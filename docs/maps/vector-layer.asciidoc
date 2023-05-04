@@ -11,7 +11,7 @@ To add a vector layer to your map, click *Add layer*, then select one of the fol
 
 *Choropleth*:: Shaded areas to compare statistics across boundaries.
 
-*Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
+*Clusters*:: Geospatial data grouped in grids with metrics for each gridded cell.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 *Create index*:: Draw shapes on the map and index in Elasticsearch.
@@ -32,6 +32,10 @@ Each tile request is limited to the `index.max_result_window` index setting.
 When a tile exceeds `index.max_result_window`, results exceeding `index.max_result_window` are not contained in the tile and a dashed rectangle outlining the bounding box containing all geo values within the tile is displayed.
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+
+*ML Anomalies*:: Points and lines associated with anomalies. The {anomaly-job}
+must use a `lat_long` function. Go to
+{ml-docs}/geographic-anomalies.html[Detecting anomalous locations in geographic data] for an example.
 
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.

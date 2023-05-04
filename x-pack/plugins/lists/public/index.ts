@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export { getExceptionBuilderComponentLazy } from './exceptions/components/builder/index';
-export type { OnChangeProps } from './exceptions/components/builder/index';
+export { getExceptionBuilderComponentLazy } from './exceptions/components/builder';
+export type { OnChangeProps } from './exceptions/components/builder';
 
-import type { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { Plugin } from './plugin';
 import type { PluginSetup, PluginStart } from './types';

@@ -10,7 +10,7 @@ import type { LogStreamProps } from './log_stream';
 
 const LazyLogStream = React.lazy(() => import('./log_stream'));
 
-export const LazyLogStreamWrapper: React.FC<LogStreamProps> = (props) => (
+export const LazyLogStreamWrapper = (props: LogStreamProps) => (
   <React.Suspense fallback={<div />}>
     <LazyLogStream {...props} />
   </React.Suspense>

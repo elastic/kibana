@@ -19,14 +19,12 @@ import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../es_ui_shared/public';
-// @ts-ignore
-import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
+import { ace } from '@kbn/es-ui-shared-plugin/public';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequestToES,
+  useSendCurrentRequest,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
@@ -34,11 +32,14 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
 
 const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  setEditorInstance: (instance: SenseEditor) => void;
 }
 
 interface QueryParams {
@@ -53,24 +54,33 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `GET _search
+const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }`;
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+      storage,
+    },
     docLinkVersion,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const sendCurrentRequest = useSendCurrentRequest();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -105,8 +115,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     const loadBufferFromRemote = (url: string) => {
       const coreEditor = editor.getCoreEditor();
-
-      if (/^https?:\/\//.test(url)) {
+      // Normalize and encode the URL to avoid issues with spaces and other special characters.
+      const encodedUrl = new URL(url).toString();
+      if (/^https?:\/\//.test(encodedUrl)) {
         const loadFrom: Record<string, any> = {
           url,
           // Having dataType here is required as it doesn't allow jQuery to `eval` content
@@ -121,7 +132,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
-          await editor.update(data, true);
+          // when we load data from another Api we also must pass history
+          await editor.update(`${initialTextValue}\n ${data}`, true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
           editor.highlightCurrentRequestsAndUpdateActionBar();
@@ -191,19 +203,41 @@ function EditorUI({ initialTextValue }: EditorProps) {
       }
     }
 
+    function restoreFolds() {
+      if (editor) {
+        const foldRanges = storage.get(StorageKeys.FOLDS, []);
+        editor.getCoreEditor().addFoldsAtRanges(foldRanges);
+      }
+    }
+
+    restoreFolds();
+
+    function saveFoldsOnChange() {
+      if (editor) {
+        editor.getCoreEditor().on('changeFold', () => {
+          const foldRanges = editor.getCoreEditor().getAllFoldRanges();
+          storage.set(StorageKeys.FOLDS, foldRanges);
+        });
+      }
+    }
+
+    saveFoldsOnChange();
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      clearSubscriptions();
+      autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
+        // Close autocomplete popup on unmount
+        editorInstanceRef.current?.getCoreEditor().detachCompleter();
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
@@ -214,6 +248,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
     history,
     setInputEditor,
     settingsService,
+    http,
+    autocompleteInfo,
+    storage,
   ]);
 
   useEffect(() => {
@@ -224,12 +261,22 @@ function EditorUI({ initialTextValue }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    registerCommands({
-      senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
-      openDocumentation,
-    });
-  }, [sendCurrentRequestToES, openDocumentation]);
+    const { isKeyboardShortcutsEnabled } = settings;
+    if (isKeyboardShortcutsEnabled) {
+      registerCommands({
+        senseEditor: editorInstanceRef.current!,
+        sendCurrentRequest,
+        openDocumentation,
+      });
+    }
+  }, [openDocumentation, settings, sendCurrentRequest]);
+
+  useEffect(() => {
+    const { current: editor } = editorInstanceRef;
+    if (editor) {
+      setEditorInstance(editor);
+    }
+  }, [setEditorInstance]);
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
@@ -249,7 +296,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
             >
               <EuiLink
                 color="success"
-                onClick={sendCurrentRequestToES}
+                onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',

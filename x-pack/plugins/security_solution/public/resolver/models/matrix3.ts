@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Matrix3 } from '../types';
+import type { Matrix3 } from '../types';
 
 /**
  * Return a new matrix which is the product of the first and second matrix.

@@ -7,9 +7,10 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { noop } from 'lodash/fp';
-import { useTimelineLastEventTime, UseTimelineLastEventTimeArgs } from '.';
+import type { UseTimelineLastEventTimeArgs } from '.';
+import { useTimelineLastEventTime } from '.';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 
 const mockSearchStrategy = jest.fn();
 const mockUseKibana = {
@@ -41,12 +42,13 @@ const mockUseKibana = {
   },
 };
 
-jest.mock('../../../../common/lib/kibana', () => ({
+jest.mock('../../../lib/kibana', () => ({
   useKibana: jest.fn(),
   useToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
 }));
 
@@ -65,7 +67,6 @@ describe('useTimelineLastEventTime', () => {
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
-          docValueFields: [],
           indexNames: [],
         })
       );
@@ -84,7 +85,6 @@ describe('useTimelineLastEventTime', () => {
           useTimelineLastEventTime({
             indexKey: LastEventIndexKey.hostDetails,
             details: {},
-            docValueFields: [],
             indexNames: [],
           })
       );
@@ -93,7 +93,6 @@ describe('useTimelineLastEventTime', () => {
       expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
         defaultIndex: [],
         details: {},
-        docValueFields: [],
         factoryQueryType: 'eventsLastEventTime',
         indexKey: 'hostDetails',
       });
@@ -109,7 +108,6 @@ describe('useTimelineLastEventTime', () => {
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
-          docValueFields: [],
           indexNames: [],
         })
       );

@@ -5,66 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import {
-  setActiveTabTimeline,
-  updateTimelineGraphEventId,
-} from '../../../../timelines/store/timeline/actions';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../../common/containers/use_full_screen';
-import { TimelineId, TimelineTabs } from '../../../../../common/types';
-import { ACTION_INVESTIGATE_IN_RESOLVER } from '../../../../timelines/components/timeline/body/translations';
-import { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
-export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
-  (get(['agent', 'type', 0], ecsData) === 'endpoint' ||
-    (get(['agent', 'type', 0], ecsData) === 'winlogbeat' &&
-      get(['event', 'module', 0], ecsData) === 'sysmon')) &&
-  get(['process', 'entity_id'], ecsData)?.length === 1 &&
-  get(['process', 'entity_id', 0], ecsData) !== '';
-interface InvestigateInResolverProps {
-  timelineId: string;
-  ecsData: Ecs;
-  onClose: () => void;
-}
-export const useInvestigateInResolverContextItem = ({
-  timelineId,
-  ecsData,
-  onClose,
-}: InvestigateInResolverProps) => {
-  const dispatch = useDispatch();
-  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
-  const { setGlobalFullScreen } = useGlobalFullScreen();
-  const { setTimelineFullScreen } = useTimelineFullScreen();
-  const handleClick = useCallback(() => {
-    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-    if (timelineId === TimelineId.active) {
-      if (dataGridIsFullScreen) {
-        setTimelineFullScreen(true);
-      }
-      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
-    } else {
-      if (dataGridIsFullScreen) {
-        setGlobalFullScreen(true);
-      }
-    }
-    onClose();
-  }, [dispatch, ecsData._id, onClose, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
-  return isDisabled
-    ? []
-    : [
-        <EuiContextMenuItem
-          key="investigate-in-resolver-action-item"
-          data-test-subj="investigate-in-resolver-action-item"
-          onClick={handleClick}
-        >
-          {ACTION_INVESTIGATE_IN_RESOLVER}
-        </EuiContextMenuItem>,
-      ];
+export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
+  const agentType = get(['agent', 'type', 0], ecsData);
+  const processEntityIds = get(['process', 'entity_id'], ecsData);
+  const firstProcessEntityId = get(['process', 'entity_id', 0], ecsData);
+  const eventModule = get(['event', 'module', 0], ecsData);
+  const eventDataStream = get(['event', 'dataset'], ecsData);
+  const datasetIncludesSysmon =
+    Array.isArray(eventDataStream) &&
+    eventDataStream.some((datastream) => datastream.includes('windows.sysmon'));
+  const agentTypeIsEndpoint = agentType === 'endpoint';
+  const agentTypeIsWinlogBeat = agentType === 'winlogbeat' && eventModule === 'sysmon';
+  const isEndpointOrSysmonFromWinlogBeat =
+    agentTypeIsEndpoint || agentTypeIsWinlogBeat || datasetIncludesSysmon;
+  const hasProcessEntityId =
+    processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
+  return isEndpointOrSysmonFromWinlogBeat && hasProcessEntityId;
 };

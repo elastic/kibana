@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { MutableRefObject } from 'react';
-import { Ecs, CaseViewRefreshPropInterface } from '../../../common/ui/types';
-import { CasesNavigation } from '../links';
-import { CasesTimelineIntegration } from '../timeline_context';
+import type { MutableRefObject } from 'react';
+import type { CaseViewRefreshPropInterface, UseFetchAlertData } from '../../../common/ui/types';
+import type { CasesNavigation } from '../links';
+import type { CasesTimelineIntegration } from '../timeline_context';
 
 export interface CasesRoutesProps {
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
+  useFetchAlertData: UseFetchAlertData;
   /**
    * A React `Ref` that Exposes data refresh callbacks.
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale

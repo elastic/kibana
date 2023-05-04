@@ -8,11 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ColorPicker } from '../../color_picker';
-import { AddDeleteButtons } from '../../add_delete_buttons';
-import { SeriesConfig } from '../../series_config';
-import { Split } from '../../split';
-import { SeriesDragHandler } from '../../series_drag_handler';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -20,10 +16,16 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
+import { SeriesConfig } from '../../series_config';
+import { Split } from '../../split';
+import { SeriesDragHandler } from '../../series_drag_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { Aggs } from '../../aggs/aggs';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 function GaugeSeriesUi(props) {
   const {
@@ -40,6 +42,8 @@ function GaugeSeriesUi(props) {
     intl,
     uiRestrictions,
   } = props;
+
+  const { euiTheme } = useEuiTheme();
 
   const defaults = { label: '' };
   const model = { ...defaults, ...props.model };
@@ -64,7 +68,7 @@ function GaugeSeriesUi(props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div className="tvbAggRow tvbAggRow--split">
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

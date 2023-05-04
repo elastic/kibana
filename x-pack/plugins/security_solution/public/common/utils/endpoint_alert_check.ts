@@ -6,8 +6,18 @@
  */
 
 import { find, getOr, some } from 'lodash/fp';
-import { TimelineEventsDetailsItem } from '../../../../timelines/common';
-import { Ecs } from '../../../common/ecs';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+
+/**
+ * Check to see if a timeline event item is an Alert (vs an event)
+ * @param timelineEventItem
+ */
+export const isTimelineEventItemAnAlert = (
+  timelineEventItem: TimelineEventsDetailsItem[]
+): boolean => {
+  return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
+};
 
 /**
  * Checks to see if the given set of Timeline event detail items includes data that indicates its
@@ -19,9 +29,7 @@ export const isAlertFromEndpointEvent = ({
 }: {
   data: TimelineEventsDetailsItem[];
 }): boolean => {
-  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data);
-
-  if (!isAlert) {
+  if (!isTimelineEventItemAnAlert(data)) {
     return false;
   }
 

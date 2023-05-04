@@ -7,18 +7,20 @@
 
 import React, { Component } from 'react';
 
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { Space, SpacesApiUi } from '../../../../../../../spaces/public';
 import type { Role } from '../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
+import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
 
 interface Props {
   role: Role;
+  spacesEnabled: boolean;
   canCustomizeSubFeaturePrivileges: boolean;
   spaces?: Space[];
   uiCapabilities: Capabilities;
@@ -42,6 +44,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
     const {
       kibanaPrivileges,
       role,
+      spacesEnabled,
       canCustomizeSubFeaturePrivileges,
       spaces = [],
       uiCapabilities,
@@ -55,17 +58,29 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       return <TransformErrorSection />;
     }
 
+    if (spacesApiUi && spacesEnabled) {
+      return (
+        <SpaceAwarePrivilegeSection
+          kibanaPrivileges={kibanaPrivileges}
+          role={role}
+          spaces={spaces}
+          uiCapabilities={uiCapabilities}
+          onChange={onChange}
+          editable={editable}
+          canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
+          validator={validator}
+          spacesApiUi={spacesApiUi}
+        />
+      );
+    }
+
     return (
-      <SpaceAwarePrivilegeSection
+      <SimplePrivilegeSection
         kibanaPrivileges={kibanaPrivileges}
         role={role}
-        spaces={spaces}
-        uiCapabilities={uiCapabilities}
         onChange={onChange}
         editable={editable}
         canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
-        validator={validator}
-        spacesApiUi={spacesApiUi!}
       />
     );
   };

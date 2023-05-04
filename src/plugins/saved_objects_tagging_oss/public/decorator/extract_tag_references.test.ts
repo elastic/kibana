@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../core/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { extractTagReferences } from './extract_tag_references';
 
 const ref = (type: string, id: string, name = `ref-to-${type}-${id}`): SavedObjectReference => ({

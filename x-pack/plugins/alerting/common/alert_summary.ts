@@ -20,7 +20,7 @@ export interface AlertSummary {
   ruleTypeId: string;
   consumer: string;
   muteAll: boolean;
-  throttle: string | null;
+  throttle?: string | null;
   enabled: boolean;
   statusStartDate: string;
   statusEndDate: string;
@@ -29,12 +29,15 @@ export interface AlertSummary {
   errorMessages: Array<{ date: string; message: string }>;
   alerts: Record<string, AlertStatus>;
   executionDuration: ExecutionDuration;
+  revision: number;
 }
 
 export interface AlertStatus {
+  uuid?: string;
   status: AlertStatusValues;
   muted: boolean;
   actionGroupId?: string;
-  actionSubgroup?: string;
   activeStartDate?: string;
+  flapping: boolean;
+  maintenanceWindowIds?: string[];
 }

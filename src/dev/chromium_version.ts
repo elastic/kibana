@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { run, ToolingLog } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { run } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-import { PackageJson } from 'type-fest';
 
 type PuppeteerRelease = string;
 type ChromiumRevision = string;
@@ -27,7 +27,7 @@ const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
-  const puppeteerPackageJson: PackageJson = JSON.parse(
+  const puppeteerPackageJson = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
   );
   const { version } = puppeteerPackageJson;
@@ -46,7 +46,7 @@ async function getChromiumRevision(
   kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
 ): Promise<ChromiumRevision> {
-  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/src/revisions.ts`;
+  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/puppeteer-v${kibanaPuppeteerVersion}/packages/puppeteer-core/src/revisions.ts`;
   let body: string;
   try {
     log.info(`Fetching code from Puppeteer source: ${url}`);
@@ -103,7 +103,12 @@ async function getChromiumCommit(
     throw new Error(`Could not find a Chromium commit! Check ${url} in a browser.`);
   }
 
+  const baseUrl = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots';
+
   log.info(`Found Chromium commit ${commit} from revision ${revision}.`);
+  log.info(`Mac x64 download:     ${baseUrl}/Mac/${revision}/chrome-mac.zip`);
+  log.info(`Mac ARM download:     ${baseUrl}/Mac_Arm/${revision}/chrome-mac.zip`);
+  log.info(`Windows x64 download: ${baseUrl}/Win/${revision}/chrome-win.zip`);
   return commit;
 }
 

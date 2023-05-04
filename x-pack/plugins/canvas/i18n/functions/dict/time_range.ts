@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { timerange } from '../../../canvas_plugin_src/functions/common/time_range';
+import type { timerange } from '../../../canvas_plugin_src/functions/common/time_range';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

@@ -27,6 +27,8 @@ export interface PipelineFormProps {
   saveError: any;
   defaultValue?: Pipeline;
   isEditing?: boolean;
+  // That fields is used to disable the name field when creating a pipeline with the name prepopulated
+  canEditName?: boolean;
 }
 
 const defaultFormValue: Pipeline = Object.freeze({
@@ -34,6 +36,7 @@ const defaultFormValue: Pipeline = Object.freeze({
   description: '',
   processors: [],
   on_failure: [],
+  _meta: {},
 });
 
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
@@ -43,6 +46,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   saveError,
   isEditing,
   onCancel,
+  canEditName,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
@@ -128,7 +132,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onFailure={processorsState.onFailure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
+          hasMeta={Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)}
           isEditing={isEditing}
+          canEditName={canEditName}
         />
 
         {/* Form submission */}

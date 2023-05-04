@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
-import { State } from '../../../../common/store';
+import {
+  ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
+import type { State } from '../../../../common/store';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../../../common/constants';
 import {
+  getPolicyBlocklistsPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
 } from '../../../common/routing';
-import {
-  getCurrentArtifactsLocation,
-  getUpdateArtifacts,
-  getUpdateArtifactsLoaded,
-  getUpdateArtifactsIsFailed,
-  policyIdFromParams,
-} from '../store/policy_details/selectors';
-import { useToasts } from '../../../../common/lib/kibana';
+import { getCurrentArtifactsLocation, policyIdFromParams } from '../store/policy_details/selectors';
+import { APP_UI_ID, POLICIES_PATH } from '../../../../../common/constants';
 
 /**
  * Narrows global state down to the PolicyDetailsState before calling the provided Policy Details Selector
@@ -44,87 +46,71 @@ export function usePolicyDetailsSelector<TSelected>(
   );
 }
 
-export type NavigationCallback = (
-  ...args: Parameters<Parameters<typeof useCallback>[0]>
-) => Partial<PolicyDetailsArtifactsPageLocation>;
-
-export function usePolicyDetailsNavigateCallback() {
+export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const history = useHistory();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
-
-  return useCallback(
-    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
-      history.push(
-        getPolicyDetailsArtifactsListPath(policyId, {
+  const { state } = useLocation();
+  const getPath = useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => {
+      if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
+        return getPolicyDetailsArtifactsListPath(policyId, {
           ...location,
           ...args,
-        })
-      ),
-    [history, location, policyId]
+        });
+      } else if (listId === ENDPOINT_EVENT_FILTERS_LIST_ID) {
+        return getPolicyEventFiltersPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_BLOCKLISTS_LIST_ID) {
+        return getPolicyBlocklistsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else {
+        return getPolicyHostIsolationExceptionsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      }
+    },
+    [listId, location, policyId]
+  );
+
+  return useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => history.push(getPath(args), state),
+    [getPath, history, state]
   );
 }
 
-export function usePolicyDetailsEventFiltersNavigateCallback() {
-  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
-  const history = useHistory();
-  const policyId = usePolicyDetailsSelector(policyIdFromParams);
-
-  return useCallback(
-    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
-      history.push(
-        getPolicyEventFiltersPath(policyId, {
-          ...location,
-          ...args,
-        })
-      ),
-    [history, location, policyId]
+export const useIsPolicySettingsBarVisible = () => {
+  return (
+    window.location.pathname.includes(POLICIES_PATH) &&
+    window.location.pathname.includes('/settings')
   );
-}
+};
 
-export const usePolicyTrustedAppsNotification = () => {
-  const updateSuccessfull = usePolicyDetailsSelector(getUpdateArtifactsLoaded);
-  const updateFailed = usePolicyDetailsSelector(getUpdateArtifactsIsFailed);
-  const updatedArtifacts = usePolicyDetailsSelector(getUpdateArtifacts);
-  const toasts = useToasts();
-  const [wasAlreadyHandled] = useState(new WeakSet());
+/**
+ * Indicates if user is granted Write access to Policy Management. This method differs from what
+ * `useUserPrivileges().endpointPrivileges.canWritePolicyManagement` in that it also checks if
+ * user has `canAccessFleet` if form is being displayed outside of Security Solution.
+ * This is to ensure that the Policy Form remains accessible when displayed inside of Fleet
+ * pages if the user does not have privileges to security solution policy management.
+ */
+export const useShowEditableFormFields = (): boolean => {
+  const { canWritePolicyManagement, canAccessFleet } = useUserPrivileges().endpointPrivileges;
+  const { getUrlForApp } = useKibana().services.application;
 
-  if (updateSuccessfull && updatedArtifacts && !wasAlreadyHandled.has(updatedArtifacts)) {
-    wasAlreadyHandled.add(updatedArtifacts);
-    const updateCount = updatedArtifacts.length;
+  const securitySolutionUrl = useMemo(() => {
+    return getUrlForApp(APP_UI_ID);
+  }, [getUrlForApp]);
 
-    toasts.addSuccess({
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.title',
-        {
-          defaultMessage: 'Success',
-        }
-      ),
-      text:
-        updateCount > 1
-          ? i18n.translate(
-              'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textMultiples',
-              {
-                defaultMessage: '{count} trusted applications have been added to your list.',
-                values: { count: updateCount },
-              }
-            )
-          : i18n.translate(
-              'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastSuccess.textSingle',
-              {
-                defaultMessage: '"{name}" has been added to your trusted applications list.',
-                values: { name: updatedArtifacts[0].data.name },
-              }
-            ),
-    });
-  } else if (updateFailed) {
-    toasts.addDanger(
-      i18n.translate(
-        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastError.text',
-        {
-          defaultMessage: `An error occurred updating artifacts`,
-        }
-      )
-    );
-  }
+  return useMemo(() => {
+    if (window.location.pathname.startsWith(securitySolutionUrl)) {
+      return canWritePolicyManagement;
+    } else {
+      return canAccessFleet;
+    }
+  }, [canAccessFleet, canWritePolicyManagement, securitySolutionUrl]);
 };

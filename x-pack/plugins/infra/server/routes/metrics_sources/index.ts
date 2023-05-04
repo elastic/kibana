@@ -11,15 +11,63 @@ import { createValidationFunction } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
-import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
+import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
 import {
-  partialMetricsSourceConfigurationPropertiesRT,
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
+  partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
+import { InfraSource, InfraSourceIndexField } from '../../lib/sources';
+import { InfraPluginRequestHandlerContext } from '../../types';
+
+const defaultStatus = {
+  indexFields: [],
+  metricIndicesExist: false,
+  remoteClustersExist: false,
+};
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
-  const { framework } = libs;
+  const { framework, logger } = libs;
+
+  const composeSourceStatus = async (
+    requestContext: InfraPluginRequestHandlerContext,
+    sourceId: string
+  ): Promise<MetricsSourceStatus> => {
+    const [metricIndicesExistSettled, indexFieldsSettled] = await Promise.allSettled([
+      libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
+      libs.fields.getFields(requestContext, sourceId, 'METRICS'),
+    ]);
+
+    /**
+     * Extract values from promises settlements
+     */
+    const indexFields = isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)
+      ? indexFieldsSettled.value
+      : defaultStatus.indexFields;
+    const metricIndicesExist = isFulfilled<boolean>(metricIndicesExistSettled)
+      ? metricIndicesExistSettled.value
+      : defaultStatus.metricIndicesExist;
+    const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(
+      indexFieldsSettled,
+      metricIndicesExistSettled
+    );
+
+    /**
+     * Report gracefully handled rejections
+     */
+    if (!isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)) {
+      logger.error(indexFieldsSettled.reason);
+    }
+    if (!isFulfilled<boolean>(metricIndicesExistSettled)) {
+      logger.error(metricIndicesExistSettled.reason);
+    }
+
+    return {
+      indexFields,
+      metricIndicesExist,
+      remoteClustersExist,
+    };
+  };
 
   framework.registerRoute(
     {
@@ -33,25 +81,38 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
+      const soClient = (await requestContext.core).savedObjects.client;
 
-      const [source, metricIndicesExist, indexFields] = await Promise.all([
-        libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
-        libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-        libs.fields.getFields(requestContext, sourceId, 'METRICS'),
-      ]);
+      try {
+        const [sourceSettled, statusSettled] = await Promise.allSettled([
+          libs.sources.getSourceConfiguration(soClient, sourceId),
+          composeSourceStatus(requestContext, sourceId),
+        ]);
 
-      if (!source) {
-        return response.notFound();
+        const source = isFulfilled<InfraSource>(sourceSettled) ? sourceSettled.value : null;
+        const status = isFulfilled<MetricsSourceStatus>(statusSettled)
+          ? statusSettled.value
+          : defaultStatus;
+
+        if (!source) {
+          return response.notFound();
+        }
+
+        const sourceResponse = {
+          source: { ...source, status },
+        };
+
+        return response.ok({
+          body: metricsSourceConfigurationResponseRT.encode(sourceResponse),
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
+        });
       }
-
-      const status: MetricsSourceStatus = {
-        metricIndicesExist,
-        indexFields,
-      };
-
-      return response.ok({
-        body: metricsSourceConfigurationResponseRT.encode({ source: { ...source, status } }),
-      });
     }
   );
 
@@ -63,19 +124,17 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         params: schema.object({
           sourceId: schema.string(),
         }),
-        body: createValidationFunction(partialMetricsSourceConfigurationPropertiesRT),
+        body: createValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const { sources } = libs;
       const { sourceId } = request.params;
-      const patchedSourceConfigurationProperties = request.body;
+      const sourceConfigurationPayload = request.body;
 
       try {
-        const sourceConfiguration = await sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
+        const soClient = (await requestContext.core).savedObjects.client;
+        const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
 
         if (sourceConfiguration.origin === 'internal') {
           response.conflict({
@@ -85,33 +144,17 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
         const sourceConfigurationExists = sourceConfiguration.origin === 'stored';
         const patchedSourceConfiguration = await (sourceConfigurationExists
-          ? sources.updateSourceConfiguration(
-              requestContext.core.savedObjects.client,
-              sourceId,
-              // @ts-ignore
-              patchedSourceConfigurationProperties
-            )
-          : sources.createSourceConfiguration(
-              requestContext.core.savedObjects.client,
-              sourceId,
-              // @ts-ignore
-              patchedSourceConfigurationProperties
-            ));
+          ? sources.updateSourceConfiguration(soClient, sourceId, sourceConfigurationPayload)
+          : sources.createSourceConfiguration(soClient, sourceId, sourceConfigurationPayload));
 
-        const [metricIndicesExist, indexFields] = await Promise.all([
-          libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-          libs.fields.getFields(requestContext, sourceId, 'METRICS'),
-        ]);
+        const status = await composeSourceStatus(requestContext, sourceId);
 
-        const status: MetricsSourceStatus = {
-          metricIndicesExist,
-          indexFields,
+        const sourceResponse = {
+          source: { ...patchedSourceConfiguration, status },
         };
 
         return response.ok({
-          body: metricsSourceConfigurationResponseRT.encode({
-            source: { ...patchedSourceConfiguration, status },
-          }),
+          body: metricsSourceConfigurationResponseRT.encode(sourceResponse),
         });
       } catch (error) {
         if (Boom.isBoom(error)) {
@@ -151,16 +194,27 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const { sourceId } = request.params;
 
       const client = createSearchClient(requestContext, framework);
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
       const results = await hasData(source.configuration.metricAlias, client);
 
       return response.ok({
-        body: { hasData: results },
+        body: { hasData: results, configuration: source.configuration },
       });
     }
   );
+};
+
+const isFulfilled = <Type>(
+  promiseSettlement: PromiseSettledResult<Type>
+): promiseSettlement is PromiseFulfilledResult<Type> => promiseSettlement.status === 'fulfilled';
+
+const hasRemoteCluster = <Type>(...promiseSettlements: Array<PromiseSettledResult<Type>>) => {
+  const isRemoteMissing = promiseSettlements.some(
+    (settlement) =>
+      !isFulfilled<Type>(settlement) && settlement.reason instanceof NoSuchRemoteClusterError
+  );
+
+  return !isRemoteMissing;
 };

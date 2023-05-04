@@ -8,7 +8,7 @@
 jest.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { retryTransientEsErrors } from './retry';
@@ -84,5 +84,14 @@ describe('retryTransientErrors', () => {
     const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
     await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
     expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries with additionalResponseStatuses', async () => {
+    const error = new EsErrors.ResponseError({ statusCode: 123, meta: {} as any, warnings: [] });
+    const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
+    expect(await retryTransientEsErrors(esCallMock, { additionalResponseStatuses: [123] })).toEqual(
+      'success'
+    );
+    expect(esCallMock).toHaveBeenCalledTimes(2);
   });
 });

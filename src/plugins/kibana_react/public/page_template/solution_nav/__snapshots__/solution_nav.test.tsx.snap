@@ -1,7 +1,292 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `<Fragment />`;
+exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
+<Fragment>
+  <EuiSideNav
+    aria-hidden={true}
+    className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
+    data-test-subj="DTS"
+    heading={
+      <React.Fragment>
+        <strong>
+          Solution
+        </strong>
+      </React.Fragment>
+    }
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "items": undefined,
+              "name": "Ingest Node Pipelines",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "1.2",
+              "items": undefined,
+              "name": "Logstash Pipelines",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "1.3",
+              "items": undefined,
+              "name": "Beats Central Management",
+              "tabIndex": -1,
+            },
+          ],
+          "name": "Ingest",
+          "tabIndex": -1,
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "items": undefined,
+              "name": "Index Management",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2.2",
+              "items": undefined,
+              "name": "Index Lifecycle Policies",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2.3",
+              "items": undefined,
+              "name": "Snapshot and Restore",
+              "tabIndex": -1,
+            },
+          ],
+          "name": "Data",
+          "tabIndex": -1,
+        },
+      ]
+    }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+    mobileTitle={
+      <React.Fragment>
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="kibana-react.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </React.Fragment>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+  <KibanaPageTemplateSolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;
 
-exports[`KibanaPageTemplateSolutionNav renders 1`] = `<Fragment />`;
+exports[`KibanaPageTemplateSolutionNav renders 1`] = `
+<Fragment>
+  <EuiSideNav
+    aria-hidden={true}
+    className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
+    heading={
+      <React.Fragment>
+        <strong>
+          Solution
+        </strong>
+      </React.Fragment>
+    }
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "items": undefined,
+              "name": "Ingest Node Pipelines",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "1.2",
+              "items": undefined,
+              "name": "Logstash Pipelines",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "1.3",
+              "items": undefined,
+              "name": "Beats Central Management",
+              "tabIndex": -1,
+            },
+          ],
+          "name": "Ingest",
+          "tabIndex": -1,
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "items": undefined,
+              "name": "Index Management",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2.2",
+              "items": undefined,
+              "name": "Index Lifecycle Policies",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2.3",
+              "items": undefined,
+              "name": "Snapshot and Restore",
+              "tabIndex": -1,
+            },
+          ],
+          "name": "Data",
+          "tabIndex": -1,
+        },
+      ]
+    }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+    mobileTitle={
+      <React.Fragment>
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="kibana-react.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </React.Fragment>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+  <KibanaPageTemplateSolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;
 
-exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `<Fragment />`;
+exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
+<Fragment>
+  <EuiSideNav
+    aria-hidden={true}
+    className="kbnPageTemplateSolutionNav kbnPageTemplateSolutionNav--hidden"
+    heading={
+      <React.Fragment>
+        <KibanaPageTemplateSolutionNavAvatar
+          iconType="logoElastic"
+          name="Solution"
+        />
+        <strong>
+          Solution
+        </strong>
+      </React.Fragment>
+    }
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "items": undefined,
+              "name": "Ingest Node Pipelines",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "1.2",
+              "items": undefined,
+              "name": "Logstash Pipelines",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "1.3",
+              "items": undefined,
+              "name": "Beats Central Management",
+              "tabIndex": -1,
+            },
+          ],
+          "name": "Ingest",
+          "tabIndex": -1,
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "items": undefined,
+              "name": "Index Management",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2.2",
+              "items": undefined,
+              "name": "Index Lifecycle Policies",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2.3",
+              "items": undefined,
+              "name": "Snapshot and Restore",
+              "tabIndex": -1,
+            },
+          ],
+          "name": "Data",
+          "tabIndex": -1,
+        },
+      ]
+    }
+    mobileBreakpoints={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+    mobileTitle={
+      <React.Fragment>
+        <KibanaPageTemplateSolutionNavAvatar
+          iconType="logoElastic"
+          name="Solution"
+        />
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="kibana-react.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </React.Fragment>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+  <KibanaPageTemplateSolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;

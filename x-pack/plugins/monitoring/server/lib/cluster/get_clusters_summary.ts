@@ -10,10 +10,9 @@ import {
   ElasticsearchModifiedSource,
   ElasticsearchLegacySource,
   ElasticsearchSourceKibanaStats,
+  ElasticsearchMetricbeatSource,
 } from '../../../common/types/es';
-// @ts-ignore
 import { calculateOverallStatus } from '../calculate_overall_status';
-// @ts-ignore
 import { MonitoringLicenseError } from '../errors/custom_errors';
 
 export type EnhancedClusters = ElasticsearchModifiedSource & {
@@ -47,7 +46,7 @@ export function getClustersSummary(
     } = cluster;
 
     const license = cluster.license || cluster.elasticsearch?.cluster?.stats?.license;
-    const version = cluster.version || cluster.elasticsearch?.version;
+    const version = cluster.version || ecsFormatVersion(cluster);
     const clusterUuid = cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id;
     const clusterStatsLegacy = cluster.cluster_stats;
     const clusterStatsMB = cluster.elasticsearch?.cluster?.stats;
@@ -160,4 +159,10 @@ export function getClustersSummary(
       isCcrEnabled,
     };
   });
+}
+
+function ecsFormatVersion(cluster: ElasticsearchMetricbeatSource) {
+  const versions = cluster.elasticsearch?.cluster?.stats?.nodes?.versions || [];
+  const sortedVersions = [...versions].sort().reverse();
+  return sortedVersions.join('/');
 }

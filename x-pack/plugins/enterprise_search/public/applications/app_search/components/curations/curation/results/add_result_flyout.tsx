@@ -36,7 +36,7 @@ import {
 } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 
-import { AddResultLogic, CurationResult } from './';
+import { AddResultLogic, CurationResult } from '.';
 
 export const AddResultFlyout: React.FC = () => {
   const searchLogic = SearchLogic({ id: 'add-results-flyout' });

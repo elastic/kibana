@@ -15,7 +15,7 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryContextMenuItem {
@@ -58,6 +58,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   const button = (
     <ButtonWrapper>
       <EuiButton
+        data-test-subj="infraLogEntryContextMenuButton"
         size="s"
         fill
         aria-label={ariaLabel || DEFAULT_MENU_LABEL}

@@ -10,24 +10,15 @@ import React, { Component } from 'react';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-expect-error
+import mapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
+// @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
-import { DrawCircle, DRAW_CIRCLE_RADIUS_MB_FILTER } from './draw_circle';
+import { DrawCircle, DRAW_CIRCLE_RADIUS_LABEL_STYLE } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
-
-const GL_DRAW_RADIUS_LABEL_LAYER_ID = 'gl-draw-radius-label';
-
-const mbModeEquivalencies = new Map<string, DRAW_SHAPE>([
-  ['simple_select', DRAW_SHAPE.SIMPLE_SELECT],
-  ['draw_rectangle', DRAW_SHAPE.BOUNDS],
-  ['draw_circle', DRAW_SHAPE.DISTANCE],
-  ['draw_polygon', DRAW_SHAPE.POLYGON],
-  ['draw_line_string', DRAW_SHAPE.LINE],
-  ['draw_point', DRAW_SHAPE.POINT],
-]);
 
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
@@ -41,15 +32,16 @@ export interface Props {
   onClick?: (event: MapMouseEvent, drawControl?: MapboxDraw) => void;
   mbMap: MbMap;
   enable: boolean;
-  updateEditShape: (shapeToDraw: DRAW_SHAPE) => void;
 }
 
 export class DrawControl extends Component<Props> {
   private _isMounted = false;
+  private _isMapRemoved = false;
   private _mbDrawControlAdded = false;
   private _mbDrawControl = new MapboxDraw({
     displayControlsDefault: false,
     modes: mbDrawModes,
+    styles: [...mapboxDrawStyles, DRAW_CIRCLE_RADIUS_LABEL_STYLE],
   });
 
   componentDidUpdate() {
@@ -58,13 +50,19 @@ export class DrawControl extends Component<Props> {
 
   componentDidMount() {
     this._isMounted = true;
+    this.props.mbMap.on('remove', this._setIsMapRemoved);
     this._syncDrawControl();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.props.mbMap.off('remove', this._setIsMapRemoved);
     this._removeDrawControl();
   }
+
+  _setIsMapRemoved = () => {
+    this._isMapRemoved = true;
+  };
 
   _onDraw = (event: { features: Feature[] }) => {
     this.props.onDraw(event, this._mbDrawControl);
@@ -90,65 +88,38 @@ export class DrawControl extends Component<Props> {
     }
   }, 0);
 
-  _onModeChange = ({ mode }: { mode: string }) => {
-    if (mbModeEquivalencies.has(mode)) {
-      this.props.updateEditShape(mbModeEquivalencies.get(mode)!);
-    }
-  };
-
   _removeDrawControl() {
-    if (!this._mbDrawControlAdded) {
+    // Do not remove draw control after mbMap.remove is called, causes execeptions and mbMap.remove cleans up all map resources.
+    if (!this._mbDrawControlAdded || this._isMapRemoved) {
       return;
     }
 
     this.props.mbMap.getCanvas().style.cursor = '';
-    this.props.mbMap.off('draw.modechange', this._onModeChange);
     this.props.mbMap.off('draw.create', this._onDraw);
     if (this.props.onClick) {
       this.props.mbMap.off('click', this._onClick);
     }
-    this.props.mbMap.removeLayer(GL_DRAW_RADIUS_LABEL_LAYER_ID);
     this.props.mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
   }
 
   _updateDrawControl() {
-    if (!this.props.drawShape) {
-      return;
-    }
-
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
-      this.props.mbMap.addLayer({
-        id: GL_DRAW_RADIUS_LABEL_LAYER_ID,
-        type: 'symbol',
-        source: 'mapbox-gl-draw-hot',
-        filter: DRAW_CIRCLE_RADIUS_MB_FILTER,
-        layout: {
-          'text-anchor': 'right',
-          'text-field': '{radiusLabel}',
-          'text-size': 16,
-          'text-offset': [-1, 0],
-          'text-ignore-placement': true,
-          'text-allow-overlap': true,
-        },
-        paint: {
-          'text-color': '#fbb03b',
-          'text-halo-color': 'rgba(0, 0, 0, 1)',
-          'text-halo-width': 2,
-        },
-      });
       this._mbDrawControlAdded = true;
-      this.props.mbMap.getCanvas().style.cursor = 'crosshair';
-      this.props.mbMap.on('draw.modechange', this._onModeChange);
       this.props.mbMap.on('draw.create', this._onDraw);
+
       if (this.props.onClick) {
         this.props.mbMap.on('click', this._onClick);
       }
     }
 
+    this.props.mbMap.getCanvas().style.cursor =
+      !this.props.drawShape || this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT ? '' : 'crosshair';
+
     const { DRAW_LINE_STRING, DRAW_POLYGON, DRAW_POINT, SIMPLE_SELECT } = this._mbDrawControl.modes;
     const drawMode = this._mbDrawControl.getMode();
+
     if (drawMode !== DRAW_RECTANGLE && this.props.drawShape === DRAW_SHAPE.BOUNDS) {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawShape === DRAW_SHAPE.DISTANCE) {
@@ -159,7 +130,15 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(DRAW_LINE_STRING);
     } else if (drawMode !== DRAW_POINT && this.props.drawShape === DRAW_SHAPE.POINT) {
       this._mbDrawControl.changeMode(DRAW_POINT);
-    } else if (drawMode !== SIMPLE_SELECT && this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT) {
+    } else if (this.props.drawShape === DRAW_SHAPE.DELETE) {
+      this._mbDrawControl.changeMode(SIMPLE_SELECT);
+    } else if (this.props.drawShape === DRAW_SHAPE.WAIT) {
+      this.props.mbMap.getCanvas().style.cursor = 'wait';
+      this._mbDrawControl.changeMode(SIMPLE_SELECT);
+    } else if (
+      (drawMode !== SIMPLE_SELECT && !this.props.drawShape) ||
+      this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT
+    ) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
     }
   }

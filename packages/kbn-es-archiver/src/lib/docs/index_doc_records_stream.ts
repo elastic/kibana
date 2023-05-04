@@ -13,6 +13,11 @@ import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
+enum BulkOperation {
+  Create = 'create',
+  Index = 'index',
+}
+
 export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
@@ -20,7 +25,7 @@ export function createIndexDocRecordsStream(
   useCreate: boolean = false
 ) {
   async function indexDocs(docs: any[]) {
-    const operation = useCreate === true ? 'create' : 'index';
+    const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
@@ -29,9 +34,11 @@ export function createIndexDocRecordsStream(
         retries: 5,
         datasource: docs.map((doc) => {
           const body = doc.source;
+          const op = doc.data_stream ? BulkOperation.Create : operation;
+          const index = doc.data_stream || doc.index;
           ops.set(body, {
-            [operation]: {
-              _index: doc.index,
+            [op]: {
+              _index: index,
               _id: doc.id,
             },
           });
@@ -56,7 +63,7 @@ export function createIndexDocRecordsStream(
     }
 
     for (const doc of docs) {
-      stats.indexedDoc(doc.index);
+      stats.indexedDoc(doc.data_stream || doc.index);
     }
   }
 

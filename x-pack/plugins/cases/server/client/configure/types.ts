@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { CaseConnector } from '../../../common/api';
+import type { CaseConnector } from '../../../common/api';
+import type { IndexRefresh } from '../../services/types';
 
 export interface MappingsArgs {
   connector: CaseConnector;
 }
 
-export interface CreateMappingsArgs extends MappingsArgs {
+export interface CreateMappingsArgs extends MappingsArgs, IndexRefresh {
   owner: string;
 }
 
-export interface UpdateMappingsArgs extends MappingsArgs {
+export interface UpdateMappingsArgs extends MappingsArgs, IndexRefresh {
   mappingId: string;
 }

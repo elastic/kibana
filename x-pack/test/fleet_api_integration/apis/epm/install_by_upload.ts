@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -19,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
+  const esClient = getService('es');
 
   const testPkgArchiveTgz = path.join(
     path.dirname(__filename),
@@ -49,8 +51,14 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
 
+  const testPkgArchiveZipNewer = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache-0.1.5.zip'
+  );
+
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
+  const testPkgNewVersion = '0.1.5';
   const server = dockerServers.get('registry');
 
   const deletePackage = async (name: string, version: string) => {
@@ -60,6 +68,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages from direct upload', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     afterEach(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests
@@ -67,15 +76,76 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    it('should install a tar archive correctly', async function () {
+    async function uploadPackage() {
       const buf = fs.readFileSync(testPkgArchiveTgz);
-      const res = await supertest
+      return await supertest
         .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(27);
+    }
+
+    it('should install a tar archive correctly', async function () {
+      const res = await uploadPackage();
+      expect(res.body.items.length).to.be(30);
+    });
+
+    it('should upgrade when uploading a newer zip archive', async () => {
+      await uploadPackage();
+
+      const buf = fs.readFileSync(testPkgArchiveZipNewer);
+      const res = await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
+
+      await deletePackage(testPkgName, testPkgNewVersion);
+    });
+
+    it('should clean up assets when uninstalling uploaded archive', async () => {
+      await uploadPackage();
+      await deletePackage(testPkgName, testPkgVersion);
+
+      const epmPackageRes = await esClient.search({
+        index: INGEST_SAVED_OBJECT_INDEX,
+        size: 0,
+        rest_total_hits_as_int: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'epm-packages.name': testPkgName,
+                },
+              },
+            ],
+          },
+        },
+      });
+      const epmPackageAssetsRes = await esClient.search({
+        index: INGEST_SAVED_OBJECT_INDEX,
+        size: 0,
+        rest_total_hits_as_int: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'epm-packages-assets.package_name': testPkgName,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(epmPackageRes.hits.total).to.equal(0);
+      expect(epmPackageAssetsRes.hits.total).to.equal(0);
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
@@ -86,21 +156,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(27);
-
-      const packageInfoRes = await supertest
-        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
-      delete packageInfoRes.body.item.latestVersion;
-      delete packageInfoRes.body.item.savedObject.attributes.install_started_at;
-      delete packageInfoRes.body.item.savedObject.version;
-      delete packageInfoRes.body.item.savedObject.updated_at;
-      delete packageInfoRes.body.item.savedObject.coreMigrationVersion;
-      delete packageInfoRes.body.item.savedObject.migrationVersion;
-
-      expectSnapshot(packageInfoRes.body.item).toMatch();
+      expect(res.body.items.length).to.be(30);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
@@ -177,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest: one or more fields missing of name, version, description, title, format_version, release, owner"}'
+        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest: one or more fields missing of name, version, description, title, format_version, owner"}'
       );
     });
 
@@ -198,7 +254,18 @@ export default function (providerContext: FtrProviderContext) {
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
-        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/gzip')
+        .send(buf)
+        .expect(403);
+    });
+
+    it('should not allow non superusers', async () => {
+      const buf = fs.readFileSync(testPkgArchiveTgz);
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)

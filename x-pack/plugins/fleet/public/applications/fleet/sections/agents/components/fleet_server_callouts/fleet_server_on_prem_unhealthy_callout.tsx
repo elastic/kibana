@@ -20,7 +20,7 @@ export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut
-      iconType="alert"
+      iconType="warning"
       color="warning"
       title={
         <FormattedMessage
@@ -44,7 +44,12 @@ export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<
         }}
       />
       <EuiSpacer size="m" />
-      <EuiButton onClick={onClickAddFleetServer} color="warning" fill>
+      <EuiButton
+        onClick={onClickAddFleetServer}
+        color="warning"
+        fill
+        data-test-subj="addFleetServerBtn"
+      >
         <FormattedMessage
           id="xpack.fleet.fleetServerOnPremUnhealthyCallout.addFleetServerButtonLabel"
           defaultMessage="Add Fleet Server"

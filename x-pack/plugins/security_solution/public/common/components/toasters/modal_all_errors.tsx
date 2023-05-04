@@ -20,7 +20,7 @@ import {
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { AppToast } from '.';
+import type { AppToast } from '.';
 import * as i18n from './translations';
 
 /**
@@ -47,7 +47,7 @@ const ModalAllErrorsComponent: React.FC<FullErrorProps> = ({ isShowing, toast, t
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCallOut title={toast.title} color="danger" size="s" iconType="alert" />
+        <EuiCallOut title={toast.title} color="danger" size="s" iconType="warning" />
         <EuiSpacer size="s" />
         {Array.isArray(toast.errors) && // FunFact: This can be a non-array in some rare cases
           toast.errors.map((error, index) => (

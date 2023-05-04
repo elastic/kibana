@@ -47,6 +47,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                 meta: {
                   title: 'my title',
                 },
+                managed: false,
               },
             ],
           });
@@ -72,7 +73,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               {
                 id: 'some-id-1',
                 type: 'test-hidden-non-importable-exportable',
-                title: 'my title',
                 meta: {
                   title: 'my title',
                 },

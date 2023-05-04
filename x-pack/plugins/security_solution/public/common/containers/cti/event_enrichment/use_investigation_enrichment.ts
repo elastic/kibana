@@ -10,7 +10,8 @@ import { useDispatch } from 'react-redux';
 import { isEmpty, isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
+import { InputsModelId } from '../../../store/inputs/constants';
+import type { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
@@ -41,14 +42,14 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { error, loading, result, start } = useEventEnrichmentComplete();
 
   const deleteQuery = useCallback(() => {
-    dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));
+    dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id: QUERY_ID }));
   }, [dispatch]);
 
   useEffect(() => {
     if (!loading && result) {
       dispatch(
         inputsActions.setQuery({
-          inputId: 'global',
+          inputId: InputsModelId.global,
           id: QUERY_ID,
           inspect: {
             dsl: result.inspect.dsl,

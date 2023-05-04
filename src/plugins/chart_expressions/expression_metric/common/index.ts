@@ -14,12 +14,14 @@ export type {
   MetricInput,
   MetricVisRenderConfig,
   MetricVisExpressionFunctionDefinition,
+  TrendlineExpressionFunctionDefinition,
   DimensionsVisParam,
   MetricVisParam,
   VisParams,
   MetricOptions,
+  AvailableMetricIcon,
 } from './types';
 
 export { metricVisFunction } from './expression_functions';
 
-export { EXPRESSION_METRIC_NAME } from './constants';
+export { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from './constants';

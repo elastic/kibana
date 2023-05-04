@@ -14,30 +14,20 @@
   border-right: $euiBorderThin; // Adds divider between the tag list and 'Go to' badge
 }
 
-//TODO add these overrides to EUI so that search behaves the same globally (eui/issues/4363)
-.kbnSearchBar {
-  width: 400px;
-  max-width: 100%;
-  will-change: width;
-}
-
 @include euiBreakpoint('xs', 's') {
   .kbnSearchOption__tagsList {
     display: none;
   }
 }
 
-@include euiBreakpoint('l', 'xl') {
-  .kbnSearchBar:focus {
-    animation: kbnAnimateSearchBar $euiAnimSpeedFast forwards;
+@include euiBreakpoint('m', 'l') {
+  .kbnSearchBar {
+    width: 400px;
   }
 }
 
-@keyframes kbnAnimateSearchBar {
-  from {
-    width: 400px;
-  }
-  to {
+@include euiBreakpoint('xl') {
+  .kbnSearchBar {
     width: 600px;
   }
 }

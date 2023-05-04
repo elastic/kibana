@@ -15,6 +15,7 @@ export type ExpressionValueFilter = ExpressionValueBoxed<
   'filter',
   {
     filterType?: string;
+    filterGroup?: string;
     value?: string;
     column?: string;
     and: ExpressionValueFilter[];

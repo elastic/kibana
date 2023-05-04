@@ -6,7 +6,14 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { BehaviorSubject, Observable, OperatorFunction, PartialObserver, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  OperatorFunction,
+  PartialObserver,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 export const useLatest = <Value>(value: Value) => {
@@ -23,16 +30,48 @@ export const useObservable = <
   createObservableOnce: (inputValues: Observable<InputValues>) => OutputObservable,
   inputValues: InputValues
 ) => {
-  const [inputValues$] = useState(() => new BehaviorSubject<InputValues>(inputValues));
-  const [output$] = useState(() => createObservableOnce(inputValues$));
+  const [output$, next] = useBehaviorSubject(createObservableOnce, () => inputValues);
 
   useEffect(() => {
-    inputValues$.next(inputValues);
+    next(inputValues);
     // `inputValues` can't be statically analyzed
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, inputValues);
 
   return output$;
+};
+
+export const useBehaviorSubject = <
+  InputValue,
+  OutputValue,
+  OutputObservable extends Observable<OutputValue>
+>(
+  deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable,
+  createInitialValue: () => InputValue
+) => {
+  const [[subject$, next], _] = useState(() => {
+    const newSubject$ = new BehaviorSubject<InputValue>(createInitialValue());
+    const newNext = newSubject$.next.bind(newSubject$);
+    return [newSubject$, newNext] as const;
+  });
+  const [output$] = useState(() => deriveObservableOnce(subject$));
+  return [output$, next] as const;
+};
+
+export const useReplaySubject = <
+  InputValue,
+  OutputValue,
+  OutputObservable extends Observable<OutputValue>
+>(
+  deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable
+) => {
+  const [[subject$, next], _] = useState(() => {
+    const newSubject$ = new ReplaySubject<InputValue>();
+    const newNext = newSubject$.next.bind(newSubject$);
+    return [newSubject$, newNext] as const;
+  });
+  const [output$] = useState(() => deriveObservableOnce(subject$));
+  return [output$, next] as const;
 };
 
 export const useObservableState = <State, InitialState>(

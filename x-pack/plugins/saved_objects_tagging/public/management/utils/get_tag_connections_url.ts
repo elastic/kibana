@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IBasePath } from 'src/core/public';
+import { IBasePath } from '@kbn/core/public';
 import { TagWithRelations } from '../../../common/types';
 
 /**

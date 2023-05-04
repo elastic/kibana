@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import type { ConfigType } from '../config';
 import { spacesConfig } from '../lib/__fixtures__';

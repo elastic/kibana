@@ -17,19 +17,20 @@ import { useSearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
+export type EditAction = ReturnType<typeof useEditAction>;
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   const [config, setConfig] = useState<TransformConfigUnion>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [indexPatternId, setIndexPatternId] = useState<string | undefined>();
+  const [dataViewId, setDataViewId] = useState<string | undefined>();
 
   const closeFlyout = () => setIsFlyoutVisible(false);
 
-  const { getIndexPatternIdByTitle } = useSearchItems(undefined);
+  const { getDataViewIdByTitle } = useSearchItems(undefined);
   const toastNotifications = useToastNotifications();
   const appDeps = useAppDependencies();
-  const indexPatterns = appDeps.data.indexPatterns;
+  const dataViews = appDeps.data.dataViews;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
@@ -37,9 +38,9 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
         const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const currentIndexPatternId = getIndexPatternIdByTitle(dataViewTitle);
+        const currentDataViewId = getDataViewIdByTitle(dataViewTitle);
 
-        if (currentIndexPatternId === undefined) {
+        if (currentDataViewId === undefined) {
           toastNotifications.addWarning(
             i18n.translate('xpack.transform.edit.noDataViewErrorPromptText', {
               defaultMessage:
@@ -48,7 +49,7 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
             })
           );
         }
-        setIndexPatternId(currentIndexPatternId);
+        setDataViewId(currentDataViewId);
         setConfig(item.config);
         setIsFlyoutVisible(true);
       } catch (e) {
@@ -60,7 +61,7 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexPatterns, toastNotifications, getIndexPatternIdByTitle]
+    [dataViews, toastNotifications, getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(
@@ -81,6 +82,6 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
     config,
     closeFlyout,
     isFlyoutVisible,
-    indexPatternId,
+    dataViewId,
   };
 };

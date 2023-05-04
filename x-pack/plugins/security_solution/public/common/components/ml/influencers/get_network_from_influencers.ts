@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DestinationOrSource, isDestinationOrSource } from '../types';
+import type { DestinationOrSource } from '../types';
+import { isDestinationOrSource } from '../types';
 import { getEntries } from '../get_entries';
 
 export const getNetworkFromInfluencers = (

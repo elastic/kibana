@@ -7,8 +7,13 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
+import {
+  allCasesCapabilities,
+  noCasesCapabilities,
+  readCasesCapabilities,
+} from '../../common/mock';
 import { useAvailableCasesOwners } from './use_available_owners';
 
 jest.mock('../../common/lib/kibana');
@@ -16,30 +21,19 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const hasAll = {
-  securitySolutionCases: {
-    crud_cases: true,
-    read_cases: true,
-  },
-  observabilityCases: {
-    crud_cases: true,
-    read_cases: true,
-  },
+  securitySolutionCases: allCasesCapabilities(),
+  observabilityCases: allCasesCapabilities(),
+  generalCases: allCasesCapabilities(),
 };
 
-const hasSecurityAsCrudAndObservabilityAsRead = {
-  securitySolutionCases: {
-    crud_cases: true,
-  },
-  observabilityCases: {
-    read_cases: true,
-  },
+const secAllObsReadGenNone = {
+  securitySolutionCases: allCasesCapabilities(),
+  observabilityCases: readCasesCapabilities(),
+  generalCases: noCasesCapabilities(),
 };
 
 const unrelatedFeatures = {
-  bogusCapability: {
-    crud_cases: true,
-    read_cases: true,
-  },
+  bogusCapability: allCasesCapabilities(),
 };
 
 const mockKibana = (permissionType: unknown = hasAll) => {
@@ -57,7 +51,7 @@ describe('useAvailableCasesOwners correctly grabs user case permissions', () => 
     mockKibana();
     const { result } = renderHook(useAvailableCasesOwners);
 
-    expect(result.current).toEqual([SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]);
+    expect(result.current).toEqual([SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, APP_ID]);
   });
 
   it('returns no owner types if user has access to none', () => {
@@ -68,17 +62,17 @@ describe('useAvailableCasesOwners correctly grabs user case permissions', () => 
   });
 
   it('returns only the permission it should have with CRUD as default', () => {
-    mockKibana(hasSecurityAsCrudAndObservabilityAsRead);
+    mockKibana(secAllObsReadGenNone);
     const { result } = renderHook(useAvailableCasesOwners);
 
     expect(result.current).toEqual([SECURITY_SOLUTION_OWNER]);
   });
 
   it('returns only the permission it should have with READ as default', () => {
-    mockKibana(hasSecurityAsCrudAndObservabilityAsRead);
-    const { result } = renderHook(() => useAvailableCasesOwners('read'));
+    mockKibana(secAllObsReadGenNone);
+    const { result } = renderHook(() => useAvailableCasesOwners(['read']));
 
-    expect(result.current).toEqual([OBSERVABILITY_OWNER]);
+    expect(result.current).toEqual([SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]);
   });
 
   it('returns no owners when the capabilities does not contain valid entries', () => {

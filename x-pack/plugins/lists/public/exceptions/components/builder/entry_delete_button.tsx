@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
-  padding-top: 20px;
+  padding-top: 25px;
 `;
 
 interface BuilderEntryDeleteButtonProps {

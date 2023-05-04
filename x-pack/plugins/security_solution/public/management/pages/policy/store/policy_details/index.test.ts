@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { PolicyDetailsState } from '../../types';
-import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
-import { policyDetailsReducer, PolicyDetailsAction, policyDetailsMiddlewareFactory } from './index';
+import type { PolicyDetailsState } from '../../types';
+import type { Dispatch, Store } from 'redux';
+import { applyMiddleware, createStore } from 'redux';
+import type { PolicyDetailsAction } from '.';
+import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
 import { policyConfig } from './selectors';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
-import { PolicyData } from '../../../../../../common/endpoint/types';
-import {
-  createSpyMiddleware,
-  MiddlewareActionSpyHelper,
-} from '../../../../../common/store/test_utils';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
-import { HttpFetchOptions } from 'kibana/public';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
+import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test_utils';
+import { createSpyMiddleware } from '../../../../../common/store/test_utils';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
-import { licenseMock } from '../../../../../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 describe('policy details: ', () => {
   let store: Store;
@@ -40,7 +38,6 @@ describe('policy details: ', () => {
       updated_by: '',
       policy_id: '',
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -261,7 +258,6 @@ describe('policy details: ', () => {
         description: '',
         policy_id: '',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'endpoint',
@@ -273,8 +269,10 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
+                  meta: { license: '', cloud: false },
                   windows: {
                     events: {
+                      credential_access: true,
                       dll_and_driver_load: true,
                       dns: false,
                       file: true,
@@ -283,10 +281,15 @@ describe('policy details: ', () => {
                       registry: true,
                       security: true,
                     },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
+                    attack_surface_reduction: {
+                      credential_hardening: {
+                        enabled: false,
+                      },
+                    },
                     popup: {
                       malware: {
                         enabled: true,
@@ -312,7 +315,7 @@ describe('policy details: ', () => {
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
@@ -330,11 +333,21 @@ describe('policy details: ', () => {
                       },
                     },
                     logging: { file: 'info' },
+                    advanced: {
+                      capture_env_vars:
+                        'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+                    },
                   },
                   linux: {
-                    events: { process: true, file: true, network: true },
+                    events: {
+                      process: true,
+                      file: true,
+                      network: true,
+                      session_data: false,
+                      tty_io: false,
+                    },
                     logging: { file: 'info' },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
@@ -350,6 +363,9 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                    },
+                    advanced: {
+                      capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
                   },
                 },

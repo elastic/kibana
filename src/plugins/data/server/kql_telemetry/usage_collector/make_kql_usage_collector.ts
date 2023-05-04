@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetchProvider, Usage } from './fetch';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
-export function makeKQLUsageCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
+export function makeKQLUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  getIndexForType: (type: string) => Promise<string>
+) {
   const kqlUsageCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'kql',
-    fetch: fetchProvider(kibanaIndex),
+    fetch: fetchProvider(getIndexForType),
     isReady: () => true,
     schema: {
       optInCount: { type: 'long' },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../../../test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
@@ -13,7 +13,6 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
   const kibanaServer = getService('kibanaServer');
 
   describe('search examples', function () {
-    this.tags('ciGroup13');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -33,5 +32,6 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
     loadTestFile(require.resolve('./search_example'));
     loadTestFile(require.resolve('./search_sessions_cache'));
     loadTestFile(require.resolve('./partial_results_example'));
+    loadTestFile(require.resolve('./sql_search_example'));
   });
 }

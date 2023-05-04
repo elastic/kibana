@@ -6,40 +6,89 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
-import { EuiResizeObserver } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 
-import { IInterpreterRenderHandlers } from '../../../expressions/public';
-import type { PersistedState } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
-import { PieRenderValue } from './pie_fn';
 
 import './index.scss';
+import { getUsageCollectionStart } from './services';
 
-type VislibWrapperProps = (VislibRenderValue | PieRenderValue) & {
+type VislibWrapperProps = VislibRenderValue & {
   core: VisTypeVislibCoreSetup;
   charts: ChartsPluginSetup;
   handlers: IInterpreterRenderHandlers;
 };
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<VislibVisController | null>(null);
+  const skipRenderComplete = useRef<boolean>(true);
 
-  const updateChart = useMemo(
+  const renderComplete = useMemo(
+    () => () => {
+      const usageCollection = getUsageCollectionStart();
+      const containerType = extractContainerType(handlers.getExecutionContext());
+
+      if (usageCollection && containerType) {
+        usageCollection.reportUiCounter(
+          containerType,
+          METRIC_TYPE.COUNT,
+          `render_agg_based_${visConfig!.type}`
+        );
+      }
+      handlers.done();
+    },
+    [handlers, visConfig]
+  );
+
+  const renderChart = useMemo(
     () =>
       debounce(() => {
         if (visController.current) {
-          visController.current.render(visData, visConfig, handlers);
+          visController.current.render(
+            visData,
+            visConfig,
+            handlers,
+            skipRenderComplete.current ? undefined : renderComplete
+          );
         }
+        skipRenderComplete.current = true;
       }, 100),
-    [visConfig, visData, handlers]
+    [handlers, renderComplete, skipRenderComplete, visConfig, visData]
   );
+
+  const onResize: EuiResizeObserverProps['onResize'] = useCallback(() => {
+    renderChart();
+  }, [renderChart]);
+
+  useEffect(() => {
+    skipRenderComplete.current = false;
+    renderChart();
+  }, [renderChart]);
 
   useEffect(() => {
     if (chartDiv.current) {
@@ -52,22 +101,20 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     };
   }, [core, charts]);
 
-  useEffect(updateChart, [updateChart]);
-
   useEffect(() => {
     if (handlers.uiState) {
       const uiState = handlers.uiState as PersistedState;
 
-      uiState.on('change', updateChart);
+      uiState.on('change', renderChart);
 
       return () => {
-        uiState?.off('change', updateChart);
+        uiState?.off('change', renderChart);
       };
     }
-  }, [handlers.uiState, updateChart]);
+  }, [handlers.uiState, renderChart]);
 
   return (
-    <EuiResizeObserver onResize={updateChart}>
+    <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
         <div className="vislib__wrapper" ref={resizeRef}>
           <div className="vislib__container" ref={chartDiv} />

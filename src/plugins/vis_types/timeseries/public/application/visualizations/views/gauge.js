@@ -9,13 +9,16 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
-import reactcss from 'reactcss';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
+
+import './_gauge.scss';
 
 export class Gauge extends Component {
   constructor(props) {
@@ -29,37 +32,32 @@ export class Gauge extends Component {
     };
 
     this.handleResize = this.handleResize.bind(this);
+    this.checkResizeThrottled = _.throttle(() => {
+      const newState = calculateCoordinates(this.inner, this.resize, this.state);
+      if (newState && this.state && !_.isEqual(newState, this.state)) {
+        this.handleResize();
+      }
+    }, 200);
   }
-
-  UNSAFE_componentWillMount() {
-    const check = () => {
-      this.timeout = setTimeout(() => {
-        const newState = calculateCoordinates(this.inner, this.resize, this.state);
-        if (newState && this.state && !_.isEqual(newState, this.state)) {
-          this.handleResize();
-        }
-        check();
-      }, 500);
-    };
-    check();
-  }
+  handledResize = false;
 
   componentWillUnmount() {
     clearTimeout(this.timeout);
   }
 
   componentDidMount() {
-    this.handleResize();
+    this.handleResize(true);
   }
 
   handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
     this.setState(newState);
+    this.handledResize = true;
   }
 
   render() {
-    const { metric, type } = this.props;
+    const { metric, type, initialRender } = this.props;
     const { scale, translateX, translateY } = this.state;
     const value = getLastValue(metric?.data);
     const max = (metric && getValueBy('max', metric.data)) || 1;
@@ -68,22 +66,12 @@ export class Gauge extends Component {
       this.props.tickFormatter ||
       ((v) => v);
     const title = (metric && metric.label) || '';
-    const styles = reactcss(
-      {
-        default: {
-          inner: {
-            top: this.state.top || 0,
-            left: this.state.left || 0,
-            transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
-            zIndex: 1,
-          },
-          valueColor: {
-            color: this.props.valueColor,
-          },
-        },
-      },
-      this.props
-    );
+    const innerCSS = css`
+      top: ${this.state.top || 0}px;
+      left: ${this.state.left || 0}px;
+      transform: matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY});
+      z-index: 1;
+    `;
     const gaugeProps = {
       value,
       reversed: isBackgroundDark(this.props.backgroundColor),
@@ -93,6 +81,7 @@ export class Gauge extends Component {
       max: this.props.max || max,
       color: (metric && metric.color) || '#8ac336',
       type,
+      initialRender,
     };
 
     let metrics;
@@ -104,17 +93,13 @@ export class Gauge extends Component {
     }
     if (type === 'half') {
       metrics = (
-        <div
-          className="tvbVisHalfGauge__metrics"
-          ref={(el) => (this.inner = el)}
-          style={styles.inner}
-        >
+        <div css={innerCSS} className="tvbVisHalfGauge__metrics" ref={(el) => (this.inner = el)}>
           <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
             {title}
           </div>
           <div
             className="tvbVisGauge__value"
-            style={styles.valueColor}
+            style={this.props.valueColor ? { color: this.props.valueColor } : {}}
             ref="label"
             data-test-subj="gaugeValue"
           >
@@ -126,14 +111,10 @@ export class Gauge extends Component {
       );
     } else {
       metrics = (
-        <div
-          className="tvbVisCircleGauge__metrics"
-          ref={(el) => (this.inner = el)}
-          style={styles.inner}
-        >
+        <div css={innerCSS} className="tvbVisCircleGauge__metrics" ref={(el) => (this.inner = el)}>
           <div
             className="tvbVisGauge__value"
-            style={styles.valueColor}
+            style={this.props.valueColor ? { color: this.props.valueColor } : {}}
             ref="label"
             data-test-subj="gaugeValue"
           >
@@ -155,16 +136,20 @@ export class Gauge extends Component {
     });
 
     return (
-      <div className={classes}>
-        <div
-          ref={(el) => (this.resize = el)}
-          className={`tvbVisGauge__resize`}
-          data-test-subj="tvbVisGaugeContainer"
-        >
-          {metrics}
-          <GaugeVis {...gaugeProps} />
-        </div>
-      </div>
+      <EuiResizeObserver onResize={this.checkResizeThrottled}>
+        {(resizeRef) => (
+          <div className={classes} ref={resizeRef}>
+            <div
+              ref={(el) => (this.resize = el)}
+              className={`tvbVisGauge__resize`}
+              data-test-subj="tvbVisGaugeContainer"
+            >
+              {metrics}
+              <GaugeVis {...gaugeProps} />
+            </div>
+          </div>
+        )}
+      </EuiResizeObserver>
     );
   }
 }

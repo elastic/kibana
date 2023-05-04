@@ -6,11 +6,10 @@
  */
 
 import { TimelineType } from '../../../../common/types/timeline';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import {
-  DataProvider,
-  DataProviderType,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 
 import {

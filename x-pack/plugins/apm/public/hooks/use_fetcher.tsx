@@ -7,14 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
   AutoAbortedAPMClient,
   callApmApi,
-} from '../services/rest/createCallApmApi';
-import { useInspectorContext } from '../../../observability/public';
+} from '../services/rest/create_call_apm_api';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -22,6 +25,10 @@ export enum FETCH_STATUS {
   FAILURE = 'failure',
   NOT_INITIATED = 'not_initiated',
 }
+
+export const isPending = (fetchStatus: FETCH_STATUS) =>
+  fetchStatus === FETCH_STATUS.LOADING ||
+  fetchStatus === FETCH_STATUS.NOT_INITIATED;
 
 export interface FetcherResult<Data> {
   data?: Data;
@@ -47,10 +54,28 @@ function getDetailsFromErrorResponse(
 }
 
 const createAutoAbortedAPMClient = (
-  signal: AbortSignal
+  signal: AbortSignal,
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): AutoAbortedAPMClient => {
-  return ((options: Parameters<AutoAbortedAPMClient>[0]) => {
-    return callApmApi({ ...options, signal });
+  return ((endpoint, options) => {
+    return callApmApi(endpoint, {
+      ...options,
+      signal,
+    } as any)
+      .catch((err) => {
+        addInspectorRequest({
+          status: FETCH_STATUS.FAILURE,
+          data: err.body?.attributes,
+        });
+        throw err;
+      })
+      .then((response) => {
+        addInspectorRequest({
+          data: response,
+          status: FETCH_STATUS.SUCCESS,
+        });
+        return response;
+      });
   }) as AutoAbortedAPMClient;
 };
 
@@ -92,7 +117,9 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createAutoAbortedAPMClient(signal));
+      const promise = fn(
+        createAutoAbortedAPMClient(signal, addInspectorRequest)
+      );
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
@@ -168,14 +195,6 @@ export function useFetcher<TReturn>(
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
-
-  useEffect(() => {
-    if (result.error) {
-      addInspectorRequest({ ...result, data: result.error.body?.attributes });
-    } else {
-      addInspectorRequest(result);
-    }
-  }, [addInspectorRequest, result]);
 
   return useMemo(() => {
     return {

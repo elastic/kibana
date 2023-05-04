@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+source .buildkite/scripts/common/util.sh
+
 echo "--- Setup Node"
 
 NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
@@ -61,7 +65,7 @@ YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yar
 export YARN_VERSION
 
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  npm install -g "yarn@^${YARN_VERSION}"
+  npm_install_global yarn "^$YARN_VERSION"
 fi
 
 yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"

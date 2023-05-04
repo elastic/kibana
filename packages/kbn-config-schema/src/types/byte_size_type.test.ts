@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 import { ByteSizeValue } from '../byte_size_value';
 
 const { byteSize } = schema;

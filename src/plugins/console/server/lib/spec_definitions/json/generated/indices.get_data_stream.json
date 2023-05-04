@@ -7,7 +7,8 @@
         "hidden",
         "none",
         "all"
-      ]
+      ],
+      "include_defaults": "__flag__"
     },
     "methods": [
       "GET"

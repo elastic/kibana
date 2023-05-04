@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -35,7 +35,7 @@ export const getAlertStateRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('state', usageCounter);
-      const rulesClient = context.alerting.getRulesClient();
+      const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
       const state = await rulesClient.getAlertState({ id });
       return state ? res.ok({ body: state }) : res.noContent();

@@ -6,22 +6,21 @@
  */
 
 import { mean } from 'lodash';
-import { SanitizedAlert, AlertSummary, AlertStatus } from '../types';
-import { IEvent } from '../../../event_log/server';
+import { IEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
-const Millis2Nanos = 1000 * 1000;
-
 export interface AlertSummaryFromEventLogParams {
-  rule: SanitizedAlert<{ bar: boolean }>;
+  rule: SanitizedRule<{ bar: boolean }>;
   events: IEvent[];
+  executionEvents: IEvent[];
   dateStart: string;
   dateEnd: string;
 }
 
 export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams): AlertSummary {
   // initialize the  result
-  const { rule, events, dateStart, dateEnd } = params;
+  const { rule, events, executionEvents, dateStart, dateEnd } = params;
   const alertSummary: AlertSummary = {
     id: rule.id,
     name: rule.name,
@@ -32,7 +31,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     statusEndDate: dateEnd,
     status: 'OK',
     muteAll: rule.muteAll,
-    throttle: rule.throttle,
+    throttle: rule.throttle ?? null,
     enabled: rule.enabled,
     lastRun: undefined,
     errorMessages: [],
@@ -41,6 +40,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: rule.revision,
   };
 
   const alerts = new Map<string, AlertStatus>();
@@ -57,6 +57,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (provider !== EVENT_LOG_PROVIDER) continue;
 
     const action = event?.event?.action;
+
     if (action === undefined) continue;
 
     if (action === EVENT_LOG_ACTIONS.execute) {
@@ -73,21 +74,23 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
         alertSummary.status = 'OK';
       }
 
-      if (event?.event?.duration) {
-        const eventDirationMillis = event?.event?.duration / Millis2Nanos;
-        eventDurations.push(eventDirationMillis);
-        if (event?.['@timestamp']) {
-          eventDurationsWithTimestamp[event?.['@timestamp']] = eventDirationMillis;
-        }
-      }
-
       continue;
     }
 
     const alertId = event?.kibana?.alerting?.instance_id;
     if (alertId === undefined) continue;
 
-    const status = getAlertStatus(alerts, alertId);
+    const alertUuid = event?.kibana?.alert?.uuid;
+    const status = getAlertStatus(alerts, alertId, alertUuid);
+
+    if (event?.kibana?.alert?.flapping) {
+      status.flapping = true;
+    }
+
+    if (event?.kibana?.alert?.maintenance_window_ids?.length) {
+      status.maintenanceWindowIds = event.kibana.alert.maintenance_window_ids as string[];
+    }
+
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
         status.activeStartDate = timeStamp;
@@ -95,14 +98,29 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       case EVENT_LOG_ACTIONS.activeInstance:
         status.status = 'Active';
         status.actionGroupId = event?.kibana?.alerting?.action_group_id;
-        status.actionSubgroup = event?.kibana?.alerting?.action_subgroup;
         break;
       case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
       case EVENT_LOG_ACTIONS.recoveredInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
-        status.actionSubgroup = undefined;
+    }
+  }
+
+  for (const event of executionEvents.reverse()) {
+    const timeStamp = event?.['@timestamp'];
+    if (timeStamp === undefined) continue;
+    const action = event?.event?.action;
+
+    if (action === undefined) continue;
+    if (action !== EVENT_LOG_ACTIONS.execute) {
+      continue;
+    }
+
+    if (event?.event?.duration) {
+      const eventDirationMillis = nanosToMillis(event.event.duration);
+      eventDurations.push(eventDirationMillis);
+      eventDurationsWithTimestamp[event['@timestamp']!] = eventDirationMillis;
     }
   }
 
@@ -137,15 +155,20 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
 }
 
 // return an alert status object, creating and adding to the map if needed
-function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): AlertStatus {
+function getAlertStatus(
+  alerts: Map<string, AlertStatus>,
+  alertId: string,
+  alertUuid?: string
+): AlertStatus {
   if (alerts.has(alertId)) return alerts.get(alertId)!;
 
   const status: AlertStatus = {
+    uuid: alertUuid,
     status: 'OK',
     muted: false,
     actionGroupId: undefined,
-    actionSubgroup: undefined,
     activeStartDate: undefined,
+    flapping: false,
   };
   alerts.set(alertId, status);
   return status;

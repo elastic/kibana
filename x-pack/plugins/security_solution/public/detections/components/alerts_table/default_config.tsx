@@ -12,11 +12,14 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import { RowRendererId } from '../../../../common/types/timeline';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { columns } from '../../configurations/security_solution_detections/columns';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  getColumns,
+  getRulePreviewColumns,
+} from '../../configurations/security_solution_detections/columns';
+import type { LicenseService } from '../../../../common/license';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => {
   const combinedQuery =
@@ -149,12 +152,26 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const alertsDefaultModel: SubsetTimelineModel = {
-  ...timelineDefaults,
-  columns,
+export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
+  ...tableDefaults,
+  columns: getColumns(license),
   showCheckboxes: true,
-  excludedRowRendererIds: Object.values(RowRendererId),
-};
+});
+
+export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
+  ...getAlertsDefaultModel(license),
+  columns: getColumns(license),
+  defaultColumns: getRulePreviewColumns(license),
+  sort: [
+    {
+      columnId: 'kibana.alert.original_time',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: 'desc',
+    },
+  ],
+  showCheckboxes: false,
+});
 
 export const requiredFieldsForActions = [
   '@timestamp',
@@ -162,15 +179,13 @@ export const requiredFieldsForActions = [
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',
-  'kibana.alert.rule.filters',
   'kibana.alert.rule.from',
-  'kibana.alert.rule.language',
-  'kibana.alert.rule.query',
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
-  'kibana.alert.rule.index',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
+  'kibana.alert.suppression.docs_count',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   // Endpoint exception fields
@@ -180,4 +195,5 @@ export const requiredFieldsForActions = [
   'file.hash.sha256',
   'host.os.family',
   'event.code',
+  'process.entry_leader.entity_id',
 ];

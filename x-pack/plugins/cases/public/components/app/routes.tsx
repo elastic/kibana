@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import React, { lazy, Suspense, useCallback } from 'react';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
-import { CaseView } from '../case_view';
 import { CreateCase } from '../create';
 import { ConfigureCases } from '../configure_cases';
-import { CasesRoutesProps } from './types';
+import type { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import {
   getCasesConfigurePath,
   getCreateCasePath,
   getCaseViewPath,
   getCaseViewWithCommentPath,
-  getSubCaseViewPath,
-  getSubCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
+import { casesQueryClient } from '../cases_context/query_client';
+import type { CaseViewProps } from '../case_view/types';
+
+const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onComponentInitialized,
@@ -36,7 +42,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   refreshRef,
   timelineIntegration,
 }) => {
-  const { basePath, userCanCrud } = useCasesContext();
+  const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
   useReadonlyHeader();
@@ -47,56 +53,56 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   );
 
   return (
-    <Switch>
-      <Route strict exact path={basePath}>
-        <AllCases />
-      </Route>
+    <QueryClientProvider client={casesQueryClient}>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <Switch>
+        <Route strict exact path={basePath}>
+          <AllCases />
+        </Route>
 
-      <Route path={getCreateCasePath(basePath)}>
-        {userCanCrud ? (
-          <CreateCase
-            onSuccess={onCreateCaseSuccess}
-            onCancel={navigateToAllCases}
-            timelineIntegration={timelineIntegration}
-          />
-        ) : (
-          <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
-        )}
-      </Route>
+        <Route path={getCreateCasePath(basePath)}>
+          {permissions.create ? (
+            <CreateCase
+              onSuccess={onCreateCaseSuccess}
+              onCancel={navigateToAllCases}
+              timelineIntegration={timelineIntegration}
+            />
+          ) : (
+            <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
+          )}
+        </Route>
 
-      <Route path={getCasesConfigurePath(basePath)}>
-        {userCanCrud ? (
-          <ConfigureCases />
-        ) : (
-          <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
-        )}
-      </Route>
+        <Route path={getCasesConfigurePath(basePath)}>
+          {permissions.update ? (
+            <ConfigureCases />
+          ) : (
+            <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+          )}
+        </Route>
 
-      <Route
-        exact
-        path={[
-          getSubCaseViewWithCommentPath(basePath),
-          getCaseViewWithCommentPath(basePath),
-          getSubCaseViewPath(basePath),
-          getCaseViewPath(basePath),
-        ]}
-      >
-        <CaseView
-          onComponentInitialized={onComponentInitialized}
-          actionsNavigation={actionsNavigation}
-          ruleDetailsNavigation={ruleDetailsNavigation}
-          showAlertDetails={showAlertDetails}
-          useFetchAlertData={useFetchAlertData}
-          refreshRef={refreshRef}
-          timelineIntegration={timelineIntegration}
-        />
-      </Route>
+        <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <CaseViewLazy
+              onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              showAlertDetails={showAlertDetails}
+              useFetchAlertData={useFetchAlertData}
+              refreshRef={refreshRef}
+              timelineIntegration={timelineIntegration}
+            />
+          </Suspense>
+        </Route>
 
-      <Route path={basePath}>
-        <Redirect to={basePath} />
-      </Route>
-    </Switch>
+        <Route path={basePath}>
+          <Redirect to={basePath} />
+        </Route>
+      </Switch>
+    </QueryClientProvider>
   );
 };
+CasesRoutesComponent.displayName = 'CasesRoutes';
 
 export const CasesRoutes = React.memo(CasesRoutesComponent);
+// eslint-disable-next-line import/no-default-export
+export { CasesRoutes as default };

@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
 import { Sidebar } from './sidebar';

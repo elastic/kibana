@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
-
 import * as Rx from 'rxjs';
 import {
   map,
@@ -20,7 +18,7 @@ import {
   takeUntil,
   ignoreElements,
 } from 'rxjs/operators';
-import { observeLines } from '@kbn/dev-utils';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { usingServerProcess } from './using_server_process';
 import { Watcher } from './watcher';
@@ -36,6 +34,7 @@ export interface Options {
   sigint$?: Rx.Observable<void>;
   sigterm$?: Rx.Observable<void>;
   mapLogLine?: DevServer['mapLogLine'];
+  forceColor?: boolean;
 }
 
 export class DevServer {
@@ -52,6 +51,7 @@ export class DevServer {
   private readonly argv: string[];
   private readonly gracefulTimeout: number;
   private readonly mapLogLine?: (line: string) => string | null;
+  private readonly forceColor: boolean;
 
   constructor(options: Options) {
     this.log = options.log;
@@ -60,10 +60,11 @@ export class DevServer {
     this.script = options.script;
     this.argv = options.argv;
     this.gracefulTimeout = options.gracefulTimeout;
-    this.processExit$ = options.processExit$ ?? Rx.fromEvent(process as EventEmitter, 'exit');
-    this.sigint$ = options.sigint$ ?? Rx.fromEvent(process as EventEmitter, 'SIGINT');
-    this.sigterm$ = options.sigterm$ ?? Rx.fromEvent(process as EventEmitter, 'SIGTERM');
+    this.processExit$ = options.processExit$ ?? Rx.fromEvent<void>(process, 'exit');
+    this.sigint$ = options.sigint$ ?? Rx.fromEvent<void>(process, 'SIGINT');
+    this.sigterm$ = options.sigterm$ ?? Rx.fromEvent<void>(process, 'SIGTERM');
     this.mapLogLine = options.mapLogLine;
+    this.forceColor = options.forceColor ?? !!process.stdout.isTTY;
   }
 
   isReady$() {
@@ -117,7 +118,7 @@ export class DevServer {
    */
   run$ = new Rx.Observable<void>((subscriber) => {
     // listen for SIGINT and forward to process if it's running, otherwise unsub
-    const gracefulShutdown$ = new Rx.Subject();
+    const gracefulShutdown$ = new Rx.Subject<void>();
     subscriber.add(
       this.sigint$
         .pipe(
@@ -143,8 +144,13 @@ export class DevServer {
       })
     );
 
+    const serverOptions = {
+      script: this.script,
+      argv: this.argv,
+      forceColor: this.forceColor,
+    };
     const runServer = () =>
-      usingServerProcess(this.script, this.argv, (proc) => {
+      usingServerProcess(serverOptions, (proc) => {
         this.phase$.next('starting');
         this.ready$.next(false);
 

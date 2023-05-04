@@ -6,10 +6,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
-import { ILicense } from '../../../../licensing/common/types';
+import { firstValueFrom, Observable } from 'rxjs';
+import { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 
@@ -24,22 +23,21 @@ export const setupCapabilitiesSwitcher = (
 function getSwitcher(license$: Observable<ILicense>, logger: Logger): CapabilitiesSwitcher {
   return async (request, capabilities) => {
     const isAnonymousRequest = !request.route.options.authRequired;
-
     if (isAnonymousRequest) {
-      return capabilities;
+      return {};
     }
 
     try {
-      const license = await license$.pipe(take(1)).toPromise();
+      const license = await firstValueFrom(license$);
       const mlEnabled = isMlEnabled(license);
 
       // full license, leave capabilities as they were
       if (mlEnabled && isFullLicense(license)) {
-        return capabilities;
+        return {};
       }
 
-      const mlCaps = capabilities.ml as MlCapabilities;
-      const originalCapabilities = cloneDeep(mlCaps);
+      const originalCapabilities = capabilities.ml as MlCapabilities;
+      const mlCaps = cloneDeep(originalCapabilities);
 
       // not full licence, switch off all capabilities
       Object.keys(mlCaps).forEach((k) => {
@@ -51,10 +49,10 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
         basicLicenseMlCapabilities.forEach((c) => (mlCaps[c] = originalCapabilities[c]));
       }
 
-      return capabilities;
+      return { ml: mlCaps };
     } catch (e) {
       logger.debug(`Error updating capabilities for ML based on licensing: ${e}`);
-      return capabilities;
+      return {};
     }
   };
 }

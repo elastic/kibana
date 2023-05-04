@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import * as selectors from '../store/selectors';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverAction } from '../store/actions';
+import type { ResolverAction } from '../store/actions';
 import { panelViewAndParameters } from '../store/panel_view_and_parameters';
 
 /**

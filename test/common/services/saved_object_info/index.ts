@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 import { pipe } from 'fp-ts/function';
 import { payload, noop, areValid, print, expectedFlags, format } from './utils';
 import { types } from './saved_object_info';

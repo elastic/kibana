@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
-import { METRIC_TYPES } from '../../../../../../data/common';
+import { v1 as uuidv1 } from 'uuid';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { Metric } from '../../../../common/types';
 
 export const newMetricAggFn = (): Metric => {
   return {
-    id: uuid.v1(),
+    id: uuidv1(),
     type: METRIC_TYPES.COUNT,
   };
 };

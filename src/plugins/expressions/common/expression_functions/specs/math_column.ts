@@ -14,6 +14,7 @@ import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../
 export type MathColumnArguments = MathArguments & {
   id: string;
   name?: string;
+  castColumns?: string[];
   copyMetaFrom?: string | null;
 };
 
@@ -28,12 +29,11 @@ export const mathColumn: ExpressionFunctionDefinition<
   inputTypes: ['datatable'],
   help: i18n.translate('expressions.functions.mathColumnHelpText', {
     defaultMessage:
-      'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments.' +
-      'See also {alterColumnFn} and {staticColumnFn}.',
+      'Adds a column by evaluating {tinymath} on each row. ' +
+      'This function is optimized for math and performs better than using a math expression in {mapColumnFn}.',
     values: {
-      alterColumnFn: '`alterColumn`',
-      staticColumnFn: '`staticColumn`',
+      mapColumnFn: '`mapColumn`',
+      tinymath: '`TinyMath`',
     },
   }),
   args: {
@@ -52,6 +52,14 @@ export const mathColumn: ExpressionFunctionDefinition<
         defaultMessage: 'The name of the resulting column. Names are not required to be unique.',
       }),
       required: true,
+    },
+    castColumns: {
+      types: ['string'],
+      multi: true,
+      help: i18n.translate('expressions.functions.mathColumn.args.castColumnsHelpText', {
+        defaultMessage: 'The ids of columns to cast to numbers before applying the formula',
+      }),
+      required: false,
     },
     copyMetaFrom: {
       types: ['string', 'null'],
@@ -78,11 +86,31 @@ export const mathColumn: ExpressionFunctionDefinition<
 
     const newRows = await Promise.all(
       input.rows.map(async (row) => {
+        let preparedRow = row;
+        if (args.castColumns) {
+          preparedRow = { ...row };
+          args.castColumns.forEach((columnId) => {
+            switch (typeof row[columnId]) {
+              case 'string':
+                const parsedAsDate = Number(new Date(preparedRow[columnId]));
+                if (!isNaN(parsedAsDate)) {
+                  preparedRow[columnId] = parsedAsDate;
+                  return;
+                } else {
+                  preparedRow[columnId] = Number(preparedRow[columnId]);
+                  return;
+                }
+              case 'boolean':
+                preparedRow[columnId] = Number(preparedRow[columnId]);
+                return;
+            }
+          });
+        }
         const result = await math.fn(
           {
-            type: 'datatable',
+            ...input,
             columns: input.columns,
-            rows: [row],
+            rows: [preparedRow],
           },
           {
             expression: args.expression,
@@ -129,7 +157,7 @@ export const mathColumn: ExpressionFunctionDefinition<
     columns.push(newColumn);
 
     return {
-      type: 'datatable',
+      ...input,
       columns,
       rows: newRows,
     } as Datatable;

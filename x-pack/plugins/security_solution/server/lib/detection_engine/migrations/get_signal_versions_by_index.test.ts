@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSignalVersionsByIndex } from './get_signal_versions_by_index';
 
 describe('getSignalVersionsByIndex', () => {
@@ -16,9 +16,9 @@ describe('getSignalVersionsByIndex', () => {
   });
 
   it('properly transforms the elasticsearch aggregation', async () => {
-    esClient.search.mockResolvedValueOnce({
+    esClient.search.mockResponseOnce(
       // @ts-expect-error mocking only what we need
-      body: {
+      {
         aggregations: {
           signals_indices: {
             buckets: [
@@ -34,8 +34,8 @@ describe('getSignalVersionsByIndex', () => {
             ],
           },
         },
-      },
-    });
+      }
+    );
 
     const result = await getSignalVersionsByIndex({
       esClient,

@@ -11,12 +11,16 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange } from 'src/plugins/data/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { Geometry, Position } from 'geojson';
-import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
+import { asyncForEach, asyncMap } from '@kbn/std';
+import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { MapStoreState } from '../reducers/store';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
   getDataFilters,
   getFilters,
@@ -40,13 +44,14 @@ import {
   MAP_EXTENT_CHANGED,
   MAP_READY,
   ROLLBACK_MAP_SETTINGS,
+  SET_EMBEDDABLE_SEARCH_CONTEXT,
+  SET_EXECUTION_CONTEXT,
   SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
@@ -56,16 +61,23 @@ import {
   autoFitToBounds,
   syncDataForAllLayers,
   syncDataForLayerDueToDrawing,
+  syncDataForLayerId,
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
-import { MapSettings } from '../reducers/map';
-import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
+import {
+  CustomIcon,
+  DrawState,
+  MapCenterAndZoom,
+  MapExtent,
+  MapSettings,
+  Timeslice,
+} from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
-import { SET_DRAW_MODE } from './ui_actions';
-import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
+import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
+import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
+import { getDeletedFeatureIds } from '../selectors/ui_selectors';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -106,6 +118,49 @@ export function updateMapSetting(
   };
 }
 
+export function updateCustomIcons(customIcons: CustomIcon[]) {
+  return {
+    type: UPDATE_MAP_SETTING,
+    settingKey: 'customIcons',
+    settingValue: customIcons,
+  };
+}
+
+export function deleteCustomIcon(value: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layersContainingCustomIcon = getLayerList(getState()).filter((layer) => {
+      const style = layer.getCurrentStyle();
+      if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+        return false;
+      }
+      return (style as IVectorStyle).isUsingCustomIcon(value);
+    });
+
+    if (layersContainingCustomIcon.length > 0) {
+      const layerList = await asyncMap(layersContainingCustomIcon, async (layer) => {
+        return await layer.getDisplayName();
+      });
+      getToasts().addWarning(
+        i18n.translate('xpack.maps.mapActions.deleteCustomIconWarning', {
+          defaultMessage: `Unable to delete icon. The icon is in use by the {count, plural, one {layer} other {layers}}: {layerNames}`,
+          values: {
+            count: layerList.length,
+            layerNames: layerList.join(', '),
+          },
+        })
+      );
+    } else {
+      const newIcons = getState().map.settings.customIcons.filter(
+        ({ symbolId }) => symbolId !== value
+      );
+      dispatch(updateMapSetting('customIcons', newIcons));
+    }
+  };
+}
+
 export function mapReady() {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -116,9 +171,6 @@ export function mapReady() {
     });
 
     const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
-    dispatch({
-      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-    });
 
     if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
@@ -130,6 +182,12 @@ export function mapReady() {
         dispatch(addLayer(layerDescriptor));
       });
     }
+
+    // clear waiting list after transfer to avoid state condition
+    // where waiting list is empty and layers have not been added to layerList
+    dispatch({
+      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+    });
   };
 }
 
@@ -164,24 +222,20 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       doesPrevBufferContainNextExtent = turfBooleanContains(bufferGeometry, extentGeometry);
     }
 
+    const requiresNewBuffer =
+      !prevBuffer || !doesPrevBufferContainNextExtent || prevZoom !== nextZoom;
+    if (requiresNewBuffer) {
+      getInspectorAdapters(getState()).vectorTiles.setTiles(getTilesForExtent(nextZoom, extent));
+    }
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapViewContext: {
         ...mapExtentState,
-        buffer:
-          !prevBuffer || !doesPrevBufferContainNextExtent || prevZoom !== nextZoom
-            ? expandToTileBoundaries(extent, Math.ceil(nextZoom))
-            : prevBuffer,
+        buffer: requiresNewBuffer
+          ? expandToTileBoundaries(extent, Math.ceil(nextZoom))
+          : prevBuffer,
       } as MapViewContext,
     });
-
-    if (prevZoom !== nextZoom) {
-      getLayerList(getState()).map((layer) => {
-        if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(updateTooltipStateForLayer(layer));
-        }
-      });
-    }
 
     dispatch(syncDataForAllLayers(false));
   };
@@ -206,10 +260,6 @@ export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) 
 
 export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
-}
-
-export function disableScrollZoom() {
-  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
 }
 
 export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {
@@ -296,6 +346,26 @@ export function setQuery({
   };
 }
 
+export function setEmbeddableSearchContext({
+  query,
+  filters,
+}: {
+  filters: Filter[];
+  query?: Query;
+}) {
+  return {
+    type: SET_EMBEDDABLE_SEARCH_CONTEXT,
+    embeddableSearchContext: { filters, query },
+  };
+}
+
+export function setExecutionContext(executionContext: KibanaExecutionContext) {
+  return {
+    type: SET_EXECUTION_CONTEXT,
+    executionContext,
+  };
+}
+
 export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
@@ -321,6 +391,10 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
         drawShape: shapeToDraw,
       },
     });
+
+    if (shapeToDraw !== DRAW_SHAPE.DELETE) {
+      dispatch(clearDeletedFeatureIds());
+    }
   };
 }
 
@@ -338,7 +412,7 @@ export function setEditLayerToSelectedLayer() {
 }
 
 export function updateEditLayer(layerId: string | null) {
-  return (dispatch: Dispatch) => {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     if (layerId !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
     }
@@ -350,10 +424,11 @@ export function updateEditLayer(layerId: string | null) {
       type: UPDATE_EDIT_STATE,
       editState: layerId ? { layerId } : undefined,
     });
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
-export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
+export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -369,7 +444,10 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     }
 
     try {
-      await (layer as IVectorLayer).addFeature(geometry);
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
+      await asyncForEach(geometries, async (geometry) => {
+        await (layer as IVectorLayer).addFeature(geometry);
+      });
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
@@ -378,6 +456,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
         }),
       });
     }
+    dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
   };
 }
 
@@ -386,6 +465,12 @@ export function deleteFeatureFromIndex(featureId: string) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
+    // There is a race condition where users can click on a previously deleted feature before layer has re-rendered after feature delete.
+    // Check ensures delete requests for previously deleted features are aborted.
+    if (getDeletedFeatureIds(getState()).includes(featureId)) {
+      return;
+    }
+
     const editState = getEditState(getState());
     const layerId = editState ? editState.layerId : undefined;
     if (!layerId) {
@@ -395,8 +480,11 @@ export function deleteFeatureFromIndex(featureId: string) {
     if (!layer || !isVectorLayer(layer)) {
       return;
     }
+
     try {
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await (layer as IVectorLayer).deleteFeature(featureId);
+      dispatch(pushDeletedFeatureId(featureId));
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
@@ -405,5 +493,6 @@ export function deleteFeatureFromIndex(featureId: string) {
         }),
       });
     }
+    dispatch(updateEditShape(DRAW_SHAPE.DELETE));
   };
 }

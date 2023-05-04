@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,
@@ -26,38 +26,42 @@ import { WelcomeContent } from './welcome_content';
 
 interface Props {
   onFilePickerChange(files: FileList | null): void;
+  hasPermissionToImport: boolean;
 }
 
-export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
+export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
   return (
-    <EuiPage restrictWidth={1000} data-test-subj="dataVisualizerPageFileUpload">
-      <EuiPageBody>
-        <EuiPageContent className="file-datavisualizer-about-panel__content">
-          <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem grow={true}>
-              <WelcomeContent />
+    <EuiPageBody
+      paddingSize="none"
+      panelled={false}
+      restrictWidth={1000}
+      data-test-subj="dataVisualizerPageFileUpload"
+    >
+      <EuiPageContent hasShadow={false} hasBorder>
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={true}>
+            <WelcomeContent hasPermissionToImport={hasPermissionToImport} />
 
-              <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="l" />
 
-              <div style={{ textAlign: 'center' }}>
-                <EuiFilePicker
-                  id="filePicker"
-                  initialPromptText={i18n.translate(
-                    'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-                    {
-                      defaultMessage: 'Select or drag and drop a file',
-                    }
-                  )}
-                  onChange={(files) => onFilePickerChange(files)}
-                  className="file-datavisualizer-file-picker"
-                />
-              </div>
-              <EuiSpacer size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+            <div style={{ textAlign: 'center' }}>
+              <EuiFilePicker
+                id="filePicker"
+                initialPromptText={i18n.translate(
+                  'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+                  {
+                    defaultMessage: 'Select or drag and drop a file',
+                  }
+                )}
+                onChange={(files) => onFilePickerChange(files)}
+                className="file-datavisualizer-file-picker"
+              />
+            </div>
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageContent>
+    </EuiPageBody>
   );
 };
 

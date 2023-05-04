@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
+import { demoTimelineData } from '../../../../common/demo_data/timeline';
 import { createGenericAuditRowRenderer } from '../../timeline/body/renderers/auditd/generic_row_renderer';
 import { CONNECTED_USING } from '../../timeline/body/renderers/auditd/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -21,10 +21,9 @@ const AuditdExampleComponent: React.FC = () => {
   return (
     <>
       {auditdRowRenderer.renderRow({
-        browserFields: {},
-        data: mockTimelineData[26].ecs,
+        data: demoTimelineData[26].ecs,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

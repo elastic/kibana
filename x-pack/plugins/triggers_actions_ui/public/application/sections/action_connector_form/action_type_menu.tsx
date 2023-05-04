@@ -15,20 +15,22 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
 import { SectionLoading } from '../../components/section_loading';
+import { betaBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
-  actionTypes?: ActionType[];
+  featureId?: string;
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
+  setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
-  actionTypes,
+  featureId,
   setHasActionsUpgradeableByTrial,
+  setAllActionTypes,
   actionTypeRegistry,
 }: Props) => {
   const {
@@ -37,30 +39,21 @@ export const ActionTypeMenu = ({
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-
   useEffect(() => {
     (async () => {
       try {
-        /**
-         * Hidden action types will be hidden only on Alerts & Actions.
-         * actionTypes prop is not filtered. Thus, any consumer that provides it's own actionTypes
-         * can use the hidden action types. For example, Cases or Detections of Security Solution.
-         *
-         * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-         *  */
-        let availableActionTypes = actionTypes;
-        if (!availableActionTypes) {
-          setLoadingActionTypes(true);
-          availableActionTypes = (await loadActionTypes({ http })).filter(
-            (actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id)
-          );
-          setLoadingActionTypes(false);
-        }
+        setLoadingActionTypes(true);
+        const availableActionTypes = await loadActionTypes({ http, featureId });
+        setLoadingActionTypes(false);
+
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
+        if (setAllActionTypes) {
+          setAllActionTypes(index);
+        }
         // determine if there are actions disabled by license that that
         // would be enabled by upgrading to gold or trial
         if (setHasActionsUpgradeableByTrial) {
@@ -84,9 +77,13 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(([id, details]) => actionTypeRegistry.has(id) && details.enabledInConfig === true)
+    .filter(
+      ([id, details]) =>
+        actionTypeRegistry.has(id) &&
+        details.enabledInConfig === true &&
+        !actionTypeRegistry.get(id).hideInUi
+    )
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
@@ -94,6 +91,7 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
+        isExperimental: actionTypeModel.isExperimental,
       };
     });
 
@@ -103,13 +101,16 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
+          betaBadgeProps={item.isExperimental ? betaBadgeProps : undefined}
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
-          onClick={() => onActionTypeChange(item.actionType)}
+          onClick={() => {
+            onActionTypeChange(item.actionType);
+          }}
         />
       );
 

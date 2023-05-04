@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { ConnectorMappingsAttributes } from '../../../common/api';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { ConnectorMappingsAttributes } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
-import { UpdateMappingsArgs } from './types';
+import type { CasesClientArgs } from '..';
+import type { UpdateMappingsArgs } from './types';
 import { casesConnectors } from '../../connectors';
 
 export const updateMappings = async (
-  { connector, mappingId }: UpdateMappingsArgs,
+  { connector, mappingId, refresh }: UpdateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
-  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { connectorMappingsService },
+    logger,
+  } = clientArgs;
 
   try {
     const mappings = casesConnectors.get(connector.type)?.getMapping() ?? [];
@@ -34,6 +38,7 @@ export const updateMappings = async (
           id: connector.id,
         },
       ],
+      refresh,
     });
 
     return theMapping.attributes.mappings ?? [];

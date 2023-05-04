@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { EMS_APP_NAME, FONTS_API_PATH } from '../common/constants';
-import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
+import { getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 
 export function getKibanaTileMap(): unknown {
-  return getTilemap();
+  const mapsEms = getMapsEmsStart();
+  return mapsEms.config.tilemap ? mapsEms.config.tilemap : {};
 }
 
 export async function getEmsFileLayers(): Promise<FileLayer[]> {
@@ -20,7 +19,7 @@ export async function getEmsFileLayers(): Promise<FileLayer[]> {
     return [];
   }
 
-  return getEMSClient().getFileLayers();
+  return (await getEMSClient()).getFileLayers();
 }
 
 export async function getEmsTmsServices(): Promise<TMSService[]> {
@@ -28,46 +27,29 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
     return [];
   }
 
-  return getEMSClient().getTMSServices();
+  return (await getEMSClient()).getTMSServices();
 }
 
-let emsClient: EMSClient | null = null;
+let emsClientPromise: Promise<EMSClient> | null = null;
 let latestLicenseId: string | undefined;
-export function getEMSClient(): EMSClient {
-  if (!emsClient) {
-    const emsSettings = getEMSSettings();
-    const proxyPath = '';
-    const tileApiUrl = emsSettings!.getEMSTileApiUrl();
-    const fileApiUrl = emsSettings!.getEMSFileApiUrl();
-
-    emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: EMS_APP_NAME,
-      tileApiUrl,
-      fileApiUrl,
-      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
-      fetchFunction(url: string) {
-        return fetch(url);
-      },
-      proxyPath,
+async function getEMSClient(): Promise<EMSClient> {
+  if (!emsClientPromise) {
+    emsClientPromise = new Promise(async (resolve, reject) => {
+      try {
+        const emsClient = await getMapsEmsStart().createEMSClient();
+        resolve(emsClient);
+      } catch (error) {
+        reject(error);
+      }
     });
   }
+  const emsClient = await emsClientPromise;
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
     emsClient.addQueryParams({ license: licenseId ? licenseId : '' });
   }
   return emsClient;
-}
-
-export function getGlyphUrl(): string {
-  const emsSettings = getEMSSettings();
-  if (!emsSettings!.isEMSEnabled()) {
-    return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
-  }
-
-  return emsSettings!.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {

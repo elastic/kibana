@@ -6,8 +6,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { Dictionary } from '../../../../common/types/common';
-import { LayerDescriptor } from '../../../../../maps/common';
 import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
 import { MlEmbeddedMapComponent } from '../../components/ml_embedded_map';
 interface Props {

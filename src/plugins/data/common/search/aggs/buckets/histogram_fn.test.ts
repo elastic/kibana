@@ -25,6 +25,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "autoExtendBounds": undefined,
               "customLabel": undefined,
               "extended_bounds": undefined,
               "field": "field",
@@ -50,6 +51,7 @@ describe('agg_expression_functions', () => {
         maxBars: 25,
         min_doc_count: false,
         has_extended_bounds: false,
+        autoExtendBounds: true,
         extended_bounds: {
           type: 'extended_bounds',
           min: 1,
@@ -62,6 +64,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "autoExtendBounds": true,
             "customLabel": undefined,
             "extended_bounds": Object {
               "max": 2,

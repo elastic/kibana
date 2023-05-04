@@ -1,0 +1,271 @@
+{
+  "id": "@kbn/core-http-context-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-context-server-mocks",
+        "id": "def-common.ContextContainerMock",
+        "type": "Type",
+        "tags": [],
+        "label": "ContextContainerMock",
+        "description": [],
+        "signature": [
+          "{ registerContext: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IContextContainer",
+            "text": "IContextContainer"
+          },
+          ", [pluginOpaqueId: symbol, contextName: \"resolve\", provider: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IContextProvider",
+            "text": "IContextProvider"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ", \"resolve\">]>; createHandler: jest.MockInstance<(request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, response: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<any>>, [pluginOpaqueId: symbol, handler: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandler",
+            "text": "RequestHandler"
+          },
+          "<unknown, unknown, unknown, ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ", any, ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
+          ">]>; } & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IContextContainer",
+            "text": "IContextContainer"
+          }
+        ],
+        "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-http-context-server-mocks",
+        "id": "def-common.contextMock",
+        "type": "Object",
+        "tags": [],
+        "label": "contextMock",
+        "description": [],
+        "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-context-server-mocks",
+            "id": "def-common.contextMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(mockContext?: any) => ",
+              {
+                "pluginId": "@kbn/core-http-context-server-mocks",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpContextServerMocksPluginApi",
+                "section": "def-common.ContextContainerMock",
+                "text": "ContextContainerMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-context-server-mocks",
+                "id": "def-common.contextMock.create.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "mockContext",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-context-server-mocks",
+        "id": "def-common.contextServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "contextServiceMock",
+        "description": [],
+        "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-context-server-mocks",
+            "id": "def-common.contextServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<ContextServiceContract>"
+            ],
+            "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-context-server-mocks",
+            "id": "def-common.contextServiceMock.createPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createPrebootContract",
+            "description": [],
+            "signature": [
+              "(mockContext?: {}) => jest.Mocked<",
+              "InternalContextSetup",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-context-server-mocks",
+                "id": "def-common.contextServiceMock.createPrebootContract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "mockContext",
+                "description": [],
+                "signature": [
+                  "{}"
+                ],
+                "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-context-server-mocks",
+            "id": "def-common.contextServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "(mockContext?: {}) => jest.Mocked<",
+              "InternalContextSetup",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-context-server-mocks",
+                "id": "def-common.contextServiceMock.createSetupContract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "mockContext",
+                "description": [],
+                "signature": [
+                  "{}"
+                ],
+                "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

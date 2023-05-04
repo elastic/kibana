@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { IRouter, Logger } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { LicenseStatus } from '../common';
 
 export interface AppServerPluginDependencies {

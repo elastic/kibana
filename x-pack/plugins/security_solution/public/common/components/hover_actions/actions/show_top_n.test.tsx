@@ -7,8 +7,39 @@
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
+import { TimelineId } from '../../../../../common/types';
+
+jest.mock('../../visualization_actions/actions');
+jest.mock('../../visualization_actions/visualization_embeddable');
+
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          ui: {
+            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          },
+        },
+      },
+    }),
+  };
+});
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
+  };
+});
 
 describe('show topN button', () => {
   const defaultProps = {
@@ -16,7 +47,7 @@ describe('show topN button', () => {
     onClick: jest.fn(),
     ownFocus: false,
     showTopN: false,
-    timelineId: 'timeline-1',
+    scopeId: TimelineId.active,
     value: ['rule_name'],
   };
 
@@ -155,9 +186,7 @@ describe('show topN button', () => {
       expect(wrapper.find('[data-test-subj="top-n"]').prop('toggleTopN')).toEqual(
         testProps.onClick
       );
-      expect(wrapper.find('[data-test-subj="top-n"]').prop('timelineId')).toEqual(
-        testProps.timelineId
-      );
+      expect(wrapper.find('[data-test-subj="top-n"]').prop('scopeId')).toEqual(testProps.scopeId);
       expect(wrapper.find('[data-test-subj="top-n"]').prop('onFilterAdded')).toEqual(
         testProps.onFilterAdded
       );

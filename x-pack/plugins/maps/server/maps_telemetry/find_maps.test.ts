@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 // @ts-ignore
-import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
+import mapSavedObjects from '../../common/telemetry/test_resources/sample_map_saved_objects.json';
 import { findMaps } from './find_maps';
 
 function getMockSavedObjectsClient(perPage: number) {
@@ -29,7 +29,7 @@ function getMockSavedObjectsClient(perPage: number) {
   } as unknown as ISavedObjectsRepository;
 }
 
-test('should process all map saved objects with single page', async () => {
+test('should process all map saved objects with a single page', async () => {
   const foundMapIds: string[] = [];
   await findMaps(getMockSavedObjectsClient(20), async (savedObject) => {
     foundMapIds.push(savedObject.id);
@@ -43,7 +43,7 @@ test('should process all map saved objects with single page', async () => {
   ]);
 });
 
-test('should process all map saved objects with with paging', async () => {
+test('should process all map saved objects with paging', async () => {
   const foundMapIds: string[] = [];
   await findMaps(getMockSavedObjectsClient(2), async (savedObject) => {
     foundMapIds.push(savedObject.id);

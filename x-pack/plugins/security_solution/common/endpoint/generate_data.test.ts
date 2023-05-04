@@ -6,11 +6,9 @@
  */
 
 import _ from 'lodash';
+import type { Event, Tree, TreeNode } from './generate_data';
 import {
   EndpointDocGenerator,
-  Event,
-  Tree,
-  TreeNode,
   RelatedEventCategory,
   ECSCategory,
   ANCESTRY_LIMIT,
@@ -506,7 +504,7 @@ describe('data generator', () => {
         events[previousProcessEventIndex].process?.parent?.entity_id
       );
       expect(events[events.length - 1].event?.kind).toEqual('alert');
-      expect(events[events.length - 1].event?.category).toEqual('malware');
+      expect(events[events.length - 1].event?.category).toEqual('behavior');
     });
   });
 
@@ -577,5 +575,17 @@ describe('data generator', () => {
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);
+  });
+
+  it('creates full resolver tree with a single entry_leader id', () => {
+    const events = [...generator.alertsGenerator(1)];
+    const [rootEvent, ...children] = events;
+    expect(
+      children.every((event) => {
+        return (
+          event.process?.entry_leader?.entity_id === rootEvent.process?.entry_leader?.entity_id
+        );
+      })
+    ).toBe(true);
   });
 });

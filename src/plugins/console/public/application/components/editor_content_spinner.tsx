@@ -7,7 +7,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiLoadingContent, EuiPageContent } from '@elastic/eui';
+import { EuiLoadingContent, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 
 export const EditorContentSpinner: FunctionComponent = () => {
   return (

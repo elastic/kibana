@@ -15,18 +15,20 @@ export const defaultHandlers: RendererHandlers = {
   getFilter: () => 'filter',
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncCursorEnabled: () => true,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
   onEmbeddableInputChange: action('onEmbeddableInputChange'),
   onResize: action('onResize'),
   resize: action('resize'),
-  setFilter: action('setFilter'),
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),
   update: action('update'),
   event: action('event'),
+  getExecutionContext: () => undefined,
 };
 
 /*

@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-const createAppToastsMock = () => ({
+import type { UseAppToasts } from './use_app_toasts';
+
+const createAppToastsMock = (): jest.Mocked<UseAppToasts> => ({
   addError: jest.fn(),
   addSuccess: jest.fn(),
   addWarning: jest.fn(),
+  remove: jest.fn(),
+  api: {
+    get$: jest.fn(),
+    add: jest.fn(),
+    remove: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    addDanger: jest.fn(),
+    addError: jest.fn(),
+    addInfo: jest.fn(),
+  },
 });
 
 export const useAppToastsMock = {

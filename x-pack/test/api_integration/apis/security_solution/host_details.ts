@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   HostDetailsStrategyResponse,
   HostsQueries,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -198,7 +198,6 @@ export default function ({ getService }: FtrProviderContext) {
             architecture: ['armv7l'],
             id: ['b19a781f683541a7a25ee345133aa399'],
             ip: ['151.205.0.17'],
-            mac: [],
             name: ['raspberrypi'],
             os: {
               family: [''],
@@ -206,16 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
               platform: ['raspbian'],
               version: ['9 (stretch)'],
             },
-          },
-          cloud: {
-            instance: {
-              id: [],
-            },
-            machine: {
-              type: [],
-            },
-            provider: [],
-            region: [],
           },
         },
       };
@@ -231,7 +220,6 @@ export default function ({ getService }: FtrProviderContext) {
               from: FROM,
             },
             defaultIndex: ['filebeat-*'],
-            docValueFields: [],
             hostName: 'raspberrypi',
             inspect: false,
           },

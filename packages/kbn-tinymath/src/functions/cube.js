@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { pow } = require('./pow.js');
+const { pow } = require('./pow');
 
 /**
  * Calculates the cube of a number. For arrays, the function will be applied index-wise to each element.
@@ -18,8 +18,7 @@ const { pow } = require('./pow.js');
  * cube([3, 4, 5]) // returns [27, 64, 125]
  */
 
-module.exports = { cube };
-
 function cube(a) {
   return pow(a, 3);
 }
+module.exports = { cube };

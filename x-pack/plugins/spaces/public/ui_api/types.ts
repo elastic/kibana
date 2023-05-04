@@ -7,10 +7,14 @@
 
 import type { ReactElement } from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
-import type { EmbeddableLegacyUrlConflictProps, LegacyUrlConflictProps } from '../legacy_urls';
+import type {
+  EmbeddableLegacyUrlConflictProps,
+  LegacyUrlConflictProps,
+  RedirectLegacyUrlParams,
+} from '../legacy_urls';
 import type { ShareToSpaceFlyoutProps } from '../share_saved_objects_to_space';
 import type { SpaceAvatarProps } from '../space_avatar';
 import type { SpaceListProps } from '../space_list';
@@ -44,12 +48,8 @@ export interface SpacesApiUi {
    * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
    *
    * The protocol, hostname, port, base path, and app path are automatically included.
-   *
-   * @param path The path to use for the new URL, optionally including `search` and/or `hash` URL components.
-   * @param objectNoun The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new
-   * location_. Default value is 'object'.
    */
-  redirectLegacyUrl: (path: string, objectNoun?: string) => Promise<void>;
+  redirectLegacyUrl: (params: RedirectLegacyUrlParams) => Promise<void>;
   /**
    * Helper function to easily access the Spaces React Context provider.
    */

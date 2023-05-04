@@ -8,8 +8,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ShortUrlData } from 'src/plugins/share/common/url_service/short_urls/types';
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { ShortUrlData } from '../../../../common/url_service/short_urls/types';
 import { ShortUrlStorage, ShortUrlRecord } from '../types';
 
 const clone = <P>(obj: P): P => JSON.parse(JSON.stringify(obj)) as P;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VisualizationsStart } from '../../../../../src/plugins/visualizations/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 export interface CanvasVisualizationsService {
   showNewVisModal: VisualizationsStart['showNewVisModal'];

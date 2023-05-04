@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { Filter, FILTERS, fromCombinedFilter } from '@kbn/es-query';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 
 export const filtersToAst = (filters: Filter[] | Filter) => {
   return (Array.isArray(filters) ? filters : [filters]).map((filter) => {
-    const { meta, $state, query, ...restOfFilters } = filter;
+    const filterWithQuery =
+      filter.meta.type === FILTERS.COMBINED ? fromCombinedFilter(filter) : filter;
+    const { meta, $state, query, ...restOfFilters } = filterWithQuery;
+
     return buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
         query: JSON.stringify(query || restOfFilters),

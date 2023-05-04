@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
-import { FramePublicAPI, Visualization } from '../../../types';
+import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+import { FramePublicAPI, UserMessage, Visualization } from '../../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -25,18 +25,25 @@ jest.mock('../../../debounced_component', () => {
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
-import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
-import { fromExpression } from '@kbn/interpreter';
-import { coreMock } from 'src/core/public/mocks';
-import { esFilters, IndexPattern } from '../../../../../../../src/plugins/data/public';
-import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
-import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
-import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
-import { LensRootStore, setState } from '../../../state_management';
+import { DragDrop, ChildDragDropProvider } from '@kbn/dom-drag-drop';
+import { buildExistsFilter } from '@kbn/es-query';
+import { coreMock } from '@kbn/core/public/mocks';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
+import {
+  applyChanges,
+  setState,
+  updateDatasourceState,
+  updateVisualizationState,
+} from '../../../state_management';
 import { getLensInspectorService } from '../../../lens_inspector_service';
-import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
+import { Ast, toExpression } from '@kbn/interpreter';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -54,6 +61,7 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
 
 const defaultProps = {
   datasourceMap: {},
+  visualizationMap: {},
   framePublicAPI: createMockFramePublicAPI(),
   ExpressionRenderer: createExpressionRendererMock(),
   core: createCoreStartWithPermissions(),
@@ -64,6 +72,27 @@ const defaultProps = {
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
+  getUserMessages: jest.fn(() => []),
+  addUserMessages: jest.fn(() => () => {}),
+};
+
+const toExpr = (
+  datasourceExpressionsByLayers: Record<string, Ast>,
+  fn: string = 'testVis',
+  layerId: string = 'first'
+) =>
+  toExpression({
+    type: 'expression',
+    chain: [
+      ...(datasourceExpressionsByLayers[layerId]?.chain ?? []),
+      { type: 'function', function: fn, arguments: {} },
+    ],
+  });
+
+const SELECTORS = {
+  applyChangesButton: 'button[data-test-subj="lnsApplyChanges__toolbar"]',
+  dragDropPrompt: '[data-test-subj="workspace-drag-drop-prompt"]',
+  applyChangesPrompt: '[data-test-subj="workspace-apply-changes-prompt"]',
 };
 
 describe('workspace_panel', () => {
@@ -101,13 +130,14 @@ describe('workspace_panel', () => {
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
-
       {
         preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} },
       }
     );
     instance = mounted.instance;
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
+    instance.update();
+
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -123,8 +153,9 @@ describe('workspace_panel', () => {
       { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
+    instance.update();
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -133,15 +164,20 @@ describe('workspace_panel', () => {
       <WorkspacePanel
         {...defaultProps}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
         }}
       />,
 
       { preloadedState: { datasourceStates: {} } }
     );
     instance = mounted.instance;
+    instance.update();
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
+    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -161,7 +197,11 @@ describe('workspace_panel', () => {
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
         }}
         ExpressionRenderer={expressionRendererMock}
       />
@@ -169,11 +209,263 @@ describe('workspace_panel', () => {
 
     instance = mounted.instance;
 
+    instance.update();
+
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      "kibana
-      | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+      "datasource
       | testVis"
     `);
+  });
+
+  it('should give user control when auto-apply disabled', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />,
+      {
+        preloadedState: {
+          autoApplyDisabled: true,
+        },
+      }
+    );
+
+    instance = mounted.instance;
+    instance.update();
+
+    const getExpression = () => instance.find(expressionRendererMock).prop('expression');
+
+    // allows initial render
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
+
+    mockDatasource.toExpression.mockReturnValue('new-datasource');
+    act(() => {
+      instance.setProps({
+        visualizationMap: {
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers, 'new-vis'),
+          } as Visualization,
+        },
+      });
+    });
+    instance.update();
+
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
+
+    act(() => {
+      mounted.lensStore.dispatch(applyChanges());
+    });
+    instance.update();
+
+    // should update
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "new-datasource
+      | new-vis"
+    `);
+
+    mockDatasource.toExpression.mockReturnValue('other-new-datasource');
+    act(() => {
+      instance.setProps({
+        visualizationMap: {
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers, 'other-new-vis'),
+          } as Visualization,
+        },
+      });
+      mounted.lensStore.dispatch(enableAutoApply());
+    });
+    instance.update();
+
+    // reenabling auto-apply triggers an update as well
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "other-new-datasource
+      | other-new-vis"
+    `);
+  });
+
+  it('should base saveability on working changes when auto-apply disabled', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    let userMessages: UserMessage[] = [];
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        getUserMessages={() => userMessages}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    instance = mounted.instance;
+    const isSaveable = () => mounted.lensStore.getState().lens.isSaveable;
+
+    instance.update();
+
+    // allows initial render
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
+    expect(isSaveable()).toBe(true);
+
+    // note that populating the user messages and then dispatching a state update is true to
+    // how Lens interacts with the workspace panel from its perspective. all the panel does is call
+    // that getUserMessages function any time it gets re-rendered (aka state update)
+    userMessages = [
+      {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ] as UserMessage[];
+
+    act(() => {
+      mounted.lensStore.dispatch(
+        updateVisualizationState({
+          visualizationId: 'testVis',
+          newState: {},
+        })
+      );
+    });
+    instance.update();
+
+    expect(isSaveable()).toBe(false);
+  });
+
+  it('should show proper workspace prompts when auto-apply disabled', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    const configureValidVisualization = () => {
+      mockVisualization.toExpression.mockReturnValue('testVis');
+      mockDatasource.toExpression.mockReturnValue('datasource');
+      mockDatasource.getLayers.mockReturnValue(['first']);
+      act(() => {
+        instance.setProps({
+          visualizationMap: {
+            testVis: { ...mockVisualization, toExpression: () => 'new-vis' },
+          },
+        });
+      });
+    };
+
+    const deleteVisualization = () => {
+      act(() => {
+        instance.setProps({
+          visualizationMap: {
+            testVis: { ...mockVisualization, toExpression: () => null },
+          },
+        });
+      });
+    };
+
+    const dragDropPromptShowing = () => instance.exists(SELECTORS.dragDropPrompt);
+
+    const applyChangesPromptShowing = () => instance.exists(SELECTORS.applyChangesPrompt);
+
+    const visualizationShowing = () => instance.exists(expressionRendererMock);
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: mockVisualization,
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />,
+      {
+        preloadedState: {
+          autoApplyDisabled: true,
+        },
+      }
+    );
+
+    instance = mounted.instance;
+    instance.update();
+
+    expect(dragDropPromptShowing()).toBeTruthy();
+
+    configureValidVisualization();
+    instance.update();
+
+    expect(dragDropPromptShowing()).toBeFalsy();
+    expect(applyChangesPromptShowing()).toBeTruthy();
+
+    instance.find(SELECTORS.applyChangesButton).simulate('click');
+    instance.update();
+
+    expect(visualizationShowing()).toBeTruthy();
+
+    deleteVisualization();
+    instance.update();
+
+    expect(visualizationShowing()).toBeTruthy();
+
+    act(() => {
+      mounted.lensStore.dispatch(applyChanges());
+    });
+    instance.update();
+
+    expect(visualizationShowing()).toBeFalsy();
+    expect(dragDropPromptShowing()).toBeTruthy();
+
+    configureValidVisualization();
+    instance.update();
+
+    expect(dragDropPromptShowing()).toBeFalsy();
+    expect(applyChangesPromptShowing()).toBeTruthy();
   });
 
   it('should execute a trigger on expression event', async () => {
@@ -203,11 +495,81 @@ describe('workspace_panel', () => {
 
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
-    const eventData = {};
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
     onEvent({ name: 'brush', data: eventData });
 
     expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
-    expect(trigger.exec).toHaveBeenCalledWith({ data: eventData });
+    expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
+  });
+
+  it('should execute a multi value click trigger on expression event', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const props = defaultProps;
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...props}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+        plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+      />
+    );
+    instance = mounted.instance;
+
+    const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
+
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
+    onEvent({ name: 'multiFilter', data: eventData });
+
+    expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.multiFilter);
+    expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
+  });
+
+  it('should call getTriggerCompatibleActions on hasCompatibleActions call from within renderer', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const props = defaultProps;
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...props}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+        plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+      />
+    );
+    instance = mounted.instance;
+
+    const hasCompatibleActions = expressionRendererMock.mock.calls[0][0].hasCompatibleActions!;
+
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
+    hasCompatibleActions({ name: 'filter', data: eventData });
+
+    expect(uiActionsMock.getTriggerCompatibleActions).toHaveBeenCalledWith(
+      VIS_EVENT_TO_TRIGGER.filter,
+      expect.objectContaining({ data: eventData })
+    );
   });
 
   it('should push add current data table to state on data$ emitting value', async () => {
@@ -216,7 +578,7 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
     mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockDatasource.getLayers.mockReturnValue(['table1']);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -236,96 +598,18 @@ describe('workspace_panel', () => {
 
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
-    const tableData = { table1: { columns: [], rows: [] } };
-    onData(undefined, { tables: { tables: tableData } });
+    const tablesData = {
+      table1: { columns: [], rows: [] },
+      table2: { columns: [], rows: [] },
+    };
+    onData(undefined, { tables: { tables: tablesData } });
 
     expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/onActiveDataChange',
-      payload: tableData,
+      payload: {
+        activeData: tablesData,
+      },
     });
-  });
-
-  it('should include data fetching for each layer in the expression', async () => {
-    const mockDatasource2 = createMockDatasource('a');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-      second: mockDatasource2.publicAPIMock,
-    };
-    mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
-
-    mockDatasource2.toExpression.mockReturnValue('datasource2');
-    mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-          mock2: mockDatasource2,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-        ExpressionRenderer={expressionRendererMock}
-      />,
-
-      {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              state: {},
-              isLoading: false,
-            },
-            mock2: {
-              state: {},
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-
-    const ast = fromExpression(instance.find(expressionRendererMock).prop('expression') as string);
-
-    expect(ast.chain[1].arguments.layerIds).toEqual(['first', 'second', 'third']);
-    expect(ast.chain[1].arguments.tables).toMatchInlineSnapshot(`
-                                    Array [
-                                      Object {
-                                        "chain": Array [
-                                          Object {
-                                            "arguments": Object {},
-                                            "function": "datasource",
-                                            "type": "function",
-                                          },
-                                        ],
-                                        "type": "expression",
-                                      },
-                                      Object {
-                                        "chain": Array [
-                                          Object {
-                                            "arguments": Object {},
-                                            "function": "datasource2",
-                                            "type": "function",
-                                          },
-                                        ],
-                                        "type": "expression",
-                                      },
-                                      Object {
-                                        "chain": Array [
-                                          Object {
-                                            "arguments": Object {},
-                                            "function": "datasource2",
-                                            "type": "function",
-                                          },
-                                        ],
-                                        "type": "expression",
-                                      },
-                                    ]
-                        `);
   });
 
   it('should run the expression again if the date range changes', async () => {
@@ -341,27 +625,25 @@ describe('workspace_panel', () => {
 
     expressionRendererMock = jest.fn((_arg) => <span />);
 
-    await act(async () => {
-      const mounted = await mountWithProvider(
-        <WorkspacePanel
-          {...defaultProps}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-          }}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-      instance = mounted.instance;
-    });
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+    instance = mounted.instance;
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-    await act(async () => {
+    act(() => {
       instance.setProps({
         framePublicAPI: {
           ...framePublicAPI,
@@ -372,7 +654,7 @@ describe('workspace_panel', () => {
 
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(3);
   });
 
   it('should run the expression again if the filters change', async () => {
@@ -387,260 +669,149 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource second');
 
     expressionRendererMock = jest.fn((_arg) => <span />);
-    await act(async () => {
-      const mounted = await mountWithProvider(
-        <WorkspacePanel
-          {...defaultProps}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-          }}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-      instance = mounted.instance;
-    });
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+    instance = mounted.instance;
 
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const indexPattern = { id: 'index1' } as unknown as DataView;
     const field = { name: 'myfield' } as unknown as FieldSpec;
 
-    await act(async () => {
+    act(() => {
       instance.setProps({
         framePublicAPI: {
           ...framePublicAPI,
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [buildExistsFilter(field, indexPattern)],
         },
       });
     });
 
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(3);
   });
 
-  it('should show an error message if there are missing indexpatterns in the visualization', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockDatasource.checkIntegrity.mockReturnValue(['a']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-      />,
-
+  it('should show configuration error messages if present', async () => {
+    const messages: UserMessage[] = [
       {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-
-    expect(instance.find('[data-test-subj="missing-refs-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
-  it('should not show the management action in case of missing indexpattern and no navigation permissions', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-        // Use cannot navigate to the management page
-        core={createCoreStartWithPermissions({
-          navLinks: { management: false },
-          management: { kibana: { indexPatterns: true } },
-        })}
-      />,
-
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm an error",
+      },
       {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ];
 
-    expect(
-      instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
-    ).toBeFalsy();
-  });
-
-  it('should not show the management action in case of missing indexpattern and no indexPattern specific permissions', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
+    const getUserMessages = jest.fn(() => messages);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
+        getUserMessages={getUserMessages}
         datasourceMap={{
           testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-        // user can go to management, but indexPatterns management is not accessible
-        core={createCoreStartWithPermissions({
-          navLinks: { management: true },
-          management: { kibana: { indexPatterns: false } },
-        })}
-      />,
-
-      {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-
-    expect(
-      instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
-    ).toBeFalsy();
-  });
-
-  it('should show an error message if validation on datasource does not pass', async () => {
-    mockDatasource.getErrorMessages.mockReturnValue([
-      { shortMessage: 'An error occurred', longMessage: 'An long description here' },
-    ]);
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
       />
     );
     instance = mounted.instance;
-
-    expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
-  it('should show an error message if validation on visualization does not pass', async () => {
-    mockDatasource.getErrorMessages.mockReturnValue(undefined);
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockVisualization.getErrorMessages.mockReturnValue([
-      { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
-    ]);
-    mockVisualization.toExpression.mockReturnValue('testVis');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: mockVisualization,
-        }}
-      />
-    );
-    instance = mounted.instance;
-
-    expect(instance.find('[data-test-subj="configuration-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
-  it('should show an error message if validation on both datasource and visualization do not pass', async () => {
-    mockDatasource.getErrorMessages.mockReturnValue([
-      { shortMessage: 'An error occurred', longMessage: 'An long description here' },
-    ]);
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockVisualization.getErrorMessages.mockReturnValue([
-      { shortMessage: 'Some error happened', longMessage: 'Some long description happened' },
-    ]);
-    mockVisualization.toExpression.mockReturnValue('testVis');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: mockVisualization,
-        }}
-      />
-    );
-    instance = mounted.instance;
+    instance.update();
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
-    expect(
-      instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
-    ).toEqual(' +1 error');
+    expect(instance.find('[data-test-subj="workspace-more-errors-button"]').last().text()).toEqual(
+      ' +1 error'
+    );
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
+    expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {
+      severity: 'error',
+    });
   });
 
+  it('should NOT display config errors for unapplied changes', async () => {
+    // this test is important since we don't want the workspace panel to
+    // display errors if the user has disabled auto-apply, messed something up,
+    // but not yet applied their changes
+
+    let userMessages = [] as UserMessage[];
+    const getUserMessageFn = jest.fn(() => userMessages);
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        getUserMessages={getUserMessageFn}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        visualizationMap={{
+          testVis: mockVisualization,
+        }}
+      />
+    );
+
+    instance = mounted.instance;
+    const lensStore = mounted.lensStore;
+
+    const showingErrors = () => instance.exists('[data-test-subj="workspace-error-message"]');
+
+    expect(showingErrors()).toBeFalsy();
+
+    act(() => {
+      lensStore.dispatch(disableAutoApply());
+    });
+    instance.update();
+
+    expect(showingErrors()).toBeFalsy();
+
+    // introduce some issues
+    userMessages = [
+      {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ] as UserMessage[];
+
+    act(() => {
+      lensStore.dispatch(
+        updateDatasourceState({
+          datasourceId: 'testDatasource',
+          updater: {},
+        })
+      );
+    });
+
+    expect(showingErrors()).toBeFalsy();
+
+    // errors should appear when problem changes are applied
+    instance.find(SELECTORS.applyChangesButton).simulate('click');
+    instance.update();
+
+    expect(showingErrors()).toBeTruthy();
+  });
+
+  // TODO - test refresh after expression failure error
   it('should show an error message if the expression fails to parse', async () => {
     mockDatasource.toExpression.mockReturnValue('|||');
     mockDatasource.getLayers.mockReturnValue(['first']);
@@ -649,6 +820,10 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
+    const mockRemoveUserMessages = jest.fn();
+    const mockAddUserMessages = jest.fn(() => mockRemoveUserMessages);
+    const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
+
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
@@ -659,11 +834,13 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
+        addUserMessages={mockAddUserMessages}
+        getUserMessages={mockGetUserMessages}
       />
     );
     instance = mounted.instance;
 
-    expect(instance.find('[data-test-subj="expression-failure"]').exists()).toBeTruthy();
+    expect(mockAddUserMessages.mock.lastCall).toMatchSnapshot();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -675,30 +852,27 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    await act(async () => {
-      const mounted = await mountWithProvider(
-        <WorkspacePanel
-          {...defaultProps}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-          }}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-      instance = mounted.instance;
-    });
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+    instance = mounted.instance;
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
-
-    instance.update();
-
-    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
   });
 
   it('should attempt to run the expression again if it changes', async () => {
@@ -708,28 +882,25 @@ describe('workspace_panel', () => {
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
-    let lensStore: LensRootStore;
-    await act(async () => {
-      const mounted = await mountWithProvider(
-        <WorkspacePanel
-          {...defaultProps}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-          }}
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-      instance = mounted.instance;
-      lensStore = mounted.lensStore;
-    });
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+    instance = mounted.instance;
+    const lensStore = mounted.lensStore;
 
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
     expressionRendererMock.mockImplementation((_) => {
       return <span />;
@@ -745,7 +916,7 @@ describe('workspace_panel', () => {
     );
     instance.update();
 
-    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+    expect(expressionRendererMock).toHaveBeenCalledTimes(3);
 
     expect(instance.find(expressionRendererMock)).toHaveLength(1);
   });
@@ -764,6 +935,7 @@ describe('workspace_panel', () => {
     async function initComponent(draggingContext = draggedField) {
       const mounted = await mountWithProvider(
         <ChildDragDropProvider
+          dataTestSubjPrefix="lnsDragDrop"
           dragging={draggingContext}
           setDragging={() => {}}
           setActiveDropTarget={() => {}}

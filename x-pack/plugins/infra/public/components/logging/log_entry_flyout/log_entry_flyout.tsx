@@ -17,8 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
 import type { Query } from '@kbn/es-query';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LogViewReference } from '../../../../common/log_views';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
@@ -31,14 +36,59 @@ export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
   onCloseFlyout: () => void;
   onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
-  sourceId: string | null | undefined;
+  logViewReference: LogViewReference | null | undefined;
 }
+
+export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
+  const flyoutRef = useRef<OverlayRef>();
+  const {
+    services: { http, data, uiSettings, application },
+    overlays: { openFlyout },
+  } = useKibana<{ data: DataPublicPluginStart }>();
+
+  const closeLogEntryFlyout = useCallback(() => {
+    flyoutRef.current?.close();
+  }, []);
+
+  const openLogEntryFlyout = useCallback(
+    (logEntryId) => {
+      const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+        http,
+        data,
+        uiSettings,
+        application,
+      });
+
+      flyoutRef.current = openFlyout(
+        <KibanaReactContextProvider>
+          <LogEntryFlyout
+            logEntryId={logEntryId}
+            onCloseFlyout={closeLogEntryFlyout}
+            logViewReference={logViewReference}
+          />
+        </KibanaReactContextProvider>
+      );
+    },
+    [http, data, uiSettings, application, openFlyout, logViewReference, closeLogEntryFlyout]
+  );
+
+  useEffect(() => {
+    return () => {
+      closeLogEntryFlyout();
+    };
+  }, [closeLogEntryFlyout]);
+
+  return {
+    openLogEntryFlyout,
+    closeLogEntryFlyout,
+  };
+};
 
 export const LogEntryFlyout = ({
   logEntryId,
   onCloseFlyout,
   onSetFieldFilter,
-  sourceId,
+  logViewReference,
 }: LogEntryFlyoutProps) => {
   const {
     cancelRequest: cancelLogEntryRequest,
@@ -49,15 +99,15 @@ export const LogEntryFlyout = ({
     logEntry,
     total: logEntryRequestTotal,
   } = useLogEntry({
-    sourceId,
+    logViewReference,
     logEntryId,
   });
 
   useEffect(() => {
-    if (sourceId && logEntryId) {
+    if (logViewReference && logEntryId) {
       fetchLogEntry();
     }
-  }, [fetchLogEntry, sourceId, logEntryId]);
+  }, [fetchLogEntry, logViewReference, logEntryId]);
 
   return (
     <EuiFlyout onClose={onCloseFlyout} size="m">

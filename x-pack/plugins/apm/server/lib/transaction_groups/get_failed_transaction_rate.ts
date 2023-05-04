@@ -6,99 +6,93 @@
  */
 
 import {
-  EVENT_OUTCOME,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import {
   kqlQuery,
   rangeQuery,
   termQuery,
-} from '../../../../observability/server';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { Coordinate } from '../../../typings/timeseries';
+} from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../helpers/transactions';
-import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../helpers/setup_request';
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/es_fields/apm';
+import { RollupInterval } from '../../../common/rollup';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { Coordinate } from '../../../typings/timeseries';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 import {
   calculateFailedTransactionRate,
-  getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
+  getOutcomeAggregation,
 } from '../helpers/transaction_error_rate';
 
 export async function getFailedTransactionRate({
   environment,
   kuery,
   serviceName,
-  transactionType,
+  transactionTypes,
   transactionName,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   start,
   end,
-  numBuckets,
+  offset,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType?: string;
+  transactionTypes: string[];
   transactionName?: string;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
-  numBuckets?: number;
+  offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
 }> {
-  const { apmEventClient } = setup;
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      terms: {
-        [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
-      },
-    },
+    { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
-    ...termQuery(TRANSACTION_TYPE, transactionType),
-    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
 
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(documentType);
 
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      sources: [{ documentType, rollupInterval }],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        outcomes,
+        ...outcomes,
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
-              searchAggregatedTransactions,
-              numBuckets,
-            }).intervalString,
+            fixed_interval: `${bucketSizeInSeconds}s`,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
-            outcomes,
+            ...outcomes,
           },
         },
       },
@@ -116,7 +110,7 @@ export async function getFailedTransactionRate({
   const timeseries = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
-  const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
+  const average = calculateFailedTransactionRate(resp.aggregations);
 
   return { timeseries, average };
 }

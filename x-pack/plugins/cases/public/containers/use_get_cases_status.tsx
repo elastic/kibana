@@ -5,89 +5,37 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useRef } from 'react';
-
+import { useQuery } from '@tanstack/react-query';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
-import { getCasesStatus } from './api';
 import * as i18n from './translations';
-import { CasesStatus } from './types';
-import { useToasts } from '../common/lib/kibana';
+import type { CasesStatus } from './types';
+import { useHttp } from '../common/lib/kibana';
+import { getCasesStatus } from '../api';
+import { useCasesToast } from '../common/use_cases_toast';
+import type { ServerError } from '../types';
+import { casesQueriesKeys } from './constants';
 
-interface CasesStatusState extends CasesStatus {
-  isLoading: boolean;
-  isError: boolean;
-}
-
-const initialData: CasesStatusState = {
-  countClosedCases: null,
-  countInProgressCases: null,
-  countOpenCases: null,
-  isLoading: true,
-  isError: false,
-};
-
-export interface UseGetCasesStatus extends CasesStatusState {
-  fetchCasesStatus: () => void;
-}
-
-export const useGetCasesStatus = (): UseGetCasesStatus => {
+export const useGetCasesStatus = () => {
+  const http = useHttp();
   const { owner } = useCasesContext();
-  const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
+  const { showErrorToast } = useCasesToast();
 
-  const fetchCasesStatus = useCallback(async () => {
-    try {
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-      setCasesStatusState({
-        ...initialData,
-        isLoading: true,
+  return useQuery<CasesStatus, ServerError>(
+    casesQueriesKeys.casesStatuses(),
+    () => {
+      const abortCtrlRef = new AbortController();
+      return getCasesStatus({
+        http,
+        signal: abortCtrlRef.signal,
+        query: { owner },
       });
-
-      const response = await getCasesStatus(abortCtrlRef.current.signal, owner);
-
-      if (!isCancelledRef.current) {
-        setCasesStatusState({
-          ...response,
-          isLoading: false,
-          isError: false,
-        });
-      }
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
-        }
-        setCasesStatusState({
-          countClosedCases: 0,
-          countInProgressCases: 0,
-          countOpenCases: 0,
-          isLoading: false,
-          isError: true,
-        });
-      }
+    },
+    {
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
+      },
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    fetchCasesStatus();
-
-    return () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return {
-    ...casesStatusState,
-    fetchCasesStatus,
-  };
+  );
 };
+
+export type UseGetCasesStatus = ReturnType<typeof useGetCasesStatus>;

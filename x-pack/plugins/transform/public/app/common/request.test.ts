@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
-import { PivotGroupByConfig } from '../common';
+import { PivotGroupByConfig } from '.';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
-import { PivotAggsConfig } from './pivot_aggs';
+import type { PivotAggsConfig } from './pivot_aggs';
 import {
   defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
-  getPivotQuery,
+  getTransformConfigQuery,
   getMissingBucketConfig,
   getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,
   matchAllQuery,
-  PivotQuery,
+  type TransformConfigQuery,
 } from './request';
-import { LatestFunctionConfigUI } from '../../../common/types/transform';
-import { RuntimeField } from '../../../../../../src/plugins/data/common';
+import type { LatestFunctionConfigUI } from '../../../common/types/transform';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
-const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
+const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
 
 const groupByTerms: PivotGroupByConfig = {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
@@ -62,12 +64,12 @@ describe('Transform: Common', () => {
 
   test('isDefaultQuery()', () => {
     expect(isDefaultQuery(defaultQuery)).toBe(true);
-    expect(isDefaultQuery(matchAllQuery)).toBe(false);
+    expect(isDefaultQuery(matchAllQuery)).toBe(true);
     expect(isDefaultQuery(simpleQuery)).toBe(false);
   });
 
-  test('getPivotQuery()', () => {
-    const query = getPivotQuery('the-query');
+  test('getTransformConfigQuery()', () => {
+    const query = getTransformConfigQuery('the-query');
 
     expect(query).toEqual({
       query_string: {
@@ -78,31 +80,10 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody()', () => {
-    const query = getPivotQuery('the-query');
+    const query = getTransformConfigQuery('the-query');
 
-    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
-      pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-      },
-    });
-
-    expect(request).toEqual({
-      pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-      },
-      source: {
-        index: ['the-index-pattern-title'],
-        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
-      },
-    });
-  });
-
-  test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
-    const query = getPivotQuery('the-query');
     const request = getPreviewTransformRequestBody(
-      'the-index-pattern-title,the-other-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       query,
       {
         pivot: {
@@ -118,7 +99,60 @@ describe('Transform: Common', () => {
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: ['the-index-pattern-title', 'the-other-title'],
+        index: ['the-data-view-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+      },
+    });
+  });
+
+  test('getPreviewTransformRequestBody() with time field and default query', () => {
+    const query = { query_string: { query: '*', default_operator: 'AND' } };
+
+    const request = getPreviewTransformRequestBody(
+      {
+        getIndexPattern: () => 'the-data-view-title',
+        timeFieldName: 'the-time-field-name',
+      } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-data-view-title'],
+      },
+    });
+  });
+
+  test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
+    const query = getTransformConfigQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title,the-other-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-data-view-title', 'the-other-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });
@@ -176,9 +210,9 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody() with missing_buckets config', () => {
-    const query = getPivotQuery('the-query');
+    const query = getTransformConfigQuery('the-query');
     const request = getPreviewTransformRequestBody(
-      'the-index-pattern-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       query,
       getRequestPayload([aggsAvg], [{ ...groupByTerms, ...{ missing_bucket: true } }])
     );
@@ -191,18 +225,19 @@ describe('Transform: Common', () => {
         },
       },
       source: {
-        index: ['the-index-pattern-title'],
+        index: ['the-data-view-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });
   });
 
-  test('getCreateTransformRequestBody()', () => {
-    const pivotState: StepDefineExposedState = {
+  test('getCreateTransformRequestBody() skips default values', () => {
+    const transformConfigState: StepDefineExposedState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
@@ -225,48 +260,49 @@ describe('Transform: Common', () => {
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
-      continuousModeDelay: 'the-continuous-mode-delay',
-      createIndexPattern: false,
-      isContinuousModeEnabled: false,
+      continuousModeDelay: '60s',
+      createDataView: false,
+      isContinuousModeEnabled: true,
       isRetentionPolicyEnabled: false,
       retentionPolicyDateField: '',
       retentionPolicyMaxAge: '',
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',
-      transformSettingsMaxPageSearchSize: 100,
-      transformSettingsDocsPerSecond: 400,
+      transformSettingsMaxPageSearchSize: 500,
+      transformSettingsDocsPerSecond: null,
       destinationIndex: 'the-destination-index',
+      destinationIngestPipeline: 'the-destination-ingest-pipeline',
       touched: true,
       valid: true,
     };
 
     const request = getCreateTransformRequestBody(
-      'the-index-pattern-title',
-      pivotState,
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      transformConfigState,
       transformDetailsState
     );
 
     expect(request).toEqual({
       description: 'the-transform-description',
-      dest: { index: 'the-destination-index' },
-      frequency: '1m',
+      dest: { index: 'the-destination-index', pipeline: 'the-destination-ingest-pipeline' },
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
-      settings: {
-        max_page_search_size: 100,
-        docs_per_second: 400,
-      },
       source: {
-        index: ['the-index-pattern-title'],
+        index: ['the-data-view-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+      },
+      sync: {
+        time: {
+          field: 'the-continuous-mode-date-field',
+        },
       },
     });
   });
 
-  test('getCreateTransformRequestBody() with runtime fields', () => {
+  test('getCreateTransformRequestBody() with runtime fields and custom values', () => {
     const runtimeMappings = {
       rt_bytes_bigger: {
         type: 'double',
@@ -281,6 +317,7 @@ describe('Transform: Common', () => {
       groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
@@ -303,32 +340,34 @@ describe('Transform: Common', () => {
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
-      continuousModeDelay: 'the-continuous-mode-delay',
-      createIndexPattern: false,
-      isContinuousModeEnabled: false,
+      continuousModeDelay: '3600s',
+      createDataView: false,
+      isContinuousModeEnabled: true,
       isRetentionPolicyEnabled: false,
       retentionPolicyDateField: '',
       retentionPolicyMaxAge: '',
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
-      transformFrequency: '1m',
+      transformFrequency: '10m',
       transformSettingsMaxPageSearchSize: 100,
       transformSettingsDocsPerSecond: 400,
+      transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
+      destinationIngestPipeline: 'the-destination-ingest-pipeline',
       touched: true,
       valid: true,
     };
 
     const request = getCreateTransformRequestBody(
-      'the-index-pattern-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       pivotState,
       transformDetailsState
     );
 
     expect(request).toEqual({
       description: 'the-transform-description',
-      dest: { index: 'the-destination-index' },
-      frequency: '1m',
+      dest: { index: 'the-destination-index', pipeline: 'the-destination-ingest-pipeline' },
+      frequency: '10m',
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
@@ -336,11 +375,18 @@ describe('Transform: Common', () => {
       settings: {
         max_page_search_size: 100,
         docs_per_second: 400,
+        num_failure_retries: 5,
       },
       source: {
-        index: ['the-index-pattern-title'],
+        index: ['the-data-view-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
         runtime_mappings: runtimeMappings,
+      },
+      sync: {
+        time: {
+          delay: '3600s',
+          field: 'the-continuous-mode-date-field',
+        },
       },
     });
   });
@@ -373,5 +419,16 @@ describe('Transform: Common', () => {
         docs_per_second: 400,
       },
     });
+  });
+
+  test('getCreateTransformSettingsRequestBody() skips default settings', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
+      transformSettingsDocsPerSecond: null,
+      transformSettingsMaxPageSearchSize: 500,
+    };
+
+    const request = getCreateTransformSettingsRequestBody(transformDetailsState);
+
+    expect(request).toEqual({});
   });
 });

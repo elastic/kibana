@@ -19,9 +19,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCode,
+  EuiLink,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
@@ -48,9 +50,24 @@ const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.title', {
     defaultMessage: 'Migrate system indices',
   }),
-  bodyDescription: i18n.translate('xpack.upgradeAssistant.overview.systemIndices.body', {
-    defaultMessage: 'Migrate the indices that store system information before you upgrade.',
-  }),
+  bodyDescription: (docLink: string) => {
+    return (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.overview.systemIndices.body"
+        defaultMessage="Prepare the system indices that store internal information for the upgrade. This is only required during major version upgrades. Any {hiddenIndicesLink} that need to be reindexed are shown in the next step."
+        values={{
+          hiddenIndicesLink: (
+            <EuiLink external target="_blank" href={docLink}>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.systemIndices.body.hiddenIndicesLink"
+                defaultMessage="hidden indices"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  },
   startButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.startButtonLabel',
     {
@@ -66,7 +83,7 @@ const i18nTexts = {
   noMigrationNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.noMigrationNeeded',
     {
-      defaultMessage: 'Migration complete',
+      defaultMessage: 'System indices migration not needed.',
     }
   ),
   viewSystemIndicesStatus: i18n.translate(
@@ -121,7 +138,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="systemIndicesStatusErrorCallout"
       >
         <p>
@@ -164,7 +181,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
           <EuiCallOut
             size="s"
             color="danger"
-            iconType="alert"
+            iconType="warning"
             title={`${startMigrationStatus.error!.statusCode} - ${
               startMigrationStatus.error!.message
             }`}
@@ -179,7 +196,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
           <EuiCallOut
             size="s"
             color="danger"
-            iconType="alert"
+            iconType="warning"
             title={i18nTexts.migrationFailedTitle}
             data-test-subj="migrationFailedCallout"
           >
@@ -214,10 +231,16 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
   );
 };
 
+interface CustomProps {
+  docLinks: DocLinksStart;
+}
+
 export const getMigrateSystemIndicesStep = ({
   isComplete,
+
   setIsComplete,
-}: OverviewStepProps): EuiStepProps => {
+  docLinks,
+}: OverviewStepProps & CustomProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
@@ -227,7 +250,7 @@ export const getMigrateSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.bodyDescription}</p>
+          <p>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.hiddenIndices)}</p>
         </EuiText>
 
         <EuiSpacer size="m" />

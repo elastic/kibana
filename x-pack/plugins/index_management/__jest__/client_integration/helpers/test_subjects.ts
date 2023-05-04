@@ -62,4 +62,5 @@ export type TestSubjects =
   | 'unfreezeIndexMenuButton'
   | 'updateEditIndexSettingsButton'
   | 'updateIndexSettingsErrorCallout'
-  | 'viewButton';
+  | 'viewButton'
+  | 'detailPanelTabSelected';

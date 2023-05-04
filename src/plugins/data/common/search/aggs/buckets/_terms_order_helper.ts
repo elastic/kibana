@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
 
 export const termsAggFilter = [
   '!top_hits',
   '!percentiles',
+  '!percentile_ranks',
+  '!filtered_metric',
+  '!percentile',
+  '!percentile_rank',
+  '!geo_bounds',
+  '!geo_centroid',
   '!std_dev',
   '!derivative',
   '!moving_avg',
@@ -61,6 +67,9 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
 
     if (aggs?.hasTimeShifts() && Object.keys(aggs?.getTimeShifts()).length > 1 && aggs.timeRange) {
       const shift = orderAgg.getTimeShift();
+      // The timeRange can be either absolute or relative
+      // We need the absolute/resolved one for moment, so use the helper method
+      const timeRange = aggs.getResolvedTimeRange();
       orderAgg = aggs.createAggConfig(
         {
           type: 'filtered_metric',
@@ -77,10 +86,12 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
                       query: {
                         range: {
                           [aggs.timeFields![0]]: {
-                            gte: moment(aggs.timeRange.from)
+                            gte: moment
+                              .tz(timeRange?.min, aggs.timeZone)
                               .subtract(shift || 0)
                               .toISOString(),
-                            lte: moment(aggs.timeRange.to)
+                            lte: moment
+                              .tz(timeRange?.max, aggs.timeZone)
                               .subtract(shift || 0)
                               .toISOString(),
                           },

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
-import type { DeploymentState } from '../constants/trained_models';
+import type { MlSavedObjectType } from './saved_objects';
 
 export interface IngestStats {
   count: number;
@@ -50,7 +51,7 @@ export interface TrainedModelStat {
       }
     >;
   };
-  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  deployment_stats?: TrainedModelDeploymentStatsResponse;
   model_size_stats?: TrainedModelModelSizeStats;
 }
 
@@ -66,6 +67,7 @@ export type PutTrainedModelConfig = {
     model_aliases?: string[];
   } & Record<string, unknown>;
   tags?: string[];
+  model_type?: TrainedModelType;
   inference_config?: Record<string, unknown>;
   input: { field_names: string[] };
 } & XOR<
@@ -87,14 +89,12 @@ export type PutTrainedModelConfig = {
   }
 >; // compressed_definition and definition are mutually exclusive
 
-export interface TrainedModelConfigResponse {
-  description?: string;
-  created_by: string;
-  create_time: string;
-  default_field_map: Record<string, string>;
-  estimated_heap_memory_usage_bytes: number;
-  estimated_operations: number;
-  license_level: string;
+export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
+  pipelines?: Record<string, PipelineDefinition> | null;
+
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;
@@ -103,15 +103,11 @@ export interface TrainedModelConfigResponse {
     model_aliases?: string[];
   } & Record<string, unknown>;
   model_id: string;
-  model_type: 'tree_ensemble' | 'pytorch' | 'lang_ident';
+  model_type: TrainedModelType;
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
-  /**
-   * Associated pipelines. Extends response from the ES endpoint.
-   */
-  pipelines?: Record<string, PipelineDefinition> | null;
-}
+};
 
 export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;
@@ -132,9 +128,12 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
+  deployment_id: string;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
+  threads_per_allocation: number;
+  number_of_allocations: number;
   allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
   nodes: Array<{
     node: Record<
@@ -158,16 +157,23 @@ export interface TrainedModelDeploymentStatsResponse {
     last_access: number;
     number_of_pending_requests: number;
     start_time: number;
+    throughput_last_minute: number;
+    threads_per_allocation: number;
+    number_of_allocations: number;
   }>;
 }
 
 export interface AllocatedModel {
+  key: string;
+  deployment_id: string;
   inference_threads: number;
   allocation_status: {
     target_allocation_count: number;
     state: string;
     allocation_count: number;
   };
+  number_of_allocations: number;
+  threads_per_allocation: number;
   /**
    * Not required for rendering in the Model stats
    */
@@ -190,6 +196,9 @@ export interface AllocatedModel {
     last_access?: number;
     number_of_pending_requests: number;
     start_time: number;
+    throughput_last_minute: number;
+    number_of_allocations: number;
+    threads_per_allocation: number;
   };
 }
 
@@ -205,6 +214,8 @@ export interface NodeDeploymentStatsResponse {
       total: number;
       jvm: number;
     };
+    /** Max amount of memory available for ML */
+    ml_max_in_bytes: number;
     /** Open anomaly detection jobs + hardcoded overhead */
     anomaly_detection: {
       /** Total size in bytes */
@@ -226,6 +237,50 @@ export interface NodeDeploymentStatsResponse {
 }
 
 export interface NodesOverviewResponse {
-  count: number;
+  _nodes: { total: number; failed: number; successful: number };
   nodes: NodeDeploymentStatsResponse[];
+}
+
+export interface MemoryUsageInfo {
+  id: string;
+  type: MlSavedObjectType;
+  size: number;
+  nodeNames: string[];
+}
+
+export interface MemoryStatsResponse {
+  _nodes: { total: number; failed: number; successful: number };
+  cluster_name: string;
+  nodes: Record<
+    string,
+    {
+      jvm: {
+        heap_max_in_bytes: number;
+        java_inference_in_bytes: number;
+        java_inference_max_in_bytes: number;
+      };
+      mem: {
+        adjusted_total_in_bytes: number;
+        total_in_bytes: number;
+        ml: {
+          data_frame_analytics_in_bytes: number;
+          native_code_overhead_in_bytes: number;
+          max_in_bytes: number;
+          anomaly_detectors_in_bytes: number;
+          native_inference_in_bytes: number;
+        };
+      };
+      transport_address: string;
+      roles: string[];
+      name: string;
+      attributes: Record<`${'ml.'}${string}`, string>;
+      ephemeral_id: string;
+    }
+  >;
+}
+
+// @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
+export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
+  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
 }

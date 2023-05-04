@@ -15,7 +15,14 @@ import { CloseEditor } from '../types';
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 export interface Props {
   children: (deleteFieldHandler: DeleteFieldFunc) => React.ReactNode;
+  /**
+   * Data view of fields to be deleted
+   */
   dataView: DataView;
+  /**
+   * Callback fired when fields are deleted
+   * @param fieldNames - the names of the deleted fields
+   */
   onDelete?: (fieldNames: string[]) => void;
 }
 

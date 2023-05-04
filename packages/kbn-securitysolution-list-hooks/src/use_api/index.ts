@@ -15,17 +15,14 @@ import type {
   ApiCallFindListsItemsMemoProps,
   ApiCallMemoProps,
   ApiListExportProps,
+  ApiCallGetExceptionFilterFromIdsMemoProps,
+  ApiCallGetExceptionFilterFromExceptionsMemoProps,
+  ApiListDuplicateProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as Api from '@kbn/securitysolution-list-api';
-
-// TODO: Replace these with kbn packaged versions once we have those available to us
-// These originally came from this location below before moving them to this hacked "any" types:
-// import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
-interface HttpStart {
-  fetch: <T>(...args: any) => any;
-}
-
 import { getIdsAndNamespaces } from '@kbn/securitysolution-list-utils';
+import type { HttpStart } from '@kbn/core-http-browser';
+
 import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';
 
 export interface ExceptionsApi {
@@ -37,6 +34,7 @@ export interface ExceptionsApi {
   }) => Promise<ExceptionListItemSchema>;
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
   deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
+  duplicateExceptionList: (arg: ApiListDuplicateProps) => Promise<void>;
   getExceptionItem: (
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }
   ) => Promise<void>;
@@ -44,6 +42,10 @@ export interface ExceptionsApi {
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
+  getExceptionFilterFromIds: (arg: ApiCallGetExceptionFilterFromIdsMemoProps) => Promise<void>;
+  getExceptionFilterFromExceptions: (
+    arg: ApiCallGetExceptionFilterFromExceptionsMemoProps
+  ) => Promise<void>;
   exportExceptionList: (arg: ApiListExportProps) => Promise<void>;
 }
 
@@ -104,8 +106,31 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
           onError(error);
         }
       },
+      async duplicateExceptionList({
+        includeExpiredExceptions,
+        listId,
+        namespaceType,
+        onError,
+        onSuccess,
+      }: ApiListDuplicateProps): Promise<void> {
+        const abortCtrl = new AbortController();
+
+        try {
+          const newList = await Api.duplicateExceptionList({
+            http,
+            includeExpiredExceptions,
+            listId,
+            namespaceType,
+            signal: abortCtrl.signal,
+          });
+          onSuccess(newList);
+        } catch (error) {
+          onError(error);
+        }
+      },
       async exportExceptionList({
         id,
+        includeExpiredExceptions,
         listId,
         namespaceType,
         onError,
@@ -117,6 +142,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
           const blob = await Api.exportExceptionList({
             http,
             id,
+            includeExpiredExceptions,
             listId,
             namespaceType,
             signal: abortCtrl.signal,
@@ -170,7 +196,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async getExceptionListsItems({
         lists,
-        filterOptions,
+        filter,
         pagination,
         showDetectionsListsOnly,
         showEndpointListsOnly,
@@ -192,7 +218,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               per_page: perPage,
               total,
             } = await Api.fetchExceptionListsItemsByListIds({
-              filterOptions,
+              filter,
               http,
               listIds: ids,
               namespaceTypes: namespaces,
@@ -220,6 +246,52 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               },
             });
           }
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async getExceptionFilterFromIds({
+        exceptionListIds,
+        chunkSize,
+        alias,
+        excludeExceptions,
+        onSuccess,
+        onError,
+      }: ApiCallGetExceptionFilterFromIdsMemoProps): Promise<void> {
+        const abortCtrl = new AbortController();
+        try {
+          const { filter } = await Api.getExceptionFilterFromExceptionListIds({
+            http,
+            exceptionListIds,
+            signal: abortCtrl.signal,
+            chunkSize,
+            alias,
+            excludeExceptions,
+          });
+          onSuccess(filter);
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async getExceptionFilterFromExceptions({
+        exceptions,
+        chunkSize,
+        alias,
+        excludeExceptions,
+        onSuccess,
+        onError,
+      }: ApiCallGetExceptionFilterFromExceptionsMemoProps): Promise<void> {
+        const abortCtrl = new AbortController();
+        try {
+          const { filter } = await Api.getExceptionFilterFromExceptions({
+            http,
+            exceptions,
+            signal: abortCtrl.signal,
+            chunkSize,
+            alias,
+            excludeExceptions,
+          });
+          onSuccess(filter);
         } catch (error) {
           onError(error);
         }

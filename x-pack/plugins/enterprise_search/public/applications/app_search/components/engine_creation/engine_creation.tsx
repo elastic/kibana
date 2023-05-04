@@ -12,47 +12,32 @@ import { useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiForm,
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFieldText,
-  EuiSelect,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiButton,
-} from '@elastic/eui';
-
+import { ESINDEX_QUERY_PARAMETER } from '../../../shared/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
 
-import {
-  ALLOWED_CHARS_NOTE,
-  ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
-  ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
-  ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
-  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
-  ENGINE_CREATION_FORM_TITLE,
-  ENGINE_CREATION_TITLE,
-  SANITIZED_NAME_NOTE,
-  SUPPORTED_LANGUAGES,
-} from './constants';
-import { EngineCreationLogic } from './engine_creation_logic';
+import { ConfigureAppSearchEngine } from './configure_app_search_engine';
+import { ConfigureElasticsearchEngine } from './configure_elasticsearch_engine';
+import { ENGINE_CREATION_TITLE } from './constants';
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
+import { ReviewElasticsearchEngine } from './review_elasticsearch_engine';
+import { SelectEngineType } from './select_engine_type';
 
 export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;
-  const { method } = parseQueryParams(search);
+  const { method, ...params } = parseQueryParams(search);
 
-  const { name, rawName, language, isLoading } = useValues(EngineCreationLogic);
-  const { setIngestionMethod, setLanguage, setRawName, submitEngine } =
-    useActions(EngineCreationLogic);
+  const { engineType, currentEngineCreationStep } = useValues(EngineCreationLogic);
+  const { setIngestionMethod, initializeWithESIndex } = useActions(EngineCreationLogic);
 
   useEffect(() => {
     if (typeof method === 'string') {
       setIngestionMethod(method);
+    }
+    const esIndexParam = params[ESINDEX_QUERY_PARAMETER];
+    if (typeof esIndexParam === 'string') {
+      initializeWithESIndex(esIndexParam);
     }
   }, []);
 
@@ -62,72 +47,14 @@ export const EngineCreation: React.FC = () => {
       pageHeader={{ pageTitle: ENGINE_CREATION_TITLE }}
       data-test-subj="EngineCreation"
     >
-      <EuiPanel hasBorder>
-        <EuiForm
-          component="form"
-          data-test-subj="EngineCreationForm"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submitEngine();
-          }}
-        >
-          <EuiTitle>
-            <h2>{ENGINE_CREATION_FORM_TITLE}</h2>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow
-                data-test-subj="EngineCreationNameFormRow"
-                label={ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
-                helpText={
-                  name.length > 0 && rawName !== name ? (
-                    <>
-                      {SANITIZED_NAME_NOTE} <strong>{name}</strong>
-                    </>
-                  ) : (
-                    ALLOWED_CHARS_NOTE
-                  )
-                }
-                fullWidth
-              >
-                <EuiFieldText
-                  name="engine-name"
-                  value={rawName}
-                  onChange={(event) => setRawName(event.currentTarget.value)}
-                  autoComplete="off"
-                  fullWidth
-                  data-test-subj="EngineCreationNameInput"
-                  placeholder={ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
-                  autoFocus
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow label={ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL}>
-                <EuiSelect
-                  name="engine-language"
-                  value={language}
-                  options={SUPPORTED_LANGUAGES}
-                  data-test-subj="EngineCreationLanguageInput"
-                  onChange={(event) => setLanguage(event.currentTarget.value)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiButton
-            disabled={name.length === 0}
-            isLoading={isLoading}
-            type="submit"
-            data-test-subj="NewEngineSubmitButton"
-            color="success"
-            fill
-          >
-            {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
-          </EuiButton>
-        </EuiForm>
-      </EuiPanel>
+      {currentEngineCreationStep === EngineCreationSteps.SelectStep && <SelectEngineType />}
+      {currentEngineCreationStep === EngineCreationSteps.ConfigureStep &&
+        engineType === 'appSearch' && <ConfigureAppSearchEngine />}
+      {currentEngineCreationStep === EngineCreationSteps.ConfigureStep &&
+        engineType === 'elasticsearch' && <ConfigureElasticsearchEngine />}
+      {currentEngineCreationStep === EngineCreationSteps.ReviewStep && (
+        <ReviewElasticsearchEngine />
+      )}
     </AppSearchPageTemplate>
   );
 };

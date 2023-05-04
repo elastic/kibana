@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,13 +24,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { remove } from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Space } from '@kbn/spaces-plugin/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
-import type { Role } from '../../../../../../../common/model';
+import { ALL_SPACES_ID } from '../../../../../../../common/constants';
+import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
@@ -118,7 +120,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <Fragment>
               <EuiCallOut
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
                 title={
                   <FormattedMessage
@@ -261,6 +263,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           privilegeIndex={this.state.privilegeIndex}
           canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
           disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
+          allSpacesSelected={this.state.selectedSpaceIds.includes(ALL_SPACES_ID)}
         />
 
         {this.requiresGlobalPrivilegeWarning() && (
@@ -268,7 +271,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <EuiSpacer size="l" />
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="globalPrivilegeWarning"
               title={
                 <FormattedMessage
@@ -326,7 +329,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         throw new Error(`Unsupported mode: ${mode}`);
     }
 
-    let buttonColor: ButtonColor = 'primary';
+    let buttonColor: EuiButtonColor = 'primary';
     if (this.requiresGlobalPrivilegeWarning()) {
       buttonColor = 'warning';
     }
@@ -427,6 +430,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const form = role.kibana[this.state.privilegeIndex];
     form.spaces = [...selectedSpaceIds];
+    form.feature = this.resetRoleFeature(form.feature, selectedSpaceIds); // Remove any feature privilege(s) that cannot currently be selected
 
     this.setState({
       selectedSpaceIds,
@@ -459,6 +463,41 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     });
   };
 
+  private resetRoleFeature = (roleFeature: FeaturesPrivileges, selectedSpaceIds: string[]) => {
+    const securedFeatures = this.props.kibanaPrivileges.getSecuredFeatures();
+    return Object.entries(roleFeature).reduce((features, [featureId, privileges]) => {
+      if (!Array.isArray(privileges)) {
+        return features;
+      }
+      const securedFeature = securedFeatures.find((sf) => sf.id === featureId);
+      const primaryFeaturePrivilege = securedFeature
+        ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
+        .find((pfp) => privileges.includes(pfp.id)) ?? { disabled: false, requireAllSpaces: false };
+
+      const areAllSpacesSelected = selectedSpaceIds.includes(ALL_SPACES_ID);
+      if (securedFeature) {
+        securedFeature.getSubFeatures().forEach((subFeature) => {
+          subFeature.privileges.forEach((currentPrivilege) => {
+            if (privileges.includes(currentPrivilege.id)) {
+              if (subFeature.requireAllSpaces && !areAllSpacesSelected) {
+                remove(privileges, (privilege) => privilege === currentPrivilege.id);
+              }
+            }
+          });
+        });
+      }
+      const newFeaturePrivileges =
+        primaryFeaturePrivilege?.disabled ||
+        (primaryFeaturePrivilege?.requireAllSpaces && !areAllSpacesSelected)
+          ? [] // The primary feature privilege cannot be selected; remove that and any selected sub-feature privileges, too
+          : privileges;
+      return {
+        ...features,
+        ...(newFeaturePrivileges.length && { [featureId]: newFeaturePrivileges }),
+      };
+    }, {});
+  };
+
   private getDisplayedBasePrivilege = () => {
     const basePrivilege = this.state.privilegeCalculator.getBasePrivilege(
       this.state.privilegeIndex
@@ -472,42 +511,67 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
-    const role = copyRole(this.state.role);
-    const form = role.kibana[this.state.privilegeIndex];
-
-    if (privileges.length === 0) {
-      delete form.feature[featureId];
-    } else {
-      form.feature[featureId] = [...privileges];
-    }
-
-    this.setState({
-      role,
-      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
-    });
+    this.setRole(privileges, featureId);
   };
 
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
+    this.setRole(privileges);
+  };
+
+  private setRole(privileges: string[], featureId?: string) {
     const role = copyRole(this.state.role);
     const entry = role.kibana[this.state.privilegeIndex];
 
     if (privileges.length === 0) {
-      entry.feature = {};
+      if (featureId) {
+        delete entry.feature[featureId];
+      } else {
+        entry.feature = {};
+      }
     } else {
-      this.props.kibanaPrivileges.getSecuredFeatures().forEach((feature) => {
+      let securedFeaturesToSet = this.props.kibanaPrivileges.getSecuredFeatures();
+      if (featureId) {
+        securedFeaturesToSet = [securedFeaturesToSet.find((sf) => sf.id === featureId)!];
+      }
+      securedFeaturesToSet.forEach((feature) => {
         const nextFeaturePrivilege = feature
-          .getPrimaryFeaturePrivileges()
-          .find((pfp) => privileges.includes(pfp.id));
+          .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
+          .find((pfp) => {
+            if (
+              pfp?.disabled ||
+              (pfp?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+            ) {
+              return false;
+            }
+            return Array.isArray(privileges) && privileges.includes(pfp.id);
+          });
+        let newPrivileges: string[] = [];
         if (nextFeaturePrivilege) {
-          entry.feature[feature.id] = [nextFeaturePrivilege.id];
+          newPrivileges = [nextFeaturePrivilege.id];
+          feature.getSubFeaturePrivileges().forEach((psf) => {
+            if (Array.isArray(privileges) && privileges.includes(psf.id)) {
+              if (
+                !psf.requireAllSpaces ||
+                (psf.requireAllSpaces && this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+              ) {
+                newPrivileges.push(psf.id);
+              }
+            }
+          });
+        }
+        if (newPrivileges.length === 0) {
+          delete entry.feature[feature.id];
+        } else {
+          entry.feature[feature.id] = newPrivileges;
         }
       });
     }
+
     this.setState({
       role,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
-  };
+  }
 
   private canSave = () => {
     if (this.state.selectedSpaceIds.length === 0) {

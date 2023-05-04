@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { ReportingCore } from '../..';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { checkParamsVersion, cryptoFactory, LevelLogger } from '../../lib';
+import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
-import { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import { Counters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -23,6 +25,9 @@ const getDownloadBaseUrl = (reporting: ReportingCore) => {
   return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 };
 
+/**
+ * Handles the common parts of requests to generate a report
+ */
 export class RequestHandler {
   constructor(
     private reporting: ReportingCore,
@@ -30,7 +35,7 @@ export class RequestHandler {
     private context: ReportingRequestHandlerContext,
     private req: KibanaRequest,
     private res: KibanaResponseFactory,
-    private logger: LevelLogger
+    private logger: Logger
   ) {}
 
   private async encryptHeaders() {
@@ -53,7 +58,7 @@ export class RequestHandler {
     }
 
     const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
+      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
       reporting.getStore(),
     ]);
 
@@ -61,14 +66,14 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
-    // 1. ensure the incoming params have a version field
+    // 1. ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
 
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
     // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      createJob(jobParams, context),
+      createJob(jobParams, context, this.req),
     ]);
 
     const payload = {
@@ -99,10 +104,17 @@ export class RequestHandler {
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
+    // 6. Log the action with event log
+    reporting.getEventLogger(report, task).logScheduleTask();
+
     return report;
   }
 
-  public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
+  public async handleGenerateRequest(
+    exportTypeId: string,
+    jobParams: BaseParams,
+    counters: Counters
+  ) {
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -119,11 +131,20 @@ export class RequestHandler {
       return this.res.forbidden({ body: licenseResults.message });
     }
 
+    if (jobParams.browserTimezone && !moment.tz.zone(jobParams.browserTimezone)) {
+      return this.res.badRequest({
+        body: `Invalid timezone "${jobParams.browserTimezone ?? ''}".`,
+      });
+    }
+
+    let report: Report | undefined;
     try {
-      const report = await this.enqueueJob(exportTypeId, jobParams);
+      report = await this.enqueueJob(exportTypeId, jobParams);
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
+
+      counters.usageCounter();
 
       return this.res.ok({
         headers: { 'content-type': 'application/json' },
@@ -133,22 +154,24 @@ export class RequestHandler {
         },
       });
     } catch (err) {
-      this.logger.error(err);
-      throw err;
+      return this.handleError(err, counters, report?.jobtype);
     }
   }
 
-  /*
-   * This method does not log the error, as it assumes the error has already
-   * been caught and logged for stack trace context, and then rethrown
-   */
-  public handleError(err: Error | Boom.Boom) {
+  private handleError(err: Error | Boom.Boom, counters: Counters, jobtype?: string) {
+    this.logger.error(err);
+
     if (err instanceof Boom.Boom) {
+      const statusCode = err.output.statusCode;
+      counters?.errorCounter(jobtype, statusCode);
+
       return this.res.customError({
-        statusCode: err.output.statusCode,
+        statusCode,
         body: err.output.payload.message,
       });
     }
+
+    counters?.errorCounter(jobtype, 500);
 
     return this.res.customError({
       statusCode: 500,

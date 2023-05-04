@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, useParams } from 'react-router-dom';
+import { Switch, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
 

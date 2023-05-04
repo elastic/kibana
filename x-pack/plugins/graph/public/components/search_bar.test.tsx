@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { SearchBar, SearchBarProps } from './search_bar';
-import React, { Component, ReactElement } from 'react';
-import { CoreStart } from 'src/core/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
+import React, { Component } from 'react';
+import {
+  DocLinksStart,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+  OverlayStart,
+  SavedObjectsStart,
+} from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
-
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
@@ -21,29 +29,31 @@ import { GraphStore, setDatasource, submitSearchSaga } from '../state_management
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
 const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
 
-function wrapSearchBarInContext(testProps: SearchBarProps) {
-  const services = {
+function getServiceMocks() {
+  return {
     uiSettings: {
       get: (key: string) => {
         return 10;
       },
-    } as CoreStart['uiSettings'],
-    savedObjects: {} as CoreStart['savedObjects'],
-    notifications: {} as CoreStart['notifications'],
+    } as IUiSettingsClient,
+    savedObjects: {} as SavedObjectsStart,
+    savedObjectsManagement: {} as SavedObjectsManagementPluginStart,
+    notifications: {} as NotificationsStart,
     docLinks: {
       links: {
         query: {
           kueryQuerySyntax: '',
         },
       },
-    } as CoreStart['docLinks'],
-    http: {} as CoreStart['http'],
-    overlays: {} as CoreStart['overlays'],
+    } as DocLinksStart,
+    http: {} as HttpStart,
+    overlays: {} as OverlayStart,
     storage: {
       get: () => {},
     },
@@ -51,12 +61,17 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
       query: {
         savedQueries: {},
       },
+    },
+    unifiedSearch: {
       autocomplete: {
         hasQuerySuggestions: () => false,
       },
     },
   };
+}
 
+function wrapSearchBarInContext(testProps: SearchBarProps) {
+  const services = getServiceMocks();
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
@@ -77,12 +92,14 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as IndexPattern)),
+      get: jest.fn(() =>
+        Promise.resolve(createStubDataView({ spec: { fields: {}, name: 'Test Name' } }))
+      ),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
-    onIndexPatternChange: (indexPattern?: IndexPattern) => {
+    onIndexPatternChange: (indexPattern?: DataView) => {
       instance.setProps({
         ...defaultProps,
         currentIndexPattern: indexPattern,
@@ -117,6 +134,21 @@ describe('search_bar', () => {
 
     await act(async () => {
       instance = mountWithIntl(searchBarTestRoot);
+    });
+  }
+
+  async function mountSearchBarWithExplicitContext(props: SearchBarProps & SearchBarStateProps) {
+    jest.clearAllMocks();
+    const services = getServiceMocks();
+
+    await act(async () => {
+      instance = mountWithIntl(
+        <I18nProvider>
+          <KibanaContextProvider services={services}>
+            <SearchBarComponent {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      );
     });
   }
 
@@ -169,10 +201,48 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (
-      instance.find(QueryStringInput).prop('prepend') as ReactElement
-    ).props.children.props.onClick();
+    instance.find('button[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
+  });
+
+  it('should disable the graph button when no data view is configured', async () => {
+    const stateProps = {
+      submit: jest.fn(),
+      onIndexPatternSelected: jest.fn(),
+      currentDatasource: undefined,
+      selectedFields: [],
+    };
+    await mountSearchBarWithExplicitContext({
+      urlQuery: null,
+      ...defaultProps,
+      ...stateProps,
+    });
+
+    expect(
+      instance.find('[data-test-subj="graph-explore-button"]').first().prop('disabled')
+    ).toBeTruthy();
+  });
+
+  it('should disable the graph button when no field is configured', async () => {
+    const stateProps = {
+      submit: jest.fn(),
+      onIndexPatternSelected: jest.fn(),
+      currentDatasource: {
+        type: 'indexpattern' as const,
+        id: '123',
+        title: 'test-index',
+      },
+      selectedFields: [],
+    };
+    await mountSearchBarWithExplicitContext({
+      urlQuery: null,
+      ...defaultProps,
+      ...stateProps,
+    });
+
+    expect(
+      instance.find('[data-test-subj="graph-explore-button"]').first().prop('disabled')
+    ).toBeTruthy();
   });
 });

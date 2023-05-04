@@ -14,9 +14,9 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import { ConfigType } from '../';
+import { ConfigType } from '..';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
@@ -59,10 +59,12 @@ export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
   private log: Logger;
   private headers: Record<string, string> = {};
+  private customHeaders: Record<string, string> = {};
 
   constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
+    this.customHeaders = config.customHeaders as Record<string, string>;
   }
 
   createRequest({
@@ -88,7 +90,11 @@ export class EnterpriseSearchRequestHandler {
         // Set up API options
         const options = {
           method: request.route.method as string,
-          headers: { Authorization: request.headers.authorization as string, ...JSON_HEADER },
+          headers: {
+            Authorization: request.headers.authorization as string,
+            ...JSON_HEADER,
+            ...this.customHeaders,
+          },
           body: this.getBodyAsString(request.body as object | Buffer),
           agent: entSearchHttpAgent.getHttpAgent(),
         };

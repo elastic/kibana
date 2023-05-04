@@ -19,6 +19,7 @@ interface Props {
   isLinesOnly: boolean;
   strokeColor?: string;
   symbolId?: string;
+  svg?: string;
 }
 
 export function VectorIcon({
@@ -28,6 +29,7 @@ export function VectorIcon({
   isLinesOnly,
   strokeColor,
   symbolId,
+  svg,
 }: Props) {
   if (isLinesOnly) {
     const style = {
@@ -53,13 +55,18 @@ export function VectorIcon({
     return <CircleIcon style={style} />;
   }
 
-  return (
-    <SymbolIcon
-      key={`${symbolId}${fillColor}${strokeColor}`}
-      symbolId={symbolId}
-      fill={fillColor}
-      stroke={strokeColor}
-      style={borderStyle}
-    />
-  );
+  if (svg) {
+    return (
+      <SymbolIcon
+        key={`${symbolId}${fillColor}${strokeColor}`}
+        symbolId={symbolId}
+        fill={fillColor}
+        stroke={strokeColor}
+        style={borderStyle}
+        svg={svg}
+      />
+    );
+  }
+
+  return null;
 }

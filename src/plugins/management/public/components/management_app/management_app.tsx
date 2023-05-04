@@ -8,19 +8,22 @@
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
-import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
+import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  ManagementSection,
+  MANAGEMENT_BREADCRUMB,
+  MANAGEMENT_BREADCRUMB_NO_HREF,
+} from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-  reactRouterNavigate,
-  KibanaThemeProvider,
-} from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
 
 interface ManagementAppProps {
@@ -34,12 +37,14 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
 export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
-  const { setBreadcrumbs } = dependencies;
+  const { setBreadcrumbs, isSidebarEnabled$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
+  const isSidebarEnabled = useObservable(isSidebarEnabled$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -53,8 +58,14 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
+      // Clicking the Management breadcrumb to navigate back to the "root" only
+      // makes sense if there's a management app open. So when one isn't open
+      // this breadcrumb shouldn't be a clickable link.
+      const managementBreadcrumb = crumbs.length
+        ? MANAGEMENT_BREADCRUMB
+        : MANAGEMENT_BREADCRUMB_NO_HREF;
       setBreadcrumbs([
-        wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
+        wrapBreadcrumb(managementBreadcrumb, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },
@@ -69,30 +80,30 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
     return null;
   }
 
-  const solution: KibanaPageTemplateProps['solutionNav'] = {
-    name: i18n.translate('management.nav.label', {
-      defaultMessage: 'Management',
-    }),
-    icon: 'managementApp',
-    'data-test-subj': 'mgtSideBarNav',
-    items: managementSidebarNav({
-      selectedId,
-      sections,
-      history,
-    }),
-  };
+  const solution: KibanaPageTemplateProps['solutionNav'] | undefined = isSidebarEnabled
+    ? {
+        name: i18n.translate('management.nav.label', {
+          defaultMessage: 'Management',
+        }),
+        icon: 'managementApp',
+        'data-test-subj': 'mgtSideBarNav',
+        items: managementSidebarNav({
+          selectedId,
+          sections,
+          history,
+        }),
+      }
+    : undefined;
 
   return (
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaPageTemplate
           restrictWidth={false}
-          // EUI TODO
-          // The different template options need to be manually recreated by the individual pages.
-          // These classes help enforce the layouts.
-          pageContentProps={{ className: 'kbnAppWrapper' }}
-          pageContentBodyProps={{ className: 'kbnAppWrapper' }}
           solutionNav={solution}
+          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+          mainProps={{ paddingSize: 'l' }}
         >
           <ManagementRouter
             history={history}

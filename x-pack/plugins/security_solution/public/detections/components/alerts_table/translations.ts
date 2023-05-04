@@ -18,12 +18,6 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   }
 );
 
-export const ALERTS_UNIT = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsUnit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
-  });
-
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
@@ -80,20 +74,6 @@ export const ALERTS_HEADERS_RULE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_VERSION = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle',
-  {
-    defaultMessage: 'Version',
-  }
-);
-
-export const ALERTS_HEADERS_METHOD = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.methodTitle',
-  {
-    defaultMessage: 'Method',
-  }
-);
-
 export const ALERTS_HEADERS_SEVERITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.severityTitle',
   {
@@ -118,7 +98,7 @@ export const ALERTS_HEADERS_RISK_SCORE = i18n.translate(
 export const ALERTS_HEADERS_THRESHOLD_COUNT = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCount',
   {
-    defaultMessage: 'Threshold Count',
+    defaultMessage: 'Event Count',
   }
 );
 
@@ -132,35 +112,21 @@ export const ALERTS_HEADERS_THRESHOLD_TERMS = i18n.translate(
 export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCardinality',
   {
-    defaultMessage: 'Threshold Cardinality',
+    defaultMessage: 'Event Cardinality',
   }
 );
 
-export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
+export const ALERTS_HEADERS_NEW_TERMS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTerms',
   {
-    defaultMessage: 'Import Hash',
+    defaultMessage: 'New Terms',
   }
 );
 
-export const ACTION_OPEN_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
+export const ALERTS_HEADERS_NEW_TERMS_FIELDS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTermsFields',
   {
-    defaultMessage: 'Open alert',
-  }
-);
-
-export const ACTION_CLOSE_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.closeAlertTitle',
-  {
-    defaultMessage: 'Close alert',
-  }
-);
-
-export const ACTION_ACKNOWLEDGED_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.acknowledgedAlertTitle',
-  {
-    defaultMessage: 'Mark as acknowledged',
+    defaultMessage: 'New Terms fields',
   }
 );
 
@@ -189,6 +155,14 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
   {
     defaultMessage: 'Add Endpoint event filter',
+  }
+);
+
+export const ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip',
+  {
+    defaultMessage:
+      'Endpoint event filters can be created from the Events section of the Hosts page.',
   }
 );
 
@@ -292,3 +266,171 @@ export const TRIGGERED = i18n.translate(
     defaultMessage: 'Triggered',
   }
 );
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const ADD_TO_CASE_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
+  {
+    defaultMessage: 'Add to case is not supported for this selection',
+  }
+);
+
+export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
+  {
+    defaultMessage: 'Investigate in timeline',
+  }
+);
+
+export const SESSIONS_TITLE = i18n.translate('xpack.securitySolution.sessionsView.sessionsTitle', {
+  defaultMessage: 'Sessions',
+});
+
+export const TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
+  {
+    defaultMessage: 'Take actions',
+  }
+);
+
+export const STATS_GROUP_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.alertsCount',
+  {
+    defaultMessage: 'Alerts:',
+  }
+);
+
+export const STATS_GROUP_HOSTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.hostsCount',
+  {
+    defaultMessage: 'Hosts:',
+  }
+);
+
+export const STATS_GROUP_IPS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.ipsCount',
+  {
+    defaultMessage: `IP's:`,
+  }
+);
+
+export const GROUP_ALERTS_SELECTOR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.selectGroup.title',
+  {
+    defaultMessage: `Group alerts by`,
+  }
+);
+
+export const STATS_GROUP_USERS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.usersCount',
+  {
+    defaultMessage: 'Users:',
+  }
+);
+
+export const STATS_GROUP_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.rulesCount',
+  {
+    defaultMessage: 'Rules:',
+  }
+);
+
+export const STATS_GROUP_SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity',
+  {
+    defaultMessage: 'Severity:',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_MULTI = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.multi',
+  {
+    defaultMessage: 'Multi',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_LOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.low',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_HIGH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.high',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_CRITICAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.critical',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.medium',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const ruleName = i18n.translate('xpack.securitySolution.selector.groups.ruleName.label', {
+  defaultMessage: 'Rule name',
+});
+export const userName = i18n.translate('xpack.securitySolution.selector.grouping.userName.label', {
+  defaultMessage: 'User name',
+});
+export const hostName = i18n.translate('xpack.securitySolution.selector.grouping.hostName.label', {
+  defaultMessage: 'Host name',
+});
+export const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.sourceIP.label', {
+  defaultMessage: 'Source IP',
+});
+export const sourceAddress = i18n.translate(
+  'xpack.securitySolution.selector.groups.sourceAddress.label',
+  {
+    defaultMessage: 'Source address',
+  }
+);
+
+export const destinationAddress = i18n.translate(
+  'xpack.securitySolution.selector.groups.destinationAddress.label',
+  {
+    defaultMessage: 'Destination address',
+  }
+);
+
+export const INSPECT_GROUPING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionsEngine.grouping.inspectTitle',
+  {
+    defaultMessage: 'Grouping query',
+  }
+);
+
+export const EVENT_RENDERED_VIEW_COLUMNS = {
+  timestamp: i18n.translate('xpack.securitySolution.EventRenderedView.timestampTitle.column', {
+    defaultMessage: 'Timestamp',
+  }),
+  rule: i18n.translate('xpack.securitySolution.EventRenderedView.ruleTitle.column', {
+    defaultMessage: 'Rule',
+  }),
+  eventSummary: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
+    defaultMessage: 'Event Summary',
+  }),
+};

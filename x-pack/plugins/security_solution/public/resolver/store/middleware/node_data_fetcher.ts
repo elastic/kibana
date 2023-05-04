@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { Dispatch, MiddlewareAPI } from 'redux';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer } from '../../types';
+import type { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
-import { ResolverAction } from '../actions';
+import type { ResolverAction } from '../actions';
 
 /**
  * Max number of nodes to request from the server
@@ -60,7 +60,9 @@ export function NodeDataFetcher(
 
     let results: SafeResolverEvent[] | undefined;
     try {
-      const timeRangeFilters = selectors.timeRangeFilters(state);
+      const detectedBounds = selectors.detectedBounds(state);
+      const timeRangeFilters =
+        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
         timeRange: timeRangeFilters,

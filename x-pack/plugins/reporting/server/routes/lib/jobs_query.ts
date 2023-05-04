@@ -6,33 +6,32 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import {
-  DeleteResponse,
-  SearchHit,
-  SearchResponse,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'src/core/server';
-import { PromiseType } from 'utility-types';
-import { ReportingCore } from '../../';
+import type { ReportingCore } from '../..';
 import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import { ReportApiJSON, ReportSource } from '../../../common/types';
+import type { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
-import { ReportingUser } from '../../types';
+import { runtimeFieldKeys, runtimeFields } from '../../lib/store/runtime_fields';
+import type { ReportingUser } from '../../types';
+import type { Payload } from './get_document_payload';
+import { getDocumentPayloadFactory } from './get_document_payload';
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
-function getSearchBody(body: SearchRequest['body']): SearchRequest['body'] {
+function getSearchBody(body: estypes.SearchRequest['body']): estypes.SearchRequest['body'] {
   return {
     _source: {
-      excludes: ['output.content'],
+      excludes: ['output.content', 'payload.headers'],
     },
     sort: [{ created_at: { order: 'desc' } }],
     size: defaultSize,
+    fields: runtimeFieldKeys,
+    runtime_mappings: runtimeFields,
     ...body,
   };
 }
@@ -41,7 +40,7 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
   payload?: Pick<ReportSource['payload'], 'title'>;
 };
 
-interface JobsQueryFactory {
+export interface JobsQueryFactory {
   list(
     jobTypes: string[],
     user: ReportingUser,
@@ -52,7 +51,8 @@ interface JobsQueryFactory {
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
-  delete(deleteIndex: string, id: string): Promise<TransportResult<DeleteResponse>>;
+  getDocumentPayload(doc: ReportApiJSON): Promise<Payload>;
+  delete(deleteIndex: string, id: string): Promise<TransportResult<estypes.DeleteResponse>>;
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
@@ -61,7 +61,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   }
 
   async function execQuery<
-    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
+    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
@@ -99,10 +99,10 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const response = (await execQuery((elasticsearchClient) =>
         elasticsearchClient.search({ body, index: getIndex() })
-      )) as TransportResult<SearchResponse<ReportSource>>;
+      )) as estypes.SearchResponse<ReportSource>;
 
       return (
-        response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {
+        response?.hits?.hits.map((report: estypes.SearchHit<ReportSource>) => {
           const { _source: reportSource, ...reportHead } = report;
           if (!reportSource) {
             throw new Error(`Search hit did not include _source!`);
@@ -132,13 +132,13 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         elasticsearchClient.count({ body, index: getIndex() })
       );
 
-      return response?.body.count ?? 0;
+      return response?.count ?? 0;
     },
 
     async get(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
-        logger.warning(`No ID provided for GET`);
+        logger.warn(`No ID provided for GET`);
         return;
       }
 
@@ -161,18 +161,18 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
 
-      const result = response?.body.hits?.hits?.[0];
+      const result = response?.hits?.hits?.[0];
       if (!result?._source) {
-        logger.warning(`No hits resulted in search`);
+        logger.warn(`No hits resulted in search`);
         return;
       }
 
-      const report = new Report({ ...result, ...result._source });
+      const report = new Report({ ...result, ...result._source }, result.fields);
       return report.toApiJSON();
     },
 
     async getError(id) {
-      const body: SearchRequest['body'] = {
+      const body: estypes.SearchRequest['body'] = {
         _source: {
           includes: ['output.content', 'status'],
         },
@@ -191,7 +191,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       const response = await execQuery((elasticsearchClient) =>
         elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
-      const hits = response?.body.hits?.hits?.[0];
+      const hits = response?.hits?.hits?.[0];
       const status = hits?._source?.status;
 
       if (status !== statuses.JOB_STATUS_FAILED) {
@@ -201,12 +201,17 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return hits?._source?.output?.content!;
     },
 
+    async getDocumentPayload(doc: ReportApiJSON) {
+      const getDocumentPayload = getDocumentPayloadFactory(reportingCore);
+      return await getDocumentPayload(doc);
+    },
+
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
         const query = { id, index: deleteIndex, refresh: true };
 
-        return await elasticsearchClient.delete(query);
+        return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
         throw new Error(
           i18n.translate('xpack.reporting.jobsQuery.deleteError', {

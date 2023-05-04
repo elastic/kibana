@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES } from '../common/constants';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';
-import type { KibanaContext } from '../../../data/public';
 
 interface MetricsRequestHandlerParams {
   input: KibanaContext | null;
@@ -20,6 +21,8 @@ interface MetricsRequestHandlerParams {
   visParams: TimeseriesVisParams;
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
+  inspectorAdapters?: Adapters;
+  expressionAbortSignal: AbortSignal;
 }
 
 export const metricsRequestHandler = async ({
@@ -28,26 +31,27 @@ export const metricsRequestHandler = async ({
   visParams,
   searchSessionId,
   executionContext,
+  inspectorAdapters,
+  expressionAbortSignal,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
-  const config = getUISettings();
-  const data = getDataStart();
+  if (!expressionAbortSignal.aborted) {
+    const config = getUISettings();
+    const data = getDataStart();
+    const abortController = new AbortController();
+    const expressionAbortHandler = function () {
+      abortController.abort();
+    };
 
-  const timezone = getTimezone(config);
-  const uiStateObj = uiState[visParams.type] ?? {};
-  const dataSearch = data.search;
-  const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
+    expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
-  if (visParams && visParams.id && !visParams.isModelInvalid) {
-    const untrackSearch =
-      dataSearch.session.isCurrentSession(searchSessionId) &&
-      dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
-      });
+    const timezone = getTimezone(config);
+    const uiStateObj = uiState[visParams.type] ?? {};
+    const dataSearch = data.search;
+    const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
-    try {
-      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+    const doSearch = async (
+      searchOptions: ReturnType<typeof dataSearch.session.getSearchOptions>
+    ): Promise<TimeseriesVisData> => {
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
@@ -58,16 +62,51 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          ...(searchSessionOptions && {
-            searchSession: searchSessionOptions,
-          }),
+          ...(searchOptions
+            ? {
+                searchSession: searchOptions,
+              }
+            : {}),
         }),
         context: executionContext,
+        signal: abortController.signal,
       });
-    } finally {
-      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-        // untrack if this search still belongs to current session
-        untrackSearch();
+    };
+
+    if (visParams && visParams.id && !visParams.isModelInvalid && !expressionAbortSignal.aborted) {
+      const searchTracker = dataSearch.session.isCurrentSession(searchSessionId)
+        ? dataSearch.session.trackSearch({
+            abort: () => abortController.abort(),
+            poll: async () => {
+              // don't use, keep this empty, onSavingSession is used instead
+            },
+            onSavingSession: async (searchSessionOptions) => {
+              await doSearch(searchSessionOptions);
+            },
+          })
+        : undefined;
+
+      try {
+        const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+        const visData: TimeseriesVisData = await doSearch(searchSessionOptions);
+
+        inspectorAdapters?.requests?.reset();
+
+        Object.entries(visData.trackedEsSearches || {}).forEach(([key, query]) => {
+          inspectorAdapters?.requests
+            ?.start(query.label ?? key, { searchSessionId })
+            .json(query.body)
+            .ok({ time: query.time, json: { rawResponse: query.response } });
+        });
+
+        searchTracker?.complete();
+
+        return visData;
+      } catch (e) {
+        searchTracker?.error();
+        throw e;
+      } finally {
+        expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
       }
     }
   }

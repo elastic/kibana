@@ -7,21 +7,22 @@
 
 import './spaces_popover_list.scss';
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiFocusTrap,
+  EuiLoadingSpinner,
   EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
   EuiText,
 } from '@elastic/eui';
-import React, { Component, memo } from 'react';
+import React, { Component, memo, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
-import type { Space, SpacesApiUi } from '../../../../../../spaces/public';
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '@kbn/spaces-plugin/common';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 interface Props {
   spaces: Space[];
@@ -30,14 +31,12 @@ interface Props {
 }
 
 interface State {
-  searchTerm: string;
   allowSpacesListFocus: boolean;
   isPopoverOpen: boolean;
 }
 
 export class SpacesPopoverList extends Component<Props, State> {
   public state = {
-    searchTerm: '',
     allowSpacesListFocus: false,
     isPopoverOpen: false,
   };
@@ -57,154 +56,106 @@ export class SpacesPopoverList extends Component<Props, State> {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
-        ownFocus
+        ownFocus={false}
       >
-        {this.getMenuPanel()}
+        <EuiFocusTrap>{this.getMenuPanel()}</EuiFocusTrap>
       </EuiPopover>
     );
   }
 
   private getMenuPanel = () => {
-    const { searchTerm } = this.state;
+    const options = this.getSpaceOptions();
 
-    const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
+    const noSpacesMessage = (
+      <EuiText color="subdued" className="eui-textCenter">
+        <FormattedMessage
+          id="xpack.security.management.editRole.spacesPopoverList.noSpacesFoundTitle"
+          defaultMessage=" no spaces found "
+        />
+      </EuiText>
+    );
 
-    const panelProps = {
-      className: 'spcMenu',
-      title: i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
-        defaultMessage: 'Spaces',
-      }),
-      watchedItemProps: ['data-search-term'],
-    };
-
-    if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {
-      return (
-        <EuiContextMenuPanel {...panelProps}>
-          {this.renderSearchField()}
-          {this.renderSpacesListPanel(items, searchTerm)}
-        </EuiContextMenuPanel>
-      );
-    }
-
-    return <EuiContextMenuPanel {...panelProps} items={items} />;
+    return (
+      <EuiSelectable
+        className={'spcMenu'}
+        title={i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
+          defaultMessage: 'Spaces',
+        })}
+        searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
+        searchProps={
+          this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
+            ? ({
+                placeholder: i18n.translate(
+                  'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
+                  {
+                    defaultMessage: 'Find a space',
+                  }
+                ),
+                compressed: true,
+                isClearable: true,
+                id: 'spacesPopoverListSearch',
+              } as any)
+            : undefined
+        }
+        noMatchesMessage={noSpacesMessage}
+        options={options}
+        singleSelection={true}
+        style={{ width: 300 }}
+        listProps={{
+          rowHeight: 40,
+          showIcons: false,
+          onFocusBadge: false,
+        }}
+      >
+        {(list, search) => (
+          <>
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate(
+                'xpack.security.management.editRole.spacesPopoverList.selectSpacesTitle',
+                {
+                  defaultMessage: 'Spaces',
+                }
+              )}
+            </EuiPopoverTitle>
+            {search}
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+    );
   };
 
   private onButtonClick = () => {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
-      searchTerm: '',
     });
   };
 
   private closePopover = () => {
     this.setState({
       isPopoverOpen: false,
-      searchTerm: '',
     });
   };
 
-  private getVisibleSpaces = (searchTerm: string): Space[] => {
-    const { spaces } = this.props;
-
-    let filteredSpaces = spaces;
-    if (searchTerm) {
-      filteredSpaces = spaces.filter((space) => {
-        const { name, description = '' } = space;
-        return (
-          name.toLowerCase().indexOf(searchTerm) >= 0 ||
-          description.toLowerCase().indexOf(searchTerm) >= 0
-        );
-      });
-    }
-
-    return filteredSpaces;
-  };
-
-  private renderSpacesListPanel = (items: JSX.Element[], searchTerm: string) => {
-    if (items.length === 0) {
-      return (
-        <EuiText color="subdued" className="eui-textCenter">
-          <FormattedMessage
-            id="xpack.security.management.editRole.spacesPopoverList.noSpacesFoundTitle"
-            defaultMessage=" no spaces found "
-          />
-        </EuiText>
-      );
-    }
-
-    return (
-      <EuiContextMenuPanel
-        key={`spcMenuList`}
-        data-search-term={searchTerm}
-        className="spcMenu__spacesList"
-        hasFocus={this.state.allowSpacesListFocus}
-        initialFocusedItemIndex={this.state.allowSpacesListFocus ? 0 : undefined}
-        items={items}
-      />
-    );
-  };
-
-  private renderSearchField = () => {
-    return (
-      <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
-        {
-          <EuiFieldSearch
-            placeholder={i18n.translate(
-              'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
-              {
-                defaultMessage: 'Find a space',
-              }
-            )}
-            incremental={true}
-            onSearch={this.onSearch}
-            onKeyDown={this.onSearchKeyDown}
-            onFocus={this.onSearchFocus}
-            compressed
-          />
-        }
-      </div>
-    );
-  };
-
-  private onSearchKeyDown = (e: any) => {
-    //  9: tab
-    // 13: enter
-    // 40: arrow-down
-    const focusableKeyCodes = [9, 13, 40];
-
-    const keyCode = e.keyCode;
-    if (focusableKeyCodes.includes(keyCode)) {
-      // Allows the spaces list panel to recieve focus. This enables keyboard and screen reader navigation
-      this.setState({
-        allowSpacesListFocus: true,
-      });
-    }
-  };
-
-  private onSearchFocus = () => {
-    this.setState({
-      allowSpacesListFocus: false,
-    });
-  };
-
-  private onSearch = (searchTerm: string) => {
-    this.setState({
-      searchTerm: searchTerm.trim().toLowerCase(),
-    });
-  };
-
-  private renderSpaceMenuItem = (space: Space): JSX.Element => {
+  private getSpaceOptions = (): EuiSelectableOption[] => {
     const LazySpaceAvatar = memo(this.props.spacesApiUi.components.getSpaceAvatar);
-    const icon = <LazySpaceAvatar space={space} size={'s'} />; // wrapped in a Suspense above
-    return (
-      <EuiContextMenuItem
-        key={space.id}
-        icon={icon}
-        toolTipTitle={space.description && space.name}
-        toolTipContent={space.description}
-      >
-        {space.name}
-      </EuiContextMenuItem>
-    );
+
+    return this.props.spaces.map((space) => {
+      const icon = (
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
+        </Suspense>
+      );
+      return {
+        'aria-label': space.name,
+        'aria-roledescription': 'space',
+        label: space.name,
+        key: space.id,
+        prepend: icon,
+        checked: undefined,
+        'data-test-subj': `${space.id}-selectableSpaceItem`,
+        className: 'selectableSpaceItem',
+      };
+    });
   };
 }

@@ -4,129 +4,246 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../src/core/types/elasticsearch';
-import {
-  inspectSearchParams,
-  SearchParamsMock,
-} from '../../../utils/test_helpers';
-import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
-import multipleVersions from './__fixtures__/multiple_versions.json';
-import noVersions from './__fixtures__/no_versions.json';
-import oneVersion from './__fixtures__/one_version.json';
-import versionsFirstSeen from './__fixtures__/versions_first_seen.json';
+  ScopedAnnotationsClient,
+  WrappedElasticsearchClientError,
+} from '@kbn/observability-plugin/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getServiceAnnotations } from '.';
+import * as GetDerivedServiceAnnotations from './get_derived_service_annotations';
+import * as GetStoredAnnotations from './get_stored_annotations';
+import { Annotation, AnnotationType } from '../../../../common/annotations';
+import { errors } from '@elastic/elasticsearch';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 describe('getServiceAnnotations', () => {
-  let mock: SearchParamsMock;
+  const storedAnnotations = [
+    {
+      type: AnnotationType.VERSION,
+      id: '1',
+      '@timestamp': Date.now(),
+      text: 'foo',
+    },
+  ] as Annotation[];
 
   afterEach(() => {
-    mock.teardown();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
-  describe('with 0 versions', () => {
-    it('returns no annotations', async () => {
-      mock = await inspectSearchParams(
-        (setup) =>
-          getDerivedServiceAnnotations({
-            setup,
-            serviceName: 'foo',
-            environment: 'bar',
-            searchAggregatedTransactions: false,
-            start: 0,
-            end: 50000,
-          }),
-        {
-          mockResponse: () =>
-            noVersions as ESSearchResponse<
-              unknown,
-              ESSearchRequest,
-              {
-                restTotalHitsAsInt: false;
-              }
-            >,
-        }
+  it('returns stored annotarions even though derived annotations throws an error', async () => {
+    jest
+      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
+      .mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('BOOM'));
+            }, 20);
+          })
       );
+    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(storedAnnotations);
+          }, 10);
+        })
+    );
 
-      expect(mock.response).toEqual([]);
+    const annotations = await getServiceAnnotations({
+      serviceName: 'foo',
+      environment: 'bar',
+      searchAggregatedTransactions: false,
+      start: Date.now(),
+      end: Date.now(),
+      client: {} as ElasticsearchClient,
+      logger: {} as Logger,
+      annotationsClient: {} as ScopedAnnotationsClient,
+      apmEventClient: {} as APMEventClient,
+    });
+    expect(annotations).toEqual({
+      annotations: storedAnnotations,
     });
   });
 
-  describe('with 1 version', () => {
-    it('returns no annotations', async () => {
-      mock = await inspectSearchParams(
-        (setup) =>
-          getDerivedServiceAnnotations({
-            setup,
-            serviceName: 'foo',
-            environment: 'bar',
-            searchAggregatedTransactions: false,
-            start: 0,
-            end: 50000,
-          }),
-        {
-          mockResponse: () =>
-            oneVersion as ESSearchResponse<
-              unknown,
-              ESSearchRequest,
-              {
-                restTotalHitsAsInt: false;
-              }
-            >,
-        }
+  it('returns stored annotarions even when derived annotations throws an error first', async () => {
+    jest
+      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
+      .mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('BOOM'));
+            }, 10);
+          })
       );
+    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(storedAnnotations);
+          }, 20);
+        })
+    );
 
-      expect(mock.response).toEqual([]);
+    const annotations = await getServiceAnnotations({
+      serviceName: 'foo',
+      environment: 'bar',
+      searchAggregatedTransactions: false,
+      start: Date.now(),
+      end: Date.now(),
+      client: {} as ElasticsearchClient,
+      logger: {} as Logger,
+      annotationsClient: {} as ScopedAnnotationsClient,
+      apmEventClient: {} as APMEventClient,
+    });
+    expect(annotations).toEqual({
+      annotations: storedAnnotations,
     });
   });
 
-  describe('with more than 1 version', () => {
-    it('returns two annotations', async () => {
-      const responses = [
-        multipleVersions,
-        versionsFirstSeen,
-        versionsFirstSeen,
-      ];
-      mock = await inspectSearchParams(
-        (setup) =>
-          getDerivedServiceAnnotations({
-            setup,
-            serviceName: 'foo',
-            environment: 'bar',
-            searchAggregatedTransactions: false,
-            start: 1528113600000,
-            end: 1528977600000,
-          }),
-        {
-          mockResponse: () =>
-            responses.shift() as unknown as ESSearchResponse<
-              unknown,
-              ESSearchRequest,
-              {
-                restTotalHitsAsInt: false;
-              }
-            >,
-        }
+  it('Throws an exception when derived annotations fires an error before stored annotations is completed and return an empty array', async () => {
+    jest
+      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
+      .mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('BOOM'));
+            }, 10);
+          })
       );
+    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([] as Annotation[]);
+          }, 20);
+        })
+    );
 
-      expect(mock.spy.mock.calls.length).toBe(3);
+    expect(
+      getServiceAnnotations({
+        serviceName: 'foo',
+        environment: 'bar',
+        searchAggregatedTransactions: false,
+        start: Date.now(),
+        end: Date.now(),
+        client: {} as ElasticsearchClient,
+        logger: {} as Logger,
+        annotationsClient: {} as ScopedAnnotationsClient,
+        apmEventClient: {} as APMEventClient,
+      })
+    ).rejects.toThrow('BOOM');
+  });
 
-      expect(mock.response).toEqual([
-        {
-          id: '8.0.0',
-          text: '8.0.0',
-          '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
-          type: 'version',
-        },
-        {
-          id: '7.5.0',
-          text: '7.5.0',
-          '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
-          type: 'version',
-        },
-      ]);
+  it('returns empty derived annotations when RequestAbortedError is thrown and stored annotations is empty', async () => {
+    jest
+      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
+      .mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(
+                new WrappedElasticsearchClientError(
+                  new errors.RequestAbortedError('foo')
+                )
+              );
+            }, 20);
+          })
+      );
+    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([] as Annotation[]);
+          }, 10);
+        })
+    );
+
+    const annotations = await getServiceAnnotations({
+      serviceName: 'foo',
+      environment: 'bar',
+      searchAggregatedTransactions: false,
+      start: Date.now(),
+      end: Date.now(),
+      client: {} as ElasticsearchClient,
+      logger: {} as Logger,
+      annotationsClient: {} as ScopedAnnotationsClient,
+      apmEventClient: {} as APMEventClient,
+    });
+    expect(annotations).toEqual({ annotations: [] });
+  });
+
+  it('Throws an exception when derived annotations fires an error after stored annotations is completed and return an empty array', async () => {
+    jest
+      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
+      .mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('BOOM'));
+            }, 20);
+          })
+      );
+    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([] as Annotation[]);
+          }, 10);
+        })
+    );
+
+    expect(
+      getServiceAnnotations({
+        serviceName: 'foo',
+        environment: 'bar',
+        searchAggregatedTransactions: false,
+        start: Date.now(),
+        end: Date.now(),
+        client: {} as ElasticsearchClient,
+        logger: {} as Logger,
+        annotationsClient: {} as ScopedAnnotationsClient,
+        apmEventClient: {} as APMEventClient,
+      })
+    ).rejects.toThrow('BOOM');
+  });
+
+  it('returns stored annotations when derived annotations throws RequestAbortedError', async () => {
+    jest
+      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
+      .mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            reject(
+              new WrappedElasticsearchClientError(
+                new errors.RequestAbortedError('foo')
+              )
+            );
+          })
+      );
+    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
+      async () =>
+        new Promise((resolve) => {
+          resolve(storedAnnotations);
+        })
+    );
+
+    const annotations = await getServiceAnnotations({
+      serviceName: 'foo',
+      environment: 'bar',
+      searchAggregatedTransactions: false,
+      start: Date.now(),
+      end: Date.now(),
+      client: {} as ElasticsearchClient,
+      logger: {} as Logger,
+      annotationsClient: {} as ScopedAnnotationsClient,
+      apmEventClient: {} as APMEventClient,
+    });
+    expect(annotations).toEqual({
+      annotations: storedAnnotations,
     });
   });
 });

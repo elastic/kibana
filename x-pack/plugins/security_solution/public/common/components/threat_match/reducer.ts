@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { ThreatMapEntries } from './types';
+import type { ThreatMapEntries } from './types';
 import { getDefaultEmptyEntry } from './helpers';
-
-export type ViewerModalName = 'addModal' | 'editModal' | null;
 
 export interface State {
   andLogicIncluded: boolean;

@@ -2,35 +2,32 @@
 
 exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownLeft"
+  className="euiPopover emotion-euiPopover"
   data-test-subj="add-element-button"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <button
-      className="euiButton euiButton--primary euiButton--fill solutionToolbarButton undefined"
+      className="solutionToolbarButton undefined emotion-euiButtonDisplay-m-m-fill-primary"
       data-test-subj="add-element-button"
       disabled={false}
       onClick={[Function]}
-      style={
-        Object {
-          "minWidth": undefined,
-        }
-      }
       type="button"
     >
       <span
-        className="euiButtonContent euiButton__content"
+        className="emotion-euiButtonDisplayContent"
       >
         <span
-          className="euiButtonContent__icon"
+          className="emotion-euiButtonDisplayContent__icon-m"
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
         <span
-          className="euiButton__text"
+          className="eui-textTruncate"
         >
           Add element
         </span>

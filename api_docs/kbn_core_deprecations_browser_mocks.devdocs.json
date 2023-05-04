@@ -1,0 +1,114 @@
+{
+  "id": "@kbn/core-deprecations-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-browser-mocks",
+        "id": "def-common.deprecationsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "deprecationsServiceMock",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser-mocks",
+            "id": "def-common.deprecationsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-deprecations-browser-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsBrowserInternalPluginApi",
+                "section": "def-common.DeprecationsService",
+                "text": "DeprecationsService"
+              },
+              ">>"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser-mocks",
+            "id": "def-common.deprecationsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => undefined"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser-mocks",
+            "id": "def-common.deprecationsServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-deprecations-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
+                "section": "def-common.DeprecationsServiceStart",
+                "text": "DeprecationsServiceStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

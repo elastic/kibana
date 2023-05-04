@@ -7,19 +7,19 @@
 
 import { pick } from 'lodash';
 import { updateRuleRoute } from './update_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
-import { AlertNotifyWhenType } from '../../common';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
+import { RuleNotifyWhen } from '../../common';
 import { AsApiContract } from './lib';
-import { PartialAlert } from '../types';
+import { PartialRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -42,15 +42,23 @@ describe('updateRuleRoute', () => {
     updatedAt: new Date(),
     actions: [
       {
+        uuid: '1234-5678',
         group: 'default',
         id: '2',
         actionTypeId: 'test',
         params: {
           baz: true,
         },
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+          },
+        },
       },
     ],
-    notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
+    notifyWhen: RuleNotifyWhen.CHANGE,
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
@@ -58,22 +66,25 @@ describe('updateRuleRoute', () => {
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
+        uuid: '1234-5678',
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        alerts_filter: mockedAlert.actions[0].alertsFilter,
       },
     ],
   };
 
-  const updateResult: AsApiContract<PartialAlert<{ otherField: boolean }>> = {
+  const updateResult: AsApiContract<PartialRule<{ otherField: boolean }>> = {
     ...updateRequest,
     id: mockedAlert.id,
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, ...rest }) => ({
+    actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
       ...rest,
       connector_type_id: actionTypeId,
+      alerts_filter: alertsFilter,
     })),
   };
 
@@ -109,11 +120,19 @@ describe('updateRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "filters": Array [],
+                    "kql": "name:test",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
                   "baz": true,
                 },
+                "uuid": "1234-5678",
               },
             ],
             "name": "abc",
@@ -201,7 +220,7 @@ describe('updateRuleRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.update.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

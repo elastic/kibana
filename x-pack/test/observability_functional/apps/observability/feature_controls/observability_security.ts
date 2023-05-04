@@ -20,6 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
 
   describe('observability security feature controls', function () {
     this.tags(['skipFirefox']);
@@ -29,11 +31,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/cases/default');
-    });
-
-    it('Shows the no data page on load', async () => {
-      await PageObjects.common.navigateToActualUrl('observabilityCases');
-      await PageObjects.observability.expectNoDataPage();
+      // Since the above unload removes the default config,
+      // the following command will set it back to avoid changing the test environment
+      await kibanaServer.uiSettings.update(config.get('uiSettings.defaults'));
     });
 
     describe('observability cases all privileges', () => {

@@ -6,30 +6,41 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '../../containers';
+import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
-import { StorageKeys } from '../../../services';
+import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import type { SenseEditor } from '../../models';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
 interface Props {
   loading: boolean;
+  setEditorInstance: (instance: SenseEditor) => void;
 }
 
-export const Editor = memo(({ loading }: Props) => {
+export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
   const { requestInFlight } = useRequestReadContext();
+
+  const [fetchingMappings, setFetchingMappings] = useState(false);
+
+  useEffect(() => {
+    const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -48,7 +59,7 @@ export const Editor = memo(({ loading }: Props) => {
 
   return (
     <>
-      {requestInFlight ? (
+      {requestInFlight || fetchingMappings ? (
         <div className="conApp__requestProgressBarContainer">
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>
@@ -61,7 +72,10 @@ export const Editor = memo(({ loading }: Props) => {
           {loading ? (
             <EditorContentSpinner />
           ) : (
-            <EditorUI initialTextValue={currentTextObject.text} />
+            <EditorUI
+              initialTextValue={currentTextObject.text}
+              setEditorInstance={setEditorInstance}
+            />
           )}
         </Panel>
         <Panel

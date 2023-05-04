@@ -94,6 +94,11 @@ export class ElasticChartService extends FtrService {
     }
   }
 
+  public async getAllChartsDebugDataByTestSubj(dataTestSubj: string): Promise<WebElementWrapper[]> {
+    const charts = await this.testSubjects.findAll(dataTestSubj);
+    return charts;
+  }
+
   private async getAllCharts(timeout?: number) {
     return await this.find.allByCssSelector('.echChart', timeout);
   }
@@ -104,18 +109,35 @@ export class ElasticChartService extends FtrService {
    */
   public async getChartDebugData(
     dataTestSubj?: string,
-    match: number = 0
-  ): Promise<DebugState | null> {
-    const chart = await this.getChart(dataTestSubj, undefined, match);
+    match: number = 0,
+    timeout: number | undefined = undefined
+  ): Promise<DebugState> {
+    const chart = await this.getChart(dataTestSubj, timeout, match);
+
+    return await this.getChartDebugDataFromChart(chart);
+  }
+
+  /**
+   * used to get chart data from `@elastic/charts`
+   * requires `window._echDebugStateFlag` to be true
+   */
+  public async getChartDebugDataFromChart(chart: WebElementWrapper): Promise<DebugState> {
+    const visContainer = await chart.findByCssSelector('.echChartStatus');
+    const debugDataString: string | undefined = await visContainer.getAttribute(
+      'data-ech-debug-state'
+    );
+    this.log.debug('data-ech-debug-state: ', debugDataString);
+
+    if (debugDataString === undefined) {
+      throw Error(
+        `Elastic charts debugState not found, ensure 'setNewChartUiDebugFlag' is called before DOM rendering starts.`
+      );
+    }
 
     try {
-      const visContainer = await chart.findByCssSelector('.echChartStatus');
-      const debugDataString: string | undefined = await visContainer.getAttribute(
-        'data-ech-debug-state'
-      );
-      return debugDataString ? JSON.parse(debugDataString) : null;
+      return JSON.parse(debugDataString);
     } catch (error) {
-      throw Error('Elastic charts debugState not found');
+      throw Error('Unable to parse Elastic charts debugState');
     }
   }
 

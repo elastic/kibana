@@ -7,26 +7,33 @@
  */
 
 import { share } from 'rxjs/operators';
-import { HttpStart, IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { buildEsQuery } from '@kbn/es-query';
+import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { buildEsQuery, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
-import { TimefilterService } from './timefilter';
 import type { TimefilterSetup } from './timefilter';
+import { TimefilterService } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
-import { createQueryStateObservable } from './state_sync/create_global_query_observable';
+import {
+  createQueryStateObservable,
+  QueryState$,
+} from './state_sync/create_query_state_observable';
+import { getQueryState, QueryState } from './query_state';
 import type { QueryStringContract } from './query_string';
 import { QueryStringManager } from './query_string';
-import { getEsQueryConfig, TimeRange } from '../../common';
+import { getEsQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
-import { IndexPattern } from '..';
-
-/**
- * Query Service
- * @internal
- */
+import {
+  extract,
+  getAllMigrations,
+  inject,
+  migrateToLatest,
+  telemetry,
+} from '../../common/query/persistable_state';
 
 interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;
@@ -40,14 +47,41 @@ interface QueryServiceStartDependencies {
   http: HttpStart;
 }
 
-export class QueryService {
+export interface QuerySetup extends PersistableStateService<QueryState> {
+  filterManager: FilterManager;
+  timefilter: TimefilterSetup;
+  queryString: QueryStringContract;
+  state$: QueryState$;
+  getState(): QueryState;
+}
+
+export interface QueryStart extends PersistableStateService<QueryState> {
+  filterManager: FilterManager;
+  timefilter: TimefilterSetup;
+  queryString: QueryStringContract;
+  state$: QueryState$;
+  getState(): QueryState;
+
+  // TODO: type explicitly
+  addToQueryLog: ReturnType<typeof createAddToQueryLog>;
+  // TODO: type explicitly
+  savedQueries: ReturnType<typeof createSavedQueryService>;
+  // TODO: type explicitly
+  getEsQuery(indexPattern: DataView, timeRange?: TimeRange): ReturnType<typeof buildEsQuery>;
+}
+
+/**
+ * Query Service
+ * @internal
+ */
+export class QueryService implements PersistableStateService<QueryState> {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
   queryStringManager!: QueryStringContract;
 
-  state$!: ReturnType<typeof createQueryStateObservable>;
+  state$!: QueryState$;
 
-  public setup({ storage, uiSettings, nowProvider }: QueryServiceSetupDependencies) {
+  public setup({ storage, uiSettings, nowProvider }: QueryServiceSetupDependencies): QuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService(nowProvider);
@@ -69,10 +103,12 @@ export class QueryService {
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
       state$: this.state$,
+      getState: () => this.getQueryState(),
+      ...this.getPersistableStateMethods(),
     };
   }
 
-  public start({ storage, uiSettings, http }: QueryServiceStartDependencies) {
+  public start({ storage, uiSettings, http }: QueryServiceStartDependencies): QueryStart {
     return {
       addToQueryLog: createAddToQueryLog({
         storage,
@@ -82,8 +118,9 @@ export class QueryService {
       queryString: this.queryStringManager,
       savedQueries: createSavedQueryService(http),
       state$: this.state$,
+      getState: () => this.getQueryState(),
       timefilter: this.timefilter,
-      getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {
+      getEsQuery: (indexPattern: DataView, timeRange?: TimeRange) => {
         const timeFilter = this.timefilter.timefilter.createFilter(indexPattern, timeRange);
 
         return buildEsQuery(
@@ -93,14 +130,42 @@ export class QueryService {
           getEsQueryConfig(getUiSettings())
         );
       },
+      ...this.getPersistableStateMethods(),
     };
   }
 
   public stop() {
     // nothing to do here yet
   }
-}
 
-/** @public */
-export type QuerySetup = ReturnType<QueryService['setup']>;
-export type QueryStart = ReturnType<QueryService['start']>;
+  private getQueryState() {
+    return getQueryState({
+      timefilter: this.timefilter,
+      queryString: this.queryStringManager,
+      filterManager: this.filterManager,
+    });
+  }
+
+  public extract = extract;
+
+  public inject = inject;
+
+  public telemetry = telemetry;
+
+  public getAllMigrations = getAllMigrations;
+
+  public migrateToLatest = (versionedState: VersionedState) => {
+    // Argument of type 'VersionedState<Serializable>' is not assignable to parameter of type 'VersionedState<QueryState>'.
+    return migrateToLatest(versionedState as VersionedState<QueryState>);
+  };
+
+  private getPersistableStateMethods(): PersistableStateService<QueryState> {
+    return {
+      extract: this.extract.bind(this),
+      inject: this.inject.bind(this),
+      telemetry: this.telemetry.bind(this),
+      migrateToLatest: this.migrateToLatest.bind(this),
+      getAllMigrations: this.getAllMigrations.bind(this),
+    };
+  }
+}

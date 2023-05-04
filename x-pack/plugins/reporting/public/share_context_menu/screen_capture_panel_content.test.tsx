@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
@@ -27,6 +27,8 @@ const getJobParamsDefault = () => ({
   browserTimezone: 'America/New_York',
 });
 
+const theme = themeServiceMock.createSetupContract();
+
 test('ScreenCapturePanelContent renders the default view properly', () => {
   const component = mount(
     <IntlProvider locale="en">
@@ -37,10 +39,11 @@ test('ScreenCapturePanelContent renders the default view properly', () => {
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
+        theme={theme}
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
   expect(component.text()).not.toMatch('Full page layout');
   expect(component.text()).not.toMatch('Optimize for printing');
 });
@@ -56,10 +59,11 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
+        theme={theme}
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
   expect(component.text()).toMatch('Full page layout');
 });
 
@@ -75,6 +79,7 @@ test('ScreenCapturePanelContent allows POST URL to be copied when objectId is pr
         toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
         objectId={'1234-5'}
+        theme={theme}
       />
     </IntlProvider>
   );
@@ -93,6 +98,7 @@ test('ScreenCapturePanelContent does not allow POST URL to be copied when object
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
+        theme={theme}
       />
     </IntlProvider>
   );
@@ -111,10 +117,11 @@ test('ScreenCapturePanelContent properly renders a view with "print" layout opti
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
+        theme={theme}
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
   expect(component.text()).toMatch('Optimize for printing');
 });
 
@@ -130,6 +137,7 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
+        theme={theme}
       />
     </IntlProvider>
   );

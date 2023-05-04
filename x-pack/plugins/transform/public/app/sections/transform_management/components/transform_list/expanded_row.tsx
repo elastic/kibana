@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
+import { css } from '@emotion/react';
+import moment from 'moment-timezone';
 
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
+
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+import { stringHash } from '@kbn/ml-string-hash';
 
-import moment from 'moment-timezone';
+import { isDefined } from '@kbn/ml-is-defined';
+
+import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+
 import { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
+
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
-import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import { ExpandedRowHealthPane } from './expanded_row_health_pane';
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -26,23 +35,6 @@ function getItemDescription(value: any) {
   }
 
   return value.toString();
-}
-
-/**
- * Creates a deterministic number based hash out of a string.
- */
-export function stringHash(str: string): number {
-  let hash = 0;
-  let chr = 0;
-  if (str.length === 0) {
-    return hash;
-  }
-  for (let i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr; // eslint-disable-line no-bitwise
-    hash |= 0; // eslint-disable-line no-bitwise
-  }
-  return hash < 0 ? hash * -2 : hash;
 }
 
 type Item = SectionItem;
@@ -79,6 +71,12 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       description: item.stats.node.name,
     });
   }
+  if (item.stats.health !== undefined) {
+    stateItems.push({
+      title: 'health',
+      description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
+    });
+  }
 
   const state: SectionConfig = {
     title: 'State',
@@ -86,37 +84,52 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
     position: 'right',
   };
 
-  const configItems: Item[] = [
-    {
-      title: 'transform_id',
-      description: item.id,
-    },
-    {
-      title: 'transform_version',
-      description: item.config.version,
-    },
-    {
-      title: 'description',
-      description: item.config.description ?? '',
-    },
-    {
-      title: 'create_time',
-      description:
-        formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
-    },
-    {
-      title: 'source_index',
-      description: Array.isArray(item.config.source.index)
-        ? item.config.source.index[0]
-        : item.config.source.index,
-    },
-    {
-      title: 'destination_index',
-      description: Array.isArray(item.config.dest.index)
-        ? item.config.dest.index[0]
-        : item.config.dest.index,
-    },
-  ];
+  const configItems = useMemo(() => {
+    const configs: Item[] = [
+      {
+        title: 'transform_id',
+        description: item.id,
+      },
+      {
+        title: 'transform_version',
+        description: item.config.version,
+      },
+      {
+        title: 'description',
+        description: item.config.description ?? '',
+      },
+      {
+        title: 'create_time',
+        description:
+          formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
+      },
+      {
+        title: 'source_index',
+        description: Array.isArray(item.config.source.index)
+          ? item.config.source.index[0]
+          : item.config.source.index,
+      },
+      {
+        title: 'destination_index',
+        description: Array.isArray(item.config.dest.index)
+          ? item.config.dest.index[0]
+          : item.config.dest.index,
+      },
+      {
+        title: 'authorization',
+        description: item.config.authorization ? JSON.stringify(item.config.authorization) : '',
+      },
+    ];
+    if (isDefined(item.config.settings?.num_failure_retries)) {
+      configs.push({
+        title: 'num_failure_retries',
+        description: item.config.settings?.num_failure_retries ?? '',
+      });
+    }
+    return configs;
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item?.config]);
 
   const general: SectionConfig = {
     title: 'General',
@@ -227,6 +240,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
             checkpointing,
             ...(alertingRules.items ? [alertingRules] : []),
           ]}
+          dataTestSubj={'transformDetailsTabContent'}
         />
       ),
     },
@@ -239,7 +253,9 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
           defaultMessage: 'Stats',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={[stats]} />,
+      content: (
+        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
+      ),
     },
     {
       id: `transform-json-tab-${tabId}`,
@@ -247,6 +263,21 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
+    ...(item.stats.health
+      ? [
+          {
+            id: `transform-health-tab-${tabId}`,
+            'data-test-subj': 'transformHealthTab',
+            name: i18n.translate(
+              'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
+              {
+                defaultMessage: 'Health',
+              }
+            ),
+            content: <ExpandedRowHealthPane health={item.stats.health} />,
+          },
+        ]
+      : []),
     {
       id: `transform-messages-tab-${tabId}`,
       'data-test-subj': 'transformMessagesTab',
@@ -282,7 +313,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}
       expand={false}
-      style={{ width: '100%' }}
+      css={css`
+        width: 100%;
+
+        .euiTable {
+          background-color: transparent;
+        }
+      `}
       data-test-subj="transformExpandedRowTabbedContent"
     />
   );

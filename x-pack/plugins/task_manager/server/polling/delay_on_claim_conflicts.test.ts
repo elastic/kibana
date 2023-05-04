@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { Subject, of } from 'rxjs';
+import { Subject, of, firstValueFrom } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep } from '../test_utils';
 import { asOk } from '../lib/result_type';
@@ -17,7 +16,7 @@ import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { FillPoolResult } from '../lib/fill_pool';
 
 describe('delayOnClaimConflicts', () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   test(
     'initializes with a delay of 0',
@@ -46,15 +45,12 @@ describe('delayOnClaimConflicts', () => {
       const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
-      const delays$ = delayOnClaimConflicts(
-        of(maxWorkers),
-        of(pollInterval),
-        taskLifecycleEvents$,
-        80,
-        2
-      )
-        .pipe(take(2), bufferCount(2))
-        .toPromise<number[]>();
+      const delays$ = firstValueFrom<number[]>(
+        delayOnClaimConflicts(of(maxWorkers), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
+          take(2),
+          bufferCount(2)
+        )
+      );
 
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
@@ -87,8 +83,8 @@ describe('delayOnClaimConflicts', () => {
 
       const delays$ = delayOnClaimConflicts(of(10), of(100), taskLifecycleEvents$, 80, 2);
 
-      const firstSubscriber$ = delays$.pipe(take(2), bufferCount(2)).toPromise<number[]>();
-      const secondSubscriber$ = delays$.pipe(take(2), bufferCount(2)).toPromise<number[]>();
+      const firstSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
+      const secondSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
 
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
@@ -105,7 +101,7 @@ describe('delayOnClaimConflicts', () => {
         )
       );
 
-      const thirdSubscriber$ = delays$.pipe(take(2), bufferCount(2)).toPromise<number[]>();
+      const thirdSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
 
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(

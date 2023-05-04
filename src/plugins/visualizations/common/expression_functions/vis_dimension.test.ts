@@ -7,8 +7,8 @@
  */
 
 import { Arguments, visDimension } from './vis_dimension';
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../expressions/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 
 describe('interpreter/functions#vis_dimension', () => {
@@ -58,13 +58,15 @@ describe('interpreter/functions#vis_dimension', () => {
     const accessor = input.columns.length;
     const args: Arguments = { accessor };
 
-    expect(() => fn(input, args)).toThrowError('Column name or index provided is invalid');
+    expect(() => fn(input, args)).toThrowError('Provided column name or index is invalid: 2');
   });
 
   it("should throw error when the passed column doesn't exist in columns", () => {
     const accessor = column1 + '_modified';
     const args: Arguments = { accessor };
 
-    expect(() => fn(input, args)).toThrowError('Column name or index provided is invalid');
+    expect(() => fn(input, args)).toThrowError(
+      'Provided column name or index is invalid: username_modified'
+    );
   });
 });

@@ -13,6 +13,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
+import { createNumberHandler } from '../../lib/create_number_handler';
 import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
@@ -26,6 +27,7 @@ import {
   EuiCode,
   EuiHorizontalRule,
   EuiFieldNumber,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
@@ -34,20 +36,23 @@ import { getCharts } from '../../../../services';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+import { tsvbEditorRowStyles } from '../../../styles/common.styles';
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
+  const handleNumberChange = createNumberHandler(props.onChange);
   const defaults = {
     value_template: '{{value}}',
     offset_time: '',
-    axis_min: '',
-    axis_max: '',
+    axis_min: undefined,
+    axis_max: undefined,
     stacked: STACKED_OPTIONS.NONE,
     steps: 0,
   };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
+  const { euiTheme } = useEuiTheme();
   const { intl } = props;
   const stackedOptions = [
     {
@@ -182,6 +187,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesStackedComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -285,6 +291,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesStackedComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -338,6 +345,19 @@ export const TimeseriesConfig = injectI18n(function (props) {
   );
   const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
 
+  const { indexPatternForQuery, onChange } = props;
+  const onChangeOverride = useCallback(
+    (partialState) => {
+      const stateUpdate = { ...partialState };
+      const isEnabling = partialState.override_index_pattern;
+      if (isEnabling && !model.series_index_pattern) {
+        stateUpdate.series_index_pattern = indexPatternForQuery;
+      }
+      onChange(stateUpdate);
+    },
+    [model.series_index_pattern, indexPatternForQuery, onChange]
+  );
+
   const initialPalette = model.palette ?? {
     type: 'palette',
     name: 'default',
@@ -352,7 +372,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   };
 
   return (
-    <div className="tvbAggRow">
+    <div css={tsvbEditorRowStyles(euiTheme)}>
       <EuiFlexGroup gutterSize="s">
         <DataFormatPicker
           formatterValue={model.formatter}
@@ -476,16 +496,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              It accepts a null value, but is passed a empty string.
-            */}
-            <input
-              className="tvbAgg__input"
-              type="number"
-              disabled={disableSeparateYaxis}
-              onChange={handleTextChange('axis_min')}
+            <EuiFieldNumber
+              onChange={handleNumberChange('axis_min', { isClearable: true })}
               value={model.axis_min}
+              disabled={disableSeparateYaxis}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -499,15 +513,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              It accepts a null value, but is passed a empty string.
-            */}
-            <input
-              className="tvbAgg__input"
-              disabled={disableSeparateYaxis}
-              onChange={handleTextChange('axis_max')}
+            <EuiFieldNumber
+              onChange={handleNumberChange('axis_max', { isClearable: true })}
               value={model.axis_max}
+              disabled={disableSeparateYaxis}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -545,7 +554,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             <YesNo
               value={model.override_index_pattern}
               name="override_index_pattern"
-              onChange={props.onChange}
+              onChange={onChangeOverride}
               data-test-subj="seriesOverrideIndexPattern"
             />
           </EuiFormRow>
@@ -556,6 +565,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             prefix="series_"
             disabled={!model.override_index_pattern}
             allowLevelOfDetail={true}
+            baseIndexPattern={indexPatternForQuery}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -34,4 +34,6 @@ export const getTimeFieldRangeSchema = schema.object({
   /** Additional search options. */
   runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
+  /** Return times from the future. */
+  allowFutureTime: schema.maybe(schema.boolean()),
 });

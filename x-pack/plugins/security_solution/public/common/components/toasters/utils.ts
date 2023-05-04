@@ -6,11 +6,11 @@
  */
 
 import type React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isError } from 'lodash/fp';
 import { isAppError } from '@kbn/securitysolution-t-grid';
 
-import { AppToast, ActionToaster } from './';
+import type { AppToast, ActionToaster } from '.';
 import { isToasterError } from './errors';
 
 /**
@@ -24,38 +24,14 @@ export const displayErrorToast = (
   errorTitle: string,
   errorMessages: string[],
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
+  id: string = uuidv4()
 ): void => {
   const toast: AppToast = {
     id,
     title: errorTitle,
     color: 'danger',
-    iconType: 'alert',
+    iconType: 'error',
     errors: errorMessages,
-  };
-  dispatchToaster({
-    type: 'addToaster',
-    toast,
-  });
-};
-
-/**
- * Displays a warning toast for the provided title and message
- * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
- * @param title warning message to display in toaster and modal
- * @param dispatchToaster provided by useStateToaster()
- * @param id unique ID if necessary
- */
-export const displayWarningToast = (
-  title: string,
-  dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
-): void => {
-  const toast: AppToast = {
-    id,
-    title,
-    color: 'warning',
-    iconType: 'help',
   };
   dispatchToaster({
     type: 'addToaster',
@@ -72,7 +48,7 @@ export const displayWarningToast = (
 export const displaySuccessToast = (
   title: string,
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
+  id: string = uuidv4()
 ): void => {
   const toast: AppToast = {
     id,
@@ -107,11 +83,11 @@ export type ErrorToToasterArgs = Partial<AppToast> & {
  * @param dispatchToaster provided by useStateToaster()
  */
 export const errorToToaster = ({
-  id = uuid.v4(),
+  id = uuidv4(),
   title,
   error,
   color = 'danger',
-  iconType = 'alert',
+  iconType = 'error',
   dispatchToaster,
 }: ErrorToToasterArgs) => {
   let toast: AppToast;

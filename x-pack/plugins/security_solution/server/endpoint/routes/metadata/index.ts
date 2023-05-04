@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { HostStatus } from '../../../../common/endpoint/types';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import {
   getLogger,
   getMetadataRequestHandler,
@@ -57,7 +57,7 @@ export function registerEndpointRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       logger,
       getMetadataListRequestHandler(endpointAppContext, logger)
     )
@@ -67,10 +67,10 @@ export function registerEndpointRoutes(
     {
       path: HOST_METADATA_GET_ROUTE,
       validate: GetMetadataRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      options: { authRequired: true },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
       logger,
       getMetadataRequestHandler(endpointAppContext, logger)
     )
@@ -83,7 +83,7 @@ export function registerEndpointRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       logger,
       getMetadataTransformStatsHandler(logger)
     )

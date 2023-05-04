@@ -8,7 +8,8 @@
 import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { ILicense, LicenseType } from '../../../licensing/common/types';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+
 import type { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
@@ -83,8 +84,10 @@ export class SecurityLicenseService {
         allowAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
+        allowRoleRemoteIndexPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
+        allowUserProfileCollaboration: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -102,11 +105,14 @@ export class SecurityLicenseService {
         allowAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
+        allowRoleRemoteIndexPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
+        allowUserProfileCollaboration: false,
       };
     }
 
+    const isLicenseStandardOrBetter = rawLicense.hasAtLeast('standard');
     const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
@@ -120,7 +126,9 @@ export class SecurityLicenseService {
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
+      allowRoleRemoteIndexPrivileges: isLicensePlatinumOrBetter,
       allowRbac: true,
+      allowUserProfileCollaboration: isLicenseStandardOrBetter,
     };
   }
 }

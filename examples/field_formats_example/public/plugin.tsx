@@ -14,16 +14,16 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-} from '../../../src/core/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
-import { App } from './app';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../../src/plugins/field_formats/public';
-import { registerExampleFormat } from './examples/2_creating_custom_formatter';
+} from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   IndexPatternFieldEditorStart,
   IndexPatternFieldEditorSetup,
-} from '../../../src/plugins/data_view_field_editor/public';
-import { DataPublicPluginStart } from '../../../src/plugins/data/public';
+} from '@kbn/data-view-field-editor-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { registerExampleFormat } from './examples/2_creating_custom_formatter';
+import { App } from './app';
 import { registerExampleFormatEditor } from './examples/3_creating_custom_format_editor';
 import img from './formats.png';
 

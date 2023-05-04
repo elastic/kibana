@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EUI_MODAL_CONFIRM_BUTTON,
@@ -15,22 +15,24 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-
 import { DeleteAction } from './use_delete_action';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
   deleteAndCloseModal,
   deleteDestIndex,
-  deleteIndexPattern,
-  indexPatternExists,
+  deleteDataView,
+  dataViewExists,
   items,
   shouldForceDelete,
   toggleDeleteIndex,
-  toggleDeleteIndexPattern,
+  toggleDeleteDataView,
   userCanDeleteIndex,
   userCanDeleteDataView,
 }) => {
+  const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 
   const bulkDeleteModalTitle = i18n.translate(
@@ -47,6 +49,19 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   const bulkDeleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
+        {hasManagedTransforms ? (
+          <>
+            <ManagedTransformsWarningCallout
+              count={items.length}
+              action={i18n.translate(
+                'xpack.transform.transformList.deleteManagedTransformDescription',
+                { defaultMessage: 'deleting' }
+              )}
+            />
+            <EuiSpacer />
+          </>
+        ) : null}
+
         <EuiFlexItem>
           {
             <EuiSwitch
@@ -66,15 +81,15 @@ export const DeleteActionModal: FC<DeleteAction> = ({
         <EuiFlexItem>
           {
             <EuiSwitch
-              data-test-subj="transformBulkDeleteIndexPatternSwitch"
+              data-test-subj="transformBulkDeleteDataViewSwitch"
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.bulkDeleteDestDataViewTitle',
                 {
                   defaultMessage: 'Delete destination data views',
                 }
               )}
-              checked={deleteIndexPattern}
-              onChange={toggleDeleteIndexPattern}
+              checked={deleteDataView}
+              onChange={toggleDeleteDataView}
               disabled={userCanDeleteDataView === false}
             />
           }
@@ -86,6 +101,19 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   const deleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
+        {hasManagedTransforms ? (
+          <>
+            <ManagedTransformsWarningCallout
+              count={1}
+              action={i18n.translate(
+                'xpack.transform.transformList.deleteManagedTransformDescription',
+                { defaultMessage: 'deleting' }
+              )}
+            />
+            <EuiSpacer />
+          </>
+        ) : null}
+
         <EuiFlexItem>
           {userCanDeleteIndex && (
             <EuiSwitch
@@ -102,11 +130,11 @@ export const DeleteActionModal: FC<DeleteAction> = ({
             />
           )}
         </EuiFlexItem>
-        {userCanDeleteIndex && indexPatternExists && (
+        {userCanDeleteIndex && dataViewExists && (
           <EuiFlexItem>
             <EuiSpacer size="s" />
             <EuiSwitch
-              data-test-subj="transformDeleteIndexPatternSwitch"
+              data-test-subj="transformDeleteDataViewSwitch"
               label={i18n.translate(
                 'xpack.transform.actionDeleteTransform.deleteDestDataViewTitle',
                 {
@@ -114,8 +142,8 @@ export const DeleteActionModal: FC<DeleteAction> = ({
                   values: { destinationIndex: items[0] && items[0].config.dest.index },
                 }
               )}
-              checked={deleteIndexPattern}
-              onChange={toggleDeleteIndexPattern}
+              checked={deleteDataView}
+              onChange={toggleDeleteDataView}
               disabled={userCanDeleteDataView === false}
             />
           </EuiFlexItem>

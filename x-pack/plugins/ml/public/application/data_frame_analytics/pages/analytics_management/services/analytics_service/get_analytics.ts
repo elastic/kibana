@@ -109,8 +109,7 @@ export const getAnalyticsFactory = (
   >,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
-  blockRefresh: boolean,
-  isManagementTable: boolean
+  blockRefresh: boolean
 ): GetAnalytics => {
   let concurrentLoads = 0;
 
@@ -126,12 +125,6 @@ export const getAnalyticsFactory = (
       try {
         const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
-
-        let spaces: { [id: string]: string[] } = {};
-        if (isManagementTable) {
-          const allSpaces = await ml.savedObjects.jobsSpaces();
-          spaces = allSpaces['data-frame-analytics'];
-        }
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)
@@ -164,7 +157,6 @@ export const getAnalyticsFactory = (
               mode: DATA_FRAME_MODE.BATCH,
               state: stats.state,
               stats,
-              spaceIds: spaces[config.id] ?? [],
             });
             return reducedtableRows;
           },

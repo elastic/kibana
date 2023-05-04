@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
 import { ENTRIES } from '../../../../../common/constants.mock';
 
 import { bulkCreateImportedItems } from './bulk_create_imported_items';
@@ -22,6 +22,7 @@ describe('bulkCreateImportedItems', () => {
         created_by: 'elastic',
         description: 'description here',
         entries: ENTRIES,
+        expire_time: undefined,
         immutable: undefined,
         item_id: 'item-id',
         list_id: 'list-id',

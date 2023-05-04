@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
@@ -27,7 +27,7 @@ function createMockAnomalyTimeseries({
     anomalies: [],
     bounds: [],
     environment,
-    jobId: uuid(),
+    jobId: uuidv4(),
     type,
     serviceName: 'opbeans-java',
     transactionType: 'request',
@@ -62,17 +62,14 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
     ];
 
     describe('with one environment', () => {
-      const environments = [PROD];
-
       describe('and all being selected', () => {
-        const environment = ENVIRONMENT_ALL.value;
+        const preferredEnvironment = PROD;
         it('returns the series for prod', () => {
           expect(
             getPreferredServiceAnomalyTimeseries({
               allAnomalyTimeseries,
               detectorType: ApmMlDetectorType.txLatency,
-              environment,
-              environments,
+              preferredEnvironment,
               fallbackToTransactions: false,
             })?.environment
           ).toBe(PROD);
@@ -81,18 +78,15 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
     });
 
     describe('with multiple environments', () => {
-      const environments = [PROD, DEV];
-
       describe('and all being selected', () => {
-        const environment = ENVIRONMENT_ALL.value;
+        const preferredEnvironment = ENVIRONMENT_ALL.value;
 
         it('returns no series', () => {
           expect(
             getPreferredServiceAnomalyTimeseries({
               allAnomalyTimeseries,
               detectorType: ApmMlDetectorType.txLatency,
-              environment,
-              environments,
+              preferredEnvironment,
               fallbackToTransactions: false,
             })
           ).toBeUndefined();
@@ -101,8 +95,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
             getPreferredServiceAnomalyTimeseries({
               allAnomalyTimeseries,
               detectorType: ApmMlDetectorType.txLatency,
-              environment,
-              environments,
+              preferredEnvironment,
               fallbackToTransactions: true,
             })
           ).toBeUndefined();
@@ -110,14 +103,13 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
       });
 
       describe('and production being selected', () => {
-        const environment = PROD;
+        const preferredEnvironment = PROD;
 
         it('returns the series for production', () => {
           const series = getPreferredServiceAnomalyTimeseries({
             allAnomalyTimeseries,
             detectorType: ApmMlDetectorType.txFailureRate,
-            environment,
-            environments,
+            preferredEnvironment,
             fallbackToTransactions: false,
           });
 
@@ -143,15 +135,13 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
       }),
     ];
 
-    const environments = [PROD];
-    const environment = ENVIRONMENT_ALL.value;
+    const preferredEnvironment = PROD;
 
     it('selects the most recent version when transaction metrics are being used', () => {
       const series = getPreferredServiceAnomalyTimeseries({
         allAnomalyTimeseries,
         detectorType: ApmMlDetectorType.txLatency,
-        environment,
-        environments,
+        preferredEnvironment,
         fallbackToTransactions: false,
       });
 
@@ -162,8 +152,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
       const series = getPreferredServiceAnomalyTimeseries({
         allAnomalyTimeseries,
         detectorType: ApmMlDetectorType.txLatency,
-        environment,
-        environments,
+        preferredEnvironment,
         fallbackToTransactions: true,
       });
 

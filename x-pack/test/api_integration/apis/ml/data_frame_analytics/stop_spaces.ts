@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -29,16 +29,15 @@ export default ({ getService }: FtrProviderContext) => {
     action: string,
     expectedStatusCode: number
   ) {
-    const resp = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/${action}`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
       .set(COMMON_REQUEST_HEADERS);
-    const { body, status } = resp;
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
-    expect(status).to.be(expectedStatusCode);
     return body;
   }
 

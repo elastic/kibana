@@ -8,8 +8,8 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import {
   contextServiceMock,
   executionContextServiceMock,
-} from '../../../../../../../../src/core/server/mocks';
-import { createHttpServer } from 'src/core/server/test_utils';
+} from '@kbn/core/server/mocks';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
 import { APMEventClient } from '.';
 
@@ -54,6 +54,7 @@ describe('APMEventClient', () => {
           indices: {} as any,
           options: {
             includeFrozen: false,
+            forceSyntheticSource: false,
           },
         });
 
@@ -61,6 +62,7 @@ describe('APMEventClient', () => {
           apm: {
             events: [],
           },
+          body: { size: 0, track_total_hits: false },
         });
 
         return res.ok({ body: 'ok' });

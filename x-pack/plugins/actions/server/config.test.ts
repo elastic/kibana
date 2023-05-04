@@ -6,8 +6,8 @@
  */
 
 import { configSchema, ActionsConfig, getValidatedConfig } from './config';
-import { Logger } from '../../../..//src/core/server';
-import { loggingSystemMock } from '../../../..//src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -23,12 +23,7 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
-        "cleanupFailedExecutionsTask": Object {
-          "cleanupInterval": "PT5M",
-          "enabled": true,
-          "idleInterval": "PT1H",
-          "pageSize": 100,
-        },
+        "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -63,12 +58,7 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
-        "cleanupFailedExecutionsTask": Object {
-          "cleanupInterval": "PT5M",
-          "enabled": true,
-          "idleInterval": "PT1H",
-          "pageSize": 100,
-        },
+        "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -163,6 +153,28 @@ describe('config validation', () => {
     `);
   });
 
+  test('validates proxyUrl', () => {
+    const proxyUrl = 'https://test.com';
+    const badProxyUrl = 'bad url';
+    let validated: ActionsConfig;
+
+    validated = configSchema.validate({ proxyUrl });
+    expect(validated.proxyUrl).toEqual(proxyUrl);
+    expect(getValidatedConfig(mockLogger, validated).proxyUrl).toEqual(proxyUrl);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`Array []`);
+
+    validated = configSchema.validate({ proxyUrl: badProxyUrl });
+    expect(validated.proxyUrl).toEqual(badProxyUrl);
+    expect(getValidatedConfig(mockLogger, validated).proxyUrl).toEqual(badProxyUrl);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "The confguration xpack.actions.proxyUrl: bad url is invalid.",
+        ],
+      ]
+    `);
+  });
+
   // Most of the customHostSettings tests are in ./lib/custom_host_settings.test.ts
   // but this one seemed more relevant for this test suite, since url is the one
   // required property.
@@ -188,12 +200,7 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
-        "cleanupFailedExecutionsTask": Object {
-          "cleanupInterval": "PT5M",
-          "enabled": true,
-          "idleInterval": "PT1H",
-          "pageSize": 100,
-        },
+        "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -211,6 +218,25 @@ describe('config validation', () => {
         },
       }
     `);
+  });
+
+  test('validates email.domain_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {};
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email.domain_allowlist]: expected value of type [array] but got [undefined]"`
+    );
+
+    config.email = { domain_allowlist: [] };
+    result = configSchema.validate(config);
+    expect(result.email?.domain_allowlist).toEqual([]);
+
+    config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
+    result = configSchema.validate(config);
+    expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
 });
 

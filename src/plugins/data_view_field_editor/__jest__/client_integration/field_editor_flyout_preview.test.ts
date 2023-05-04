@@ -27,12 +27,11 @@ describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   let testBed: FieldEditorFlyoutContentTestBed;
@@ -55,9 +54,6 @@ describe('Field editor Preview panel', () => {
   ];
 
   beforeEach(async () => {
-    server.respondImmediately = true;
-    server.autoRespond = true;
-
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
     setIndexPatternFields(indexPatternFields);
     setSearchResponse(mockDocuments);
@@ -220,7 +216,7 @@ describe('Field editor Preview panel', () => {
     test('should **not** display an empty prompt editing a document with a script', async () => {
       const field = {
         name: 'foo',
-        type: 'ip',
+        type: 'ip' as const,
         script: {
           source: 'emit("hello world")',
         },
@@ -229,7 +225,7 @@ describe('Field editor Preview panel', () => {
       // We open the editor with a field to edit the empty prompt should not be there
       // as we have a script and we'll load the preview.
       await act(async () => {
-        testBed = await setup({ field });
+        testBed = await setup({ fieldToEdit: field });
       });
 
       const { exists, component } = testBed;
@@ -241,7 +237,7 @@ describe('Field editor Preview panel', () => {
     test('should **not** display an empty prompt editing a document with format defined', async () => {
       const field = {
         name: 'foo',
-        type: 'ip',
+        type: 'ip' as const,
         format: {
           id: 'upper',
           params: {},
@@ -249,7 +245,7 @@ describe('Field editor Preview panel', () => {
       };
 
       await act(async () => {
-        testBed = await setup({ field });
+        testBed = await setup({ fieldToEdit: field });
       });
 
       const { exists, component } = testBed;
@@ -278,30 +274,24 @@ describe('Field editor Preview panel', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
 
       const {
-        actions: {
-          toggleFormRow,
-          fields,
-          waitForUpdates,
-          getLatestPreviewHttpRequest,
-          getRenderedFieldsPreview,
-        },
+        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
       await waitForUpdates(); // Run validations
-      const request = getLatestPreviewHttpRequest(server);
 
       // Make sure the payload sent is correct
-      expect(request.requestBody).toEqual({
+      const firstCall = server.post.mock.calls[0] as Array<{ body: any }>;
+      const payload = JSON.parse(firstCall[1]?.body);
+      expect(payload).toEqual({
         context: 'keyword_field',
         document: {
           description: 'First doc - description',
           subTitle: 'First doc - subTitle',
           title: 'First doc - title',
         },
-        documentId: '001',
         index: 'testIndex',
         script: {
           source: 'echo("hello")',
@@ -373,10 +363,8 @@ describe('Field editor Preview panel', () => {
     test('should display an updating indicator while fetching the docs and the preview', async () => {
       // We want to test if the loading indicator is in the DOM, for that we don't want the server to
       // respond immediately. We'll manualy send the response.
-      server.respondImmediately = false;
-      server.autoRespond = false;
 
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
 
       const {
         exists,
@@ -394,17 +382,14 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true); // indicator while getting preview
 
-      server.respond();
       await waitForUpdates();
       expect(exists('isUpdatingIndicator')).toBe(false);
     });
 
     test('should not display the updating indicator when neither the type nor the script has changed', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
       // We want to test if the loading indicator is in the DOM, for that we need to manually
       // send the response from the server
-      server.respondImmediately = false;
-      server.autoRespond = false;
 
       const {
         exists,
@@ -417,7 +402,6 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true);
 
-      server.respond();
       await waitForDocumentsAndPreviewUpdate();
 
       expect(exists('isUpdatingIndicator')).toBe(false);
@@ -761,7 +745,13 @@ describe('Field editor Preview panel', () => {
       } = testBed;
 
       const expectedParamsToFetchClusterData = {
-        params: { index: indexPatternNameForTest, body: { size: 50 } },
+        params: {
+          index: indexPatternNameForTest,
+          body: {
+            fields: ['*'],
+            size: 50,
+          },
+        },
       };
 
       // Initial state
@@ -786,6 +776,7 @@ describe('Field editor Preview panel', () => {
       expect(searchMeta.lastCallParams).toEqual({
         params: {
           body: {
+            fields: ['*'],
             query: {
               ids: {
                 values: [nextId],
@@ -827,6 +818,50 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates(); // wait for docs to be fetched
       expect(exists('isUpdatingIndicator')).toBe(false);
       expect(exists('previewNotAvailableCallout')).toBe(true);
+    });
+  });
+
+  describe('composite runtime field', () => {
+    test('should display composite editor when composite type is selected', async () => {
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      fields.updateType('composite', 'Composite');
+      await waitForUpdates();
+      expect(exists('compositeEditor')).toBe(true);
+    });
+
+    test('should show composite field types and update appropriately', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      await fields.updateType('composite', 'Composite');
+      await fields.updateScript("emit('a',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+
+      // increase the number of fields
+      httpRequestsMockHelpers.setFieldPreviewResponse({
+        values: { 'composite_field.a': [1], 'composite_field.b': [1] },
+      });
+      await fields.updateScript("emit('a',1); emit('b',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+      expect(exists('typeField_1')).toBe(true);
+
+      // decrease the number of fields
+      httpRequestsMockHelpers.setFieldPreviewResponse({
+        values: { 'composite_field.a': [1] },
+      });
+      await fields.updateScript("emit('a',1)");
+      await waitForUpdates();
+      expect(exists('typeField_0')).toBe(true);
+      expect(exists('typeField_1')).toBe(false);
     });
   });
 });

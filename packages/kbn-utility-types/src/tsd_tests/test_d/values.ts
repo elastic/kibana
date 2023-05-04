@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { Values } from '../..';
+import { Values } from '../../..';
 
 // Arrays
 type STRING = Values<string[]>;

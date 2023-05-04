@@ -5,21 +5,37 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/common';
-import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
+import React from 'react';
+import {
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  MultiPolygon,
+  Polygon,
+  Position,
+} from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/data-plugin/common';
+import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { TimeRange } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { TooltipFeatureAction } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
+  DataFilters,
   ESSearchSourceResponseMeta,
   MapExtent,
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
+import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 export interface SourceStatus {
   tooltipContent: string | null;
@@ -39,23 +55,52 @@ export interface BoundsRequestMeta {
   applyGlobalTime: boolean;
   filters: Filter[];
   query?: Query;
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
+  isFeatureEditorOpenForLayer: boolean;
+  joinKeyFilter?: Filter;
+  executionContext: KibanaExecutionContext;
+}
+
+export interface GetFeatureActionsArgs {
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
+  featureId: string;
+  geoFieldNames: string[];
+  getActionContext?: () => ActionExecutionContext;
+  getFilterActions?: () => Promise<Action[]>;
+  /*
+   * Callback to get original geometry. Original geometry is only available for geojson sources.
+   * There is no way to get original geometry for vector tiles.
+   */
+  getGeojsonGeometry: () => Geometry | null;
+  /*
+   * Feature from map. mbFeature.geometry may not be the original geometry, it has been simplified and trimmed to tile bounds.
+   */
+  mbFeature: MapGeoJSONFeature;
+  onClose: () => void;
 }
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
-  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null>;
   getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
@@ -68,7 +113,7 @@ export interface IVectorSource extends ISource {
    * Vector layer avoids unnecessarily re-fetching source data.
    * Use getSyncMeta to expose fields that require source data re-fetch when changed.
    */
-  getSyncMeta(): object | null;
+  getSyncMeta(dataFilters: DataFilters): object | null;
 
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
@@ -84,6 +129,20 @@ export interface IVectorSource extends ISource {
     defaultFields: Record<string, Record<string, string>>
   ): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
+
+  /*
+   * Create tooltip actions for a feature.
+   */
+  getFeatureActions({
+    addFilters,
+    featureId,
+    geoFieldNames,
+    getActionContext,
+    getFilterActions,
+    getGeojsonGeometry,
+    mbFeature,
+    onClose,
+  }: GetFeatureActionsArgs): TooltipFeatureAction[];
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -136,9 +195,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     throw new Error('Should implement VectorSource#getGeoJson');
   }
@@ -148,7 +208,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {
@@ -176,7 +239,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta(): object | null {
+  getSyncMeta(dataFilters: DataFilters): object | null {
     return null;
   }
 
@@ -201,5 +264,54 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     return {};
+  }
+
+  getFeatureActions({
+    addFilters,
+    geoFieldNames,
+    getActionContext,
+    getFilterActions,
+    getGeojsonGeometry,
+    mbFeature,
+    onClose,
+  }: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    if (geoFieldNames.length === 0 || addFilters === null) {
+      return [];
+    }
+
+    const isPolygon =
+      mbFeature.geometry.type === GEO_JSON_TYPE.POLYGON ||
+      mbFeature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON;
+    if (!isPolygon) {
+      return [];
+    }
+
+    if (this.isMvt()) {
+      // It is not possible to filter by geometry for vector tiles because there is no way to get original geometry
+      // mbFeature.geometry may not be the original geometry, it has been simplified and trimmed to tile bounds
+      return [];
+    }
+
+    const geojsonGeometry = getGeojsonGeometry();
+    return geojsonGeometry
+      ? [
+          {
+            label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
+              defaultMessage: 'Filter by geometry',
+            }),
+            id: 'FILTER_BY_GEOMETRY_ACTION',
+            form: (
+              <FeatureGeometryFilterForm
+                onClose={onClose}
+                geoFieldNames={geoFieldNames}
+                addFilters={addFilters}
+                getFilterActions={getFilterActions}
+                getActionContext={getActionContext}
+                geometry={geojsonGeometry as Polygon | MultiPolygon}
+              />
+            ),
+          },
+        ]
+      : [];
   }
 }

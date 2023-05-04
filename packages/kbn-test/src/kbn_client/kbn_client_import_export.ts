@@ -12,8 +12,10 @@ import { existsSync } from 'fs';
 import Path from 'path';
 
 import FormData from 'form-data';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { isAxiosResponseError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
@@ -23,6 +25,7 @@ interface ImportApiResponse {
   success: boolean;
   [key: string]: unknown;
 }
+
 export class KbnClientImportExport {
   constructor(
     public readonly log: ToolingLog,
@@ -90,7 +93,7 @@ export class KbnClientImportExport {
     const src = this.resolveAndValidatePath(path);
     this.log.debug('unloading docs from archive at', src);
 
-    const objects = await parseArchive(src);
+    const objects = await parseArchive(src, { stripSummary: true });
     this.log.info('deleting', objects.length, 'objects', { space: options?.space });
 
     const { deleted, missing } = await this.savedObjects.bulkDelete({

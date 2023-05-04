@@ -1,24 +1,38 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/timelion.json",
     "*.ts"
   ],
-  "references": [
-    { "path": "../../../core/tsconfig.json" },
-    { "path": "../../visualizations/tsconfig.json" },
-    { "path": "../../data/tsconfig.json" },
-    { "path": "../../expressions/tsconfig.json" },
-    { "path": "../../kibana_utils/tsconfig.json" },
-    { "path": "../../kibana_react/tsconfig.json" },
-    { "path": "../../vis_default_editor/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/visualizations-plugin",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/config-schema",
+    "@kbn/expect",
+    "@kbn/std",
+    "@kbn/timelion-grammar",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

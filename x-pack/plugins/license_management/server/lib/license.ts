@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { LicensingPluginStart } from '../../../licensing/server';
+import { LicenseLicense } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface PutLicenseArg {
   acknowledge: boolean;
   client: IScopedClusterClient;
   licensing: LicensingPluginStart;
-  license: { [key: string]: any };
+  licenses: LicenseLicense[];
 }
 
-export async function putLicense({ acknowledge, client, licensing, license }: PutLicenseArg) {
+export async function putLicense({ acknowledge, client, licensing, licenses }: PutLicenseArg) {
   try {
-    const { body: response } = await client.asCurrentUser.license.post({
-      body: license,
+    const response = await client.asCurrentUser.license.post({
+      licenses,
       acknowledge,
     });
     const { acknowledged, license_status: licenseStatus } = response;

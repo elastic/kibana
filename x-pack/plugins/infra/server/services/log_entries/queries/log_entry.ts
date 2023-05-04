@@ -21,11 +21,11 @@ export const createGetLogEntryQuery = (
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
-  terminate_after: 1,
-  track_scores: false,
-  track_total_hits: false,
   body: {
     size: 1,
+    terminate_after: 1,
+    track_scores: false,
+    track_total_hits: false,
     query: {
       ids: {
         values: [logEntryId],

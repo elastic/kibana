@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * The status of the datafeed.
+ */
 export enum DATAFEED_STATE {
   STARTED = 'started',
   STARTING = 'starting',
@@ -13,6 +16,9 @@ export enum DATAFEED_STATE {
   DELETED = 'deleted',
 }
 
+/**
+ * The status of the anomaly detection job forecast.
+ */
 export enum FORECAST_REQUEST_STATE {
   FAILED = 'failed',
   FINISHED = 'finished',
@@ -20,6 +26,9 @@ export enum FORECAST_REQUEST_STATE {
   STARTED = 'started',
 }
 
+/**
+ * The status of the anomaly detection job.
+ */
 export enum JOB_STATE {
   CLOSED = 'closed',
   CLOSING = 'closing',

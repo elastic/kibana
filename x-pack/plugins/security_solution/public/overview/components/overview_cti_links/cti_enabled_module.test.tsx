@@ -12,7 +12,8 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CtiEnabledModule } from './cti_enabled_module';
 import { ThemeProvider } from 'styled-components';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -22,6 +23,9 @@ import {
 import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 jest.mock('../../../common/lib/kibana');
 
@@ -49,7 +53,9 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} allIntegrationsInstalled={true} />
+            <MockKibanaContextProvider>
+              <CtiEnabledModule {...mockProps} />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>

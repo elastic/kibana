@@ -1,0 +1,190 @@
+{
+  "id": "@kbn/core-fatal-errors-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser",
+        "id": "def-common.FatalErrorInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "FatalErrorInfo",
+        "description": [
+          "\nRepresents the `message` and `stack` of a fatal Error\n"
+        ],
+        "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-common.FatalErrorInfo.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-common.FatalErrorInfo.stack",
+            "type": "string",
+            "tags": [],
+            "label": "stack",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser",
+        "id": "def-common.FatalErrorsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "FatalErrorsSetup",
+        "description": [
+          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+        ],
+        "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-common.FatalErrorsSetup.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [
+              "\nAdd a new fatal error. This will stop the Kibana Public Core and display\na fatal error screen with details about the Kibana build and the error.\n"
+            ],
+            "signature": [
+              "(error: string | Error, source?: string | undefined) => never"
+            ],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-common.FatalErrorsSetup.add.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [
+                  "- The error to display"
+                ],
+                "signature": [
+                  "string | Error"
+                ],
+                "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-fatal-errors-browser",
+                "id": "def-common.FatalErrorsSetup.add.$2",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [
+                  "- Adds a prefix of the form `${source}: ` to the error message"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser",
+            "id": "def-common.FatalErrorsSetup.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [
+              "\nAn Observable that will emit whenever a fatal error is added with `add()`"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-fatal-errors-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+                "section": "def-common.FatalErrorInfo",
+                "text": "FatalErrorInfo"
+              },
+              ">"
+            ],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser",
+        "id": "def-common.FatalErrorsStart",
+        "type": "Type",
+        "tags": [],
+        "label": "FatalErrorsStart",
+        "description": [
+          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-fatal-errors-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+            "section": "def-common.FatalErrorsSetup",
+            "text": "FatalErrorsSetup"
+          }
+        ],
+        "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

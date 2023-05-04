@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DELETE_BUTTON_LABEL } from '../../../shared/constants';
 import { useDecodedParams } from '../../utils/encode_path_params';
-import { getEngineBreadcrumbs } from '../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 import { ResultFieldValue } from '../result';
 
@@ -32,6 +32,8 @@ const DOCUMENT_DETAIL_TITLE = (documentId: string) =>
 export const DocumentDetail: React.FC = () => {
   const { dataLoading, fields } = useValues(DocumentDetailLogic);
   const { deleteDocument, getDocumentDetails, setFields } = useActions(DocumentDetailLogic);
+  const { isMetaEngine, isElasticsearchEngine } = useValues(EngineLogic);
+  const showDeleteButton = !isMetaEngine && !isElasticsearchEngine;
 
   const { documentId } = useParams() as { documentId: string };
   const { documentId: documentTitle } = useDecodedParams();
@@ -60,21 +62,23 @@ export const DocumentDetail: React.FC = () => {
     },
   ];
 
+  const deleteButton = (
+    <EuiButton
+      color="danger"
+      iconType="trash"
+      onClick={() => deleteDocument(documentId)}
+      data-test-subj="DeleteDocumentButton"
+    >
+      {DELETE_BUTTON_LABEL}
+    </EuiButton>
+  );
+
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([DOCUMENTS_TITLE, documentTitle])}
       pageHeader={{
         pageTitle: DOCUMENT_DETAIL_TITLE(documentTitle),
-        rightSideItems: [
-          <EuiButton
-            color="danger"
-            iconType="trash"
-            onClick={() => deleteDocument(documentId)}
-            data-test-subj="DeleteDocumentButton"
-          >
-            {DELETE_BUTTON_LABEL}
-          </EuiButton>,
-        ],
+        rightSideItems: showDeleteButton ? [deleteButton] : [],
       }}
       isLoading={dataLoading}
     >

@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { MetricEditor } from './metric_editor';
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
@@ -22,8 +22,10 @@ export function isMetricValid(aggDescriptor: AggDescriptor) {
 
 interface Props {
   allowMultipleMetrics: boolean;
+  bucketsName?: string;
+  isJoin: boolean;
   metrics: AggDescriptor[];
-  fields: IndexPatternField[];
+  fields: DataViewField[];
   onChange: (metrics: AggDescriptor[]) => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
 }
@@ -81,6 +83,8 @@ export class MetricsEditor extends Component<Props, State> {
       return (
         <div key={index} className="mapMetricEditorPanel__metricEditor">
           <MetricEditor
+            bucketsName={this.props.bucketsName}
+            isJoin={this.props.isJoin}
             onChange={onMetricChange}
             metric={metric}
             fields={this.props.fields}

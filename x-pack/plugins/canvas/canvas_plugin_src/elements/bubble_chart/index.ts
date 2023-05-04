@@ -15,7 +15,8 @@ export const bubbleChart: ElementFactory = () => ({
   width: 700,
   height: 300,
   icon: 'heatmap',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="project" y="sum(price)" color="state" size="size(username)"
 | plot defaultStyle={seriesStyle points=5 fill=1}

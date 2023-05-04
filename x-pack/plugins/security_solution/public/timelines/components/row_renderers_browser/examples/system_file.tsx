@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mockEndgameFileDeleteEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { demoEndgameFileDeleteEvent } from '../../../../common/demo_data/endgame_ecs/file_events';
 import { createGenericFileRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { DELETED_FILE } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -21,10 +21,9 @@ const SystemFileExampleComponent: React.FC = () => {
   return (
     <>
       {systemFileRowRenderer.renderRow({
-        browserFields: {},
-        data: mockEndgameFileDeleteEvent,
+        data: demoEndgameFileDeleteEvent,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

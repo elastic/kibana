@@ -6,18 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { validateMetricThreshold } from './components/validation';
-import { formatReason } from './rule_data_formatters';
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { lazy } from 'react';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/metric_threshold/types';
+} from '../../../common/alerting/metrics';
+import { validateMetricThreshold } from './components/validation';
+import { formatReason } from './rule_data_formatters';
 
-interface MetricThresholdRuleTypeParams extends RuleTypeParams {
+export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
 }
 
@@ -31,7 +30,7 @@ export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<Metr
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.metricsThreshold}`;
     },
-    ruleParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
@@ -45,5 +44,6 @@ Reason:
     ),
     requiresAppContext: false,
     format: formatReason,
+    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
   };
 }

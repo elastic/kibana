@@ -16,6 +16,7 @@ export type LegendProps = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   symbolId?: string;
+  svg?: string;
 };
 
 export interface IStyleProperty<T> {

@@ -24,6 +24,7 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "customLabel": undefined,
               "drop_partials": undefined,
+              "extendToTimeRange": undefined,
               "extended_bounds": undefined,
               "field": undefined,
               "format": undefined,
@@ -71,6 +72,7 @@ describe('agg_expression_functions', () => {
           "params": Object {
             "customLabel": undefined,
             "drop_partials": false,
+            "extendToTimeRange": undefined,
             "extended_bounds": Object {
               "max": 2,
               "min": 1,

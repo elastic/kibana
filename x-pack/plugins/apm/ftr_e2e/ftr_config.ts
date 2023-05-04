@@ -7,16 +7,15 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { cypressTestRunner } from './cypress_test_runner';
+import { FtrProviderContext } from './ftr_provider_context';
 
-// Used to spin up a docker container with package registry service that will be used by fleet
-export const packageRegistryPort = 1234;
-
-async function config({ readConfigFile }: FtrConfigProviderContext) {
+async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   return {
@@ -41,15 +40,18 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-
-        // Fleet config
-        `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
-        `--xpack.fleet.registryUrl=http://localhost:${packageRegistryPort}`,
       ],
+    },
+    testRunner: async (ftrProviderContext: FtrProviderContext) => {
+      const result = await cypressTestRunner(ftrProviderContext);
+
+      // set exit code explicitly if at least one Cypress test fails
+      if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+        process.exitCode = 1;
+      }
     },
   };
 }
 
 // eslint-disable-next-line import/no-default-export
-export default config;
+export default ftrConfig;

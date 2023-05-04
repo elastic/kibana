@@ -6,11 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'kibana/public';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../../../src/plugins/embeddable/public';
+import { StartServicesAccessor } from '@kbn/core/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import {
   DataVisualizerGridEmbeddableInput,

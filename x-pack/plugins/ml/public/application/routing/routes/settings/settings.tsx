@@ -6,13 +6,12 @@
  */
 
 import React, { FC } from 'react';
-
+import { i18n } from '@kbn/i18n';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-
-import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
@@ -26,22 +25,35 @@ export const settingsRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings',
+  id: 'settings',
+  path: createPath(ML_PAGES.SETTINGS),
+  title: i18n.translate('xpack.ml.settings.docTitle', {
+    defaultMessage: 'Settings',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB'),
   ],
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    getMlNodeCount,
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkFullLicense,
+      checkGetJobsCapabilities: () =>
+        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+      getMlNodeCount,
+    }
+  );
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 

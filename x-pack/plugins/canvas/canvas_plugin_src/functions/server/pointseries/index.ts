@@ -8,14 +8,14 @@
 import { evaluate } from '@kbn/tinymath';
 import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import {
   Datatable,
   DatatableRow,
   PointSeries,
   PointSeriesColumnName,
   PointSeriesColumns,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';

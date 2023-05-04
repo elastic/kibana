@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useCallback, useState, useRef } from 'react';
+import React, { FC, useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -50,6 +50,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   const [revertSnapshot, setRevertSnapshot] = useState<ModelSnapshot | null>(null);
   const [closeJobModalVisible, setCloseJobModalVisible] = useState<ModelSnapshot | null>(null);
   const [combinedJobState, setCombinedJobState] = useState<COMBINED_JOB_STATE | null>(null);
+  const actionsEnabled = useMemo(() => job.blocked === undefined, [job]);
 
   const isMounted = useRef(true);
   useEffect(() => {
@@ -57,6 +58,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     return () => {
       isMounted.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadModelSnapshots() {
@@ -115,6 +117,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     if (reload) {
       loadModelSnapshots();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const closeRevertFlyout = useCallback(() => {
@@ -125,6 +128,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     loadModelSnapshots();
     // wait half a second before refreshing the jobs list
     setTimeout(refreshJobList, 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const columns: Array<EuiBasicTableColumn<any>> = [
@@ -182,7 +186,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           description: i18n.translate('xpack.ml.modelSnapshotTable.actions.revert.description', {
             defaultMessage: 'Revert to this snapshot',
           }),
-          enabled: () => canCreateJob && canStartStopDatafeed,
+          enabled: () => actionsEnabled && canCreateJob && canStartStopDatafeed,
           type: 'icon',
           icon: 'crosshairs',
           onClick: checkJobIsClosed,
@@ -194,7 +198,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
           description: i18n.translate('xpack.ml.modelSnapshotTable.actions.edit.description', {
             defaultMessage: 'Edit this snapshot',
           }),
-          enabled: () => canCreateJob,
+          enabled: () => actionsEnabled && canCreateJob,
           type: 'icon',
           icon: 'pencil',
           onClick: setEditSnapshot,
@@ -218,7 +222,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   return (
     <>
       <EuiInMemoryTable
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
         compressed={true}
         items={snapshots}
         columns={columns}

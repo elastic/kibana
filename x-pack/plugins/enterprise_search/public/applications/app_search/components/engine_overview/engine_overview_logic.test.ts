@@ -11,11 +11,11 @@ jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
 }));
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { EngineOverviewLogic } from './';
+import { EngineOverviewLogic } from '.';
 
 describe('EngineOverviewLogic', () => {
   const { mount } = new LogicMounter(EngineOverviewLogic);

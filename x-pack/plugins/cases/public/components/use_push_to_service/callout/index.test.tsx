@@ -10,7 +10,8 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { createCalloutId } from './helpers';
-import { CaseCallOut, CaseCallOutProps } from '.';
+import type { CaseCallOutProps } from '.';
+import { CaseCallOut } from '.';
 
 describe('CaseCallOut ', () => {
   beforeEach(() => {

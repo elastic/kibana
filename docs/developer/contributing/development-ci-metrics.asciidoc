@@ -60,7 +60,7 @@ The number of saved object fields broken down by saved object type.
 [[ci-metric-adding-new-metrics]]
 === Adding new metrics
 
-You can report new metrics by using the `CiStatsReporter` class provided by the `@kbn/dev-utils` package. This class is automatically configured on CI and its methods noop when running outside of CI. For more details checkout the {kib-repo}blob/{branch}/packages/kbn-dev-utils/src/ci_stats_reporter[`CiStatsReporter` readme].
+You can report new metrics by using the `CiStatsReporter` class provided by the `@kbn/dev-utils` package. This class is automatically configured on CI and its methods noop when running outside of CI. For more details checkout the {kib-repo}blob/{branch}/packages/kbn-ci-stats-reporter[`CiStatsReporter` readme].
 
 [[ci-metric-resolving-overages]]
 === Resolving `page load bundle size` overages
@@ -137,4 +137,4 @@ If you only want to run the build once you can run:
 node scripts/build_kibana_platform_plugins --validate-limits --focus {pluginId}
 -----------
 
-This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developmer machines will consume all of your machines resources for 20 minutes or more. If you'd like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.
+This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developer machines will consume all of your machines resources for 20 minutes or more. If you'd like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.

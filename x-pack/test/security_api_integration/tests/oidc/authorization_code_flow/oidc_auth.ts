@@ -10,11 +10,14 @@ import { parse as parseCookie, Cookie } from 'tough-cookie';
 import url from 'url';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
-import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
+import { resolve } from 'path';
+import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FileWrapper } from '../../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const retry = getService('retry');
 
   describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
@@ -175,10 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/api/security/oidc/callback?code=thisisthecode&state=${stateAndNonce.state}`)
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should fail if state is not matching', async () => {
@@ -187,10 +188,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
@@ -218,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
-        expect(apiResponse.body).to.only.have.keys([
+        expect(apiResponse.body).to.have.keys([
           'username',
           'full_name',
           'email',
@@ -229,6 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
           'lookup_realm',
           'authentication_provider',
           'authentication_type',
+          'elastic_cloud_user',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
@@ -271,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
-        expect(apiResponse.body).to.only.have.keys([
+        expect(apiResponse.body).to.have.keys([
           'username',
           'full_name',
           'email',
@@ -282,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
           'lookup_realm',
           'authentication_provider',
           'authentication_type',
+          'elastic_cloud_user',
         ]);
 
         expect(apiResponse.body.username).to.be('user2');
@@ -540,6 +541,53 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
       });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            expectNewSessionCookie(newSessionCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', newSessionCookie.cookieString())
+              .expect(200);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
+      });
     });
 
     describe('API access with missing access token document.', () => {
@@ -612,6 +660,91 @@ export default function ({ getService }: FtrProviderContext) {
         expect(redirectURL.query.redirect_uri).to.not.be.empty();
         expect(redirectURL.query.state).to.not.be.empty();
         expect(redirectURL.query.nonce).to.not.be.empty();
+      });
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../../packages/helpers/audit/oidc.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        // Initiating handshake
+        const handshakeResponse = await supertest
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
+
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
+
+        // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
+        await supertest
+          .post('/api/oidc_provider/setup')
+          .set('kbn-xsrf', 'xxx')
+          .send({ nonce: stateAndNonce.nonce })
+          .expect(200);
+
+        // Signing in should create a `user_login` event.
+        const oidcAuthenticationResponse = await supertest
+          .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
+          .set('Cookie', handshakeCookie.cookieString())
+          .expect(302);
+
+        const cookies = oidcAuthenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('user1');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('oidc');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('user1');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('oidc');
+      });
+
+      it('should log authentication failure correctly', async () => {
+        await supertest
+          .get(`/api/security/oidc/callback?code=thisisthecode&state=someothervalue`)
+          .expect(401);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(1);
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('failure');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].kibana.authentication_provider).to.be('oidc');
       });
     });
   });

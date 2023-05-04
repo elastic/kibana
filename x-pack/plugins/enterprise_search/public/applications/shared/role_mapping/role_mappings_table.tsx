@@ -135,7 +135,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const columns = [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, actionsCol];
 
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageSize: 10,
   };
 

@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import {
-  unremovablePackages,
-  installationStatuses,
-  KibanaSavedObjectType,
-} from '../../../../common';
+import { KibanaSavedObjectType } from '../../../../common/types';
+import { installationStatuses } from '../../../../common/constants';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
@@ -28,13 +25,12 @@ export {
   getLimitedPackages,
 } from './get';
 
+export { getBundledPackages } from './bundled_packages';
+
 export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
+export { reinstallPackageForInstallation } from './reinstall';
 export { removeInstallation } from './remove';
-
-export function isUnremovablePackage(value: string): boolean {
-  return unremovablePackages.includes(value);
-}
 
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {

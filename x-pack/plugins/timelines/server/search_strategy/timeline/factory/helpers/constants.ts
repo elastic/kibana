@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-
-// TODO: share with security_solution/common/cti/constants.ts
-export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
+  ALERT_RULE_PARAMETERS,
+} from '@kbn/rule-data-utils';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
@@ -42,29 +45,30 @@ export const CTI_ROW_RENDERER_FIELDS = [
   FEED_NAME_REFERENCE,
 ];
 
+// TODO: update all of these fields to use the constants from technical field names
 export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RULE_CONSUMER,
   '@timestamp',
+  'kibana.alert.ancestors.index',
   'kibana.alert.workflow_status',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.reason',
-  'kibana.alert.rule.filters',
   'kibana.alert.rule.from',
-  'kibana.alert.rule.language',
-  'kibana.alert.rule.query',
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
-  'kibana.alert.rule.index',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   'kibana.alert.rule.version',
   ALERT_SEVERITY,
   ALERT_RISK_SCORE,
+  ALERT_RULE_PARAMETERS,
   'kibana.alert.threshold_result',
   'kibana.alert.building_block_type',
+  'kibana.alert.suppression.docs_count',
   'event.code',
   'event.module',
   'event.action',
@@ -98,6 +102,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'event.timezone',
   'event.type',
   'agent.type',
+  'agent.id',
   'auditd.result',
   'auditd.session',
   'auditd.data.acct',
@@ -135,6 +140,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'file.Ext.code_signature.trusted',
   'file.hash.sha256',
   'host.os.family',
+  'host.os.name',
   'host.id',
   'host.ip',
   'registry.key',
@@ -175,12 +181,9 @@ export const TIMELINE_EVENTS_FIELDS = [
   'endgame.target_domain_name',
   'endgame.target_logon_id',
   'endgame.target_user_name',
-  'kibana.alert.rule.saved_id',
   'kibana.alert.rule.timeline_id',
   'kibana.alert.rule.timeline_title',
-  'kibana.alert.rule.output_index',
   'kibana.alert.rule.note',
-  'kibana.alert.rule.threshold',
   'kibana.alert.rule.exceptions_list',
   'kibana.alert.rule.building_block_type',
   'suricata.eve.proto',
@@ -206,10 +209,14 @@ export const TIMELINE_EVENTS_FIELDS = [
   'tls.server_certificate.fingerprint.sha1',
   'user.domain',
   'winlog.event_id',
+  'process.end',
+  'process.entry_leader.entry_meta.type',
+  'process.entry_leader.entry_meta.source.ip',
   'process.exit_code',
   'process.hash.md5',
   'process.hash.sha1',
   'process.hash.sha256',
+  'process.interactive',
   'process.parent.name',
   'process.parent.pid',
   'process.pid',
@@ -218,8 +225,19 @@ export const TIMELINE_EVENTS_FIELDS = [
   'process.args',
   'process.entity_id',
   'process.executable',
+  'process.start',
   'process.title',
   'process.working_directory',
+  'process.entry_leader.entity_id',
+  'process.entry_leader.name',
+  'process.entry_leader.pid',
+  'process.entry_leader.start',
+  'process.session_leader.entity_id',
+  'process.session_leader.name',
+  'process.session_leader.pid',
+  'process.group_leader.entity_id',
+  'process.group_leader.name',
+  'process.group_leader.pid',
   'zeek.session_id',
   'zeek.connection.local_resp',
   'zeek.connection.local_orig',

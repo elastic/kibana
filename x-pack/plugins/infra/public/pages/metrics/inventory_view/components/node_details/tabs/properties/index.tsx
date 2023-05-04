@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TabContent, TabProps } from '../shared';
-import { Source } from '../../../../../../../containers/metrics_source';
+import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';
 import { getFields } from './build_fields';
 import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
 import { Table } from './table';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleFiltersContext } from '../../../../hooks/use_waffle_filters';
 
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.id;
   const nodeType = props.nodeType as InventoryItemType;
   const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useContext(Source.Context);
+  const { sourceId } = useSourceContext();
   const { currentTimeRange } = useWaffleTimeContext();
   const { applyFilterQuery } = useWaffleFiltersContext();
   const { loading: metadataLoading, metadata } = useMetadata(

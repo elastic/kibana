@@ -6,21 +6,21 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
-} from '../../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 import type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
-} from '../../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
 let httpClient: HttpSetup;
 
-export type { UseRequestConfig } from '../../../../../../src/plugins/es_ui_shared/public';
+export type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
 
 /**
  * @internal
@@ -40,6 +40,26 @@ export const sendRequest = <D = any, E = RequestError>(
     throw new Error('sendRequest has no http client set');
   }
   return _sendRequest<D, E>(httpClient, config);
+};
+
+// Sends requests with better ergonomics for React Query, e.g. throw error rather
+// than resolving with an `error` property in the result. Also returns `data` directly
+// as opposed to { data } in a response object.
+export const sendRequestForRq = async <D = any, E = RequestError>(
+  config: SendRequestConfig
+): Promise<D> => {
+  if (!httpClient) {
+    throw new Error('sendRequest has no http client set');
+  }
+
+  const response = await _sendRequest<D, E>(httpClient, config);
+
+  if (response.error) {
+    throw response.error;
+  }
+
+  // Data can't be null so long as `_sendRequest` did not throw
+  return response.data!;
 };
 
 export const useRequest = <D = any, E = RequestError>(config: UseRequestConfig) => {

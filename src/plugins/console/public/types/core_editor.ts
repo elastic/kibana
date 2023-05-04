@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { Editor } from 'brace';
+import { ResultTerm } from '../lib/autocomplete/types';
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
 
@@ -16,12 +18,17 @@ export type EditorEvent =
   | 'changeCursor'
   | 'changeScrollTop'
   | 'change'
-  | 'changeSelection';
+  | 'changeSelection'
+  | 'changeFold';
 
 export type AutoCompleterFunction = (
   pos: Position,
   prefix: string,
-  callback: (...args: unknown[]) => void
+  callback: (e: Error | null, result: ResultTerm[] | null) => void,
+  annotationControls: {
+    setAnnotation: (text: string) => void;
+    removeAnnotation: () => void;
+  }
 ) => void;
 
 export interface Position {
@@ -252,9 +259,14 @@ export interface CoreEditor {
    */
   registerKeyboardShortcut(opts: {
     keys: string | { win?: string; mac?: string };
-    fn: () => void;
+    fn: (editor: Editor) => void;
     name: string;
   }): void;
+
+  /**
+   * Unregister a keyboard shortcut and provide a command name
+   */
+  unregisterKeyboardShortcut(command: string): void;
 
   /**
    * Register a completions function that will be called when the editor
@@ -266,4 +278,24 @@ export interface CoreEditor {
    * Release any resources in use by the editor.
    */
   destroy(): void;
+
+  /**
+   * Indent document within request range
+   */
+  autoIndent(reqRange: Range): void;
+
+  /*
+   * Get all fold ranges in document
+   */
+  getAllFoldRanges(): Range[];
+
+  /**
+   * Add folds at given ranges
+   */
+  addFoldsAtRanges(foldRanges: Range[]): void;
+
+  /**
+   * Detach autocomplete
+   */
+  detachCompleter(): void;
 }

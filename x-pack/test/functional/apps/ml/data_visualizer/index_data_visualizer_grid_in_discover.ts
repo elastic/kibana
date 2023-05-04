@@ -17,6 +17,7 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
@@ -107,6 +108,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
     });
 
     describe('when enabled', function () {

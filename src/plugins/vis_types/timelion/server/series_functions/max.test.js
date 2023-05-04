@@ -9,13 +9,13 @@
 import fn from './max';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('max.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('keeps the max of a series vs a number', () => {

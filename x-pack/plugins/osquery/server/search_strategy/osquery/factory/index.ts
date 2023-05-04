@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes, OsqueryQueries } from '../../../../common/search_strategy/osquery';
+import type { FactoryQueryTypes } from '../../../../common/search_strategy/osquery';
+import { OsqueryQueries } from '../../../../common/search_strategy/osquery';
 
 import { allActions, actionDetails, actionResults } from './actions';
 import { allAgents } from './agents';
 import { allResults } from './results';
 
-import { OsqueryFactory } from './types';
+import type { OsqueryFactory } from './types';
 
 export const osqueryFactory: Record<FactoryQueryTypes, OsqueryFactory<FactoryQueryTypes>> = {
   [OsqueryQueries.actions]: allActions,

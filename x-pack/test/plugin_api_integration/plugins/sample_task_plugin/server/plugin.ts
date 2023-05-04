@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { random } from 'lodash';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { initRoutes } from './init_routes';
+import { firstValueFrom, Subject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
   EphemeralTask,
-} from '../../../../../plugins/task_manager/server';
-import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
+} from '@kbn/task-manager-plugin/server';
+import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
 export interface SampleTaskManagerFixtureSetupDeps {
@@ -32,9 +32,7 @@ export class SampleTaskManagerFixturePlugin
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
@@ -146,15 +144,13 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
-      sampleOneTimeTaskTimingOut: {
-        title: 'Sample One-Time Task that Times Out',
-        description: 'A sample task that times out each run.',
+      sampleOneTimeTaskThrowingError: {
+        title: 'Sample One-Time Task that throws an error',
+        description: 'A sample task that throws an error each run.',
         maxAttempts: 3,
-        timeout: '1s',
-        getRetry: (attempts: number, error: object) => new Date(Date.now() + _.random(2, 5) * 1000),
         createTaskRunner: () => ({
           async run() {
-            return await new Promise((resolve) => {});
+            throwRetryableError(new Error('Error'), new Date(Date.now() + random(2, 5) * 1000));
           },
         }),
       },

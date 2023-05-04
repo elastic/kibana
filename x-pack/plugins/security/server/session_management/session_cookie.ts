@@ -10,7 +10,7 @@ import type {
   KibanaRequest,
   Logger,
   SessionStorageFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { ConfigType } from '../config';
 
@@ -122,7 +122,7 @@ export class SessionCookie {
   }
 
   /**
-   * Creates or updates session value for the specified request.
+   * Sets session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
    */

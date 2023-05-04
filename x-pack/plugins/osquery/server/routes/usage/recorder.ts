@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { usageMetricSavedObjectType } from '../../../common/types';
-import { LiveQuerySessionUsage } from '../../usage/types';
+import type { LiveQuerySessionUsage } from '../../usage/types';
 
 export interface RouteUsageMetric {
   queries: number;

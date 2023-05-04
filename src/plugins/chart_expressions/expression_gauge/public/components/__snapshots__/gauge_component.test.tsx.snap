@@ -4,11 +4,29 @@ exports[`GaugeComponent renders the chart 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
+    ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
     debugState={false}
-    theme={Object {}}
+    noResults={
+      <EmptyPlaceholder
+        icon={[Function]}
+        renderComplete={[Function]}
+      />
+    }
+    onRenderChange={[Function]}
+    theme={
+      Array [
+        Object {
+          "background": Object {
+            "color": "transparent",
+          },
+        },
+        Object {},
+      ]
+    }
   />
-  <Connect(SpecInstance)
+  <Goal
     actual={3}
     bandFillColor={[Function]}
     bands={
@@ -18,19 +36,18 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
     base={0}
+    domain={
+      Object {
+        "max": 4,
+        "min": 0,
+      }
+    }
     id="goal"
     labelMajor="Count of records   "
     labelMinor=""
     subtype="verticalBullet"
     tickValueFormatter={[Function]}
-    ticks={
-      Array [
-        0,
-        1.33,
-        2.67,
-        4,
-      ]
-    }
+    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

@@ -9,8 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { ZeekSignature } from './zeek_signature';
@@ -22,7 +21,6 @@ const Details = styled.div`
 Details.displayName = 'Details';
 
 interface ZeekDetailsProps {
-  browserFields: BrowserFields;
   data: Ecs;
   isDraggable?: boolean;
   timelineId: string;

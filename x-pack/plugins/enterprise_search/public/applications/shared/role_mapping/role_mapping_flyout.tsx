@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { CANCEL_BUTTON_LABEL } from '../../shared/constants/actions';
+import { CANCEL_BUTTON_LABEL } from '../constants/actions';
 
 import {
   ROLE_MAPPING_FLYOUT_CREATE_TITLE,

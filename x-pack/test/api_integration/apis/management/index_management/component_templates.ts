@@ -16,12 +16,21 @@ import { API_BASE_PATH } from './constants';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const { createComponentTemplate, cleanUpComponentTemplates, deleteComponentTemplate } =
-    initElasticsearchHelpers(getService);
+  const {
+    createComponentTemplate,
+    createIndexTemplate,
+    cleanUpIndexTemplates,
+    cleanUpComponentTemplates,
+    deleteComponentTemplate,
+    cleanupDatastreams,
+    createDatastream,
+  } = initElasticsearchHelpers(getService);
 
   describe('Component templates', function () {
     after(async () => {
+      await cleanUpIndexTemplates();
       await cleanUpComponentTemplates();
+      await cleanupDatastreams();
     });
 
     describe('Get', () => {
@@ -388,6 +397,75 @@ export default function ({ getService }: FtrProviderContext) {
           missingPrivileges: {
             cluster: [],
           },
+        });
+      });
+    });
+
+    describe('Get datastreams', () => {
+      const COMPONENT_NAME = 'test_get_component_template_datastreams';
+      const COMPONENT = {
+        template: {
+          settings: {
+            index: {
+              number_of_shards: 1,
+            },
+          },
+          mappings: {
+            _source: {
+              enabled: false,
+            },
+            properties: {
+              host_name: {
+                type: 'keyword',
+              },
+              created_at: {
+                type: 'date',
+                format: 'EEE MMM dd HH:mm:ss Z yyyy',
+              },
+            },
+          },
+        },
+      };
+      const DATASTREAM_NAME = 'logs-test-component-template-default';
+      const INDEX_PATTERN = 'logs-test-component-template-*';
+      const TEMPLATE_NAME = 'test_get_component_template_datastreams';
+      const TEMPLATE = {
+        index_patterns: INDEX_PATTERN,
+        composed_of: [COMPONENT_NAME],
+      };
+
+      // Create component template to verify GET requests
+      before(async () => {
+        try {
+          await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
+          await createIndexTemplate({ body: TEMPLATE, name: TEMPLATE_NAME }, true);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating component template');
+          throw err;
+        }
+      });
+
+      describe('without datastreams', () => {
+        it('should return no datastreams', async () => {
+          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams`;
+
+          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+
+          expect(body).to.eql({ data_streams: [] });
+        });
+      });
+
+      describe('with datastreams', () => {
+        before(async () => {
+          await createDatastream(DATASTREAM_NAME);
+        });
+        it('should return datastreams', async () => {
+          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}/datastreams`;
+
+          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+
+          expect(body).to.eql({ data_streams: ['logs-test-component-template-default'] });
         });
       });
     });

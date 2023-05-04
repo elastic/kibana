@@ -6,8 +6,8 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo, PublicAppDeepLinkInfo } from 'src/core/public';
-import { GlobalSearchProviderResult } from '../../../global_search/public';
+import { PublicAppInfo, PublicAppDeepLinkInfo } from '@kbn/core/public';
+import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
 /** Type used internally to represent an application unrolled into its separate deepLinks */
 export interface AppLink {

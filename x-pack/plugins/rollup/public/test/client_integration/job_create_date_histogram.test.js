@@ -9,7 +9,7 @@ import { mockHttpRequest, pageHelpers } from './helpers';
 
 import moment from 'moment-timezone';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
-import { docLinksServiceMock, coreMock } from '../../../../../../src/core/public/mocks';
+import { docLinksServiceMock, coreMock } from '@kbn/core/public/mocks';
 
 const { setup } = pageHelpers.jobCreate;
 
@@ -23,7 +23,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   let startMock;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

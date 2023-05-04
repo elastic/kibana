@@ -9,15 +9,13 @@
 import { accessSync, constants, readFileSync, statSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+import { ensureDeepObject } from '@kbn/std';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
-import { take } from 'rxjs/operators';
 import { TelemetryConfigType } from '../../config';
 
 // look for telemetry.yml in the same places we expect kibana.yml
-import { ensureDeepObject } from './ensure_deep_object';
 import { staticTelemetrySchema } from './schema';
 
 /**
@@ -129,7 +127,7 @@ export function registerTelemetryUsageCollector(
   config$: Observable<TelemetryConfigType>
 ) {
   const collector = createTelemetryUsageCollector(usageCollection, async () => {
-    const config = await config$.pipe(take(1)).toPromise();
+    const config = await firstValueFrom(config$);
     return config.config;
   });
   usageCollection.registerCollector(collector);

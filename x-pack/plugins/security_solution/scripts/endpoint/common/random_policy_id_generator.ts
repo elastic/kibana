@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import type { AxiosResponse } from 'axios';
 import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common/constants';
+} from '@kbn/fleet-plugin/common/constants';
+import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
+import type { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 const fetchEndpointPolicies = (
   kbnClient: KbnClient
@@ -35,7 +36,8 @@ export const randomPolicyIdGenerator: (
   log: ToolingLog
 ) => Promise<() => string> = async (kbn, log) => {
   log.info('Setting up fleet');
-  const fleetResponse = await setupFleetForEndpoint(kbn);
+  await setupFleetForEndpoint(kbn);
+  const endpointPackage = await getEndpointPackageInfo(kbn);
 
   log.info('Generarting test policies...');
   const randomN = (max: number): number => Math.floor(Math.random() * max);
@@ -50,7 +52,7 @@ export const randomPolicyIdGenerator: (
           await indexFleetEndpointPolicy(
             kbn,
             `Policy for exceptions assignment ${i + 1}`,
-            fleetResponse.endpointPackage.version
+            endpointPackage.version
           )
         ).integrationPolicies[0].id
       );

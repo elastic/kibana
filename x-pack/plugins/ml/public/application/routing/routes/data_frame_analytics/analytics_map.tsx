@@ -8,20 +8,24 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/analytics_management';
+import { Page } from '../../../data_frame_analytics/pages/job_map/page';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const analyticsMapRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/data_frame_analytics/map',
+  path: createPath(ML_PAGES.DATA_FRAME_ANALYTICS_MAP),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.analyticsMap.docTitle', {
+    defaultMessage: 'Analytics Map',
+  }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
@@ -29,9 +33,10 @@ export const analyticsMapRouteFactory = (
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.analyticsMapLabel', {
         defaultMessage: 'Analytics Map',
       }),
-      href: '',
     },
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageAnalyticsMap',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
@@ -40,6 +45,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     undefined,
     deps.config,
     deps.dataViewsContract,
+    deps.getSavedSearchDeps,
     basicResolvers(deps)
   );
 

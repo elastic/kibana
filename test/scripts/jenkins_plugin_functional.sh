@@ -11,4 +11,5 @@ cd -;
 pwd
 
 ./test/scripts/test/plugin_functional.sh
+./test/scripts/test/health_gateway.sh
 ./test/scripts/test/interpreter_functional.sh

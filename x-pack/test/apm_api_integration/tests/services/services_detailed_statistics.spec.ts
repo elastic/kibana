@@ -5,43 +5,56 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import url from 'url';
-import moment from 'moment';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { uniq, map } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 
 type ServicesDetailedStatisticsReturn =
-  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
 
-  const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
-  const { start, end } = metadata;
-  const serviceNames = ['opbeans-java', 'opbeans-go'];
+  const apmApiClient = getService('apmApiClient');
+
+  const synthtrace = getService('synthtraceEsClient');
+
+  const start = '2021-01-01T00:00:00.000Z';
+  const end = '2021-01-01T00:59:59.999Z';
+
+  const serviceNames = ['my-service'];
 
   registry.when(
-    'Services detailed statistics when data is not loaded',
+    'Services detailed statistics when data is generated',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `POST /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start,
               end,
-              serviceNames: JSON.stringify(serviceNames),
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
-              offset: '1d',
+              probability: 1,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              bucketSizeInSeconds: 60,
+              _inspect: true,
             },
-          })
-        );
+            body: {
+              serviceNames: JSON.stringify(serviceNames),
+            },
+          },
+        });
+
         expect(response.status).to.be(200);
         expect(response.body.currentPeriod).to.be.empty();
         expect(response.body.previousPeriod).to.be.empty();
@@ -49,197 +62,126 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Services detailed statistics when data is loaded',
-    { config: 'basic', archives: [archiveName] },
-    () => {
-      let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
-      before(async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
-            query: {
-              start,
-              end,
-              serviceNames: JSON.stringify(serviceNames),
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          })
-        );
-        expect(response.status).to.be(200);
-        servicesDetailedStatistics = response.body;
-      });
-      it('returns current period data', async () => {
-        expect(servicesDetailedStatistics.currentPeriod).not.to.be.empty();
-      });
-      it("doesn't returns previous period data", async () => {
-        expect(servicesDetailedStatistics.previousPeriod).to.be.empty();
-      });
-      it('returns current data for requested service names', () => {
-        serviceNames.forEach((serviceName) => {
-          expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
-        });
-      });
-      it('returns correct statistics', () => {
-        const statistics = servicesDetailedStatistics.currentPeriod[serviceNames[0]];
+  async function getStats(
+    overrides?: Partial<
+      APIClientRequestParamsOf<'POST /internal/apm/services/detailed_statistics'>['params']['query']
+    >
+  ) {
+    const response = await apmApiClient.readUser({
+      endpoint: `POST /internal/apm/services/detailed_statistics`,
+      params: {
+        query: {
+          start,
+          end,
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          probability: 1,
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          bucketSizeInSeconds: 60,
+          ...overrides,
+        },
+        body: {
+          serviceNames: JSON.stringify(serviceNames),
+        },
+      },
+    });
 
-        expect(statistics.latency.length).to.be.greaterThan(0);
-        expect(statistics.throughput.length).to.be.greaterThan(0);
-        expect(statistics.transactionErrorRate.length).to.be.greaterThan(0);
-
-        // latency
-        const nonNullLantencyDataPoints = statistics.latency.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullLantencyDataPoints.length).to.be.greaterThan(0);
-
-        // throughput
-        const nonNullThroughputDataPoints = statistics.throughput.filter(({ y }) =>
-          isFiniteNumber(y)
-        );
-        expect(nonNullThroughputDataPoints.length).to.be.greaterThan(0);
-
-        // transaction erro rate
-        const nonNullTransactionErrorRateDataPoints = statistics.transactionErrorRate.filter(
-          ({ y }) => isFiniteNumber(y)
-        );
-        expect(nonNullTransactionErrorRateDataPoints.length).to.be.greaterThan(0);
-      });
-
-      it('returns empty when empty service names is passed', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
-            query: {
-              start,
-              end,
-              serviceNames: JSON.stringify([]),
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          })
-        );
-        expect(response.status).to.be(400);
-        expect(response.body.message).to.equal('serviceNames cannot be empty');
-      });
-
-      it('filters by environment', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
-            query: {
-              start,
-              end,
-              serviceNames: JSON.stringify(serviceNames),
-              environment: 'production',
-              kuery: '',
-            },
-          })
-        );
-        expect(response.status).to.be(200);
-        expect(Object.keys(response.body.currentPeriod).length).to.be(1);
-        expect(response.body.currentPeriod['opbeans-java']).not.to.be.empty();
-      });
-      it('filters by kuery', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
-            query: {
-              start,
-              end,
-              serviceNames: JSON.stringify(serviceNames),
-              environment: 'ENVIRONMENT_ALL',
-              kuery: 'transaction.type : "invalid_transaction_type"',
-            },
-          })
-        );
-        expect(response.status).to.be(200);
-        expect(Object.keys(response.body.currentPeriod)).to.be.empty();
-      });
-    }
-  );
+    return response.body;
+  }
 
   registry.when(
-    'Services detailed statistics with time comparison',
-    { config: 'basic', archives: [archiveName] },
+    'Services detailed statistics when data is generated',
+    { config: 'basic', archives: [] },
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
+
+      const instance = apm.service('my-service', 'production', 'java').instance('instance');
+
+      const EXPECTED_TPM = 5;
+      const EXPECTED_LATENCY = 1000;
+      const EXPECTED_FAILURE_RATE = 0.25;
+
       before(async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
-            query: {
-              start: moment(end).subtract(15, 'minutes').toISOString(),
-              end,
-              serviceNames: JSON.stringify(serviceNames),
-              offset: '15m',
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          })
+        const interval = timerange(new Date(start).getTime(), new Date(end).getTime() - 1).interval(
+          '1m'
         );
-        expect(response.status).to.be(200);
-        servicesDetailedStatistics = response.body;
+
+        await synthtrace.index([
+          interval.rate(3).generator((timestamp) => {
+            return instance
+              .transaction('GET /api')
+              .duration(EXPECTED_LATENCY)
+              .outcome('success')
+              .timestamp(timestamp);
+          }),
+          interval.rate(1).generator((timestamp) => {
+            return instance
+              .transaction('GET /api')
+              .duration(EXPECTED_LATENCY)
+              .outcome('failure')
+              .timestamp(timestamp);
+          }),
+          interval.rate(1).generator((timestamp) => {
+            return instance
+              .transaction('GET /api')
+              .duration(EXPECTED_LATENCY)
+              .outcome('unknown')
+              .timestamp(timestamp);
+          }),
+        ]);
       });
-      it('returns current period data', async () => {
-        expect(servicesDetailedStatistics.currentPeriod).not.to.be.empty();
-      });
-      it('returns previous period data', async () => {
-        expect(servicesDetailedStatistics.previousPeriod).not.to.be.empty();
-      });
-      it('returns current data for requested service names', () => {
-        serviceNames.forEach((serviceName) => {
-          expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
+
+      after(() => synthtrace.clean());
+
+      function checkStats() {
+        const stats = servicesDetailedStatistics.currentPeriod['my-service'];
+
+        expect(stats).not.empty();
+
+        expect(uniq(map(stats.throughput, 'y'))).eql([EXPECTED_TPM], 'tpm');
+
+        expect(uniq(map(stats.latency, 'y'))).eql([EXPECTED_LATENCY * 1000], 'latency');
+
+        expect(uniq(map(stats.transactionErrorRate, 'y'))).eql(
+          [EXPECTED_FAILURE_RATE],
+          'errorRate'
+        );
+      }
+
+      describe('and transaction metrics are used', () => {
+        before(async () => {
+          servicesDetailedStatistics = await getStats();
+        });
+
+        it('returns the expected statistics', () => {
+          checkStats();
         });
       });
-      it('returns previous data for requested service names', () => {
-        serviceNames.forEach((serviceName) => {
-          expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
+
+      describe('and service transaction metrics are used', () => {
+        before(async () => {
+          servicesDetailedStatistics = await getStats({
+            documentType: ApmDocumentType.ServiceTransactionMetric,
+          });
+        });
+
+        it('returns the expected statistics', () => {
+          checkStats();
         });
       });
-      it('returns correct statistics', () => {
-        const currentPeriodStatistics = servicesDetailedStatistics.currentPeriod[serviceNames[0]];
-        const previousPeriodStatistics = servicesDetailedStatistics.previousPeriod[serviceNames[0]];
 
-        expect(currentPeriodStatistics.latency.length).to.be.greaterThan(0);
-        expect(currentPeriodStatistics.throughput.length).to.be.greaterThan(0);
-        expect(currentPeriodStatistics.transactionErrorRate.length).to.be.greaterThan(0);
+      describe('and rolled up data is used', () => {
+        before(async () => {
+          servicesDetailedStatistics = await getStats({
+            rollupInterval: RollupInterval.TenMinutes,
+            bucketSizeInSeconds: 600,
+          });
+        });
 
-        // latency
-        const nonNullCurrentPeriodLantencyDataPoints = currentPeriodStatistics.latency.filter(
-          ({ y }) => isFiniteNumber(y)
-        );
-        expect(nonNullCurrentPeriodLantencyDataPoints.length).to.be.greaterThan(0);
-
-        // throughput
-        const nonNullCurrentPeriodThroughputDataPoints = currentPeriodStatistics.throughput.filter(
-          ({ y }) => isFiniteNumber(y)
-        );
-        expect(nonNullCurrentPeriodThroughputDataPoints.length).to.be.greaterThan(0);
-
-        // transaction erro rate
-        const nonNullCurrentPeriodTransactionErrorRateDataPoints =
-          currentPeriodStatistics.transactionErrorRate.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullCurrentPeriodTransactionErrorRateDataPoints.length).to.be.greaterThan(0);
-
-        expect(previousPeriodStatistics.latency.length).to.be.greaterThan(0);
-        expect(previousPeriodStatistics.throughput.length).to.be.greaterThan(0);
-        expect(previousPeriodStatistics.transactionErrorRate.length).to.be.greaterThan(0);
-
-        // latency
-        const nonNullPreviousPeriodLantencyDataPoints = previousPeriodStatistics.latency.filter(
-          ({ y }) => isFiniteNumber(y)
-        );
-        expect(nonNullPreviousPeriodLantencyDataPoints.length).to.be.greaterThan(0);
-
-        // throughput
-        const nonNullPreviousPeriodThroughputDataPoints =
-          previousPeriodStatistics.throughput.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullPreviousPeriodThroughputDataPoints.length).to.be.greaterThan(0);
-
-        // transaction erro rate
-        const nonNullPreviousPeriodTransactionErrorRateDataPoints =
-          previousPeriodStatistics.transactionErrorRate.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullPreviousPeriodTransactionErrorRateDataPoints.length).to.be.greaterThan(0);
+        it('returns the expected statistics', () => {
+          checkStats();
+        });
       });
     }
   );

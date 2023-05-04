@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kubernetes-security-plugin",
+  "owner": "@elastic/sec-cloudnative-integrations",
+  "plugin": {
+    "id": "kubernetesSecurity",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "timelines",
+      "ruleRegistry",
+      "sessionView"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

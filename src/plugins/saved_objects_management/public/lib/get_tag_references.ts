@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/server';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 export const getTagFindReferences = ({
   selectedTags,

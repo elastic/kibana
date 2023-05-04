@@ -6,18 +6,25 @@
  */
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import {
-  experimentalRuleFieldMap,
-  ExperimentalRuleFieldMap,
-} from './assets/field_maps/experimental_rule_field_map';
+import { pick } from 'lodash';
+import { legacyExperimentalFieldMap, ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const experimentalFieldRuntimeType =
-  runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(experimentalRuleFieldMap);
+const experimentalFieldRuntimeType = runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(
+  legacyExperimentalFieldMap
+);
 
-export const parseExperimentalFields = (input: unknown) => {
-  const validate = experimentalFieldRuntimeType.decode(input);
+export const parseExperimentalFields = (input: unknown, partial = false) => {
+  const decodePartial = (alert: unknown) => {
+    const limitedFields = pick(legacyExperimentalFieldMap, Object.keys(alert as object));
+    const partialTechnicalFieldRuntimeType = runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(
+      limitedFields as unknown as ExperimentalRuleFieldMap
+    );
+    return partialTechnicalFieldRuntimeType.decode(alert);
+  };
+
+  const validate = partial ? decodePartial(input) : experimentalFieldRuntimeType.decode(input);
 
   if (isLeft(validate)) {
     throw new Error(PathReporter.report(validate).join('\n'));

@@ -7,7 +7,7 @@ There are many ways to run {es} while you are developing.
 
 === By snapshot
 
-This will run a snapshot of {es} that is usually built nightly. Read more about <<development-es-snapshots>>.
+This will run a snapshot of {es} that is usually built nightly. Snapshot status is available on the https://ci.kibana.dev/es-snapshots[dashboard].
 
 [source,bash]
 ----
@@ -69,13 +69,6 @@ elasticsearch.hosts:
 elasticsearch.username: {{ username }}
 elasticsearch.password: {{ password }}
 elasticsearch.ssl.verificationMode: none
-----
-
-If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
-
-[source,bash]
-----
-kibana.index: '.{YourGitHubHandle}-kibana'
 ----
 
 ==== Running remote clusters

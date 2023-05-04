@@ -21,14 +21,18 @@ interface Args {
 const args: Args = {
   width: 1200,
 };
+const fleetServerHost = {
+  id: 'id1',
+  name: 'fleet server 1',
+  host_urls: ['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220'],
+  is_default: false,
+  is_preconfigured: false,
+};
 
 export const FleetServerHostsFlyout = ({ width }: Args) => {
   return (
     <div style={{ width }}>
-      <Component
-        onClose={() => {}}
-        fleetServerHosts={['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220']}
-      />
+      <Component proxies={[]} onClose={() => {}} fleetServerHost={fleetServerHost} />
     </div>
   );
 };

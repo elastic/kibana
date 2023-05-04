@@ -7,15 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  ValidationFunc,
-  ERROR_CODE,
-  VALIDATION_TYPES,
-} from '../../../../shared_imports';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import type { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
@@ -238,6 +232,17 @@ export const schema: FormSchema<AboutStepRule> = {
       {
         defaultMessage:
           'Choose timestamp field used when executing rule. Pick field with timestamp closest to ingest time (e.g. event.ingested).',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
+  timestampOverrideFallbackDisabled: {
+    type: FIELD_TYPES.CHECKBOX,
+    defaultValue: false,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideFallbackDisabledLabel',
+      {
+        defaultMessage: 'Do not use @timestamp as a fallback timestamp field',
       }
     ),
     labelAppend: OptionalFieldLabel,

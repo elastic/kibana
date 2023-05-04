@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { PaletteService } from './service';
-import { PaletteDefinition, SeriesLayer } from './types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
+import type { PaletteService } from './service';
 
 export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {

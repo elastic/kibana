@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
-import { set } from '@elastic/safer-lodash-set/fp';
+import type * as rt from 'io-ts';
+import { set } from '@kbn/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { SetupPlugins, StartPlugins } from '../../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../../plugin';
 
-import { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: RequestHandlerContext,
   security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
-  const savedObjectsClient = context.core.savedObjects.client;
+  const savedObjectsClient = (await context.core).savedObjects.client;
   const user = await security?.authc.getCurrentUser(request);
 
   return set<FrameworkRequest>(

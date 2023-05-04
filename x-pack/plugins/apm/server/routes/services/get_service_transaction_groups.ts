@@ -5,28 +5,30 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
-  EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
+} from '../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
-import { calculateThroughput } from '../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../lib/helpers/setup_request';
-import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
+import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '../../lib/helpers/transaction_error_rate';
+
+const txGroupsDroppedBucketName = '_other';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -35,50 +37,70 @@ export type ServiceOverviewTransactionGroupSortField =
   | 'errorRate'
   | 'impact';
 
+export interface ServiceTransactionGroupsResponse {
+  transactionGroups: Array<{
+    transactionType: string;
+    name: string;
+    latency: number | null;
+    throughput: number;
+    errorRate: number;
+    impact: number;
+  }>;
+  maxTransactionGroupsExceeded: boolean;
+  transactionOverflowCount: number;
+}
+
 export async function getServiceTransactionGroups({
   environment,
   kuery,
   serviceName,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   transactionType,
   latencyAggregationType,
   start,
   end,
+  documentType,
+  rollupInterval,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
-}) {
-  const { apmEventClient, config } = setup;
-  const bucketSize = config.ui.transactionGroupBucketSize;
-
-  const field = getDurationFieldForTransactions(searchAggregatedTransactions);
+  documentType: ApmTransactionDocumentType;
+  rollupInterval: RollupInterval;
+}): Promise<ServiceTransactionGroupsResponse> {
+  const field = getDurationFieldForTransactions(documentType);
 
   const response = await apmEventClient.search(
     'get_service_transaction_groups',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+        sources: [
+          {
+            documentType,
+            rollupInterval,
+          },
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
+              {
+                bool: {
+                  should: [
+                    { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
+                    { term: { [TRANSACTION_TYPE]: transactionType } },
+                  ],
+                },
+              },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -87,10 +109,15 @@ export async function getServiceTransactionGroups({
         },
         aggs: {
           total_duration: { sum: { field } },
+          transaction_overflow_count: {
+            sum: {
+              field: TRANSACTION_OVERFLOW_COUNT,
+            },
+          },
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
-              size: bucketSize,
+              size: 1000,
               order: { _count: 'desc' },
             },
             aggs: {
@@ -98,12 +125,7 @@ export async function getServiceTransactionGroups({
                 sum: { field },
               },
               ...getLatencyAggregation(latencyAggregationType, field),
-              [EVENT_OUTCOME]: {
-                terms: {
-                  field: EVENT_OUTCOME,
-                  include: [EventOutcome.failure, EventOutcome.success],
-                },
-              },
+              ...getOutcomeAggregation(documentType),
             },
           },
         },
@@ -115,7 +137,7 @@ export async function getServiceTransactionGroups({
 
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate = calculateFailedTransactionRate(bucket[EVENT_OUTCOME]);
+      const errorRate = calculateFailedTransactionRate(bucket);
 
       const transactionGroupTotalDuration =
         bucket.transaction_group_total_duration.value || 0;
@@ -126,7 +148,7 @@ export async function getServiceTransactionGroups({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: calculateThroughput({
+        throughput: calculateThroughputWithRange({
           start,
           end,
           value: bucket.doc_count,
@@ -143,9 +165,9 @@ export async function getServiceTransactionGroups({
       ...transactionGroup,
       transactionType,
     })),
-    isAggregationAccurate:
-      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
-      0,
-    bucketSize,
+    maxTransactionGroupsExceeded:
+      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
+    transactionOverflowCount:
+      response.aggregations?.transaction_overflow_count.value ?? 0,
   };
 }

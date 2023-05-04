@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
-import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
-import { BucketAggsSchemas } from '../../common/types';
+import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 
 export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -24,10 +24,13 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         body: buildRouteValidation(
           t.exact(
             t.partial({
+              aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsSchemas])),
+              feature_ids: t.union([t.array(t.string), t.undefined]),
               index: t.string,
               query: t.object,
-              aggs: t.union([t.record(t.string, BucketAggsSchemas), t.undefined]),
+              search_after: t.union([t.array(t.number), t.array(t.string), t.undefined]),
               size: t.union([PositiveInteger, t.undefined]),
+              sort: t.union([t.array(t.object), t.undefined]),
               track_total_hits: t.union([t.boolean, t.undefined]),
               _source: t.union([t.array(t.string), t.undefined]),
             })
@@ -40,18 +43,31 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
     },
     async (context, request, response) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { query, aggs, _source, track_total_hits, size, index } = request.body;
-
-        const alertsClient = await context.rac.getAlertsClient();
-
-        const alerts = await alertsClient.find({
-          query,
+        const {
           aggs,
-          _source,
-          track_total_hits,
-          size,
+          feature_ids: featureIds,
           index,
+          query,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          search_after,
+          size,
+          sort,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          track_total_hits,
+          _source,
+        } = request.body;
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
+        const alerts = await alertsClient.find({
+          aggs,
+          featureIds,
+          index,
+          query,
+          search_after,
+          size,
+          sort: sort as SortOptions[],
+          track_total_hits,
+          _source,
         });
         if (alerts == null) {
           return response.notFound({

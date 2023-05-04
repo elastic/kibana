@@ -8,8 +8,8 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ItemTemplate } from './item_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { Node } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
@@ -31,11 +31,11 @@ import {
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
 } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { zoomInfo, onBrush } = useCharts();
   const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
     'showSystemIndices',
@@ -45,7 +45,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
 
   const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
-  const [data, setData] = useState({} as any);
+  const [data, setData] = useState<any>({});
 
   const clusterUuid = globalState.cluster_uuid;
   const cluster = find(clusters, {
@@ -62,7 +62,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
     }
   }, [cluster, generateBreadcrumbs, data?.nodeSummary?.name]);
   const ccs = globalState.ccs;
-  const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
+  const [nodesByIndicesData, setNodesByIndicesData] = useState<any[]>([]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',

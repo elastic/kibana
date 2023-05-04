@@ -5,39 +5,38 @@
  * 2.0.
  */
 
-import {
-  indexPatternTitleSchema,
-  IndexPatternTitleSchema,
-} from '../../../common/api_schemas/common';
+import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+
+import { dataViewTitleSchema, DataViewTitleSchema } from '../../../common/api_schemas/common';
 import {
   fieldHistogramsRequestSchema,
   FieldHistogramsRequestSchema,
 } from '../../../common/api_schemas/field_histograms';
-import { getHistogramsForFields } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 import { wrapError, wrapEsError } from './error_utils';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
-  router.post<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
+  router.post<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
     {
-      path: addBasePath('field_histograms/{indexPatternTitle}'),
+      path: addBasePath('field_histograms/{dataViewTitle}'),
       validate: {
-        params: indexPatternTitleSchema,
+        params: dataViewTitleSchema,
         body: fieldHistogramsRequestSchema,
       },
     },
-    license.guardApiRoute<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
+    license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
       async (ctx, req, res) => {
-        const { indexPatternTitle } = req.params;
+        const { dataViewTitle } = req.params;
         const { query, fields, runtimeMappings, samplerShardSize } = req.body;
 
         try {
-          const resp = await getHistogramsForFields(
-            ctx.core.elasticsearch.client,
-            indexPatternTitle,
+          const esClient = (await ctx.core).elasticsearch.client;
+          const resp = await fetchHistogramsForFields(
+            esClient.asCurrentUser,
+            dataViewTitle,
             query,
             fields,
             samplerShardSize,

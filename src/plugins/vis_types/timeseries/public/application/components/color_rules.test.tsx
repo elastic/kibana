@@ -9,7 +9,7 @@
 import React from 'react';
 import { keys } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { collectionActions } from './lib/collection_actions';
 import {
@@ -72,7 +72,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
 
     it('should render non-empty <div/> node', () => {
       const wrapper = mountWithIntl(<ColorRules {...defaultProps} />);
-      const isNode = wrapper.find('div.tvbColorPicker').exists();
+      const isNode = findTestSubject(wrapper, 'tvbColorPicker').exists();
 
       expect(isNode).toBeTruthy();
     });

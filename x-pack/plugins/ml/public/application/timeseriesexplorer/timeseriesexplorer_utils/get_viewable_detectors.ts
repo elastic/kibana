@@ -8,7 +8,7 @@
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewDetector } from '../../../../common/util/job_utils';
 
-interface ViewableDetector {
+export interface ViewableDetector {
   index: number;
   detector_description: string | undefined;
   function: string;

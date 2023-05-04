@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
@@ -28,13 +29,11 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     });
   };
 
-  const refreshApp = async () => {
-    await testSubjects.click('superDatePickerApplyTimeButton', 10000);
-  };
-
   return {
     async refreshApp() {
-      await refreshApp();
+      await browser.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async goToUptime() {

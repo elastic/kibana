@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
@@ -12,10 +9,19 @@
     "generated/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "generated/*.json",
-    "common/*"
+    "common/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/safer-lodash-set",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

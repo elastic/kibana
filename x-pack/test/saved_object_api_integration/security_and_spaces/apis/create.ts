@@ -62,38 +62,30 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
     // We test the alias conflict preflight check error case twice; once by checking the alias with "find" and once by using "bulk-get".
-    {
-      ...CASES.ALIAS_CONFLICT_OBJ,
-      ...(spaceId === SPACE_1_ID ? { ...fail409(), fail409Param: 'aliasConflictSpace1' } : {}), // first try fails if this is space_1 because an alias exists in space_1
-      expectedNamespaces,
-    },
+    { ...CASES.ALIAS_CONFLICT_OBJ, ...fail409(spaceId !== SPACE_2_ID), expectedNamespaces }, // first try fails if this is the default space or space_1, because an alias exists in those spaces
   ];
-  const crossNamespace = [
-    {
-      ...CASES.ALIAS_CONFLICT_OBJ,
-      initialNamespaces: ['*'],
-      ...fail409(),
-      fail409Param: 'aliasConflictAllSpaces', // second try fails because an alias exists in space_x and space_1 (but not space_y because that alias is disabled)
-      // note that if an object was successfully created with this type/ID in the first try, that won't change this outcome, because an alias conflict supersedes all other types of conflicts
-    },
+  const badRequests = [
+    { ...CASES.HIDDEN, ...fail400() },
     {
       ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
       initialNamespaces: ['x', 'y'],
-      ...fail400(), // cannot be created in multiple spaces
+      ...fail400(), // cannot be created in multiple spaces -- second try below succeeds
     },
-    CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
     {
       ...CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
       initialNamespaces: [ALL_SPACES_ID],
-      ...fail400(), // cannot be created in multiple spaces
+      ...fail400(), // cannot be created in multiple spaces -- second try below succeeds
     },
+  ];
+  const crossNamespace = [
+    { ...CASES.ALIAS_CONFLICT_OBJ, initialNamespaces: ['*'], ...fail409() }, // second try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
+    CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
     CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
   ];
-  const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
-  const allTypes = normalTypes.concat(crossNamespace, hiddenType);
-  return { normalTypes, crossNamespace, hiddenType, allTypes };
+  const allTypes = [...normalTypes, ...badRequests, ...crossNamespace];
+  return { normalTypes, badRequests, crossNamespace, allTypes };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -102,23 +94,22 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { addTests, createTestDefinitions } = createTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
-    const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
+    const { normalTypes, badRequests, crossNamespace, allTypes } = createTestCases(
       overwrite,
       spaceId
     );
     return {
-      unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId, user }),
+      unauthorized: [
+        createTestDefinitions(normalTypes, true, overwrite, { spaceId, user }),
+        createTestDefinitions(badRequests, false, overwrite, { spaceId, user }), // validation for hidden type and initialNamespaces returns 400 Bad Request before authZ check
+        createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
+      ].flat(),
       authorizedAtSpace: [
         createTestDefinitions(normalTypes, false, overwrite, { spaceId, user }),
+        createTestDefinitions(badRequests, false, overwrite, { spaceId, user }), // validation for hidden type and initialNamespaces returns 400 Bad Request before authZ check
         createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
-        createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
       ].flat(),
-      authorizedEverywhere: [
-        createTestDefinitions(normalTypes, false, overwrite, { spaceId, user }),
-        createTestDefinitions(crossNamespace, false, overwrite, { spaceId, user }),
-        createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
-      ].flat(),
-      superuser: createTestDefinitions(allTypes, false, overwrite, { spaceId, user }),
+      authorizedEverywhere: createTestDefinitions(allTypes, false, overwrite, { spaceId, user }),
     };
   };
 
@@ -145,13 +136,10 @@ export default function ({ getService }: FtrProviderContext) {
         const { authorizedAtSpace } = createTests(overwrite!, spaceId, users.allAtSpace);
         _addTests(users.allAtSpace, authorizedAtSpace);
 
-        [users.dualAll, users.allGlobally].forEach((user) => {
+        [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
           const { authorizedEverywhere } = createTests(overwrite!, spaceId, user);
           _addTests(user, authorizedEverywhere);
         });
-
-        const { superuser } = createTests(overwrite!, spaceId, users.superuser);
-        _addTests(users.superuser, superuser);
       }
     );
   });

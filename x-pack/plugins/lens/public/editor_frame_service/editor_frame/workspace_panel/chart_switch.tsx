@@ -20,16 +20,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import {
   Visualization,
   FramePublicAPI,
   VisualizationType,
   VisualizationMap,
   DatasourceMap,
+  Suggestion,
 } from '../../../types';
-import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
+import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { showMemoizedErrorNotification } from '../../../lens_ui_errors';
 import {
   insertLayer,
   removeLayers,
@@ -91,7 +92,7 @@ function VisualizationSummary({
       {description.icon && (
         <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
-      {description.label}
+      <span className="lnsChartSwitch__summaryText">{description.label}</span>
     </>
   );
 }
@@ -106,11 +107,23 @@ function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
 }
 
+function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn): TReturn {
+  try {
+    return action();
+  } catch (error) {
+    showMemoizedErrorNotification(error);
+    return defaultReturnValue;
+  }
+}
+
 function getCurrentVisualizationId(
   activeVisualization: Visualization,
   visualizationState: unknown
 ) {
-  return activeVisualization.getVisualizationTypeId(visualizationState);
+  return safeFnCall(
+    () => activeVisualization.getVisualizationTypeId(visualizationState),
+    undefined
+  );
 }
 
 export const ChartSwitch = memo(function ChartSwitch(props: Props) {
@@ -123,15 +136,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    trackUiEvent(`chart_switch`);
-
     switchToSuggestion(
       dispatchLens,
       {
         ...selection,
         visualizationState: selection.getVisualizationState(),
       },
-      true
+      { clearStagedPreview: true }
     );
 
     if (
@@ -152,18 +163,27 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     subVisualizationId: string
   ): VisualizationSelection {
     const newVisualization = props.visualizationMap[visualizationId];
-    const switchVisType =
-      props.visualizationMap[visualizationId].switchVisualizationType ||
-      ((_type: string, initialState: unknown) => initialState);
+    const switchVisType = (type: string, state: unknown) => {
+      if (props.visualizationMap[visualizationId].switchVisualizationType) {
+        return safeFnCall(
+          () => props.visualizationMap[visualizationId].switchVisualizationType!(type, state),
+          state
+        );
+      }
+      return state;
+    };
     const layers = Object.entries(props.framePublicAPI.datasourceLayers);
     const containsData = layers.some(
-      ([_layerId, datasource]) => datasource.getTableSpec().length > 0
+      ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
     );
     // Always show the active visualization as a valid selection
     if (
       visualization.activeId === visualizationId &&
       visualization.state &&
-      newVisualization.getVisualizationTypeId(visualization.state) === subVisualizationId
+      safeFnCall(
+        () => newVisualization.getVisualizationTypeId(visualization.state) === subVisualizationId,
+        false
+      )
     ) {
       return {
         visualizationId,
@@ -192,7 +212,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       dataLoss = 'everything';
     } else if (layers.length > 1 && layers.length !== topSuggestion.keptLayerIds.length) {
       dataLoss = 'layers';
-    } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
+    } else if (topSuggestion.columns !== layers[0][1]?.getTableSpec().length) {
       dataLoss = 'columns';
     } else {
       dataLoss = 'nothing';
@@ -247,10 +267,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       if (!flyoutOpen) {
         return { visualizationTypes: [], visualizationsLookup: {} };
       }
-      const subVisualizationId = getCurrentVisualizationId(
-        props.visualizationMap[visualization.activeId || ''],
-        visualization.state
-      );
+      const subVisualizationId =
+        visualization.activeId && props.visualizationMap[visualization.activeId]
+          ? getCurrentVisualizationId(
+              props.visualizationMap[visualization.activeId],
+              visualization.state
+            )
+          : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       // reorganize visualizations in groups
       const grouped: Record<
@@ -345,7 +368,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                 aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
                                   defaultMessage: 'Warning',
                                 })}
-                                type="alert"
+                                type="warning"
                                 color="warning"
                                 content={i18n.translate(
                                   'xpack.lens.chartSwitch.dataLossDescription',
@@ -366,7 +389,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                               <EuiBadge color="hollow">
                                 <FormattedMessage
                                   id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Experimental"
+                                  defaultMessage="Technical preview"
                                 />
                               </EuiBadge>
                             </EuiFlexItem>
@@ -434,10 +457,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            incremental: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
-            onSearch: (value) => setSearchTerm(value),
+            onChange: (value) => setSearchTerm(value),
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {
@@ -496,22 +518,24 @@ function getTopSuggestion(
     subVisualizationId,
     activeData: props.framePublicAPI.activeData,
     mainPalette,
+    dataViews: props.framePublicAPI.dataViews,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return (
       suggestion.changeType !== 'extended' &&
-      newVisualization.getVisualizationTypeId(suggestion.visualizationState) === subVisualizationId
+      safeFnCall(
+        () =>
+          newVisualization.getVisualizationTypeId(suggestion.visualizationState) ===
+          subVisualizationId,
+        false
+      )
     );
   });
 
-  // We prefer unchanged or reduced suggestions when switching
-  // charts since that allows you to switch from A to B and back
-  // to A with the greatest chance of preserving your original state.
   return (
-    suggestions.find((s) => s.changeType === 'unchanged') ||
-    suggestions.find((s) => s.changeType === 'reduced') ||
+    suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
     suggestions[0]
   );
 }

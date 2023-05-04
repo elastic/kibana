@@ -24,20 +24,14 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="appliesToPopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="When"
@@ -101,21 +95,15 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       withTitle={true}
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"
@@ -222,20 +210,14 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="appliesToPopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="When"
@@ -298,21 +280,15 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       withTitle={true}
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"

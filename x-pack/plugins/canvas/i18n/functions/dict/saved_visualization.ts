@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { savedVisualization } from '../../../canvas_plugin_src/functions/external/saved_visualization';
+import type { savedVisualization } from '../../../canvas_plugin_src/functions/external/saved_visualization';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

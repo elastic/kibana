@@ -8,7 +8,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { BrowserField } from '../../../../../../timelines/common';
+import type { IFieldSubTypeNested } from '@kbn/es-query';
+
+import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getAllFieldsByName } from '../../../../common/containers/source';
@@ -19,6 +21,7 @@ export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' 
   refetch: (() => void) | null;
   uniqueQueryId: string;
   loading: boolean;
+  searchSessionId?: string;
 }
 
 /**
@@ -33,6 +36,7 @@ export const useInspectButton = ({
   uniqueQueryId,
   deleteQuery,
   loading,
+  searchSessionId,
 }: UseInspectButtonParams) => {
   useEffect(() => {
     if (refetch != null && setQuery != null) {
@@ -44,6 +48,7 @@ export const useInspectButton = ({
         },
         loading,
         refetch,
+        searchSessionId,
       });
     }
 
@@ -52,32 +57,56 @@ export const useInspectButton = ({
         deleteQuery({ id: uniqueQueryId });
       }
     };
-  }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
+  }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery, searchSessionId]);
 };
 
-function getAggregatableFields(fields: { [fieldName: string]: Partial<BrowserField> }) {
-  return Object.entries(fields).reduce<EuiComboBoxOptionOption[]>(
-    (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
-      if (field.aggregatable === true) {
-        return [...filteredOptions, { label: key, value: key }];
-      } else {
-        return filteredOptions;
-      }
-    },
-    []
-  );
+export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
+  const subTypeNested = field?.subType as IFieldSubTypeNested;
+  return !!subTypeNested?.nested?.path;
 }
 
-export const useStackByFields = () => {
+export function isLensSupportedType(fieldType: string | undefined) {
+  const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+  return fieldType ? supportedTypes.has(fieldType) : false;
+}
+
+export interface GetAggregatableFields {
+  [fieldName: string]: Partial<BrowserField>;
+}
+
+export function getAggregatableFields(
+  fields: GetAggregatableFields,
+  useLensCompatibleFields?: boolean
+): EuiComboBoxOptionOption[] {
+  const result = [];
+  for (const [key, field] of Object.entries(fields)) {
+    if (useLensCompatibleFields) {
+      if (
+        !!field.aggregatable &&
+        isLensSupportedType(field.type) &&
+        !isDataViewFieldSubtypeNested(field)
+      ) {
+        result.push({ label: key, value: key });
+      }
+    } else {
+      if (field.aggregatable === true) {
+        result.push({ label: key, value: key });
+      }
+    }
+  }
+  return result;
+}
+
+export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { pathname } = useLocation();
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
-    getAggregatableFields(allFields)
+    getAggregatableFields(allFields, useLensCompatibleFields)
   );
   useEffect(() => {
-    setStackByFieldOptions(getAggregatableFields(allFields));
-  }, [allFields]);
+    setStackByFieldOptions(getAggregatableFields(allFields, useLensCompatibleFields));
+  }, [allFields, useLensCompatibleFields]);
   return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };

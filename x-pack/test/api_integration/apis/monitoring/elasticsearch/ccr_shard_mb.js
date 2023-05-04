@@ -7,42 +7,47 @@
 
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import ccrShardFixture from './fixtures/ccr_shard';
+import ccrShardFixture from './fixtures/ccr_shard.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('ccr shard mb', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/ccr_mb';
-    const timeRange = {
-      min: '2018-09-19T00:00:00.000Z',
-      max: '2018-09-19T23:59:59.000Z',
-    };
+  describe('ccr shard - metricbeat and package', () => {
+    ['mb', 'package'].forEach((source) => {
+      const archive = `x-pack/test/functional/es_archives/monitoring/ccr_${source}`;
 
-    before('load archive', () => {
-      return setup(archive);
-    });
+      describe(`ccr shard ${source}`, () => {
+        const timeRange = {
+          min: '2018-09-19T00:00:00.000Z',
+          max: '2018-09-19T23:59:59.000Z',
+        };
 
-    after('unload archive', () => {
-      return tearDown();
-    });
+        before('load archive', () => {
+          return setup(archive);
+        });
 
-    it('should return specific shard details', async () => {
-      const { body } = await supertest
-        .post(
-          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/ccr/follower/shard/0'
-        )
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          timeRange,
-        })
-        .expect(200);
+        after('unload archive', () => {
+          return tearDown(archive);
+        });
 
-      // These will be inherently different, but they are only shown in JSON format in the UI so that's okay
-      const keysToIgnore = ['stat', 'oldestStat'];
-      expect(omit(body, keysToIgnore)).to.eql(omit(ccrShardFixture, keysToIgnore));
+        it('should return specific shard details', async () => {
+          const { body } = await supertest
+            .post(
+              '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/ccr/follower/shard/0'
+            )
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              timeRange,
+            })
+            .expect(200);
+
+          // These will be inherently different, but they are only shown in JSON format in the UI so that's okay
+          const keysToIgnore = ['stat', 'oldestStat'];
+          expect(omit(body, keysToIgnore)).to.eql(omit(ccrShardFixture, keysToIgnore));
+        });
+      });
     });
   });
 }

@@ -7,9 +7,9 @@
  */
 
 import { Observable } from 'rxjs';
-import { SharedGlobalConfig } from 'kibana/server';
-import { HomeServerPluginSetup } from '../../../home/server';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { SharedGlobalConfig } from '@kbn/core/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 

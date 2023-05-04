@@ -12,7 +12,7 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineActions } from '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SchemaType, Schema } from '../../../shared/schema/types';
 
@@ -37,6 +37,7 @@ describe('SchemaLogic', () => {
     },
     unconfirmedFields: ['some_field'],
     unsearchedUnconfirmedFields: true,
+    incompleteFields: ['some_other_field'],
   };
 
   const DEFAULT_VALUES = {
@@ -51,6 +52,8 @@ describe('SchemaLogic', () => {
     hasUnconfirmedFields: false,
     hasNewUnsearchedFields: false,
     isModalOpen: false,
+    incompleteFields: [],
+    hasIncompleteFields: false,
   };
 
   /*
@@ -93,6 +96,8 @@ describe('SchemaLogic', () => {
           unconfirmedFields: MOCK_RESPONSE.unconfirmedFields,
           hasUnconfirmedFields: true,
           hasNewUnsearchedFields: MOCK_RESPONSE.unsearchedUnconfirmedFields,
+          incompleteFields: MOCK_RESPONSE.incompleteFields,
+          hasIncompleteFields: true,
         });
       });
     });

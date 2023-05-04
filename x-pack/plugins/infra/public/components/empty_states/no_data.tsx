@@ -8,7 +8,7 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface NoDataProps {
   titleText: string;
@@ -30,7 +30,13 @@ export const NoData: React.FC<NoDataProps> = ({
     titleSize="m"
     body={<p>{bodyText}</p>}
     actions={
-      <EuiButton iconType="refresh" color="primary" fill onClick={onRefetch}>
+      <EuiButton
+        data-test-subj="infraNoDataButton"
+        iconType="refresh"
+        color="primary"
+        fill
+        onClick={onRefetch}
+      >
         {refetchText}
       </EuiButton>
     }

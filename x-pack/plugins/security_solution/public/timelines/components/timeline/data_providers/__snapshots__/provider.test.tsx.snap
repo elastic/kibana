@@ -3,6 +3,7 @@
 exports[`Provider rendering renders correctly against snapshot 1`] = `
 <ProviderItemBadge
   deleteProvider={[Function]}
+  displayValue="Provider 1"
   field="name"
   isEnabled={true}
   isExcluded={false}

@@ -6,7 +6,5 @@
  */
 
 // compile typescript on the fly
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
-
-require('./create_functional_tests_archive/index.ts');
+require('@kbn/babel-register').install();
+require('./create_functional_tests_archive');

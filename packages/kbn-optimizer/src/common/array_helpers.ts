@@ -62,14 +62,3 @@ export const descending = <T>(...getters: Array<SortPropGetter<T>>): Comparator<
  * Alternate Array#includes() implementation with sane types, functions as a type guard
  */
 export const includes = <T>(array: T[], value: any): value is T => array.includes(value);
-
-/**
- * Ponyfill for Object.fromEntries()
- */
-export const entriesToObject = <T>(entries: Array<readonly [string, T]>): Record<string, T> => {
-  const object: Record<string, T> = {};
-  for (const [key, value] of entries) {
-    object[key] = value;
-  }
-  return object;
-};

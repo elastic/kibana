@@ -11,76 +11,147 @@ import {
   Plugin,
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
+  Logger,
+} from '@kbn/core/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
+import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import {
+  createUICapabilities as createCasesUICapabilities,
+  getApiTags as getCasesApiTags,
+} from '@kbn/cases-plugin/common';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  kubernetesGuideId,
+  kubernetesGuideConfig,
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
-import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
-import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { casesFeatureId, observabilityFeatureId } from '../common';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
+import { slo, SO_SLO_TYPE } from './saved_objects';
+import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
+import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
+import { registerSloUsageCollector } from './lib/collectors/register';
+import { sloRuleFieldMap } from './lib/rules/slo_burn_rate/field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
+  alerting: PluginSetupContract;
   features: FeaturesSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces?: SpacesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+}
+
+interface PluginStart {
+  alerting: PluginStartContract;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
+  private logger: Logger;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
+    this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: PluginSetup) {
+  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
+    const casesCapabilities = createCasesUICapabilities();
+    const casesApiTags = getCasesApiTags(observabilityFeatureId);
+
     const config = this.initContext.config.get<ObservabilityConfig>();
 
-    if (config.unsafe.cases.enabled) {
-      plugins.features.registerKibanaFeature({
-        id: casesFeatureId,
-        name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
-          defaultMessage: 'Cases',
-        }),
-        order: 1100,
-        category: DEFAULT_APP_CATEGORIES.observability,
-        app: [casesFeatureId, 'kibana'],
-        catalogue: [observabilityFeatureId],
-        cases: [observabilityFeatureId],
-        privileges: {
-          all: {
-            app: [casesFeatureId, 'kibana'],
-            catalogue: [observabilityFeatureId],
-            cases: {
-              all: [observabilityFeatureId],
-            },
-            api: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
+    plugins.features.registerKibanaFeature({
+      id: casesFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 1100,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [casesFeatureId, 'kibana'],
+      catalogue: [observabilityFeatureId],
+      cases: [observabilityFeatureId],
+      privileges: {
+        all: {
+          api: casesApiTags.all,
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            create: [observabilityFeatureId],
+            read: [observabilityFeatureId],
+            update: [observabilityFeatureId],
+            push: [observabilityFeatureId],
           },
-          read: {
-            app: [casesFeatureId, 'kibana'],
-            catalogue: [observabilityFeatureId],
-            cases: {
-              read: [observabilityFeatureId],
-            },
-            api: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
+          savedObject: {
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
+          ui: casesCapabilities.all,
         },
-      });
-    }
+        read: {
+          api: casesApiTags.read,
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            read: [observabilityFeatureId],
+          },
+          savedObject: {
+            all: [],
+            read: [...filesSavedObjectTypes],
+          },
+          ui: casesCapabilities.read,
+        },
+      },
+      subFeatures: [
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureName', {
+            defaultMessage: 'Delete',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  api: casesApiTags.delete,
+                  id: 'cases_delete',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.deleteSubFeatureDetails',
+                    {
+                      defaultMessage: 'Delete cases and comments',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  cases: {
+                    delete: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -98,21 +169,99 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
-
     const { ruleDataService } = plugins.ruleRegistry;
 
-    registerRoutes({
-      core: {
-        setup: core,
-        start,
+    plugins.features.registerKibanaFeature({
+      id: sloFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
+        defaultMessage: 'SLOs',
+      }),
+      order: 1200,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [sloFeatureId, 'kibana'],
+      catalogue: [sloFeatureId, 'observability'],
+      alerting: [SLO_BURN_RATE_RULE_ID],
+      privileges: {
+        all: {
+          app: [sloFeatureId, 'kibana'],
+          catalogue: [sloFeatureId, 'observability'],
+          api: ['slo_write', 'slo_read', 'rac'],
+          savedObject: {
+            all: [SO_SLO_TYPE],
+            read: [],
+          },
+          alerting: {
+            rule: {
+              all: [SLO_BURN_RATE_RULE_ID],
+            },
+            alert: {
+              all: [SLO_BURN_RATE_RULE_ID],
+            },
+          },
+          ui: ['read', 'write'],
+        },
+        read: {
+          app: [sloFeatureId, 'kibana'],
+          catalogue: [sloFeatureId, 'observability'],
+          api: ['slo_read', 'rac'],
+          savedObject: {
+            all: [],
+            read: [SO_SLO_TYPE],
+          },
+          alerting: {
+            rule: {
+              read: [SLO_BURN_RATE_RULE_ID],
+            },
+            alert: {
+              read: [SLO_BURN_RATE_RULE_ID],
+            },
+          },
+          ui: ['read'],
+        },
       },
-      logger: this.initContext.logger.get(),
-      repository: getGlobalObservabilityServerRouteRepository(),
-      ruleDataService,
     });
 
+    core.savedObjects.registerType(slo);
+
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: sloFeatureId,
+      registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            { ...legacyExperimentalFieldMap, ...sloRuleFieldMap },
+            'strict'
+          ),
+        },
+      ],
+    });
+    registerRuleTypes(plugins.alerting, this.logger, ruleDataClient, core.http.basePath);
+    registerSloUsageCollector(plugins.usageCollection);
+
+    core.getStartServices().then(([coreStart, pluginStart]) => {
+      registerRoutes({
+        core,
+        dependencies: {
+          ruleDataService,
+          getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+        },
+        logger: this.logger,
+        repository: getObservabilityServerRouteRepository(),
+      });
+    });
+
+    /**
+     * Register a config for the observability guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
     return {
+      getAlertDetailsConfig() {
+        return config.unsafe.alertDetails;
+      },
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);

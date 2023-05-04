@@ -5,27 +5,34 @@
  * 2.0.
  */
 
+import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session, SessionValue } from '../session_management';
+import {
+  type Session,
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionUnexpectedError,
+  type SessionValue,
+} from '../session_management';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -80,14 +87,26 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
+  isElasticCloudDeployment: () => boolean;
+}
+
+/** @internal */
+interface InvalidateSessionValueParams {
+  /** Request instance. */
+  request: KibanaRequest;
+  /** Value of the existing session, if any. */
+  sessionValue: SessionValue | null;
+  /** If enabled, skips writing a `user_logout` audit event for this session. */
+  skipAuditEvent?: boolean;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -119,7 +138,7 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
 
 function assertRequest(request: KibanaRequest) {
-  if (!(request instanceof KibanaRequest)) {
+  if (!(request instanceof CoreKibanaRequest)) {
     throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
 }
@@ -152,7 +171,11 @@ function isLoginAttemptWithProviderType(
   );
 }
 
-function isSessionAuthenticated(sessionValue?: Readonly<SessionValue> | null) {
+type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+function isSessionAuthenticated(
+  sessionValue?: Readonly<SessionValue> | null
+): sessionValue is WithRequiredProperty<SessionValue, 'username'> {
   return !!sessionValue?.username;
 }
 
@@ -221,6 +244,7 @@ export class Authenticator {
         logger: this.options.loggers.get('tokens'),
       }),
       getServerBaseURL: this.options.getServerBaseURL,
+      isElasticCloudDeployment: this.options.isElasticCloudDeployment,
     };
 
     this.providers = new Map(
@@ -273,7 +297,7 @@ export class Authenticator {
     assertRequest(request);
     assertLoginAttempt(attempt);
 
-    const existingSessionValue = await this.getSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
 
     // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
@@ -318,25 +342,14 @@ export class Authenticator {
           existingSessionValue,
         });
 
-        // Checking for presence of `user` object to determine success state rather than
-        // `success()` method since that indicates a successful authentication and `redirect()`
-        // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
-        if (authenticationResult.user || authenticationResult.failed()) {
-          const auditLogger = this.options.audit.asScoped(request);
-          auditLogger.log(
-            userLoginEvent({
-              authenticationResult,
-              authenticationProvider: providerName,
-              authenticationType: provider.type,
-            })
-          );
-        }
-
-        return this.handlePreAccessRedirects(
-          request,
-          authenticationResult,
-          sessionUpdateResult,
-          attempt.redirectURL
+        return enrichWithUserProfileId(
+          this.handlePreAccessRedirects(
+            request,
+            authenticationResult,
+            sessionUpdateResult,
+            attempt.redirectURL
+          ),
+          sessionUpdateResult ? sessionUpdateResult.value : null
         );
       }
     }
@@ -348,11 +361,12 @@ export class Authenticator {
    * Performs request authentication using configured chain of authentication providers.
    * @param request Request instance.
    */
-  async authenticate(request: KibanaRequest) {
+  async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
     assertRequest(request);
 
-    const existingSessionValue = await this.getSessionValue(request);
-    if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
+    const existingSession = await this.getSessionValue(request);
+
+    if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
       const providerNameSuggestedByHint = request.url.searchParams.get(
         AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
       );
@@ -372,38 +386,148 @@ export class Authenticator {
                 providerNameSuggestedByHint
               )}`
             : ''
+        }${
+          existingSession.error instanceof SessionExpiredError ||
+          existingSession.error instanceof SessionConcurrencyLimitError
+            ? `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                existingSession.error.code
+              )}`
+            : ''
         }`
       );
     }
 
+    const requestIsRedirectable = canRedirectRequest(request);
+
     const suggestedProviderName =
-      existingSessionValue?.provider.name ??
+      existingSession.value?.provider.name ??
       request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
-        existingSessionValue?.provider.name === providerName &&
-        existingSessionValue?.provider.type === provider.type;
+        existingSession.value?.provider.name === providerName &&
+        existingSession.value?.provider.type === provider.type;
 
-      const authenticationResult = await provider.authenticate(
+      let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSession.value!.state : null
       );
 
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,
-          existingSessionValue,
+          existingSessionValue: existingSession.value,
         });
 
-        return canRedirectRequest(request)
-          ? this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult)
-          : authenticationResult;
+        if (requestIsRedirectable) {
+          if (
+            (existingSession.error instanceof SessionExpiredError ||
+              existingSession.error instanceof SessionConcurrencyLimitError) &&
+            authenticationResult.redirectURL?.startsWith(
+              `${this.options.basePath.get(request)}/login?`
+            )
+          ) {
+            // TODO: Make this less verbose!
+            authenticationResult = AuthenticationResult.redirectTo(
+              authenticationResult.redirectURL +
+                `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                  existingSession.error.code
+                )}`,
+              {
+                user: authenticationResult.user,
+                userProfileGrant: authenticationResult.userProfileGrant,
+                authResponseHeaders: authenticationResult.authResponseHeaders,
+                state: authenticationResult.state,
+              }
+            );
+          }
+          return enrichWithUserProfileId(
+            this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult),
+            sessionUpdateResult ? sessionUpdateResult.value : null
+          );
+        } else {
+          if (existingSession.error instanceof SessionExpiredError) {
+            // TODO: Make this less verbose! Possible alternatives:
+            // 1. Make authResponseHeaders editable
+            // 2. Create utility function outside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
+            // 3. Create utility function inside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
+            // Whatever we choose, we probably want to consider doing the same for editing the `redirectURL` and the `user`, both of which we need to edit in this file
+            if (authenticationResult.succeeded()) {
+              authenticationResult = AuthenticationResult.succeeded(authenticationResult.user!, {
+                userProfileGrant: authenticationResult.userProfileGrant,
+                authHeaders: authenticationResult.authHeaders,
+                state: authenticationResult.state,
+                authResponseHeaders: {
+                  ...authenticationResult.authResponseHeaders,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
+                },
+              });
+            } else if (authenticationResult.failed()) {
+              authenticationResult = AuthenticationResult.failed(authenticationResult.error!, {
+                authResponseHeaders: {
+                  ...authenticationResult.authResponseHeaders,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
+                },
+              });
+            } else {
+              // Currently we can only get to here if the request is 1) not redirectable, and 2) handled. This leaves only the states `succeeded` and `failed` that we have to handle
+              throw new Error(`Unexpected state: ${(authenticationResult as any).status}`);
+            }
+          }
+          return enrichWithUserProfileId(
+            authenticationResult,
+            sessionUpdateResult ? sessionUpdateResult.value : null
+          );
+        }
+      }
+    }
+    if (
+      existingSession.error instanceof SessionExpiredError ||
+      existingSession.error instanceof SessionConcurrencyLimitError ||
+      existingSession.error instanceof SessionUnexpectedError
+    ) {
+      const options = requestIsRedirectable
+        ? undefined
+        : {
+            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSession.error.code },
+          };
+      return AuthenticationResult.failed(existingSession.error, options);
+    } else {
+      return AuthenticationResult.notHandled();
+    }
+  }
+
+  /**
+   * Tries to reauthenticate request with the existing session.
+   * @param request Request instance.
+   */
+  async reauthenticate(request: KibanaRequest) {
+    assertRequest(request);
+
+    const { value: existingSessionValue } = await this.getSessionValue(request);
+    if (!existingSessionValue) {
+      this.logger.warn('Session is no longer available and cannot be re-authenticated.');
+      return AuthenticationResult.notHandled();
+    }
+
+    // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
+    // available then `getSessionValue` should have returned `null`.
+    const provider = this.providers.get(existingSessionValue.provider.name)!;
+    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    if (!authenticationResult.notHandled()) {
+      const sessionUpdateResult = await this.updateSessionValue(request, {
+        provider: existingSessionValue.provider,
+        authenticationResult,
+        existingSessionValue,
+      });
+
+      if (sessionUpdateResult) {
+        return enrichWithUserProfileId(authenticationResult, sessionUpdateResult.value);
       }
     }
 
-    return AuthenticationResult.notHandled();
+    return authenticationResult;
   }
 
   /**
@@ -413,12 +537,12 @@ export class Authenticator {
   async logout(request: KibanaRequest) {
     assertRequest(request);
 
-    const sessionValue = await this.getSessionValue(request);
+    const { value: sessionValue } = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
-      await this.invalidateSessionValue(request, sessionValue);
+      await this.invalidateSessionValue({ request, sessionValue });
 
       // Provider name may be passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it.
@@ -453,8 +577,9 @@ export class Authenticator {
   async acknowledgeAccessAgreement(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValue = await this.getSessionValue(request);
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
+
     if (!existingSessionValue || !currentUser) {
       throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
     }
@@ -554,24 +679,24 @@ export class Authenticator {
    * @param request Request instance.
    */
   private async getSessionValue(request: KibanaRequest) {
-    const existingSessionValue = await this.session.get(request);
+    const existingSession = await this.session.get(request);
 
     // If we detect that for some reason we have a session stored for the provider that is not
     // available anymore (e.g. when user was logged in with one provider, but then configuration has
     // changed and that provider is no longer available), then we should clear session entirely.
     if (
-      existingSessionValue &&
-      this.providers.get(existingSessionValue.provider.name)?.type !==
-        existingSessionValue.provider.type
+      existingSession.value &&
+      this.providers.get(existingSession.value.provider.name)?.type !==
+        existingSession.value.provider.type
     ) {
       this.logger.warn(
-        `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
+        `Attempted to retrieve session for the "${existingSession.value.provider.type}/${existingSession.value.provider.name}" provider, but it is not configured.`
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
-      return null;
+      await this.invalidateSessionValue({ request, sessionValue: existingSession.value });
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
-    return existingSessionValue;
+    return existingSession;
   }
 
   /**
@@ -593,6 +718,22 @@ export class Authenticator {
       existingSessionValue: Readonly<SessionValue> | null;
     }
   ) {
+    // Log failed `user_login` attempt only if creating a brand new session or if the existing session is
+    // not authenticated (e.g. during SAML handshake). If the existing session is authenticated we will
+    // invalidate it and log a `user_logout` event instead.
+    if (authenticationResult.failed() && !isSessionAuthenticated(existingSessionValue)) {
+      const auditLogger = this.options.audit.asScoped(request);
+      auditLogger.log(
+        userLoginEvent({
+          userProfileId: existingSessionValue?.userProfileId,
+          sessionId: existingSessionValue?.sid,
+          authenticationResult,
+          authenticationProvider: provider.name,
+          authenticationType: provider.type,
+        })
+      );
+    }
+
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
       return null;
     }
@@ -601,7 +742,7 @@ export class Authenticator {
     // attempt didn't fail.
     if (authenticationResult.shouldClearState()) {
       this.logger.debug('Authentication provider requested to invalidate existing session.');
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
 
@@ -615,7 +756,7 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
-        await this.invalidateSessionValue(request, existingSessionValue);
+        await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       }
       return null;
     }
@@ -653,30 +794,75 @@ export class Authenticator {
       this.logger.debug(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({
+        request,
+        sessionValue: existingSessionValue,
+        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
+      });
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.debug('Username has changed, existing session will be invalidated.');
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     }
 
-    let newSessionValue;
+    let userProfileId = existingSessionValue?.userProfileId;
+
+    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // store user profile identifier in the session value.
+    const shouldActivateProfile = authenticationResult.userProfileGrant;
+
+    if (shouldActivateProfile) {
+      this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
+      userProfileId = (
+        await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
+      ).uid;
+
+      if (
+        existingSessionValue?.userProfileId &&
+        existingSessionValue.userProfileId !== userProfileId
+      ) {
+        this.logger.warn(`User profile for "${authenticationResult.user?.username}" has changed.`);
+      }
+    }
+
+    let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
+        userProfileId,
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
       });
+
+      // Log successful `user_login` event if a new authenticated session was created or an existing session was overwritten and
+      // the username or authentication provider changed. When username or authentication provider changes the session
+      // gets invalidated (logging `user_logout` event) before a new session is created.
+      if (
+        isNewSessionAuthenticated &&
+        (!isExistingSessionAuthenticated || usernameHasChanged || providerHasChanged)
+      ) {
+        const auditLogger = this.options.audit.asScoped(request);
+        auditLogger.log(
+          userLoginEvent({
+            userProfileId, // We must explicitly specify the `userProfileId` here since we just created the session and it can't be inferred from the request context.
+            sessionId: newSessionValue?.sid, // We must explicitly specify the `sessionId` here since we just created the session and it can't be inferred from the request context.
+            authenticationResult,
+            authenticationProvider: provider.name,
+            authenticationType: provider.type,
+          })
+        );
+      }
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
+        userProfileId,
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSessionValue.state,
@@ -698,18 +884,15 @@ export class Authenticator {
 
   /**
    * Invalidates session value associated with the specified request.
-   * @param request Request instance.
-   * @param sessionValue Value of the existing session if any.
    */
-  private async invalidateSessionValue(request: KibanaRequest, sessionValue: SessionValue | null) {
-    if (sessionValue) {
+  private async invalidateSessionValue({
+    request,
+    sessionValue,
+    skipAuditEvent,
+  }: InvalidateSessionValueParams) {
+    if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
-      auditLogger.log(
-        userLogoutEvent({
-          username: sessionValue.username,
-          provider: sessionValue.provider,
-        })
-      );
+      auditLogger.log(userLogoutEvent(sessionValue));
     }
 
     await this.session.invalidate(request, { match: 'current' });
@@ -739,21 +922,27 @@ export class Authenticator {
    * @param sessionValue Current session value if any.
    */
   private shouldRedirectToAccessAgreement(sessionValue: SessionValue | null) {
-    // Request should be redirected to Access Agreement UI only if all following conditions are met:
-    //  1. Request can be redirected (not API call)
-    //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
-    //     session yet (based on the flag we store in the session)
-    //  3. Request is authenticated by the provider that has `accessAgreement` configured
-    //  4. Current license allows access agreement
-    //  5. And it's not a request to the Access Agreement UI itself
-    return (
-      sessionValue != null &&
-      !sessionValue.accessAgreementAcknowledged &&
-      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
-        sessionValue.provider.name
-      ]?.accessAgreement &&
-      this.options.license.getFeatures().allowAccessAgreement
-    );
+    // If user doesn't have an active session or if they already acknowledged
+    // access agreement (based on the flag we store in the session) - bail out.
+    if (sessionValue == null || sessionValue.accessAgreementAcknowledged) {
+      return false;
+    }
+
+    // If access agreement is neither enabled globally (for all providers)
+    // nor for the provider that authenticated user request - bail out.
+    const providerConfig = (this.options.config.authc.providers as Record<string, any>)[
+      sessionValue.provider.type
+    ]?.[sessionValue.provider.name];
+
+    if (
+      !this.options.config.accessAgreement?.message &&
+      !providerConfig?.accessAgreement?.message
+    ) {
+      return false;
+    }
+
+    // Check if the current license allows access agreement.
+    return this.options.license.getFeatures().allowAccessAgreement;
   }
 
   /**
@@ -782,6 +971,7 @@ export class Authenticator {
     const isUpdatedSessionAuthenticated = isSessionAuthenticated(sessionUpdateResult?.value);
 
     let preAccessRedirectURL;
+
     if (isUpdatedSessionAuthenticated && sessionUpdateResult?.overwritten) {
       this.logger.debug('Redirecting user to the overwritten session UI.');
       preAccessRedirectURL = `${this.options.basePath.serverBasePath}${OVERWRITTEN_SESSION_ROUTE}`;
@@ -811,6 +1001,7 @@ export class Authenticator {
           state: authenticationResult.state,
           user: authenticationResult.user,
           authResponseHeaders: authenticationResult.authResponseHeaders,
+          userProfileGrant: authenticationResult.userProfileGrant,
         })
       : authenticationResult;
   }
@@ -846,4 +1037,38 @@ export class Authenticator {
       ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
       : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }
+}
+
+export function enrichWithUserProfileId(
+  authenticationResult: AuthenticationResult,
+  sessionValue: SessionValue | null
+) {
+  if (
+    !authenticationResult.user ||
+    !sessionValue?.userProfileId ||
+    authenticationResult.user.profile_uid === sessionValue.userProfileId
+  ) {
+    return authenticationResult;
+  }
+
+  const enrichedUser: AuthenticatedUser = {
+    ...authenticationResult.user,
+    profile_uid: sessionValue.userProfileId,
+  };
+
+  if (authenticationResult.redirected()) {
+    return AuthenticationResult.redirectTo(authenticationResult.redirectURL!, {
+      user: enrichedUser,
+      userProfileGrant: authenticationResult.userProfileGrant,
+      authResponseHeaders: authenticationResult.authResponseHeaders,
+      state: authenticationResult.state,
+    });
+  }
+
+  return AuthenticationResult.succeeded(enrichedUser, {
+    userProfileGrant: authenticationResult.userProfileGrant,
+    authHeaders: authenticationResult.authHeaders,
+    authResponseHeaders: authenticationResult.authResponseHeaders,
+    state: authenticationResult.state,
+  });
 }

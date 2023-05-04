@@ -15,7 +15,8 @@ export const progressSemicircle: ElementFactory = () => ({
   help: 'Displays progress as a portion of a semicircle',
   width: 200,
   height: 100,
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | progress shape="semicircle" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}

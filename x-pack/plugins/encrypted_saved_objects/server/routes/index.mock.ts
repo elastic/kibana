@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { FeaturesAPIClient } from './features_api_client';
 
 export class FeaturesPlugin implements Plugin<FeaturesPluginSetup, FeaturesPluginStart> {

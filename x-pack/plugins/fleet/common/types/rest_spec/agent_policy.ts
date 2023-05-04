@@ -7,16 +7,18 @@
 
 import type { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
 
-import type { ListResult, ListWithKuery } from './common';
+import type { ListResult, ListWithKuery, BulkGetResult } from './common';
 
 export interface GetAgentPoliciesRequest {
   query: ListWithKuery & {
+    noAgentCount?: boolean;
     full?: boolean;
   };
 }
 
 export type GetAgentPoliciesResponseItem = AgentPolicy & { agents?: number };
 
+export type BulkGetAgentPoliciesResponse = BulkGetResult<GetAgentPoliciesResponseItem>;
 export type GetAgentPoliciesResponse = ListResult<GetAgentPoliciesResponseItem>;
 
 export interface GetOneAgentPolicyRequest {
@@ -75,5 +77,9 @@ export interface GetFullAgentPolicyResponse {
 }
 
 export interface GetFullAgentConfigMapResponse {
+  item: string;
+}
+
+export interface GetFullAgentManifestResponse {
   item: string;
 }

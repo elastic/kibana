@@ -14,7 +14,7 @@ import React, {
   useMemo,
   useLayoutEffect,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiFlyoutProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
 
@@ -47,7 +47,7 @@ export interface Props {
    * The total max width with all the panels in the DOM
    * Corresponds to the "maxWidth" prop passed to the EuiFlyout
    */
-  maxWidth: number;
+  maxWidth: EuiFlyoutProps['maxWidth'];
   /** The className selector of the flyout */
   flyoutClassName: string;
   /** The size between the panels. Corresponds to EuiFlexGroup gutterSize */
@@ -110,20 +110,27 @@ export const Panels: React.FC<Props> = ({
 
     let currentWidth: number;
 
-    if (fixedPanelWidths) {
-      const totalWidth = Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0);
-      currentWidth = Math.min(maxWidth, totalWidth);
-      // As EUI declares both min-width and max-width on the .euiFlyout CSS class
-      // we need to override  both values
-      flyoutDOMelement.style.minWidth = `${limitWidthToWindow(currentWidth, window)}px`;
-      flyoutDOMelement.style.maxWidth = `${limitWidthToWindow(currentWidth, window)}px`;
+    if (typeof maxWidth === 'number') {
+      if (fixedPanelWidths) {
+        const totalWidth = Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0);
+        currentWidth = Math.min(maxWidth, totalWidth);
+        // As EUI declares both min-width and max-width on the .euiFlyout CSS class
+        // we need to override  both values
+        flyoutDOMelement.style.minWidth = `${limitWidthToWindow(currentWidth, window)}px`;
+        flyoutDOMelement.style.maxWidth = `${limitWidthToWindow(currentWidth, window)}px`;
+      } else {
+        const totalPercentWidth = Math.min(
+          100,
+          Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
+        );
+        currentWidth = (maxWidth * totalPercentWidth) / 100;
+        flyoutDOMelement.style.maxWidth = `${limitWidthToWindow(currentWidth, window)}px`;
+      }
     } else {
-      const totalPercentWidth = Math.min(
-        100,
-        Object.values(panels).reduce((acc, { width = 0 }) => acc + width, 0)
-      );
-      currentWidth = (maxWidth * totalPercentWidth) / 100;
-      flyoutDOMelement.style.maxWidth = `${limitWidthToWindow(currentWidth, window)}px`;
+      // maxWidth is false on smaller mobile screens when the preview panel is unused.
+      // Unset custom min/max widths and let EUI's default 90vw width be used
+      flyoutDOMelement.style.minWidth = '';
+      flyoutDOMelement.style.maxWidth = '';
     }
   }, [panels, maxWidth, fixedPanelWidths, flyoutClassName, flyoutDOMelement]);
 

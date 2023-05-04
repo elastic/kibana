@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -22,9 +22,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-// @ts-expect-error
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { ColorRules } from '../color_rules';
 import { YesNo } from '../yes_no';
@@ -50,7 +48,7 @@ export class MetricPanelConfig extends Component<
       (model.background_color_rules && model.background_color_rules.length === 0)
     ) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }],
+        background_color_rules: [{ id: uuidv1() }],
       });
     }
   }

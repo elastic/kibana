@@ -6,17 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
-// @ts-ignore
 import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
-// @ts-ignore
 import { calculateNodeType } from './calculate_node_type';
-// @ts-ignore
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
 import {
   ElasticsearchSource,
@@ -24,6 +17,8 @@ import {
   ElasticsearchLegacySource,
 } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   clusterState: ElasticsearchSource['cluster_state'],
@@ -100,7 +95,6 @@ export function handleResponse(
 
 export function getNodeSummary(
   req: LegacyRequest,
-  esIndexPattern: string,
   clusterState: ElasticsearchSource['cluster_state'],
   shardStats: any,
   {
@@ -110,25 +104,40 @@ export function getNodeSummary(
     end,
   }: { clusterUuid: string; nodeUuid: string; start: number; end: number }
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getNodeSummary');
-
-  // Build up the Elasticsearch request
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [
     {
       term: { 'source_node.uuid': nodeUuid },
     },
   ];
+
+  const dataset = 'node_stats';
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    dataset,
+    moduleType,
+  });
+
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({ type: 'node_stats', start, end, clusterUuid, metric, filters }),
+      query: createQuery({
+        type: dataset,
+        dsDataset: getElasticsearchDataset(dataset),
+        metricset: dataset,
+        start,
+        end,
+        clusterUuid,
+        metric,
+        filters,
+      }),
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then(
     handleResponse(clusterState, shardStats, nodeUuid)

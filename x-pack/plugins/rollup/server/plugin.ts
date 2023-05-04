@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
+import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
@@ -18,7 +19,6 @@ import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
 import { handleEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -92,7 +92,9 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
     if (usageCollection) {
       try {
-        registerRollupUsageCollector(usageCollection, savedObjects.getKibanaIndex());
+        const getIndexForType = (type: string) =>
+          getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+        registerRollupUsageCollector(usageCollection, getIndexForType);
       } catch (e) {
         this.logger.warn(`Registering Rollup collector failed: ${e}`);
       }

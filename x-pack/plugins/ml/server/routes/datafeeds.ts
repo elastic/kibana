@@ -37,7 +37,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDatafeeds();
+        const body = await mlClient.getDatafeeds();
         return response.ok({
           body,
         });
@@ -69,7 +69,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const { body } = await mlClient.getDatafeeds({ datafeed_id: datafeedId });
+        const body = await mlClient.getDatafeeds({ datafeed_id: datafeedId });
 
         return response.ok({
           body,
@@ -97,7 +97,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDatafeedStats();
+        const body = await mlClient.getDatafeedStats();
         return response.ok({
           body,
         });
@@ -129,7 +129,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const { body } = await mlClient.getDatafeedStats({
+        const body = await mlClient.getDatafeedStats({
           datafeed_id: datafeedId,
         });
 
@@ -166,9 +166,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const { body } = await mlClient.putDatafeed(
+        const body = await mlClient.putDatafeed(
           {
             datafeed_id: datafeedId,
+            // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -207,9 +208,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const { body } = await mlClient.updateDatafeed(
+        const body = await mlClient.updateDatafeed(
           {
             datafeed_id: datafeedId,
+            // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -255,7 +257,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
           options.force = force;
         }
 
-        const { body } = await mlClient.deleteDatafeed(options);
+        const body = await mlClient.deleteDatafeed(options);
 
         return response.ok({
           body,
@@ -292,7 +294,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
         const datafeedId = request.params.datafeedId;
         const { start, end } = request.body;
 
-        const { body } = await mlClient.startDatafeed({
+        const body = await mlClient.startDatafeed({
           datafeed_id: datafeedId,
           body: {
             start: start !== undefined ? String(start) : undefined,
@@ -332,7 +334,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       try {
         const datafeedId = request.params.datafeedId;
 
-        const { body } = await mlClient.stopDatafeed({
+        const body = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
         });
 
@@ -367,11 +369,11 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const { body } = await mlClient.previewDatafeed(
+        const body = await mlClient.previewDatafeed(
           {
             datafeed_id: datafeedId,
           },
-          getAuthorizationHeader(request)
+          { ...getAuthorizationHeader(request), maxRetries: 0 }
         );
 
         return response.ok({

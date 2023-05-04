@@ -10,6 +10,7 @@ import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,
+  groupByAuthorization,
   getOwnersFilter,
   includeFieldsRequiredForAuthentication,
 } from './utils';
@@ -26,16 +27,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -50,16 +49,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -78,16 +75,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -96,16 +91,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "b",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -128,16 +121,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "b",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -146,16 +137,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -174,8 +163,8 @@ describe('utils', () => {
       expect(includeFieldsRequiredForAuthentication()).toBeUndefined();
     });
 
-    it('returns an array with a single entry containing the owner field', () => {
-      expect(includeFieldsRequiredForAuthentication([])).toStrictEqual([OWNER_FIELD]);
+    it('returns undefined when the fields parameter is an empty array', () => {
+      expect(includeFieldsRequiredForAuthentication([])).toBeUndefined();
     });
 
     it('returns an array without duplicates and including the owner field', () => {
@@ -229,16 +218,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a.attributes.owner",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -254,16 +241,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a.attributes.owner",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -272,16 +257,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a.attributes.owner",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -292,6 +275,33 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('groupByAuthorization', () => {
+    const cases = [
+      { id: '1', type: 'cases', references: [], attributes: { owner: 'cases' } },
+      { id: '2', type: 'cases', references: [], attributes: { owner: 'securitySolution' } },
+      { id: '3', type: 'cases', references: [], attributes: { owner: 'securitySolution' } },
+    ];
+
+    it('partitions authorized and unauthorized cases correctly', () => {
+      const authorizedOwners = ['cases'];
+
+      const res = groupByAuthorization(cases, authorizedOwners);
+      expect(res).toEqual({ authorized: [cases[0]], unauthorized: [cases[1], cases[2]] });
+    });
+
+    it('partitions authorized and unauthorized cases correctly when there are not authorized entities', () => {
+      const res = groupByAuthorization(cases, []);
+      expect(res).toEqual({ authorized: [], unauthorized: cases });
+    });
+
+    it('partitions authorized and unauthorized cases correctly when there are no saved objects', () => {
+      const authorizedOwners = ['cases'];
+
+      const res = groupByAuthorization([], authorizedOwners);
+      expect(res).toEqual({ authorized: [], unauthorized: [] });
     });
   });
 });

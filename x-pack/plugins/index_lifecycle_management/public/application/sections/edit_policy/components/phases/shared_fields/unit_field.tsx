@@ -40,7 +40,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
                 onClick={() => setOpen((x) => !x)}
                 data-test-subj="show-filters-button"
               >
-                {options.find((x) => x.value === field.value)?.text}
+                {options.find((x) => x.value === field.value)?.text ?? `${field.value}`}
               </EuiButtonEmpty>
             }
             ownFocus

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
 
@@ -46,5 +46,6 @@ describe('diagnostics telemetry task test', () => {
     expect(mockTelemetryEventsSender.queueTelemetryEvents).toHaveBeenCalledWith(
       testDiagnosticsAlerts.hits.hits.flatMap((doc) => [doc._source])
     );
+    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(1);
   });
 });

@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110898
-/* eslint-disable @kbn/eslint/no_export_all */
-
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
-export * from './shared';
+export type {
+  DatafeedStats as MlDatafeedStats,
+  Job as MlJob,
+  MlSummaryJob,
+  SummaryJobState as MlSummaryJobState,
+  AlertingService as MlAlertingService,
+  AnomalyDetectors as MlAnomalyDetectors,
+  JobService as MlJobService,
+  MlSystem as MlMlSystem,
+  Modules as MlModules,
+  ResultsService as MlResultsService,
+  TrainedModels as MlTrainedModels,
+} from './shared';
+export {
+  UnknownMLCapabilitiesError,
+  InsufficientMLCapabilities,
+  MLPrivilegesUninitialized,
+} from './shared';
 
 export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);

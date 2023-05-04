@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
-import { TileMapVisConfig } from './types';
-import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
+import type { Filter } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { TileMapVisConfig } from './types';
 import { MapComponent } from '../../embeddable/map_component';
+import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
 
 interface Props {
   filters?: Filter[];
@@ -25,16 +26,13 @@ function TileMapVisualization(props: Props) {
     lon: props.visConfig.mapCenter[1],
     zoom: props.visConfig.mapZoom,
   };
-  function getLayerDescriptors({
-    createTileMapLayerDescriptor,
-  }: {
-    createTileMapLayerDescriptor: LazyLoadedMapModules['createTileMapLayerDescriptor'];
-  }) {
+  function getLayerDescriptors() {
     const layerDescriptor = createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
   }
   return (
     <MapComponent
+      title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
       timeRange={props.timeRange}

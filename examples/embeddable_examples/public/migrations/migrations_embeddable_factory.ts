@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableStateWithType } from '../../../../src/plugins/embeddable/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   IContainer,
   EmbeddableInput,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { SimpleEmbeddable } from './migrations_embeddable';
 import { migration730 } from './migration.7.3.0';
 

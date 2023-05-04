@@ -5,14 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useEffect, useRef } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { UseField, useFormData, ES_FIELD_TYPES, useFormContext } from '../../../shared_imports';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  UseField,
+  useFormData,
+  ES_FIELD_TYPES,
+  useFormContext,
+  SerializedFieldFormat,
+} from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
 import { FormatSelectEditor } from '../../field_format_editor';
 import type { FieldFormInternal } from '../field_editor';
-import type { FieldFormatConfig } from '../../../types';
 
 export const FormatField = () => {
   const { dataView, uiSettings, fieldFormats, fieldFormatEditors } = useFieldEditorContext();
@@ -44,7 +49,7 @@ export const FormatField = () => {
   }, [type, getFields]);
 
   return (
-    <UseField<FieldFormatConfig | undefined> path="format">
+    <UseField<SerializedFieldFormat | undefined> path="format">
       {({ setValue, errors, value }) => {
         return (
           <>

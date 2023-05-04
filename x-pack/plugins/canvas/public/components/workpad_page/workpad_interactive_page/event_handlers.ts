@@ -76,7 +76,6 @@ const setupHandler = (commit: CommitFn, canvasOrigin: CanvasOriginFn, zoomScale?
       return;
     }
 
-    e.stopPropagation();
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
     resetHandler();
@@ -123,7 +122,6 @@ const handleMouseDown = (
     return;
   }
 
-  e.stopPropagation();
   if (buttons !== 1 || !commit) {
     resetHandler();
     return; // left-click only

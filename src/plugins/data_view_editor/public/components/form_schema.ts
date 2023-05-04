@@ -6,29 +6,47 @@
  * Side Public License, v 1.
  */
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { fieldValidators } from '../shared_imports';
-import { INDEX_PATTERN_TYPE } from '../types';
+import { fieldValidators, ValidationFunc } from '../shared_imports';
+
+export const singleAstriskValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value, path }] = args;
+
+  const message = i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
+    defaultMessage: "A single '*' is not an allowed index pattern",
+  });
+
+  return value === '*' ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+};
 
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
-      defaultMessage: 'Name',
+      defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
-      defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
-    }),
     validations: [
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'A name is required.',
+            defaultMessage: 'An index pattern is required.',
           })
         ),
       },
+      {
+        validator: singleAstriskValidator,
+      },
     ],
+  },
+  name: {
+    label: i18n.translate('indexPatternEditor.editor.form.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    defaultValue: '',
+    validations: [],
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {
@@ -59,5 +77,12 @@ export const schema = {
       defaultMessage: 'Data view type',
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
+  },
+  isAdHoc: {
+    label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
+      defaultMessage: 'Create AdHoc DataView',
+    }),
+    defaultValue: false,
+    type: 'hidden',
   },
 };

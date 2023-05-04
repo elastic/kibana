@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/e
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   theme: EuiTheme | undefined;
@@ -40,6 +40,7 @@ export const ModeSwitcher = withTheme(
             <>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="infraModeSwitcherCancelButton"
                   size="s"
                   flush="left"
                   onClick={onEditCancel}
@@ -56,6 +57,7 @@ export const ModeSwitcher = withTheme(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="infraModeSwitcherSaveButton"
                   onClick={onSave}
                   size="s"
                   fill
@@ -75,6 +77,7 @@ export const ModeSwitcher = withTheme(
             <>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="infraModeSwitcherEditButton"
                   size="s"
                   flush="left"
                   onClick={onEdit}
@@ -92,6 +95,7 @@ export const ModeSwitcher = withTheme(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="infraModeSwitcherAddMetricButton"
                   onClick={onAdd}
                   size="s"
                   flush="right"

@@ -58,6 +58,10 @@ export const getStringBasedClassName = (v: string | boolean | undefined | number
   if (typeof v === 'boolean') {
     return v ? 'True' : 'False';
   }
+
+  if (v === 'true') return 'True';
+  if (v === 'false') return 'False';
+
   if (typeof v === 'number') {
     return v.toString();
   }
@@ -94,6 +98,7 @@ export const useDecisionPathData = ({
         predictedProbability,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseline, featureImportance, predictedValue]);
 
   return { decisionPathData };

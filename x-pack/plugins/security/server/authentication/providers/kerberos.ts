@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
@@ -156,14 +156,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     };
     try {
       // @ts-expect-error authentication.email can be optional
-      tokens = (
-        await this.options.client.asInternalUser.security.getToken({
-          body: {
-            grant_type: '_kerberos',
-            kerberos_ticket: kerberosTicket,
-          },
-        })
-      ).body;
+      tokens = await this.options.client.asInternalUser.security.getToken({
+        body: {
+          grant_type: '_kerberos',
+          kerberos_ticket: kerberosTicket,
+        },
+      });
     } catch (err) {
       this.logger.debug(
         `Failed to exchange SPNEGO token for an access token: ${getDetailedErrorMessage(err)}`
@@ -219,6 +217,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(tokens.authentication),
       {
+        userProfileGrant: { type: 'accessToken', accessToken: tokens.access_token },
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
         },

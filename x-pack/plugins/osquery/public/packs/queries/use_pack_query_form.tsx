@@ -6,114 +6,104 @@
  */
 
 import { isArray, isEmpty, xor } from 'lodash';
-import uuid from 'uuid';
+import { useForm as useHookForm } from 'react-hook-form';
+import type { Draft } from 'immer';
 import { produce } from 'immer';
-
 import { useMemo } from 'react';
-import { FormConfig, useForm } from '../../shared_imports';
-import { createFormSchema } from './schema';
-
-const FORM_ID = 'editQueryFlyoutForm';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { Shard } from '../../../common/schemas/common/utils';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
-  defaultValue?: PackFormData | undefined;
-  handleSubmit: FormConfig<PackFormData, PackFormData>['onSubmit'];
+  defaultValue?: PackSOQueryFormData | undefined;
 }
 
-export interface PackSOFormData {
+export interface PackSOQueryFormData {
   id: string;
   query: string;
-  interval: number;
+  interval: string;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string | undefined;
   version?: string | undefined;
-  ecs_mapping?: Array<{ field: string; value: string }> | undefined;
+  ecs_mapping?: ECSMapping;
+  shards: Shard;
 }
 
-export interface PackFormData {
+export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
+
+export interface PackQueryFormData {
   id: string;
+  description?: string;
   query: string;
   interval: number;
+  snapshot?: boolean;
+  removed?: boolean;
   platform?: string | undefined;
-  version?: string | undefined;
-  ecs_mapping?:
-    | Record<
-        string,
-        {
-          field: string;
-        }
-      >
-    | undefined;
+  version?: string[] | undefined;
+  ecs_mapping: ECSMapping;
 }
 
-export const usePackQueryForm = ({
-  uniqueQueryIds,
-  defaultValue,
-  handleSubmit,
-}: UsePackQueryFormProps) => {
+const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({
+  id: payload.id,
+  query: payload.query,
+  interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  snapshot: payload.snapshot,
+  removed: payload.removed,
+  platform: payload.platform,
+  version: payload.version ? [payload.version] : [],
+  ecs_mapping: payload.ecs_mapping ?? {},
+});
+
+const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
+  // @ts-expect-error update types
+  produce<PackQueryFormData>(payload, (draft: Draft<PackSOQueryFormData>) => {
+    if (isArray(draft.platform)) {
+      if (draft.platform.length) {
+        draft.platform.join(',');
+      } else {
+        delete draft.platform;
+      }
+    }
+
+    if (isArray(draft.version)) {
+      if (!draft.version.length) {
+        delete draft.version;
+      } else {
+        draft.version = draft.version[0];
+      }
+    }
+
+    if (draft.interval) {
+      draft.interval = draft.interval + '';
+    }
+
+    if (isEmpty(draft.ecs_mapping)) {
+      delete draft.ecs_mapping;
+    }
+
+    return draft;
+  });
+
+export const usePackQueryForm = ({ uniqueQueryIds, defaultValue }: UsePackQueryFormProps) => {
   const idSet = useMemo<Set<string>>(
     () => new Set<string>(xor(uniqueQueryIds, defaultValue?.id ? [defaultValue.id] : [])),
     [uniqueQueryIds, defaultValue]
   );
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
-    () => createFormSchema(idSet),
-    [idSet]
-  );
 
-  return useForm<PackSOFormData, PackFormData>({
-    id: FORM_ID + uuid.v4(),
-    onSubmit: async (formData, isValid) => {
-      if (isValid && handleSubmit) {
-        // @ts-expect-error update types
-        return handleSubmit(formData, isValid);
-      }
-    },
-    options: {
-      stripEmptyFields: true,
-    },
-    // @ts-expect-error update types
-    defaultValue: defaultValue || {
-      id: '',
-      query: '',
-      interval: 3600,
-      ecs_mapping: {},
-    },
-    // @ts-expect-error update types
-    serializer: (payload) =>
-      produce(payload, (draft) => {
-        if (isArray(draft.platform)) {
-          draft.platform.join(',');
-        }
-        if (draft.platform?.split(',').length === 3) {
-          // if all platforms are checked then use undefined
-          delete draft.platform;
-        }
-        if (isArray(draft.version)) {
-          if (!draft.version.length) {
-            delete draft.version;
-          } else {
-            draft.version = draft.version[0];
-          }
-        }
-        if (isEmpty(draft.ecs_mapping)) {
-          delete draft.ecs_mapping;
-        }
-        return draft;
-      }),
-    // @ts-expect-error update types
-    deserializer: (payload) => {
-      if (!payload) return {} as PackFormData;
-
-      return {
-        id: payload.id,
-        query: payload.query,
-        interval: payload.interval,
-        platform: payload.platform,
-        version: payload.version ? [payload.version] : [],
-        ecs_mapping: payload.ecs_mapping ?? {},
-      };
-    },
-    // @ts-expect-error update types
-    schema: formSchema,
-  });
+  return {
+    serializer,
+    idSet,
+    ...useHookForm<PackQueryFormData>({
+      defaultValues: defaultValue
+        ? deserializer(defaultValue)
+        : {
+            id: '',
+            query: '',
+            interval: 3600,
+            snapshot: true,
+            removed: false,
+          },
+    }),
+  };
 };

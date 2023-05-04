@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_JAVA_THREAD_COUNT,
+  METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
   AGENT_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+} from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   threadCount: {
@@ -44,32 +46,41 @@ const chartBase: ChartBase = {
 export async function getThreadCountChart({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const threadCountField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_THREADS_COUNT
+    : METRIC_JAVA_THREAD_COUNT;
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     serviceNodeName,
     start,
     end,
     chartBase,
     aggs: {
-      threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
-      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
+      threadCount: { avg: { field: threadCountField } },
+      threadCountMax: { max: { field: threadCountField } },
     },
     additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
     operationName: 'get_thread_count_charts',

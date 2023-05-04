@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { ConfigurationStep } from './configuration_step/index';
-export { AdvancedStep } from './advanced_step/index';
-export { DetailsStep } from './details_step/index';
-export { CreateStep } from './create_step/index';
-export { ValidationStepWrapper } from './validation_step/index';
+export { ConfigurationStep } from './configuration_step';
+export { AdvancedStep } from './advanced_step';
+export { DetailsStep } from './details_step';
+export { CreateStep } from './create_step';
+export { ValidationStepWrapper } from './validation_step';

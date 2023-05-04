@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '@kbn/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
 import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
@@ -47,7 +47,7 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { name } = request.params;
 
@@ -69,11 +69,9 @@ export const register = (deps: RouteDependencies): void => {
       // Update cluster as new settings
       const updateClusterPayload = serializeCluster({ ...request.body, name } as Cluster);
 
-      const { body: updateClusterResponse } = await clusterClient.asCurrentUser.cluster.putSettings(
-        {
-          body: updateClusterPayload,
-        }
-      );
+      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
+        body: updateClusterPayload,
+      });
 
       const acknowledged = get(updateClusterResponse, 'acknowledged');
       const cluster = get(

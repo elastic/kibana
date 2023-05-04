@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { SearchHit } from '../../../common';
-
 interface AnomaliesOverTimeHistogramData {
   key_as_string: string;
   key: number;
@@ -19,16 +17,4 @@ export interface AnomaliesActionGroupData {
     bucket: AnomaliesOverTimeHistogramData[];
   };
   doc_count: number;
-}
-
-export interface AnomalySource {
-  [field: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-}
-
-export interface AnomalyHit extends SearchHit {
-  sort: string[];
-  _source: AnomalySource;
-  aggregations: {
-    [agg: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  };
 }

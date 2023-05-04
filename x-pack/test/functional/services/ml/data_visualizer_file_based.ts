@@ -103,9 +103,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertCreateIndexPatternCheckboxValue(expectedValue: boolean) {
-      const isChecked = await testSubjects.isChecked(
-        'dataVisualizerFileCreateIndexPatternCheckbox'
-      );
+      const isChecked = await testSubjects.isChecked('dataVisualizerFileCreateDataViewCheckbox');
       expect(isChecked).to.eql(
         expectedValue,
         `Expected create index pattern checkbox to be ${expectedValue ? 'checked' : 'unchecked'}`
@@ -113,20 +111,18 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async setCreateIndexPatternCheckboxState(newState: boolean) {
-      const isChecked = await testSubjects.isChecked(
-        'dataVisualizerFileCreateIndexPatternCheckbox'
-      );
+      const isChecked = await testSubjects.isChecked('dataVisualizerFileCreateDataViewCheckbox');
       if (isChecked !== newState) {
         // this checkbox can't be clicked directly, instead click the corresponding label
         const panel = await testSubjects.find('dataVisualizerFileImportSettingsPanel');
-        const label = await panel.findByCssSelector('[for="createIndexPattern"]');
+        const label = await panel.findByCssSelector('[for="createDataView"]');
         await label.click();
       }
       await this.assertCreateIndexPatternCheckboxValue(newState);
     },
 
     async startImportAndWaitForProcessing() {
-      await testSubjects.clickWhenNotDisabled('dataVisualizerFileImportButton');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerFileImportButton');
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('dataVisualizerFileImportSuccessCallout');
       });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for the Logged Out view.
@@ -25,7 +25,7 @@ export function defineLoggedOutRoutes({
     async (context, request, response) => {
       // Authentication flow isn't triggered automatically for this route, so we should explicitly
       // check whether user has an active session already.
-      const isUserAlreadyLoggedIn = (await getSession().get(request)) !== null;
+      const isUserAlreadyLoggedIn = (await getSession().get(request)).value !== null;
       if (isUserAlreadyLoggedIn) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({

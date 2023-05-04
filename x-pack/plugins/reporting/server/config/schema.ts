@@ -42,26 +42,11 @@ const QueueSchema = schema.object({
   }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
   timeout: schema.oneOf([schema.number(), schema.duration()], {
-    defaultValue: moment.duration({ minutes: 2 }),
+    defaultValue: moment.duration({ minutes: 4 }),
   }),
 });
 
 const CaptureSchema = schema.object({
-  timeouts: schema.object({
-    openUrl: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration({ minutes: 1 }),
-    }),
-    waitForElements: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration({ seconds: 30 }),
-    }),
-    renderComplete: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration({ seconds: 30 }),
-    }),
-  }),
-  zoom: schema.number({ defaultValue: 2 }),
-  loadDelay: schema.oneOf([schema.number(), schema.duration()], {
-    defaultValue: moment.duration({ seconds: 3 }),
-  }),
   maxAttempts: schema.conditional(
     schema.contextRef('dist'),
     true,

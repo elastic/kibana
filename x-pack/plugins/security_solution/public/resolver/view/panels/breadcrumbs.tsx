@@ -7,7 +7,7 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { ThemedBreadcrumbs } from './styles';
 import { useColors } from '../use_colors';

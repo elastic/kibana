@@ -54,10 +54,10 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nats_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/nats_metrics/screenshot.webp',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['message_queue', 'observability'],
   };
 }

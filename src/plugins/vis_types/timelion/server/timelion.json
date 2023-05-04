@@ -1,13 +1,7 @@
 {
-  "quandl": {
-    "key": "someKeyHere"
-  },
   "es": {
     "timefield": "@timestamp",
     "default_index": "_all"
-  },
-  "graphite": {
-    "url": "https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite"
   },
   "default_rows": 2,
   "default_columns": 2,

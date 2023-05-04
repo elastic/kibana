@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadAlert, loadAlertType } from './alert_api';
-import { Alert, AlertNavigation } from '../common';
+import { loadRule, loadRuleType } from './services/alert_api';
+import { ENABLE_MAINTENANCE_WINDOWS, Rule } from '../common';
+import { MAINTENANCE_WINDOWS_APP_ID } from './config';
 
 export interface PluginSetupContract {
   /**
@@ -18,7 +23,7 @@ export interface PluginSetupContract {
    * anything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently
    * the trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.
    *
-   * @param applicationId The application id that the user should be navigated to, to view a particular alert in a custom way.
+   * @param applicationId The application id that the user should be navigated to, to view a particular rule in a custom way.
    * @param ruleType The rule type that has been registered with Alerting.Server.PluginSetupContract.registerType. If
    * no such rule with that id exists, a warning is output to the console log. It used to throw an error, but that was temporarily moved
    * because it was causing flaky test failures with https://github.com/elastic/kibana/issues/59229 and needs to be
@@ -26,6 +31,8 @@ export interface PluginSetupContract {
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
    * @throws an error if the given applicationId and ruleType combination has already been registered.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerNavigation: (
     applicationId: string,
@@ -39,20 +46,38 @@ export interface PluginSetupContract {
    * anything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently
    * the trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.
    *
-   * @param applicationId The application id that the user should be navigated to, to view a particular alert in a custom way.
+   * @param applicationId The application id that the user should be navigated to, to view a particular rule in a custom way.
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerDefaultNavigation: (applicationId: string, handler: AlertNavigationHandler) => void;
 }
 export interface PluginStartContract {
-  getNavigation: (alertId: Alert['id']) => Promise<AlertNavigation | undefined>;
+  getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
+}
+export interface AlertingPluginSetup {
+  management: ManagementSetup;
 }
 
-export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
+export interface AlertingPluginStart {
+  licensing: LicensingPluginStart;
+  spaces: SpacesPluginStart;
+}
+
+export class AlertingPublicPlugin
+  implements
+    Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
+{
   private alertNavigationRegistry?: AlertNavigationRegistry;
-  public setup(core: CoreSetup) {
+
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
+
+    const kibanaVersion = this.initContext.env.packageInfo.version;
 
     const registerNavigation = async (
       applicationId: string,
@@ -67,6 +92,31 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
+    if (ENABLE_MAINTENANCE_WINDOWS) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: MAINTENANCE_WINDOWS_APP_ID,
+        title: i18n.translate('xpack.alerting.management.section.title', {
+          defaultMessage: 'Maintenance Windows',
+        }),
+        async mount(params: ManagementAppMountParams) {
+          const { renderApp } = await import('./application/maintenance_windows');
+
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            AlertingPluginStart,
+            unknown
+          ];
+
+          return renderApp({
+            core: coreStart,
+            plugins: pluginsStart,
+            mountParams: params,
+            kibanaVersion,
+          });
+        },
+      });
+    }
+
     return {
       registerNavigation,
       registerDefaultNavigation,
@@ -75,22 +125,25 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
   public start(core: CoreStart) {
     return {
-      getNavigation: async (alertId: Alert['id']) => {
-        const alert = await loadAlert({ http: core.http, alertId });
-        const alertType = await loadAlertType({ http: core.http, id: alert.alertTypeId });
+      getNavigation: async (ruleId: Rule['id']) => {
+        const rule = await loadRule({ http: core.http, ruleId });
+        const ruleType = await loadRuleType({ http: core.http, id: rule.alertTypeId });
 
-        if (!alertType) {
+        if (!ruleType) {
           // eslint-disable-next-line no-console
           console.log(
-            `Unable to get navigation for alert type "${alert.alertTypeId}" because it is not registered on the server side.`
+            `Unable to get navigation for rule type "${rule.alertTypeId}" because it is not registered on the server side.`
           );
           return;
         }
 
-        if (this.alertNavigationRegistry!.has(alert.consumer, alertType)) {
-          const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, alertType);
-          const state = navigationHandler(alert);
-          return typeof state === 'string' ? { path: state } : { state };
+        if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
+          const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
+          return navigationHandler(rule);
+        }
+
+        if (rule.viewInAppRelativeUrl) {
+          return rule.viewInAppRelativeUrl;
         }
       },
     };

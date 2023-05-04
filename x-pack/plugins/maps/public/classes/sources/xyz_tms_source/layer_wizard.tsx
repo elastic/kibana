@@ -11,10 +11,12 @@ import { XYZTMSEditor, XYZTMSSourceConfig } from './xyz_tms_editor';
 import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 
 export const tmsLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.TMS_LAYER,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
     defaultMessage: 'Raster image tile map service using {z}/{x}/{y} url pattern.',

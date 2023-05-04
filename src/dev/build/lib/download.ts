@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { openSync, writeSync, unlinkSync, closeSync } from 'fs';
+import { openSync, writeSync, unlinkSync, closeSync, statSync } from 'fs';
 import { dirname } from 'path';
 import { setTimeout } from 'timers/promises';
 
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import Axios from 'axios';
-import { ToolingLog, isAxiosResponseError } from '@kbn/dev-utils';
+import { isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
@@ -39,6 +40,7 @@ interface DownloadToDiskOptions {
   shaAlgorithm: string;
   maxAttempts?: number;
   retryDelaySecMultiplier?: number;
+  skipChecksumCheck?: boolean;
 }
 export async function downloadToDisk({
   log,
@@ -48,8 +50,9 @@ export async function downloadToDisk({
   shaAlgorithm,
   maxAttempts = 1,
   retryDelaySecMultiplier = 5,
+  skipChecksumCheck = false,
 }: DownloadToDiskOptions) {
-  if (!shaChecksum) {
+  if (!shaChecksum && !skipChecksumCheck) {
     throw new Error(`${shaAlgorithm} checksum of ${url} not provided, refusing to download.`);
   }
 
@@ -69,7 +72,7 @@ export async function downloadToDisk({
     try {
       log.debug(
         `[${attempt}/${maxAttempts}] Attempting download of ${url}`,
-        chalk.dim(shaAlgorithm)
+        skipChecksumCheck ? '' : chalk.dim(shaAlgorithm)
       );
 
       const response = await Axios.request({
@@ -83,30 +86,47 @@ export async function downloadToDisk({
       }
 
       const hash = createHash(shaAlgorithm);
-      await new Promise((resolve, reject) => {
+      let bytesWritten = 0;
+
+      await new Promise<void>((resolve, reject) => {
         response.data.on('data', (chunk: Buffer) => {
-          hash.update(chunk);
-          writeSync(fileHandle, chunk);
+          if (!skipChecksumCheck) {
+            hash.update(chunk);
+          }
+
+          const bytes = writeSync(fileHandle, chunk);
+          bytesWritten += bytes;
         });
 
         response.data.on('error', reject);
-        response.data.on('end', resolve);
+        response.data.on('end', () => {
+          if (bytesWritten === 0) {
+            return reject(new Error(`No bytes written when downloading ${url}`));
+          }
+
+          return resolve();
+        });
       });
 
-      const downloadedSha = hash.digest('hex');
-      if (downloadedSha !== shaChecksum) {
-        throw new Error(
-          `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
-        );
+      if (!skipChecksumCheck) {
+        const downloadedSha = hash.digest('hex');
+        if (downloadedSha !== shaChecksum) {
+          throw new Error(
+            `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
+          );
+        }
       }
     } catch (_error) {
       error = _error;
     } finally {
       closeSync(fileHandle);
+
+      const fileStats = statSync(destination);
+      log.debug(`Downloaded ${fileStats.size} bytes to ${destination}`);
     }
 
     if (!error) {
-      log.debug(`Downloaded ${url} and verified checksum`);
+      log.debug(`Downloaded ${url} ${skipChecksumCheck ? '' : 'and verified checksum'}`);
       return;
     }
 

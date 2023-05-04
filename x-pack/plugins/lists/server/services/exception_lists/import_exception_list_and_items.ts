@@ -16,17 +16,15 @@ import {
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
+import { v4 as uuidv4 } from 'uuid';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
 import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
 import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
-import {
-  createExceptionsStreamFromNdjson,
-  exceptionsChecksFromArray,
-} from './utils/import/create_exceptions_stream_logic';
+import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
 
 export interface PromiseFromStreams {
   lists: Array<ImportExceptionListSchemaDecoded | Error>;
@@ -52,6 +50,7 @@ export interface ImportDataResponse {
 interface ImportExceptionListAndItemsOptions {
   exceptions: PromiseFromStreams;
   overwrite: boolean;
+  generateNewListId: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
 }
@@ -63,15 +62,6 @@ interface ImportExceptionListAndItemsAsStreamOptions {
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
 }
-
-interface ImportExceptionListAndItemsAsArrayOptions {
-  exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
-  maxExceptionsImportSize: number;
-  overwrite: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
-  user: string;
-}
-
 export type ExceptionsImport = Array<ImportExceptionListItemSchema | ImportExceptionsListSchema>;
 
 export const CHUNK_PARSED_OBJECT_SIZE = 100;
@@ -102,51 +92,54 @@ export const importExceptionsAsStream = async ({
 
   return importExceptions({
     exceptions: parsedObjects,
+    generateNewListId: false,
     overwrite,
     savedObjectsClient,
     user,
   });
 };
 
-/**
- * Import exception lists parent containers and items as array. The shape of the list and items
- * will be validated here as well.
- * @params exceptionsToImport {array} lists and items to be imported
- * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
- * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
- * @params savedObjectsClient {object} SO client
- * @params user {string} user importing list and items
- * @return {ImportExceptionsResponseSchema} summary of imported count and errors
- */
-export const importExceptionsAsArray = async ({
-  exceptionsToImport,
-  maxExceptionsImportSize,
-  overwrite,
-  savedObjectsClient,
-  user,
-}: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
-  // validation of import and sorting of lists and items
-  const objectsToImport = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
-
-  return importExceptions({
-    exceptions: objectsToImport,
-    overwrite,
-    savedObjectsClient,
-    user,
-  });
-};
-
-const importExceptions = async ({
+export const importExceptions = async ({
   exceptions,
   overwrite,
+  generateNewListId,
   savedObjectsClient,
   user,
 }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
+  let exceptionsToValidate = exceptions;
+  if (generateNewListId) {
+    // we need to generate a new list id and update the old list id references
+    // in each list item to point to the new list id
+    exceptionsToValidate = exceptions.lists.reduce(
+      (acc, exceptionList) => {
+        if (exceptionList instanceof Error) {
+          return { items: [...acc.items], lists: [...acc.lists] };
+        }
+        const newListId = uuidv4();
+
+        return {
+          items: [
+            ...acc.items,
+            ...exceptions.items
+              .filter(
+                (item) =>
+                  !(item instanceof Error) &&
+                  !(exceptionList instanceof Error) &&
+                  item?.list_id === exceptionList?.list_id
+              )
+              .map((item) => ({ ...item, list_id: newListId })),
+          ],
+          lists: [...acc.lists, { ...exceptionList, list_id: newListId }],
+        };
+      },
+      { items: [], lists: [] } as PromiseFromStreams
+    );
+  }
   // removal of duplicates
   const [exceptionListDuplicateErrors, uniqueExceptionLists] =
-    getTupleErrorsAndUniqueExceptionLists(exceptions.lists);
+    getTupleErrorsAndUniqueExceptionLists(exceptionsToValidate.lists);
   const [exceptionListItemsDuplicateErrors, uniqueExceptionListItems] =
-    getTupleErrorsAndUniqueExceptionListItems(exceptions.items);
+    getTupleErrorsAndUniqueExceptionListItems(exceptionsToValidate.items);
 
   // chunking of validated import stream
   const chunkParsedListObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionLists);
@@ -155,6 +148,7 @@ const importExceptions = async ({
   // where the magic happens - purposely importing parent exception
   // containers first, items second
   const importExceptionListsResponse = await importExceptionLists({
+    generateNewListId,
     isOverwrite: overwrite,
     listsChunks: chunkParsedListObjects,
     savedObjectsClient,

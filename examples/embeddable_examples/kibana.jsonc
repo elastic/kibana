@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/embeddable-examples-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Example app that shows how to register custom embeddables",
+  "plugin": {
+    "id": "embeddableExamples",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions",
+      "savedObjects",
+      "dashboard",
+      "kibanaUtils"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "public/todo",
+      "public/hello_world",
+      "public/todo/todo_ref_embeddable"
+    ]
+  }
+}

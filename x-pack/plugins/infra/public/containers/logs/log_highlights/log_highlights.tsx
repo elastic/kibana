@@ -6,18 +6,19 @@
  */
 
 import createContainer from 'constate';
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
+import { LogViewReference } from '../../../../common/log_views';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
-import { LogPositionState } from '../log_position';
+import { useLogPositionStateContext } from '../log_position';
 import { TimeKey } from '../../../../common/time';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 
 interface UseLogHighlightsStateProps {
-  sourceId: string;
+  logViewReference: LogViewReference;
   sourceVersion: string | undefined;
   centerCursor: TimeKey | null;
   size: number;
@@ -25,23 +26,22 @@ interface UseLogHighlightsStateProps {
 }
 
 export const useLogHighlightsState = ({
-  sourceId,
+  logViewReference,
   sourceVersion,
   centerCursor,
   size,
   filterQuery,
 }: UseLogHighlightsStateProps) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } = useContext(
-    LogPositionState.Context
-  );
+  const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } =
+    useLogPositionStateContext();
 
   const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
   const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
   const { logEntryHighlights, logEntryHighlightsById, loadLogEntryHighlightsRequest } =
     useLogEntryHighlights(
-      sourceId,
+      logViewReference,
       sourceVersion,
       throttledStartTimestamp,
       throttledEndTimestamp,
@@ -52,7 +52,7 @@ export const useLogHighlightsState = ({
     );
 
   const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
-    sourceId,
+    logViewReference,
     sourceVersion,
     throttledStartTimestamp,
     throttledEndTimestamp,
@@ -89,4 +89,5 @@ export const useLogHighlightsState = ({
   };
 };
 
-export const LogHighlightsState = createContainer(useLogHighlightsState);
+export const [LogHighlightsStateProvider, useLogHighlightsStateContext] =
+  createContainer(useLogHighlightsState);

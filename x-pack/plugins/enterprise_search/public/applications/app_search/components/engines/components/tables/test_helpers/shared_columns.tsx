@@ -12,9 +12,8 @@ import { ShallowWrapper } from 'enzyme';
 
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 
+import { EnginesLogic } from '../../..';
 import { rerender } from '../../../../../../test_helpers';
-
-import { EnginesLogic } from '../../../../engines';
 
 import * as engineLinkHelpers from '../engine_link_helpers';
 
@@ -23,7 +22,8 @@ export const runSharedColumnsTests = (
   tableContent: string,
   values: object = {}
 ) => {
-  const getTable = () => wrapper.find(EuiBasicTable).dive();
+  const getTableBody = () =>
+    wrapper.find(EuiBasicTable).dive().find('RenderWithEuiTheme').renderProp('children')();
 
   describe('name column', () => {
     it('renders', () => {
@@ -55,7 +55,7 @@ export const runSharedColumnsTests = (
   });
 
   describe('actions column', () => {
-    const getActions = () => getTable().find('ExpandedItemActions');
+    const getActions = () => getTableBody().find('ExpandedItemActions');
     const getActionItems = () => getActions().dive().find('DefaultItemAction');
 
     it('will hide the action buttons if the user cannot manage/delete engines', () => {

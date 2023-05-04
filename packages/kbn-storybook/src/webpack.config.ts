@@ -68,18 +68,28 @@ function isDesiredPreset(preset: Preset) {
 
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
-export default function ({ config: storybookConfig }: { config: Configuration }) {
+export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config = {
     devServer: {
       stats,
     },
     externals,
     module: {
+      // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary dependencies
+      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
+          },
+        },
+        {
+          test: /\.peggy$/,
+          use: {
+            loader: require.resolve('@kbn/peggy-loader'),
           },
         },
         {
@@ -91,8 +101,8 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             {
               loader: 'postcss-loader',
               options: {
-                config: {
-                  path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
                 },
               },
             },
@@ -102,7 +112,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
                 additionalData(content: string, loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
+                    resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                   )};\n${content}`;
                 },
                 implementation: require('node-sass'),
@@ -120,9 +130,10 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
+        core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+        vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
-      symlinks: false,
     },
     stats,
   };
@@ -139,14 +150,13 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       const options = (loader.options = { ...(loader.options as Record<string, any>) });
 
       // capture the plugins defined at the root level
-      const plugins: string[] = options.plugins;
+      const plugins: string[] = options.plugins ?? [];
       options.plugins = [];
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
-        {
-          plugins,
-        },
+        require.resolve('@kbn/babel-preset/common_preset'),
+        { plugins },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);
           if (!tsPreset) {
@@ -195,4 +205,4 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     config
   );
-}
+};

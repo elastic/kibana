@@ -1,0 +1,30 @@
+{
+  "description": "Security: Authentication - Detects unusually high number of authentication attempts.",
+  "groups": ["security", "authentication"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects high number of authentication attempts for a host.",
+        "function": "high_non_zero_count",
+        "partition_field_name": "host.name",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "user.name", "source.ip"],
+    "model_prune_window": "30d"
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-auth",
+    "security_app_display_name": "Unusual Login Activity",
+    "managed": true,
+    "job_revision": 4
+  }
+}

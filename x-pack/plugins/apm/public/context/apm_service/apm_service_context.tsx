@@ -6,39 +6,36 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { ValuesType } from 'utility-types';
-import { isRumAgentName } from '../../../common/agent_name';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { useHistory } from 'react-router-dom';
+import { History } from 'history';
+import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
-import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
-
-export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
->;
+import { replace } from '../../components/shared/links/url_helpers';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { ServerlessType } from '../../../common/serverless';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
+  serverlessType?: ServerlessType;
   transactionType?: string;
+  transactionTypeStatus: FETCH_STATUS;
   transactionTypes: string[];
-  alerts: APMServiceAlert[];
   runtimeName?: string;
   fallbackToTransactions: boolean;
+  serviceAgentStatus: FETCH_STATUS;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
+  transactionTypeStatus: FETCH_STATUS.NOT_INITIATED,
   transactionTypes: [],
-  alerts: [],
   fallbackToTransactions: false,
+  serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
 export function ApmServiceContextProvider({
@@ -46,38 +43,42 @@ export function ApmServiceContextProvider({
 }: {
   children: ReactNode;
 }) {
+  const history = useHistory();
+
   const {
     path: { serviceName },
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { agentName, runtimeName } = useServiceAgentFetcher({
+  const {
+    agentName,
+    runtimeName,
+    serverlessType,
+    status: serviceAgentStatus,
+  } = useServiceAgentFetcher({
     serviceName,
     start,
     end,
   });
 
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName,
-    start,
-    end,
-  });
+  const { transactionTypes, status: transactionTypeStatus } =
+    useServiceTransactionTypesFetcher({
+      serviceName,
+      start,
+      end,
+    });
 
-  const transactionType = getTransactionType({
+  const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
-  });
-
-  const { alerts } = useServiceAlertsFetcher({
-    serviceName,
-    transactionType,
-    environment: query.environment,
-    start,
-    end,
+    history,
   });
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -89,16 +90,34 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
-        transactionType,
+        serverlessType,
+        transactionType: currentTransactionType,
+        transactionTypeStatus,
         transactionTypes,
-        alerts,
         runtimeName,
         fallbackToTransactions,
+        serviceAgentStatus,
       }}
       children={children}
     />
   );
 }
+
+const isTypeExistsInTransactionTypesList = ({
+  transactionType,
+  transactionTypes,
+}: {
+  transactionType?: string;
+  transactionTypes: string[];
+}): boolean => !!transactionType && transactionTypes.includes(transactionType);
+
+const isNoAgentAndNoTransactionTypes = ({
+  transactionTypes,
+  agentName,
+}: {
+  transactionTypes: string[];
+  agentName?: string;
+}): boolean => !agentName || transactionTypes.length === 0;
 
 export function getTransactionType({
   transactionType,
@@ -108,22 +127,66 @@ export function getTransactionType({
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
-}) {
-  if (transactionType) {
-    return transactionType;
-  }
+}): string | undefined {
+  const isTransactionTypeExists = isTypeExistsInTransactionTypesList({
+    transactionType,
+    transactionTypes,
+  });
 
-  if (!agentName || transactionTypes.length === 0) {
-    return;
-  }
+  if (isTransactionTypeExists) return transactionType;
 
-  // The default transaction type is "page-load" for RUM agents and "request" for all others
-  const defaultTransactionType = isRumAgentName(agentName)
-    ? TRANSACTION_PAGE_LOAD
-    : TRANSACTION_REQUEST;
+  const isNoAgentAndNoTransactionTypesExists = isNoAgentAndNoTransactionTypes({
+    transactionTypes,
+    agentName,
+  });
+
+  if (isNoAgentAndNoTransactionTypesExists) return undefined;
+
+  const defaultTransactionType = getDefaultTransactionType(agentName);
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  return transactionTypes.includes(defaultTransactionType)
+  const currentTransactionType = transactionTypes.includes(
+    defaultTransactionType
+  )
     ? defaultTransactionType
     : transactionTypes[0];
+
+  return currentTransactionType;
+}
+
+export function getOrRedirectToTransactionType({
+  transactionType,
+  transactionTypes,
+  agentName,
+  history,
+}: {
+  transactionType?: string;
+  transactionTypes: string[];
+  agentName?: string;
+  history: History;
+}) {
+  const isTransactionTypeExists = isTypeExistsInTransactionTypesList({
+    transactionType,
+    transactionTypes,
+  });
+
+  if (isTransactionTypeExists) return transactionType;
+
+  const isNoAgentAndNoTransactionTypesExists = isNoAgentAndNoTransactionTypes({
+    transactionTypes,
+    agentName,
+  });
+
+  if (isNoAgentAndNoTransactionTypesExists) return undefined;
+
+  const currentTransactionType = getTransactionType({
+    transactionTypes,
+    transactionType,
+    agentName,
+  });
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  replace(history, { query: { transactionType: currentTransactionType! } });
+
+  return currentTransactionType;
 }

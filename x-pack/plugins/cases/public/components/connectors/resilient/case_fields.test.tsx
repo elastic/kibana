@@ -7,13 +7,17 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { waitFor, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { connector } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import Fields from './case_fields';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');
@@ -61,8 +65,10 @@ describe('ResilientParamsFields renders', () => {
   };
 
   const onChange = jest.fn();
+  let mockedContext: AppMockRenderer;
 
   beforeEach(() => {
+    mockedContext = createAppMockRenderer();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     jest.clearAllMocks();
@@ -132,5 +138,41 @@ describe('ResilientParamsFields renders', () => {
       });
 
     expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '4' });
+  });
+
+  it('should submit a resilient connector', async () => {
+    const { rerender } = mockedContext.render(
+      <Fields fields={fields} onChange={onChange} connector={connector} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Low' }));
+    });
+
+    const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    userEvent.type(checkbox, 'Denial of Service{enter}');
+
+    rerender(
+      <Fields
+        fields={{ ...fields, incidentTypes: ['21'] }}
+        onChange={onChange}
+        connector={connector}
+      />
+    );
+
+    userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    expect(onChange).toBeCalledWith({
+      incidentTypes: ['21'],
+      severityCode: '4',
+    });
   });
 });

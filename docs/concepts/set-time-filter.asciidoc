@@ -6,19 +6,18 @@ selected <<data-views, {data-source}>>.
 The default time range is 15 minutes, but you can customize
 it in <<advanced-options,Advanced Settings>>.
 
-. Click image:concepts/images/time-filter-icon.png[clock icon].
+. Click image:concepts/images/time-filter-icon.png[calendar icon, width=36px].
 
 . Choose one of the following:
 
-* *Quick select* to use a recent time range, then use the back and forward
-  arrows to move through the time ranges.
+* *Quick select*. Set a time based on the last or next number of seconds, minutes, hours, or other time unit.
 
-* *Commonly used* to use a time range from options such as *Last 15 minutes*,
+* *Commonly used*. Select a time range from options such as *Last 15 minutes*,
   *Today*, and *Week to date*.
 
-* *Recently used date ranges* to use a previously selected data range.
+* *Recently used date ranges*. Use a previously selected data range.
 
-* *Refresh every* to specify an automatic refresh rate.
+* *Refresh every*. Specify an automatic refresh rate.
 +
 [role="screenshot"]
 image::concepts/images/time-filter.png["Time filter menu", width=75%]

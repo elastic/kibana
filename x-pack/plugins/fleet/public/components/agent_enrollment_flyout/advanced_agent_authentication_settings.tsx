@@ -218,12 +218,12 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             />
           ) : isLoadingEnrollmentApiKeys ? (
             <Loading />
-          ) : (
+          ) : agentPolicyId ? (
             <NoEnrollmentKeysCallout
               agentPolicyId={agentPolicyId}
               onCreateEnrollmentApiKey={onCreateEnrollmentApiKey}
             />
-          )}
+          ) : null}
         </>
       )}
     </>

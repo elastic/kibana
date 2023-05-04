@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../../../../../core/server/http/router/request', () => ({
-  ensureRawRequest: jest.fn(),
-}));
+jest.mock('@kbn/core-http-router-server-internal', () => {
+  const realModule = jest.requireActual('@kbn/core-http-router-server-internal');
+  return {
+    ...realModule,
+    ensureRawRequest: jest.fn(),
+  };
+});
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router/request';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 
@@ -92,6 +95,24 @@ describe('Console Proxy Route', () => {
       const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
       expect(headers).toHaveProperty('x-elastic-product-origin');
       expect(headers['x-elastic-product-origin']).toBe('kibana');
+    });
+
+    it('sends es status code and status text as headers', async () => {
+      const response = await handler(
+        {} as any,
+        {
+          headers: {},
+          query: {
+            method: 'POST',
+            path: '/api/console/proxy?path=_aliases&method=GET',
+          },
+        } as any,
+        kibanaResponseFactory
+      );
+
+      const { headers } = response.options;
+      expect(headers).toHaveProperty('x-console-proxy-status-code');
+      expect(headers).toHaveProperty('x-console-proxy-status-text');
     });
   });
 });

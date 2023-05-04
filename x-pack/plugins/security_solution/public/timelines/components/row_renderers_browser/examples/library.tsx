@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mockEndpointLibraryLoadEvent } from '../../../../common/mock/mock_timeline_data';
+import { demoEndpointLibraryLoadEvent } from '../../../../common/demo_data/endpoint/library_load_event';
 import { createEndpointLibraryRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { LOADED_LIBRARY } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -21,10 +21,9 @@ const LibraryExampleComponent: React.FC = () => {
   return (
     <>
       {libraryRowRenderer.renderRow({
-        browserFields: {},
-        data: mockEndpointLibraryLoadEvent,
+        data: demoEndpointLibraryLoadEvent,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

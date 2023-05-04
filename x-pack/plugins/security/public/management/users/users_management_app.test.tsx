@@ -8,8 +8,8 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
-import type { Unmount } from 'src/plugins/management/public/types';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import type { Unmount } from '@kbn/management-plugin/public/types';
 
 import { securityMock } from '../../mocks';
 import { usersManagementApp } from './users_management_app';
@@ -22,9 +22,14 @@ describe('usersManagementApp', () => {
     const coreStartMock = coreMock.createStart();
     getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
-
     const setBreadcrumbs = jest.fn();
     const history = scopedHistoryMock.create({ pathname: '/create' });
+    coreStartMock.application.capabilities = {
+      ...coreStartMock.application.capabilities,
+      users: {
+        save: true,
+      },
+    };
 
     let unmount: Unmount = noop;
     await act(async () => {

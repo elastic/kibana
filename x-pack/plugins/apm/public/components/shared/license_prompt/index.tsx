@@ -8,7 +8,7 @@
 import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
+import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
 export interface LicensePromptProps {
   text: string;
@@ -27,26 +27,33 @@ export function LicensePrompt({
     <EuiCard
       display={showBetaBadge ? undefined : 'plain'}
       paddingSize="l"
-      betaBadgeProps={{
-        label: showBetaBadge
-          ? i18n.translate('xpack.apm.license.betaBadge', {
-              defaultMessage: 'Beta',
-            })
-          : undefined,
-        tooltipContent: showBetaBadge
-          ? i18n.translate('xpack.apm.license.betaTooltipMessage', {
-              defaultMessage:
-                'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-            })
-          : undefined,
-      }}
+      betaBadgeProps={
+        showBetaBadge
+          ? {
+              label: i18n.translate('xpack.apm.license.betaBadge', {
+                defaultMessage: 'Beta',
+              }),
+              tooltipContent: i18n.translate(
+                'xpack.apm.license.betaTooltipMessage',
+                {
+                  defaultMessage:
+                    'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+                }
+              ),
+            }
+          : undefined
+      }
       title={i18n.translate('xpack.apm.license.title', {
         defaultMessage: 'Start free 30-day trial',
       })}
       titleElement="h2"
       description={<EuiTextColor color="subdued">{text}</EuiTextColor>}
       footer={
-        <EuiButton fill={true} href={licensePageUrl}>
+        <EuiButton
+          data-test-subj="apmLicensePromptStartTrialButton"
+          fill={true}
+          href={licensePageUrl}
+        >
           {i18n.translate('xpack.apm.license.button', {
             defaultMessage: 'Start trial',
           })}

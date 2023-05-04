@@ -6,11 +6,11 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
-import { Datatable, ExecutionContext } from 'src/plugins/expressions';
-import { Adapters } from 'src/plugins/inspector';
+import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 
 const errors = getFunctionErrors().csv;
 

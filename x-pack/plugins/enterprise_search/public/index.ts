@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 
 import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new EnterpriseSearchPlugin(initializerContext);
 };
+
+export type { EnterpriseSearchPublicSetup, EnterpriseSearchPublicStart } from './plugin';

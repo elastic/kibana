@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ConnectorTypes } from '../../common/api';
 import { createESJiraConnector, createJiraConnector } from './test_utils';
 import {

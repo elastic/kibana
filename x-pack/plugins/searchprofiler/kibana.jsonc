@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/searchprofiler-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "searchprofiler",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchprofiler"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "home",
+      "licensing",
+      "share"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact"
+    ]
+  }
+}

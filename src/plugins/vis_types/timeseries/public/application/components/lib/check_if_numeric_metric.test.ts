@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '../../../../../../data/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { checkIfNumericMetric } from './check_if_numeric_metric';
 
 import type { Metric } from '../../../../common/types';
+import type { VisFields } from '../../lib/fetch_fields';
 
 describe('checkIfNumericMetric(metric, fields, indexPattern)', () => {
   const indexPattern = { id: 'some_id' };
@@ -20,7 +21,7 @@ describe('checkIfNumericMetric(metric, fields, indexPattern)', () => {
       { name: 'string field', type: 'string' },
       { name: 'date field', type: 'date' },
     ],
-  };
+  } as VisFields;
 
   it('should return true for Count metric', () => {
     const metric = { type: METRIC_TYPES.COUNT } as Metric;

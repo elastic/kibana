@@ -3,7 +3,13 @@
 == Configure map settings
 
 Maps offers settings that let you configure how a map is displayed.
-To access these settings, click *Map settings* in the application toolbar.
+To access these settings, click *Settings* in the application toolbar.
+
+[float]
+[[maps-settings-custom-icons]]
+=== Custom icons
+
+Add, edit, or delete custom icons for the map. Icons added to the map can be used for <<point-style-properties, styling Point features>>.
 
 [float]
 [[maps-settings-display]]

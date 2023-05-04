@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import type { RoleMapping } from '../../../common/model';
 
-interface CheckRoleMappingFeaturesResponse {
+export interface CheckRoleMappingFeaturesResponse {
   canManageRoleMappings: boolean;
   canUseInlineScripts: boolean;
   canUseStoredScripts: boolean;
   hasCompatibleRealms: boolean;
+  canUseRemoteIndices: boolean;
 }
 
 type DeleteRoleMappingsResponse = Array<{

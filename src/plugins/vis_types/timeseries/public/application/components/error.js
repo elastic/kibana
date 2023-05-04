@@ -12,6 +12,8 @@ import React from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import './_error.scss';
+
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
 
 export function ErrorComponent(props) {
@@ -45,7 +47,7 @@ export function ErrorComponent(props) {
   return (
     <div className="visError">
       <EuiText size="xs" color="subdued">
-        <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
+        <EuiIcon type="warning" size="m" color="danger" aria-hidden="true" />
 
         <EuiSpacer size="s" />
 

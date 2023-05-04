@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import {
   CorePluginDeprecationsPlugin,
   CorePluginDeprecationsPluginSetup,

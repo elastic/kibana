@@ -60,9 +60,10 @@ export function stopDataRequest(
         dataRequestMeta: {
           ...(dataRequest.dataRequestMetaAtStart ? dataRequest.dataRequestMetaAtStart : {}),
           ...(responseMeta ? responseMeta : {}),
+          requestStopTime: Date.now(),
         },
         dataRequestMetaAtStart: undefined,
-        dataRequestToken: undefined,
+        dataRequestToken: undefined, // active data request
       })
     : state;
 }

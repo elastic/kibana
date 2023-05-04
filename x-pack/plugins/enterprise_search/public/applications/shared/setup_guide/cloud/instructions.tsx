@@ -5,17 +5,25 @@
  * 2.0.
  */
 
+/* eslint-disable sort-keys */
+
 import React from 'react';
 
-import { EuiPageContent, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiSteps,
+  EuiText,
+  EuiLink,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../doc_links';
 
 interface Props {
-  productName: string;
   cloudDeploymentLink?: string;
+  productName: string;
 }
 
 export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDeploymentLink }) => (
@@ -133,6 +141,37 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                 />
               </p>
             </EuiCallOut>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.enterpriseSearch.setupGuide.cloud.step6.title', {
+            defaultMessage: 'Troubleshooting issues',
+          }),
+          children: (
+            <>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.setupGuide.cloud.step6.instruction1"
+                    defaultMessage="For help with common setup issues, read our {link} guide."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.enterpriseSearchTroubleshootSetup}
+                          target="_blank"
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.setupGuide.cloud.step6.instruction1LinkText',
+                            { defaultMessage: 'Troubleshoot Enterprise Search setup' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </>
           ),
         },
       ]}

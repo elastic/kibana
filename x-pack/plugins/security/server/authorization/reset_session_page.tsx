@@ -9,9 +9,10 @@
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
 import React from 'react';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IBasePath } from 'src/core/server';
 
 import { PromptPage } from '../prompt_page';
 
@@ -19,10 +20,12 @@ export function ResetSessionPage({
   logoutUrl,
   buildNumber,
   basePath,
+  customBranding,
 }: {
   logoutUrl: string;
   buildNumber: number;
   basePath: IBasePath;
+  customBranding: CustomBranding;
 }) {
   return (
     <PromptPage
@@ -54,6 +57,7 @@ export function ResetSessionPage({
           />
         </EuiButtonEmpty>,
       ]}
+      customBranding={customBranding}
     />
   );
 }

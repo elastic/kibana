@@ -7,25 +7,17 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-// @ts-ignore
 import { useRouteMatch } from 'react-router-dom';
-// @ts-ignore
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
-import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
-// @ts-ignore
 import { DetailStatus } from '../../../components/logstash/detail_status';
-// @ts-ignore
-import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { useTable } from '../../hooks/use_table';
-// @ts-ignore
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { useCharts } from '../../hooks/use_charts';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -38,7 +30,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
     cluster_uuid: clusterUuid,
   }) as any;
 
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');

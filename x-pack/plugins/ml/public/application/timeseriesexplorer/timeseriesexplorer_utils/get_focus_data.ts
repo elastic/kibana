@@ -7,12 +7,10 @@
 
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { ml } from '../../services/ml_api_service';
-import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-} from '../../../../common/constants/search';
-import { extractErrorMessage } from '../../../../common/util/errors';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
 import { mlResultsService, CriteriaField } from '../../services/results_service';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
@@ -26,7 +24,6 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { GetAnnotationsResponse } from '../../../../common/types/annotations';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -71,13 +68,13 @@ export function getFocusData(
       esFunctionToPlotIfMetric
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
-    mlResultsService.getRecordsForCriteria(
+    ml.results.getAnomalyRecords$(
       [selectedJob.job_id],
       criteriaFields,
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+      focusAggregationInterval.expression,
       functionDescription
     ),
     // Query 3 - load any scheduled events for the selected job.
@@ -148,7 +145,11 @@ export function getFocusData(
         modelPlotEnabled,
         functionDescription
       );
-      focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
+      focusChartData = processScheduledEventsForChart(
+        focusChartData,
+        scheduledEvents,
+        focusAggregationInterval
+      );
 
       const refreshFocusData: FocusData = {
         scheduledEvents,

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
-import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
+import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/es_fields/apm';
+import {
+  fetchAndTransformGcMetrics,
+  RATE,
+} from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   [METRIC_JAVA_GC_COUNT]: {
@@ -34,31 +38,37 @@ const chartBase: ChartBase = {
 function getGcRateChart({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
   return fetchAndTransformGcMetrics({
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     serviceNodeName,
     start,
     end,
     chartBase,
-    fieldName: METRIC_JAVA_GC_COUNT,
+    rateOrTime: RATE,
     operationName: 'get_gc_rate_charts',
+    isOpenTelemetry,
   });
 }
 

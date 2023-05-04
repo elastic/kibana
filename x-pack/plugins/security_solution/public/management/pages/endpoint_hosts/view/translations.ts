@@ -12,8 +12,8 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 });
 
 export const ACTIVITY_LOG = {
-  tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.activityLog', {
-    defaultMessage: 'Activity Log',
+  tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.responseActionsHistory', {
+    defaultMessage: 'Response actions history',
   }),
   LogEntry: {
     endOfLog: i18n.translate(
@@ -121,10 +121,3 @@ export const ACTIVITY_LOG = {
     },
   },
 };
-
-export const SEARCH_ACTIVITY_LOG = i18n.translate(
-  'xpack.securitySolution.endpointDetails.activityLog.search',
-  {
-    defaultMessage: 'Search activity log',
-  }
-);

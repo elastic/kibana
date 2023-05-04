@@ -6,25 +6,30 @@
  */
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../src/plugins/field_formats/common';
-import type { Datatable } from '../../../../src/plugins/expressions/common';
+import type { Position } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ColorMode } from '@kbn/charts-plugin/common';
+import type { LegendSize } from '@kbn/visualizations-plugin/common';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+import { layerTypes } from './layer_types';
+import { CollapseFunction } from './expressions';
+
+export type { OriginalColumn } from './expressions/map_to_columns';
+export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
+export type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
+export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
-
-export interface ExistingFields {
-  indexPatternTitle: string;
-  existingFieldNames: string[];
-}
 
 export interface DateRange {
   fromDate: string;
   toDate: string;
 }
 
-export interface PersistableFilterMeta extends FilterMeta {
+interface PersistableFilterMeta extends FilterMeta {
   indexRefName?: string;
 }
 
@@ -32,41 +37,62 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
+export type SortingHint = 'version';
+
+export type LayerType = typeof layerTypes[keyof typeof layerTypes];
+
+export type ValueLabelConfig = 'hide' | 'show';
+
+export type PieChartType = $Values<typeof PieChartTypes>;
+type CategoryDisplayType = $Values<typeof CategoryDisplay>;
+type NumberDisplayType = $Values<typeof NumberDisplay>;
+
+type LegendDisplayType = $Values<typeof LegendDisplay>;
+
+export enum EmptySizeRatios {
+  SMALL = 0.3,
+  MEDIUM = 0.54,
+  LARGE = 0.7,
 }
 
-export interface ColorStop {
-  color: string;
-  stop: number;
+export interface SharedPieLayerState {
+  metrics: string[];
+  primaryGroups: string[];
+  secondaryGroups?: string[];
+  allowMultipleMetrics?: boolean;
+  colorsByDimension?: Record<string, string>;
+  collapseFns?: Record<string, CollapseFunction>;
+  numberDisplay: NumberDisplayType;
+  categoryDisplay: CategoryDisplayType;
+  legendDisplay: LegendDisplayType;
+  legendPosition?: Position;
+  showValuesInLegend?: boolean;
+  nestedLegend?: boolean;
+  percentDecimals?: number;
+  emptySizeRatio?: number;
+  legendMaxLines?: number;
+  legendSize?: LegendSize;
+  truncateLegend?: boolean;
 }
 
-export interface CustomPaletteParams {
-  name?: string;
-  reverse?: boolean;
-  rangeType?: 'number' | 'percent';
-  continuity?: 'above' | 'below' | 'all' | 'none';
-  progression?: 'fixed';
-  rangeMin?: number;
-  rangeMax?: number;
-  stops?: ColorStop[];
-  colorStops?: ColorStop[];
-  steps?: number;
-}
-export type CustomPaletteParamsConfig = CustomPaletteParams & {
-  maxSteps?: number;
+export type PieLayerState = SharedPieLayerState & {
+  layerId: string;
+  layerType: LayerType;
 };
 
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
-  maxSteps?: number;
-};
-
-export type LayerType = 'data' | 'referenceLine';
-
-// Shared by XY Chart and Heatmap as for now
-export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+export interface PieVisualizationState {
+  shape: $Values<typeof PieChartTypes>;
+  layers: PieLayerState[];
+  palette?: PaletteOutput;
+}
+export interface LegacyMetricState {
+  autoScaleMetricAlignment?: 'left' | 'right' | 'center';
+  layerId: string;
+  accessor?: string;
+  layerType: LayerType;
+  colorMode?: ColorMode;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  titlePosition?: 'top' | 'bottom';
+  size?: string;
+  textAlign?: 'left' | 'right' | 'center';
+}

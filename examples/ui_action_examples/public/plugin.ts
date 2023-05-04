@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
-import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction } from './hello_world_action';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createHelloWorldActionDefinition } from './hello_world_action';
 import { helloWorldTrigger } from './hello_world_trigger';
 
 export interface UiActionExamplesSetupDependencies {
@@ -29,7 +29,7 @@ export class UiActionExamplesPlugin
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
-    const helloWorldAction = createHelloWorldAction(async () => ({
+    const helloWorldAction = createHelloWorldActionDefinition(async () => ({
       openModal: (await core.getStartServices())[0].overlays.openModal,
     }));
 

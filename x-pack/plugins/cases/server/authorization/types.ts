@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EcsEventType, KibanaRequest } from 'kibana/server';
+import type { EcsEvent } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { Space } from '../../../spaces/server';
+import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -17,8 +18,6 @@ export interface Verbs {
   progressive: string;
   past: string;
 }
-
-export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 /**
  * Read operations for the cases APIs.
@@ -30,18 +29,25 @@ export enum ReadOperations {
   GetCase = 'getCase',
   ResolveCase = 'resolveCase',
   FindCases = 'findCases',
+  BulkGetCases = 'bulkGetCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
+  BulkGetAttachments = 'bulkGetAttachments',
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
+  FindUserActions = 'findUserActions',
   GetUserActions = 'getUserActions',
+  GetConnectors = 'getConnectors',
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
   GetAttachmentMetrics = 'getAttachmentMetrics',
   GetCaseMetrics = 'getCaseMetrics',
+  GetCasesMetrics = 'getCasesMetrics',
+  GetUserActionMetrics = 'getUserActionMetrics',
+  GetUserActionUsers = 'getUserActionUsers',
 }
 
 /**
@@ -56,6 +62,7 @@ export enum WriteOperations {
   UpdateCase = 'updateCase',
   PushCase = 'pushCase',
   CreateComment = 'createComment',
+  BulkCreateAttachments = 'bulkCreateAttachments',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',
   UpdateComment = 'updateComment',
@@ -70,14 +77,14 @@ export interface OperationDetails {
   /**
    * The ECS event type that this operation should be audit logged as (creation, deletion, access, etc)
    */
-  ecsType: EcsEventType;
+  ecsType: ArrayElement<EcsEvent['type']>;
   /**
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
    */
-  name: string;
+  name: CasesSupportedOperations;
   /**
-   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
+   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_find
    */
   action: string;
   /**

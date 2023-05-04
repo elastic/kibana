@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+
 import { WatcherServerPlugin } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => new WatcherServerPlugin(ctx);
+
+export const config = {
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+};

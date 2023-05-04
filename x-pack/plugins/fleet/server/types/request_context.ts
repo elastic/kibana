@@ -8,16 +8,18 @@
 import type {
   KibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   RouteMethod,
   SavedObjectsClientContract,
   IRouter,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
+import type { PackagePolicyClient } from '../services/package_policy_service';
 
 /** @internal */
-export interface FleetRequestHandlerContext extends RequestHandlerContext {
+export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
   fleet: {
     /** {@link FleetAuthz} */
     authz: FleetAuthz;
@@ -26,16 +28,24 @@ export interface FleetRequestHandlerContext extends RequestHandlerContext {
       asCurrentUser: AgentClient;
       asInternalUser: AgentClient;
     };
-    epm: {
-      /**
-       * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
-       * used by routes that have additional privilege checks for authorization (such as requiring superuser).
-       */
-      readonly internalSoClient: SavedObjectsClientContract;
+    packagePolicyService: {
+      asCurrentUser: PackagePolicyClient;
+      asInternalUser: PackagePolicyClient;
     };
+    /**
+     * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
+     * used by routes that have additional privilege checks for authorization (such as requiring superuser).
+     */
+    readonly internalSoClient: SavedObjectsClientContract;
+
     spaceId: string;
+    /**
+     * If data is to be limited to the list of integration package names. This will be set when
+     * authz to the API was granted only based on Package Privileges.
+     */
+    limitedToPackages: string[] | undefined;
   };
-}
+}>;
 
 /**
  * Convenience type for request handlers in Fleet that includes the FleetRequestHandlerContext type

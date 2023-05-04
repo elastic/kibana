@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
@@ -56,10 +56,9 @@ export function getFunctionDefinition({
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
-          args.aggs?.map((agg) => agg.value) ?? []
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
         );
-
-        aggConfigs.hierarchical = args.metricsAtAllLevels;
 
         return { aggConfigs, indexPattern, searchSource };
       }).pipe(
@@ -70,10 +69,10 @@ export function getFunctionDefinition({
             filters: get(input, 'filters', undefined),
             indexPattern,
             inspectorAdapters,
-            partialRows: args.partialRows,
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
+            disableShardWarnings: false,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
           })
@@ -111,7 +110,7 @@ export function getEsaggs({
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        indexPatterns: await indexPatterns.indexPatternsServiceFactory(
+        indexPatterns: await indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser
         ),

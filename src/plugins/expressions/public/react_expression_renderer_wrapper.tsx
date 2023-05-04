@@ -10,7 +10,11 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ReactExpressionRendererProps } from './react_expression_renderer';
 
-const ReactExpressionRendererComponent = lazy(() => import('./react_expression_renderer'));
+const ReactExpressionRendererComponent = lazy(async () => {
+  const { ReactExpressionRenderer } = await import('./react_expression_renderer');
+
+  return { default: ReactExpressionRenderer };
+});
 
 export const ReactExpressionRenderer = (props: ReactExpressionRendererProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>

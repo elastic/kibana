@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
@@ -18,8 +18,8 @@ export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
 export function createEditAnomalyChartsPanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<EditAnomalyChartsPanelContext>({
+): UiActionsActionDefinition<EditAnomalyChartsPanelContext> {
+  return {
     id: 'edit-anomaly-charts',
     type: EDIT_ANOMALY_CHARTS_PANEL_ACTION,
     getIconType(context): string {
@@ -56,5 +56,5 @@ export function createEditAnomalyChartsPanelAction(
         embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },
-  });
+  };
 }

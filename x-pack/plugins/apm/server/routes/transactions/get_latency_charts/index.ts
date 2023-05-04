@@ -6,29 +6,30 @@
  */
 
 import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import {
   kqlQuery,
   rangeQuery,
   termQuery,
-} from '../../../../../observability/server';
-import { environmentQuery } from '../../../../common/utils/environment_query';
+} from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+  FAAS_ID,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/es_fields/apm';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { RollupInterval } from '../../../../common/rollup';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../typings/timeseries';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
+
 export type LatencyChartsSearchResponse = Awaited<
   ReturnType<typeof searchLatency>
 >;
@@ -39,52 +40,57 @@ function searchLatency({
   serviceName,
   transactionType,
   transactionName,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   latencyAggregationType,
   start,
   end,
+  offset,
+  serverlessId,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
+  offset?: string;
+  serverlessId?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }) {
-  const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
-    searchAggregatedTransactions,
+    offset,
   });
 
-  const transactionDurationField = getDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
+  const transactionDurationField =
+    getDurationFieldForTransactions(documentType);
 
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      sources: [{ documentType, rollupInterval }],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
-            ...rangeQuery(start, end),
+            ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(FAAS_ID, serverlessId),
           ],
         },
       },
@@ -92,9 +98,9 @@ function searchLatency({
         latencyTimeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: intervalString,
+            fixed_interval: `${bucketSizeInSeconds}s`,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: getLatencyAggregation(
             latencyAggregationType,
@@ -115,22 +121,30 @@ export async function getLatencyTimeseries({
   serviceName,
   transactionType,
   transactionName,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   latencyAggregationType,
   start,
   end,
+  offset,
+  serverlessId,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  transactionType?: string;
+  transactionName?: string;
+  apmEventClient: APMEventClient;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
+  offset?: string;
+  serverlessId?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }) {
   const response = await searchLatency({
     environment,
@@ -138,11 +152,15 @@ export async function getLatencyTimeseries({
     serviceName,
     transactionType,
     transactionName,
-    setup,
-    searchAggregatedTransactions,
+    apmEventClient,
     latencyAggregationType,
     start,
     end,
+    offset,
+    serverlessId,
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
   });
 
   if (!response.aggregations) {
@@ -166,41 +184,56 @@ export async function getLatencyTimeseries({
   };
 }
 
+export interface TransactionLatencyResponse {
+  currentPeriod: {
+    overallAvgDuration: number | null;
+    latencyTimeseries: Coordinate[];
+  };
+  previousPeriod: {
+    overallAvgDuration: number | null;
+    latencyTimeseries: Coordinate[];
+  };
+}
+
 export async function getLatencyPeriods({
   serviceName,
   transactionType,
   transactionName,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   latencyAggregationType,
-  comparisonStart,
-  comparisonEnd,
   kuery,
   environment,
   start,
   end,
+  offset,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
   latencyAggregationType: LatencyAggregationType;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   kuery: string;
   environment: string;
   start: number;
   end: number;
-}) {
+  offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
+}): Promise<TransactionLatencyResponse> {
   const options = {
     serviceName,
     transactionType,
     transactionName,
-    setup,
-    searchAggregatedTransactions,
+    apmEventClient,
     kuery,
     environment,
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
   };
 
   const currentPeriodPromise = getLatencyTimeseries({
@@ -210,16 +243,16 @@ export async function getLatencyPeriods({
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
   });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getLatencyTimeseries({
-          ...options,
-          start: comparisonStart,
-          end: comparisonEnd,
-          latencyAggregationType:
-            latencyAggregationType as LatencyAggregationType,
-        })
-      : { latencyTimeseries: [], overallAvgDuration: null };
+  const previousPeriodPromise = offset
+    ? getLatencyTimeseries({
+        ...options,
+        start,
+        end,
+        offset,
+        latencyAggregationType:
+          latencyAggregationType as LatencyAggregationType,
+      })
+    : { latencyTimeseries: [], overallAvgDuration: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

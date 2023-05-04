@@ -6,26 +6,41 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { CreateOptions } from '../methods/create';
+import { RulesClient, ConstructorOptions } from '../rules_client';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { RuleNotifyWhen } from '../../types';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
+import { getDefaultMonitoring } from '../../lib/monitoring';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
+
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -33,7 +48,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -52,6 +67,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -70,7 +88,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
     tags: ['foo'],
     alertTypeId: '123',
     consumer: 'bar',
-    schedule: { interval: '10s' },
+    schedule: { interval: '1m' },
     throttle: null,
     notifyWhen: null,
     params: {
@@ -85,6 +103,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
         },
       },
     ],
+    running: false,
     ...overwrites,
   };
 }
@@ -112,6 +131,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     taskManager.schedule.mockResolvedValue({
@@ -141,7 +161,7 @@ describe('create()', () => {
         type: 'alert',
         attributes: {
           alertTypeId: '123',
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           params: {
             bar: true,
           },
@@ -154,6 +174,7 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
+              frequency: { summary: false, notifyWhen: RuleNotifyWhen.CHANGE, throttle: null },
             },
           ],
         },
@@ -284,7 +305,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -293,6 +314,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -364,8 +386,9 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -389,10 +412,12 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "123",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -402,21 +427,44 @@ describe('create()', () => {
           "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
+          "warning": null,
         },
         "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
         },
+        "monitoring": Object {
+          "run": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "duration": 0,
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -441,13 +489,15 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "enabled": true,
                                                                             "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
+                                                                              "consumer": "bar",
                                                                               "spaceId": "default",
                                                                             },
                                                                             "schedule": Object {
-                                                                              "interval": "10s",
+                                                                              "interval": "1m",
                                                                             },
                                                                             "scope": Array [
                                                                               "alerting",
@@ -478,7 +528,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -487,6 +537,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -537,7 +588,7 @@ describe('create()', () => {
       ...data,
       legacyId: '123',
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -546,6 +597,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -582,10 +634,12 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "104",
           },
         ],
         "alertTypeId": "123",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -595,21 +649,44 @@ describe('create()', () => {
           "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
+          "warning": null,
         },
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
+        "monitoring": Object {
+          "run": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "duration": 0,
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -662,6 +739,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -677,6 +755,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -684,13 +763,13 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -777,12 +856,12 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -832,6 +911,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -847,6 +927,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -862,6 +943,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -873,13 +955,13 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -906,6 +988,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -961,12 +1044,13 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -983,6 +1067,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '108',
           },
           {
             group: 'default',
@@ -991,6 +1076,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '109',
           },
           {
             group: 'default',
@@ -999,11 +1085,13 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '110',
           },
         ],
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1013,14 +1101,19 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true },
-        schedule: { interval: '10s' },
+        revision: 0,
+        running: false,
+        schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -1051,7 +1144,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1088,7 +1181,7 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -1132,11 +1225,16 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     const data = getMockData({
@@ -1147,7 +1245,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
@@ -1165,6 +1263,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1195,11 +1294,18 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '112',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1209,14 +1315,19 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
-        schedule: { interval: '10s' },
+        revision: 0,
+        running: false,
+        schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -1258,8 +1369,9 @@ describe('create()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "9",
         },
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1297,11 +1409,16 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     const data = getMockData({
@@ -1312,7 +1429,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'action_0',
@@ -1330,6 +1447,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1360,11 +1478,18 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '113',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1374,14 +1499,19 @@ describe('create()', () => {
           error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
-        schedule: { interval: '10s' },
+        revision: 0,
+        running: false,
+        schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -1423,8 +1553,9 @@ describe('create()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "8",
         },
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1476,7 +1607,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -1485,6 +1616,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActionGroupChange',
       actions: [
@@ -1497,6 +1629,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1520,6 +1653,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '115',
           },
         ],
         alertTypeId: '123',
@@ -1529,6 +1663,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1537,17 +1672,22 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1585,8 +1725,9 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1604,7 +1745,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -1613,6 +1754,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onThrottleInterval',
       actions: [
@@ -1625,6 +1767,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1648,6 +1791,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '116',
           },
         ],
         legacyId: null,
@@ -1657,6 +1801,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1665,17 +1810,22 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1713,8 +1863,9 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1732,7 +1883,7 @@ describe('create()', () => {
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       params: {
         bar: true,
       },
@@ -1741,8 +1892,9 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
-      notifyWhen: 'onActiveAlert',
+      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -1753,6 +1905,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1776,6 +1929,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '117',
           },
         ],
         legacyId: null,
@@ -1785,6 +1939,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1793,17 +1948,22 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1837,10 +1997,192 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
+      }
+    `);
+  });
+
+  test('should create alerts with mapped_params', async () => {
+    const data = getMockData({
+      params: {
+        bar: true,
+        risk_score: 42,
+        severity: 'low',
+      },
+    });
+
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+        risk_score: 42,
+        severity: 'low',
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      snoozeSchedule: [],
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+      running: false,
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '123',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    const result = await rulesClient.create({ data });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        enabled: true,
+        name: 'abc',
+        tags: ['foo'],
+        alertTypeId: '123',
+        consumer: 'bar',
+        schedule: {
+          interval: '1m',
+        },
+        throttle: null,
+        notifyWhen: null,
+        params: {
+          bar: true,
+          risk_score: 42,
+          severity: 'low',
+        },
+        actions: [
+          {
+            group: 'default',
+            params: {
+              foo: true,
+            },
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            uuid: '118',
+          },
+        ],
+        apiKeyOwner: null,
+        apiKey: null,
+        apiKeyCreatedByUser: null,
+        legacyId: null,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+          warning: null,
+        },
+        monitoring: {
+          run: {
+            history: [],
+            calculated_metrics: {
+              success_ratio: 0,
+            },
+            last_run: {
+              timestamp: '2019-02-12T21:01:22.479Z',
+              metrics: {
+                duration: 0,
+                gap_duration_s: null,
+                total_alerts_created: null,
+                total_alerts_detected: null,
+                total_indexing_duration_ms: null,
+                total_search_duration_ms: null,
+              },
+            },
+          },
+        },
+        mapped_params: {
+          risk_score: 42,
+          severity: '20-low',
+        },
+        meta: {
+          versionApiKeyLastmodified: 'v8.0.0',
+        },
+        revision: 0,
+        running: false,
+      },
+      {
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+        id: 'mock-saved-object-id',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "consumer": "bar",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
+        "id": "123",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+          "risk_score": 42,
+          "severity": "low",
+        },
+        "running": false,
         "schedule": Object {
           "interval": "10s",
         },
@@ -1876,7 +2218,9 @@ describe('create()', () => {
       },
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1903,25 +2247,17 @@ describe('create()', () => {
       result: { id: '123', name: '123', api_key: 'abc' },
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
-    const createdAt = new Date().toISOString();
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
-    });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
-      apiKeyId: '123',
-      createdAt,
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   test('fails if task scheduling fails due to conflict', async () => {
@@ -1931,7 +2267,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1977,7 +2313,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2021,7 +2357,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2077,7 +2413,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2127,6 +2463,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '126',
           },
         ],
         alertTypeId: '123',
@@ -2144,17 +2481,22 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2176,7 +2518,7 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -2190,6 +2532,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -2226,6 +2569,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '127',
           },
         ],
         legacyId: null,
@@ -2235,6 +2579,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2243,17 +2588,22 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
           error: null,
+          warning: null,
         },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2307,16 +2657,18 @@ describe('create()', () => {
         isMissingSecrets: true,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid connectors: email connector"`
+      `"Failed to validate actions due to the following error: Invalid connectors: email connector"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error when updating with an interval less than the minimum configured one', async () => {
+  test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
+    const data = getMockData({ schedule: { interval: '1s' } });
     ruleTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
@@ -2325,20 +2677,814 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
-      minimumScheduleInterval: '5m',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '1s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+      running: false,
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    await rulesClient.create({ data });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      `Rule schedule interval (1s) for "123" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+    );
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    expect(taskManager.schedule).toHaveBeenCalled();
+  });
+
+  test('throws error when creating with an interval less than the minimum configured one when enforce = true', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
-    const data = getMockData({ schedule: { interval: '1m' } });
+    const data = getMockData({ schedule: { interval: '1s' } });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: the interval is less than the minimum interval of 5m"`
+      `"Error creating rule: the interval is less than the allowed minimum interval of 1m"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when mixing and matching global and per-action frequency values', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: 'onActionGroupChange',
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+
+    const data2 = getMockData({
+      notifyWhen: null,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when neither global frequency nor action frequency are defined', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when some actions are missing frequency params', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Actions missing frequency parameters: group2"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when some actions have throttle intervals shorter than the check interval', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      schedule: { interval: '3h' },
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '3m',
+          },
+        },
+        {
+          group: 'group3',
+          id: '3',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '240m',
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Action frequency cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws multiple errors when actions have multiple problems', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      schedule: { interval: '3h' },
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '3m',
+          },
+        },
+        {
+          group: 'group3',
+          id: '3',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Failed to validate actions due to the following 2 errors:
+      - Actions missing frequency parameters: group3
+      - Action frequency cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"
+    `);
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+  test('should create a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
+    const data = getMockData({
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: '.slack',
+        config: {},
+        isMissingSecrets: true,
+        name: 'Slack connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await rulesClient.create({ data, allowMissingConnectorSecrets: true });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+  });
+
+  test('throws error when some actions have alertsFilter but neither timeframe nor query', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '10h',
+          },
+          alertsFilter: {},
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 149"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when some actions have alertsFilter but the rule type does not support it', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+          },
+          alertsFilter: {
+            query: { kql: 'test:1', filters: [] },
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [150]"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+            uuid: '151',
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        legacyId: null,
+        params: { bar: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: true,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        schedule: { interval: '1m' },
+        throttle: null,
+        notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+          warning: null,
+        },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+  });
+
+  test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Test failure"`
+    );
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

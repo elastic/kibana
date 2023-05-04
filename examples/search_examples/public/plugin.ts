@@ -12,7 +12,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-} from '../../../src/core/public';
+} from '@kbn/core/public';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,

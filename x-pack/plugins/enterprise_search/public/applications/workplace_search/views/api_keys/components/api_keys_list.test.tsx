@@ -83,7 +83,7 @@ describe('ApiKeysList', () => {
         pageIndex: 5,
         pageSize: 55,
         totalItemCount: 1004,
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       });
     });
   });

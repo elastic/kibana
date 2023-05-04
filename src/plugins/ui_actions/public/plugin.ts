@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { UiActionsService } from './service';
-import { rowClickTrigger, visualizeFieldTrigger, visualizeGeoFieldTrigger } from './triggers';
+import {
+  categorizeFieldTrigger,
+  rowClickTrigger,
+  visualizeFieldTrigger,
+  visualizeGeoFieldTrigger,
+} from './triggers';
+import { setTheme } from './services';
 
 export type UiActionsSetup = Pick<
   UiActionsService,
@@ -29,9 +35,11 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): UiActionsSetup {
+    setTheme(core.theme);
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);
+    this.service.registerTrigger(categorizeFieldTrigger);
     return this.service;
   }
 

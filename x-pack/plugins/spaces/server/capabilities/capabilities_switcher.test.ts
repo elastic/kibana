@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Capabilities, CoreSetup } from 'src/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { Capabilities, CoreSetup } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import type { KibanaFeature } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
 import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
@@ -173,7 +173,7 @@ describe('capabilitiesSwitcher', () => {
 
     const result = await switcher(request, capabilities, false);
 
-    expect(result).toEqual(buildCapabilities());
+    expect(result).toEqual({});
     expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 
@@ -191,7 +191,7 @@ describe('capabilitiesSwitcher', () => {
 
     const result = await switcher(request, capabilities, true);
 
-    expect(result).toEqual(buildCapabilities());
+    expect(result).toEqual({});
     expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 

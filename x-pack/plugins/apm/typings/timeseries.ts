@@ -15,7 +15,7 @@ import {
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
-import { Maybe } from '../typings/common';
+import { Maybe } from './common';
 
 export interface Coordinate {
   x: number;
@@ -69,5 +69,5 @@ export interface APMChartSpec<
   groupId?: string;
 }
 
-export type ChartType = 'area' | 'linemark';
+export type ChartType = 'area' | 'linemark' | 'bar';
 export type YUnit = 'percent' | 'bytes' | 'number' | 'time' | 'integer';

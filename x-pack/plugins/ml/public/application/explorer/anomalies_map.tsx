@@ -23,16 +23,16 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VectorLayerDescriptor,
-} from '../../../../maps/common';
+} from '@kbn/maps-plugin/common';
+import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { useMlKibana } from '../contexts/kibana';
-import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
-import { EMSTermJoinConfig } from '../../../../maps/public';
-import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 
 const MAX_ENTITY_VALUES = 3;
 
-function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
+function getAnomalyRows(anomalies: MlAnomaliesTableRecord[], jobId: string) {
   const anomalyRows: Record<string, { count: number; entityValue: string; max_severity: number }> =
     {};
   for (let i = 0; i < anomalies.length; i++) {
@@ -58,7 +58,7 @@ function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
 }
 
 export const getChoroplethAnomaliesLayer = (
-  anomalies: AnomaliesTableRecord[],
+  anomalies: MlAnomaliesTableRecord[],
   { layerId, field, jobId }: MLEMSTermJoinConfig
 ): VectorLayerDescriptor => {
   return {
@@ -131,7 +131,7 @@ export const getChoroplethAnomaliesLayer = (
 };
 
 interface Props {
-  anomalies: AnomaliesTableRecord[];
+  anomalies: MlAnomaliesTableRecord[];
   jobIds: string[];
 }
 
@@ -186,6 +186,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     );
 
     setEMSSuggestions(suggestions.filter(isDefined));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...jobIds]);
 
   useEffect(
@@ -194,6 +195,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         getEMSTermSuggestions();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [...jobIds]
   );
 
@@ -222,12 +224,12 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel data-test-subj="mlAnomaliesMapContainer">
+      <EuiPanel data-test-subj="mlAnomaliesMapContainer" hasShadow={false} hasBorder>
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}
           buttonContent={
-            <EuiTitle className="panel-title">
+            <EuiTitle size={'xs'}>
               <h2>
                 <FormattedMessage
                   id="xpack.ml.explorer.mapTitle"

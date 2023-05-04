@@ -5,7 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
+} from '@kbn/expressions-plugin/common';
 
 interface Arguments {
   image: string | null;

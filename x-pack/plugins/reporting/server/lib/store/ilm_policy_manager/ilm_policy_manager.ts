@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ILM_POLICY_NAME } from '../../../../common/constants';
 
 import { reportingIlmPolicy } from './constants';

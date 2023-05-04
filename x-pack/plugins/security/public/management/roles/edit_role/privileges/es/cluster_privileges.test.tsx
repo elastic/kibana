@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import type { Role } from '../../../../../../common/model';
 import { ClusterPrivileges } from './cluster_privileges';
@@ -32,6 +32,28 @@ test('it renders without crashing', () => {
     />
   );
   expect(wrapper).toMatchSnapshot();
+});
+
+test('it renders fields as disabled when not editable', () => {
+  const role: Role = {
+    name: '',
+    elasticsearch: {
+      cluster: [],
+      indices: [],
+      run_as: [],
+    },
+    kibana: [],
+  };
+
+  const wrapper = shallow(
+    <ClusterPrivileges
+      role={role}
+      onChange={jest.fn()}
+      builtinClusterPrivileges={['all', 'manage', 'monitor']}
+      editable={false}
+    />
+  );
+  expect(wrapper.find('EuiComboBox').prop('isDisabled')).toBe(true);
 });
 
 test('it allows for custom cluster privileges', () => {

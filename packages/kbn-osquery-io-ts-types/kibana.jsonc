@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/osquery-io-ts-types",
+  "owner": "@elastic/security-asset-management"
+}

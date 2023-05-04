@@ -10,30 +10,32 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, Logger, RouteRegistrar } from 'kibana/server';
+import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import { RuleDataPluginService } from '../../../rule_registry/server';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
+import { getHTTPResponseCode, ObservabilityError } from '../errors';
 
-export function registerRoutes({
-  repository,
-  core,
-  logger,
-  ruleDataService,
-}: {
-  core: {
-    setup: CoreSetup;
-    start: () => Promise<CoreStart>;
-  };
+interface RegisterRoutes {
+  core: CoreSetup;
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
-  ruleDataService: RuleDataPluginService;
-}) {
-  const routes = repository.getRoutes();
+  dependencies: RegisterRoutesDependencies;
+}
 
-  const router = core.setup.http.createRouter();
+export interface RegisterRoutesDependencies {
+  ruleDataService: RuleDataPluginService;
+  getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+}
+
+export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
+  const routes = Object.values(repository);
+
+  const router = core.http.createRouter();
 
   routes.forEach((route) => {
     const { endpoint, options, handler, params } = route;
@@ -59,14 +61,35 @@ export function registerRoutes({
           const data = (await handler({
             context,
             request,
-            core,
             logger,
             params: decodedParams,
-            ruleDataService,
+            dependencies,
           })) as any;
+
+          if (data === undefined) {
+            return response.noContent();
+          }
 
           return response.ok({ body: data });
         } catch (error) {
+          if (error instanceof ObservabilityError) {
+            logger.error(error.message);
+            return response.customError({
+              statusCode: getHTTPResponseCode(error),
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
+          if (Boom.isBoom(error)) {
+            logger.error(error.output.payload.message);
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: { message: error.output.payload.message },
+            });
+          }
+
           logger.error(error);
           const opts = {
             statusCode: 500,
@@ -75,16 +98,12 @@ export function registerRoutes({
             },
           };
 
-          if (Boom.isBoom(error)) {
-            opts.statusCode = error.output.statusCode;
-          }
-
           if (error instanceof errors.RequestAbortedError) {
             opts.statusCode = 499;
             opts.body.message = 'Client closed request';
           }
 
-          return response.custom(opts);
+          return response.customError(opts);
         }
       }
     );

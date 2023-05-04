@@ -15,11 +15,11 @@ import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiPageHeader,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouterLinkProps, listBreadcrumb } from '../../services';
@@ -90,7 +90,7 @@ export class JobListUi extends Component {
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListNoPermission"
-          iconType="alert"
+          iconType="warning"
           title={<h1>{title}</h1>}
           body={
             <p>
@@ -118,7 +118,7 @@ export class JobListUi extends Component {
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListError"
-          iconType="alert"
+          iconType="warning"
           title={<h1>{title}</h1>}
           body={
             <p>

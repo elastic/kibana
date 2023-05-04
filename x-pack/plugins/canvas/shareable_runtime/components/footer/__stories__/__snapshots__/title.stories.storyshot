@@ -26,7 +26,7 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
       }
     >
       <a
-        className="euiLink euiLink--primary"
+        className="euiLink emotion-euiLink-primary"
         href="https://www.elastic.co"
         rel=""
         title="Powered by Elastic.co"
@@ -34,7 +34,9 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        />
+        >
+          
+        </span>
       </a>
     </div>
     <div
@@ -47,17 +49,13 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s-euiTextColor-ghost"
+        style={Object {}}
       >
         <div
-          className="euiTextColor euiTextColor--ghost"
-          style={Object {}}
+          className="eui-textTruncate"
         >
-          <div
-            className="eui-textTruncate"
-          >
-            This is a test title.
-          </div>
+          This is a test title.
         </div>
       </div>
     </div>
@@ -91,7 +89,7 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
       }
     >
       <a
-        className="euiLink euiLink--primary"
+        className="euiLink emotion-euiLink-primary"
         href="https://www.elastic.co"
         rel=""
         title="Powered by Elastic.co"
@@ -99,7 +97,9 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        />
+        >
+          
+        </span>
       </a>
     </div>
     <div
@@ -112,17 +112,13 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s-euiTextColor-ghost"
+        style={Object {}}
       >
         <div
-          className="euiTextColor euiTextColor--ghost"
-          style={Object {}}
+          className="eui-textTruncate"
         >
-          <div
-            className="eui-textTruncate"
-          >
-            Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
-          </div>
+          Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
         </div>
       </div>
     </div>
@@ -156,7 +152,7 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
       }
     >
       <a
-        className="euiLink euiLink--primary"
+        className="euiLink emotion-euiLink-primary"
         href="https://www.elastic.co"
         rel=""
         title="Powered by Elastic.co"
@@ -164,7 +160,9 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        />
+        >
+          
+        </span>
       </a>
     </div>
     <div
@@ -177,17 +175,13 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s-euiTextColor-ghost"
+        style={Object {}}
       >
         <div
-          className="euiTextColor euiTextColor--ghost"
-          style={Object {}}
+          className="eui-textTruncate"
         >
-          <div
-            className="eui-textTruncate"
-          >
-            My Canvas Workpad
-          </div>
+          My Canvas Workpad
         </div>
       </div>
     </div>

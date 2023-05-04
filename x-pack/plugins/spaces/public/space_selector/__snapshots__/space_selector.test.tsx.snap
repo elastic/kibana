@@ -1,29 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`it renders without crashing 1`] = `
-<EuiPage
+exports[`it renders with custom logo 1`] = `
+<_KibanaPageTemplate
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
+  panelled={true}
 >
-  <EuiPageBody>
-    <EuiPageHeader
-      className="spcSpaceSelector__heading"
+  <EuiPortal>
+    <div
+      className="spcSelectorBackground"
+      role="presentation"
+    />
+  </EuiPortal>
+  <_EuiPageSection
+    color="transparent"
+    paddingSize="xl"
+  >
+    <EuiText
+      size="s"
+      textAlign="center"
     >
       <EuiSpacer
         size="xxl"
       />
-      <span
-        className="spcSpaceSelector__logo"
-      >
-        <EuiIcon
-          size="xxl"
-          type="logoElastic"
-        />
-      </span>
-      <EuiTitle
-        size="l"
+      <EuiImage
+        alt="Custom logo"
+        size={64}
+        src="img.jpg"
+      />
+      <EuiSpacer
+        size="xxl"
+      />
+      <EuiTextColor
+        color="subdued"
       >
         <h1
+          className="eui spcSpaceSelector__pageHeader"
           tabIndex={0}
         >
           <FormattedMessage
@@ -32,35 +44,83 @@ exports[`it renders without crashing 1`] = `
             values={Object {}}
           />
         </h1>
-      </EuiTitle>
-      <EuiText
-        color="subdued"
-        size="s"
-      >
         <p>
           <FormattedMessage
-            defaultMessage="You can change your space at anytime"
+            defaultMessage="You can change your space at anytime."
             id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
             values={Object {}}
           />
         </p>
-      </EuiText>
-    </EuiPageHeader>
-    <EuiPageContent
-      className="spcSpaceSelector__pageContent"
+      </EuiTextColor>
+    </EuiText>
+    <EuiSpacer
+      size="xl"
+    />
+    <EuiLoadingSpinner
+      size="xl"
+    />
+  </_EuiPageSection>
+</_KibanaPageTemplate>
+`;
+
+exports[`it renders without crashing 1`] = `
+<_KibanaPageTemplate
+  className="spcSpaceSelector"
+  data-test-subj="kibanaSpaceSelector"
+  panelled={true}
+>
+  <EuiPortal>
+    <div
+      className="spcSelectorBackground"
+      role="presentation"
+    />
+  </EuiPortal>
+  <_EuiPageSection
+    color="transparent"
+    paddingSize="xl"
+  >
+    <EuiText
+      size="s"
+      textAlign="center"
     >
-      <EuiFlexGroup
-        alignItems="center"
-        direction="column"
-        responsive={false}
+      <EuiSpacer
+        size="xxl"
+      />
+      <KibanaSolutionAvatar
+        name="Elastic"
+        size="xl"
       />
       <EuiSpacer
-        size="xl"
+        size="xxl"
       />
-      <EuiLoadingSpinner
-        size="xl"
-      />
-    </EuiPageContent>
-  </EuiPageBody>
-</EuiPage>
+      <EuiTextColor
+        color="subdued"
+      >
+        <h1
+          className="eui spcSpaceSelector__pageHeader"
+          tabIndex={0}
+        >
+          <FormattedMessage
+            defaultMessage="Select your space"
+            id="xpack.spaces.spaceSelector.selectSpacesTitle"
+            values={Object {}}
+          />
+        </h1>
+        <p>
+          <FormattedMessage
+            defaultMessage="You can change your space at anytime."
+            id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+            values={Object {}}
+          />
+        </p>
+      </EuiTextColor>
+    </EuiText>
+    <EuiSpacer
+      size="xl"
+    />
+    <EuiLoadingSpinner
+      size="xl"
+    />
+  </_EuiPageSection>
+</_KibanaPageTemplate>
 `;

@@ -89,6 +89,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -180,6 +181,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -330,14 +332,34 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "system.process.cgroup.memory.mem.usage.bytes",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.usage.bytes",
+                  },
+                },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.limit.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.memory.total",
+                  },
+                },
+              ],
             },
           },
         ],
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -429,6 +451,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -510,6 +533,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -609,6 +633,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -706,6 +731,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -862,14 +888,34 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "system.process.cgroup.memory.mem.usage.bytes",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.usage.bytes",
+                  },
+                },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.limit.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.memory.total",
+                  },
+                },
+              ],
             },
           },
         ],
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -967,6 +1013,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1054,6 +1101,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1142,6 +1190,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1228,6 +1277,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1373,14 +1423,34 @@ Object {
             },
           },
           Object {
-            "exists": Object {
-              "field": "system.process.cgroup.memory.mem.usage.bytes",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.usage.bytes",
+                  },
+                },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.limit.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.memory.total",
+                  },
+                },
+              ],
             },
           },
         ],
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1467,6 +1537,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;
@@ -1543,6 +1614,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": 1,
   },
 }
 `;

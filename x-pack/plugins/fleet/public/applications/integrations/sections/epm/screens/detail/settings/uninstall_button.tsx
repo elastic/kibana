@@ -12,11 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { InstallStatus } from '../../../../../types';
 import type { PackageInfo } from '../../../../../types';
 
-import {
-  useCapabilities,
-  useGetPackageInstallStatus,
-  useUninstallPackage,
-} from '../../../../../hooks';
+import { useAuthz, useGetPackageInstallStatus, useUninstallPackage } from '../../../../../hooks';
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 
@@ -34,7 +30,7 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   title,
   version,
 }) => {
-  const hasWriteCapabilites = useCapabilities().write;
+  const canRemovePackages = useAuthz().integrations.removePackages;
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
@@ -59,9 +55,10 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
     />
   );
 
-  return hasWriteCapabilites ? (
+  return canRemovePackages ? (
     <>
       <EuiButton
+        data-test-subj="uninstallAssetsButton"
         iconType={'trash'}
         isLoading={isRemoving}
         onClick={() => setIsUninstallModalVisible(true)}

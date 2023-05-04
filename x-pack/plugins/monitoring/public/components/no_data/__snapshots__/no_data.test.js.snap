@@ -2,74 +2,73 @@
 
 exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow"
+  class="euiPage emotion-euiPage-row-grow"
   data-test-subj="noDataContainer"
 >
   <h1
-    class="euiScreenReaderOnly"
+    class="emotion-euiScreenReaderOnly"
   >
     No monitoring data found.
   </h1>
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
+    class="euiPageBody emotion-euiPageBody-restrictWidth"
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter emotion-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <span
         data-euiicon-type="monitoringApp"
       />
       <div
-        class="euiSpacer euiSpacer--m"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <h2
-        class="euiTitle euiTitle--large"
+        class="euiTitle emotion-euiTitle-l"
       >
         No monitoring data found
       </h2>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <div
-        class="euiText euiText--medium"
+        class="euiText emotion-euiText-m"
       >
         <p>
           Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
         </p>
+        <p>
+          If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
+        </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--l"
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="enableCollectionInterval"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Set up monitoring with Metricbeat
-              </span>
+              Set up monitoring with Metricbeat
             </span>
           </button>
         </div>
       </div>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="useInternalCollection"
         type="button"
       >
@@ -80,7 +79,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
             class="euiButtonEmpty__text"
           >
             <span
-              class="euiTextColor euiTextColor--subdued"
+              class="emotion-euiTextColor-subdued"
             >
               Or, set up with self monitoring
             </span>
@@ -94,74 +93,73 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 
 exports[`NoData should show text next to the spinner while checking a setting 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow"
+  class="euiPage emotion-euiPage-row-grow"
   data-test-subj="noDataContainer"
 >
   <h1
-    class="euiScreenReaderOnly"
+    class="emotion-euiScreenReaderOnly"
   >
     No monitoring data found.
   </h1>
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
+    class="euiPageBody emotion-euiPageBody-restrictWidth"
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter emotion-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <span
         data-euiicon-type="monitoringApp"
       />
       <div
-        class="euiSpacer euiSpacer--m"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <h2
-        class="euiTitle euiTitle--large"
+        class="euiTitle emotion-euiTitle-l"
       >
         No monitoring data found
       </h2>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <div
-        class="euiText euiText--medium"
+        class="euiText emotion-euiText-m"
       >
         <p>
           Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
         </p>
+        <p>
+          If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
+        </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--l"
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="enableCollectionInterval"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Set up monitoring with Metricbeat
-              </span>
+              Set up monitoring with Metricbeat
             </span>
           </button>
         </div>
       </div>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="useInternalCollection"
         type="button"
       >
@@ -172,7 +170,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
             class="euiButtonEmpty__text"
           >
             <span
-              class="euiTextColor euiTextColor--subdued"
+              class="emotion-euiTextColor-subdued"
             >
               Or, set up with self monitoring
             </span>

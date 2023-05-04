@@ -6,17 +6,17 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerNodesRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Retrieve the es plugins installed on the cluster nodes
   router.get(
     { path: addBasePath('/nodes/plugins'), validate: {} },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        const { body } = await client.asCurrentUser.nodes.info();
+        const body = await client.asCurrentUser.nodes.info();
         const plugins: Set<string> = Object.values(body.nodes).reduce((acc, nodeInfo) => {
           nodeInfo.plugins?.forEach(({ name }) => {
             acc.add(name);

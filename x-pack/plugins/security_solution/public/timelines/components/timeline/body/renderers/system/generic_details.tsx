@@ -9,8 +9,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 
@@ -104,6 +103,8 @@ export const SystemGenericLine = React.memo<Props>(
             isDraggable={isDraggable}
             queryValue={outcome}
             value={outcome}
+            isAggregatable={true}
+            fieldType="keyword"
           />
         </TokensFlexItem>
         <AuthSsh
@@ -141,7 +142,6 @@ export const SystemGenericLine = React.memo<Props>(
 SystemGenericLine.displayName = 'SystemGenericLine';
 
 interface GenericDetailsProps {
-  browserFields: BrowserFields;
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;

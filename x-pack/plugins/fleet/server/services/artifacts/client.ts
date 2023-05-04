@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { ListResult } from '../../../common';
+import type { ListResult } from '../../../common/types';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
@@ -27,6 +27,7 @@ import {
   generateArtifactContentHash,
   getArtifact,
   listArtifacts,
+  bulkCreateArtifacts,
 } from './artifacts';
 
 /**
@@ -74,6 +75,32 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     };
 
     return createArtifact(this.esClient, newArtifactData);
+  }
+
+  async bulkCreateArtifacts(
+    optionsList: ArtifactsClientCreateOptions[]
+  ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> {
+    const newArtifactsData = [];
+
+    for (const options of optionsList) {
+      const { content, type = '', identifier = this.packageName } = options;
+
+      const encodedMetaData = await this.encodeContent(content);
+      const newArtifactData: NewArtifact = {
+        type,
+        identifier,
+        packageName: this.packageName,
+        encryptionAlgorithm: 'none',
+        relative_url: relativeDownloadUrlFromArtifact({
+          identifier,
+          decodedSha256: encodedMetaData.decodedSha256,
+        }),
+        ...encodedMetaData,
+      };
+      newArtifactsData.push(newArtifactData);
+    }
+
+    return bulkCreateArtifacts(this.esClient, newArtifactsData);
   }
 
   async deleteArtifact(id: string) {

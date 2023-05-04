@@ -5,26 +5,24 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
+import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
-import { convertToBuildEsQuery } from '../../../../common/lib/keury';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
+import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { QUERY_PREVIEW_ERROR } from './translations';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
-import { FieldValueThreshold } from '../threshold_input';
-import { FieldValueQueryBar } from '../query_bar';
 
 interface PreviewHistogramParams {
   previewId: string | undefined;
   endDate: string;
   startDate: string;
   spaceId: string;
-  threshold?: FieldValueThreshold;
-  query: FieldValueQueryBar;
-  index: string[];
   ruleType: Type;
+  indexPattern: DataViewBase | undefined;
+  skip?: boolean;
 }
 
 export const usePreviewHistogram = ({
@@ -32,34 +30,22 @@ export const usePreviewHistogram = ({
   startDate,
   endDate,
   spaceId,
-  threshold,
-  query,
-  index,
   ruleType,
+  indexPattern,
+  skip,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
-  const {
-    query: { query: queryString, language },
-    filters,
-  } = query;
 
   const [filterQuery, error] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    indexPattern: {
-      fields: [],
-      title: index.join(),
-    },
-    queries: [
-      { query: `signal.rule.id:${previewId}`, language: 'kuery' },
-      { query: queryString, language },
-    ],
-    filters,
+    indexPattern,
+    queries: [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
+    filters: [],
   });
 
   const stackByField = useMemo(() => {
-    const stackByDefault = ruleType === 'machine_learning' ? 'host.name' : 'event.category';
-    return threshold?.field[0] ?? stackByDefault;
-  }, [threshold, ruleType]);
+    return ruleType === 'machine_learning' ? 'host.name' : 'event.category';
+  }, [ruleType]);
 
   const matrixHistogramRequest = useMemo(() => {
     return {
@@ -70,11 +56,10 @@ export const usePreviewHistogram = ({
       indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
       stackByField,
       startDate,
-      threshold,
       includeMissingData: false,
-      skip: error != null,
+      skip: skip || error != null,
     };
-  }, [startDate, endDate, filterQuery, spaceId, error, threshold, stackByField]);
+  }, [endDate, filterQuery, spaceId, stackByField, startDate, skip, error]);
 
-  return useMatrixHistogram(matrixHistogramRequest);
+  return useMatrixHistogramCombined(matrixHistogramRequest);
 };

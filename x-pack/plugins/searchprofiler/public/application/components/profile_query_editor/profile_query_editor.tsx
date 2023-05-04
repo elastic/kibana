@@ -18,6 +18,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { decompressFromEncodedURIComponent } from 'lz-string';
+
 import { useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
@@ -42,7 +44,15 @@ export const ProfileQueryEditor = memo(() => {
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications } = useAppContext();
+  const { getLicenseStatus, notifications, location } = useAppContext();
+
+  const queryParams = new URLSearchParams(location.search);
+  const indexName = queryParams.get('index');
+  const searchProfilerQueryURI = queryParams.get('load_from');
+  const searchProfilerQuery =
+    searchProfilerQueryURI &&
+    decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
+
   const requestProfile = useRequestProfile();
 
   const handleProfileClick = async () => {
@@ -88,11 +98,12 @@ export const ProfileQueryEditor = memo(() => {
                 })}
               >
                 <EuiFieldText
+                  data-test-subj="indexName"
                   disabled={!licenseEnabled}
                   inputRef={(ref) => {
                     if (ref) {
                       indexInputRef.current = ref;
-                      ref.value = DEFAULT_INDEX_VALUE;
+                      ref.value = indexName ? indexName : DEFAULT_INDEX_VALUE;
                     }
                   }}
                 />
@@ -107,7 +118,7 @@ export const ProfileQueryEditor = memo(() => {
         <Editor
           onEditorReady={onEditorReady}
           licenseEnabled={licenseEnabled}
-          initialValue={INITIAL_EDITOR_VALUE}
+          initialValue={searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE}
         />
       </EuiFlexItem>
 

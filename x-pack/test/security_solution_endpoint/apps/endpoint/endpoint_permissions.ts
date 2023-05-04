@@ -6,27 +6,24 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   describe('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
       // todo: way to force an endpoint to be created in isolated mode so we can check that state in the UI
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
 
       // Force a logout so that we start from the login page
@@ -59,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should NOT allow access to endpoint management pages', async () => {
           await PageObjects.endpoint.navigateToEndpointList();
-          await testSubjects.existOrFail('noIngestPermissions');
+          await testSubjects.existOrFail('noPrivilegesPage');
         });
 
         it('should display endpoint data on Host Details', async () => {
@@ -75,20 +72,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // The values for these are calculated, so let's just make sure its not teh default when no data is returned
           expect(endpointSummary['Policy status']).not.be('—');
           expect(endpointSummary['Agent status']).not.to.be('—');
-        });
-
-        // FIXME: this area (detections) is unstable and due to time, skipping it.
-        //        The page does not always (its intermittent) display with the created roles. Sometimes you get a
-        //        "not enought priviliges" and others the data shows up.
-        it.skip('should display endpoint data on Alert Details', async () => {
-          await PageObjects.detections.navigateToAlerts();
-          await PageObjects.detections.openFirstAlertDetailsForHostName(
-            indexedData.hosts[0].host.name
-          );
-
-          const hostAgentStatus = await testSubjects.getVisibleText('rowHostStatus');
-
-          expect(hostAgentStatus).to.eql('Healthy');
         });
       });
     }

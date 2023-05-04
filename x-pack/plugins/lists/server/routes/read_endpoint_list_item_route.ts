@@ -41,7 +41,7 @@ export const readEndpointListItemRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, item_id: itemId } = request.query;
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         if (id != null || itemId != null) {
           const exceptionListItem = await exceptionLists.getEndpointListItem({
             id,

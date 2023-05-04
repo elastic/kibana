@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function catalogueTests({ getService }: FtrProviderContext) {
@@ -50,9 +51,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) =>
-                catalogueId !== 'monitoring' &&
-                catalogueId !== 'osquery' &&
-                !esFeatureExceptions.includes(catalogueId)
+                catalogueId !== 'monitoring' && !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
@@ -65,10 +64,13 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
+              'enterpriseSearchAnalytics',
+              'elasticsearch',
               'appSearch',
               'workplaceSearch',
+              'searchExperiences',
               'spaces',
-              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(
@@ -89,10 +91,13 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'ml_file_data_visualizer',
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
+              'enterpriseSearchAnalytics',
+              'elasticsearch',
               'appSearch',
               'workplaceSearch',
+              'searchExperiences',
               'spaces',
-              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(

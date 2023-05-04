@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
+import { useEffect, useMemo, useState } from 'react';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { checkArtifactHasData } from '../../../../management/services/exceptions_list/check_artifact_has_data';
+import { HostIsolationExceptionsApiClient } from '../../../../management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { useCurrentUser, useHttp, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
-import { EndpointPrivileges, Immutable } from '../../../../../common/endpoint/types';
+import type {
+  EndpointPrivileges,
+  Immutable,
+  MaybeImmutable,
+} from '../../../../../common/endpoint/types';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
-import { FleetAuthz } from '../../../../../../fleet/common';
+import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -22,55 +30,94 @@ import { FleetAuthz } from '../../../../../../fleet/common';
  * to keep API calls to a minimum.
  */
 export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
+  const isMounted = useIsMounted();
+  const http = useHttp();
   const user = useCurrentUser();
-  const fleetServices = useKibana().services.fleet;
-  const isMounted = useRef<boolean>(true);
+
+  const kibanaServices = useKibana().services;
+  const fleetServicesFromUseKibana = kibanaServices.fleet;
+  // The `fleetServicesFromPluginStart` will be defined when this hooks called from a component
+  // that is being rendered under the Fleet context (UI extensions). The `fleetServicesFromUseKibana`
+  // above will be `undefined` in this case.
+  const fleetServicesFromPluginStart = useSecuritySolutionStartDependencies()?.fleet;
+  const fleetAuthz = fleetServicesFromUseKibana?.authz ?? fleetServicesFromPluginStart?.authz;
+
   const licenseService = useLicense();
-  const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
-  const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
+  const isPlatinumPlus = licenseService.isPlatinumPlus();
+
+  const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
+  const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
+
+  const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
+  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
+
+  const [checkHostIsolationExceptionsDone, setCheckHostIsolationExceptionsDone] =
+    useState<boolean>(false);
+  const [hasHostIsolationExceptionsItems, setHasHostIsolationExceptionsItems] =
+    useState<boolean>(false);
 
   const privileges = useMemo(() => {
+    const loading = !userRolesCheckDone || !user || !checkHostIsolationExceptionsDone;
+
     const privilegeList: EndpointPrivileges = Object.freeze({
-      loading: !fleetCheckDone || !user,
-      ...(fleetAuthz
-        ? calculateEndpointAuthz(licenseService, fleetAuthz)
+      loading,
+      ...(!loading && fleetAuthz
+        ? calculateEndpointAuthz(
+            licenseService,
+            fleetAuthz,
+            userRoles,
+            isEndpointRbacEnabled || isEndpointRbacV1Enabled,
+            hasHostIsolationExceptionsItems
+          )
         : getEndpointAuthzInitialState()),
     });
 
     return privilegeList;
-  }, [fleetCheckDone, user, fleetAuthz, licenseService]);
+  }, [
+    userRolesCheckDone,
+    user,
+    checkHostIsolationExceptionsDone,
+    fleetAuthz,
+    licenseService,
+    userRoles,
+    isEndpointRbacEnabled,
+    isEndpointRbacV1Enabled,
+    hasHostIsolationExceptionsItems,
+  ]);
 
-  // Check if user can access fleet
+  // get user roles
   useEffect(() => {
-    if (!fleetServices) {
-      setFleetCheckDone(true);
-      return;
-    }
-
-    setFleetCheckDone(false);
-
     (async () => {
-      try {
-        const fleetAuthzForCurrentUser = await fleetServices.authz;
-
-        if (isMounted.current) {
-          setFleetAuthz(fleetAuthzForCurrentUser);
-        }
-      } finally {
-        if (isMounted.current) {
-          setFleetCheckDone(true);
-        }
+      if (user && isMounted()) {
+        setUserRoles(user?.roles);
+        setUserRolesCheckDone(true);
       }
     })();
-  }, [fleetServices]);
+  }, [isMounted, user]);
 
-  // Capture if component is unmounted
-  useEffect(
-    () => () => {
-      isMounted.current = false;
-    },
-    []
-  );
+  // Check if Host Isolation Exceptions exist if license is not Platinum+
+  useEffect(() => {
+    if (!isPlatinumPlus) {
+      // Reset these back to false. Case license is changed while the user is logged in.
+      setHasHostIsolationExceptionsItems(false);
+      setCheckHostIsolationExceptionsDone(false);
+
+      checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(http))
+        .then((hasData) => {
+          if (isMounted()) {
+            setHasHostIsolationExceptionsItems(hasData);
+          }
+        })
+        .finally(() => {
+          if (isMounted()) {
+            setCheckHostIsolationExceptionsDone(true);
+          }
+        });
+    } else {
+      setHasHostIsolationExceptionsItems(true);
+      setCheckHostIsolationExceptionsDone(true);
+    }
+  }, [http, isMounted, isPlatinumPlus]);
 
   return privileges;
 };

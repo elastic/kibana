@@ -87,6 +87,20 @@ export const getDefaultWorkpad = () => {
   };
 };
 
+export const getExportedWorkpad = () => {
+  const workpad = getDefaultWorkpad();
+  return {
+    id: workpad.id,
+    attributes: workpad,
+  };
+};
+
 export const getDefaultSidebar = () => ({
   groupFiltersByOption: DEFAULT_GROUP_BY_FIELD,
+});
+
+export const getDefaultFlyouts = () => ({
+  keyboardShortcutsDoc: {
+    isVisible: false,
+  },
 });

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
+import { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
 
 export function getImportWarnings(
   rulesSavedObjects: Array<SavedObject<unknown>>

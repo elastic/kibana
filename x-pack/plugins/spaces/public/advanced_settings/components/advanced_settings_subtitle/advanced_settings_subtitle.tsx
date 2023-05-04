@@ -32,15 +32,13 @@ export const AdvancedSettingsSubtitle = (props: Props) => {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
-              defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
-              values={{
-                spaceName: <strong>{activeSpace.name}</strong>,
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
+            defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
+            values={{
+              spaceName: <strong>{activeSpace.name}</strong>,
+            }}
+          />
         }
       />
     </Fragment>

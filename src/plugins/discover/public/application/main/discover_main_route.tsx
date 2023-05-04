@@ -5,41 +5,49 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo } from 'react';
-import { History } from 'history';
-import { useParams } from 'react-router-dom';
-
-import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { DataViewListItem } from '@kbn/data-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DataViewSavedObjectConflictError, type DataView } from '@kbn/data-views-plugin/public';
+import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import {
+  AnalyticsNoDataPageKibanaProvider,
+  AnalyticsNoDataPage,
+} from '@kbn/shared-ux-page-analytics-no-data';
 import {
   SavedSearch,
   getSavedSearch,
   getSavedSearchFullPathUrl,
-} from '../../services/saved_searches';
-import { getState } from './services/discover_state';
-import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
+} from '@kbn/saved-search-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { MainHistoryLocationState } from '../../../common/locator';
+import { getDiscoverStateContainer } from './services/discover_state';
+import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
-import { redirectWhenMissing } from '../../../../kibana_utils/public';
-import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
-import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { DiscoverRouteProps } from '../types';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getScopedHistory, getUrlTracker } from '../../kibana_services';
+import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
+import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
-
-export interface DiscoverMainProps extends DiscoverRouteProps {
-  /**
-   * Instance of browser history
-   */
-  history: History;
-}
 
 interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
+interface Props {
+  isDev: boolean;
+}
+
+export function DiscoverMainRoute(props: Props) {
+  const history = useHistory();
+  const services = useDiscoverServices();
+  const { isDev } = props;
   const {
     core,
     chrome,
@@ -47,52 +55,131 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     data,
     toastNotifications,
     http: { basePath },
+    dataViewEditor,
   } = services;
   const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState(true);
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const indexPattern = savedSearch?.searchSource?.getField('index');
-  const [indexPatternList, setIndexPatternList] = useState<
-    Array<SavedObject<IndexPatternAttributes>>
-  >([]);
-
+  const [dataViewList, setDataViewList] = useState<DataViewListItem[]>([]);
+  const [hasESData, setHasESData] = useState(false);
+  const [hasUserDataView, setHasUserDataView] = useState(false);
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
   const { id } = useParams<DiscoverLandingParams>();
 
-  useEffect(() => {
-    const savedSearchId = id;
+  /**
+   * Get location state of scoped history only on initial load
+   */
+  const historyLocationState = useMemo(
+    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
+    []
+  );
 
-    async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
+  useAlertResultsToast({
+    isAlertResults: historyLocationState?.isAlertResults,
+    toastNotifications,
+  });
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: id || 'new',
+  });
+
+  const loadDefaultOrCurrentDataView = useCallback(
+    async (nextSavedSearch: SavedSearch) => {
       try {
-        await data.indexPatterns.ensureDefaultDataView();
-        const { appStateContainer } = getState({ history, uiSettings: config });
-        const { index } = appStateContainer.getState();
-        const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
+        const hasUserDataViewValue = await data.dataViews.hasData
+          .hasUserDataView()
+          .catch(() => false);
+        const hasESDataValue =
+          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
+        setHasUserDataView(hasUserDataViewValue);
+        setHasESData(hasESDataValue);
 
-        const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
-        const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
+        if (!hasUserDataViewValue) {
+          setShowNoDataPage(true);
+          return;
+        }
 
-        setIndexPatternList(ipList);
+        let defaultDataView: DataView | null = null;
+        try {
+          defaultDataView = await data.dataViews.getDefaultDataView({ displayErrors: false });
+        } catch (e) {
+          //
+        }
 
-        return indexPatternData;
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+          return;
+        }
+
+        const { appState } = getDiscoverStateContainer({
+          history,
+          savedSearch: nextSavedSearch,
+          services,
+        });
+        const { index, query } = appState.getState();
+        const ip = await loadDataView(
+          data.dataViews,
+          config,
+          index,
+          historyLocationState?.dataViewSpec
+        );
+
+        const ipList = ip.list;
+        const isTextBasedQuery = query && isOfAggregateQueryType(query);
+        const dataViewData = resolveDataView(
+          ip,
+          nextSavedSearch.searchSource,
+          toastNotifications,
+          isTextBasedQuery
+        );
+        setDataViewList(ipList);
+
+        return dataViewData;
       } catch (e) {
         setError(e);
       }
-    }
+    },
+    [
+      config,
+      data.dataViews,
+      history,
+      isDev,
+      historyLocationState?.dataViewSpec,
+      toastNotifications,
+      services,
+    ]
+  );
 
-    async function loadSavedSearch() {
+  const loadSavedSearch = useCallback(
+    async (nextDataView?: DataView) => {
       try {
-        const currentSavedSearch = await getSavedSearch(savedSearchId, {
+        setLoading(true);
+        const currentSavedSearch = await getSavedSearch(id, {
           search: services.data.search,
           savedObjectsClient: core.savedObjects.client,
           spaces: services.spaces,
+          savedObjectsTagging: services.savedObjectsTagging,
         });
 
-        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
-          currentSavedSearch.searchSource
-        );
+        const currentDataView = nextDataView
+          ? nextDataView
+          : await loadDefaultOrCurrentDataView(currentSavedSearch);
+
+        if (!currentDataView) {
+          return;
+        }
 
         if (!currentSavedSearch.searchSource.getField('index')) {
-          currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
+          currentSavedSearch.searchSource.setField('index', currentDataView);
         }
+
+        restoreStateFromSavedSearch({
+          savedSearch: currentSavedSearch,
+          timefilter: services.timefilter,
+        });
 
         setSavedSearch(currentSavedSearch);
 
@@ -103,6 +190,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
             currentSavedSearch.id
           );
         }
+        setLoading(false);
       } catch (e) {
         if (e instanceof DataViewSavedObjectConflictError) {
           setError(e);
@@ -122,24 +210,43 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
             onBeforeRedirect() {
               getUrlTracker().setTrackedUrl('/');
             },
+            theme: core.theme,
           })(e);
         }
       }
-    }
+    },
+    [
+      id,
+      services.data,
+      services.spaces,
+      services.timefilter,
+      services.savedObjectsTagging,
+      core.savedObjects.client,
+      core.application.navigateToApp,
+      core.theme,
+      loadDefaultOrCurrentDataView,
+      chrome.recentlyAccessed,
+      history,
+      basePath,
+      toastNotifications,
+    ]
+  );
 
+  const onDataViewCreated = useCallback(
+    async (nextDataView: unknown) => {
+      if (nextDataView) {
+        setLoading(true);
+        setShowNoDataPage(false);
+        setError(undefined);
+        await loadSavedSearch(nextDataView as DataView);
+      }
+    },
+    [loadSavedSearch]
+  );
+
+  useEffect(() => {
     loadSavedSearch();
-  }, [
-    core.savedObjects.client,
-    basePath,
-    chrome.recentlyAccessed,
-    config,
-    core.application.navigateToApp,
-    data.indexPatterns,
-    history,
-    id,
-    services,
-    toastNotifications,
-  ]);
+  }, [loadSavedSearch]);
 
   useEffect(() => {
     chrome.setBreadcrumbs(
@@ -149,20 +256,37 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     );
   }, [chrome, savedSearch]);
 
+  if (showNoDataPage) {
+    const analyticsServices = {
+      coreStart: core,
+      dataViews: {
+        ...data.dataViews,
+        hasData: {
+          ...data.dataViews.hasData,
+
+          // We've already called this, so we can optimize the analytics services to
+          // use the already-retrieved data to avoid a double-call.
+          hasESData: () => Promise.resolve(isDev ? true : hasESData),
+          hasUserDataView: () => Promise.resolve(hasUserDataView),
+        },
+      },
+      dataViewEditor,
+    };
+
+    return (
+      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView />
+      </AnalyticsNoDataPageKibanaProvider>
+    );
+  }
+
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!indexPattern || !savedSearch) {
-    return <LoadingIndicator />;
+  if (loading || !savedSearch) {
+    return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
-  return (
-    <DiscoverMainAppMemoized
-      history={history}
-      indexPatternList={indexPatternList}
-      savedSearch={savedSearch}
-      services={services}
-    />
-  );
+  return <DiscoverMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;
 }

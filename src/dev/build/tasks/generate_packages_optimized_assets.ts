@@ -14,16 +14,15 @@ import fs from 'fs';
 
 import gulpBrotli from 'gulp-brotli';
 // @ts-expect-error
-import gulpGzip from 'gulp-gzip';
-// @ts-expect-error
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
+import zlib from 'zlib';
 
 import { Task, write } from '../lib';
 
@@ -43,33 +42,26 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     log.debug('Minify CSS');
     await asyncPipeline(
       vfs.src(['**/*.css'], { cwd: assetDir }),
-      gulpPostCSS([
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require('cssnano')({
-          preset: ['default', { discardComments: false }],
-        }),
-      ]),
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
       vfs.dest(assetDir)
     );
 
     log.debug('Minify JS');
     await asyncPipeline(
       vfs.src(['**/*.js'], { cwd: assetDir }),
-      gulpTerser({ compress: true, mangle: true }, terser.minify),
+      gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
       vfs.dest(assetDir)
     );
 
     log.debug('Brotli compress');
     await asyncPipeline(
       vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpBrotli(),
-      vfs.dest(assetDir)
-    );
-
-    log.debug('GZip compress');
-    await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpGzip(),
+      gulpBrotli({
+        params: {
+          [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+        },
+      }),
       vfs.dest(assetDir)
     );
   } finally {

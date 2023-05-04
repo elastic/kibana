@@ -29,7 +29,15 @@ interface ShrinkFields {
   };
 }
 
-interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields {
+export interface DownsampleFields {
+  downsample: {
+    enabled: boolean;
+    fixedIntervalSize?: string;
+    fixedIntervalUnits?: string;
+  };
+}
+
+interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields, DownsampleFields {
   /**
    * By default rollover is enabled with set values for max age, max size and max docs. In this policy form
    * opting in to default rollover overrides custom rollover values.
@@ -58,13 +66,14 @@ interface WarmPhaseMetaFields
   extends DataAllocationMetaFields,
     MinAgeField,
     ForcemergeFields,
-    ShrinkFields {
+    ShrinkFields,
+    DownsampleFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
   readonlyEnabled: boolean;
 }
 
-interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
+interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, DownsampleFields {
   enabled: boolean;
   readonlyEnabled: boolean;
 }

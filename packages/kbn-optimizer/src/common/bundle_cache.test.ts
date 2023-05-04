@@ -15,7 +15,7 @@ const mockWriteFileSync: jest.Mock = jest.requireMock('fs').writeFileSync;
 
 const SOME_STATE: State = {
   cacheKey: 'abc',
-  files: ['123'],
+  referencedPaths: ['123'],
   moduleCount: 123,
   optimizerCacheKey: 'abc',
 };
@@ -49,7 +49,7 @@ it(`updates files on disk when calling set()`, () => {
         "/foo/.kbn-optimizer-cache",
         "{
       \\"cacheKey\\": \\"abc\\",
-      \\"files\\": [
+      \\"referencedPaths\\": [
         \\"123\\"
       ],
       \\"moduleCount\\": 123,
@@ -94,14 +94,14 @@ it('provides accessors to specific state properties', () => {
   const cache = new BundleCache('/foo');
 
   expect(cache.getModuleCount()).toBe(undefined);
-  expect(cache.getReferencedFiles()).toEqual(undefined);
+  expect(cache.getReferencedPaths()).toEqual(undefined);
   expect(cache.getCacheKey()).toEqual(undefined);
   expect(cache.getOptimizerCacheKey()).toEqual(undefined);
 
   cache.set(SOME_STATE);
 
   expect(cache.getModuleCount()).toBe(123);
-  expect(cache.getReferencedFiles()).toEqual(['123']);
+  expect(cache.getReferencedPaths()).toEqual(['123']);
   expect(cache.getCacheKey()).toEqual('abc');
   expect(cache.getOptimizerCacheKey()).toEqual('abc');
 });

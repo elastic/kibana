@@ -50,7 +50,6 @@ export const Component = (props: PureComponentProps) => {
 
 Component.args = {
   cloudId: 'cloud-id',
-  endpointUrl: 'https://endpoint-url',
   learnMoreUrl: 'https://learn-more-url',
   managementUrl: 'https://management-url',
 };

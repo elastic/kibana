@@ -27,18 +27,12 @@ export const CategorizationPerPartitionField: FC = () => {
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
   useEffect(() => {
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (
     <Description>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel"
-            defaultMessage="Enable per-partition categorization"
-          />
-        }
-      >
+      <EuiFormRow>
         <CategorizationPerPartitionSwitch />
       </EuiFormRow>
 

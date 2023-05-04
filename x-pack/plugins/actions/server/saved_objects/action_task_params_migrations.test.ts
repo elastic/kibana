@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   getActionTaskParamsMigrations,
   isPreconfiguredAction,
 } from './action_task_params_migrations';
 import { ActionTaskParams } from '../types';
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -26,6 +26,7 @@ const preconfiguredActions = [
     name: 'Slack #xyz',
     secrets: {},
     isPreconfigured: true,
+    isDeprecated: false,
   },
 ];
 
@@ -414,12 +415,12 @@ function getMockData(
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   return {
     attributes: {
-      actionId: uuid.v4(),
+      actionId: uuidv4(),
       params: {},
       ...overwrites,
     },
     references: [...referencesOverwrites],
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'action_task_param',
   };
 }

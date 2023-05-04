@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ECSField } from '../types';
+import type { ECSField } from '../types';
 
 /**
  * Use these functions to accecss information held in `ECSField`s.

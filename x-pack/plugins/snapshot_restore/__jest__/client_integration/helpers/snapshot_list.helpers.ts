@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBedConfig, registerTestBed, TestBed } from '@kbn/test/jest';
+import { TestBedConfig, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { BASE_PATH } from '../../../public/application/constants';
 import { SnapshotList } from '../../../public/application/sections/home/snapshot_list';
@@ -35,6 +35,7 @@ const searchErrorSelector = 'snapshotListSearchError';
 
 export const setup = async (query?: string): Promise<SnapshotListTestBed> => {
   const testBed = await initTestBed(query);
+
   const { form, component, find, exists } = testBed;
 
   const setSearchText = async (value: string, advanceTime = true) => {

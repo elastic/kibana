@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/flot-charts",
+  "owner": "@elastic/kibana-operations"
+}

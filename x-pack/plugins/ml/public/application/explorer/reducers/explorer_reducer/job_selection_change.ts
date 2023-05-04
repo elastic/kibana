@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import { ActionPayload } from '../../explorer_dashboard_service';
-import { getDefaultSwimlaneData, getInfluencers } from '../../explorer_utils';
+import type { ActionPayload } from '../../explorer_dashboard_service';
+import { getInfluencers } from '../../explorer_utils';
 
 import { getIndexPattern } from './get_index_pattern';
-import { ExplorerState } from './state';
+import type { ExplorerState } from './state';
 
 export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload): ExplorerState => {
   const { selectedJobs } = payload;
   const stateUpdate: ExplorerState = {
     ...state,
     noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
-    overallSwimlaneData: getDefaultSwimlaneData(),
     selectedJobs,
-    // currently job selection set asynchronously so
-    // we want to preserve the pagination from the url state
-    // on initial load
-    viewByFromPage:
-      !state.selectedJobs || isEqual(state.selectedJobs, selectedJobs) ? state.viewByFromPage : 1,
   };
 
   // clear filter if selected jobs have no influencers

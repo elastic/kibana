@@ -5,30 +5,58 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-export const TotalCountHeader = ({ totalCount }: { totalCount: number }) => {
+const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
+
+export const TotalCountHeader = ({
+  totalCount,
+  approximate,
+  loading,
+}: {
+  totalCount: number;
+  loading?: boolean;
+  approximate?: boolean;
+}) => {
   return (
-    <EuiFlexItem>
-      <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader">
+    <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
+      <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader" textAlign="center">
         <FormattedMessage
           id="xpack.dataVisualizer.searchPanel.totalDocCountLabel"
-          defaultMessage="Total documents: {strongTotalCount}"
+          defaultMessage="Total documents: {prepend}{strongTotalCount}"
           values={{
-            strongTotalCount: (
+            prepend: !loading && approximate ? '~' : '',
+            strongTotalCount: loading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
               <strong data-test-subj="dataVisualizerTotalDocCount">
                 <FormattedMessage
                   id="xpack.dataVisualizer.searchPanel.totalDocCountNumber"
                   defaultMessage="{totalCount, plural, one {#} other {#}}"
-                  values={{ totalCount }}
+                  values={{
+                    totalCount: approximate
+                      ? totalCount.toPrecision(SIGFIGS_IF_ROUNDING)
+                      : totalCount,
+                  }}
                 />
               </strong>
             ),
           }}
         />
       </EuiText>
+      {approximate ? (
+        <EuiIconTip
+          content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
+            defaultMessage:
+              'Approximate values are shown in the total document count and chart, which use random sampler aggregations.',
+          })}
+          position="right"
+          type="iInCircle"
+        />
+      ) : null}
     </EuiFlexItem>
   );
 };

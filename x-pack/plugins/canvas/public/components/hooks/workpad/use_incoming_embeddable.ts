@@ -8,12 +8,13 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
+import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';
 import { decode, encode } from '../../../../common/lib/embeddable_dataurl';
 import { CanvasElement, CanvasPage } from '../../../../types';
-import { useEmbeddablesService, useLabsService } from '../../../services';
+import { useEmbeddablesService, useLabsService, useNotifyService } from '../../../services';
 // @ts-expect-error unconverted file
-import { addElement } from '../../../state/actions/elements';
+import { addElement, fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-expect-error unconverted file
 import { selectToplevelNodes } from '../../../state/actions/transient';
 
@@ -23,10 +24,13 @@ import {
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
 
+const { actionsElements: strings } = ErrorStrings;
+
 export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
   const embeddablesService = useEmbeddablesService();
   const labsService = useLabsService();
   const dispatch = useDispatch();
+  const notifyService = useNotifyService();
   const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const stateTransferService = embeddablesService.getStateTransfer();
 
@@ -45,19 +49,39 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
       if (originalElement) {
         const originalAst = fromExpression(originalElement!.expression);
 
-        const functionIndex = originalAst.chain.findIndex(
-          ({ function: fn }) => fn === 'embeddable'
+        const functionIndex = originalAst.chain.findIndex(({ function: fn }) =>
+          ['embeddable', 'savedVisualization'].includes(fn)
         );
+
+        if (functionIndex === -1) {
+          dispatch(fetchAllRenderables());
+          return;
+        }
+
+        if (originalAst.chain[functionIndex].function === 'savedVisualization') {
+          notifyService.error(strings.getConvertToLensUnsupportedSavedVisualization());
+          dispatch(fetchAllRenderables());
+          return;
+        }
 
         const originalInput = decode(
           originalAst.chain[functionIndex].arguments.config[0] as string
         );
 
+        const originalType = originalAst.chain[functionIndex].arguments.type[0];
+
         // clear out resolved arg for old embeddable
         const argumentPath = [embeddableId, 'expressionRenderable'];
         dispatch(clearValue({ path: argumentPath }));
 
-        const updatedInput = { ...originalInput, ...incomingInput };
+        let updatedInput;
+
+        // if type was changed, we should not provide originalInput
+        if (originalType !== type) {
+          updatedInput = incomingInput;
+        } else {
+          updatedInput = { ...originalInput, ...incomingInput };
+        }
 
         const expression = `embeddable config="${encode(updatedInput)}"
   type="${type}"
@@ -82,5 +106,5 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         dispatch(addElement(selectedPage.id, { expression }));
       }
     }
-  }, [dispatch, selectedPage, incomingEmbeddable, isByValueEnabled]);
+  }, [dispatch, notifyService, selectedPage, incomingEmbeddable, isByValueEnabled]);
 };

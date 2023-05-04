@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { DVErrorObject } from '../../../../../index_data_visualizer/utils/error_utils';
+import { MLErrorObject } from '@kbn/ml-error-utils';
 
 export const ErrorMessageContent = ({
   fieldName,
   error,
 }: {
   fieldName: string;
-  error: DVErrorObject;
+  error: MLErrorObject;
 }) => {
   return (
-    <EuiText textAlign="center" size={'xs'}>
+    <EuiCallOut heading="p" color="danger" size="s">
       <FormattedMessage
         id="xpack.dataVisualizer.index.fieldStatisticsErrorMessage"
         defaultMessage="Error getting statistics for field '{fieldName}' because {reason}"
         values={{ fieldName, reason: error.message }}
       />
-    </EuiText>
+    </EuiCallOut>
   );
 };

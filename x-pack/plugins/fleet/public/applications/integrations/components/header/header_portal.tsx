@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import type { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 
-export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu }) => {
-  const portalNode = useMemo(() => createPortalNode(), []);
+export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, theme$ }) => {
+  const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />);
+      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$ });
       return mount(element);
     });
 
@@ -29,7 +30,7 @@ export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu }) => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu]);
+  }, [portalNode, setHeaderActionMenu, theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 };

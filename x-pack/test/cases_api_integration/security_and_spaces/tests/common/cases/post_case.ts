@@ -7,21 +7,21 @@
 
 import expect from '@kbn/expect';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
   CaseStatuses,
-  CaseType,
-} from '../../../../../../plugins/cases/common/api';
+  CaseSeverity,
+} from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   getCaseUserActions,
-} from '../../../../common/lib/utils';
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   secOnly,
   secOnlyRead,
@@ -103,6 +103,32 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should post a case without severity', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(postCaseResp(null, getPostCaseRequest()));
+      });
+
+      it('should post a case with severity', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            severity: CaseSeverity.HIGH,
+          })
+        );
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(
+          postCaseResp(
+            null,
+            getPostCaseRequest({
+              severity: CaseSeverity.HIGH,
+            })
+          )
+        );
+      });
+
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -114,10 +140,8 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: defaultUser,
           case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
           payload: {
-            type: postedCase.type,
             description: postedCase.description,
             title: postedCase.title,
             tags: postedCase.tags,
@@ -125,6 +149,8 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: postedCase.settings,
             owner: postedCase.owner,
             status: CaseStatuses.open,
+            severity: CaseSeverity.LOW,
+            assignees: [],
           },
         });
       });
@@ -138,10 +164,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      it('should not allow creating a collection style case', async () => {
-        await createCase(supertest, getPostCaseRequest({ type: CaseType.collection }), 400);
-      });
-
       it('400s when bad query supplied', async () => {
         await supertest
           .post(CASES_URL)
@@ -214,6 +236,11 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseWithoutTags).expect(400);
       });
 
+      it('400s when passing a wrong severity value', async () => {
+        // @ts-expect-error
+        await createCase(supertest, { ...getPostCaseRequest(), severity: 'very-severe' }, 400);
+      });
+
       it('400s if you passing status for a new case', async () => {
         const req = getPostCaseRequest();
 
@@ -225,10 +252,23 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s if the title is too long', async () => {
-        const longTitle =
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
+        const longTitle = 'a'.repeat(161);
 
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
+      });
+
+      describe('tags', async () => {
+        it('400s if the a tag is a whitespace', async () => {
+          const tags = ['test', ' '];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is an empty string', async () => {
+          const tags = ['test', ''];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
       });
     });
 

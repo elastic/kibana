@@ -35,6 +35,8 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
               field.fieldName !== undefined
             ) {
               options.push({ value: field.fieldName });
+            } else {
+              options.push({ value: field.fieldName, disabled: true });
             }
           });
         }

@@ -7,14 +7,21 @@
  */
 
 import React from 'react';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
-import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
-import { shallowWithIntl } from '@kbn/test/jest';
-import { GaugeRenderProps, GaugeArguments, GaugeLabelMajorMode, ColorStop } from '../../common';
+import { ColorStop } from '@kbn/coloring';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import {
+  GaugeRenderProps,
+  GaugeArguments,
+  GaugeLabelMajorModes,
+  GaugeTicksPositions,
+  GaugeColorModes,
+} from '../../common';
 import GaugeComponent from './gauge_component';
-import { Chart, Goal } from '@elastic/charts';
+import { Chart, Goal, Settings } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -47,17 +54,19 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const paletteThemeService = chartPluginMock.createSetupContract().palettes;
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeArguments = {
   labelMajor: 'Gauge',
-  metricAccessor: 'metric-accessor',
-  minAccessor: '',
-  maxAccessor: '',
-  goalAccessor: '',
+  metric: 'metric-accessor',
+  min: '',
+  max: '',
+  goal: '',
   shape: 'verticalBullet',
-  colorMode: 'none',
-  ticksPosition: 'auto',
-  labelMajorMode: 'auto',
+  colorMode: GaugeColorModes.NONE,
+  ticksPosition: GaugeTicksPositions.AUTO,
+  labelMajorMode: GaugeLabelMajorModes.AUTO,
+  centralMajorMode: GaugeLabelMajorModes.NONE,
 };
 
 const createData = (
@@ -70,15 +79,29 @@ const createData = (
   };
 };
 
+const mockState = new Map();
+const uiState = {
+  get: jest
+    .fn()
+    .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: jest.fn(),
+  setSilent: jest.fn(),
+} as any;
+
 describe('GaugeComponent', function () {
   let wrapperProps: GaugeRenderProps;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     wrapperProps = {
+      canNavigateToLens: false,
       data: createData(),
       chartsThemeService,
       args,
       formatFactory: formatService.deserialize,
+      paletteService: await paletteThemeService.getPalettes(),
+      uiState,
+      renderComplete: jest.fn(),
     };
   });
 
@@ -87,14 +110,14 @@ describe('GaugeComponent', function () {
     expect(component.find(Chart)).toMatchSnapshot();
   });
 
-  it('returns null when metricAccessor is not provided', async () => {
+  it('returns null when metric is not provided', async () => {
     const customProps = {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        metricAccessor: undefined,
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: undefined,
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'min-accessor': 0, 'max-accessor': 10 }),
     };
@@ -107,9 +130,9 @@ describe('GaugeComponent', function () {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'metric-accessor': 0, 'min-accessor': 0, 'max-accessor': 0 }),
     };
@@ -121,9 +144,9 @@ describe('GaugeComponent', function () {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'metric-accessor': 0, 'min-accessor': 0, 'max-accessor': -10 }),
     };
@@ -135,10 +158,10 @@ describe('GaugeComponent', function () {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        ticksPosition: 'bands',
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        ticksPosition: GaugeTicksPositions.BANDS,
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'metric-accessor': 12, 'min-accessor': 0, 'max-accessor': 10 }),
     } as GaugeRenderProps;
@@ -152,7 +175,7 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          labelMajorMode: 'none' as GaugeLabelMajorMode,
+          labelMajorMode: GaugeLabelMajorModes.NONE,
           labelMinor: '',
         },
       };
@@ -165,7 +188,7 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          labelMajorMode: 'custom' as GaugeLabelMajorMode,
+          labelMajorMode: GaugeLabelMajorModes.CUSTOM,
           labelMajor: 'custom labelMajor',
           labelMinor: 'custom labelMinor',
         },
@@ -179,7 +202,7 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          labelMajorMode: 'auto' as GaugeLabelMajorMode,
+          labelMajorMode: GaugeLabelMajorModes.AUTO,
           labelMajor: '',
         },
       };
@@ -189,45 +212,6 @@ describe('GaugeComponent', function () {
   });
 
   describe('ticks and color bands', () => {
-    it('displays auto ticks', () => {
-      const customProps = {
-        ...wrapperProps,
-        args: {
-          ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
-        },
-      };
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 3.33, 6.67, 10]);
-    });
-    it('spreads auto ticks only over the [min, max] domain if color bands defined bigger domain', () => {
-      const palette = {
-        type: 'palette' as const,
-        name: 'custom',
-        params: {
-          colors: ['#aaa', '#bbb', '#ccc'],
-          gradient: false,
-          stops: [10, 20, 30] as unknown as ColorStop[],
-          range: 'number',
-          rangeMin: 0,
-          rangeMax: 20,
-        },
-      };
-      const customProps = {
-        ...wrapperProps,
-        args: {
-          ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
-          palette,
-        },
-      } as GaugeRenderProps;
-      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 3.33, 6.67, 10]);
-    });
     it('sets proper color bands and ticks on color bands for values smaller than maximum', () => {
       const palette = {
         type: 'palette' as const,
@@ -245,18 +229,18 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
-          ticksPosition: 'bands',
+          ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 10]);
-      expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 10]);
+      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 4, 10]);
+      expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 4, 10]);
     });
-    it('sets proper color bands and ticks on color bands if palette steps are smaller than minimum', () => {
+    it('sets proper color bands if palette steps are smaller than minimum', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -273,18 +257,17 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
-          ticksPosition: 'bands',
+          ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 10]);
-      expect(goal.prop('bands')).toEqual([0, 10]);
+      expect(goal.prop('bands')).toEqual([0, 4, 10]);
     });
-    it('sets proper color bands and ticks on color bands if percent palette steps are smaller than 0', () => {
+    it('sets proper color bands if percent palette steps are smaller than 0', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -294,25 +277,24 @@ describe('GaugeComponent', function () {
           stops: [-20, -60, 80],
           range: 'percent',
           rangeMin: 0,
-          rangeMax: 4,
+          rangeMax: 100,
         },
       };
       const customProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
-          ticksPosition: 'bands',
+          ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 8, 10]);
       expect(goal.prop('bands')).toEqual([0, 8, 10]);
     });
-    it('doesnt set ticks for values differing <10%', () => {
+    it('doesnt set bands for values differing <10%', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -329,18 +311,17 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
-          ticksPosition: 'bands',
+          ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 1, 3, 10]);
       expect(goal.prop('bands')).toEqual([0, 1, 1.5, 3, 10]);
     });
-    it('sets proper color bands and ticks on color bands for values greater than maximum', () => {
+    it('sets proper color bands for values greater than maximum', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -357,15 +338,14 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
-          ticksPosition: 'bands',
+          ticksPosition: GaugeTicksPositions.BANDS,
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 10]);
       expect(goal.prop('bands')).toEqual([0, 10]);
     });
     it('passes number bands from color palette with no stops defined', () => {
@@ -385,16 +365,15 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          colorMode: 'palette',
+          colorMode: GaugeColorModes.PALETTE,
           palette,
-          ticksPosition: 'bands',
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          ticksPosition: GaugeTicksPositions.BANDS,
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 5, 10]);
       expect(goal.prop('bands')).toEqual([0, 5, 10]);
     });
     it('passes percent bands from color palette', () => {
@@ -407,24 +386,38 @@ describe('GaugeComponent', function () {
           stops: [20, 60, 80],
           range: 'percent',
           rangeMin: 0,
-          rangeMax: 10,
+          rangeMax: 100,
         },
       };
       const customProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          colorMode: 'palette',
+          colorMode: GaugeColorModes.PALETTE,
           palette,
-          ticksPosition: 'bands',
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          ticksPosition: GaugeTicksPositions.BANDS,
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 2, 6, 8, 10]);
       expect(goal.prop('bands')).toEqual([0, 2, 6, 8, 10]);
+    });
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallowWithIntl(
+        <GaugeComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
 });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { exp } = require('../../src/functions/exp.js');
+const { exp } = require('../../src/functions/exp');
 
 describe('Exp', () => {
   it('numbers', () => {

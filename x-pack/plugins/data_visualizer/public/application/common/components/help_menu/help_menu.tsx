@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { INDEX_DATA_VISUALIZER_NAME } from '../../constants';
 
 interface HelpMenuProps {
   docLink: string;
@@ -19,9 +19,7 @@ export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink }) => {
 
   useEffect(() => {
     chrome.setHelpExtension({
-      appName: i18n.translate('xpack.dataVisualizer.chrome.help.appName', {
-        defaultMessage: 'Data Visualizer',
-      }),
+      appName: INDEX_DATA_VISUALIZER_NAME,
       links: [
         {
           href: docLink,

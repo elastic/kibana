@@ -56,6 +56,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
           namespace_type: namespaceType,
           os_types: osTypes,
           tags,
+          expire_time: expireTime,
         } = request.body;
         if (id == null && itemId == null) {
           return siemResponse.error({
@@ -63,12 +64,13 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             statusCode: 404,
           });
         } else {
-          const exceptionLists = getExceptionListClient(context);
-          const exceptionListItem = await exceptionLists.updateExceptionListItem({
+          const exceptionLists = await getExceptionListClient(context);
+          const exceptionListItem = await exceptionLists.updateOverwriteExceptionListItem({
             _version,
             comments,
             description,
             entries,
+            expireTime,
             id,
             itemId,
             meta,

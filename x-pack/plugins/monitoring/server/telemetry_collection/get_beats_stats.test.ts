@@ -7,9 +7,9 @@
 
 import { fetchBeatsStats, processResults } from './get_beats_stats';
 import sinon from 'sinon';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const beatsStatsResultSet = require('./__mocks__/fixtures/beats_stats_results');
+const beatsStatsResultSet = require('./__mocks__/fixtures/beats_stats_results.json');
 
 const getBaseOptions = () => ({
   clusters: {},
@@ -34,7 +34,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 0, to: 10000` in the query', async () => {
-      searchMock.returns(Promise.resolve({ body: {} }));
+      searchMock.returns(Promise.resolve({}));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, {} as any);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
@@ -44,7 +44,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 10000, from: 10000` in the query', async () => {
-      searchMock.returns(Promise.resolve({ body: {} }));
+      searchMock.returns(Promise.resolve({}));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 1 } as any);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;
@@ -54,7 +54,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 20000, from: 10000` in the query', async () => {
-      searchMock.returns(Promise.resolve({ body: {} }));
+      searchMock.returns(Promise.resolve({}));
       await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 2 } as any);
       const { args } = searchMock.firstCall;
       const [{ body }] = args;

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Datatable } from '../../../expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { VisParams } from './types';
 
 export const visData = {

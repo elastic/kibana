@@ -7,7 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Monitoring app', function () {
-    this.tags('ciGroup1');
     loadTestFile(require.resolve('./feature_controls'));
 
     loadTestFile(require.resolve('./cluster/list'));
@@ -41,6 +40,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./logstash/nodes_mb'));
     loadTestFile(require.resolve('./logstash/pipelines'));
     loadTestFile(require.resolve('./logstash/pipelines_mb'));
+    loadTestFile(require.resolve('./logstash/pipeline_viewer'));
+    loadTestFile(require.resolve('./logstash/pipeline_viewer_mb'));
     loadTestFile(require.resolve('./logstash/node_detail'));
     loadTestFile(require.resolve('./logstash/node_detail_mb'));
     loadTestFile(require.resolve('./beats/cluster'));

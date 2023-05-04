@@ -31,3 +31,5 @@ export const VALIDATION_TYPES = {
   /** If the field value is an Array, this error type would be returned if an _item_ of the array is invalid */
   ARRAY_ITEM: 'arrayItem',
 };
+
+export const STORYBOOK_SECTION = 'Form lib';

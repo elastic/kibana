@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   SortFieldOrUndefined,
@@ -28,6 +29,7 @@ interface ScrollToStartPageOptions {
   index: string;
   currentIndexPosition: number;
   searchAfter: string[] | undefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const scrollToStartPage = async ({
@@ -41,6 +43,7 @@ export const scrollToStartPage = async ({
   sortOrder,
   sortField,
   index,
+  runtimeMappings,
 }: ScrollToStartPageOptions): Promise<Scroll> => {
   const { hops, leftOverAfterHops } = calculateScrollMath({
     currentIndexPosition,
@@ -67,6 +70,7 @@ export const scrollToStartPage = async ({
       hopSize,
       hops,
       index,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,
@@ -78,6 +82,7 @@ export const scrollToStartPage = async ({
         hopSize: leftOverAfterHops,
         hops: 1,
         index,
+        runtimeMappings,
         searchAfter: scroll.searchAfter,
         sortField,
         sortOrder,
@@ -92,6 +97,7 @@ export const scrollToStartPage = async ({
       hopSize: leftOverAfterHops,
       hops: 1,
       index,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,

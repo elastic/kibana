@@ -21,6 +21,7 @@ export {
   SAMLAuthenticationProvider,
   OIDCAuthenticationProvider,
   AnonymousAuthenticationProvider,
+  HTTPAuthenticationProvider,
 } from './providers';
 export {
   BasicHTTPAuthorizationHeaderCredentials,
@@ -31,5 +32,6 @@ export type {
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
   InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
   GrantAPIKeyResult,
 } from './api_keys';

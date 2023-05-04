@@ -232,10 +232,34 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   metricVis: {
     displayName: i18n.translate('xpack.canvas.elements.metricVisDisplayName', {
-      defaultMessage: '(New) Metric Vis',
+      defaultMessage: 'Metric',
     }),
     help: i18n.translate('xpack.canvas.elements.metricVisHelpText', {
       defaultMessage: 'Metric visualization',
+    }),
+  },
+  legacyMetricVis: {
+    displayName: i18n.translate('xpack.canvas.elements.legacyMetricVisDisplayName', {
+      defaultMessage: 'Legacy Metric Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.legacyMetricVisHelpText', {
+      defaultMessage: 'Legacy metric visualization. We recommend using metricVis instead.',
+    }),
+  },
+  heatmap: {
+    displayName: i18n.translate('xpack.canvas.elements.heatmapDisplayName', {
+      defaultMessage: 'Heatmap',
+    }),
+    help: i18n.translate('xpack.canvas.elements.heatmapHelpText', {
+      defaultMessage: 'Heatmap visualization',
+    }),
+  },
+  pieVis: {
+    displayName: i18n.translate('xpack.canvas.elements.pieVisDisplayName', {
+      defaultMessage: '(New) Pie Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.pieVisHelpText', {
+      defaultMessage: 'Pie visualization',
     }),
   },
 });

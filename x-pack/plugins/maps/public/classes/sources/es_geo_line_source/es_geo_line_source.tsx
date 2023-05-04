@@ -10,7 +10,8 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -33,12 +34,11 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { GeoJsonWithMeta } from '../vector_source';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { mergeExecutionContext } from '../execution_context_utils';
 
 type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
@@ -83,15 +83,22 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   readonly _descriptor: ESGeoLineSourceDescriptor;
 
-  constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESGeoLineSourceDescriptor>) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
+  }
+
+  getBucketsName() {
+    return i18n.translate('xpack.maps.source.esGeoLine.bucketsName', {
+      defaultMessage: 'tracks',
+    });
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
+        bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
@@ -109,14 +116,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternTitle = this.getIndexPatternId();
-    try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternTitle = indexPattern.title;
-    } catch (error) {
-      // ignore error, title will just default to id
-    }
-
     return [
       {
         label: getDataSourceLabel(),
@@ -124,7 +123,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternTitle,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esGeoLine.geospatialFieldLabel', {
@@ -171,9 +170,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     if (!getIsGoldPlus()) {
       throw new Error(REQUIRES_GOLD_LICENSE_MSG);
@@ -189,7 +189,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     // Fetch entities
     //
-    const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
+    const entitySearchSource = await this.makeSearchSource(requestMeta, 0);
     entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: 1 };
@@ -203,7 +203,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       },
     });
     if (splitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+      const entityIsNotEmptyFilter = buildPhraseFilter(splitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       entitySearchSource.setField('filter', [
         ...(entitySearchSource.getField('filter') as Filter[]),
@@ -224,7 +224,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_geo_line:entities' },
+        requestMeta.executionContext
+      ),
+      requestsAdapter: inspectorAdapters.requests,
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -251,13 +256,13 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     const entityFilters: { [key: string]: unknown } = {};
     for (let i = 0; i < entityBuckets.length; i++) {
-      entityFilters[entityBuckets[i].key] = esFilters.buildPhraseFilter(
+      entityFilters[entityBuckets[i].key] = buildPhraseFilter(
         splitField,
         entityBuckets[i].key,
         indexPattern
       ).query;
     }
-    const tracksSearchFilters = { ...searchFilters };
+    const tracksSearchFilters = { ...requestMeta };
     delete tracksSearchFilters.buffer;
     const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
     tracksSearchSource.setField('trackTotalHits', false);
@@ -295,7 +300,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage:
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_geo_line:tracks' },
+        requestMeta.executionContext
+      ),
+      requestsAdapter: inspectorAdapters.requests,
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,

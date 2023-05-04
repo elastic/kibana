@@ -9,17 +9,15 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import * as i18n from '../translations';
-import type { DataViewField } from '../../../../../../../../src/plugins/data_views/common';
 import { getExampleText } from '../helpers';
-import { BrowserField } from '../../../containers/source';
-import { EventFieldsData } from '../types';
+import type { EventFieldsData } from '../types';
 import { getFieldTypeName } from './get_field_type_name';
 
 export interface FieldNameCellProps {
   data: EventFieldsData;
   field: string;
-  fieldFromBrowserField: BrowserField;
   fieldMapping?: DataViewField;
   scripted?: boolean;
 }

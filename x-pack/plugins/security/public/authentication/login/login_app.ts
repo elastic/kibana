@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ApplicationSetup,
   AppMountParameters,
   HttpSetup,
   StartServicesAccessor,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 import type { ConfigType } from '../../config';
 
@@ -40,6 +40,7 @@ export const loginApp = Object.freeze({
           coreStart.i18n,
           { element, theme$ },
           {
+            customBranding: coreStart.customBranding,
             http: coreStart.http,
             notifications: coreStart.notifications,
             fatalErrors: coreStart.fatalErrors,

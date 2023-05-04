@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export const dataViewMock = {
   id: 'the-index-pattern-id',

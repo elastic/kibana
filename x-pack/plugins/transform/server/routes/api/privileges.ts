@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { getPrivilegesAndCapabilities } from '../../../common/privilege/has_privilege_factory';
 import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
-import { Privileges } from '../../../common/types/privileges';
+import type { Privileges } from '../../../common/types/privileges';
 
-import { RouteDependencies } from '../../types';
-import { addBasePath } from '../index';
+import type { RouteDependencies } from '../../types';
+import { addBasePath } from '..';
 
 export function registerPrivilegesRoute({ router, license }: RouteDependencies) {
   router.get(
@@ -28,52 +31,42 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
         return res.ok({ body: privilegesResult });
       }
 
-      // Get cluster privileges
-      const {
-        body: { has_all_requested: hasAllPrivileges, cluster },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-        body: {
-          // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
-          cluster: APP_CLUSTER_PRIVILEGES,
-        },
-      });
+      const esClient: IScopedClusterClient = (await ctx.core).elasticsearch.client;
 
-      // Find missing cluster privileges and set overall app privileges
-      privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
-      privilegesResult.hasAllPrivileges = hasAllPrivileges;
+      const esClusterPrivilegesReq: Promise<SecurityHasPrivilegesResponse> =
+        esClient.asCurrentUser.security.hasPrivileges({
+          body: {
+            // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
+            cluster: APP_CLUSTER_PRIVILEGES,
+          },
+        });
+      const [esClusterPrivileges, userPrivileges] = await Promise.all([
+        // Get cluster privileges
+        esClusterPrivilegesReq,
+        // // Get all index privileges the user has
+        esClient.asCurrentUser.security.getUserPrivileges(),
+      ]);
 
-      // Get all index privileges the user has
-      const {
-        body: { indices },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges();
+      const { has_all_requested: hasAllPrivileges, cluster } = esClusterPrivileges;
+      const { indices } = userPrivileges;
 
       // Check if they have all the required index privileges for at least one index
-      const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
-        if (privileges.includes('all')) {
-          return true;
-        }
+      const hasOneIndexWithAllPrivileges =
+        indices.find(({ privileges }: { privileges: string[] }) => {
+          if (privileges.includes('all')) {
+            return true;
+          }
 
-        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
-          privileges.includes(privilege)
-        );
+          const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
+            privileges.includes(privilege)
+          );
 
-        return indexHasAllPrivileges;
+          return indexHasAllPrivileges;
+        }) !== undefined;
+
+      return res.ok({
+        body: getPrivilegesAndCapabilities(cluster, hasOneIndexWithAllPrivileges, hasAllPrivileges),
       });
-
-      // If they don't, return list of required index privileges
-      if (!oneIndexWithAllPrivileges) {
-        privilegesResult.missingPrivileges.index = [...APP_INDEX_PRIVILEGES];
-      }
-
-      return res.ok({ body: privilegesResult });
     })
   );
 }
-
-const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
-  Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
-    if (!privilegesObject[privilegeName]) {
-      privileges.push(privilegeName);
-    }
-    return privileges;
-  }, []);

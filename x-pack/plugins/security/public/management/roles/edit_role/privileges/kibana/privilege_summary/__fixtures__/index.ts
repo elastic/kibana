@@ -8,7 +8,7 @@
 import { EuiTableRow } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 
-import { findTestSubject } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test-jest-helpers';
 
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { FeatureTableCell } from '../../feature_table_cell';
@@ -60,7 +60,7 @@ export function getDisplayedFeaturePrivileges(
 
         acc[feature.id][key] = {
           ...acc[feature.id][key],
-          primaryFeaturePrivilege: primary.text().trim(),
+          primaryFeaturePrivilege: primary.text().replaceAll('Info', '').trim(), // Removing the word "info" to account for the rendered text coming from EuiIcon
           hasCustomizedSubFeaturePrivileges:
             findTestSubject(primary, 'additionalPrivilegesGranted').length > 0,
         };

@@ -9,6 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+// eslint-disable-next-line no-restricted-imports
 import { Route } from 'react-router-dom';
 import qs from 'query-string';
 
@@ -19,7 +20,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiSearchBar,
@@ -285,7 +286,7 @@ export class IndexTable extends Component {
           {renderBadges(index, filterChanged, appServices.extensionsService)}
         </Fragment>
       );
-    } else if (fieldName === 'data_stream') {
+    } else if (fieldName === 'data_stream' && value) {
       return (
         <EuiLink
           data-test-subj="dataStreamLink"

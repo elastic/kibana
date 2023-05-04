@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '../../../utils/test_helper';
-import { SectionContainer } from './';
+import { SectionContainer } from '.';
 
 describe('SectionContainer', () => {
   it('renders section without app link', () => {
@@ -41,5 +41,14 @@ describe('SectionContainer', () => {
     expect(
       component.getByText('An error happened when trying to fetch data. Please try again')
     ).toBeInTheDocument();
+  });
+
+  it('renders section with experimental badge', () => {
+    const component = render(
+      <SectionContainer title="Foo" hasError={false} showExperimentalBadge={true}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
+    );
+    expect(component.getByText('Technical preview')).toBeInTheDocument();
   });
 });

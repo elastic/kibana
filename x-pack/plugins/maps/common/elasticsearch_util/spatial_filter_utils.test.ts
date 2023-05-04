@@ -6,14 +6,42 @@
  */
 
 import { Polygon } from 'geojson';
+import { DataViewBase } from '@kbn/es-query';
 import {
   createDistanceFilterWithMeta,
   createExtentFilter,
-  createSpatialFilterWithGeometry,
+  buildGeoGridFilter,
+  buildGeoShapeFilter,
   extractFeaturesFromFilters,
 } from './spatial_filter_utils';
+import { buildQueryFromFilters } from '@kbn/es-query';
 
 const geoFieldName = 'location';
+
+describe('buildQueryFromFilters', () => {
+  it('should not drop spatial filters when ignoreFilterIfFieldNotInIndex is true', () => {
+    const query = buildQueryFromFilters(
+      [
+        createDistanceFilterWithMeta({
+          point: [100, 30],
+          distanceKm: 1000,
+          geoFieldNames: ['geo.coordinates'],
+        }),
+        createDistanceFilterWithMeta({
+          point: [120, 30],
+          distanceKm: 1000,
+          geoFieldNames: ['geo.coordinates', 'location'],
+        }),
+      ],
+      {
+        id: 'myDataViewWithoutAnyMacthingFields',
+        fields: [],
+      } as unknown as DataViewBase,
+      { ignoreFilterIfFieldNotInIndex: true }
+    );
+    expect(query.filter.length).toBe(2);
+  });
+});
 
 describe('createExtentFilter', () => {
   it('should return elasticsearch geo_bounding_box filter', () => {
@@ -27,8 +55,9 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -63,8 +92,9 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -99,8 +129,9 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -135,8 +166,9 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -171,8 +203,9 @@ describe('createExtentFilter', () => {
       meta: {
         alias: null,
         disabled: false,
-        key: 'location',
+        isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -209,6 +242,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -258,9 +292,105 @@ describe('createExtentFilter', () => {
   });
 });
 
-describe('createSpatialFilterWithGeometry', () => {
+describe('buildGeoGridFilter', () => {
   it('should build filter for single field', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoGridFilter({
+      geoFieldNames: ['geo.coordinates'],
+      gridId: '9/146/195',
+      isHex: false,
+    });
+    expect(spatialFilter).toEqual({
+      meta: {
+        alias: 'intersects cluster 9/146/195',
+        disabled: false,
+        isMultiIndex: true,
+        negate: false,
+        type: 'spatial_filter',
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'geo.coordinates',
+              },
+            },
+            {
+              geo_grid: {
+                'geo.coordinates': {
+                  geotile: '9/146/195',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should build filter for multiple field', () => {
+    const spatialFilter = buildGeoGridFilter({
+      geoFieldNames: ['geo.coordinates', 'location'],
+      gridId: '822af7fffffffff',
+      isHex: true,
+    });
+    expect(spatialFilter).toEqual({
+      meta: {
+        alias: 'intersects cluster 822af7fffffffff',
+        disabled: false,
+        isMultiIndex: true,
+        negate: false,
+        type: 'spatial_filter',
+      },
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'geo.coordinates',
+                    },
+                  },
+                  {
+                    geo_grid: {
+                      'geo.coordinates': {
+                        geohex: '822af7fffffffff',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'location',
+                    },
+                  },
+                  {
+                    geo_grid: {
+                      location: {
+                        geohex: '822af7fffffffff',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+});
+
+describe('buildGeoShapeFilter', () => {
+  it('should build filter for single field', () => {
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -280,7 +410,7 @@ describe('createSpatialFilterWithGeometry', () => {
       meta: {
         alias: 'intersects myShape',
         disabled: false,
-        key: 'geo.coordinates',
+        isMultiIndex: true,
         negate: false,
         type: 'spatial_filter',
       },
@@ -319,7 +449,7 @@ describe('createSpatialFilterWithGeometry', () => {
   });
 
   it('should build filter for multiple field', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -340,7 +470,6 @@ describe('createSpatialFilterWithGeometry', () => {
         alias: 'intersects myShape',
         disabled: false,
         isMultiIndex: true,
-        key: undefined,
         negate: false,
         type: 'spatial_filter',
       },
@@ -427,7 +556,7 @@ describe('createDistanceFilterWithMeta', () => {
       meta: {
         alias: 'within 1000km of 120, 30',
         disabled: false,
-        key: 'geo.coordinates',
+        isMultiIndex: true,
         negate: false,
         type: 'spatial_filter',
       },
@@ -462,7 +591,6 @@ describe('createDistanceFilterWithMeta', () => {
         alias: 'within 1000km of 120, 30',
         disabled: false,
         isMultiIndex: true,
-        key: undefined,
         negate: false,
         type: 'spatial_filter',
       },
@@ -533,6 +661,37 @@ describe('extractFeaturesFromFilters', () => {
     expect(extractFeaturesFromFilters([phraseFilter])).toEqual([]);
   });
 
+  it('should ignore malformed spatial filers', () => {
+    expect(
+      extractFeaturesFromFilters([
+        {
+          meta: {
+            type: 'spatial_filter',
+          },
+          query: {
+            bool: {
+              must: [],
+            },
+          },
+        },
+      ])
+    ).toEqual([]);
+    expect(
+      extractFeaturesFromFilters([
+        {
+          meta: {
+            type: 'spatial_filter',
+          },
+          query: {
+            bool: {
+              should: [],
+            },
+          },
+        },
+      ])
+    ).toEqual([]);
+  });
+
   it('should convert single field geo_distance filter to feature', () => {
     const spatialFilter = createDistanceFilterWithMeta({
       point: [-89.87125, 53.49454],
@@ -566,7 +725,7 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should convert single field geo_shape filter to feature', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -605,7 +764,7 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should convert multi field geo_shape filter to feature', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -644,7 +803,7 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should ignore geo_shape filter with pre-index shape', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       preIndexedShape: {
         index: 'world_countries_v1',
         id: 's5gldXEBkTB2HMwpC8y0',

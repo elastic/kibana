@@ -16,7 +16,7 @@ export { LISTS } from './lists';
 export { PAGINATION } from './pagination';
 export { PLUGIN } from './plugin';
 export { REFRESH_INTERVALS } from './refresh_intervals';
-export { ROUTES } from './routes';
+export { ROUTES, API_BASE_PATH } from './routes';
 export { SORT_ORDERS } from './sort_orders';
 export { TIME_UNITS } from './time_units';
 export { WATCH_STATE_COMMENTS } from './watch_state_comments';

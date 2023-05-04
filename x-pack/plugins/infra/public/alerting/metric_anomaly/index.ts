@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
-import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
 import { validateMetricAnomaly } from './components/validation';
 
 interface MetricAnomalyRuleTypeParams extends RuleTypeParams {

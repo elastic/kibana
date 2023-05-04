@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestBasicOptions } from '../..';
 
 export enum LastEventIndexKey {
   hostDetails = 'hostDetails',
   hosts = 'hosts',
+  users = 'users',
+  userDetails = 'userDetails',
   ipDetails = 'ipDetails',
   network = 'network',
-  ueba = 'ueba', // TODO: Steph/ueba implement this
 }
 
 export interface LastTimeDetails {
   hostName?: Maybe<string>;
+  userName?: Maybe<string>;
   ip?: Maybe<string>;
 }
 

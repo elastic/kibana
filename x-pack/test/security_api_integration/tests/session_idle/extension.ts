@@ -7,15 +7,30 @@
 
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import expect from '@kbn/expect';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const config = getService('config');
+  const es = getService('es');
 
   const kibanaServerConfig = config.get('servers.kibana');
   const validUsername = kibanaServerConfig.username;
   const validPassword = kibanaServerConfig.password;
+
+  // Get `createdAt` values from all existing sessions. It's the easiest solution
+  // to check that the values weren't modified since we cannot get the specific
+  // session id used during a test run, and we might have lots of unrelated
+  // sessions in the index created by the tests that didn't clean up the index.
+  async function getSessionsCreatedAt() {
+    await es.indices.refresh({ index: '.kibana_security_session*' });
+    const searchResponse = await es.search<{ createdAt: number }>({
+      index: '.kibana_security_session*',
+    });
+
+    return searchResponse.hits.hits.map((hit) => hit._source!.createdAt).sort();
+  }
 
   describe('Session', () => {
     let sessionCookie: Cookie;
@@ -25,22 +40,24 @@ export default function ({ getService }: FtrProviderContext) {
       sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       return response;
     };
-    const getSessionInfo = async () =>
-      supertestWithoutAuth
+    const getSessionInfo = async () => {
+      return supertestWithoutAuth
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('kbn-system-request', 'true')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(200);
-    const extendSession = async () =>
-      supertestWithoutAuth
+    };
+    const extendSession = async () => {
+      return supertestWithoutAuth
         .post('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(302)
         .then(saveCookie);
+    };
 
     beforeEach(async () => {
       await supertestWithoutAuth
@@ -80,10 +97,23 @@ export default function ({ getService }: FtrProviderContext) {
       it('should extend the session', async () => {
         // browsers will follow the redirect and return the new session info, but this testing framework does not
         // we simulate that behavior in this test by sending another GET request
+
+        // Make sure that all sessions have populated `createdAt` field.
+        const sessionsCreatedAtBeforeExtension = await getSessionsCreatedAt();
+        expect(sessionsCreatedAtBeforeExtension.every((createdAt) => createdAt > 0)).to.be(true);
+
+        // Make sure that the session time has somewhat elapsed to ensure
+        // there is a noticable difference after extending the session
+        await setTimeoutAsync(200);
         const { body } = await getSessionInfo();
         await extendSession();
         const { body: body2 } = await getSessionInfo();
+
+        // Check that the extended session has more time left than before
         expect(body2.expiresInMs).not.to.be.lessThan(body.expiresInMs);
+
+        // Check that session extension didn't alter `createdAt`.
+        expect(await getSessionsCreatedAt()).to.eql(sessionsCreatedAtBeforeExtension);
       });
     });
   });

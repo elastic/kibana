@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { KibanaFeature } from '@kbn/features-plugin/common';
+
+import { ALL_SPACES_ID } from '../../../../../common/constants';
+import { validateKibanaPrivileges } from '../../../../lib';
 import { getPutPayloadSchema } from './put_payload';
 
 const basePrivilegeNamesMap = {
@@ -253,6 +257,20 @@ describe('Put payload schema', () => {
               query: `{ "match": { "title": "foo" } }`,
             },
           ],
+
+          remote_indices: [
+            {
+              field_security: {
+                grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
+              },
+              clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+              query: `{ "match": { "title": "foo" } }`,
+            },
+          ],
+
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: [
@@ -280,6 +298,33 @@ describe('Put payload schema', () => {
           ],
           "indices": Array [
             Object {
+              "field_security": Object {
+                "except": Array [
+                  "test-field-security-except-1",
+                  "test-field-security-except-2",
+                ],
+                "grant": Array [
+                  "test-field-security-grant-1",
+                  "test-field-security-grant-2",
+                ],
+              },
+              "names": Array [
+                "test-index-name-1",
+                "test-index-name-2",
+              ],
+              "privileges": Array [
+                "test-index-privilege-1",
+                "test-index-privilege-2",
+              ],
+              "query": "{ \\"match\\": { \\"title\\": \\"foo\\" } }",
+            },
+          ],
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "test-cluster-name-1",
+                "test-cluster-name-2",
+              ],
               "field_security": Object {
                 "except": Array [
                   "test-field-security-except-1",
@@ -343,5 +388,248 @@ describe('Put payload schema', () => {
         },
       }
     `);
+  });
+
+  test('passes through remote_indices when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_indices: [
+            {
+              clusters: ['remote_cluster'],
+              names: ['remote_index'],
+              privileges: ['all'],
+            },
+          ],
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "remote_cluster",
+              ],
+              "names": Array [
+                "remote_index",
+              ],
+              "privileges": Array [
+                "all",
+              ],
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  // This is important for backwards compatibility
+  test('does not set default value for remote_indices when not specified', () => {
+    expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {},
+      }
+    `);
+  });
+});
+
+describe('validateKibanaPrivileges', () => {
+  const fooFeature = new KibanaFeature({
+    id: 'foo',
+    name: 'Foo',
+    privileges: {
+      all: {
+        requireAllSpaces: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        disabled: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+    app: [],
+    category: { id: 'foo', label: 'foo' },
+  });
+
+  test('allows valid privileges', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: [ALL_SPACES_ID],
+            base: [],
+            feature: {
+              foo: ['all'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+
+  test('does not reject unknown features', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: [ALL_SPACES_ID],
+            base: [],
+            feature: {
+              foo: ['all'],
+              bar: ['all'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+
+  test('returns errors if requireAllSpaces: true and not all spaces specified', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
+    ]);
+  });
+
+  test('returns errors if disabled: true and privilege is specified', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: [ALL_SPACES_ID],
+            base: [],
+            feature: {
+              foo: ['read'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([`Feature [foo] does not support privilege [read].`]);
+  });
+
+  test('returns multiple errors when necessary', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all', 'read'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
+      `Feature [foo] does not support privilege [read].`,
+    ]);
+  });
+
+  const fooSubFeature = new KibanaFeature({
+    id: 'foo',
+    name: 'Foo',
+    privileges: {
+      all: {
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        disabled: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+    subFeatures: [
+      {
+        name: 'Require All Spaces Enabled',
+        requireAllSpaces: true,
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'test',
+                name: 'foo',
+                includeIn: 'none',
+                ui: ['test-ui'],
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    app: [],
+    category: { id: 'foo', label: 'foo' },
+  });
+
+  test('returns no error when subfeature requireAllSpaces enabled and all spaces selected', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooSubFeature],
+        [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {
+              foo: ['all', 'test'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+  test('returns error when subfeature requireAllSpaces enabled but not all spaces selected', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooSubFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all', 'test'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      'Sub-feature privilege [Foo - Require All Spaces Enabled] requires all spaces to be selected but received [foo-space]',
+    ]);
   });
 });

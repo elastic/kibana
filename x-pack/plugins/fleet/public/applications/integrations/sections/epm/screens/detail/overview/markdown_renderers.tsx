@@ -6,14 +6,15 @@
  */
 
 import {
+  EuiCode,
   EuiCodeBlock,
   EuiLink,
   EuiTableHeaderCell,
   EuiTableRow,
   EuiTableRowCell,
-  EuiText,
 } from '@elastic/eui';
 import React from 'react';
+import type { TransformOptions } from 'react-markdown';
 
 /** prevents links to the new pages from accessing `window.opener` */
 const REL_NOOPENER = 'noopener';
@@ -30,56 +31,41 @@ const CODE_LANGUAGE_OVERRIDES: Record<string, string> = {
   $yml: 'yml',
 };
 
-export const markdownRenderers = {
-  root: ({ children }: { children: React.ReactNode[] }) => (
-    <EuiText grow={true}>{children}</EuiText>
-  ),
-  table: ({ children }: { children: React.ReactNode[] }) => (
-    <table className="euiTable euiTable--responsive">{children}</table>
-  ),
-  tableRow: ({ children }: { children: React.ReactNode[] }) => (
-    <EuiTableRow>{children}</EuiTableRow>
-  ),
-  tableCell: ({ isHeader, children }: { isHeader: boolean; children: React.ReactNode[] }) => {
-    return isHeader ? (
-      <EuiTableHeaderCell>{children}</EuiTableHeaderCell>
-    ) : (
-      <EuiTableRowCell>{children}</EuiTableRowCell>
-    );
-  },
+export const markdownRenderers: TransformOptions['components'] = {
+  table: ({ children }) => <table className="euiTable euiTable--responsive">{children}</table>,
+  tr: ({ children }) => <EuiTableRow>{children}</EuiTableRow>,
+  th: ({ children }) => <EuiTableHeaderCell>{children}</EuiTableHeaderCell>,
+  td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
   // the headings used in markdown don't match our page so mapping them to the appropriate one
-  heading: ({ level, children }: { level: number; children: React.ReactNode[] }) => {
-    switch (level) {
-      case 1:
-        return <h3>{children}</h3>;
-      case 2:
-        return <h4>{children}</h4>;
-      case 3:
-        return <h5>{children}</h5>;
-      default:
-        return <h6>{children}</h6>;
-    }
-  },
+  h1: ({ children }) => <h3>{children}</h3>,
+  h2: ({ children }) => <h4>{children}</h4>,
+  h3: ({ children }) => <h5>{children}</h5>,
+  h4: ({ children }) => <h6>{children}</h6>,
+  h5: ({ children }) => <h6>{children}</h6>,
+  h6: ({ children }) => <h6>{children}</h6>,
   link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
     <EuiLink href={href} target="_blank" rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}>
       {children}
     </EuiLink>
   ),
-  code: ({ language, value }: { language: string; value: string }) => {
-    let parsedLang = language;
+  code: ({ className, children, inline }) => {
+    let parsedLang = /language-(\w+)/.exec(className || '')?.[1] ?? '';
 
     // Some integrations export code block content that includes language tags that have since
     // been removed or deprecated in `prism.js`, the upstream depedency that handles syntax highlighting
     // in EuiCodeBlock components
-    const languageOverride = CODE_LANGUAGE_OVERRIDES[language];
+    const languageOverride = parsedLang ? CODE_LANGUAGE_OVERRIDES[parsedLang] : undefined;
 
     if (languageOverride) {
       parsedLang = languageOverride;
     }
 
+    if (inline) {
+      return <EuiCode>{children}</EuiCode>;
+    }
     return (
       <EuiCodeBlock language={parsedLang} isCopyable>
-        {value}
+        {children}
       </EuiCodeBlock>
     );
   },

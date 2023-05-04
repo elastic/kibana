@@ -39,11 +39,9 @@ export const isQueryStringFilter = (filter: Filter): filter is QueryStringFilter
  *
  * @public
  */
-export const buildQueryFilter = (query: QueryStringFilter['query'], index: string, alias: string) =>
-  ({
-    query,
-    meta: {
-      index,
-      alias,
-    },
-  } as QueryStringFilter);
+export const buildQueryFilter = (
+  query: QueryStringFilter['query'],
+  index: string,
+  alias?: string,
+  meta: QueryStringFilterMeta = {}
+) => ({ query, meta: { index, alias, ...meta } });

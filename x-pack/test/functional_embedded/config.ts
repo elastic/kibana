@@ -12,7 +12,9 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   const iframeEmbeddedPlugin = resolve(__dirname, './plugins/iframe_embedded');
 

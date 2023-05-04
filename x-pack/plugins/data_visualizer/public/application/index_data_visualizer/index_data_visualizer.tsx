@@ -5,85 +5,175 @@
  * 2.0.
  */
 import '../_index.scss';
+import { pick } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
-import { encode } from 'rison-node';
-import { SimpleSavedObject } from 'kibana/public';
+import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+  toMountPoint,
+  wrapWithTheme,
+} from '@kbn/kibana-react-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  Provider as UrlStateContextProvider,
+  parseUrlState,
+  isRisonSerializationRequired,
+  type Accessor,
+  type Dictionary,
+  type SetUrlState,
+} from '@kbn/ml-url-state';
+import { getSavedSearch, type SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
-  IndexDataVisualizerViewProps,
+  type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
-  getNestedProperty,
-  isRisonSerializationRequired,
-} from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DataView } from '../../../../../../src/plugins/data/common';
-import { ResultLink } from '../common/components/results_links';
+import type { GetAdditionalLinks } from '../common/components/results_links';
+import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
+import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
+import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { DV_STORAGE_KEYS } from './types/storage';
 
+const XXL_BREAKPOINT = 1400;
+
+const localStorage = new Storage(window.localStorage);
+
+export interface DataVisualizerStateContextProviderProps {
+  IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
+  getAdditionalLinks?: GetAdditionalLinks;
+}
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
-export interface DataVisualizerUrlStateContextProviderProps {
-  IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
-  additionalLinks: ResultLink[];
-}
+export const getLocatorParams = (params: {
+  dataViewId?: string;
+  savedSearchId?: string;
+  urlSearchString: string;
+  searchSessionId?: string;
+  shouldRestoreSearchSession: boolean;
+}): IndexDataVisualizerLocatorParams => {
+  const urlState = parseUrlState(params.urlSearchString);
 
-export const DataVisualizerUrlStateContextProvider: FC<
-  DataVisualizerUrlStateContextProviderProps
-> = ({ IndexDataVisualizerComponent, additionalLinks }) => {
+  let locatorParams: IndexDataVisualizerLocatorParams = {
+    dataViewId: urlState.index,
+    searchSessionId: params.searchSessionId,
+  };
+
+  if (params.savedSearchId) locatorParams.savedSearchId = params.savedSearchId;
+  if (urlState) {
+    if (urlState._g) {
+      const { time, refreshInterval } = urlState._g;
+
+      locatorParams.timeRange = time;
+      locatorParams.refreshInterval = refreshInterval;
+    }
+
+    if (urlState._a && urlState._a[DATA_VISUALIZER_INDEX_VIEWER]) {
+      locatorParams = { ...locatorParams, ...urlState._a[DATA_VISUALIZER_INDEX_VIEWER] };
+    }
+  }
+  return locatorParams;
+};
+
+export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+  IndexDataVisualizerComponent,
+  getAdditionalLinks,
+}) => {
+  const { services } = useDataVisualizerKibana();
   const {
-    services: {
-      data: { indexPatterns },
-      savedObjects: { client: savedObjectsClient },
-      notifications: { toasts },
-    },
-  } = useDataVisualizerKibana();
-  const history = useHistory();
-  const { search: searchString } = useLocation();
+    data: { dataViews, search },
+    savedObjects: { client: savedObjectsClient },
+    notifications: { toasts },
+  } = services;
 
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
-  const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
-    null
-  );
+  const history = useHistory();
+  const { search: urlSearchString } = useLocation();
+
+  const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
+  const [currentSavedSearch, setCurrentSavedSearch] = useState<SavedSearch | null>(null);
+
+  const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const prevSearchString = searchString;
+    const urlState = parseUrlState(urlSearchString);
+
+    if (search.session) {
+      search.session.enableStorage({
+        getName: async () => {
+          // return the name you want to give the saved Search Session
+          return INDEX_DATA_VISUALIZER_NAME;
+        },
+        getLocatorData: async () => {
+          return {
+            id: DATA_VISUALIZER_APP_LOCATOR,
+            initialState: getLocatorParams({
+              ...services,
+              urlSearchString,
+              dataViewId: currentDataView?.id,
+              savedSearchId: currentSavedSearch?.id,
+              shouldRestoreSearchSession: false,
+              searchSessionId: search.session.getSessionId(),
+            }),
+            restoreState: getLocatorParams({
+              ...services,
+              urlSearchString,
+              dataViewId: currentDataView?.id,
+              savedSearchId: currentSavedSearch?.id,
+              shouldRestoreSearchSession: true,
+              searchSessionId: search.session.getSessionId(),
+            }),
+          };
+        },
+      });
+    }
+
+    if (urlState.searchSessionId !== undefined && urlState.searchSessionId !== currentSessionId) {
+      search.session?.restore(urlState.searchSessionId);
+      setCurrentSessionId(urlState.searchSessionId);
+    } else {
+      const newSessionId = search.session?.start();
+      setCurrentSessionId(newSessionId);
+    }
+    return () => {
+      search.session.clear();
+    };
+    // urlSearchString already includes all the other dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.session, urlSearchString]);
+
+  useEffect(() => {
+    const prevSearchString = urlSearchString;
     const parsedQueryString = parse(prevSearchString, { sort: false });
 
-    const getIndexPattern = async () => {
+    const getDataView = async () => {
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
-          const savedSearch = await savedObjectsClient.get('search', savedSearchId);
-          const indexPatternId = savedSearch.references.find(
-            (ref) => ref.type === 'index-pattern'
-          )?.id;
-          if (indexPatternId !== undefined && savedSearch) {
-            try {
-              const indexPattern = await indexPatterns.get(indexPatternId);
-              setCurrentSavedSearch(savedSearch);
-              setCurrentIndexPattern(indexPattern);
-            } catch (e) {
-              toasts.addError(e, {
-                title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
-                  defaultMessage: 'Error finding data view',
-                }),
-              });
-            }
+          const savedSearch = await getSavedSearch(savedSearchId, {
+            search,
+            savedObjectsClient,
+          });
+          const dataView = savedSearch.searchSource.getField('index');
+
+          if (!dataView) {
+            toasts.addDanger({
+              title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                defaultMessage: 'Error finding data view',
+              }),
+            });
           }
+          setCurrentSavedSearch(savedSearch);
+          setCurrentDataView(dataView);
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
@@ -95,13 +185,12 @@ export const DataVisualizerUrlStateContextProvider: FC<
       }
 
       if (typeof parsedQueryString?.index === 'string') {
-        const indexPattern = await indexPatterns.get(parsedQueryString.index);
-        setCurrentIndexPattern(indexPattern);
+        const dataView = await dataViews.get(parsedQueryString.index);
+        setCurrentDataView(dataView);
       }
     };
-    getIndexPattern();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedObjectsClient, toasts, indexPatterns]);
+    getDataView();
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -110,7 +199,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = searchString;
+      const prevSearchString = urlSearchString;
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
@@ -162,16 +251,17 @@ export const DataVisualizerUrlStateContextProvider: FC<
         console.error('Could not save url state', error);
       }
     },
-    [history, searchString]
+    [history, urlSearchString]
   );
 
   return (
-    <UrlStateContextProvider value={{ searchString, setUrlState }}>
-      {currentIndexPattern ? (
+    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+      {currentDataView ? (
         <IndexDataVisualizerComponent
-          currentIndexPattern={currentIndexPattern}
+          currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
-          additionalLinks={additionalLinks}
+          currentSessionId={currentSessionId}
+          getAdditionalLinks={getAdditionalLinks}
         />
       ) : (
         <div />
@@ -180,12 +270,15 @@ export const DataVisualizerUrlStateContextProvider: FC<
   );
 };
 
-export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ additionalLinks }) => {
+export const IndexDataVisualizer: FC<{
+  getAdditionalLinks?: GetAdditionalLinks;
+}> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const {
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,
@@ -193,11 +286,13 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     dataViewFieldEditor,
     uiActions,
     charts,
+    unifiedSearch,
   } = getPluginsStart();
   const services = {
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,
@@ -205,16 +300,34 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     dataViewFieldEditor,
     uiActions,
     charts,
+    unifiedSearch,
     ...coreStart,
+  };
+  const datePickerDeps = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
   };
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaThemeProvider
+      theme$={coreStart.theme.theme$}
+      modify={{
+        breakpoint: {
+          xxl: XXL_BREAKPOINT,
+        },
+      }}
+    >
       <KibanaContextProvider services={{ ...services }}>
-        <DataVisualizerUrlStateContextProvider
-          IndexDataVisualizerComponent={IndexDataVisualizerView}
-          additionalLinks={additionalLinks}
-        />
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <DataVisualizerStateContextProvider
+              IndexDataVisualizerComponent={IndexDataVisualizerView}
+              getAdditionalLinks={getAdditionalLinks}
+            />
+          </DatePickerContextProvider>
+        </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

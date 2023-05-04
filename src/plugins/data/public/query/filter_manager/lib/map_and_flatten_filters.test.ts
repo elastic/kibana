@@ -7,17 +7,11 @@
  */
 
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
-import { Filter } from '../../../../common';
+import type { Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {
     let filters: unknown;
-
-    function getDisplayName(filter: Filter) {
-      return typeof filter.meta.value === 'function'
-        ? (filter.meta.value as any)()
-        : filter.meta.value;
-    }
 
     beforeEach(() => {
       filters = [
@@ -51,11 +45,8 @@ describe('filter manager utilities', () => {
       expect(results[2].meta).toHaveProperty('key', 'query');
       expect(results[2].meta).toHaveProperty('value', 'foo:bar');
       expect(results[3].meta).toHaveProperty('key', 'bytes');
-      expect(results[3].meta).toHaveProperty('value');
-      expect(getDisplayName(results[3])).toBe('1024 to 2048');
+      expect(results[3].meta).toHaveProperty('value', { gt: 1024, lt: 2048 });
       expect(results[4].meta).toHaveProperty('key', '_type');
-      expect(results[4].meta).toHaveProperty('value');
-      expect(getDisplayName(results[4])).toBe('apache');
     });
   });
 });

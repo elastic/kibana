@@ -5,25 +5,47 @@
  * 2.0.
  */
 
-jest.mock('../registry');
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
-import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
-
-import * as Registry from '../registry';
+import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
+import { PackageNotFoundError } from '../../../errors';
 
-import { getPackageInfo, getPackageUsageStats } from './get';
+import { getSettings } from '../../settings';
+import { auditLoggingService } from '../../audit_logging';
 
-const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+import * as Registry from '../registry';
+
+import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
+
+jest.mock('../registry');
+jest.mock('../../settings');
+jest.mock('../../audit_logging');
+
+const MockRegistry = jest.mocked(Registry);
+
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
+  beforeEach(() => {
+    const mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
   describe('and invoking getPackageUsageStats()', () => {
     let soClient: jest.Mocked<SavedObjectsClientContract>;
 
@@ -39,7 +61,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '22222-22222-2222-2222',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -63,7 +84,6 @@ describe('When using EPM `get` services', () => {
             package: { name: 'system', title: 'System', version: '0.10.4' },
             enabled: true,
             policy_id: '11111-111111-11111-11111', // << duplicate id with plicy below
-            output_id: 'ca111b80-43c1-11eb-84bf-7177b74381c5',
             inputs: [],
             revision: 1,
             created_at: '2020-12-21T19:22:04.902Z',
@@ -86,7 +106,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '11111-111111-11111-11111',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -110,7 +129,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '33333-33333-333333-333333',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -180,15 +198,163 @@ describe('When using EPM `get` services', () => {
     });
   });
 
+  describe('getPackages', () => {
+    beforeEach(() => {
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+        } as any,
+      ]);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      MockRegistry.fetchInfo.mockResolvedValue({} as any);
+      MockRegistry.pkgToPkgKey.mockImplementation(({ name, version }) => `${name}-${version}`);
+    });
+
+    it('should return installed package that is not in registry with package info', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'elasticsearch-0.0.1/manifest.yml',
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description
+format_version: 0.0.1
+owner: elastic`,
+            },
+          },
+        ],
+      });
+      await getPackages({
+        savedObjectsClient: soClient,
+      });
+      await expect(
+        getPackages({
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toMatchObject([
+        {
+          id: 'elasticsearch',
+          name: 'elasticsearch',
+          version: '0.0.1',
+          title: 'Elastic',
+          description: 'Elasticsearch description',
+          savedObject: {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+            },
+          },
+        },
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+      ]);
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+            score: 0,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        id: 'elasticsearch',
+        attributes: {},
+        references: [],
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+
+      await getPackages({ savedObjectsClient: soClient });
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'get',
+        id: 'elasticsearch',
+        savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
   describe('getPackageInfo', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
-      MockRegistry.fetchFindLatestPackage.mockResolvedValue({
+      jest.clearAllMocks();
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.getRegistryPackage.mockResolvedValue({
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         packageInfo: {
           name: 'my-package',
@@ -277,6 +443,122 @@ describe('When using EPM `get` services', () => {
         ).toMatchObject({
           status: 'install_failed',
         });
+      });
+    });
+
+    describe('registry fetch errors', () => {
+      it('throws when a package that is not installed is not available in the registry and not bundled', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).rejects.toThrowError(PackageNotFoundError);
+      });
+
+      it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
+        });
+      });
+
+      it('sets the latestVersion to installed version when an installed package is newer than package in registry', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            version: '2.0.0',
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
+        });
+      });
+    });
+
+    describe('skipArchive', () => {
+      it('avoids loading archive when skipArchive = true', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
+      });
+
+      // when calling the get package endpoint without a package version we
+      // were previously incorrectly getting the info from archive
+      it('avoids loading archive when skipArchive = true and no version supplied', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
   });

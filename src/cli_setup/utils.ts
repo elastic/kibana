@@ -10,14 +10,14 @@ import { getConfigPath, getDataPath } from '@kbn/utils';
 import inquirer from 'inquirer';
 import { duration } from 'moment';
 import { merge } from 'lodash';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { Logger } from '../core/server';
-import { ClusterClient } from '../core/server/elasticsearch/client';
-import { configSchema } from '../core/server/elasticsearch';
-import { ElasticsearchService } from '../plugins/interactive_setup/server/elasticsearch_service';
-import { KibanaConfigWriter } from '../plugins/interactive_setup/server/kibana_config_writer';
-import type { EnrollmentToken } from '../plugins/interactive_setup/common';
+import { Logger } from '@kbn/core/server';
+import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
+import { configSchema } from '@kbn/core-elasticsearch-server-internal';
+import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import { KibanaConfigWriter } from '@kbn/interactive-setup-plugin/server/kibana_config_writer';
+import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
 
 const noop = () => {};
 const logger: Logger = {
@@ -29,6 +29,7 @@ const logger: Logger = {
   fatal: noop,
   log: noop,
   get: () => logger,
+  isLevelEnabled: () => true,
 };
 
 export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), getDataPath(), logger);
@@ -37,8 +38,8 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
   elasticsearch: {
     createClient: (type, config) => {
       const defaults = configSchema.validate({});
-      return new ClusterClient(
-        merge(
+      return new ClusterClient({
+        config: merge(
           defaults,
           {
             hosts: Array.isArray(defaults.hosts) ? defaults.hosts : [defaults.hosts],
@@ -46,8 +47,11 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
           config
         ),
         logger,
-        type
-      );
+        type,
+        // we use an independent AgentManager for cli_setup, no need to track performance of this one
+        agentFactoryProvider: new AgentManager(logger.get('agent-manager')),
+        kibanaVersion: kibanaPackageJson.version,
+      });
     },
   },
 });

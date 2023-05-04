@@ -42,7 +42,7 @@ import { SCHEMA_TITLE } from '../schema';
 import { SEARCH_UI_TITLE } from '../search_ui';
 import { SYNONYMS_TITLE } from '../synonyms';
 
-import { EngineLogic, generateEnginePath } from './';
+import { EngineLogic, generateEnginePath } from '.';
 
 import './engine_nav.scss';
 
@@ -68,10 +68,12 @@ export const useEngineNav = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    isElasticsearchEngine,
     hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
+    hasIncompleteFields,
   } = useValues(EngineLogic);
 
   if (!isEngineRoute) return undefined;
@@ -96,6 +98,13 @@ export const useEngineNav = () => {
             <EuiBadge>
               {i18n.translate('xpack.enterpriseSearch.appSearch.engine.metaEngineBadge', {
                 defaultMessage: 'META ENGINE',
+              })}
+            </EuiBadge>
+          )}
+          {isElasticsearchEngine && (
+            <EuiBadge>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.elasticsearchEngineBadge', {
+                defaultMessage: 'ELASTICSEARCH INDEX',
               })}
             </EuiBadge>
           )}
@@ -148,7 +157,7 @@ export const useEngineNav = () => {
         <>
           {hasSchemaErrors && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="danger"
               className="appSearchNavIcon"
               title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
@@ -171,7 +180,7 @@ export const useEngineNav = () => {
           )}
           {hasSchemaConflicts && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.conflicts', {
@@ -180,12 +189,27 @@ export const useEngineNav = () => {
               data-test-subj="EngineNavSchemaConflicts"
             />
           )}
+          {hasIncompleteFields && (
+            <EuiIcon
+              type="warning"
+              color="warning"
+              className="appSearchNavIcon"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.schema.hasIncompleteFields',
+                {
+                  defaultMessage: 'Precision tuning is not enabled on all fields',
+                }
+              )}
+              data-test-subj="EngineNavPrecisionTuningWarning"
+            />
+          )}
         </>
       ),
     });
   }
 
-  if (canViewEngineCrawler && !isMetaEngine) {
+  const showCrawlerNavItem = canViewEngineCrawler && !isMetaEngine && !isElasticsearchEngine;
+  if (showCrawlerNavItem) {
     navItems.push({
       id: 'crawler',
       name: CRAWLER_TITLE,
@@ -218,7 +242,7 @@ export const useEngineNav = () => {
         <>
           {invalidBoosts && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(
@@ -230,7 +254,7 @@ export const useEngineNav = () => {
           )}
           {unsearchedUnconfirmedFields && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(

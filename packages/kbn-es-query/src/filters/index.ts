@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { FilterCompareOptions } from './helpers';
+export type { FilterCompareOptions, TimeRange } from './helpers';
+
 export {
   dedupFilters,
   uniqFilters,
@@ -16,6 +17,7 @@ export {
   isFilter,
   isFilters,
   pinFilter,
+  updateFilter,
   isFilterPinned,
   onlyDisabledFiltersChanged,
   enableFilter,
@@ -25,11 +27,16 @@ export {
   toggleFilterDisabled,
   toggleFilterPinned,
   unpinFilter,
+  extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRange,
 } from './helpers';
 
 export {
   isExistsFilter,
   isMatchAllFilter,
+  buildCombinedFilter,
+  isCombinedFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -51,10 +58,12 @@ export {
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
   getFilterParams,
+  BooleanRelation,
 } from './build_filters';
 
 export type {
   Query,
+  AggregateQuery,
   Filter,
   LatLon,
   FieldFilter,
@@ -70,6 +79,8 @@ export type {
   CustomFilter,
   RangeFilterParams,
   QueryStringFilter,
+  CombinedFilter,
+  CombinedFilterMeta,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';

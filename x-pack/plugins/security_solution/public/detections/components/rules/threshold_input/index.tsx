@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../common/containers/source';
-import { getCategorizedFieldNames } from '../../../../timelines/components/edit_data_provider/helpers';
-import { FieldHook, Field } from '../../../../shared_imports';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { FieldHook } from '../../../../shared_imports';
+import { Field } from '../../../../shared_imports';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
 
 const FIELD_COMBO_BOX_WIDTH = 410;
@@ -30,7 +30,7 @@ interface ThresholdInputProps {
   thresholdValue: FieldHook;
   thresholdCardinalityField: FieldHook;
   thresholdCardinalityValue: FieldHook;
-  browserFields: BrowserFields;
+  browserFields: DataViewFieldBase[];
 }
 
 const OperatorWrapper = styled(EuiFlexItem)`
@@ -53,7 +53,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
     () => ({
       fullWidth: true,
       noSuggestions: false,
-      options: getCategorizedFieldNames(browserFields),
+      options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
@@ -64,7 +64,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
     () => ({
       fullWidth: true,
       noSuggestions: false,
-      options: getCategorizedFieldNames(browserFields),
+      options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Reducer } from 'redux';
-import { DataState } from '../../types';
-import { ResolverAction } from '../actions';
+import type { Reducer } from 'redux';
+import type { DataState } from '../../types';
+import type { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
@@ -20,6 +20,7 @@ const initialState: DataState = {
   },
   resolverComponentInstanceID: undefined,
   indices: [],
+  detectedBounds: undefined,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -101,6 +102,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         // This cannot model multiple in-flight requests
         pendingRequestParameters: undefined,
       },
+      detectedBounds: action.payload.detectedBounds,
     };
     return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {

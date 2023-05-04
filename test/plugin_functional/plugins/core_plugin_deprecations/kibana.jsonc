@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-deprecations-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "corePluginDeprecations",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "corePluginDeprecations"
+    ]
+  }
+}

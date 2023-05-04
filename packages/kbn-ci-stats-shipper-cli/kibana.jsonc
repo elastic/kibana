@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ci-stats-shipper-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

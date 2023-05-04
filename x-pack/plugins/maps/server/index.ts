@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { MapsPlugin } from './plugin';
 import { configSchema, MapsXPackConfig } from '../config';
 

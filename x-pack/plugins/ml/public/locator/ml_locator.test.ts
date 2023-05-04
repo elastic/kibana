@@ -323,5 +323,22 @@ describe('ML locator', () => {
         });
       });
     });
+
+    describe('Trained Models', () => {
+      it('should generate valid URL for the Trained Models page with model id', async () => {
+        const location = await definition.getLocation({
+          page: ML_PAGES.TRAINED_MODELS_MANAGE,
+          pageState: {
+            modelId: 'my_model_01',
+          },
+        });
+
+        expect(location).toMatchObject({
+          app: 'ml',
+          path: "/trained_models?_a=(trained_models:(queryText:'model_id:(my_model_01)'))",
+          state: {},
+        });
+      });
+    });
   });
 });

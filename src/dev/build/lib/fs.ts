@@ -7,28 +7,20 @@
  */
 
 import fs from 'fs';
+import Fsp from 'fs/promises';
+import * as Rx from 'rxjs';
 import { createHash } from 'crypto';
-import { pipeline, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
-import { inspect, promisify } from 'util';
+import { inspect } from 'util';
 
 import archiver from 'archiver';
-import vfs from 'vinyl-fs';
-import File from 'vinyl';
+import globby from 'globby';
+import cpy from 'cpy';
 import del from 'del';
-import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
-import { ToolingLog } from '@kbn/dev-utils';
-
-const pipelineAsync = promisify(pipeline);
-const mkdirAsync = promisify(fs.mkdir);
-const writeFileAsync = promisify(fs.writeFile);
-const readFileAsync = promisify(fs.readFile);
-const readdirAsync = promisify(fs.readdir);
-const utimesAsync = promisify(fs.utimes);
-const copyFileAsync = promisify(fs.copyFile);
-const statAsync = promisify(fs.stat);
+import { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -37,6 +29,13 @@ export function assertAbsolute(path: string) {
     );
   }
 }
+
+export const rmdir$ = Rx.bindNodeCallback(fs.rmdir);
+export const fsReadDir$ = Rx.bindNodeCallback(
+  (path: string, cb: (err: Error | null, ents: fs.Dirent[]) => void) => {
+    fs.readdir(path, { withFileTypes: true }, cb);
+  }
+);
 
 export function isFileAccessible(path: string) {
   assertAbsolute(path);
@@ -57,23 +56,23 @@ function longInspect(value: any) {
 
 export async function mkdirp(path: string) {
   assertAbsolute(path);
-  await mkdirAsync(path, { recursive: true });
+  await Fsp.mkdir(path, { recursive: true });
 }
 
 export async function write(path: string, contents: string) {
   assertAbsolute(path);
   await mkdirp(dirname(path));
-  await writeFileAsync(path, contents);
+  await Fsp.writeFile(path, contents);
 }
 
 export async function read(path: string) {
   assertAbsolute(path);
-  return await readFileAsync(path, 'utf8');
+  return await Fsp.readFile(path, 'utf8');
 }
 
 export async function getChildPaths(path: string) {
   assertAbsolute(path);
-  const childNames = await readdirAsync(path);
+  const childNames = await Fsp.readdir(path);
   return childNames.map((name) => resolve(path, name));
 }
 
@@ -109,28 +108,34 @@ export async function deleteEmptyFolders(
     throw new TypeError('Expected root folder to be a string path');
   }
 
+  assertAbsolute(rootFolderPath);
   log.debug(
     'Deleting all empty folders and their children recursively starting on ',
     rootFolderPath
   );
-  assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
 
-  // Delete empty is used to gather all the empty folders and
-  // then we use del to actually delete them
-  const emptyFoldersList = (await deleteEmpty(rootFolderPath, {
-    // @ts-expect-error DT package has incorrect types https://github.com/jonschlinkert/delete-empty/blob/6ae34547663e6845c3c98b184c606fa90ef79c0a/index.js#L160
-    dryRun: true,
-  })) as unknown as string[]; // DT package has incorrect types
+  const handleDir$ = (path: string): Rx.Observable<string> => {
+    if (foldersToKeep.includes(path)) {
+      return Rx.EMPTY;
+    }
 
-  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
-    return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
-  });
-  const deletedEmptyFolders = await del(foldersToDelete, {
-    concurrency: 4,
-  });
+    return fsReadDir$(path).pipe(
+      Rx.mergeMap((stats) => {
+        if (stats.length === 0) {
+          return rmdir$(path, { maxRetries: 1 }).pipe(Rx.map(() => path));
+        }
 
-  log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
-  log.verbose('Deleted:', longInspect(deletedEmptyFolders));
+        return Rx.from(stats).pipe(
+          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : []))
+        );
+      })
+    );
+  };
+
+  const deleted = await Rx.lastValueFrom(handleDir$(rootFolderPath).pipe(Rx.toArray()));
+
+  log.debug('Deleted %d empty folders', deleted.length);
+  log.verbose('Deleted:', longInspect(deleted));
 }
 
 interface CopyOptions {
@@ -141,13 +146,9 @@ export async function copy(source: string, destination: string, options: CopyOpt
   assertAbsolute(destination);
 
   // ensure source exists before creating destination directory and copying source
-  await statAsync(source);
+  await Fsp.stat(source);
   await mkdirp(dirname(destination));
-  return await copyFileAsync(
-    source,
-    destination,
-    options.clone ? fs.constants.COPYFILE_FICLONE : 0
-  );
+  return await Fsp.copyFile(source, destination, options.clone ? fs.constants.COPYFILE_FICLONE : 0);
 }
 
 interface CopyAllOptions {
@@ -161,53 +162,37 @@ export async function copyAll(
   destination: string,
   options: CopyAllOptions = {}
 ) {
-  const { select = ['**/*'], dot = false, time = new Date() } = options;
+  const { select = ['**/*'], dot = false, time } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
 
-  await pipelineAsync(
-    vfs.src(select, {
-      buffer: false,
-      cwd: sourceDir,
-      base: sourceDir,
-      dot,
-    }),
-    vfs.dest(destination)
-  );
+  const copiedFiles = await cpy(select, destination, {
+    cwd: sourceDir,
+    parents: true,
+    ignoreJunk: false,
+    dot,
+  });
 
   // we must update access and modified file times after the file copy
   // has completed, otherwise the copy action can effect modify times.
-  if (Boolean(time)) {
-    await pipelineAsync(
-      vfs.src(select, {
-        buffer: false,
-        cwd: destination,
-        base: destination,
-        dot,
-      }),
-      new Writable({
-        objectMode: true,
-        write(file: File, _, cb) {
-          utimesAsync(file.path, time, time).then(() => cb(), cb);
-        },
-      })
+  if (time) {
+    const copiedDirectories = await globby(select, {
+      cwd: destination,
+      dot,
+      onlyDirectories: true,
+      absolute: true,
+    });
+    await Promise.all(
+      [...copiedFiles, ...copiedDirectories].map((entry) => Fsp.utimes(entry, time, time))
     );
   }
 }
 
 export async function getFileHash(path: string, algo: string) {
   assertAbsolute(path);
-
   const hash = createHash(algo);
-  const readStream = fs.createReadStream(path);
-  await new Promise((res, rej) => {
-    readStream
-      .on('data', (chunk) => hash.update(chunk))
-      .on('error', rej)
-      .on('end', res);
-  });
-
+  await pipeline(fs.createReadStream(path), hash);
   return hash.digest('hex');
 }
 
@@ -219,9 +204,9 @@ export async function untar(
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(destination, { recursive: true });
+  await Fsp.mkdir(destination, { recursive: true });
 
-  await pipelineAsync(
+  await pipeline(
     fs.createReadStream(source),
     createGunzip(),
     tar.extract({
@@ -235,13 +220,9 @@ export async function gunzip(source: string, destination: string) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(dirname(destination), { recursive: true });
+  await Fsp.mkdir(dirname(destination), { recursive: true });
 
-  await pipelineAsync(
-    fs.createReadStream(source),
-    createGunzip(),
-    fs.createWriteStream(destination)
-  );
+  await pipeline(fs.createReadStream(source), createGunzip(), fs.createWriteStream(destination));
 }
 
 interface CompressTarOptions {

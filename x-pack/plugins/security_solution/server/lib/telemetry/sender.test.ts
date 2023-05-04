@@ -7,8 +7,8 @@
 
 /* eslint-disable dot-notation */
 import { TelemetryEventsSender } from './sender';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {
@@ -33,8 +33,49 @@ describe('TelemetryEventsSender', () => {
       const sender = new TelemetryEventsSender(logger);
       const input = [
         {
+          credential_access: {
+            Target: {
+              process: {
+                path: 'DeviceHarddiskVolume3WindowsSystem32lsass.exe',
+                pid: 808,
+                ppid: 584,
+                sid: 0,
+              },
+            },
+            handle_type: 'process',
+            desired_access_numeric: 2097151,
+            desired_access: [
+              'DELETE',
+              'READ_CONTROL',
+              'SYNCHRONIZE',
+              'WRITE_DAC',
+              'WRITE_OWNER',
+              'STANDARD_RIGHTS_REQUIRED',
+              'PROCESS_ALL_ACCESS',
+            ],
+            call_stack: {
+              entries: [
+                {
+                  memory_address: 140706712704004,
+                  start_address_allocation_offset: 644100,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32\ntdll.dll',
+                },
+                {
+                  memory_address: 140706669379902,
+                  start_address_allocation_offset: 180542,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32KernelBase.dll',
+                },
+                {
+                  memory_address: 140704414232808,
+                  start_address_allocation_offset: 127208,
+                  module_path: 'Unbacked',
+                },
+              ],
+            },
+          },
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -50,6 +91,21 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
+          dll: {
+            Ext: {
+              device: {
+                bus_type: 'FileBackedVirtual',
+                dos_name: 'D:',
+                file_system_type: 'CDFS',
+                nt_name: 'CdRom0',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                volume_device_type: 'CD-ROM File System',
+              },
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
+            },
+          },
           file: {
             extension: '.exe',
             size: 3,
@@ -57,7 +113,40 @@ describe('TelemetryEventsSender', () => {
             path: 'X',
             test: 'me',
             another: 'nope',
+            pe: {
+              Ext: {
+                dotnet: true,
+                streams: [
+                  {
+                    name: '#~',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                  {
+                    name: '#Blob',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+                sections: [
+                  {
+                    name: '.reloc',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+              },
+              original_file_name: 'malware.exe',
+            },
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
@@ -71,6 +160,8 @@ describe('TelemetryEventsSender', () => {
               header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
               something_else: 'nope',
             },
           },
@@ -80,12 +171,43 @@ describe('TelemetryEventsSender', () => {
             },
             something_else: 'nope',
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             nope: 'nope',
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            env_vars: [{ name: 'foo', value: 'bar' }],
+            Ext: {
+              protection: 'PsProtectedSignerAntimalware-Light',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+              effective_parent: {
+                name: 'file.exe',
+                pid: 6792,
+                entity_id: 'some_entity_id',
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
+              session_info: {
+                logon_type: 'Interactive',
+                client_address: '127.0.0.1',
+                id: 1,
+                authentication_package: 'NTLM',
+                relative_logon_time: 0.1,
+                relative_password_age: 2592000.123,
+                user_flags: ['LOGON_EXTRA_SIDS', 'LOGON_NTLMV2_ENABLED', 'LOGON_WINLOGON'],
+              },
+            },
           },
           Responses: '{ "result": 0 }', // >= 7.15
           Target: {
@@ -100,14 +222,61 @@ describe('TelemetryEventsSender', () => {
           threat: {
             ignored_object: true, // this field is not allowlisted
           },
+          Persistence: {
+            name: 'foo',
+            path: '/foo/bar',
+            runatload: true,
+            args: ['foo', 'bar'],
+          },
         },
       ];
 
       const result = sender.processEvents(input);
       expect(result).toStrictEqual([
         {
+          credential_access: {
+            Target: {
+              process: {
+                path: 'DeviceHarddiskVolume3WindowsSystem32lsass.exe',
+                pid: 808,
+                ppid: 584,
+                sid: 0,
+              },
+            },
+            handle_type: 'process',
+            desired_access_numeric: 2097151,
+            desired_access: [
+              'DELETE',
+              'READ_CONTROL',
+              'SYNCHRONIZE',
+              'WRITE_DAC',
+              'WRITE_OWNER',
+              'STANDARD_RIGHTS_REQUIRED',
+              'PROCESS_ALL_ACCESS',
+            ],
+            call_stack: {
+              entries: [
+                {
+                  memory_address: 140706712704004,
+                  start_address_allocation_offset: 644100,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32\ntdll.dll',
+                },
+                {
+                  memory_address: 140706669379902,
+                  start_address_allocation_offset: 180542,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32KernelBase.dll',
+                },
+                {
+                  memory_address: 140704414232808,
+                  start_address_allocation_offset: 127208,
+                  module_path: 'Unbacked',
+                },
+              ],
+            },
+          },
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -128,7 +297,40 @@ describe('TelemetryEventsSender', () => {
             size: 3,
             created: 0,
             path: 'X',
+            pe: {
+              Ext: {
+                dotnet: true,
+                streams: [
+                  {
+                    name: '#~',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                  {
+                    name: '#Blob',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+                sections: [
+                  {
+                    name: '.reloc',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+              },
+              original_file_name: 'malware.exe',
+            },
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
@@ -149,10 +351,41 @@ describe('TelemetryEventsSender', () => {
               name: 'windows',
             },
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            env_vars: [{ name: 'foo', value: 'bar' }],
+            Ext: {
+              protection: 'PsProtectedSignerAntimalware-Light',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+              effective_parent: {
+                name: 'file.exe',
+                pid: 6792,
+                entity_id: 'some_entity_id',
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
+              session_info: {
+                logon_type: 'Interactive',
+                client_address: '127.0.0.1',
+                id: 1,
+                authentication_package: 'NTLM',
+                relative_logon_time: 0.1,
+                relative_password_age: 2592000.123,
+                user_flags: ['LOGON_EXTRA_SIDS', 'LOGON_NTLMV2_ENABLED', 'LOGON_WINLOGON'],
+              },
+            },
           },
           Responses: '{ "result": 0 }',
           Target: {
@@ -160,6 +393,27 @@ describe('TelemetryEventsSender', () => {
               name: 'bar.exe',
               thread: {
                 id: 1234,
+              },
+            },
+          },
+          Persistence: {
+            name: 'foo',
+            path: '/foo/bar',
+            runatload: true,
+            args: ['foo', 'bar'],
+          },
+          dll: {
+            Ext: {
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
               },
             },
           },
@@ -193,6 +447,7 @@ describe('TelemetryEventsSender', () => {
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
+      sender['isTelemetryServicesReachable'] = jest.fn(async () => true);
       sender['telemetryUsageCounter'] = telemetryUsageCounter;
       sender['sendEvents'] = jest.fn(async () => {
         sender['telemetryUsageCounter']?.incrementCounter({
@@ -223,6 +478,23 @@ describe('TelemetryEventsSender', () => {
         getIsOptedIn: jest.fn(async () => false),
       };
       sender['telemetryStart'] = telemetryStart;
+
+      sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
+      expect(sender['queue'].length).toBe(2);
+      await sender['sendIfDue']();
+
+      expect(sender['queue'].length).toBe(0);
+      expect(sender['sendEvents']).toBeCalledTimes(0);
+    });
+
+    it("shouldn't send when telemetry when opted in but cannot connect to elastic telemetry services", async () => {
+      const sender = new TelemetryEventsSender(logger);
+      sender['sendEvents'] = jest.fn();
+      const telemetryStart = {
+        getIsOptedIn: jest.fn(async () => true),
+      };
+      sender['telemetryStart'] = telemetryStart;
+      sender['isTelemetryServicesReachable'] = jest.fn(async () => false);
 
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender['queue'].length).toBe(2);

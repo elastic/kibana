@@ -4,33 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiEmptyPrompt,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiLoadingContent,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
+import { PolicyResponseWrapper } from '../../../../components/policy_response';
+import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
   detailsData,
   detailsError,
-  getActivityLogData,
   hostStatusInfo,
-  policyResponseActions,
-  policyResponseAppliedRevision,
-  policyResponseConfigurations,
-  policyResponseError,
-  policyResponseFailedOrWarningActionCount,
-  policyResponseLoading,
-  policyResponseTimestamp,
   policyVersionInfo,
   showView,
   uiQueryParams,
@@ -41,24 +27,23 @@ import { ActionsMenu } from './components/actions_menu';
 import {
   EndpointDetailsFlyoutTabs,
   EndpointDetailsTabsTypes,
+  type EndpointDetailsTabs,
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
-import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
-import { PolicyResponse } from './policy_response';
 
 export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const activityLog = useEndpointSelector(getActivityLogData);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsError = useEndpointSelector(detailsError);
 
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
+  const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
   const ContentLoadingMarkup = useMemo(
     () => (
@@ -72,38 +57,53 @@ export const EndpointDetails = memo(() => {
   );
 
   const getTabs = useCallback(
-    (id: string) => [
-      {
-        id: EndpointDetailsTabsTypes.overview,
-        name: i18.OVERVIEW,
-        route: getEndpointDetailsPath({
-          ...queryParams,
-          name: 'endpointDetails',
-          selected_endpoint: id,
-        }),
-        content:
-          hostDetails === undefined ? (
-            ContentLoadingMarkup
-          ) : (
-            <EndpointDetailsContent
-              details={hostDetails}
-              policyInfo={policyInfo}
-              hostStatus={hostStatus}
-            />
-          ),
-      },
-      {
-        id: EndpointDetailsTabsTypes.activityLog,
-        name: i18.ACTIVITY_LOG.tabTitle,
-        route: getEndpointDetailsPath({
-          ...queryParams,
-          name: 'endpointActivityLog',
-          selected_endpoint: id,
-        }),
-        content: <EndpointActivityLog activityLog={activityLog} />,
-      },
-    ],
-    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, activityLog, queryParams]
+    (id: string): EndpointDetailsTabs[] => {
+      const tabs: EndpointDetailsTabs[] = [
+        {
+          id: EndpointDetailsTabsTypes.overview,
+          name: i18.OVERVIEW,
+          route: getEndpointDetailsPath({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_endpoint: id,
+          }),
+          content:
+            hostDetails === undefined ? (
+              ContentLoadingMarkup
+            ) : (
+              <EndpointDetailsContent
+                details={hostDetails}
+                policyInfo={policyInfo}
+                hostStatus={hostStatus}
+              />
+            ),
+        },
+      ];
+
+      // show the response actions history tab
+      // only when the user has the required permission
+      if (canAccessEndpointActionsLogManagement) {
+        tabs.push({
+          id: EndpointDetailsTabsTypes.activityLog,
+          name: i18.ACTIVITY_LOG.tabTitle,
+          route: getEndpointDetailsPath({
+            ...queryParams,
+            name: 'endpointActivityLog',
+            selected_endpoint: id,
+          }),
+          content: <ResponseActionsLog agentIds={id} />,
+        });
+      }
+      return tabs;
+    },
+    [
+      canAccessEndpointActionsLogManagement,
+      ContentLoadingMarkup,
+      hostDetails,
+      policyInfo,
+      hostStatus,
+      queryParams,
+    ]
   );
 
   const showFlyoutFooter =
@@ -121,6 +121,7 @@ export const EndpointDetails = memo(() => {
       });
     }
   }, [hostDetailsError, show, toasts]);
+
   return (
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
@@ -139,7 +140,9 @@ export const EndpointDetails = memo(() => {
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
               hostname={hostDetails.host.hostname}
-              show={show}
+              // show overview tab if forcing response actions history
+              // tab via URL without permission
+              show={!canAccessEndpointActionsLogManagement ? 'details' : show}
               tabs={getTabs(hostDetails.agent.id)}
             />
           )}
@@ -166,58 +169,13 @@ EndpointDetails.displayName = 'EndpointDetails';
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const responseConfig = useEndpointSelector(policyResponseConfigurations);
-  const responseActions = useEndpointSelector(policyResponseActions);
-  const responseAttentionCount = useEndpointSelector(policyResponseFailedOrWarningActionCount);
-  const loading = useEndpointSelector(policyResponseLoading);
-  const error = useEndpointSelector(policyResponseError);
-  const responseTimestamp = useEndpointSelector(policyResponseTimestamp);
-  const responsePolicyRevisionNumber = useEndpointSelector(policyResponseAppliedRevision);
-
   return (
     <>
       <EuiFlyoutBody
         data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
         className="endpointDetailsPolicyResponseFlyoutBody"
       >
-        <EuiText data-test-subj="endpointDetailsPolicyResponseFlyoutTitle">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyResponse.title"
-              defaultMessage="Policy Response"
-            />
-          </h4>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued" data-test-subj="endpointDetailsPolicyResponseTimestamp">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyResponse.appliedOn"
-            defaultMessage="Revision {rev} applied on {date}"
-            values={{
-              rev: responsePolicyRevisionNumber,
-              date: <PreferenceFormattedDateFromPrimitive value={responseTimestamp} />,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        {error && (
-          <EuiEmptyPrompt
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.details.noPolicyResponse"
-                defaultMessage="No policy response available"
-              />
-            }
-          />
-        )}
-        {loading && <EuiLoadingContent lines={3} />}
-        {responseConfig !== undefined && responseActions !== undefined && (
-          <PolicyResponse
-            responseConfig={responseConfig}
-            responseActions={responseActions}
-            responseAttentionCount={responseAttentionCount}
-          />
-        )}
+        <PolicyResponseWrapper endpointId={hostMeta.agent.id} />
       </EuiFlyoutBody>
     </>
   );

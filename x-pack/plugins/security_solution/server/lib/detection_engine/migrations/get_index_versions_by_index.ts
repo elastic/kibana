@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
-
-export interface IndexMappingsResponse {
-  [indexName: string]: { mappings: { _meta: { version: number } } };
-}
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export interface IndexVersionsByIndex {
   [indexName: string]: number | undefined;
@@ -33,7 +29,7 @@ export const getIndexVersionsByIndex = async ({
   esClient: ElasticsearchClient;
   index: string[];
 }): Promise<IndexVersionsByIndex> => {
-  const { body: indexVersions } = await esClient.indices.getMapping<IndexMappingsResponse>({
+  const indexVersions = await esClient.indices.getMapping({
     index,
   });
 

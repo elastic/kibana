@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { LoadFunctions } from '../lib/load_functions';
 
 export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {

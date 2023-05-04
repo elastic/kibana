@@ -7,7 +7,7 @@
 
 import { safeLoad } from 'js-yaml';
 
-import type { InstallablePackage } from '../../../types';
+import type { PackageInfo } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
@@ -17,6 +17,7 @@ export interface Field {
   description?: string;
   value?: string;
   format?: string;
+  date_format?: string;
   fields?: Fields;
   enabled?: boolean;
   path?: string;
@@ -30,11 +31,18 @@ export interface Field {
   search_analyzer?: string;
   ignore_above?: number;
   object_type?: string;
+  object_type_mapping_type?: string;
   scaling_factor?: number;
   dynamic?: 'strict' | boolean;
   include_in_parent?: boolean;
   include_in_root?: boolean;
   null_value?: string;
+  dimension?: boolean;
+  default_field?: boolean;
+
+  // Fields specific of the aggregate_metric_double type
+  metrics?: string[];
+  default_metric?: string;
 
   // Meta fields
   metric_type?: string;
@@ -244,8 +252,23 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
   return undefined;
 };
 
+export function processFieldsWithWildcard(fields: Fields): Fields {
+  const newFields: Fields = [];
+  for (const field of fields) {
+    const hasWildcard = field.name.includes('*');
+    const hasObjectType = field.object_type;
+    if (hasWildcard && !hasObjectType) {
+      newFields.push({ ...field, type: 'object', object_type: field.type });
+    } else {
+      newFields.push({ ...field });
+    }
+  }
+  return newFields;
+}
+
 export function processFields(fields: Fields): Fields {
-  const expandedFields = expandFields(fields);
+  const processedFields = processFieldsWithWildcard(fields);
+  const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
   return validateFields(dedupedFields, dedupedFields);
 }
@@ -260,12 +283,12 @@ const isFields = (path: string) => {
  * Gets all field files, optionally filtered by dataset, extracts .yml files, merges them together
  */
 
-export const loadFieldsFromYaml = async (
-  pkg: InstallablePackage,
+export const loadFieldsFromYaml = (
+  pkg: Pick<PackageInfo, 'version' | 'name' | 'type'>,
   datasetName?: string
-): Promise<Field[]> => {
+): Field[] => {
   // Fetch all field definition files
-  const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
+  const fieldDefinitionFiles = getAssetsData(pkg, isFields, datasetName);
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {

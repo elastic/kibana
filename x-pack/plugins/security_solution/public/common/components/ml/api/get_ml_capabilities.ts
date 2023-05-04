@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '../../../../../../../../src/core/public';
-import { MlCapabilitiesResponse } from '../../../../../../ml/public';
-import { InfluencerInput } from '../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
+import type { InfluencerInput } from '../types';
 
 export interface Body {
   jobIds: string[];

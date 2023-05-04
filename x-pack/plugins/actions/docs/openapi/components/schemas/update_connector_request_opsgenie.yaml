@@ -1,0 +1,14 @@
+title: Update Opsgenie connector request
+type: object
+required:
+  - config
+  - name
+  - secrets
+properties:
+  config: 
+    $ref: 'config_properties_opsgenie.yaml'
+  name:
+    type: string
+    description: The display name for the connector.
+  secrets:
+     $ref: 'secrets_properties_opsgenie.yaml'

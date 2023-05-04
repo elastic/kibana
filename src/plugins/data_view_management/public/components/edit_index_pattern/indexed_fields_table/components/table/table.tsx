@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from 'src/core/public';
+import { OverlayModalStart, ThemeServiceStart } from '@kbn/core/public';
 
 import {
   EuiIcon,
@@ -28,10 +28,16 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { IIndexPattern } from '../../../../../../../data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
+
+export const showDelete = (field: IndexedFieldItem) =>
+  // runtime fields that aren't composite subfields
+  (!field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite') ||
+  // composite runtime field definitions
+  (field.runtimeField?.type === 'composite' && field.type === 'composite');
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
@@ -158,10 +164,29 @@ const labelDescription = i18n.translate(
   { defaultMessage: 'A custom label for the field.' }
 );
 
-const runtimeIconTipTitle = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitle',
-  { defaultMessage: 'Runtime field' }
-);
+function runtimeIconTipTitle(fld: IndexedFieldItem) {
+  // composite runtime fields
+  if (fld.runtimeField?.type === 'composite') {
+    // subfields definitions
+    if (fld.type !== 'composite') {
+      return i18n.translate(
+        'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleCompositeSubfield',
+        { defaultMessage: 'Composite runtime subfield' }
+      );
+      // composite definitions
+    } else {
+      return i18n.translate(
+        'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',
+        { defaultMessage: 'Composite runtime field' }
+      );
+    }
+  }
+
+  return i18n.translate(
+    'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitle',
+    { defaultMessage: 'Runtime field' }
+  );
+}
 
 const runtimeIconTipText = i18n.translate(
   'indexPatternManagement.editDataView.fields.table.runtimeIconTipText',
@@ -174,11 +199,12 @@ const conflictType = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
-  deleteField: (fieldName: string) => void;
+  deleteField: (fieldName: string[]) => void;
   openModal: OverlayModalStart['open'];
+  theme: ThemeServiceStart;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -194,7 +220,7 @@ const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']
 };
 
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
-  <span>
+  <span data-test-subj={`field-name-${field.name}`}>
     {field.name}
     {field.info && field.info.length ? (
       <span>
@@ -225,8 +251,8 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
         &nbsp;
         <EuiIconTip
           type="indexRuntime"
-          title={runtimeIconTipTitle}
-          content={<span>{runtimeIconTipText}</span>}
+          title={runtimeIconTipTitle(field)}
+          content={runtimeIconTipText}
         />
       </span>
     ) : null}
@@ -271,12 +297,10 @@ export const getConflictModalContent = ({
   <>
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        <h1>
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-            defaultMessage="This field has a type conflict"
-          />
-        </h1>
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+          defaultMessage="This field has a type conflict"
+        />
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -311,7 +335,8 @@ export const getConflictModalContent = ({
 const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
-  openModal: IndexedFieldProps['openModal']
+  openModal: IndexedFieldProps['openModal'],
+  theme: ThemeServiceStart
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -322,7 +347,8 @@ const getConflictBtn = (
           },
           fieldName,
           conflictDescriptions,
-        })
+        }),
+        { theme$: theme.theme$ }
       )
     );
   };
@@ -331,7 +357,7 @@ const getConflictBtn = (
     <span>
       <EuiBadge
         color="warning"
-        iconType="alert"
+        iconType="warning"
         onClick={onClick}
         iconOnClick={onClick}
         iconOnClickAriaLabel={conflictDetailIconAria}
@@ -355,7 +381,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
       <span>
         {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
-          ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
+          ? getConflictBtn(
+              field.name,
+              field.conflictDescriptions,
+              this.props.openModal,
+              this.props.theme
+            )
           : ''}
       </span>
     );
@@ -443,10 +474,19 @@ export class Table extends PureComponent<IndexedFieldProps> {
             name: deleteLabel,
             description: deleteDescription,
             icon: 'trash',
-            onClick: (field) => deleteField(field.name),
+            onClick: (field) => {
+              const toDelete = [field.name];
+              if (field.spec?.runtimeField?.fields) {
+                const childFieldNames = Object.keys(field.spec.runtimeField.fields).map(
+                  (key) => `${field.name}.${key}`
+                );
+                toDelete.push(...childFieldNames);
+              }
+              deleteField(toDelete);
+            },
             type: 'icon',
             'data-test-subj': 'deleteField',
-            available: (field) => !field.isMapped && field.isUserEditable,
+            available: showDelete,
           },
         ],
         width: '40px',

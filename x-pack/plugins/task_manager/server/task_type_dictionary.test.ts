@@ -7,7 +7,16 @@
 
 import { get } from 'lodash';
 import { RunContext, TaskDefinition } from './task';
-import { sanitizeTaskDefinitions, TaskDefinitionRegistry } from './task_type_dictionary';
+import { mockLogger } from './test_utils';
+import {
+  sanitizeTaskDefinitions,
+  TaskDefinitionRegistry,
+  TaskTypeDictionary,
+} from './task_type_dictionary';
+
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+}));
 
 interface Opts {
   numTasks: number;
@@ -40,6 +49,12 @@ const getMockTaskDefinitions = (opts: Opts) => {
 };
 
 describe('taskTypeDictionary', () => {
+  let definitions: TaskTypeDictionary;
+
+  beforeEach(() => {
+    definitions = new TaskTypeDictionary(mockLogger());
+  });
+
   describe('sanitizeTaskDefinitions', () => {});
   it('provides tasks with defaults', () => {
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
@@ -153,5 +168,63 @@ describe('taskTypeDictionary', () => {
     expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
       `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
     );
+  });
+
+  describe('registerTaskDefinitions', () => {
+    it('registers a valid task', () => {
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          maxConcurrency: 2,
+          createTaskRunner: jest.fn(),
+        },
+      });
+      expect(definitions.has('foo')).toBe(true);
+    });
+
+    it('throws error when registering duplicate task type', () => {
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+      });
+
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo: {
+            title: 'foo2',
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"Task foo is already defined!"`);
+    });
+
+    it('throws error when registering removed task type', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          sampleTaskRemovedType: {
+            title: 'removed',
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task sampleTaskRemovedType has been removed from registration!"`
+      );
+    });
+
+    it(`throws error when setting maxConcurrency to a task type that isn't allowed to set it`, () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo2: {
+            title: 'foo2',
+            maxConcurrency: 2,
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"maxConcurrency setting isn't allowed for task type: foo2"`
+      );
+    });
   });
 });

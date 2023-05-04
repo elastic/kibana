@@ -1,6 +1,37 @@
 {
   "type": "doc",
   "value": {
+    "id": "task:ce7e1250-3322-11eb-94c1-db6995e83f6b",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"originalParams\":{},\"superFly\":\"My middleware param!\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "idle",
+        "taskType": "sampleTaskNotRegisteredType"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "task:be7e1250-3322-11eb-94c1-db6995e83f6a",
     "index": ".kibana_task_manager_1",
     "source": {

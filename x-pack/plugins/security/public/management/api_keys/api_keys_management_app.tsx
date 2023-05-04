@@ -12,19 +12,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
+import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 
-import type {
-  CoreStart,
-  CoreTheme,
-  StartServicesAccessor,
-} from '../../../../../../src/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
-import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
@@ -34,6 +27,7 @@ import {
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 
 interface CreateParams {
   authc: AuthenticationServiceSetup;
@@ -74,6 +68,7 @@ export const apiKeysManagementApp = Object.freeze({
                 history={history}
                 notifications={coreStart.notifications}
                 apiKeysAPIClient={new APIKeysAPIClient(coreStart.http)}
+                readOnly={!coreStart.application.capabilities.api_keys.save}
               />
             </Breadcrumb>
           </Providers>,
@@ -109,6 +104,12 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
       <I18nProvider>
         <KibanaThemeProvider theme$={theme$}>
           <Router history={history}>
+            <ReadonlyBadge
+              featureId="api_keys"
+              tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
+                defaultMessage: 'Unable to create or edit API keys',
+              })}
+            />
             <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
           </Router>
         </KibanaThemeProvider>

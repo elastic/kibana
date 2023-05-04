@@ -13,7 +13,7 @@ import useList from 'react-use/lib/useList';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface SingleCharsFieldProps {
   defaultValue: string;

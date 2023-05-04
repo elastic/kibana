@@ -17,6 +17,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { UseField } from '../../../form';
 import { LearnMoreLink, DescribedFormRow } from '../..';
+import { useKibana } from '../../../../../../shared_imports';
 
 interface Props {
   phase: PhaseExceptDelete;
@@ -32,6 +33,8 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
       policy.phases[phase]?.actions?.set_priority != null // enable index priority if it's set
     );
   }, [isNewPolicy, policy.phases, phase]);
+
+  const { docLinks } = useKibana().services;
 
   return (
     <DescribedFormRow
@@ -50,7 +53,7 @@ export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
             defaultMessage="Set the priority for recovering your indices after a node restart.
               Indices with higher priorities are recovered before indices with lower priorities."
           />{' '}
-          <LearnMoreLink docPath="ilm-set-priority.html" />
+          <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmSetPriority} />
         </EuiTextColor>
       }
       titleSize="xs"

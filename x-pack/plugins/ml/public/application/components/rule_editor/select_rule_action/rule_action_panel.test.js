@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../../services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
 // The mock is hoisted to the top, so need to prefix the filter variable
@@ -29,11 +29,12 @@ jest.mock('../../../services/ml_api_service', () => ({
   },
 }));
 
-import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+
 import { RuleActionPanel } from './rule_action_panel';
-import { ACTION } from '../../../../../common/constants/detector_rule';
 
 describe('RuleActionPanel', () => {
   const job = {
@@ -44,7 +45,7 @@ describe('RuleActionPanel', () => {
           detector_description: 'mean response time',
           custom_rules: [
             {
-              actions: [ACTION.SKIP_RESULT],
+              actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
               conditions: [
                 {
                   applies_to: 'actual',
@@ -54,7 +55,7 @@ describe('RuleActionPanel', () => {
               ],
             },
             {
-              actions: [ACTION.SKIP_MODEL_UPDATE],
+              actions: [ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE],
               scope: {
                 airline: {
                   filter_id: 'eu-airlines',
@@ -63,7 +64,7 @@ describe('RuleActionPanel', () => {
               },
             },
             {
-              actions: [ACTION.SKIP_MODEL_UPDATE],
+              actions: [ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE],
               scope: {
                 airline: {
                   filter_id: 'eu-airlines',

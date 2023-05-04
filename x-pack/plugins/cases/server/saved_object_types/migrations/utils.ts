@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogMeta, SavedObjectMigrationContext } from '../../../../../../src/core/server';
+import type {
+  LogMeta,
+  SavedObjectMigrationContext,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core/server';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {
@@ -38,4 +42,11 @@ export function logError({
       },
     }
   );
+}
+
+type CaseMigration<T> = (doc: SavedObjectUnsanitizedDoc<T>) => SavedObjectUnsanitizedDoc<T>;
+
+export function pipeMigrations<T>(...migrations: Array<CaseMigration<T>>): CaseMigration<T> {
+  return (doc: SavedObjectUnsanitizedDoc<T>) =>
+    migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }

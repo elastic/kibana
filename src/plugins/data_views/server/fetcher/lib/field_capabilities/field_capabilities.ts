@@ -8,7 +8,7 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
@@ -19,8 +19,9 @@ interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
   indices: string | string[];
   metaFields: string[];
-  fieldCapsOptions?: { allow_no_indices: boolean };
-  filter?: QueryDslQueryContainer;
+  fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
+  indexFilter?: QueryDslQueryContainer;
+  fields?: string[];
 }
 
 /**
@@ -31,17 +32,31 @@ interface FieldCapabilitiesParams {
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
  *  @param  {Object} fieldCapsOptions
- *  @return {Promise<Array<FieldDescriptor>>}
+ *  @return {Promise<{ fields: Array<FieldDescriptor>, indices: Array<string>>}>}
  */
 export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
-  const { callCluster, indices = [], fieldCapsOptions, filter, metaFields = [] } = params;
-  const esFieldCaps = await callFieldCapsApi({ callCluster, indices, fieldCapsOptions, filter });
-  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
+  const {
+    callCluster,
+    indices = [],
+    fieldCapsOptions,
+    indexFilter,
+    metaFields = [],
+    fields,
+  } = params;
+  const esFieldCaps = await callFieldCapsApi({
+    callCluster,
+    indices,
+    fieldCapsOptions,
+    indexFilter,
+    fields,
+  });
+  const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
+  const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     // not all meta fields are provided, so remove and manually add
     .filter((name) => !fieldsFromFieldCapsByName[name].metadata_field)
-    .concat(metaFields)
+    .concat(fieldCapsArr.length ? metaFields : [])
     .reduce<{ names: string[]; map: Map<string, string> }>(
       (agg, value) => {
         // This is intentionally using a Map to be highly optimized with very large indexes AND be safe for user provided data
@@ -67,5 +82,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     )
     .map(mergeOverrides);
 
-  return sortBy(allFieldsUnsorted, 'name');
+  return {
+    fields: sortBy(allFieldsUnsorted, 'name'),
+    indices: esFieldCaps.body.indices as string[],
+  };
 }

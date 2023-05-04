@@ -24,8 +24,6 @@ export const timelineIntegrationMock = {
     useInsertTimeline: jest.fn(),
   },
   ui: {
-    renderInvestigateInTimelineActionComponent: () =>
-      mockTimelineComponent('investigate-in-timeline'),
     renderTimelineDetailsPanel: () => mockTimelineComponent('timeline-details-panel'),
   },
 };

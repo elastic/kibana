@@ -7,12 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SPACES } from '../../common/lib/spaces';
-import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   resolveImportErrorsTestSuiteFactory,
+  resolveImportErrorsTestCaseFailures,
   TEST_CASES as CASES,
+  SPECIAL_TEST_CASES,
   ResolveImportErrorsTestDefinition,
 } from '../../common/suites/resolve_import_errors';
 
@@ -21,7 +23,7 @@ const {
   SPACE_1: { spaceId: SPACE_1_ID },
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
-const { fail400, fail409 } = testCaseFailures;
+const { failUnsupportedType, failConflict } = resolveImportErrorsTestCaseFailures;
 const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
 const newCopy = () => ({ successParam: 'createNewCopy' });
@@ -29,13 +31,16 @@ const newCopy = () => ({ successParam: 'createNewCopy' });
 const createNewCopiesTestCases = () => {
   // for each outcome, if failure !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
-  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
-  const importable = cases.map(([, val]) => ({
-    ...val,
-    successParam: 'createNewCopies',
-    expectedNewId: uuidv4(),
-  }));
-  const nonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const importable = Object.values(CASES).map((testCase) => {
+    const newId = uuidv4();
+    return {
+      ...testCase,
+      successParam: 'createNewCopies',
+      destinationId: newId,
+      expectedNewId: newId,
+    };
+  });
+  const nonImportable = [{ ...SPECIAL_TEST_CASES.HIDDEN, ...failUnsupportedType() }]; // unsupported_type is an "unresolvable" error
   const all = [...importable, ...nonImportable];
   return { importable, nonImportable, all };
 };
@@ -50,36 +55,36 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ? CASES.SINGLE_NAMESPACE_SPACE_1
       : CASES.SINGLE_NAMESPACE_SPACE_2;
   const group1Importable = [
-    { ...singleNamespaceObject, ...fail409(!overwrite) },
-    { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
+    { ...singleNamespaceObject, ...failConflict(!overwrite) },
+    { ...CASES.NAMESPACE_AGNOSTIC, ...failConflict(!overwrite) },
   ];
-  const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const group1NonImportable = [{ ...SPECIAL_TEST_CASES.HIDDEN, ...failUnsupportedType() }];
   const group1All = [...group1Importable, ...group1NonImportable];
   const group2 = [
-    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...failConflict(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
-      ...fail409(!overwrite && (spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID)),
+      ...failConflict(!overwrite && (spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID)),
       ...destinationId(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
     },
     {
       ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
-      ...fail409(!overwrite && spaceId === SPACE_1_ID),
+      ...failConflict(!overwrite && spaceId === SPACE_1_ID),
       ...destinationId(spaceId !== SPACE_1_ID),
     },
     {
       ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
-      ...fail409(!overwrite && spaceId === SPACE_2_ID),
+      ...failConflict(!overwrite && spaceId === SPACE_2_ID),
       ...destinationId(spaceId !== SPACE_2_ID),
     },
     {
       ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
-      ...fail409(!overwrite && spaceId === DEFAULT_SPACE_ID),
+      ...failConflict(!overwrite && spaceId === DEFAULT_SPACE_ID),
       ...destinationId(spaceId !== DEFAULT_SPACE_ID),
     },
     {
       ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
-      ...fail409(!overwrite && spaceId === SPACE_1_ID),
+      ...failConflict(!overwrite && spaceId === SPACE_1_ID),
       ...destinationId(spaceId !== SPACE_1_ID),
     },
     { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
@@ -87,11 +92,26 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
     // if we call _resolve_import_errors and don't specify overwrite, each of these will result in a conflict because an object with that
     // `expectedDestinationId` already exists
-    { ...CASES.CONFLICT_2C_OBJ, ...fail409(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
-    { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
-    { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
+    { ...CASES.CONFLICT_2C_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_2D_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
+    { ...CASES.CONFLICT_3A_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
-  return { group1Importable, group1NonImportable, group1All, group2 };
+  const refOrigins = [
+    // These are in a separate group because they will result in a different 403 error for users who are unauthorized to read
+    {
+      ...SPECIAL_TEST_CASES.OUTBOUND_MISSING_REFERENCE_CONFLICT_1_OBJ,
+      ...failConflict(!overwrite),
+    },
+    {
+      ...SPECIAL_TEST_CASES.OUTBOUND_MISSING_REFERENCE_CONFLICT_2_OBJ,
+      ...failConflict(!overwrite),
+      ...destinationId(),
+    },
+    { ...SPECIAL_TEST_CASES.OUTBOUND_REFERENCE_ORIGIN_MATCH_1_OBJ },
+    { ...SPECIAL_TEST_CASES.OUTBOUND_REFERENCE_ORIGIN_MATCH_2_OBJ },
+  ];
+  return { group1Importable, group1NonImportable, group1All, group2, refOrigins };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -107,45 +127,62 @@ export default function ({ getService }: FtrProviderContext) {
 
     if (createNewCopies) {
       const { importable, nonImportable, all } = createNewCopiesTestCases();
+      const unauthorizedCommonTestDefinitions = [
+        createTestDefinitions(importable, true, { createNewCopies, spaceId }),
+        createTestDefinitions(nonImportable, false, { createNewCopies, spaceId, singleRequest }),
+        createTestDefinitions(all, true, {
+          createNewCopies,
+          spaceId,
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden('bulk_create', [
+            'globaltype',
+            'isolatedtype',
+            'sharedtype',
+            'sharecapabletype',
+          ]),
+        }),
+      ];
       return {
-        unauthorized: [
-          createTestDefinitions(importable, true, { createNewCopies, spaceId }),
-          createTestDefinitions(nonImportable, false, { createNewCopies, spaceId, singleRequest }),
-          createTestDefinitions(all, true, {
-            createNewCopies,
-            spaceId,
-            singleRequest,
-            responseBodyOverride: expectSavedObjectForbidden([
-              'globaltype',
-              'isolatedtype',
-              'sharedtype',
-              'sharecapabletype',
-            ]),
-          }),
-        ].flat(),
+        unauthorizedRead: unauthorizedCommonTestDefinitions.flat(),
+        unauthorizedWrite: unauthorizedCommonTestDefinitions.flat(),
         authorized: createTestDefinitions(all, false, { createNewCopies, spaceId, singleRequest }),
       };
     }
 
-    const { group1Importable, group1NonImportable, group1All, group2 } = createTestCases(
-      overwrite,
-      spaceId
-    );
+    const { group1Importable, group1NonImportable, group1All, group2, refOrigins } =
+      createTestCases(overwrite, spaceId);
+    const unauthorizedCommonTestDefinitions = [
+      createTestDefinitions(group1Importable, true, { overwrite, spaceId }),
+      createTestDefinitions(group1NonImportable, false, { overwrite, spaceId, singleRequest }),
+      createTestDefinitions(group1All, true, {
+        overwrite,
+        spaceId,
+        singleRequest,
+        responseBodyOverride: expectSavedObjectForbidden('bulk_create', [
+          'globaltype',
+          'isolatedtype',
+        ]),
+      }),
+      createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
+    ];
     return {
-      unauthorized: [
-        createTestDefinitions(group1Importable, true, { overwrite, spaceId }),
-        createTestDefinitions(group1NonImportable, false, { overwrite, spaceId, singleRequest }),
-        createTestDefinitions(group1All, true, {
+      unauthorizedRead: [
+        ...unauthorizedCommonTestDefinitions,
+        createTestDefinitions(refOrigins, true, {
           overwrite,
           spaceId,
           singleRequest,
-          responseBodyOverride: expectSavedObjectForbidden(['globaltype', 'isolatedtype']),
+          responseBodyOverride: expectSavedObjectForbidden('bulk_get', ['index-pattern']),
         }),
-        createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
+      ].flat(),
+      unauthorizedWrite: [
+        ...unauthorizedCommonTestDefinitions,
+        createTestDefinitions(refOrigins, true, { overwrite, spaceId, singleRequest }),
       ].flat(),
       authorized: [
         createTestDefinitions(group1All, false, { overwrite, spaceId, singleRequest }),
         createTestDefinitions(group2, false, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(refOrigins, false, { overwrite, spaceId, singleRequest }),
       ].flat(),
     };
   };
@@ -164,20 +201,20 @@ export default function ({ getService }: FtrProviderContext) {
           ? ' with createNewCopies enabled'
           : ''
       }`;
-      const { unauthorized, authorized } = createTests(overwrite, createNewCopies, spaceId);
+      const { unauthorizedRead, unauthorizedWrite, authorized } = createTests(
+        overwrite,
+        createNewCopies,
+        spaceId
+      );
       const _addTests = (user: TestUser, tests: ResolveImportErrorsTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 
-      [
-        users.noAccess,
-        users.legacyAll,
-        users.dualRead,
-        users.readGlobally,
-        users.readAtSpace,
-        users.allAtOtherSpace,
-      ].forEach((user) => {
-        _addTests(user, unauthorized);
+      [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach((user) => {
+        _addTests(user, unauthorizedRead);
+      });
+      [users.dualRead, users.readGlobally, users.readAtSpace].forEach((user) => {
+        _addTests(user, unauthorizedWrite);
       });
       [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
         _addTests(user, authorized);

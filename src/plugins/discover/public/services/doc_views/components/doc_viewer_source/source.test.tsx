@@ -7,29 +7,24 @@
  */
 
 import React from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
-import { mountWithIntl } from '@kbn/test/jest';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DocViewerSource } from './source';
-import * as hooks from '../../../../utils/use_es_doc_search';
-import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import * as hooks from '../../../../hooks/use_es_doc_search';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
-jest.mock('../../../../kibana_services', () => ({
-  getServices: jest.fn(),
-}));
-
-import { getServices } from '../../../../kibana_services';
-
-const mockIndexPattern = {
+const mockDataView = {
   getComputedFields: () => [],
 } as never;
-const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
-const mockIndexPatternService = {
+const getMock = jest.fn(() => Promise.resolve(mockDataView));
+const mockDataViewService = {
   get: getMock,
-} as unknown as IndexPattern;
-
-(getServices as jest.Mock).mockImplementation(() => ({
+} as unknown as DataView;
+const services = {
   uiSettings: {
     get: (key: string) => {
       if (key === 'discover:useNewFieldsApi') {
@@ -38,23 +33,25 @@ const mockIndexPatternService = {
     },
   },
   data: {
-    indexPatternService: mockIndexPatternService,
+    dataViewService: mockDataViewService,
   },
-}));
+};
+
 describe('Source Viewer component', () => {
   test('renders loading state', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
 
     const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        indexPattern={mockIndexPattern}
-        width={123}
-        hasLineNumbers={true}
-      />
+      <KibanaContextProvider services={services}>
+        <DocViewerSource
+          id={'1'}
+          index={'index1'}
+          dataView={mockDataView}
+          width={123}
+          hasLineNumbers={true}
+        />
+      </KibanaContextProvider>
     );
-    expect(comp).toMatchSnapshot();
     const loadingIndicator = comp.find(EuiLoadingSpinner);
     expect(loadingIndicator).not.toBe(null);
   });
@@ -63,15 +60,16 @@ describe('Source Viewer component', () => {
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
 
     const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        indexPattern={mockIndexPattern}
-        width={123}
-        hasLineNumbers={true}
-      />
+      <KibanaContextProvider services={services}>
+        <DocViewerSource
+          id={'1'}
+          index={'index1'}
+          dataView={mockDataView}
+          width={123}
+          hasLineNumbers={true}
+        />
+      </KibanaContextProvider>
     );
-    expect(comp).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
     const refreshButton = comp.find(EuiButton);
@@ -79,9 +77,8 @@ describe('Source Viewer component', () => {
   });
 
   test('renders json code editor', () => {
-    const mockHit = {
+    const mockHit = buildDataTableRecord({
       _index: 'logstash-2014.09.09',
-      _type: 'doc',
       _id: 'id123',
       _score: 1,
       _source: {
@@ -96,21 +93,22 @@ describe('Source Viewer component', () => {
         scripted: 123,
         _underscore: 123,
       },
-    } as never;
+    });
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
     jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
       return false;
     });
     const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        indexPattern={mockIndexPattern}
-        width={123}
-        hasLineNumbers={true}
-      />
+      <KibanaContextProvider services={services}>
+        <DocViewerSource
+          id={'1'}
+          index={'index1'}
+          dataView={mockDataView}
+          width={123}
+          hasLineNumbers={true}
+        />
+      </KibanaContextProvider>
     );
-    expect(comp).toMatchSnapshot();
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
   });

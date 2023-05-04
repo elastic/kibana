@@ -7,9 +7,10 @@
 
 import { ActionType } from '../types';
 import { Subject } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import { LicenseState, ILicenseState } from './license_state';
-import { licensingMock } from '../../../licensing/server/mocks';
-import { ILicense } from '../../../licensing/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { ILicense } from '@kbn/licensing-plugin/server';
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();
@@ -61,6 +62,12 @@ describe('isLicenseValidForActionType', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -156,6 +163,12 @@ describe('ensureLicenseForActionType()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },

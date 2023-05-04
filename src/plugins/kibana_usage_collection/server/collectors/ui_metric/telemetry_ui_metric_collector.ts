@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  ISavedObjectsRepository,
-  SavedObjectAttributes,
-  SavedObjectsServiceSetup,
-} from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ISavedObjectsRepository, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { uiMetricSchema } from './schema';
 
-interface UIMetricsSavedObjects extends SavedObjectAttributes {
+interface UIMetricsSavedObjects {
   count: number;
 }
 
@@ -52,26 +48,28 @@ export function registerUiMetricUsageCollector(
         return;
       }
 
-      const { saved_objects: rawUiMetrics } = await savedObjectsClient.find<UIMetricsSavedObjects>({
+      const finder = savedObjectsClient.createPointInTimeFinder<UIMetricsSavedObjects>({
         type: 'ui-metric',
         fields: ['count'],
-        perPage: 10000,
+        perPage: 1000,
       });
 
-      const uiMetricsByAppName = rawUiMetrics.reduce((accum, rawUiMetric) => {
-        const {
-          id,
-          attributes: { count },
-        } = rawUiMetric;
+      const uiMetricsByAppName: UIMetricUsage = {};
 
-        const [appName, ...metricType] = id.split(':');
+      for await (const { saved_objects: rawUiMetrics } of finder.find()) {
+        rawUiMetrics.forEach((rawUiMetric) => {
+          const {
+            id,
+            attributes: { count },
+          } = rawUiMetric;
 
-        const pair = { key: metricType.join(':'), value: count };
-        return {
-          ...accum,
-          [appName]: [...(accum[appName] || []), pair],
-        };
-      }, {} as UIMetricUsage);
+          const [appName, ...metricType] = id.split(':');
+
+          const pair = { key: metricType.join(':'), value: count };
+
+          uiMetricsByAppName[appName] = [...(uiMetricsByAppName[appName] || []), pair];
+        });
+      }
 
       return uiMetricsByAppName;
     },

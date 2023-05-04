@@ -12,7 +12,7 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { ILicense, LicenseType, LicenseCheckState, LicensingPluginStart } from './shared_imports';
 

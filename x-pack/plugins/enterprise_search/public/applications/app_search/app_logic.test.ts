@@ -21,6 +21,21 @@ describe('AppLogic', () => {
     jest.clearAllMocks();
   });
 
+  const DEFAULT_VALUES = {
+    configuredLimits: {
+      engine: {
+        maxDocumentByteSize: 102400,
+        maxEnginesPerMetaEngine: 15,
+      },
+    },
+    account: {
+      accountId: 'some-id-string',
+      onboardingComplete: true,
+      role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
+    },
+    myRole: {},
+  };
+
   it('sets values from props', () => {
     mount({}, DEFAULT_INITIAL_APP_DATA);
 
@@ -54,7 +69,12 @@ describe('AppLogic', () => {
         mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: { onboardingComplete: false } });
 
         AppLogic.actions.setOnboardingComplete();
-        expect(AppLogic.values.account.onboardingComplete).toEqual(true);
+        expect(AppLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          account: {
+            onboardingComplete: true,
+          },
+        });
       });
     });
   });
@@ -64,7 +84,11 @@ describe('AppLogic', () => {
       it('falls back to an empty object if role is missing', () => {
         mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: {} });
 
-        expect(AppLogic.values.myRole).toEqual({});
+        expect(AppLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          account: {},
+          myRole: {},
+        });
       });
     });
   });

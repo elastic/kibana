@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPageContent, PropsOf } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  PropsOf,
+} from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import {
   MockIndexPatternsKibanaContextProvider,
   MockIndexPatternSpec,

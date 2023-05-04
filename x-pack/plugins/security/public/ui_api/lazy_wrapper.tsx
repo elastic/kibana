@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
 import React, { lazy, useMemo } from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 

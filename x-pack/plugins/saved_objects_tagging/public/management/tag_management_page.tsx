@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';

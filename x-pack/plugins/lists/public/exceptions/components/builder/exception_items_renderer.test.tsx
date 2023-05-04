@@ -8,11 +8,11 @@
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';
@@ -20,7 +20,7 @@ import { getEmptyValue } from '../../../common/empty_value';
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;
@@ -154,7 +154,7 @@ describe('ExceptionBuilderComponent', () => {
     ).toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
   });
 
-  test('it does not display "is in list" operators if "allowLargeValueLists" is false', async () => {
+  test('it still displays "is in list" operators if "allowLargeValueLists" is false', async () => {
     wrapper = mount(
       <EuiThemeProvider>
         <ExceptionBuilderComponent
@@ -188,7 +188,7 @@ describe('ExceptionBuilderComponent', () => {
 
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).prop('options')
-    ).not.toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
+    ).toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
   });
 
   test('it displays "or", "and" and "add nested button" enabled', () => {

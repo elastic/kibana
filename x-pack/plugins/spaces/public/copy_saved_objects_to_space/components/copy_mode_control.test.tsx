@@ -8,7 +8,7 @@
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import type { CopyModeControlProps } from './copy_mode_control';
 import { CopyModeControl } from './copy_mode_control';

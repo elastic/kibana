@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist } from './lib';
 
@@ -25,7 +25,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { body: bodySchema, params: paramsSchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params as typeof paramsSchema.type;
       const template = request.body as TemplateDeserialized;
 
@@ -35,14 +35,14 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
         } = template;
 
         // Verify the template exists (ES will throw 404 if not)
-        const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
+        const templateExists = await doesTemplateExist({ name, client, isLegacy });
 
         if (!templateExists) {
           return response.notFound();
         }
 
         // Next, update index template
-        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
+        const responseBody = await saveTemplate({ template, client, isLegacy });
 
         return response.ok({ body: responseBody });
       } catch (error) {

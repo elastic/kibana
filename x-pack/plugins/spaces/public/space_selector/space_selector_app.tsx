@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
 import type { SpacesManager } from '../spaces_manager';
 
@@ -37,6 +37,7 @@ export const spaceSelectorApp = Object.freeze({
           {
             spacesManager,
             serverBasePath: coreStart.http.basePath.serverBasePath,
+            customBranding$: coreStart.customBranding.customBranding$,
           }
         );
       },

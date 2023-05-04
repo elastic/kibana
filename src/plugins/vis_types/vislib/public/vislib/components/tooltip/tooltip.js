@@ -12,7 +12,7 @@ import $ from 'jquery';
 
 import { Binder } from '../../lib/binder';
 import { positionTooltip } from './position_tooltip';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 let allContents = [];
 

@@ -14,6 +14,30 @@ export const modelIdSchema = schema.object({
   modelId: schema.string(),
 });
 
+export const modelAndDeploymentIdSchema = schema.object({
+  /**
+   * Model ID
+   */
+  modelId: schema.string(),
+  /**
+   * Deployment ID
+   */
+  deploymentId: schema.string(),
+});
+
+export const threadingParamsSchema = schema.maybe(
+  schema.object({
+    number_of_allocations: schema.number(),
+    threads_per_allocation: schema.number(),
+    priority: schema.oneOf([schema.literal('low'), schema.literal('normal')]),
+    deployment_id: schema.maybe(schema.string()),
+  })
+);
+
+export const updateDeploymentParamsSchema = schema.object({
+  number_of_allocations: schema.number(),
+});
+
 export const optionalModelIdSchema = schema.object({
   /**
    * Model ID
@@ -25,4 +49,26 @@ export const getInferenceQuerySchema = schema.object({
   size: schema.maybe(schema.string()),
   with_pipelines: schema.maybe(schema.string()),
   include: schema.maybe(schema.string()),
+});
+
+export const putTrainedModelQuerySchema = schema.object({
+  defer_definition_decompression: schema.maybe(schema.boolean()),
+});
+
+export const inferTrainedModelQuery = schema.object({ timeout: schema.maybe(schema.string()) });
+export const inferTrainedModelBody = schema.object({
+  docs: schema.any(),
+  inference_config: schema.maybe(schema.any()),
+});
+
+export const pipelineSimulateBody = schema.object({
+  pipeline: schema.any(),
+  docs: schema.arrayOf(schema.any()),
+});
+export const pipelineDocs = schema.arrayOf(schema.string());
+
+export const stopDeploymentSchema = schema.object({
+  modelId: schema.string(),
+  /** force stop */
+  force: schema.maybe(schema.boolean()),
 });

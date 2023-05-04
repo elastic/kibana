@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { MlPluginSetup } from '../../../../ml/server';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
+import { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 import { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -23,11 +24,11 @@ function catch404(e: any) {
 }
 
 export function getMlJobsWithAPMGroup(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>
+  anomalyDetectors: MlAnomalyDetectors
 ): Promise<ApmMlJob[]> {
   return withApmSpan('get_ml_jobs_with_apm_group', async () => {
     try {
-      const [jobs, allJobStats, allDatafeedStats] = await Promise.all([
+      const [jobs, jobStats, datafeedStats] = await Promise.all([
         anomalyDetectors
           .jobs(APM_ML_JOB_GROUP)
           .then((response) => response.jobs),
@@ -41,24 +42,27 @@ export function getMlJobsWithAPMGroup(
           .catch(catch404),
       ]);
 
+      const datafeedStateMap = Object.fromEntries(
+        datafeedStats.map((d) => [d.datafeed_id, d.state as DATAFEED_STATE])
+      );
+
+      const jobStateMap = Object.fromEntries(
+        jobStats.map((j) => [j.job_id, j.state as JOB_STATE])
+      );
+
       return jobs.map((job): ApmMlJob => {
-        const jobStats = allJobStats.find(
-          (stats) => stats.job_id === job.job_id
-        );
-
-        const datafeedStats = allDatafeedStats.find(
-          (stats) => stats.datafeed_id === job.datafeed_config?.datafeed_id
-        );
-
+        const jobId = job.job_id;
+        const datafeedId = job.datafeed_config?.datafeed_id;
         return {
+          jobId,
+          jobState: jobStateMap[jobId],
+          datafeedId,
+          datafeedState: datafeedId ? datafeedStateMap[datafeedId] : undefined,
+          version: Number(job?.custom_settings?.job_tags?.apm_ml_version ?? 1),
           environment: String(
-            job.custom_settings?.job_tags?.environment
+            job?.custom_settings?.job_tags?.environment
           ) as Environment,
-          jobId: job.job_id,
-          jobState: jobStats?.state as ApmMlJob['jobState'],
-          version: Number(job.custom_settings?.job_tags?.apm_ml_version ?? 1),
-          datafeedId: datafeedStats?.datafeed_id,
-          datafeedState: datafeedStats?.state as ApmMlJob['datafeedState'],
+          bucketSpan: job?.analysis_config.bucket_span as string,
         };
       });
     } catch (e) {

@@ -54,6 +54,21 @@ export const i18nTexts = {
     readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
       defaultMessage: 'Make index read only',
     }),
+    downsampleEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.downsampleFieldLabel', {
+      defaultMessage: 'Enable downsampling',
+    }),
+    downsampleIntervalFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.downsampleIntervalFieldLabel',
+      {
+        defaultMessage: 'Downsampling interval',
+      }
+    ),
+    downsampleIntervalFieldUnitsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.downsampleIntervalFieldUnitsLabel',
+      {
+        defaultMessage: 'Downsampling interval units',
+      }
+    ),
     maxNumSegmentsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',
       {
@@ -107,6 +122,12 @@ export const i18nTexts = {
         defaultMessage: 'Maximum primary shard size',
       }
     ),
+    maxPrimaryShardDocsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardDocsLabel',
+      {
+        defaultMessage: 'Maximum docs in the primary shard',
+      }
+    ),
     maxPrimaryShardSizeUnitsLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
       {
@@ -154,6 +175,12 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardSizeMissingError',
         {
           defaultMessage: 'A maximum primary shard size is required',
+        }
+      ),
+      maximumPrimaryShardDocsRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardDocsMissingError',
+        {
+          defaultMessage: 'Maximum documents in the primary shard is required',
         }
       ),
       rollOverConfigurationCallout: {

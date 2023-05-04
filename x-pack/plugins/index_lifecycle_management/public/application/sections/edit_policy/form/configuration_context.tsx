@@ -10,7 +10,11 @@ import React, { FunctionComponent, createContext, useContext } from 'react';
 
 import { useFormData } from '../../../../shared_imports';
 
-import { isUsingDefaultRolloverPath, isUsingCustomRolloverPath } from '../constants';
+import {
+  isUsingDefaultRolloverPath,
+  isUsingCustomRolloverPath,
+  isUsingDownsamplePath,
+} from '../constants';
 
 export interface Configuration {
   /**
@@ -26,6 +30,14 @@ export interface Configuration {
    */
   isUsingSearchableSnapshotInHotPhase: boolean;
   isUsingSearchableSnapshotInColdPhase: boolean;
+
+  /**
+   * When downsample enabled it implicitly makes index readonly,
+   * We should hide readonly action if downsample is enabled
+   */
+  isUsingDownsampleInHotPhase: boolean;
+  isUsingDownsampleInWarmPhase: boolean;
+  isUsingDownsampleInColdPhase: boolean;
 }
 
 const ConfigurationContext = createContext<Configuration>(null as any);
@@ -43,6 +55,9 @@ export const ConfigurationProvider: FunctionComponent = ({ children }) => {
       pathToColdPhaseSearchableSnapshot,
       isUsingCustomRolloverPath,
       isUsingDefaultRolloverPath,
+      isUsingDownsamplePath('hot'),
+      isUsingDownsamplePath('warm'),
+      isUsingDownsamplePath('cold'),
     ],
   });
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
@@ -53,6 +68,9 @@ export const ConfigurationProvider: FunctionComponent = ({ children }) => {
     isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
     isUsingSearchableSnapshotInHotPhase: get(formData, pathToHotPhaseSearchableSnapshot) != null,
     isUsingSearchableSnapshotInColdPhase: get(formData, pathToColdPhaseSearchableSnapshot) != null,
+    isUsingDownsampleInHotPhase: !!get(formData, isUsingDownsamplePath('hot')),
+    isUsingDownsampleInWarmPhase: !!get(formData, isUsingDownsamplePath('warm')),
+    isUsingDownsampleInColdPhase: !!get(formData, isUsingDownsamplePath('cold')),
   };
 
   return <ConfigurationContext.Provider value={context}>{children}</ConfigurationContext.Provider>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 import type { PackagePolicy } from '../../../../common';
 
@@ -27,7 +27,6 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         policy_id: '',
         enabled: true,
         namespace: '',
-        output_id: '',
         revision: 0,
         updated_at: '',
         updated_by: '',
@@ -66,7 +65,6 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         policy_id: '',
         enabled: true,
         namespace: '',
-        output_id: '',
         revision: 0,
         updated_at: '',
         updated_by: '',
@@ -122,7 +120,6 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         policy_id: '',
         enabled: true,
         namespace: '',
-        output_id: '',
         revision: 0,
         updated_at: '',
         updated_by: '',
@@ -154,7 +151,6 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         policy_id: '',
         enabled: true,
         namespace: '',
-        output_id: '',
         revision: 0,
         updated_at: '',
         updated_by: '',

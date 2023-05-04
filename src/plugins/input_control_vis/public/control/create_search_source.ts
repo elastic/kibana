@@ -9,15 +9,16 @@
 import { Filter } from '@kbn/es-query';
 import {
   SerializedSearchSourceFields,
-  IndexPattern,
   TimefilterContract,
   DataPublicPluginStart,
-} from 'src/plugins/data/public';
+} from '@kbn/data-plugin/public';
+
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export async function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],
   initialState: SerializedSearchSourceFields | null,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   aggs: any,
   useTimeFilter: boolean,
   filters: Filter[] = [],

@@ -12,7 +12,7 @@ import {
   LazyExpressionInput,
   ExpressionInputProps,
   withSuspense,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 
 interface Props extends Omit<ExpressionInputProps, 'height'> {
   /** Optional string for displaying error messages */
@@ -23,7 +23,7 @@ const Input = withSuspense(LazyExpressionInput);
 
 export const ExpressionInput = ({ error, ...rest }: Props) => {
   return (
-    <div className="canvasExpressionInput">
+    <div className="canvasExpressionInput" data-test-subj="canvasExpressionInput">
       <EuiFormRow
         className="canvasExpressionInput__inner"
         fullWidth

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana as _useKibana, CodeEditor } from '../../../../src/plugins/kibana_react/public';
+import { useKibana as _useKibana, CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { AppServices } from './application';
 
 export { CodeEditor };
@@ -16,7 +16,7 @@ export type {
   SendRequestResponse,
   UseRequestConfig,
   OnJsonEditorUpdateHandler,
-} from '../../../../src/plugins/es_ui_shared/public/';
+} from '@kbn/es-ui-shared-plugin/public';
 
 export {
   AuthorizationProvider,
@@ -30,7 +30,8 @@ export {
   XJson,
   JsonEditor,
   attemptToURIDecode,
-} from '../../../../src/plugins/es_ui_shared/public/';
+  ViewApiRequestFlyout,
+} from '@kbn/es-ui-shared-plugin/public';
 
 export type {
   FormSchema,
@@ -46,7 +47,7 @@ export type {
   ValidationConfig,
   FormOptions,
   SerializerFunc,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   FIELD_TYPES,
@@ -60,12 +61,9 @@ export {
   FormDataProvider,
   getFieldValidityAndErrorMessage,
   useFormData,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-export {
-  fieldFormatters,
-  fieldValidators,
-} from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
+export { fieldFormatters, fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   getFormRow,
@@ -79,16 +77,14 @@ export {
   SelectField,
   CheckBoxField,
   TextField,
-} from '../../../../src/plugins/es_ui_shared/static/forms/components';
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export {
-  isJSON,
-  isEmptyString,
-} from '../../../../src/plugins/es_ui_shared/static/validators/string';
+export { isJSON, isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
 export {
   KibanaContextProvider,
   KibanaThemeProvider,
-} from '../../../../src/plugins/kibana_react/public';
+  useExecutionContext,
+} from '@kbn/kibana-react-plugin/public';
 
 export const useKibana = () => _useKibana<AppServices>();

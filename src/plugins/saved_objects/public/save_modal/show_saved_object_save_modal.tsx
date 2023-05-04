@@ -9,7 +9,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nStart } from '../../../../core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { getI18n, getTheme } from '../kibana_services';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -31,13 +32,13 @@ interface MinimalSaveModalProps {
 
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
-  I18nContext: I18nStart['Context'],
   Wrapper?: React.FC
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    saveModal.props.onClose?.();
   };
 
   const onSave = saveModal.props.onSave;
@@ -56,13 +57,11 @@ export function showSaveModal(
     onClose: closeModal,
   });
 
-  const wrappedElement = Wrapper ? (
-    <I18nContext>
-      <Wrapper>{element}</Wrapper>
-    </I18nContext>
-  ) : (
-    <I18nContext>{element}</I18nContext>
+  const I18nContext = getI18n().Context;
+  ReactDOM.render(
+    <KibanaThemeProvider theme$={getTheme().theme$}>
+      <I18nContext>{Wrapper ? <Wrapper>{element}</Wrapper> : element}</I18nContext>
+    </KibanaThemeProvider>,
+    container
   );
-
-  ReactDOM.render(wrappedElement, container);
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceStart } from 'kibana/public';
-import { createGetterSetter } from '../../kibana_utils/common';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('ThemeService');

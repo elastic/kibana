@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 

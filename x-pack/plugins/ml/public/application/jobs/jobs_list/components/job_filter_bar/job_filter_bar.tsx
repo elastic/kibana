@@ -37,7 +37,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
   const loadGroups = useCallback(async () => {
     try {
       const response = await mlApiServices.jobs.groups();
-      return response.map((g: any) => ({
+      return response.map((g) => ({
         value: g.id,
         view: (
           <div className="group-item">
@@ -56,6 +56,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
     } catch (e) {
       return [];
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const queryInstance: Query = useMemo(() => {
@@ -72,7 +73,10 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
   };
 
   useEffect(() => {
-    setFilters(queryInstance);
+    if (queryText !== undefined) {
+      setFilters(queryInstance);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryText]);
 
   const filters: SearchFilterConfig[] = useMemo(
@@ -130,6 +134,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
         options: () => loadGroups(),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -150,7 +155,6 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
           query={queryInstance}
           filters={filters}
           onChange={onChange}
-          className="mlJobFilterBar"
         />
         <EuiFormRow fullWidth isInvalid={error !== null} error={errorText} style={{ maxHeight: 0 }}>
           <Fragment />

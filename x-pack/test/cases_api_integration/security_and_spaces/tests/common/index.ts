@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
     loadTestFile(require.resolve('./client/update_alert_status'));
     loadTestFile(require.resolve('./comments/delete_comment'));
+    loadTestFile(require.resolve('./comments/delete_comments'));
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/get_all_comments'));
@@ -30,16 +31,34 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/status/get_status'));
     loadTestFile(require.resolve('./cases/tags/get_tags'));
     loadTestFile(require.resolve('./user_actions/get_all_user_actions'));
+    loadTestFile(require.resolve('./user_actions/find_user_actions'));
+    loadTestFile(require.resolve('./user_actions/get_user_action_stats'));
     loadTestFile(require.resolve('./configure/get_configure'));
-    loadTestFile(require.resolve('./configure/get_connectors'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
-    loadTestFile(require.resolve('./connectors/case'));
-    loadTestFile(require.resolve('./sub_cases/patch_sub_cases'));
-    loadTestFile(require.resolve('./sub_cases/delete_sub_cases'));
-    loadTestFile(require.resolve('./sub_cases/get_sub_case'));
-    loadTestFile(require.resolve('./sub_cases/find_sub_cases'));
     loadTestFile(require.resolve('./metrics/get_case_metrics'));
+    loadTestFile(require.resolve('./metrics/get_case_metrics_alerts'));
+    loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
+    loadTestFile(require.resolve('./metrics/get_case_metrics_connectors'));
+    loadTestFile(require.resolve('./metrics/get_cases_metrics'));
+
+    /**
+     * Internal routes
+     */
+
+    loadTestFile(require.resolve('./internal/bulk_create_attachments'));
+    loadTestFile(require.resolve('./internal/bulk_get_cases'));
+    loadTestFile(require.resolve('./internal/bulk_get_attachments'));
+    loadTestFile(require.resolve('./internal/get_connectors'));
+    loadTestFile(require.resolve('./internal/user_actions_get_users'));
+    loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
+
+    /**
+     * Attachments framework
+     */
+
+    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
+    loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those

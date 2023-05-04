@@ -6,8 +6,8 @@
  */
 
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
-import { FetchedNodeData, NodeData } from '../types';
+import type { SafeResolverEvent } from '../../../common/endpoint/types';
+import type { FetchedNodeData, NodeData } from '../types';
 import { isTerminatedProcess } from './process_event';
 
 /**

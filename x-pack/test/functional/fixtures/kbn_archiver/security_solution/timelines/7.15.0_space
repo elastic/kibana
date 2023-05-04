@@ -1,0 +1,20 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "",
+    "title": ".kibana_7.15.0",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "id": "cf0a7895-d367-5eff-9d71-8d6b58b0b5d9",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "originId": "4f57d680-25f3-11ec-a981-b77847c6ef30",
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2021-10-05T15:45:48.019Z",
+  "version": "WzIyLDJd"
+}

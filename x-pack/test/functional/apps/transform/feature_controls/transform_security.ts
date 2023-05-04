@@ -9,26 +9,26 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const pageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-      await PageObjects.security.forceLogout();
-      await PageObjects.common.navigateToApp('home');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await pageObjects.security.forceLogout();
+      await pageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should not render the "Stack" section', async () => {
-        await PageObjects.common.navigateToApp('management');
+        await pageObjects.common.navigateToApp('management');
         const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
         expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
       });
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read with transform_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_read', 'transform_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'transform_user']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should render the "Data" section with Transform', async () => {
-        await PageObjects.common.navigateToApp('management');
+        await pageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
         expect(sections).to.have.length(1);
         expect(sections[0]).to.eql({

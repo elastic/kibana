@@ -10,15 +10,25 @@ import { get } from 'lodash';
 import { ElasticsearchMetric } from '../../../metrics';
 import { createQuery } from '../../../create_query';
 import { LegacyRequest, Bucket } from '../../../../types';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 export async function getNodeIds(
   req: LegacyRequest,
-  indexPattern: string,
   { clusterUuid }: { clusterUuid: string },
   size: number
 ) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
+
+  const dataset = 'node_stats';
+  const moduleType = 'elasticsearch';
+  const indexPattern = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
 
   const params = {
     index: indexPattern,
@@ -27,7 +37,9 @@ export async function getNodeIds(
     filter_path: ['aggregations.composite_data.buckets'],
     body: {
       query: createQuery({
-        type: 'node_stats',
+        type: dataset,
+        dsDataset: getElasticsearchDataset(dataset),
+        metricset: dataset,
         start,
         end,
         metric: ElasticsearchMetric.getMetricFields(),

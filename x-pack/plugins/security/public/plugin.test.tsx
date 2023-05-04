@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import { enforceOptions } from 'broadcast-channel';
 import { Observable } from 'rxjs';
 
-import type { CoreSetup } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import type { CoreSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { stubBroadcastChannel } from '@kbn/test-jest-helpers';
 
-import type { FeaturesPluginStart } from '../../features/public';
-import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
 
-describe('Security Plugin', () => {
-  beforeAll(() => {
-    enforceOptions({ type: 'simulate' });
-  });
-  afterAll(() => {
-    enforceOptions(null);
-  });
+stubBroadcastChannel();
 
+describe('Security Plugin', () => {
   describe('#setup', () => {
     it('should be able to setup if optional plugins are not available', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
@@ -92,25 +87,32 @@ describe('Security Plugin', () => {
 
       expect(
         plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-          data: {} as DataPublicPluginStart,
+          dataViews: {} as DataViewsPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
-      ).toEqual({
-        uiApi: {
-          components: {
-            getChangePassword: expect.any(Function),
-            getPersonalInfo: expect.any(Function),
+      ).toMatchInlineSnapshot(`
+        Object {
+          "authc": Object {
+            "areAPIKeysEnabled": [Function],
+            "getCurrentUser": [Function],
           },
-        },
-        authc: {
-          getCurrentUser: expect.any(Function),
-          areAPIKeysEnabled: expect.any(Function),
-        },
-        navControlService: {
-          getUserMenuLinks$: expect.any(Function),
-          addUserMenuLinks: expect.any(Function),
-        },
-      });
+          "navControlService": Object {
+            "addUserMenuLinks": [Function],
+            "getUserMenuLinks$": [Function],
+          },
+          "uiApi": Object {
+            "components": Object {
+              "getChangePassword": [Function],
+              "getPersonalInfo": [Function],
+            },
+          },
+          "userProfiles": Object {
+            "bulkGet": [Function],
+            "getCurrent": [Function],
+            "suggest": [Function],
+          },
+        }
+      `);
     });
 
     it('starts Management Service if `management` plugin is available', () => {
@@ -133,7 +135,7 @@ describe('Security Plugin', () => {
 
       const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
       plugin.start(coreStart, {
-        data: {} as DataPublicPluginStart,
+        dataViews: {} as DataViewsPublicPluginStart,
         features: {} as FeaturesPluginStart,
         management: managementStartMock,
       });
@@ -162,7 +164,7 @@ describe('Security Plugin', () => {
       );
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-        data: {} as DataPublicPluginStart,
+        dataViews: {} as DataViewsPublicPluginStart,
         features: {} as FeaturesPluginStart,
       });
 

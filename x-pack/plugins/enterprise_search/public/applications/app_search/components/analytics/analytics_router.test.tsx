@@ -9,11 +9,13 @@ import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsRouter } from './';
+import { Route } from '@kbn/shared-ux-router';
+
+import { AnalyticsRouter } from '.';
 
 describe('AnalyticsRouter', () => {
   // Detailed route testing is better done via E2E tests

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Alert, AlertTypeParams } from '../../../alerting/common';
+import type { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export type TransformHealthRuleParams = {
   includeTransforms?: string[];
@@ -14,11 +14,20 @@ export type TransformHealthRuleParams = {
     notStarted?: {
       enabled: boolean;
     } | null;
+    /**
+     * @deprecated replaced in favor of healthCheck in 8.8
+     */
+    errorMessages?: {
+      enabled: boolean;
+    } | null;
+    healthCheck?: {
+      enabled: boolean;
+    } | null;
   } | null;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type TransformHealthRuleTestsConfig = TransformHealthRuleParams['testsConfig'];
 
 export type TransformHealthTests = keyof Exclude<TransformHealthRuleTestsConfig, null | undefined>;
 
-export type TransformHealthAlertRule = Omit<Alert<TransformHealthRuleParams>, 'apiKey'>;
+export type TransformHealthAlertRule = Omit<Rule<TransformHealthRuleParams>, 'apiKey'>;

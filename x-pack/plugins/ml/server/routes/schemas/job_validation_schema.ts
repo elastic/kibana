@@ -65,6 +65,8 @@ export const validateDatafeedPreviewSchema = schema.object({
     ...anomalyDetectionJobSchema,
     datafeed_config: datafeedConfigSchema,
   }),
+  start: schema.maybe(schema.number()),
+  end: schema.maybe(schema.number()),
 });
 
 export const validateCardinalitySchema = schema.object({

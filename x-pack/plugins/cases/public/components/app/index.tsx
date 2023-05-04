@@ -5,9 +5,51 @@
  * 2.0.
  */
 
-import { CasesRoutes } from './routes';
-import { CasesRoutesProps } from './types';
+import React from 'react';
+
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+
+import { APP_OWNER } from '../../../common/constants';
+import { getCasesLazy } from '../../client/ui/get_cases';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { Wrapper } from '../wrappers';
+import type { CasesRoutesProps } from './types';
 
 export type CasesProps = CasesRoutesProps;
-// eslint-disable-next-line import/no-default-export
-export { CasesRoutes as default };
+
+interface CasesAppProps {
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  getFilesClient: (scope: string) => ScopedFilesClient;
+}
+
+const CasesAppComponent: React.FC<CasesAppProps> = ({
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
+  getFilesClient,
+}) => {
+  const userCapabilities = useApplicationCapabilities();
+
+  return (
+    <Wrapper data-test-subj="cases-app">
+      {getCasesLazy({
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
+        getFilesClient,
+        owner: [APP_OWNER],
+        useFetchAlertData: () => [false, {}],
+        permissions: userCapabilities.generalCases,
+        basePath: '/',
+        features: { alerts: { enabled: false } },
+        releasePhase: 'experimental',
+      })}
+    </Wrapper>
+  );
+};
+
+CasesAppComponent.displayName = 'CasesApp';
+
+export const CasesApp = React.memo(CasesAppComponent);

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { TimeBuckets, getBoundsRoundedToInterval, calcEsInterval } from './time_buckets';
 
 describe('ML - time buckets', () => {

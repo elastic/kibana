@@ -7,9 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
-export type SortOrder = [string, string];
 export interface ColumnProps {
   name: string;
   displayName: string;
@@ -21,7 +20,7 @@ export interface ColumnProps {
 
 /**
  * Returns properties necessary to display the time column
- * If it's an IndexPattern with timefield, the time column is
+ * If it's an DataView with timefield, the time column is
  * prepended, not moveable and removeable
  * @param timeFieldName
  */
@@ -37,20 +36,20 @@ export function getTimeColumn(timeFieldName: string): ColumnProps {
 }
 /**
  * A given array of column names returns an array of properties
- * necessary to display the columns. If the given indexPattern
+ * necessary to display the columns. If the given dataView
  * has a timefield, a time column is prepended
  * @param columns
- * @param indexPattern
+ * @param dataView
  * @param hideTimeField
  * @param isShortDots
  */
 export function getDisplayedColumns(
   columns: string[],
-  indexPattern: IndexPattern,
+  dataView: DataView,
   hideTimeField: boolean,
   isShortDots: boolean
 ) {
-  if (!Array.isArray(columns) || typeof indexPattern !== 'object' || !indexPattern.getFieldByName) {
+  if (!Array.isArray(columns) || typeof dataView !== 'object' || !dataView.getFieldByName) {
     return [];
   }
 
@@ -69,7 +68,7 @@ export function getDisplayedColumns(
           },
         ]
       : columns.map((column, idx) => {
-          const field = indexPattern.getFieldByName(column);
+          const field = dataView.getFieldByName(column);
           return {
             name: column,
             displayName: field?.displayName ?? column,
@@ -80,7 +79,7 @@ export function getDisplayedColumns(
           };
         });
 
-  return !hideTimeField && indexPattern.timeFieldName
-    ? [getTimeColumn(indexPattern.timeFieldName), ...columnProps]
+  return !hideTimeField && dataView.timeFieldName
+    ? [getTimeColumn(dataView.timeFieldName), ...columnProps]
     : columnProps;
 }

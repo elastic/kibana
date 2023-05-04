@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from 'kibana/public';
-import type { DataViewsContract } from '../../../../../../../../../src/plugins/data_views/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { mlJobService } from '../../../../services/job_service';
 import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
@@ -44,9 +44,11 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
 
   switch (created) {
     case CREATED_BY_LABEL.SINGLE_METRIC:
+    case CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS:
       page = JOB_TYPE.SINGLE_METRIC;
       break;
     case CREATED_BY_LABEL.MULTI_METRIC:
+    case CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS:
       page = JOB_TYPE.MULTI_METRIC;
       break;
     case CREATED_BY_LABEL.POPULATION:
@@ -57,6 +59,9 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
       break;
     case CREATED_BY_LABEL.RARE:
       page = JOB_TYPE.RARE;
+      break;
+    case CREATED_BY_LABEL.GEO:
+      page = JOB_TYPE.GEO;
       break;
     default:
       page = JOB_TYPE.ADVANCED;

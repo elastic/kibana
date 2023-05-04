@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/ml-string-hash",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-string-hash",
+        "id": "def-common.stringHash",
+        "type": "Function",
+        "tags": [],
+        "label": "stringHash",
+        "description": [
+          "\nCreates a deterministic number based hash out of a string."
+        ],
+        "signature": [
+          "(str: string) => number"
+        ],
+        "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-string-hash",
+            "id": "def-common.stringHash.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

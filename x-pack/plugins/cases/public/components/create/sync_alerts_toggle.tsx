@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { Field, getUseField, useFormData } from '../../common/shared_imports';
+import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });

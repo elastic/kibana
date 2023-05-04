@@ -5,21 +5,31 @@
  * 2.0.
  */
 
-import type { KibanaFeatureConfig } from '../../../../../features/public';
-import { KibanaFeature } from '../../../../../features/public';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
+import { KibanaFeature } from '@kbn/features-plugin/public';
 
 export const createFeature = (
   config: Pick<
     KibanaFeatureConfig,
-    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
+    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip' | 'description'
   > & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
     privileges?: KibanaFeatureConfig['privileges'];
     category?: KibanaFeatureConfig['category'];
+    requireAllSpacesOnAllPrivilege?: boolean;
+    disabledReadPrivilege?: boolean;
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, privileges, category, ...rest } = config;
+  const {
+    excludeFromBaseAll,
+    excludeFromBaseRead,
+    privileges,
+    category,
+    requireAllSpacesOnAllPrivilege: requireAllSpaces = false,
+    disabledReadPrivilege: disabled = false,
+    ...rest
+  } = config;
   return new KibanaFeature({
     app: [],
     category: category ?? { id: 'foo', label: 'foo' },
@@ -35,6 +45,7 @@ export const createFeature = (
                 read: ['read-type'],
               },
               ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
+              requireAllSpaces,
             },
             read: {
               excludeFromBasePrivileges: excludeFromBaseRead,
@@ -43,6 +54,7 @@ export const createFeature = (
                 read: ['read-type'],
               },
               ui: ['read-ui', `read-${config.id}`],
+              disabled,
             },
           },
     ...rest,
@@ -207,6 +219,33 @@ export const kibanaFeatures = [
                   read: [],
                 },
                 ui: ['cool_toggle_2-ui'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }),
+  createFeature({
+    id: 'with_require_all_spaces_sub_features',
+    name: 'Require all spaces Sub Features',
+    subFeatures: [
+      {
+        name: 'Require all spaces Sub Feature',
+        requireAllSpaces: true,
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'cool_toggle_1',
+                name: 'Cool toggle 1',
+                includeIn: 'read',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['cool_toggle_1-ui'],
               },
             ],
           },

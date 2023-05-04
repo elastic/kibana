@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -48,7 +48,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
         body: getCardinalityOfFieldsSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
@@ -83,7 +83,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
         body: getTimeFieldRangeSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {

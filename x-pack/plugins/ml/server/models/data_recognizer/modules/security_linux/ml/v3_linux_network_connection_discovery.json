@@ -1,0 +1,29 @@
+{
+  "description": "Security: Linux - Looks for commands related to system network connection discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system network connection discovery to increase their understanding of connected services and systems. This information may be used to shape follow-up behaviors such as lateral movement or additional discovery.",
+  "groups": ["security", "linux"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare usernames.",
+        "function": "rare",
+        "by_field_name": "user.name",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["process.name", "host.name", "process.args", "user.name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "64mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-linux-v3",
+    "security_app_display_name": "Unusual Linux Network Connection Discovery",
+    "managed": true,
+    "job_revision": 4
+  }
+}

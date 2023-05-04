@@ -6,6 +6,7 @@
  */
 
 import { emsWorldLayerId } from '../../../../../../common/constants';
+import { getDefaultStaticProperties } from '../../../../styles/vector/vector_style_defaults';
 
 jest.mock('../../../../../kibana_services', () => {
   return {
@@ -22,11 +23,9 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import { createLayerDescriptor } from './create_layer_descriptor';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
@@ -54,7 +53,6 @@ describe('createLayerDescriptor', () => {
             applyGlobalTime: true,
             id: '12345',
             indexPatternId: 'apm_static_index_pattern_id',
-            indexPatternTitle: 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
             metrics: [
               {
                 field: 'transaction.duration.us',
@@ -74,6 +72,7 @@ describe('createLayerDescriptor', () => {
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
+      disableTooltips: false,
       sourceDescriptor: {
         id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
@@ -82,6 +81,7 @@ describe('createLayerDescriptor', () => {
       style: {
         isTimeAware: true,
         properties: {
+          ...getDefaultStaticProperties(),
           fillColor: {
             options: {
               color: 'Green to Red',
@@ -98,69 +98,11 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          icon: {
-            options: {
-              value: 'marker',
-            },
-            type: 'STATIC',
-          },
-          iconOrientation: {
-            options: {
-              orientation: 0,
-            },
-            type: 'STATIC',
-          },
-          iconSize: {
-            options: {
-              size: 6,
-            },
-            type: 'STATIC',
-          },
-          labelText: {
-            options: {
-              value: '',
-            },
-            type: 'STATIC',
-          },
-          labelBorderColor: {
-            options: {
-              color: '#FFFFFF',
-            },
-            type: 'STATIC',
-          },
-          labelBorderSize: {
-            options: {
-              size: 'SMALL',
-            },
-          },
-          labelColor: {
-            options: {
-              color: '#000000',
-            },
-            type: 'STATIC',
-          },
-          labelSize: {
-            options: {
-              size: 14,
-            },
-            type: 'STATIC',
-          },
           lineColor: {
             options: {
               color: '#3d3d3d',
             },
             type: 'STATIC',
-          },
-          lineWidth: {
-            options: {
-              size: 1,
-            },
-            type: 'STATIC',
-          },
-          symbolizeAs: {
-            options: {
-              value: 'circle',
-            },
           },
         },
         type: 'VECTOR',
@@ -229,6 +171,7 @@ describe('createLayerDescriptor', () => {
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
+      disableTooltips: false,
       query: {
         language: 'kuery',
         query: 'processor.event:"transaction"',
@@ -253,6 +196,7 @@ describe('createLayerDescriptor', () => {
       style: {
         isTimeAware: true,
         properties: {
+          ...getDefaultStaticProperties(),
           fillColor: {
             options: {
               color: 'Green to Red',
@@ -269,18 +213,6 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          icon: {
-            options: {
-              value: 'marker',
-            },
-            type: 'STATIC',
-          },
-          iconOrientation: {
-            options: {
-              orientation: 0,
-            },
-            type: 'STATIC',
-          },
           iconSize: {
             options: {
               field: {
@@ -296,51 +228,11 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          labelText: {
-            options: {
-              value: '',
-            },
-            type: 'STATIC',
-          },
-          labelBorderColor: {
-            options: {
-              color: '#FFFFFF',
-            },
-            type: 'STATIC',
-          },
-          labelBorderSize: {
-            options: {
-              size: 'SMALL',
-            },
-          },
-          labelColor: {
-            options: {
-              color: '#000000',
-            },
-            type: 'STATIC',
-          },
-          labelSize: {
-            options: {
-              size: 14,
-            },
-            type: 'STATIC',
-          },
           lineColor: {
             options: {
               color: '#3d3d3d',
             },
             type: 'STATIC',
-          },
-          lineWidth: {
-            options: {
-              size: 1,
-            },
-            type: 'STATIC',
-          },
-          symbolizeAs: {
-            options: {
-              value: 'circle',
-            },
           },
         },
         type: 'VECTOR',

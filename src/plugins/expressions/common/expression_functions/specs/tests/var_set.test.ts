@@ -10,7 +10,7 @@ import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
 import { createUnitTestExecutor } from '../../../test_helpers';
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 describe('expression_functions', () => {
   describe('var_set', () => {
@@ -47,7 +47,7 @@ describe('expression_functions', () => {
     });
 
     it('stores context if value is not set', () => {
-      const actual = fn(input, { name: ['test'], value: [] }, context);
+      const actual = fn(input, { name: ['test'] }, context);
       expect(variables.test).toEqual(input);
       expect(actual).toEqual(input);
     });
@@ -66,10 +66,9 @@ describe('expression_functions', () => {
 
       it('sets the variables', async () => {
         const vars = {};
-        const { result } = await executor
-          .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
-          .pipe(first())
-          .toPromise();
+        const { result } = await firstValueFrom(
+          executor.run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
+        );
 
         expect(result).toEqual(2);
 

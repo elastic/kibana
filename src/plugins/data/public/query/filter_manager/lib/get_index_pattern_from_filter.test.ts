@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { stubIndexPattern, phraseFilter } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern, phraseFilter } from '../../../../common/stubs';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 describe('getIndexPatternFromFilter', () => {

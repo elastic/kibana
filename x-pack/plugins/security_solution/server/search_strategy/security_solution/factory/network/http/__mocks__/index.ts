@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import {
-  Direction,
+import type {
   NetworkDnsFields,
   NetworkHttpRequestOptions,
-  NetworkQueries,
   SortField,
 } from '../../../../../../../common/search_strategy';
+import { Direction, NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkHttpRequestOptions = {
   defaultIndex: [
@@ -72,9 +71,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'L4wXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -84,8 +83,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 72174 },
-                { key: 401, doc_count: 34530 },
+                { key: '200', doc_count: 72174 },
+                { key: '401', doc_count: 34530 },
               ],
             },
           },
@@ -114,9 +113,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'tEIXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '35.227.65.114' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['35.227.65.114'],
                     },
                   },
                 ],
@@ -126,8 +125,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 75394 },
-                { key: 401, doc_count: 1350 },
+                { key: '200', doc_count: 75394 },
+                { key: '401', doc_count: 1350 },
               ],
             },
           },
@@ -156,9 +155,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'MYwXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -167,7 +166,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 58746 }],
+              buckets: [{ key: '200', doc_count: 58746 }],
             },
           },
           {
@@ -192,9 +191,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'MIwXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '24.168.52.229' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['24.168.52.229'],
                     },
                   },
                 ],
@@ -203,7 +202,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 28715 }],
+              buckets: [{ key: '200', doc_count: 28715 }],
             },
           },
           {
@@ -228,9 +227,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'MowXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -239,7 +238,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 28161 }],
+              buckets: [{ key: '200', doc_count: 28161 }],
             },
           },
           {
@@ -267,9 +266,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: '6Ywch3QBc39KFIJbVY_k',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -278,7 +277,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 23283 }],
+              buckets: [{ key: '200', doc_count: 23283 }],
             },
           },
           {
@@ -306,9 +305,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'rkIXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '35.226.77.71' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['35.226.77.71'],
                     },
                   },
                 ],
@@ -318,8 +317,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 12084 },
-                { key: 401, doc_count: 8640 },
+                { key: '200', doc_count: 12084 },
+                { key: '401', doc_count: 8640 },
               ],
             },
           },
@@ -354,9 +353,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'JEIYh3QBB-gskclyYEfA',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '35.171.72.245' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['35.171.72.245'],
                     },
                   },
                 ],
@@ -366,10 +365,10 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 3,
               buckets: [
-                { key: 401, doc_count: 18220 },
-                { key: 404, doc_count: 30 },
-                { key: 302, doc_count: 27 },
-                { key: 200, doc_count: 26 },
+                { key: '401', doc_count: 18220 },
+                { key: '404', doc_count: 30 },
+                { key: '302', doc_count: 27 },
+                { key: '200', doc_count: 26 },
               ],
             },
           },
@@ -398,9 +397,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'sUIXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '24.168.52.229' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['24.168.52.229'],
                     },
                   },
                 ],
@@ -409,7 +408,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 18048 }],
+              buckets: [{ key: '200', doc_count: 18048 }],
             },
           },
           {
@@ -434,9 +433,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 's0IXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '75.134.244.183' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['75.134.244.183'],
                     },
                   },
                 ],
@@ -445,7 +444,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 14046 }],
+              buckets: [{ key: '200', doc_count: 14046 }],
             },
           },
         ],
@@ -465,8 +464,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200', 'es.siem.estc.dev'],
         methods: ['GET'],
         statuses: ['200', '401'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '67.173.227.94',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['67.173.227.94'],
         path: '/_nodes?filter_path=nodes.*.version%2Cnodes.*.http.publish_address%2Cnodes.*.ip',
         requestCount: 106704,
       },
@@ -481,8 +480,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200', 'es.siem.estc.dev'],
         methods: ['POST'],
         statuses: ['200', '401'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '35.227.65.114',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['35.227.65.114'],
         path: '/_bulk',
         requestCount: 76744,
       },
@@ -494,8 +493,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200', 'es.siem.estc.dev'],
         methods: ['POST'],
         statuses: ['200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '67.173.227.94',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['67.173.227.94'],
         path: '/.reporting-*/_search',
         requestCount: 58746,
       },
@@ -507,8 +506,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200'],
         methods: ['POST'],
         statuses: ['200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '24.168.52.229',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['24.168.52.229'],
         path: '/.kibana-task-manager-xavier-m/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
         requestCount: 28715,
       },
@@ -524,8 +523,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200'],
         methods: ['POST'],
         statuses: ['200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '67.173.227.94',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['67.173.227.94'],
         path: '/.kibana-task-manager-andrewg-local-testing-7-9-ff/_update_by_query?ignore_unavailable=true&refresh=true&max_docs=10&conflicts=proceed',
         requestCount: 28161,
       },
@@ -541,8 +540,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200', 'es.siem.estc.dev'],
         methods: ['POST'],
         statuses: ['200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '67.173.227.94',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['67.173.227.94'],
         path: '/_security/user/_has_privileges',
         requestCount: 23283,
       },
@@ -554,8 +553,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200', 'es.siem.estc.dev'],
         methods: ['GET'],
         statuses: ['200', '401'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '35.226.77.71',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['35.226.77.71'],
         path: '/_xpack',
         requestCount: 20724,
       },
@@ -572,8 +571,8 @@ export const formattedSearchStrategyResponse = {
         ],
         methods: ['GET', 'HEAD', 'POST'],
         statuses: ['401', '404', '302', '200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '35.171.72.245',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['35.171.72.245'],
         path: '/',
         requestCount: 18306,
       },
@@ -585,8 +584,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['es.siem.estc.dev:9200', 'es.siem.estc.dev'],
         methods: ['POST'],
         statuses: ['200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '24.168.52.229',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['24.168.52.229'],
         path: '/_monitoring/bulk?system_id=kibana&system_api_version=7&interval=10000ms',
         requestCount: 18048,
       },
@@ -601,8 +600,8 @@ export const formattedSearchStrategyResponse = {
         domains: ['kibana.siem.estc.dev'],
         methods: ['GET'],
         statuses: ['200'],
-        lastHost: 'bastion00.siem.estc.dev',
-        lastSourceIp: '75.134.244.183',
+        lastHost: ['bastion00.siem.estc.dev'],
+        lastSourceIp: ['75.134.244.183'],
         path: '/s/row-renderer-checking/api/reporting/jobs/count',
         requestCount: 14046,
       },
@@ -635,7 +634,7 @@ export const formattedSearchStrategyResponse = {
                   domains: { terms: { field: 'url.domain', size: 4 } },
                   status: { terms: { field: 'http.response.status_code', size: 4 } },
                   source: {
-                    top_hits: { size: 1, _source: { includes: ['host.name', 'source.ip'] } },
+                    top_hits: { size: 1, _source: false },
                   },
                 },
               },
@@ -657,6 +656,19 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
+            _source: false,
+            fields: [
+              'host.name',
+              'source.ip',
+              'url.path',
+              'http.request.method',
+              'url.domain',
+              'http.response.status_code',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
           track_total_hits: false,
@@ -692,7 +704,7 @@ export const expectedDsl = {
           methods: { terms: { field: 'http.request.method', size: 4 } },
           domains: { terms: { field: 'url.domain', size: 4 } },
           status: { terms: { field: 'http.response.status_code', size: 4 } },
-          source: { top_hits: { size: 1, _source: { includes: ['host.name', 'source.ip'] } } },
+          source: { top_hits: { size: 1, _source: false } },
         },
       },
     },
@@ -713,6 +725,19 @@ export const expectedDsl = {
         ],
       },
     },
+    _source: false,
+    fields: [
+      'host.name',
+      'source.ip',
+      'url.path',
+      'http.request.method',
+      'url.domain',
+      'http.response.status_code',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
   track_total_hits: false,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { GetDeprecationsContext } from '../../../../../src/core/server';
-import { CloudSetup } from '../../../cloud/server';
-import { getDeprecations } from './';
-import { APMRouteHandlerResources } from '../';
-import { AgentPolicy } from '../../../fleet/common';
+import { GetDeprecationsContext } from '@kbn/core/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { getDeprecations } from '.';
+import { APMRouteHandlerResources } from '..';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 const deprecationContext = {
   esClient: {},
@@ -54,7 +54,7 @@ describe('getDeprecations', () => {
               get: () =>
                 ({
                   id: 'foo',
-                  package_policies: [''],
+                  package_policies: [{ package: { name: 'system' } }],
                 } as AgentPolicy),
             },
           }),

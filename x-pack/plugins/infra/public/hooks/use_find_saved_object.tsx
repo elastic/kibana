@@ -6,9 +6,9 @@
  */
 
 import { useState, useCallback } from 'react';
-import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
-import { useUiTracker } from '../../../observability/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { SavedObjectAttributes, SavedObjectsBatchResponse } from '@kbn/core/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });

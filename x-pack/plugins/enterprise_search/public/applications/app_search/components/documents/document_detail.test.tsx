@@ -24,6 +24,8 @@ import { DocumentDetail } from '.';
 
 describe('DocumentDetail', () => {
   const values = {
+    isMetaEngine: false,
+    isElasticsearchEngine: false,
     dataLoading: false,
     fields: [],
   };
@@ -97,5 +99,23 @@ describe('DocumentDetail', () => {
     button.simulate('click');
 
     expect(actions.deleteDocument).toHaveBeenCalledWith('1');
+  });
+
+  it('hides delete button when the document is a part of a meta engine', () => {
+    setMockValues({ ...values, isMetaEngine: true });
+    const wrapper = shallow(<DocumentDetail />);
+
+    expect(
+      getPageHeaderActions(wrapper).find('[data-test-subj="DeleteDocumentButton"]')
+    ).toHaveLength(0);
+  });
+
+  it('hides delete button when the document is a part of an elasticsearch-indexed engine', () => {
+    setMockValues({ ...values, isElasticsearchEngine: true });
+    const wrapper = shallow(<DocumentDetail />);
+
+    expect(
+      getPageHeaderActions(wrapper).find('[data-test-subj="DeleteDocumentButton"]')
+    ).toHaveLength(0);
   });
 });

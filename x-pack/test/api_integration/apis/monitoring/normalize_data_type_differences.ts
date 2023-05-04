@@ -22,12 +22,15 @@ export function normalizeDataTypeDifferences(metrics: any, fixture: any) {
       return {
         ...item,
         data: item.data.map(([_x, y], index2) => {
-          const expectedY = fixture.metrics[metricName][index].data[index2][1];
-          if (y !== expectedY) {
-            const normalizedY = numeral(y).format('0[.]00000');
-            const normalizedExpectedY = numeral(y).format('0[.]00000');
-            if (normalizedY === normalizedExpectedY) {
-              return [_x, expectedY];
+          const data = fixture.metrics[metricName][index].data;
+          if (data.length) {
+            const expectedY = data[index2][1];
+            if (y !== expectedY) {
+              const normalizedY = numeral(y).format('0[.]00000');
+              const normalizedExpectedY = numeral(y).format('0[.]00000');
+              if (normalizedY === normalizedExpectedY) {
+                return [_x, expectedY];
+              }
             }
           }
           return [_x, y];

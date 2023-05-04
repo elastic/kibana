@@ -6,7 +6,7 @@
  */
 
 import { get, getOr } from 'lodash/fp';
-import {
+import type {
   MatrixHistogramData,
   MatrixHistogramParseData,
   DnsHistogramSubBucket,

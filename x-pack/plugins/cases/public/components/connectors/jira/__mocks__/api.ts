@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetIssueTypesProps, GetFieldsByIssueTypeProps, GetIssueTypeProps } from '../api';
-import { IssueTypes, Fields, Issues, Issue } from '../types';
+import type { GetIssueTypesProps, GetFieldsByIssueTypeProps, GetIssueTypeProps } from '../api';
+import type { IssueTypes, Fields, Issues, Issue } from '../types';
 import { issues } from '../../mock';
 
 const issueTypes = [

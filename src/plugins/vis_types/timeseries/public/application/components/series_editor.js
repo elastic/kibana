@@ -16,6 +16,8 @@ import { newSeriesFn } from './lib/new_series_fn';
 import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { reorder } from './lib/reorder';
 
+import './_series_editor.scss';
+
 const DROPPABLE_ID = 'series_editor_dnd';
 
 export class SeriesEditor extends Component {
@@ -63,6 +65,10 @@ export class SeriesEditor extends Component {
     }
   };
 
+  handleSeriesChange = (doc) => {
+    handleChange(this.props, doc);
+  };
+
   render() {
     const { limit, model, name, fields, colorPicker } = this.props;
     const list = model[name].filter((val, index) => index < (limit || Infinity));
@@ -87,7 +93,7 @@ export class SeriesEditor extends Component {
                   disableDelete={model[name].length < 2}
                   fields={fields}
                   onAdd={() => handleAdd(this.props, newSeriesFn)}
-                  onChange={(doc) => handleChange(this.props, doc)}
+                  onChange={this.handleSeriesChange}
                   onClone={() => this.handleClone(row)}
                   onDelete={() => handleDelete(this.props, row)}
                   model={row}

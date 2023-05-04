@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { KibanaRequest } from 'src/core/server';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { KibanaRequest } from '@kbn/core/server';
 
 import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
-import type { ISearchStart } from '../types';
+import type { ISearchStart, ISearchSetup } from '../types';
+
+function createSetupContract(): MockedKeys<ISearchSetup['searchSource']> {
+  return {
+    getAllMigrations: jest.fn(),
+  };
+}
 
 function createStartContract(): MockedKeys<ISearchStart['searchSource']> {
   return {
@@ -21,5 +27,6 @@ function createStartContract(): MockedKeys<ISearchStart['searchSource']> {
 }
 
 export const searchSourceMock = {
+  createSetupContract,
   createStartContract,
 };

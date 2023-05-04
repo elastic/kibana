@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const FILTER_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.components.mlPopover.jobsTable.filters.searchFilterPlaceholder',
   {
-    defaultMessage: 'e.g. rare_process_linux',
+    defaultMessage: 'e.g. Unusual Linux Process',
   }
 );
 

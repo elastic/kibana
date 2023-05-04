@@ -11,14 +11,14 @@ import { createBytesFormatter } from './bytes';
 describe('createDataFormatter', () => {
   it('should format bytes as bytesDecimal', () => {
     const formatter = createBytesFormatter(InfraWaffleMapDataFormat.bytesDecimal);
-    expect(formatter(1000000)).toBe('1MB');
+    expect(formatter(1000000)).toBe('1 MB');
   });
   it('should format bytes as bitsDecimal', () => {
     const formatter = createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal);
-    expect(formatter(1000000)).toBe('8Mbit');
+    expect(formatter(1000000)).toBe('8 Mbit');
   });
   it('should format bytes as abbreviatedNumber', () => {
     const formatter = createBytesFormatter(InfraWaffleMapDataFormat.abbreviatedNumber);
-    expect(formatter(1000000)).toBe('1M');
+    expect(formatter(1000000)).toBe('1 M');
   });
 });

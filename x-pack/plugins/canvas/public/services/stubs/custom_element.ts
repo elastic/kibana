@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { CanvasCustomElementService } from '../custom_element';
 
 type CanvasCustomElementServiceFactory = PluginServiceFactory<CanvasCustomElementService>;

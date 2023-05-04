@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   LegacyEndpointEvent,
   ResolverEvent,
   SafeResolverEvent,
@@ -191,9 +191,11 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
 }
 
 export function eventID(event: SafeResolverEvent): number | undefined | string {
-  return firstNonNullValue(
-    isLegacyEventSafeVersion(event) ? event.endgame.serial_event_id : event.event?.id
-  );
+  if (isLegacyEventSafeVersion(event)) {
+    return firstNonNullValue(event.endgame?.serial_event_id);
+  } else {
+    return firstNonNullValue(event.event?.id);
+  }
 }
 
 /**
@@ -203,34 +205,6 @@ export function eventID(event: SafeResolverEvent): number | undefined | string {
  */
 export function winlogRecordID(event: WinlogEvent): undefined | string {
   return firstNonNullValue(event.winlog?.record_id);
-}
-
-/**
- * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
- */
-type EventSequenceFields = Partial<
-  | {
-      endgame: Partial<{
-        serial_event_id: ECSField<number>;
-      }>;
-    }
-  | {
-      event: Partial<{
-        sequence: ECSField<number>;
-      }>;
-    }
->;
-
-/**
- * Extract the first non null event sequence value from a document. Returns undefined if the field doesn't exist in the document.
- *
- * @param event a document from ES
- */
-export function eventSequence(event: EventSequenceFields): number | undefined {
-  if (isLegacyEventSafeVersion(event)) {
-    return firstNonNullValue(event.endgame?.serial_event_id);
-  }
-  return firstNonNullValue(event.event?.sequence);
 }
 
 /**
@@ -245,11 +219,11 @@ export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined
 /**
  * The event.entity_id field.
  */
-export function entityId(event: ResolverEvent): string {
-  if (isLegacyEvent(event)) {
+export function entityId(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
     return event.endgame.unique_pid ? String(event.endgame.unique_pid) : '';
   }
-  return event.process.entity_id;
+  return firstNonNullValue(event.process?.entity_id);
 }
 
 /**
@@ -282,16 +256,6 @@ export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   } else {
     return firstNonNullValue(event.process?.entity_id);
   }
-}
-
-/**
- * The process.parent.entity_id ECS field.
- */
-export function parentEntityId(event: ResolverEvent): string | undefined {
-  if (isLegacyEvent(event)) {
-    return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
-  }
-  return event.process.parent?.entity_id;
 }
 
 /**

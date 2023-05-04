@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from '../agents/services';
@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup checks packages completed install', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     describe('package install', async () => {
       before(async () => {
         if (!server.enabled) return;

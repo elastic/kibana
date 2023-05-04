@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
@@ -134,8 +134,12 @@ export const applicationUsageSchema = {
   apm: commonSchema,
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
+  enterpriseSearchContent: commonSchema,
+  enterpriseSearchAnalytics: commonSchema,
+  elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
+  searchExperiences: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
@@ -148,7 +152,9 @@ export const applicationUsageSchema = {
   ml: commonSchema,
   monitoring: commonSchema,
   'observability-overview': commonSchema,
+  'exploratory-view': commonSchema,
   osquery: commonSchema,
+  profiling: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
   security_access_agreement: commonSchema,
@@ -158,8 +164,13 @@ export const applicationUsageSchema = {
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
   securitySolutionUI: commonSchema,
+  /**
+   * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
+   * @removeBy 9.0.0
+   */
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
+  synthetics: commonSchema,
   ux: commonSchema,
 };

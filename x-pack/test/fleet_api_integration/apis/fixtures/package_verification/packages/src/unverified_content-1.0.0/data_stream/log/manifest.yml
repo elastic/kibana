@@ -1,0 +1,28 @@
+title: Log Dataset
+type: logs
+streams:
+  - input: logfile
+    description: Collect your custom log files.
+    title: Collect log files
+    vars:
+      - name: paths
+        required: true
+        title: Log file path
+        description: Path to log files to be collected
+        type: text
+        multi: true
+      - name: data_stream.dataset
+        required: true
+        default: generic
+        title: Dataset name
+        description: >
+          Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+
+        type: text
+      - name: custom
+        title: Custom configurations
+        description: >
+          Here YAML configuration options can be used to be added to your configuration. Be careful using this as it might break your configuration file.
+
+        type: yaml
+        default: ""

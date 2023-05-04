@@ -54,10 +54,10 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/ibmmq_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/ibmmq_logs/screenshot.webp',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['security'],
+    integrationBrowserCategories: ['observability'],
   };
 }

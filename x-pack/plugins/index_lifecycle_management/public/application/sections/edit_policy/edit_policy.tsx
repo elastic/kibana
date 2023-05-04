@@ -12,6 +12,8 @@ import { get } from 'lodash';
 
 import { useHistory } from 'react-router-dom';
 
+import './edit_policy.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,11 +24,11 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiPageHeader,
+  EuiTimeline,
 } from '@elastic/eui';
 
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
-import { createDocLink } from '../../services/documentation';
 import { UseField } from './form';
 import { savePolicy } from './save_policy';
 import {
@@ -67,7 +69,7 @@ export const EditPolicy: React.FunctionComponent = () => {
   } = useEditPolicyContext();
 
   const {
-    services: { cloud },
+    services: { cloud, docLinks },
   } = useKibana();
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
@@ -166,11 +168,7 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <EuiButtonEmpty
-            href={createDocLink('index-lifecycle-management.html')}
-            target="_blank"
-            iconType="help"
-          >
+          <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
               defaultMessage="Documentation"
@@ -240,27 +238,17 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <div>
+        <EuiTimeline className="ilmPhases">
           <HotPhase />
 
-          <EuiSpacer />
           <WarmPhase />
 
-          <EuiSpacer />
           <ColdPhase />
 
-          {isAllowedByLicense && (
-            <>
-              <EuiSpacer />
-              <FrozenPhase />
-            </>
-          )}
+          {isAllowedByLicense && <FrozenPhase />}
 
-          {/* We can't add the <EuiSpacer /> here as it breaks the layout
-              and makes the connecting line go further that it needs to.
-              There is an issue in EUI to fix this (https://github.com/elastic/eui/issues/4492) */}
           <DeletePhase />
-        </div>
+        </EuiTimeline>
 
         <EuiHorizontalRule />
 

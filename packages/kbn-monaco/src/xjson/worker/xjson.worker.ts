@@ -9,7 +9,7 @@
 // Please note: this module is intended to be run inside of a webworker.
 /* eslint-disable @kbn/eslint/module_migration */
 
-import 'regenerator-runtime/runtime';
+import '@babel/runtime/regenerator';
 // @ts-ignore
 import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
 import { XJsonWorker } from './xjson_worker';

@@ -7,25 +7,30 @@
 
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
-import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import type { AppMountParameters } from '@kbn/core/public';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { PackageInstallProvider } from '../integrations/hooks';
+
+import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -36,8 +41,15 @@ import {
   useBreadcrumbs,
   useStartServices,
   UIExtensionsContext,
+  FlyoutContextProvider,
 } from './hooks';
-import { Error, Loading, FleetSetupLoading } from './components';
+import {
+  Error,
+  Loading,
+  FleetSetupLoading,
+  AgentEnrollmentFlyout,
+  FleetServerFlyout,
+} from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -49,8 +61,11 @@ import { MissingESRequirementsPage } from './sections/agents/agent_requirements_
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
+
+const queryClient = new QueryClient();
 
 const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
   isAddIntegrationsPath,
@@ -78,13 +93,13 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
 
-  if (error === 'MISSING_SUPERUSER_ROLE') {
+  if (error === 'MISSING_PRIVILEGES') {
     return (
-      <Panel>
+      <Panel data-test-subj="missingPrivilegesPrompt">
         <EuiEmptyPrompt
           iconType="securityApp"
           title={
-            <h2>
+            <h2 data-test-subj="missingPrivilegesPromptTitle">
               <FormattedMessage
                 id="xpack.fleet.permissionDeniedErrorTitle"
                 defaultMessage="Permission denied"
@@ -92,11 +107,14 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
             </h2>
           }
           body={
-            <p>
+            <p data-test-subj="missingPrivilegesPromptMessage">
               <FormattedMessage
                 id="xpack.fleet.permissionDeniedErrorMessage"
-                defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
-                values={{ roleName: <EuiCode>superuser</EuiCode> }}
+                defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
+                values={{
+                  roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
+                  roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
+                }}
               />
             </p>
           }
@@ -122,7 +140,10 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
-  const { notifications } = useStartServices();
+  const core = useStartServices();
+  const { notifications } = core;
+
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -130,6 +151,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
     (async () => {
@@ -154,6 +176,9 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
+            if (!hasFleetAllPrivileges) {
+              setPermissionsError('MISSING_PRIVILEGES');
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -165,7 +190,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts]);
+  }, [notifications.toasts, hasFleetAllPrivileges]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
@@ -173,6 +198,10 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
+  }
+  // Debug page moved outside of initialization to allow debugging when setup failed
+  if (isDebugPath) {
+    return <DebugPage setupError={initializationError} isInitialized={isInitialized} />;
   }
 
   if (!isInitialized || initializationError) {
@@ -203,16 +232,27 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * and no routes defined
  */
 export const FleetAppContext: React.FC<{
-  basepath: string;
   startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
+  fleetStatus?: FleetStatusProviderProps;
 }> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    routerHistory,
+    theme$,
+    fleetStatus,
+  }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
     return (
@@ -222,17 +262,25 @@ export const FleetAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <Router history={history}>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </Router>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <QueryClientProvider client={queryClient}>
+                        <ReactQueryDevtools initialIsOpen={false} />
+                        <UIExtensionsContext.Provider value={extensions}>
+                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                            <Router history={history}>
+                              <PackageInstallProvider
+                                notifications={startServices.notifications}
+                                theme$={theme$}
+                              >
+                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                              </PackageInstallProvider>
+                            </Router>
+                          </FleetStatusProvider>
+                        </UIExtensionsContext.Provider>
+                      </QueryClientProvider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
@@ -252,7 +300,7 @@ const FleetTopNav = memo(
     const topNavConfig: TopNavMenuData[] = [
       {
         label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-          defaultMessage: 'Send Feedback',
+          defaultMessage: 'Send feedback',
         }),
         iconType: 'popout',
         run: () => window.open(FEEDBACK_URL),
@@ -270,6 +318,9 @@ const FleetTopNav = memo(
 
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const flyoutContext = useFlyoutContext();
+    const fleetStatus = useFleetStatus();
+
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
@@ -318,6 +369,26 @@ export const AppRoutes = memo(
             }}
           />
         </Switch>
+
+        {flyoutContext.isEnrollmentFlyoutOpen && (
+          <EuiPortal>
+            <AgentEnrollmentFlyout
+              defaultMode={
+                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                  ? 'managed'
+                  : 'standalone'
+              }
+              isIntegrationFlow={true}
+              onClose={() => flyoutContext.closeEnrollmentFlyout()}
+            />
+          </EuiPortal>
+        )}
+
+        {flyoutContext.isFleetServerFlyoutOpen && (
+          <EuiPortal>
+            <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+          </EuiPortal>
+        )}
       </>
     );
   }

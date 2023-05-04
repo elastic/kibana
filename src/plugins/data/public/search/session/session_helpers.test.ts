@@ -9,9 +9,10 @@
 import { waitUntilNextSessionCompletes$ } from './session_helpers';
 import { ISessionService, SessionService } from './session_service';
 import { BehaviorSubject } from 'rxjs';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { SearchSessionState } from './search_session_state';
 import { NowProviderInternalContract } from '../../now_provider';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { getSessionsClientMock } from './mocks';
@@ -22,7 +23,13 @@ let nowProvider: jest.Mocked<NowProviderInternalContract>;
 let currentAppId$: BehaviorSubject<string>;
 
 beforeEach(() => {
-  const initializerContext = coreMock.createPluginInitializerContext();
+  const initializerContext = coreMock.createPluginInitializerContext({
+    search: {
+      sessions: {
+        notTouchedTimeout: '5m',
+      },
+    },
+  });
   const startService = coreMock.createSetup().getStartServices;
   nowProvider = createNowProviderMock();
   currentAppId$ = new BehaviorSubject('app');
@@ -49,6 +56,7 @@ beforeEach(() => {
       ]),
     getSessionsClientMock(),
     nowProvider,
+    undefined,
     { freezeState: false } // needed to use mocks inside state container
   );
   state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
@@ -57,32 +65,44 @@ beforeEach(() => {
 
 describe('waitUntilNextSessionCompletes$', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.useRealTimers();
   });
-  test('emits when next session starts', () => {
-    sessionService.start();
-    let untrackSearch = sessionService.trackSearch({ abort: () => {} });
-    untrackSearch();
+  test(
+    'emits when next session starts',
+    fakeSchedulers((advance) => {
+      sessionService.start();
 
-    const next = jest.fn();
-    const complete = jest.fn();
-    waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
-    expect(next).not.toBeCalled();
+      let { complete: completeSearch } = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      });
 
-    sessionService.start();
-    expect(next).not.toBeCalled();
+      completeSearch();
 
-    untrackSearch = sessionService.trackSearch({ abort: () => {} });
-    untrackSearch();
+      const next = jest.fn();
+      const complete = jest.fn();
+      waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
+      expect(next).not.toBeCalled();
 
-    expect(next).not.toBeCalled();
-    jest.advanceTimersByTime(500);
-    expect(next).not.toBeCalled();
-    jest.advanceTimersByTime(1000);
-    expect(next).toBeCalledTimes(1);
-    expect(complete).toBeCalled();
-  });
+      sessionService.start();
+      expect(next).not.toBeCalled();
+
+      completeSearch = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      }).complete;
+
+      completeSearch();
+
+      expect(next).not.toBeCalled();
+      advance(500);
+      expect(next).not.toBeCalled();
+      advance(1000);
+      expect(next).toBeCalledTimes(1);
+      expect(complete).toBeCalled();
+    })
+  );
 });

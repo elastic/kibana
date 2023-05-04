@@ -10,9 +10,10 @@ import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
-import { KbnClient } from '@kbn/test';
-import { createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import { createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
   isGzip,
@@ -45,7 +46,7 @@ export async function unloadAction({
     await createPromiseFromStreams([
       createReadStream(resolve(inputDir, filename)) as Readable,
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
-      createFilterRecordsStream('index'),
+      createFilterRecordsStream((record) => ['index', 'data_stream'].includes(record.type)),
       createDeleteIndexStream(client, stats, log),
     ] as [Readable, ...Writable[]]);
   }

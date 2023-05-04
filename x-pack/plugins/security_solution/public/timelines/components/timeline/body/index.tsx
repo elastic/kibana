@@ -6,45 +6,38 @@
  */
 
 import { noop } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-  getActionsColumnWidth,
-} from '../../../../../../timelines/public';
-import { CellValueElementProps } from '../cell_rendering';
+} from '@kbn/timelines-plugin/public';
+import { getActionsColumnWidth } from '../../../../common/components/header_actions';
+import type { ControlColumnProps } from '../../../../../common/types';
+import type { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import {
-  ColumnHeaderOptions,
-  ControlColumnProps,
-  RowRendererId,
-  RowRenderer,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
-import { TimelineItem } from '../../../../../common/search_strategy/timeline';
-import { inputsModel, State } from '../../../../common/store';
-import { TimelineModel } from '../../../store/timeline/model';
+import type { RowRenderer, TimelineTabs } from '../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../common/types/timeline';
+import type { BrowserFields } from '../../../../common/containers/source';
+import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
+import type { inputsModel, State } from '../../../../common/store';
 import { timelineDefaults } from '../../../store/timeline/defaults';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { OnRowSelected, OnSelectAll } from '../events';
+import { timelineActions } from '../../../store/timeline';
+import type { OnRowSelected, OnSelectAll } from '../events';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
-import { Sort } from './sort';
+import type { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { timelineBodySelector } from './selectors';
+import { useLicense } from '../../../../common/hooks/use_license';
 
-interface OwnProps {
+export interface Props {
   activePage: number;
   browserFields: BrowserFields;
   data: TimelineItem[];
@@ -61,35 +54,18 @@ interface OwnProps {
   onRuleChange?: () => void;
 }
 
-export const hasAdditionalActions = (id: TimelineId): boolean =>
-  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
-    id
-  );
-
-export type StatefulBodyProps = OwnProps & PropsFromRedux;
-
 /**
  * The Body component is used everywhere timeline is used within the security application. It is the highest level component
  * that is shared across all implementations of the timeline.
  */
-export const BodyComponent = React.memo<StatefulBodyProps>(
+export const StatefulBody = React.memo<Props>(
   ({
     activePage,
     browserFields,
-    columnHeaders,
     data,
-    eventIdToNoteIds,
-    excludedRowRendererIds,
     id,
     isEventViewer = false,
-    isSelectAllChecked,
-    loadingEventIds,
-    pinnedEventIds,
-    selectedEventIds,
-    setSelected,
-    clearSelected,
     onRuleChange,
-    showCheckboxes,
     refetch,
     renderCellValue,
     rowRenderers,
@@ -99,41 +75,63 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     leadingControlColumns = [],
     trailingControlColumns = [],
   }) => {
+    const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, id)
+    const {
+      timeline: {
+        columns,
+        eventIdToNoteIds,
+        excludedRowRendererIds,
+        isSelectAllChecked,
+        loadingEventIds,
+        pinnedEventIds,
+        selectedEventIds,
+        show,
+        queryFields,
+        selectAll,
+      } = timelineDefaults,
+    } = useSelector((state: State) => timelineBodySelector(state, id));
+
+    const columnHeaders = useMemo(
+      () => getColumnHeaders(columns, browserFields),
+      [browserFields, columns]
     );
-    const ACTION_BUTTON_COUNT = 5;
+
+    const isEnterprisePlus = useLicense().isEnterprise();
+    const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-        setSelected({
-          id,
-          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
-          isSelected,
-          isSelectAllChecked:
-            isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
-        });
+        dispatch(
+          timelineActions.setSelected({
+            id,
+            eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
+            isSelected,
+            isSelectAllChecked:
+              isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
+          })
+        );
       },
-      [setSelected, id, data, selectedEventIds, queryFields]
+      [data, dispatch, id, queryFields, selectedEventIds]
     );
 
     const onSelectAll: OnSelectAll = useCallback(
       ({ isSelected }: { isSelected: boolean }) =>
         isSelected
-          ? setSelected({
-              id,
-              eventIds: getEventIdToDataMapping(
-                data,
-                data.map((event) => event._id),
-                queryFields
-              ),
-              isSelected,
-              isSelectAllChecked: isSelected,
-            })
-          : clearSelected({ id }),
-      [setSelected, clearSelected, id, data, queryFields]
+          ? dispatch(
+              timelineActions.setSelected({
+                id,
+                eventIds: getEventIdToDataMapping(
+                  data,
+                  data.map((event) => event._id),
+                  queryFields
+                ),
+                isSelected,
+                isSelectAllChecked: isSelected,
+              })
+            )
+          : dispatch(timelineActions.clearSelected({ id })),
+      [data, dispatch, id, queryFields]
     );
 
     // Sync to selectAll so parent components can select all events
@@ -155,7 +153,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
-    const actionsColumnWidth = useMemo(() => getActionsColumnWidth(ACTION_BUTTON_COUNT), []);
+    const actionsColumnWidth = useMemo(
+      () => getActionsColumnWidth(ACTION_BUTTON_COUNT),
+      [ACTION_BUTTON_COUNT]
+    );
 
     const columnWidths = useMemo(
       () =>
@@ -230,8 +231,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
+              show={show}
               showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
+              showSelectAllCheckbox={false}
               sort={sort}
               tabType={tabType}
               timelineId={id}
@@ -242,7 +244,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             <Events
               containerRef={containerRef}
               actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
               columnHeaders={columnHeaders}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}
@@ -257,7 +258,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               rowRenderers={enabledRowRenderers}
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
+              showCheckboxes={false}
               leadingControlColumns={leadingControlColumns}
               trailingControlColumns={trailingControlColumns}
               tabType={tabType}
@@ -267,70 +268,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         <TimelineBodyGlobalStyle />
       </>
     );
-  },
-  (prevProps, nextProps) =>
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
-    deepEqual(prevProps.data, nextProps.data) &&
-    deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
-    deepEqual(prevProps.sort, nextProps.sort) &&
-    deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
-    deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
-    deepEqual(prevProps.selectedEventIds, nextProps.selectedEventIds) &&
-    deepEqual(prevProps.loadingEventIds, nextProps.loadingEventIds) &&
-    prevProps.id === nextProps.id &&
-    prevProps.isEventViewer === nextProps.isEventViewer &&
-    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.renderCellValue === nextProps.renderCellValue &&
-    prevProps.rowRenderers === nextProps.rowRenderers &&
-    prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.tabType === nextProps.tabType
+  }
 );
 
-BodyComponent.displayName = 'BodyComponent';
-
-const makeMapStateToProps = () => {
-  const memoizedColumnHeaders: (
-    headers: ColumnHeaderOptions[],
-    browserFields: BrowserFields
-  ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
-
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
-    const {
-      columns,
-      eventIdToNoteIds,
-      excludedRowRendererIds,
-      isSelectAllChecked,
-      loadingEventIds,
-      pinnedEventIds,
-      selectedEventIds,
-      showCheckboxes,
-    } = timeline;
-
-    return {
-      columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      eventIdToNoteIds,
-      excludedRowRendererIds,
-      isSelectAllChecked,
-      loadingEventIds,
-      id,
-      pinnedEventIds,
-      selectedEventIds,
-      showCheckboxes,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  clearSelected: timelineActions.clearSelected,
-  setSelected: timelineActions.setSelected,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulBody = connector(BodyComponent);
+StatefulBody.displayName = 'StatefulBody';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { ConfigType } from '../';
+import { ConfigType } from '..';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 
@@ -16,6 +16,10 @@ export const mockRequestHandler = {
   hasValidData(data: any) {
     return (this.createRequest as jest.Mock).mock.calls[0][0].hasValidData(data);
   },
+};
+
+export const mockMl = {
+  trainedModelsProvider: jest.fn(),
 };
 
 export const mockConfig = {
@@ -34,4 +38,5 @@ export const mockDependencies = {
   config: mockConfig,
   log: mockLogger,
   enterpriseSearchRequestHandler: mockRequestHandler as any,
+  ml: mockMl as any,
 };

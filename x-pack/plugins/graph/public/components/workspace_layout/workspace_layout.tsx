@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -17,16 +19,8 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
-import {
-  ControlType,
-  IndexPatternProvider,
-  IndexPatternSavedObject,
-  TermIntersect,
-  WorkspaceNode,
-} from '../../types';
+import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
-import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
 import { GraphTitle } from '../graph_title';
 import { GraphWorkspaceSavedObject, Workspace } from '../../types';
@@ -55,14 +49,15 @@ type WorkspaceLayoutProps = Pick<
   | 'canEditDrillDownUrls'
   | 'overlays'
   | 'spaces'
+  | 'inspect'
 > & {
   renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
-  indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
   sharingSavedObjectProps?: SharingSavedObjectProps;
+  requestAdapter: RequestAdapter;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -78,7 +73,6 @@ export const WorkspaceLayoutComponent = ({
   hasFields,
   overlays,
   workspaceInitialized,
-  indexPatterns,
   indexPatternProvider,
   capabilities,
   coreStart,
@@ -88,9 +82,10 @@ export const WorkspaceLayoutComponent = ({
   setHeaderActionMenu,
   sharingSavedObjectProps,
   spaces,
+  inspect,
+  requestAdapter,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
-  const [showInspect, setShowInspect] = useState(false);
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
@@ -99,7 +94,11 @@ export const WorkspaceLayoutComponent = ({
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
 
-  const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
+  // savedWorkspace.id gets set to null while saving a copy of an existing
+  // workspace, so we need to check for savedWorkspace.isSaving as well
+  const isInitialized = Boolean(
+    workspaceInitialized || savedWorkspace.id || savedWorkspace.isSaving
+  );
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
     selectedNode.current = node;
@@ -112,7 +111,7 @@ export const WorkspaceLayoutComponent = ({
   }, []);
 
   const onIndexPatternChange = useCallback(
-    (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
+    (indexPattern?: DataView) => setCurrentIndexPattern(indexPattern),
     []
   );
 
@@ -192,20 +191,15 @@ export const WorkspaceLayoutComponent = ({
         graphSavePolicy={graphSavePolicy}
         navigation={navigation}
         capabilities={capabilities}
+        inspect={inspect}
+        requestAdapter={requestAdapter}
         coreStart={coreStart}
         canEditDrillDownUrls={canEditDrillDownUrls}
-        setShowInspect={setShowInspect}
         confirmWipeWorkspace={confirmWipeWorkspace}
         setHeaderActionMenu={setHeaderActionMenu}
         isInitialized={isInitialized}
       />
 
-      <InspectPanel
-        showInspect={showInspect}
-        lastRequest={workspace?.lastRequest}
-        lastResponse={workspace?.lastResponse}
-        indexPattern={currentIndexPattern}
-      />
       {isInitialized && <GraphTitle />}
       <div className="gphGraph__bar">
         <SearchBar
@@ -222,10 +216,7 @@ export const WorkspaceLayoutComponent = ({
       {getLegacyUrlConflictCallout()}
       {!isInitialized && (
         <div>
-          <GuidancePanelMemoized
-            noIndexPatterns={indexPatterns.length === 0}
-            onOpenFieldPicker={onOpenFieldPicker}
-          />
+          <GuidancePanelMemoized onOpenFieldPicker={onOpenFieldPicker} />
         </div>
       )}
 

@@ -9,9 +9,11 @@ import {
   valueToUpdateIsSettings,
   valueToUpdateIsStatus,
   createUpdateSuccessToaster,
+  constructAssigneesFilter,
+  constructReportersFilter,
 } from './utils';
 
-import { Case } from './types';
+import type { CaseUI } from './types';
 
 const caseBeforeUpdate = {
   comments: [
@@ -22,9 +24,9 @@ const caseBeforeUpdate = {
   settings: {
     syncAlerts: true,
   },
-} as Case;
+} as CaseUI;
 
-const caseAfterUpdate = { title: 'My case' } as Case;
+const caseAfterUpdate = { title: 'My case' } as CaseUI;
 
 describe('utils', () => {
   describe('valueToUpdateIsSettings', () => {
@@ -56,6 +58,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Alerts in "My case" have been synced',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -72,6 +75,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -83,6 +87,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -97,7 +102,8 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
-        text: 'Alerts in this case have been also had their status updated',
+        text: 'Updated the statuses of attached alerts.',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -112,6 +118,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -126,6 +133,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -140,7 +148,42 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
+    });
+  });
+
+  describe('constructAssigneesFilter', () => {
+    it('returns an empty object if the array is empty', () => {
+      expect(constructAssigneesFilter([])).toEqual({});
+    });
+
+    it('returns none if the assignees are null', () => {
+      expect(constructAssigneesFilter(null)).toEqual({ assignees: 'none' });
+    });
+
+    it('returns none for null values in the assignees array', () => {
+      expect(constructAssigneesFilter([null, '123'])).toEqual({ assignees: ['none', '123'] });
+    });
+  });
+
+  describe('constructReportersFilter', () => {
+    it('returns an empty object if the array is empty', () => {
+      expect(constructReportersFilter([])).toEqual({});
+    });
+
+    it('returns the reporters correctly', () => {
+      expect(
+        constructReportersFilter([
+          { username: 'test', full_name: 'Test', email: 'elastic@elastic.co' },
+          {
+            username: 'test2',
+            full_name: 'Test 2',
+            email: 'elastic@elastic.co',
+            profile_uid: '123',
+          },
+        ])
+      ).toEqual({ reporters: ['test', '123'] });
     });
   });
 });

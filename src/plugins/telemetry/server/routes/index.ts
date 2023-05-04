@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { IRouter, Logger } from 'kibana/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import type { Observable } from 'rxjs';
+import type { IRouter, Logger, SavedObjectsClient } from '@kbn/core/server';
+import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { TelemetryConfigType } from '../config';
+import { registerTelemetryConfigRoutes } from './telemetry_config';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
+import { registerTelemetryUsageStatsRoutes, type SecurityGetter } from './telemetry_usage_stats';
 import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
 import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
-import { TelemetryConfigType } from '../config';
+import { registerTelemetryLastReported } from './telemetry_last_reported';
 
 interface RegisterRoutesParams {
   isDev: boolean;
@@ -22,12 +24,17 @@ interface RegisterRoutesParams {
   currentKibanaVersion: string;
   router: IRouter;
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
+  savedObjectsInternalClient$: Observable<SavedObjectsClient>;
+  getSecurity: SecurityGetter;
 }
 
 export function registerRoutes(options: RegisterRoutesParams) {
-  const { isDev, telemetryCollectionManager, router } = options;
+  const { isDev, telemetryCollectionManager, router, savedObjectsInternalClient$, getSecurity } =
+    options;
   registerTelemetryOptInRoutes(options);
-  registerTelemetryUsageStatsRoutes(router, telemetryCollectionManager, isDev);
+  registerTelemetryConfigRoutes(options);
+  registerTelemetryUsageStatsRoutes(router, telemetryCollectionManager, isDev, getSecurity);
   registerTelemetryOptInStatsRoutes(router, telemetryCollectionManager);
   registerTelemetryUserHasSeenNotice(router);
+  registerTelemetryLastReported(router, savedObjectsInternalClient$);
 }

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
-import { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
-import { validateEvents } from '../../../../common/endpoint/schema/resolver';
+import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
 import { PaginationBuilder } from './utils/pagination';
 
@@ -29,7 +30,9 @@ function createEvents(
  * This function handles the `/events` api and returns an array of events and a cursor if more events exist than were
  * requested.
  */
-export function handleEvents(): RequestHandler<
+export function handleEvents(
+  ruleRegistry: RuleRegistryPluginStartContract
+): RequestHandler<
   unknown,
   TypeOf<typeof validateEvents.query>,
   TypeOf<typeof validateEvents.body>
@@ -39,14 +42,15 @@ export function handleEvents(): RequestHandler<
       query: { limit, afterEvent },
       body,
     } = req;
-    const client = context.core.elasticsearch.client;
-    const query = new EventsQuery({
+    const eventsClient = (await context.core).elasticsearch.client;
+    const alertsClient = await ruleRegistry.getRacClientWithRequest(req);
+
+    const eventsQuery = new EventsQuery({
       pagination: PaginationBuilder.createBuilder(limit, afterEvent),
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
     });
-    const results = await query.search(client, body.filter);
-
+    const results = await eventsQuery.search(eventsClient, body, alertsClient);
     return res.ok({
       body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
     });

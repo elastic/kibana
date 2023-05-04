@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
-import { setupRequest } from '../../lib/helpers/setup_request';
-import { getServiceCount } from './get_service_count';
-import { getTransactionsPerMinute } from './get_transactions_per_minute';
-import { getHasData } from './has_data';
-import { rangeRt } from '../default_api_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { withApmSpan } from '../../utils/with_apm_span';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { rangeRt } from '../default_api_types';
+import {
+  getObservabilityOverviewData,
+  ObservabilityOverviewResponse,
+} from './get_observability_overview_data';
+import { getHasData, HasDataResponse } from './has_data';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview/has_data',
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    return await getHasData({ setup });
+  handler: async (resources): Promise<HasDataResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    return await getHasData({
+      indices: apmEventClient.indices,
+      apmEventClient,
+    });
   },
 });
 
@@ -35,41 +38,30 @@ const observabilityOverviewRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
+  handler: async (resources): Promise<ObservabilityOverviewResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
     const { bucketSize, intervalString, start, end } = resources.params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config: resources.config,
       start,
       end,
       kuery: '',
     });
 
-    return withApmSpan('observability_overview', async () => {
-      const [serviceCount, transactionPerMinute] = await Promise.all([
-        getServiceCount({
-          setup,
-          searchAggregatedTransactions,
-          start,
-          end,
-        }),
-        getTransactionsPerMinute({
-          setup,
-          bucketSize,
-          searchAggregatedTransactions,
-          start,
-          end,
-          intervalString,
-        }),
-      ]);
-      return { serviceCount, transactionPerMinute };
+    return getObservabilityOverviewData({
+      apmEventClient,
+      start,
+      end,
+      bucketSize,
+      intervalString,
+      searchAggregatedTransactions,
     });
   },
 });
 
-export const observabilityOverviewRouteRepository =
-  createApmServerRouteRepository()
-    .add(observabilityOverviewRoute)
-    .add(observabilityOverviewHasDataRoute);
+export const observabilityOverviewRouteRepository = {
+  ...observabilityOverviewRoute,
+  ...observabilityOverviewHasDataRoute,
+};

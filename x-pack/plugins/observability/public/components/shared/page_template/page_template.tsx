@@ -5,35 +5,45 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps, EuiErrorBoundary } from '@elastic/eui';
+import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '../../../../../../../src/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaPageTemplate,
+  KibanaPageTemplateKibanaProvider,
+} from '@kbn/shared-ux-page-kibana-template';
+import type {
   KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+  KibanaPageTemplateKibanaDependencies,
+} from '@kbn/shared-ux-page-kibana-template';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
+import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
   | 'children'
   | 'data-test-subj'
   | 'paddingSize'
-  | 'pageBodyProps'
-  | 'pageContentBodyProps'
-  | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
-  | 'template'
   | 'isEmptyState'
   | 'noDataConfig'
 > & {
   showSolutionNav?: boolean;
+  isPageDataLoaded?: boolean;
+  pageSectionProps?: EuiPageSectionProps;
+  bottomBar?: React.ReactNode;
+  bottomBarProps?: _EuiPageBottomBarProps;
 };
 
 export interface ObservabilityPageTemplateDependencies {
@@ -41,6 +51,8 @@ export interface ObservabilityPageTemplateDependencies {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
+  getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
+  guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
 }
 
 export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
@@ -53,17 +65,25 @@ export function ObservabilityPageTemplate({
   navigateToApp,
   navigationSections$,
   showSolutionNav = true,
+  isPageDataLoaded = true,
+  getPageTemplateServices,
+  bottomBar,
+  bottomBarProps,
+  pageSectionProps,
+  guidedOnboardingApi,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
 
+  const { services } = useKibana<ObservabilityAppServices>();
+
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
-      sections.map(({ label, entries }, sectionIndex) => ({
+      sections.map(({ label, entries, isBetaFeature }, sectionIndex) => ({
         id: `${sectionIndex}`,
-        name: label,
+        name: isBetaFeature ? <NavNameWithBetaBadge label={label} /> : label,
         items: entries.map((entry, entryIndex) => {
           const href = getUrlForApp(entry.app, {
             path: entry.path,
@@ -71,21 +91,34 @@ export function ObservabilityPageTemplate({
 
           const isSelected =
             entry.app === currentAppId &&
-            matchPath(currentPath, {
-              path: entry.path,
-              exact: !!entry.matchFullPath,
-              strict: !entry.ignoreTrailingSlash,
-            }) != null;
+            (entry.matchPath
+              ? entry.matchPath(currentPath)
+              : matchPath(currentPath, {
+                  path: entry.path,
+                  exact: !!entry.matchFullPath,
+                  strict: !entry.ignoreTrailingSlash,
+                }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
+          const navId = entry.label.toLowerCase().split(' ').join('_');
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.isNewFeature ? (
+            name: entry.isBetaFeature ? (
+              <NavNameWithBetaBadge label={entry.label} />
+            ) : entry.isNewFeature ? (
               <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
+            ) : entry.isTechnicalPreview ? (
+              <NavNameWithBetaBadge
+                label={entry.label}
+                iconType="beaker"
+                isTechnicalPreview={true}
+              />
             ) : (
               entry.label
             ),
             href,
             isSelected,
+            'data-nav-id': navId,
+            'data-test-subj': `observability-nav-${entry.app}-${navId}`,
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
@@ -119,21 +152,51 @@ export function ObservabilityPageTemplate({
   );
 
   return (
-    <KibanaPageTemplate
-      restrictWidth={false}
-      {...pageTemplateProps}
-      solutionNav={
-        showSolutionNav
-          ? {
-              icon: 'logoObservability',
-              items: sideNavItems,
-              name: sideNavTitle,
-            }
-          : undefined
-      }
-    >
-      {children}
-    </KibanaPageTemplate>
+    <KibanaPageTemplateKibanaProvider {...getPageTemplateServices()}>
+      <ObservabilityTour
+        navigateToApp={navigateToApp}
+        prependBasePath={services?.http?.basePath.prepend}
+        guidedOnboardingApi={guidedOnboardingApi}
+        isPageDataLoaded={isPageDataLoaded}
+        // The tour is dependent on the solution nav, and should not render if it is not visible
+        showTour={showSolutionNav}
+      >
+        {({ isTourVisible }) => {
+          return (
+            <KibanaPageTemplate
+              restrictWidth={false}
+              {...pageTemplateProps}
+              solutionNav={
+                showSolutionNav
+                  ? {
+                      icon: 'logoObservability',
+                      items: sideNavItems,
+                      name: sideNavTitle,
+                      // Only false if tour is active
+                      canBeCollapsed: isTourVisible === false,
+                    }
+                  : undefined
+              }
+            >
+              <EuiErrorBoundary>
+                <KibanaPageTemplate.Section
+                  component="div"
+                  alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                  {...pageSectionProps}
+                >
+                  {children}
+                </KibanaPageTemplate.Section>
+              </EuiErrorBoundary>
+              {bottomBar && (
+                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+                  {bottomBar}
+                </KibanaPageTemplate.BottomBar>
+              )}
+            </KibanaPageTemplate>
+          );
+        }}
+      </ObservabilityTour>
+    </KibanaPageTemplateKibanaProvider>
   );
 }
 

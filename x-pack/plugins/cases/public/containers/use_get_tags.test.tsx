@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useGetTags, UseGetTags } from './use_get_tags';
-import { tags } from './mock';
+import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { useGetTags } from './use_get_tags';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -23,77 +23,26 @@ describe('useGetTags', () => {
     jest.restoreAllMocks();
   });
 
-  it('init', async () => {
-    const { result } = renderHook<string, UseGetTags>(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-    });
-
-    await act(async () => {
-      expect(result.current).toEqual({
-        tags: [],
-        isLoading: true,
-        isError: false,
-        fetchTags: result.current.fetchTags,
-      });
-    });
-  });
-
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+    const { waitForNextUpdate } = renderHook(() => useGetTags(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
+    await waitForNextUpdate();
+    expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
   });
 
-  it('fetch tags', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        tags,
-        isLoading: false,
-        isError: false,
-        fetchTags: result.current.fetchTags,
-      });
-    });
-  });
-
-  it('refetch tags', async () => {
-    const spyOnGetTags = jest.spyOn(api, 'getTags');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      result.current.fetchTags();
-      expect(spyOnGetTags).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  it('unhappy path', async () => {
+  it('displays and error toast when an error occurs', async () => {
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError });
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     spyOnGetTags.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        tags: [],
-        isLoading: false,
-        isError: true,
-        fetchTags: result.current.fetchTags,
-      });
+    const { waitForNextUpdate } = renderHook(() => useGetTags(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
+    await waitForNextUpdate();
+    expect(addError).toBeCalled();
   });
 });

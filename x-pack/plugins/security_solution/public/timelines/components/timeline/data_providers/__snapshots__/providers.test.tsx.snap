@@ -157,7 +157,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={0}
     isLastGroup={false}
     key="droppable-0"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -314,7 +314,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={1}
     isLastGroup={false}
     key="droppable-1"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -471,7 +471,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={2}
     isLastGroup={false}
     key="droppable-2"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -628,7 +628,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={3}
     isLastGroup={false}
     key="droppable-3"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -785,7 +785,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={4}
     isLastGroup={false}
     key="droppable-4"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -942,7 +942,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={5}
     isLastGroup={false}
     key="droppable-5"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -1099,7 +1099,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={6}
     isLastGroup={false}
     key="droppable-6"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -1256,7 +1256,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={7}
     isLastGroup={false}
     key="droppable-7"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -1413,7 +1413,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={8}
     isLastGroup={false}
     key="droppable-8"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -1570,7 +1570,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={9}
     isLastGroup={false}
     key="droppable-9"
-    timelineId="test"
+    timelineId="timeline-test"
   />
   <DataProvidersGroup
     browserFields={Object {}}
@@ -1712,7 +1712,7 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     groupIndex={10}
     isLastGroup={true}
     key="droppable-10"
-    timelineId="test"
+    timelineId="timeline-test"
   />
 </div>
 `;

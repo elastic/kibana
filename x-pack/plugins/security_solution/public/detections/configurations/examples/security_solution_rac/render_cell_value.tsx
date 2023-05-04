@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { ALERT_SEVERITY, ALERT_REASON } from '@kbn/rule-data-utils';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 const reason =
@@ -36,15 +36,17 @@ export const RenderCellValue: React.FC<
   isExpanded,
   linkValues,
   rowIndex,
+  colIndex,
   setCellProps,
-  timelineId,
+  key,
+  scopeId,
 }) => {
   const value =
-    getMappedNonEcsValue({
+    useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
-  const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
+  const draggableId = `${key}-${eventId}-${columnId}-${value}`;
 
   switch (columnId) {
     case 'signal.rule.severity':
@@ -55,6 +57,7 @@ export const RenderCellValue: React.FC<
           field={columnId}
           id={draggableId}
           value={value}
+          scopeId={scopeId}
         >
           <Severity severity={value} />
         </DefaultDraggable>
@@ -75,8 +78,9 @@ export const RenderCellValue: React.FC<
           isExpanded={isExpanded}
           linkValues={linkValues}
           rowIndex={rowIndex}
+          colIndex={colIndex}
           setCellProps={setCellProps}
-          timelineId={timelineId}
+          scopeId={scopeId}
         />
       );
   }

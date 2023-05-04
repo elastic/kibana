@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { MetricExpressionParams } from '../types';
-import { getElasticsearchMetricQuery } from './metric_query';
 import moment from 'moment';
+import {
+  Aggregators,
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../../common/alerting/metrics';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
-  const expressionParams = {
+  const expressionParams: MetricExpressionParams = {
     metric: 'system.is.a.good.puppy.dog',
-    aggType: 'avg',
+    aggType: Aggregators.AVERAGE,
     timeUnit: 'm',
     timeSize: 1,
-  } as MetricExpressionParams;
+    threshold: [1],
+    comparator: Comparator.GT,
+  };
 
   const groupBy = 'host.doggoname';
   const timeframe = {
@@ -24,7 +30,14 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   describe('when passed no filterQuery', () => {
-    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, groupBy);
+    const searchBody = getElasticsearchMetricQuery(
+      expressionParams,
+      timeframe,
+      100,
+      true,
+      void 0,
+      groupBy
+    );
     test('includes a range filter', () => {
       expect(
         searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
@@ -47,6 +60,9 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      100,
+      true,
+      void 0,
       groupBy,
       filterQuery
     );

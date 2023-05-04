@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import uuid from 'uuid';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
@@ -52,6 +52,7 @@ export const createEndpointTrustedAppsList = async ({
         created_by: user,
         description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
         entries: undefined,
+        expire_time: undefined,
         immutable: false,
         item_id: undefined,
         list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -60,7 +61,7 @@ export const createEndpointTrustedAppsList = async ({
         name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
         os_types: [],
         tags: [],
-        tie_breaker_id: tieBreaker ?? uuid.v4(),
+        tie_breaker_id: tieBreaker ?? uuidv4(),
         type: 'endpoint',
         updated_by: user,
         version,
@@ -72,7 +73,7 @@ export const createEndpointTrustedAppsList = async ({
     );
     return transformSavedObjectToExceptionList({ savedObject });
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       return null;
     } else {
       throw err;

@@ -57,6 +57,6 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['monitoring', 'datastore'],
+    integrationBrowserCategories: ['monitoring', 'observability', 'containers'],
   };
 }

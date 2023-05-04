@@ -16,7 +16,7 @@ const Text = styled.span`
   -webkit-line-clamp: ${LINE_CLAMP};
   -webkit-box-orient: vertical;
   overflow: hidden;
-  word-break: normal;
+  word-break: break-word;
 `;
 
 interface Props {
@@ -26,5 +26,6 @@ interface Props {
 const TruncatedTextComponent: React.FC<Props> = ({ text }) => {
   return <Text title={text}>{text}</Text>;
 };
+TruncatedTextComponent.displayName = 'TruncatedText';
 
 export const TruncatedText = React.memo(TruncatedTextComponent);

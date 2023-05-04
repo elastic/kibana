@@ -6,36 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 
 import './index.scss';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   createSavedObjectClass,
   SavedObjectDecoratorRegistry,
   SavedObjectDecoratorConfig,
 } from './saved_object';
-import { DataPublicPluginStart } from '../../data/public';
-import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
+import { setStartServices } from './kibana_services';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
 }
 
 export interface SavedObjectsStart {
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
-  /** @deprecated */
-  settings: {
-    /** @deprecated */
-    getPerPage: () => number;
-    /** @deprecated */
-    getListingLimit: () => number;
-  };
 }
 
 export interface SavedObjectsStartDeps {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export class SavedObjectsPublicPlugin
@@ -48,11 +46,12 @@ export class SavedObjectsPublicPlugin
       registerDecorator: (config) => this.decoratorRegistry.register(config),
     };
   }
-  public start(core: CoreStart, { data }: SavedObjectsStartDeps) {
+  public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
+    setStartServices(core);
     return {
       SavedObjectClass: createSavedObjectClass(
         {
-          indexPatterns: data.indexPatterns,
+          dataViews,
           savedObjectsClient: core.savedObjects.client,
           search: data.search,
           chrome: core.chrome,
@@ -60,10 +59,6 @@ export class SavedObjectsPublicPlugin
         },
         this.decoratorRegistry
       ),
-      settings: {
-        getPerPage: () => core.uiSettings.get(PER_PAGE_SETTING),
-        getListingLimit: () => core.uiSettings.get(LISTING_LIMIT_SETTING),
-      },
     };
   }
 }

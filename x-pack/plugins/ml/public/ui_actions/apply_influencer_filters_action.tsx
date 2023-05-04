@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom } from 'rxjs';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 
+const supportedApps = [DASHBOARD_APP_ID];
+
 export function createApplyInfluencerFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<SwimLaneDrilldownContext>({
+): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+  return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
     getIconType(context: SwimLaneDrilldownContext): string {
@@ -69,14 +72,18 @@ export function createApplyInfluencerFiltersAction(
       );
     },
     async isCompatible({ embeddable, data }) {
+      const [{ application }] = await getStartServices();
+      const appId = await firstValueFrom(application.currentAppId$);
+
       // Only compatible with view by influencer swim lanes and single selection
       return (
         embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         data !== undefined &&
         data.type === SWIMLANE_TYPE.VIEW_BY &&
         data.viewByFieldName !== VIEW_BY_JOB_LABEL &&
-        data.lanes.length === 1
+        data.lanes.length === 1 &&
+        supportedApps.includes(appId!)
       );
     },
-  });
+  };
 }

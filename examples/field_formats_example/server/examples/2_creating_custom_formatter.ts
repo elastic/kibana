@@ -8,7 +8,7 @@
 
 // This is server-side continuation of examples/field_formats_example/public/examples/2_creating_custom_formatter.ts
 
-import { FieldFormatsSetup } from '../../../../src/plugins/field_formats/server';
+import { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
 
 import { ExampleCurrencyFormat } from '../../common';
 

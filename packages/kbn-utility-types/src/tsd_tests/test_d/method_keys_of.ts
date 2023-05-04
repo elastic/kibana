@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { MethodKeysOf } from '../..';
+import { MethodKeysOf } from '../../..';
 
 class Test {
   public name: string = '';

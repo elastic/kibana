@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ml } from './ml_api_service';
 
-import { getToastNotificationService } from '../services/toast_notification_service';
+import { getToastNotificationService } from './toast_notification_service';
 import { isWebUrl } from '../util/url_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -35,6 +35,7 @@ class JobService {
       start: undefined,
       end: undefined,
       calendars: undefined,
+      autoSetTimeRange: false,
     };
 
     this.jobs = [];
@@ -378,16 +379,16 @@ class JobService {
     return ml.jobs.stopDatafeeds(dIds);
   }
 
-  deleteJobs(jIds) {
-    return ml.jobs.deleteJobs(jIds);
+  deleteJobs(jIds, deleteUserAnnotations) {
+    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations);
   }
 
   closeJobs(jIds) {
     return ml.jobs.closeJobs(jIds);
   }
 
-  resetJobs(jIds) {
-    return ml.jobs.resetJobs(jIds);
+  resetJobs(jIds, deleteUserAnnotations) {
+    return ml.jobs.resetJobs(jIds, deleteUserAnnotations);
   }
 
   validateDetector(detector) {

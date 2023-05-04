@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node", "mocha"],
+    "paths": {
+      "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
+      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"]
+    }
+  },
+  "include": [
+    "pipeline-utils/**/*",
+    "pipelines/**/*",
+    "scripts/**/*",
+    "pipelines/flaky_tests/groups.json",
+    "pull_requests.json"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

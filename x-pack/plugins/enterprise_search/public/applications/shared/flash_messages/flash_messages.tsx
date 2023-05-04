@@ -19,11 +19,11 @@ export const FlashMessages: React.FC = ({ children }) => {
 
   return (
     <div aria-live="polite" data-test-subj="FlashMessages">
-      {messages.map(({ type, message, description }, index) => (
+      {messages.map(({ type, message, description, iconType }, index) => (
         <Fragment key={index}>
           <EuiCallOut
             color={FLASH_MESSAGE_TYPES[type].color}
-            iconType={FLASH_MESSAGE_TYPES[type].iconType}
+            iconType={iconType ?? FLASH_MESSAGE_TYPES[type].iconType}
             title={message}
           >
             {description}

@@ -9,6 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import '../../../test/global_mocks';
+import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -19,6 +20,23 @@ import {
 } from './constants';
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -76,10 +94,10 @@ const componentTemplates = [componentTemplate1, componentTemplate2];
 describe('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
@@ -89,7 +107,6 @@ describe('<TemplateCreate />', () => {
   });
 
   afterAll(() => {
-    server.restore();
     jest.useRealTimers();
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
   });
@@ -97,7 +114,7 @@ describe('<TemplateCreate />', () => {
   describe('composable index template', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
     });
 
@@ -120,6 +137,7 @@ describe('<TemplateCreate />', () => {
 
       await act(async () => {
         actions.clickNextButton();
+        jest.advanceTimersByTime(0);
       });
       component.update();
 
@@ -130,7 +148,7 @@ describe('<TemplateCreate />', () => {
   describe('legacy index template', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup(true);
+        testBed = await setup(httpSetup, true);
       });
     });
 
@@ -150,7 +168,7 @@ describe('<TemplateCreate />', () => {
   describe('form validation', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
     });
@@ -159,6 +177,7 @@ describe('<TemplateCreate />', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        jest.advanceTimersByTime(0);
       });
 
       it('should set the correct page title', async () => {
@@ -367,7 +386,7 @@ describe('<TemplateCreate />', () => {
           httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
 
           await act(async () => {
-            testBed = await setup();
+            testBed = await setup(httpSetup);
           });
           testBed.component.update();
           await navigateToMappingsStep();
@@ -415,7 +434,7 @@ describe('<TemplateCreate />', () => {
   describe('review (step 6)', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
 
@@ -445,10 +464,10 @@ describe('<TemplateCreate />', () => {
       test('should have 3 tabs', () => {
         const { find } = testBed;
 
-        expect(find('summaryTabContent').find('.euiTab').length).toBe(3);
+        expect(find('summaryTabContent').find('button.euiTab').length).toBe(3);
         expect(
           find('summaryTabContent')
-            .find('.euiTab')
+            .find('button.euiTab')
             .map((t) => t.text())
         ).toEqual(['Summary', 'Preview', 'Request']);
       });
@@ -472,7 +491,7 @@ describe('<TemplateCreate />', () => {
 
     it('should render a warning message if a wildcard is used as an index pattern', async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
 
@@ -505,7 +524,7 @@ describe('<TemplateCreate />', () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
 
@@ -534,49 +553,50 @@ describe('<TemplateCreate />', () => {
         actions.clickNextButton();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
-      const expected = {
-        name: TEMPLATE_NAME,
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
-        composedOf: ['test_component_template_1'],
-        template: {
-          settings: SETTINGS,
-          mappings: {
-            properties: {
-              [BOOLEAN_MAPPING_FIELD.name]: {
-                type: BOOLEAN_MAPPING_FIELD.type,
-              },
-              [TEXT_MAPPING_FIELD.name]: {
-                type: TEXT_MAPPING_FIELD.type,
-              },
-              [KEYWORD_MAPPING_FIELD.name]: {
-                type: KEYWORD_MAPPING_FIELD.type,
-              },
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: TEMPLATE_NAME,
+            indexPatterns: DEFAULT_INDEX_PATTERNS,
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: false,
+              isLegacy: false,
             },
-          },
-          aliases: ALIASES,
-        },
-        _kbnMeta: {
-          type: 'default',
-          isLegacy: false,
-          hasDatastream: false,
-        },
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+            composedOf: ['test_component_template_1'],
+            template: {
+              settings: SETTINGS,
+              mappings: {
+                properties: {
+                  [BOOLEAN_MAPPING_FIELD.name]: {
+                    type: BOOLEAN_MAPPING_FIELD.type,
+                  },
+                  [TEXT_MAPPING_FIELD.name]: {
+                    type: TEXT_MAPPING_FIELD.type,
+                  },
+                  [KEYWORD_MAPPING_FIELD.name]: {
+                    type: KEYWORD_MAPPING_FIELD.type,
+                  },
+                },
+              },
+              aliases: ALIASES,
+            },
+          }),
+        })
+      );
     });
 
     it('should surface the API errors from the put HTTP request', async () => {
       const { component, actions, find, exists } = testBed;
 
       const error = {
-        status: 409,
+        statusCode: 409,
         error: 'Conflict',
         message: `There is already a template with name '${TEMPLATE_NAME}'`,
       };
 
-      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setCreateTemplateResponse(undefined, error);
 
       await act(async () => {
         actions.clickNextButton();
@@ -586,5 +606,34 @@ describe('<TemplateCreate />', () => {
       expect(exists('saveTemplateError')).toBe(true);
       expect(find('saveTemplateError').text()).toContain(error.message);
     });
+  });
+
+  test('preview data stream', async () => {
+    await act(async () => {
+      testBed = await setup(httpSetup);
+    });
+    testBed.component.update();
+
+    const { actions } = testBed;
+    // Logistics
+    await actions.completeStepOne({
+      name: TEMPLATE_NAME,
+      indexPatterns: DEFAULT_INDEX_PATTERNS,
+      dataStream: {},
+    });
+
+    await act(async () => {
+      await actions.previewTemplate();
+    });
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      `${API_BASE_PATH}/index_templates/simulate`,
+      expect.objectContaining({
+        body: JSON.stringify({
+          index_patterns: DEFAULT_INDEX_PATTERNS,
+          data_stream: {},
+        }),
+      })
+    );
   });
 });

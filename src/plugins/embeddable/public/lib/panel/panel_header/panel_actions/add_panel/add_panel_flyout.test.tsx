@@ -16,9 +16,9 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mountWithIntl as mount } from '@kbn/test/jest';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { coreMock } from '../../../../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { embeddablePluginMock } from '../../../../../mocks';
 

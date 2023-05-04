@@ -12,10 +12,10 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
-  AgentPolicyAction,
-  BaseAgentActionSOAttributes,
-  AgentActionSOAttributes,
-  AgentPolicyActionSOAttributes,
+  AgentActionType,
+  ActionStatus,
+  ActionErrorResult,
+  CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -32,12 +32,19 @@ export type {
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
+  ShipperOutput,
   Output,
   NewOutput,
   OutputSOAttributes,
   OutputType,
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
+  NewFleetServerHost,
+  FleetServerHost,
+  FleetServerHostSOAttributes,
+  NewFleetProxy,
+  FleetProxy,
+  FleetProxySOAttributes,
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
@@ -50,6 +57,7 @@ export type {
   EsAssetReference,
   KibanaAssetReference,
   RegistryPackage,
+  BundledPackage,
   InstallablePackage,
   AssetType,
   Installable,
@@ -62,6 +70,8 @@ export type {
   RegistrySearchResult,
   IndexTemplateEntry,
   IndexTemplateMappings,
+  TemplateMap,
+  TemplateMapEntry,
   Settings,
   SettingsSOAttributes,
   InstallType,
@@ -73,13 +83,17 @@ export type {
   FleetServerAgent,
   FleetServerAgentAction,
   FleetServerPolicy,
-} from '../../common';
-export {
-  ElasticsearchAssetType,
-  KibanaAssetType,
-  KibanaSavedObjectType,
-  dataTypes,
-} from '../../common';
+  FullAgentPolicyInputStream,
+  DownloadSourceBase,
+  DownloadSource,
+  DownloadSourceAttributes,
+  PackageVerificationStatus,
+  BulkInstallPackageInfo,
+  PackageAssetReference,
+  ExperimentalDataStreamFeature,
+} from '../../common/types';
+export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
+export { dataTypes } from '../../common/constants';
 
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
@@ -90,6 +104,12 @@ export interface BulkActionResult {
   id: string;
   success: boolean;
   error?: Error;
+}
+
+import type { PackageVerificationStatus } from '../../common/types';
+export interface PackageVerificationResult {
+  verificationKeyId?: string;
+  verificationStatus: PackageVerificationStatus;
 }
 
 export * from './models';

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
-import { mappingFromFieldMap } from '../../../../rule_registry/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 
-import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
+import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
@@ -30,11 +31,11 @@ export const createRuleDataClient = ({
     feature: ownerFeatureId,
     registrationContext,
     dataset: Dataset.alerts,
-    componentTemplateRefs: [],
+    componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
+        mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
       },
     ],
   });

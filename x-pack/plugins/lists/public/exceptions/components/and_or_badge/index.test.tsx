@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-
-import { AndOrBadge } from './';
+import { AndOrBadge } from '.';
 
 describe('AndOrBadge', () => {
   test('it renders top and bottom antenna bars when "includeAntennas" is true', () => {

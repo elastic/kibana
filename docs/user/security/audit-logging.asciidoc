@@ -2,7 +2,7 @@
 [[xpack-security-audit-logging]]
 === Audit logs
 
-Audit logging is a https://www.elastic.co/subscriptions[subscription feature] that you can enable to keep track of security-related events,
+Audit logging is a {subscriptions}[subscription feature] that you can enable to keep track of security-related events,
 such as authorization success and failures. Logging these events enables you to monitor {kib} for suspicious activity and provides evidence
 in the event of an attack.
 
@@ -15,8 +15,10 @@ by cluster-wide privileges. For more information on enabling audit logging in
 [NOTE]
 ============================================================================
 Audit logs are **disabled** by default. To enable this functionality, you must
-set `xpack.security.audit.enabled` to `true` in `kibana.yml`, and optionally configure
-an <<audit-logging-settings, appender>> to write the audit log to a location of your choosing.
+set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
+
+You can optionally configure audit logs location, file/rolling file appenders and 
+ignore filters using <<audit-logging-settings>>.
 ============================================================================
 
 [[xpack-security-ecs-audit-logging]]
@@ -24,8 +26,9 @@ an <<audit-logging-settings, appender>> to write the audit log to a location of 
 
 Refer to the table of events that can be logged for auditing purposes. 
 
-Each event is broken down into <<field-event-category, category>>, <<field-event-type, type>>, <<field-event-action, action>> and <<field-event-outcome, outcome>> fields
-to make it easy to filter, query and aggregate the resulting logs. 
+Each event is broken down into <<field-event-category, category>>, <<field-event-type, type>>, <<field-event-action, action>> and
+<<field-event-outcome, outcome>> fields to make it easy to filter, query and aggregate the resulting logs. The <<field-trace-id, trace.id>>
+field can be used to correlate multiple events that originate from the same request.
 
 Refer to <<xpack-security-ecs-audit-schema>> for a table of fields that get logged with audit event. 
 
@@ -53,8 +56,11 @@ Refer to the corresponding {es} logs for potential write errors.
 | `user_logout`
 | `unknown` | User is logging out.
 
+| `session_cleanup`
+| `unknown` | Removing invalid or expired session.
+
 | `access_agreement_acknowledged`
-| N/A | User has acknowledged the access agreement.
+| n/a | User has acknowledged the access agreement.
 
 3+a|
 ===== Category: database
@@ -84,6 +90,28 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a space.
 | `failure` | User is not authorized to create a space.
 
+.2+| `case_create`
+| `unknown` | User is creating a case.
+| `failure` | User is not authorized to create a case.
+
+.2+| `case_configuration_create`
+| `unknown` | User is creating a case configuration.
+| `failure` | User is not authorized to create a case configuration.
+
+.2+| `case_comment_create`
+| `unknown` | User is creating a case comment.
+| `failure` | User is not authorized to create a case comment.
+
+.2+| `case_comment_bulk_create`
+| `unknown` | User is creating multiple case comments.
+| `failure` | User is not authorized to create multiple case comments.
+
+.1+| `case_user_action_create_comment`
+| `success` | User has created a case comment.
+
+.1+| `case_user_action_create_case`
+| `success` | User has created a case.
+
 3+a|
 ====== Type: change
 
@@ -95,17 +123,17 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating a saved object.
 | `failure` | User is not authorized to update a saved object.
 
-.2+| `saved_object_add_to_spaces`
-| `unknown` | User is adding a saved object to other spaces.
-| `failure` | User is not authorized to add a saved object to other spaces.
-
-.2+| `saved_object_delete_from_spaces`
-| `unknown` | User is removing a saved object from other spaces.
-| `failure` | User is not authorized to remove a saved object from other spaces.
+.2+| `saved_object_update_objects_spaces`
+| `unknown` | User is adding and/or removing a saved object to/from other spaces.
+| `failure` | User is not authorized to add or remove a saved object to or from other spaces.
 
 .2+| `saved_object_remove_references`
 | `unknown` | User is removing references to a saved object.
 | `failure` | User is not authorized to remove references to a saved object.
+
+.2+| `saved_object_collect_multinamespace_references`
+| `success` | User has accessed references to a multi-space saved object.
+| `failure` | User is not authorized to access references to a multi-space saved object.
 
 .2+| `connector_update`
 | `unknown` | User is updating a connector.
@@ -151,6 +179,57 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating an alert.
 | `failure` | User is not authorized to update an alert.
 
+.2+| `rule_snooze`
+| `unknown` | User is snoozing a rule.
+| `failure` | User is not authorized to snooze a rule.
+
+.2+| `rule_unsnooze`
+| `unknown` | User is unsnoozing a rule.
+| `failure` | User is not authorized to unsnooze a rule.
+
+.2+| `case_update`
+| `unknown` | User is updating a case.
+| `failure` | User is not authorized to update a case.
+
+.2+| `case_push`
+| `unknown` | User is pushing a case to an external service.
+| `failure` | User is not authorized to push a case to an external service.
+
+.2+| `case_configuration_update`
+| `unknown` | User is updating a case configuration.
+| `failure` | User is not authorized to update a case configuration.
+
+.2+| `case_comment_update`
+| `unknown` | User is updating a case comment.
+| `failure` | User is not authorized to update a case comment.
+
+.1+| `case_user_action_add_case_assignees`
+| `success` | User has added a case assignee.
+
+.1+| `case_user_action_update_case_connector`
+| `success` | User has updated a case connector.
+
+.1+| `case_user_action_update_case_description`
+| `success` | User has updated a case description.
+
+.1+| `case_user_action_update_case_settings`
+| `success` | User has updated the case settings.
+
+.1+| `case_user_action_update_case_severity`
+| `success` | User has updated the case severity.
+
+.1+| `case_user_action_update_case_status`
+| `success` | User has updated the case status.
+
+.1+| `case_user_action_pushed_case`
+| `success` | User has pushed a case to an external service.
+
+.1+| `case_user_action_add_case_tags`
+| `success` | User has added tags to a case.
+
+.1+| `case_user_action_update_case_title`
+| `success` | User has updated the case title.
+
 3+a|
 ====== Type: deletion
 
@@ -177,6 +256,30 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `space_delete`
 | `unknown` | User is deleting a space.
 | `failure` | User is not authorized to delete a space.
+
+.2+| `case_delete`
+| `unknown` | User is deleting a case.
+| `failure` | User is not authorized to delete a case.
+
+.2+| `case_comment_delete_all`
+| `unknown` | User is deleting all comments associated with a case.
+| `failure` | User is not authorized to delete all comments associated with a case.
+
+.2+| `case_comment_delete`
+| `unknown` | User is deleting a case comment.
+| `failure` | User is not authorized to delete a case comment.
+
+.1+| `case_user_action_delete_case_assignees`
+| `success` | User has removed a case assignee.
+
+.1+| `case_user_action_delete_comment`
+| `success` | User has deleted a case comment.
+
+.1+| `case_user_action_delete_case`
+| `success` | User has deleted a case.
+
+.1+| `case_user_action_delete_case_tags`
+| `success` | User has removed tags from a case.
 
 3+a|
 ====== Type: access
@@ -209,6 +312,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a rule.
 | `failure` | User is not authorized to access a rule.
 
+.2+| `rule_get_execution_log`
+| `success` | User has accessed execution log for a rule.
+| `failure` | User is not authorized to access execution log for a rule.
+
 .2+| `rule_find`
 | `success` | User has accessed a rule as part of a search operation.
 | `failure` | User is not authorized to search for rules.
@@ -228,6 +335,90 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `alert_find`
 | `success` | User has accessed an alert as part of a search operation.
 | `failure` | User is not authorized to access alerts.
+
+.2+| `case_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_bulk_get`
+| `success` | User has accessed multiple cases.
+| `failure` | User is not authorized to access multiple cases.
+
+.2+| `case_resolve`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_find`
+| `success` | User has accessed a case as part of a search operation.
+| `failure` | User is not authorized to search for cases.
+
+.2+| `case_ids_by_alert_id_get`
+| `success` | User has accessed cases.
+| `failure` | User is not authorized to access cases.
+
+.2+| `case_get_metrics`
+| `success` | User has accessed metrics for a case.
+| `failure` | User is not authorized to access metrics for a case.
+
+.2+| `cases_get_metrics`
+| `success` | User has accessed metrics for cases.
+| `failure` | User is not authorized to access metrics for cases.
+
+.2+| `case_configuration_find`
+| `success` | User has accessed a case configuration as part of a search operation.
+| `failure` | User is not authorized to search for case configurations.
+
+.2+| `case_comment_get_metrics`
+| `success` | User has accessed metrics for case comments.
+| `failure` | User is not authorized to access metrics for case comments.
+
+.2+| `case_comment_alerts_attach_to_case`
+| `success` | User has accessed case alerts.
+| `failure` | User is not authorized to access case alerts.
+
+.2+| `case_comment_get`
+| `success` | User has accessed a case comment.
+| `failure` | User is not authorized to access a case comment.
+
+.2+| `case_comment_bulk_get`
+| `success` | User has accessed multiple case comments.
+| `failure` | User is not authorized to access multiple case comments.
+
+.2+| `case_comment_get_all`
+| `success` | User has accessed case comments.
+| `failure` | User is not authorized to access case comments.
+
+.2+| `case_comment_find`
+| `success` | User has accessed a case comment as part of a search operation.
+| `failure` | User is not authorized to search for case comments.
+
+.2+| `case_tags_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_reporters_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
+.2+| `case_find_statuses`
+| `success` | User has accessed a case as part of a search operation.
+| `failure` | User is not authorized to search for cases.
+
+.2+| `case_user_actions_get`
+| `success` | User has accessed the user activity of a case.
+| `failure` | User is not authorized to access the user activity of a case.
+
+.2+| `case_user_actions_find`
+| `success` | User has accessed the user activity of a case as part of a search operation.
+| `failure` | User is not authorized to access the user activity of a case.
+
+.2+| `case_user_action_get_metrics`
+| `success` | User has accessed metrics for the user activity of a case.
+| `failure` | User is not authorized to access metrics for the user activity of a case.
+
+.2+| `case_connectors_get`
+| `success` | User has accessed the connectors of a case.
+| `failure` | User is not authorized to access the connectors of a case.
 
 3+a|
 ===== Category: web
@@ -294,7 +485,11 @@ Possible values:
 `deletion`
 
 | [[field-event-outcome]] `event.outcome`
-| Denotes whether the event represents a success or failure. 
+a| Denotes whether the event represents a success or failure: 
+
+* Any actions that the user is not authorized to perform are logged with outcome:  `failure`
+* Authorized read operations are only logged after successfully fetching the data from {es} with outcome: `success`
+* Authorized create, update, or delete operations are logged before attempting the operation in {es} with outcome: `unknown`
 
 Possible values:
 `success`,
@@ -305,6 +500,9 @@ Possible values:
 
 | *Field*
 | *Description*
+
+| `user.id`
+| Unique identifier of the user across sessions (See {ref}/user-profile.html[user profiles]).
 
 | `user.name`
 | Login name of the user.
@@ -385,13 +583,21 @@ Example: `[marketing]`
 | *Field*
 | *Description*
 
+| `client.ip`
+| Client IP address.
+
 | `http.request.method`
 | HTTP request method.
 
 Example: `get`, `post`, `put`, `delete`
 
+| `http.request.headers.x-forwarded-for`
+| `X-Forwarded-For` request header used to identify the originating client IP address when connecting through proxy servers.
+
+Example: `161.66.20.177, 236.198.214.101`
+
 | `url.domain`
-| Domain of the url.
+| Domain of the URL.
 
 Example: `www.elastic.co`
 
@@ -420,7 +626,57 @@ Example: `https`
 | *Field*
 | *Description*
 
-| `trace.id`
-| Unique identifier allowing events of the same transaction from {kib} and {es} to be be correlated.
+| [[field-trace-id]] `trace.id`
+| Unique identifier allowing events of the same transaction from {kib} and {es} to be correlated.
 
 |======
+
+[[xpack-security-ecs-audit-correlation]]
+==== Correlating audit events
+
+Audit events can be correlated in two ways:
+
+1. Multiple {kib} audit events that resulted from the same request can be correlated together.
+2. If {ref}/enable-audit-logging.html[{es} audit logging] is enabled, {kib} audit events from one request can be correlated with backend
+   calls that create {es} audit events.
+
+NOTE: The examples below are simplified, many fields have been omitted and values have been shortened for clarity.
+
+===== Example 1: correlating multiple {kib} audit events
+
+When "thom" creates a new alerting rule, five audit events are written:
+
+[source,json]
+-------------
+{"event":{"action":"http_request","category":["web"],"outcome":"unknown"},"http":{"request":{"method":"post"}},"url":{"domain":"localhost","path":"/api/alerting/rule","port":5601,"scheme":"https"},"user":{"name":"thom","roles":["superuser"]},"kibana":{"space_id":"default","session_id":"3dHCZRB..."},"@timestamp":"2022-01-25T13:05:34.449-05:00","message":"User is requesting [/api/alerting/rule] endpoint","trace":{"id":"e300e06..."}}
+{"event":{"action":"space_get","category":["database"],"type":["access"],"outcome":"success"},"kibana":{"space_id":"default","session_id":"3dHCZRB...","saved_object":{"type":"space","id":"default"}},"user":{"name":"thom","roles":["superuser"]},"@timestamp":"2022-01-25T13:05:34.454-05:00","message":"User has accessed space [id=default]","trace":{"id":"e300e06..."}}
+{"event":{"action":"connector_get","category":["database"],"type":["access"],"outcome":"success"},"kibana":{"space_id":"default","session_id":"3dHCZRB...","saved_object":{"type":"action","id":"5e3b1ae..."}},"user":{"name":"thom","roles":["superuser"]},"@timestamp":"2022-01-25T13:05:34.948-05:00","message":"User has accessed connector [id=5e3b1ae...]","trace":{"id":"e300e06..."}}
+{"event":{"action":"connector_get","category":["database"],"type":["access"],"outcome":"success"},"kibana":{"space_id":"default","session_id":"3dHCZRB...","saved_object":{"type":"action","id":"5e3b1ae..."}},"user":{"name":"thom","roles":["superuser"]},"@timestamp":"2022-01-25T13:05:34.956-05:00","message":"User has accessed connector [id=5e3b1ae...]","trace":{"id":"e300e06..."}}
+{"event":{"action":"rule_create","category":["database"],"type":["creation"],"outcome":"unknown"},"kibana":{"space_id":"default","session_id":"3dHCZRB...","saved_object":{"type":"alert","id":"64517c3..."}},"user":{"name":"thom","roles":["superuser"]},"@timestamp":"2022-01-25T13:05:34.956-05:00","message":"User is creating rule [id=64517c3...]","trace":{"id":"e300e06..."}}
+-------------
+
+All of these audit events can be correlated together by the same `trace.id` value `"e300e06..."`. The first event is the HTTP API call, the
+next audit events are checks to validate the space and the connectors, and the last audit event is the actual rule creation.
+
+===== Example 2: correlating a {kib} audit event with {es} audit events
+
+When "thom" logs in, a "user_login" {kib} audit event is written:
+
+[source,json]
+-------------
+{"event":{"action":"user_login","category":["authentication"],"outcome":"success"},"kibana":{"session_id":"ab93zdA..."},"user":{"name":"thom","roles":["superuser"]},"@timestamp":"2022-01-25T09:40:39.267-05:00","message":"User [thom] has logged in using basic provider [name=basic]","trace":{"id":"818cbf3..."}}
+-------------
+
+The `trace.id` value `"818cbf3..."` in the {kib} audit event can be correlated with the `opaque_id` value in these six {es} audit events:
+
+[source,json]
+-------------
+{"type":"audit", "timestamp":"2022-01-25T09:40:38,604-0500", "event.action":"access_granted", "user.name":"thom", "user.roles":["superuser"], "request.id":"YCx8wxs...", "action":"cluster:admin/xpack/security/user/authenticate", "request.name":"AuthenticateRequest", "opaque_id":"818cbf3..."}
+{"type":"audit", "timestamp":"2022-01-25T09:40:38,613-0500", "event.action":"access_granted", "user.name":"kibana_system", "user.roles":["kibana_system"], "request.id":"Ksx73Ad...", "action":"indices:data/write/index", "request.name":"IndexRequest", "indices":[".kibana_security_session_1"], "opaque_id":"818cbf3..."}
+{"type":"audit", "timestamp":"2022-01-25T09:40:38,613-0500", "event.action":"access_granted", "user.name":"kibana_system", "user.roles":["kibana_system"], "request.id":"Ksx73Ad...", "action":"indices:data/write/bulk", "request.name":"BulkRequest", "opaque_id":"818cbf3..."}
+{"type":"audit", "timestamp":"2022-01-25T09:40:38,613-0500", "event.action":"access_granted", "user.name":"kibana_system", "user.roles":["kibana_system"], "request.id":"Ksx73Ad...", "action":"indices:data/write/bulk[s]", "request.name":"BulkShardRequest", "indices":[".kibana_security_session_1"], "opaque_id":"818cbf3..."}
+{"type":"audit", "timestamp":"2022-01-25T09:40:38,613-0500", "event.action":"access_granted", "user.name":"kibana_system", "user.roles":["kibana_system"], "request.id":"Ksx73Ad...", "action":"indices:data/write/index:op_type/create", "request.name":"BulkItemRequest", "indices":[".kibana_security_session_1"], "opaque_id":"818cbf3..."}
+{"type":"audit", "timestamp":"2022-01-25T09:40:38,613-0500", "event.action":"access_granted", "user.name":"kibana_system", "user.roles":["kibana_system"], "request.id":"Ksx73Ad...", "action":"indices:data/write/bulk[s][p]", "request.name":"BulkShardRequest", "indices":[".kibana_security_session_1"], "opaque_id":"818cbf3..."}
+-------------
+
+The {es} audit events show that "thom" authenticated, then subsequently "kibana_system" created a session for that user.

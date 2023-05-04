@@ -5,99 +5,45 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useActionTypes, UseActionTypesResponse } from './use_action_types';
-import { actionTypesMock } from './mock';
+import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import { useGetActionTypes } from './use_action_types';
+import { useToasts } from '../../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
 describe('useActionTypes', () => {
+  let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    appMockRenderer = createAppMockRenderer();
   });
 
-  test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseActionTypesResponse>(() =>
-        useActionTypes()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        loading: true,
-        actionTypes: [],
-        refetchActionTypes: result.current.refetchActionTypes,
-      });
+  it('should fetch action types', async () => {
+    const spy = jest.spyOn(api, 'fetchActionTypes');
+    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+      wrapper: appMockRenderer.AppWrapper,
     });
+
+    await waitForNextUpdate();
+    expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
   });
 
-  test('fetch action types', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseActionTypesResponse>(() =>
-        useActionTypes()
-      );
-
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        loading: false,
-        actionTypes: actionTypesMock,
-        refetchActionTypes: result.current.refetchActionTypes,
-      });
-    });
-  });
-
-  test('refetch actionTypes', async () => {
-    const spyOnfetchActionTypes = jest.spyOn(api, 'fetchActionTypes');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseActionTypesResponse>(() =>
-        useActionTypes()
-      );
-
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      result.current.refetchActionTypes();
-      expect(spyOnfetchActionTypes).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  test('set isLoading to true when refetching actionTypes', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseActionTypesResponse>(() =>
-        useActionTypes()
-      );
-
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      result.current.refetchActionTypes();
-
-      expect(result.current.loading).toBe(true);
-    });
-  });
-
-  test('unhappy path', async () => {
-    const spyOnfetchActionTypes = jest.spyOn(api, 'fetchActionTypes');
-    spyOnfetchActionTypes.mockImplementation(() => {
+  it('should show a toast eror message if failed to fetch', async () => {
+    const spy = jest.spyOn(api, 'fetchActionTypes');
+    spy.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseActionTypesResponse>(() =>
-        useActionTypes()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        loading: false,
-        actionTypes: [],
-        refetchActionTypes: result.current.refetchActionTypes,
-      });
+    const addErrorMock = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
+    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+      wrapper: appMockRenderer.AppWrapper,
     });
+    await waitForNextUpdate();
+    expect(addErrorMock).toHaveBeenCalled();
   });
 });

@@ -5,27 +5,47 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FieldHook } from '../../shared_imports';
+import React from 'react';
+import { useController } from 'react-hook-form';
+import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { AgentsTable } from '../../agents/agents_table';
-import { AgentSelection } from '../../agents/types';
+import type { AgentSelection } from '../../agents/types';
 
-interface AgentsTableFieldProps {
-  field: FieldHook<AgentSelection>;
-}
+const checkAgentsLength = (agentsSelection: AgentSelection) => {
+  if (!isEmpty(agentsSelection)) {
+    const isValid = !!(
+      agentsSelection.allAgentsSelected ||
+      agentsSelection.agents?.length ||
+      agentsSelection.platformsSelected?.length ||
+      agentsSelection.policiesSelected?.length
+    );
 
-const AgentsTableFieldComponent: React.FC<AgentsTableFieldProps> = ({ field }) => {
-  const { value, setValue } = field;
-  const handleChange = useCallback(
-    (props) => {
-      if (props !== value) {
-        return setValue(props);
-      }
+    return !isValid
+      ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsMissingErrorMessage', {
+          defaultMessage: 'Agents is a required field',
+        })
+      : undefined;
+  }
+
+  return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsMissingErrorMessage', {
+    defaultMessage: 'Agents is a required field',
+  });
+};
+
+const AgentsTableFieldComponent: React.FC<{}> = () => {
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'agentSelection',
+    rules: {
+      validate: checkAgentsLength,
     },
-    [value, setValue]
-  );
+    defaultValue: {},
+  });
 
-  return <AgentsTable agentSelection={value} onChange={handleChange} />;
+  return <AgentsTable agentSelection={value} onChange={onChange} error={error?.message} />;
 };
 
 export const AgentsTableField = React.memo(AgentsTableFieldComponent);

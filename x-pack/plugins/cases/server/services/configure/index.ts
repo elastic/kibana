@@ -5,56 +5,47 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   SavedObject,
-  SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
+import type { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,
   transformESConnectorOrUseDefault,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import { ESCasesConfigureAttributes } from './types';
-
-interface ClientArgs {
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}
-
-interface GetCaseConfigureArgs extends ClientArgs {
-  configurationId: string;
-}
-interface FindCaseConfigureArgs extends ClientArgs {
-  options?: SavedObjectFindOptionsKueryNode;
-}
-
-interface PostCaseConfigureArgs extends ClientArgs {
-  attributes: CasesConfigureAttributes;
-  id: string;
-}
-
-interface PatchCaseConfigureArgs extends ClientArgs {
-  configurationId: string;
-  updatedAttributes: Partial<CasesConfigureAttributes>;
-  originalConfiguration: SavedObject<CasesConfigureAttributes>;
-}
+import type {
+  DeleteCaseConfigureArgs,
+  FindCaseConfigureArgs,
+  GetCaseConfigureArgs,
+  PatchCaseConfigureArgs,
+  PostCaseConfigureArgs,
+} from './types';
+import type { ConfigurePersistedAttributes } from '../../common/types/configure';
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
 
-  public async delete({ unsecuredSavedObjectsClient, configurationId }: GetCaseConfigureArgs) {
+  public async delete({
+    unsecuredSavedObjectsClient,
+    configurationId,
+    refresh,
+  }: DeleteCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to DELETE case configure ${configurationId}`);
-      return await unsecuredSavedObjectsClient.delete(CASE_CONFIGURE_SAVED_OBJECT, configurationId);
+      return await unsecuredSavedObjectsClient.delete(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configurationId,
+        { refresh }
+      );
     } catch (error) {
       this.log.debug(`Error on DELETE case configure ${configurationId}: ${error}`);
       throw error;
@@ -67,7 +58,7 @@ export class CaseConfigureService {
   }: GetCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
     try {
       this.log.debug(`Attempting to GET case configuration ${configurationId}`);
-      const configuration = await unsecuredSavedObjectsClient.get<ESCasesConfigureAttributes>(
+      const configuration = await unsecuredSavedObjectsClient.get<ConfigurePersistedAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         configurationId
       );
@@ -86,7 +77,7 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to find all case configuration`);
 
-      const findResp = await unsecuredSavedObjectsClient.find<ESCasesConfigureAttributes>({
+      const findResp = await unsecuredSavedObjectsClient.find<ConfigurePersistedAttributes>({
         ...options,
         // Get the latest configuration
         sortField: 'created_at',
@@ -105,14 +96,15 @@ export class CaseConfigureService {
     unsecuredSavedObjectsClient,
     attributes,
     id,
+    refresh,
   }: PostCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
       const esConfigInfo = transformAttributesToESModel(attributes);
-      const createdConfig = await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributes>(
+      const createdConfig = await unsecuredSavedObjectsClient.create<ConfigurePersistedAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         esConfigInfo.attributes,
-        { id, references: esConfigInfo.referenceHandler.build() }
+        { id, references: esConfigInfo.referenceHandler.build(), refresh }
       );
 
       return transformToExternalModel(createdConfig);
@@ -127,13 +119,14 @@ export class CaseConfigureService {
     configurationId,
     updatedAttributes,
     originalConfiguration,
+    refresh,
   }: PatchCaseConfigureArgs): Promise<SavedObjectsUpdateResponse<CasesConfigurePatch>> {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
       const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
 
       const updatedConfiguration =
-        await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
+        await unsecuredSavedObjectsClient.update<ConfigurePersistedAttributes>(
           CASE_CONFIGURE_SAVED_OBJECT,
           configurationId,
           {
@@ -141,6 +134,7 @@ export class CaseConfigureService {
           },
           {
             references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
+            refresh,
           }
         );
 
@@ -153,7 +147,7 @@ export class CaseConfigureService {
 }
 
 function transformUpdateResponseToExternalModel(
-  updatedConfiguration: SavedObjectsUpdateResponse<ESCasesConfigureAttributes>
+  updatedConfiguration: SavedObjectsUpdateResponse<ConfigurePersistedAttributes>
 ): SavedObjectsUpdateResponse<CasesConfigurePatch> {
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
@@ -163,10 +157,12 @@ function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
+  const castedAttributesWithoutConnector = restUpdatedAttributes as CasesConfigurePatch;
+
   return {
     ...updatedConfiguration,
     attributes: {
-      ...restUpdatedAttributes,
+      ...castedAttributesWithoutConnector,
       // this will avoid setting connector to undefined, it won't include to field at all
       ...(transformedConnector && { connector: transformedConnector }),
     },
@@ -174,7 +170,7 @@ function transformUpdateResponseToExternalModel(
 }
 
 function transformToExternalModel(
-  configuration: SavedObject<ESCasesConfigureAttributes>
+  configuration: SavedObject<ConfigurePersistedAttributes>
 ): SavedObject<CasesConfigureAttributes> {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
@@ -183,17 +179,19 @@ function transformToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
+  const castedAttributes = configuration.attributes as CasesConfigureAttributes;
+
   return {
     ...configuration,
     attributes: {
-      ...configuration.attributes,
+      ...castedAttributes,
       connector,
     },
   };
 }
 
 function transformFindResponseToExternalModel(
-  configurations: SavedObjectsFindResponse<ESCasesConfigureAttributes>
+  configurations: SavedObjectsFindResponse<ConfigurePersistedAttributes>
 ): SavedObjectsFindResponse<CasesConfigureAttributes> {
   return {
     ...configurations,
@@ -205,15 +203,15 @@ function transformFindResponseToExternalModel(
 }
 
 function transformAttributesToESModel(configuration: CasesConfigureAttributes): {
-  attributes: ESCasesConfigureAttributes;
+  attributes: ConfigurePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
 function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
-  attributes: Partial<ESCasesConfigureAttributes>;
+  attributes: Partial<ConfigurePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
 function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
-  attributes: Partial<ESCasesConfigureAttributes>;
+  attributes: Partial<ConfigurePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, ...restWithoutConnector } = configuration;

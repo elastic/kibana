@@ -8,44 +8,45 @@
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { ActionCell } from '../table/action_cell';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { EnrichedFieldInfo } from '../types';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
+import type { EnrichedFieldInfo } from '../types';
 
 const ActionWrapper = euiStyled.div`
-  width: 0;
-  transform: translate(6px);
-  transition: transform 50ms ease-in-out;
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-    padding: ${({ theme }) => theme.eui.paddingSizes.s};
+    padding: ${({ theme }) => theme.eui.euiSizeS};
     height: 78px;
   }
 
-  & {
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
-    }
-
-    &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
-
-      ${ActionWrapper} {
-        width: auto;
-        transform: translate(0);
-      }
+  &:hover {
+    .inlineActions {
+      opacity: 1;
+      width: auto;
+      transform: translate(0);
     }
   }
+
+  .inlineActions {
+    opacity: 0;
+    width: 0;
+    transform: translate(6px);
+    transition: transform 50ms ease-in-out;
+
+    &.inlineActions-popoverOpen {
+      opacity: 1;
+      width: auto;
+      transform: translate(0);
+    }
+   }
 `;
 
 interface OverviewCardProps {
@@ -75,25 +76,36 @@ ClampedContent.displayName = 'ClampedContent';
 type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfo;
+  dataTestSubj?: string;
 };
 
 export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
   title,
   children,
   contextId,
+  dataTestSubj,
   enrichedFieldInfo,
-}) => {
-  return (
-    <OverviewCard title={title}>
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <ClampedContent>{children}</ClampedContent>
+}) => (
+  <OverviewCard title={title}>
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
 
-        <ActionWrapper>
-          <ActionCell {...enrichedFieldInfo} contextId={contextId} applyWidthAndPadding={false} />
-        </ActionWrapper>
-      </EuiFlexGroup>
-    </OverviewCard>
-  );
-};
+      <ActionWrapper>
+        <SecurityCellActions
+          field={{
+            name: enrichedFieldInfo.data.field,
+            value: enrichedFieldInfo?.values ? enrichedFieldInfo?.values[0] : '',
+            type: enrichedFieldInfo.data.type,
+            aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
+          }}
+          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+          mode={CellActionsMode.INLINE}
+          metadata={{ scopeId: contextId }}
+          visibleCellActions={3}
+        />
+      </ActionWrapper>
+    </EuiFlexGroup>
+  </OverviewCard>
+);
 
 OverviewCardWithActions.displayName = 'OverviewCardWithActions';

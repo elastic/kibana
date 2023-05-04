@@ -23,6 +23,7 @@ export enum ES_FIELD_TYPES {
 
   STRING = 'string',
   TEXT = 'text',
+  MATCH_ONLY_TEXT = 'match_only_text',
   KEYWORD = 'keyword',
   VERSION = 'version',
 
@@ -44,6 +45,8 @@ export enum ES_FIELD_TYPES {
   LONG = 'long',
   SHORT = 'short',
   UNSIGNED_LONG = 'unsigned_long',
+
+  AGGREGATE_METRIC_DOUBLE = 'aggregate_metric_double',
 
   FLOAT_RANGE = 'float_range',
   DOUBLE_RANGE = 'double_range',

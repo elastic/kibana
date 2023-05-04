@@ -6,18 +6,22 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import {
+import type { DataViewBase } from '@kbn/es-query';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import type {
   RuleStepProps,
-  RuleStep,
   AboutStepRule,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
+import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
   Form,
@@ -25,11 +29,9 @@ import {
   UseField,
   useForm,
   useFormData,
-  FieldHook,
 } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
-import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema, threatIndicatorPathRequiredSchemaValue } from './schema';
 import * as I18n from './translations';
@@ -40,14 +42,16 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useRuleIndices } from '../../../../detection_engine/rule_management/logic/use_rule_indices';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
-  defaultValues?: AboutStepRule;
+  defaultValues: AboutStepRule;
   defineRuleData?: DefineStepRule;
+  onRuleDataChange?: (data: AboutStepRule) => void;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -64,7 +68,7 @@ TagContainer.displayName = 'TagContainer';
 
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
-  defaultValues,
+  defaultValues: initialState,
   defineRuleData,
   descriptionColumns = 'singleSplit',
   isReadOnlyView,
@@ -72,19 +76,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isLoading,
   onSubmit,
   setForm,
+  onRuleDataChange,
 }) => {
+  const { data } = useKibana().services;
+
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineRuleData?.ruleType),
-    [defineRuleData?.ruleType]
-  );
-
-  const initialState: AboutStepRule = useMemo(
-    () =>
-      defaultValues ??
-      (isThreatMatchRuleValue
-        ? { ...stepAboutDefaultValue, threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH }
-        : stepAboutDefaultValue),
-    [defaultValues, isThreatMatchRuleValue]
+    [defineRuleData]
   );
 
   const schema = useMemo(
@@ -96,7 +94,41 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   );
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
-  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
+
+  const { ruleIndices } = useRuleIndices(
+    defineRuleData?.machineLearningJobId,
+    defineRuleData?.index
+  );
+
+  /**
+   * 1. if not null, fetch data view from id saved on rule form
+   * 2. Create a state to set the indexPattern to be used
+   * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
+   */
+
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(ruleIndices);
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
+
+  useEffect(() => {
+    if (
+      defineRuleData?.index != null &&
+      (defineRuleData?.dataViewId === '' || defineRuleData?.dataViewId == null)
+    ) {
+      setIndexPattern(indexIndexPattern);
+    }
+  }, [defineRuleData?.dataViewId, defineRuleData?.index, indexIndexPattern]);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
+        const dv = await data.dataViews.get(defineRuleData?.dataViewId);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, defineRuleData, indexIndexPattern, setIndexPattern]);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
@@ -104,10 +136,29 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
-    form,
-    watch: ['severity'],
-  });
+  const [{ severity: formSeverity, timestampOverride: formTimestampOverride }] =
+    useFormData<AboutStepRule>({
+      form,
+      watch: [
+        'isAssociatedToEndpointList',
+        'isBuildingBlock',
+        'riskScore',
+        'ruleNameOverride',
+        'severity',
+        'timestampOverride',
+        'threat',
+        'timestampOverrideFallbackDisabled',
+      ],
+      onChange: (aboutData: AboutStepRule) => {
+        if (onRuleDataChange) {
+          onRuleDataChange({
+            threatIndicatorPath: undefined,
+            timestampOverrideFallbackDisabled: undefined,
+            ...aboutData,
+          });
+        }
+      },
+    });
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
@@ -125,7 +176,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result?.isValid
-      ? result
+      ? {
+          isValid: true,
+          data: {
+            threatIndicatorPath: undefined,
+            timestampOverrideFallbackDisabled: undefined,
+            ...result.data,
+          },
+        }
       : {
           isValid: false,
           data: getFormData(),
@@ -190,7 +248,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -203,7 +261,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -345,7 +403,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                 fieldType: 'string',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
@@ -358,11 +416,25 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
             />
+            {!!formTimestampOverride && formTimestampOverride !== '@timestamp' && (
+              <>
+                <CommonUseField
+                  path="timestampOverrideFallbackDisabled"
+                  componentProps={{
+                    idAria: 'detectionTimestampOverrideFallbackDisabled',
+                    'data-test-subj': 'detectionTimestampOverrideFallbackDisabled',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                    },
+                  }}
+                />
+              </>
+            )}
           </EuiAccordion>
         </Form>
       </StepContentWrapper>

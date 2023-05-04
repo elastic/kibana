@@ -9,11 +9,12 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { DuplicateDataViewError } from '@kbn/data-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
-import { DuplicateDataViewError } from '../../../../../../../../../../src/plugins/data/public';
 
 import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
@@ -176,6 +177,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           await mlContext.dataViewsContract.createAndSave(
             {
               title: dataViewName,
+              ...(form.timeFieldName ? { timeFieldName: form.timeFieldName } : {}),
             },
             false,
             true
@@ -333,8 +335,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SWITCH_TO_FORM });
   };
 
-  const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit']) => {
-    dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
+  const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit'] | undefined) => {
+    dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value: value ?? '' });
   };
 
   const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {

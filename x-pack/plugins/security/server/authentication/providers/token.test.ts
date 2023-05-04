@@ -8,8 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { ScopeableRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { ScopeableRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
@@ -49,21 +49,23 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+      mockOptions.client.asInternalUser.security.getToken.mockResponse(
         // @ts-expect-error not full interface
-        securityMock.createApiResponse({
-          body: {
-            access_token: tokenPair.accessToken,
-            refresh_token: tokenPair.refreshToken,
-            authentication: user,
-          },
-        })
+        {
+          access_token: tokenPair.accessToken,
+          refresh_token: tokenPair.refreshToken,
+          authentication: user,
+        }
       );
 
       await expect(provider.login(request, credentials)).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'token', name: 'token' } },
-          { authHeaders: { authorization }, state: tokenPair }
+          {
+            authHeaders: { authorization },
+            userProfileGrant: { type: 'accessToken', accessToken: tokenPair.accessToken },
+            state: tokenPair,
+          }
         )
       );
 
@@ -163,9 +165,7 @@ describe('TokenAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: user })
-      );
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-router",
+  "owner": "@elastic/appex-sharedux"
+}

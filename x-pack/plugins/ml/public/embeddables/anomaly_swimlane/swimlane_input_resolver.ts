@@ -19,7 +19,9 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
 import {
@@ -28,10 +30,8 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
@@ -46,10 +46,15 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 export function useSwimlaneInputResolver(
   embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>,
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
-  refresh: Observable<any>,
+  refresh: Observable<void>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number,
-  fromPage: number
+  fromPage: number,
+  renderCallbacks: {
+    onRenderComplete: () => void;
+    onLoading: () => void;
+    onError: (error: Error) => void;
+  }
 ): [
   string | undefined,
   OverallSwimlaneData | undefined,
@@ -73,6 +78,7 @@ export function useSwimlaneInputResolver(
     return getJobsObservable(embeddableInput$, anomalyDetectorService, setError).pipe(
       shareReplay(1)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const bucketInterval$ = useMemo(() => {
@@ -90,6 +96,7 @@ export function useSwimlaneInputResolver(
         return prev.asSeconds() === curr.asSeconds();
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fromPage$ = useMemo(() => new Subject<number>(), []);
@@ -102,6 +109,7 @@ export function useSwimlaneInputResolver(
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -122,6 +130,9 @@ export function useSwimlaneInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
+        tap(() => {
+          renderCallbacks.onLoading();
+        }),
         switchMap(([explorerJobs, input, bucketInterval, fromPageInput, perPageFromState]) => {
           if (!explorerJobs) {
             // couldn't load the list of jobs
@@ -143,7 +154,9 @@ export function useSwimlaneInputResolver(
 
           let appliedFilters: any;
           try {
-            appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
+            if (filters || query) {
+              appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
+            }
           } catch (e) {
             // handle query syntax errors
             setError(e);
@@ -212,20 +225,38 @@ export function useSwimlaneInputResolver(
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fromPage$.next(fromPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromPage]);
 
   useEffect(() => {
     if (perPage === undefined) return;
     perPage$.next(perPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perPage]);
 
   useEffect(() => {
     chartWidth$.next(chartWidth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth]);
+
+  useEffect(() => {
+    if (error) {
+      renderCallbacks.onError(error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  useEffect(() => {
+    if (swimlaneData) {
+      renderCallbacks.onRenderComplete();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [swimlaneData]);
 
   return [
     swimlaneType,

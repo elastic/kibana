@@ -13,11 +13,17 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
-} from 'src/core/public';
+  OverlayStart,
+} from '@kbn/core/public';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { DataView, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type {
+  DataView,
+  DataViewsServicePublic,
+  INDEX_PATTERN_TYPE,
+  MatchedItem,
+} from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -26,7 +32,8 @@ export interface DataViewEditorContext {
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
-  dataViews: DataViewsPublicPluginStart;
+  overlays: OverlayStart;
+  dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
 }
 
@@ -49,6 +56,19 @@ export interface DataViewEditorProps {
    * Sets whether a timestamp field is required to create an index pattern. Defaults to false.
    */
   requireTimestampField?: boolean;
+  /**
+   * Pass the data view to be edited.
+   */
+  editData?: DataView;
+  /**
+   * if set to true user is presented with an option to create ad-hoc dataview without a saved object.
+   */
+  allowAdHocDataView?: boolean;
+
+  /**
+   * if set to true a link to the management page is shown
+   */
+  showManagementLink?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -67,56 +87,11 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export type CloseEditor = () => void;
 
-export interface MatchedItem {
-  name: string;
-  tags: Tag[];
-  item: {
-    name: string;
-    backing_indices?: string[];
-    timestamp_field?: string;
-    indices?: string[];
-    aliases?: string[];
-    attributes?: ResolveIndexResponseItemIndexAttrs[];
-    data_stream?: string;
-  };
-}
-
-// for showing index matches
-export interface ResolveIndexResponse {
-  indices?: ResolveIndexResponseItemIndex[];
-  aliases?: ResolveIndexResponseItemAlias[];
-  data_streams?: ResolveIndexResponseItemDataStream[];
-}
-
-export interface ResolveIndexResponseItem {
-  name: string;
-}
-
-export interface ResolveIndexResponseItemDataStream extends ResolveIndexResponseItem {
-  backing_indices: string[];
-  timestamp_field: string;
-}
-
-export interface ResolveIndexResponseItemAlias extends ResolveIndexResponseItem {
-  indices: string[];
-}
-
-export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem {
-  aliases?: string[];
-  attributes?: ResolveIndexResponseItemIndexAttrs[];
-  data_stream?: string;
-}
-
-export interface Tag {
-  name: string;
-  key: string;
-  color: string;
-}
 // end for index matches
 
 export interface IndexPatternTableItem {
@@ -127,28 +102,6 @@ export interface IndexPatternTableItem {
   sort: string;
 }
 
-// copied from index pattern management, needs review
-export interface MatchedItem {
-  name: string;
-  tags: Tag[];
-  item: {
-    name: string;
-    backing_indices?: string[];
-    timestamp_field?: string;
-    indices?: string[];
-    aliases?: string[];
-    attributes?: ResolveIndexResponseItemIndexAttrs[];
-    data_stream?: string;
-  };
-}
-
-export enum ResolveIndexResponseItemIndexAttrs {
-  OPEN = 'open',
-  CLOSED = 'closed',
-  HIDDEN = 'hidden',
-  FROZEN = 'frozen',
-}
-
 export interface RollupIndiciesCapability {
   aggs: Record<string, IndexPatternAggRestrictions>;
   error: string;
@@ -156,17 +109,14 @@ export interface RollupIndiciesCapability {
 
 export type RollupIndicesCapsResponse = Record<string, RollupIndiciesCapability>;
 
-export enum INDEX_PATTERN_TYPE {
-  ROLLUP = 'rollup',
-  DEFAULT = 'default',
-}
-
 export interface IndexPatternConfig {
   title: string;
   timestampField?: EuiComboBoxOptionOption<string>;
   allowHidden: boolean;
   id?: string;
   type: INDEX_PATTERN_TYPE;
+  name?: string;
+  isAdHoc: boolean;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {

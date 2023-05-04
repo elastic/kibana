@@ -7,9 +7,9 @@
  */
 
 import { DataViewFieldBase } from '@kbn/es-query';
-import { IndexPatternField } from '../../../../../../plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
-type IndexedFieldItemBase = Partial<IndexPatternField> & DataViewFieldBase;
+type IndexedFieldItemBase = Partial<DataViewField> & DataViewFieldBase;
 
 export interface IndexedFieldItem extends IndexedFieldItemBase {
   info: string[];

@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import React, { PureComponent } from 'react';
-import { ValidatedDualRange } from '../../../../kibana_react/public';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { FormRow } from './form_row';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 
@@ -82,7 +82,7 @@ export class RangeControl extends PureComponent<RangeControlProps, RangeControlS
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
-      return <ValidatedDualRange disabled showInput />;
+      return <ValidatedDualRange disabled showInput min={0} max={100} />;
     }
 
     const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);

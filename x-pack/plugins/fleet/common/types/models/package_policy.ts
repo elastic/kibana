@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+
 export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -20,17 +23,27 @@ export interface PackagePolicyConfigRecordEntry {
 export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;
 
 export interface NewPackagePolicyInputStream {
+  id?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   data_stream: {
     dataset: string;
     type: string;
     elasticsearch?: {
+      // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
+      // the package where needed.
+      dynamic_dataset?: boolean;
+      dynamic_namespace?: boolean;
       privileges?: {
         indices?: string[];
       };
+
+      // Package policy specific values
+      index_mode?: string;
+      source_mode?: string;
     };
   };
+  release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
 }
@@ -41,6 +54,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  id?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;
@@ -61,8 +75,8 @@ export interface NewPackagePolicy {
   description?: string;
   namespace: string;
   enabled: boolean;
+  is_managed?: boolean;
   policy_id: string;
-  output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
@@ -81,6 +95,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
   inputs: PackagePolicyInput[];
   version?: string;
+  agents?: number;
   revision: number;
   updated_at: string;
   updated_by: string;

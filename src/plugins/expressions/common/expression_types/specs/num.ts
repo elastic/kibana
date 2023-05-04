@@ -25,11 +25,11 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
       type: 'num',
       value: 0,
     }),
-    boolean: (b) => ({
+    boolean: (b: boolean) => ({
       type: 'num',
       value: Number(b),
     }),
-    string: (n) => {
+    string: (n: string) => {
       const value = Number(n);
       if (Number.isNaN(value)) {
         throw new Error(
@@ -46,13 +46,13 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
         value,
       };
     },
-    '*': (value) => ({
+    '*': (value: unknown) => ({
       type: 'num',
       value: Number(value),
     }),
   },
   to: {
-    render: ({ value }): ExpressionValueRender<{ text: string }> => {
+    render: ({ value }: { value: number }): ExpressionValueRender<{ text: string }> => {
       const text = `${value}`;
       return {
         type: 'render',
@@ -60,7 +60,7 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
         value: { text },
       };
     },
-    datatable: ({ value }): Datatable => ({
+    datatable: ({ value }: { value: number }): Datatable => ({
       type: 'datatable',
       columns: [{ id: 'value', name: 'value', meta: { type: 'number' } }],
       rows: [{ value }],

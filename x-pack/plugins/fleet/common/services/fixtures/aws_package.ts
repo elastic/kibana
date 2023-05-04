@@ -1921,7 +1921,6 @@ export const AWS_PACKAGE = {
     },
   ],
   latestVersion: '0.5.3',
-  removable: true,
   status: 'not_installed',
 };
 
@@ -1931,7 +1930,6 @@ export const INVALID_AWS_POLICY = {
   package: { name: 'aws', title: 'AWS', version: '0.5.3' },
   enabled: true,
   policy_id: 'some-agent-policy-id',
-  output_id: 'some-output-id',
   inputs: [
     {
       type: 'aws/metrics',
@@ -2339,7 +2337,6 @@ export const VALID_AWS_POLICY = {
   package: { name: 'aws', title: 'AWS', version: '0.5.3' },
   enabled: true,
   policy_id: 'some-agent-policy-id',
-  output_id: 'some-output-id',
   inputs: [
     {
       type: 'aws/metrics',

@@ -6,40 +6,29 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { FilterBar } from './components/filter_bar';
-
-import { DocumentTitle } from '../../../components/document_title';
-
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Source } from '../../../containers/metrics_source';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { LayoutView } from './components/layout_view';
-import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
-import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
-import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 import { MetricsPageTemplate } from '../page_template';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
+import { fullHeightContentStyles } from '../../../page_template.styles';
+import { SurveyKubernetes } from './components/survey_kubernetes';
+import { NoRemoteCluster } from '../../../components/empty_states';
 
 export const SnapshotPage = () => {
-  const {
-    hasFailedLoadingSource,
-    isLoading,
-    loadSourceFailureMessage,
-    loadSource,
-    source,
-    metricIndicesExist,
-  } = useContext(Source.Context);
+  const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
-  const { source: optionsSource } = useWaffleOptionsContext();
 
   useMetricsBreadcrumbs([
     {
@@ -47,73 +36,51 @@ export const SnapshotPage = () => {
     },
   ]);
 
+  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+
+  if (isLoading && !source) return <SourceLoadingPage />;
+
+  if (!remoteClustersExist) {
+    return <NoRemoteCluster />;
+  }
+
+  if (!metricIndicesExist) {
+    return (
+      <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
+    );
+  }
+
+  if (loadSourceFailureMessage)
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />;
+
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Inventory',
-            values: {
-              previousTitle,
+      <div className={APP_WRAPPER_CLASS}>
+        <MetricsPageTemplate
+          hasData={metricIndicesExist}
+          pageHeader={{
+            pageTitle: inventoryTitle,
+            rightSideItems: [<SavedViews />, <SurveyKubernetes />],
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: css`
+                ${fullHeightContentStyles};
+                padding-bottom: 0;
+              `,
             },
-          })
-        }
-      />
-      {isLoading && !source ? (
-        <SourceLoadingPage />
-      ) : metricIndicesExist ? (
-        <>
-          <InventoryPageWrapper className={APP_WRAPPER_CLASS}>
-            <SavedViewProvider
-              shouldLoadDefault={optionsSource === 'default'}
-              viewType={'inventory-view'}
-              defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
-            >
-              <MetricsPageTemplate
-                hasData={metricIndicesExist}
-                pageHeader={{
-                  pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />],
-                }}
-                pageBodyProps={{
-                  paddingSize: 'none',
-                }}
-              >
-                <SnapshotContainer
-                  render={({ loading, nodes, reload, interval }) => (
-                    <>
-                      <FilterBar interval={interval} />
-                      <LayoutView
-                        loading={loading}
-                        nodes={nodes}
-                        reload={reload}
-                        interval={interval}
-                      />
-                    </>
-                  )}
-                />
-              </MetricsPageTemplate>
-            </SavedViewProvider>
-          </InventoryPageWrapper>
-        </>
-      ) : hasFailedLoadingSource ? (
-        <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
-      ) : (
-        <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
-      )}
+          }}
+        >
+          <SnapshotContainer
+            render={({ loading, nodes, reload, interval }) => (
+              <>
+                <FilterBar interval={interval} />
+                <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
+              </>
+            )}
+          />
+        </MetricsPageTemplate>
+      </div>
     </EuiErrorBoundary>
   );
 };
-
-// This is added to facilitate a full height layout whereby the
-// inner container will set it's own height and be scrollable.
-// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-export const InventoryPageWrapper = euiStyled.div`
-  .euiPage .euiPageContentBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    width: 100%;
-    height: 100%;
-  }
-`;

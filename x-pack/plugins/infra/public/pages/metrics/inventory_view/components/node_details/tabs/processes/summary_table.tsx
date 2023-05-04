@@ -17,7 +17,7 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { STATE_NAMES } from './states';
 
@@ -44,8 +44,8 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
     <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
         {Object.entries(processCount).map(([field, value]) => (
-          <EuiFlexItem>
-            <EuiDescriptionList compressed={true}>
+          <EuiFlexItem key={field}>
+            <EuiDescriptionList data-test-subj="infraProcessesSummaryTableItem" compressed>
               <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
               <EuiDescriptionListDescription>
                 {value === -1 ? <LoadingSpinner /> : value}

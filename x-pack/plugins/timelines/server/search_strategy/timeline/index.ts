@@ -8,18 +8,21 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
-
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
   PluginStartContract as AlertingPluginStartContract,
-} from '../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 import {
   ISearchStrategy,
   PluginStart,
   SearchStrategyDependencies,
   shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/common';
+import { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { AlertAuditAction, alertAuditEvent } from '@kbn/rule-registry-plugin/server';
+import { Logger } from '@kbn/logging';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -28,16 +31,12 @@ import {
 } from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
 import { TimelineFactory } from './factory/types';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  ISearchOptions,
-} from '../../../../../../src/plugins/data/common';
-import { AuditLogger, SecurityPluginSetup } from '../../../../security/server';
-import { AlertAuditAction, alertAuditEvent } from '../../../../rule_registry/server';
+import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
 
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
   alerting: AlertingPluginStartContract,
+  logger: Logger,
   security?: SecurityPluginSetup
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const esAsInternal = data.search.searchAsInternalUser;
@@ -64,8 +63,16 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           alerting,
           auditLogger: securityAuditLogger,
         });
+      } else if (entityType != null && entityType === EntityType.SESSIONS) {
+        return timelineSessionsSearchStrategy({
+          es,
+          request,
+          options,
+          deps,
+          queryFactory,
+        });
       } else {
-        return timelineSearchStrategy({ es, request, options, deps, queryFactory });
+        return timelineSearchStrategy({ es, request, options, deps, queryFactory, logger });
       }
     },
     cancel: async (id, options, deps) => {
@@ -88,6 +95,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
+  logger: Logger;
 }) => {
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
@@ -179,5 +187,62 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 
       throw err;
     })
+  );
+};
+
+const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
+  es,
+  request,
+  options,
+  deps,
+  queryFactory,
+}: {
+  es: ISearchStrategy;
+  request: TimelineStrategyRequestType<T>;
+  options: ISearchOptions;
+  deps: SearchStrategyDependencies;
+  queryFactory: TimelineFactory<T>;
+}) => {
+  const indices = request.defaultIndex ?? request.indexType;
+
+  const requestSessionLeaders = {
+    ...request,
+    defaultIndex: indices,
+    indexName: indices,
+  };
+
+  const collapse = {
+    field: 'process.entry_leader.entity_id',
+  };
+
+  const aggs = {
+    total: {
+      cardinality: {
+        field: 'process.entry_leader.entity_id',
+      },
+    },
+  };
+
+  const dsl = queryFactory.buildDsl(requestSessionLeaders);
+
+  const params = { ...dsl, collapse, aggs };
+
+  return es.search({ ...requestSessionLeaders, params }, options, deps).pipe(
+    map((response) => {
+      const agg = response.rawResponse.aggregations;
+      const aggTotal = isAggCardinalityAggregate(agg, 'total') && agg.total.value;
+
+      // ES doesn't set the hits.total to the collapsed hits.
+      // so we are overriding hits.total with the total from the aggregation.
+      if (aggTotal) {
+        response.rawResponse.hits.total = aggTotal;
+      }
+
+      return {
+        ...response,
+        rawResponse: shimHitsTotal(response.rawResponse, options),
+      };
+    }),
+    mergeMap((esSearchRes) => queryFactory.parse(requestSessionLeaders, esSearchRes))
   );
 };

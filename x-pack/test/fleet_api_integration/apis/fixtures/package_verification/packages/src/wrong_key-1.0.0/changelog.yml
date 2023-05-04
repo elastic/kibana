@@ -1,0 +1,5 @@
+- version: "1.0.0"
+  changes:
+    - description: This is a test
+      type: enhancement
+      link: fakelink

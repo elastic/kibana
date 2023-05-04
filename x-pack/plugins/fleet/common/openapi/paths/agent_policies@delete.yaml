@@ -1,5 +1,7 @@
 post:
-  summary: Agent policy - Delete
+  summary: Delete agent policy by ID
+  tags:
+    - Agent policies
   operationId: delete-agent-policy
   responses:
     '200':
@@ -16,6 +18,8 @@ post:
             required:
               - id
               - success
+    '400':
+      $ref: ../components/responses/error.yaml
   requestBody:
     content:
       application/json:

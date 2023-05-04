@@ -7,17 +7,16 @@
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
+import { demoTimelineData } from '../../../../common/demo_data/timeline';
 import { threatMatchRowRenderer } from '../../timeline/body/renderers/cti/threat_match_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const ThreatMatchExampleComponent: React.FC = () => (
   <>
     {threatMatchRowRenderer.renderRow({
-      browserFields: {},
-      data: mockTimelineData[31].ecs,
+      data: demoTimelineData[31].ecs,
       isDraggable: false,
-      timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+      scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
   </>
 );

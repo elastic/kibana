@@ -9,6 +9,7 @@ import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { getClickFilterData } from './get_click_filter_data';
 import type { TSVBTables } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { SERIES_SEPARATOR } from '../../../../common/constants';
 
 describe('getClickFilterData', () => {
   test('gets the correct data for a group by everything timeseries chart', () => {
@@ -102,7 +103,7 @@ describe('getClickFilterData', () => {
         },
         {
           key: 'groupId{yaxis_6e0353a0-ad9b-11eb-b112-89cce8e43380_main_group}spec{61ca57f1-469d-11e7-af02-69e470af7417:1}yAccessor{1}splitAccessors{}',
-          specId: '61ca57f1-469d-11e7-af02-69e470af7417:1',
+          specId: '61ca57f1-469d-11e7-af02-69e470af7417╰┄►1',
         },
       ],
     ] as Array<[GeometryValue, XYChartSeriesIdentifier]>;
@@ -199,7 +200,7 @@ describe('getClickFilterData', () => {
     expect(data[1].column).toEqual(2);
     expect(data[1].row).toEqual(10);
     // expect(data).toEqual([]);
-    const splitValue = points[0][1].specId.split(':');
+    const splitValue = points[0][1].specId.split(SERIES_SEPARATOR);
     expect(data[1].value).toEqual(parseInt(splitValue[1], 10));
   });
 });

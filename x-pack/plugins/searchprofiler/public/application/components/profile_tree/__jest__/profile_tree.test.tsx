@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { searchResponse } from './fixtures/search_response';
 import { ProfileTree, Props } from '../profile_tree';
 

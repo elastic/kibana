@@ -40,40 +40,55 @@ When diagnosing issues related to alerting, focus on the tasks that begin with `
 Alerting tasks always begin with `alerting:`. For example, the `alerting:.index-threshold` tasks back the <<rule-type-index-threshold, index threshold stack rule>>.
 Action tasks always begin with `actions:`. For example, the `actions:.index` tasks back the <<index-action-type, index action>>.
 
-For more details on monitoring and diagnosing task execution in Task Manager, see <<task-manager-health-monitoring>>.
+For more details on monitoring and diagnosing tasks in Task Manager, refer to <<task-manager-health-monitoring>>.
 
 [float]
 [[connector-tls-settings]]
-==== Connectors have TLS errors when executing actions
+==== Connectors have TLS errors when running actions
 
 *Problem*
 
-When executing actions, a connector gets a TLS socket error when connecting to
-the server.
+A connector gets a TLS socket error when connecting to the server to run an action.
 
 *Solution*
 
 Configuration options are available to specialize connections to TLS servers,
-including ignoring server certificate validation, and providing certificate
-authority data to verify servers using custom certificates.  For more details, 
-see <<action-settings,Action settings>>.
+including ignoring server certificate validation and providing certificate
+authority data to verify servers using custom certificates. For more details, 
+see <<action-settings>>.
 
 [float]
-[[rules-long-execution-time]]
+[[rules-long-run-time]]
 ==== Rules take a long time to run
 
 *Problem* 
 
-Rules  are taking a long time to execute and are impacting the overall health of your deployment.
+Rules are taking a long time to run and are impacting the overall health of your deployment.
 
 [IMPORTANT]
 ==============================================
-By default, only users with a `superuser` role can query the experimental[] {kib} event log because it is a system index. To enable additional users to execute this query, assign `read` privileges to the `.kibana-event-log*` index.
+By default, only users with a `superuser` role can query the experimental[] {kib} event log because it is a system index. To enable additional users to run this query, assign `read` privileges to the `.kibana-event-log*` index.
 ==============================================
 
 *Solution*
 
-Query for a list of rule ids, bucketed by their execution times:
+By default, rules have a `5m` timeout. Rules that run longer than this timeout are automatically canceled to prevent them from consuming too much of {kib}'s resources. Alerts and actions that may have been scheduled before the rule timed out are discarded. When a rule times out, you will see this error in the {kib} logs:
+
+[source,sh]
+--------------------------------------------------
+[2022-03-28T13:14:04.062-04:00][WARN ][plugins.taskManager] Cancelling task alerting:.index-threshold "a6ea0070-aec0-11ec-9985-dd576a3fe205" as it expired at 2022-03-28T17:14:03.980Z after running for 05m 10s (with timeout set at 5m).
+--------------------------------------------------
+
+and in the <<rule-details,details page>>:
+
+[role="screenshot"]
+image::images/rule-details-timeout-error.png[Rule details page with timeout error]
+
+If you want your rules to run longer, update the `xpack.alerting.rules.run.timeout` configuration in your <<alert-settings>>. You can also target a specific rule type by using `xpack.alerting.rules.run.ruleTypeOverrides`.
+
+Rules that consistently run longer than their <<create-edit-rules,check interval>> may produce unexpected results. If the average run duration, visible on the <<rule-details,details page>>, is greater than the check interval, consider increasing the check interval.
+
+To get all long-running rules, you can query for a list of rule ids, bucketed by their run times:
 
 [source,console]
 --------------------------------------------------
@@ -144,9 +159,9 @@ GET /.kibana-event-log*/_search
 --------------------------------------------------
 // TEST
 
-<1> This queries for rules executed in the last day. Update the values of `lte` and `gte` to query over a different time range.
-<2> Use `event.provider: actions` to query for long-running action executions.
-<3> Execution durations are stored as nanoseconds. This adds a runtime field to convert that duration into seconds.
+<1> This queries for rules run in the last day. Update the values of `lte` and `gte` to query over a different time range.
+<2> Use `event.provider: actions` to query for long-running actions.
+<3> Run durations are stored as nanoseconds. This adds a runtime field to convert that duration into seconds.
 <4> This interval buckets the `event.duration_in_seconds` runtime field into 1 second intervals. Update this value to change the granularity of the buckets. If you are unable to use runtime fields, make sure this aggregation targets `event.duration` and use nanoseconds for the interval.
 <5> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
 
@@ -221,22 +236,22 @@ This query returns the following:
   }
 }
 --------------------------------------------------
-<1> Most rule execution durations fall within the first bucket (0 - 1 seconds).
-<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to execute.
+<1> Most run durations fall within the first bucket (0 - 1 seconds).
+<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to run.
 
-Use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that take a long time to execute.
+Use the <<get-rule-api,get rule API>> to retrieve additional information about rules that take a long time to run.
 
 [float]
 [[rule-cannot-decrypt-api-key]]
-=== Rule cannot decrypt apiKey
+==== Rule cannot decrypt API key
 
 *Problem*:
 
-The rule fails to execute and has an `Unable to decrypt attribute "apiKey"` error.
+The rule fails to run and has an `Unable to decrypt attribute "apiKey"` error.
 
 *Solution*:
 
-This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value used to create the rule does not match the value used during rule execution. Depending on the scenario, there are different ways to solve this problem:
+This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value used to create the rule does not match the value used when the rule runs. Depending on the scenario, there are different ways to solve this problem:
 
 [cols="2*<"]
 |===
@@ -251,3 +266,24 @@ This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value us
 | Generate a new API key for the rule by disabling then enabling the rule.
 
 |===
+
+[float]
+[[known-issue-upgrade-rule]]
+==== Rules stop running after upgrade
+
+*Problem*:
+
+Alerting rules that were created or edited in 8.2 stop running after you upgrade
+to 8.3.0 or 8.3.1. The following error occurs:
+
+[source,text]
+----
+<rule-type>:<UUID>: execution failed - security_exception: [security_exception] Reason: missing authentication credentials for REST request [/_security/user/_has_privileges], caused by: ""
+----
+
+*Solution*:
+
+Upgrade to 8.3.2 or later releases to avoid the problem. To fix failing rules,
+go to *{stack-manage-app} > {rules-ui}* and multi-select the rules. Choose
+**Manage rules > Update API Keys** to generate new API keys. For more details
+about API key authorization, refer to <<alerting-authorization>>.

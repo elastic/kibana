@@ -49,6 +49,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
 
   useEffect(() => {
     setIsCurrentSnapshot(snapshot.snapshot_id === job.model_snapshot_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot]);
 
   const updateSnapshot = useCallback(async () => {
@@ -65,6 +66,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         }),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retain, description, snapshot]);
 
   const deleteSnapshot = useCallback(async () => {
@@ -79,6 +81,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         }),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot]);
 
   function closeWithReload() {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TreeOptions } from './fetch';
 import {
   Fetcher,
   getAncestryAsArray,
@@ -12,14 +13,13 @@ import {
   getLeafNodes,
   getNameField,
   getParentField,
-  TreeOptions,
 } from './fetch';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
-import { IScopedClusterClient } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import {
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type {
   FieldsObject,
   ResolverNode,
   ResolverSchema,

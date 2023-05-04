@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObject, SavedObjectReference, SavedObjectsUpdateResponse } from 'kibana/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 
 interface Field {
   path: string;

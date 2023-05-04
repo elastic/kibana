@@ -18,7 +18,7 @@ import {
   EuiLink,
   EuiBadge,
 } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
@@ -187,7 +187,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
           defaultMessage: 'Usage count',
         }),
-        sortable: true,
+        sortable: ({ usedBy }: ComponentTemplateListItem) => usedBy.length,
         render: (usedBy: string[]) => {
           if (usedBy.length) {
             return usedBy.length;

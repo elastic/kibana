@@ -7,14 +7,8 @@
 
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import { MlJobsResponse } from '../../../common/types/job_service';
+import type { Group } from '../../../common/types/groups';
 import type { MlClient } from '../../lib/ml_client';
-
-export interface Group {
-  id: string;
-  jobIds: string[];
-  calendarIds: string[];
-}
 
 export interface Results {
   [id: string]: {
@@ -29,10 +23,7 @@ export function groupsProvider(mlClient: MlClient) {
   async function getAllGroups() {
     const groups: { [id: string]: Group } = {};
     const jobIds: { [id: string]: undefined | null } = {};
-    const [{ body }, calendars] = await Promise.all([
-      mlClient.getJobs<MlJobsResponse>(),
-      calMngr.getAllCalendars(),
-    ]);
+    const [body, calendars] = await Promise.all([mlClient.getJobs(), calMngr.getAllCalendars()]);
 
     const { jobs } = body;
     if (jobs) {

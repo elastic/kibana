@@ -17,7 +17,7 @@ jest.mock('../../curations_logic', () => ({
   },
 }));
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { CurationsLogic } from '../..';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';

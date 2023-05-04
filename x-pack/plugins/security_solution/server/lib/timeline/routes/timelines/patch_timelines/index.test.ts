@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
   serverMock,
@@ -86,11 +86,11 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getUpdateTimelinesRequest(updateTimelineWithTimelineId);
-        await server.inject(mockRequest, context);
+        await server.inject(mockRequest, requestContextMock.convertContext(context));
       });
 
       test('should Check if given timeline id exist', async () => {
@@ -122,7 +122,7 @@ describe('update timelines', () => {
       test('returns 200 when create timeline successfully', async () => {
         const response = await server.inject(
           getUpdateTimelinesRequest(updateTimelineWithTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.status).toEqual(200);
       });
@@ -150,14 +150,14 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
       test('returns error message', async () => {
         const response = await server.inject(
           getUpdateTimelinesRequest(updateTimelineWithTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.body).toEqual({
           message: UPDATE_TIMELINE_ERROR_MESSAGE,
@@ -194,11 +194,11 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId);
-        await server.inject(mockRequest, context);
+        await server.inject(mockRequest, requestContextMock.convertContext(context));
       });
 
       test('should Check if given timeline id exist', async () => {
@@ -242,7 +242,7 @@ describe('update timelines', () => {
       test('returns 200 when create timeline template successfully', async () => {
         const response = await server.inject(
           getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.status).toEqual(200);
       });
@@ -270,14 +270,14 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
       test('returns error message', async () => {
         const response = await server.inject(
           getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.body).toEqual({
           message: UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,

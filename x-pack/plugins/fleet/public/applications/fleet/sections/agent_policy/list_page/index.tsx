@@ -25,7 +25,7 @@ import { useHistory } from 'react-router-dom';
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  useCapabilities,
+  useAuthz,
   useGetAgentPolicies,
   usePagination,
   useSorting,
@@ -42,7 +42,8 @@ import { CreateAgentPolicyFlyout } from './components';
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
+
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -88,6 +89,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
     kuery: search,
+    full: true,
   });
 
   // Some policies retrieved, set up table props
@@ -101,7 +103,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '20%',
+        width: '25%',
         render: (name: string, agentPolicy: AgentPolicy) => (
           <AgentPolicySummaryLine policy={agentPolicy} />
         ),
@@ -148,6 +150,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           packagePolicies ? packagePolicies.length : 0,
       },
       {
+        field: 'actions',
         name: i18n.translate('xpack.fleet.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
@@ -177,8 +180,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasWriteCapabilites}
+        isDisabled={!hasFleetAllPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
+        data-test-subj="createAgentPolicyButton"
       >
         <FormattedMessage
           id="xpack.fleet.agentPolicyList.addButton"
@@ -186,7 +190,25 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasWriteCapabilites, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
+  );
+
+  const emptyStateCreateAgentPolicyButton = useMemo(
+    () => (
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        isDisabled={!hasFleetAllPrivileges}
+        onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
+        data-test-subj="emptyPromptCreateAgentPolicyButton"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyList.addButton"
+          defaultMessage="Create agent policy"
+        />
+      </EuiButton>
+    ),
+    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(
@@ -200,10 +222,10 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             />
           </h2>
         }
-        actions={createAgentPolicyButton}
+        actions={emptyStateCreateAgentPolicyButton}
       />
     ),
-    [createAgentPolicyButton]
+    [emptyStateCreateAgentPolicyButton]
   );
 
   const onTableChange = (criteria: CriteriaWithPagination<AgentPolicy>) => {

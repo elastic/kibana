@@ -9,8 +9,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 
 import * as i18n from './translations';
@@ -107,6 +106,8 @@ export const AuditdGenericLine = React.memo<Props>(
           isDraggable={isDraggable}
           queryValue={result}
           value={result}
+          isAggregatable={true}
+          fieldType="keyword"
         />
       </TokensFlexItem>
     </EuiFlexGroup>
@@ -116,7 +117,6 @@ export const AuditdGenericLine = React.memo<Props>(
 AuditdGenericLine.displayName = 'AuditdGenericLine';
 
 interface GenericDetailsProps {
-  browserFields: BrowserFields;
   data: Ecs;
   isDraggable?: boolean;
   contextId: string;

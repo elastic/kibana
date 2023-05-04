@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import { EsQueryParser } from './es_query_parser';
@@ -93,9 +94,7 @@ describe('EsQueryParser.populateData', () => {
 
   beforeEach(() => {
     searchApiStub = {
-      search: jest.fn(() => ({
-        toPromise: jest.fn(() => Promise.resolve(data)),
-      })),
+      search: jest.fn(() => of(data)),
     };
     parser = new EsQueryParser({}, searchApiStub, undefined, undefined);
   });

@@ -8,8 +8,8 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
-import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 import { RedirectAppLinks } from '../../../app_links';
@@ -35,9 +35,23 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     services: { http, application },
   } = useKibana<CoreStart>();
   const addBasePath = http.basePath.prepend;
-  const image = addBasePath(`/plugins/kibanaReact/assets/elastic_agent_card.svg`);
+  const imageUrl = addBasePath(`/plugins/kibanaReact/assets/elastic_agent_card.svg`);
   const canAccessFleet = application.capabilities.navLinks.integrations;
   const hasCategory = category ? `/${category}` : '';
+
+  const image = (
+    <EuiImage
+      size="fullWidth"
+      style={{
+        width: 'max(100%, 360px)',
+        height: 240,
+        objectFit: 'cover',
+        background: 'aliceblue',
+      }}
+      url={imageUrl}
+      alt=""
+    />
+  );
 
   if (!canAccessFleet) {
     return (
@@ -91,7 +105,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
           defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
         })}
-        betaBadgeProps={{ label: recommended ? NO_DATA_RECOMMENDED : undefined }}
+        betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
         footer={footer}
         layout={layout as 'vertical' | undefined}
         {...cardRest}

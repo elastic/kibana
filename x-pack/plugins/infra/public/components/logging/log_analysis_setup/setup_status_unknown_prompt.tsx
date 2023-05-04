@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface Props {
   retry: () => void;
@@ -28,7 +28,12 @@ export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<Props>
       </h2>
     }
     actions={
-      <EuiButton onClick={() => retry()} color="primary" fill>
+      <EuiButton
+        data-test-subj="infraLogAnalysisSetupStatusUnknownPromptTryAgainButton"
+        onClick={() => retry()}
+        color="primary"
+        fill
+      >
         {i18n.translate('xpack.infra.logs.analysis.setupStatusTryAgainButton', {
           defaultMessage: 'Try again',
         })}

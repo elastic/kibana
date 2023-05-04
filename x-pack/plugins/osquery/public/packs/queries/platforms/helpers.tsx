@@ -43,12 +43,14 @@ export const getSupportedPlatforms = (payload: string) => {
           acc.push(PlatformType.darwin);
           acc.push(PlatformType.linux);
         }
+
         if (nextPlatform === 'ubuntu') {
           acc.push(PlatformType.linux);
         }
       } else {
         acc.push(nextPlatform);
       }
+
       return acc;
     }, [] as string[])
   ).join(',');

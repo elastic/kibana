@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -20,9 +20,10 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { UseField } from '../../shared_imports';
 
-import { INDEX_PATTERN_TYPE, IndexPatternConfig } from '../../types';
+import { IndexPatternConfig } from '../../types';
 
 interface TypeFieldProps {
   onChange: (type: INDEX_PATTERN_TYPE) => void;

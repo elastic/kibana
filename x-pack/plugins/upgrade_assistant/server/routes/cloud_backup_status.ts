@@ -17,16 +17,13 @@ export function registerCloudBackupStatusRoutes({
   router.get(
     { path: `${API_BASE_PATH}/cloud_backup_status`, validate: false },
     versionCheckHandlerWrapper(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
 
       try {
-        const {
-          body: { snapshots },
-        } = await clusterClient.asCurrentUser.snapshot.get({
+        const { snapshots } = await clusterClient.asCurrentUser.snapshot.get({
           repository: CLOUD_SNAPSHOT_REPOSITORY,
           snapshot: '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
-          // @ts-expect-error @elastic/elasticsearch "desc" is a new param
           order: 'desc',
           sort: 'start_time',
           size: 1,

@@ -7,22 +7,20 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-// @ts-ignore untyped module
-import getFunctionalConfig from '../../functional/config';
 
 // eslint-disable-next-line import/no-default-export
 export default async ({ readConfigFile }: FtrConfigProviderContext) => {
-  const functionalConfig = await getFunctionalConfig({ readConfigFile });
+  const baseConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
 
   return {
-    ...functionalConfig,
+    ...baseConfig.getAll(),
 
     testFiles: [require.resolve('./test')],
 
     kbnTestServer: {
-      ...functionalConfig.kbnTestServer,
+      ...baseConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.kbnTestServer.serverArgs,
+        ...baseConfig.get('kbnTestServer.serverArgs'),
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json`,
       ],
     },

@@ -6,38 +6,28 @@
  */
 
 import React, { useState, FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCallOut,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSpacer,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
-import type { SimpleSavedObject } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
-
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-
-import { getNestedProperty } from '../../../../../util/object_utils';
-
 import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
-const fixedPageSize: number = 8;
+const fixedPageSize: number = 20;
 
-interface Props {
-  onClose: () => void;
-}
-
-export const SourceSelection: FC<Props> = ({ onClose }) => {
+export const SourceSelection: FC = () => {
   const {
-    services: { savedObjects, uiSettings },
+    services: { http, uiSettings, savedObjectsManagement },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -49,7 +39,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
     id: string,
     type: string,
     fullName: string,
-    savedObject: SimpleSavedObject
+    savedObject: SavedObjectCommon
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
@@ -107,79 +97,68 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <EuiModal
-      className="dataFrameAnalyticsCreateSearchDialog"
-      onClose={onClose}
-      data-test-subj="analyticsCreateSourceIndexModal"
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.ml.dataframe.analytics.create.newAnalyticsTitle"
-            defaultMessage="New analytics job"
-          />{' '}
-          /{' '}
-          <FormattedMessage
-            id="xpack.ml.dataframe.analytics.create.chooseSourceTitle"
-            defaultMessage="Choose a source data view"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        {isCcsCallOut && (
-          <>
-            <EuiCallOut
-              data-test-subj="analyticsCreateSourceIndexModalCcsErrorCallOut"
-              title={i18n.translate(
-                'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle',
-                {
-                  defaultMessage: 'Data views using cross-cluster search are not supported.',
-                }
-              )}
-              color="danger"
-            >
-              {typeof ccsCallOutBodyText === 'string' && <p>{ccsCallOutBodyText}</p>}
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <SavedObjectFinderUi
-          key="searchSavedObjectFinder"
-          onChoose={onSearchSelected}
-          showFilter
-          noItemsMessage={i18n.translate(
-            'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
-            {
-              defaultMessage: 'No matching indices or saved searches found.',
-            }
+    <div data-test-subj="mlDFAPageSourceSelection">
+      <EuiPageBody restrictWidth={1200}>
+        <EuiPageContent hasShadow={false} hasBorder={true}>
+          {isCcsCallOut && (
+            <>
+              <EuiCallOut
+                data-test-subj="analyticsCreateSourceIndexModalCcsErrorCallOut"
+                title={i18n.translate(
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle',
+                  {
+                    defaultMessage: 'Data views using cross-cluster search are not supported.',
+                  }
+                )}
+                color="danger"
+              >
+                {typeof ccsCallOutBodyText === 'string' && <p>{ccsCallOutBodyText}</p>}
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
           )}
-          savedObjectMetaData={[
-            {
-              type: 'search',
-              getIconForSavedObject: () => 'search',
-              name: i18n.translate(
-                'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
-                {
-                  defaultMessage: 'Saved search',
-                }
-              ),
-            },
-            {
-              type: 'index-pattern',
-              getIconForSavedObject: () => 'indexPatternApp',
-              name: i18n.translate(
-                'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
-                {
-                  defaultMessage: 'Data view',
-                }
-              ),
-            },
-          ]}
-          fixedPageSize={fixedPageSize}
-          uiSettings={uiSettings}
-          savedObjects={savedObjects}
-        />
-      </EuiModalBody>
-    </EuiModal>
+          <SavedObjectFinder
+            key="searchSavedObjectFinder"
+            onChoose={onSearchSelected}
+            showFilter
+            noItemsMessage={i18n.translate(
+              'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
+              {
+                defaultMessage: 'No matching indices or saved searches found.',
+              }
+            )}
+            savedObjectMetaData={[
+              {
+                type: 'search',
+                getIconForSavedObject: () => 'search',
+                name: i18n.translate(
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
+                  {
+                    defaultMessage: 'Saved search',
+                  }
+                ),
+              },
+              {
+                type: 'index-pattern',
+                getIconForSavedObject: () => 'indexPatternApp',
+                name: i18n.translate(
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
+                  {
+                    defaultMessage: 'Data view',
+                  }
+                ),
+                defaultSearchField: 'name',
+              },
+            ]}
+            fixedPageSize={fixedPageSize}
+            services={{
+              uiSettings,
+              http,
+              savedObjectsManagement,
+            }}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </div>
   );
 };

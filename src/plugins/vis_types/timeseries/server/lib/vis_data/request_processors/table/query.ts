@@ -17,14 +17,10 @@ export const query: TableRequestProcessorsFunction =
     const { timeField } = await buildSeriesMetaParams();
     const { from, to } = getTimerange(req);
     const indexPattern = seriesIndex.indexPattern || undefined;
-
-    doc.size = 0;
-
     const queries = !panel.ignore_global_filter ? req.body.query : [];
     const filters = !panel.ignore_global_filter ? req.body.filters : [];
-    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
-    const boolFilters: unknown[] = [];
+    const esQuery = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
     if (timeField) {
       const timerange = {
@@ -37,13 +33,14 @@ export const query: TableRequestProcessorsFunction =
         },
       };
 
-      boolFilters.push(timerange);
+      esQuery.bool.must.push(timerange);
     }
     if (panel.filter) {
-      boolFilters.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      esQuery.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
-    overwrite(doc, 'query.bool.must', boolFilters);
+    overwrite(doc, 'size', 0);
+    overwrite(doc, 'query', esQuery);
 
     return next(doc);
   };

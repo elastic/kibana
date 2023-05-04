@@ -1,12 +1,12 @@
 {
-  "name": "saved_object_export_transforms",
+  "name": "@kbn/saved-object-export-transforms-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/saved_object_export_transforms",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"

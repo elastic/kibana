@@ -1,10 +1,7 @@
 {
   "author": "Elastic",
-  "name": "cases",
-  "version": "8.0.0",
+  "name": "@kbn/cases-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License",
-  "scripts": {
-    "test:sub-cases": "node server/scripts/sub_cases/generator"
-  }
+  "license": "Elastic License 2.0"
 }

@@ -7,21 +7,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
-import { TSVB_EDITOR_NAME } from './application/editor_controller';
-import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
-import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR } from '../common/constants';
-import { toExpressionAst } from './to_ast';
+import { v4 as uuidv4 } from 'uuid';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import {
   Vis,
   VIS_EVENT_TO_TRIGGER,
   VisGroups,
   VisParams,
   VisTypeDefinition,
-} from '../../../visualizations/public';
-import { getDataStart } from './services';
+} from '@kbn/visualizations-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { TSVB_EDITOR_NAME } from './application/editor_controller';
+import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
+import {
+  extractIndexPatternValues,
+  isStringTypeIndexPattern,
+} from '../common/index_patterns_utils';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS } from '../common/constants';
+import { toExpressionAst } from './to_ast';
+import { getDataViewsStart, getUISettings } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
+import type { IndexPatternValue, Panel } from '../common/types';
+import { convertTSVBtoLensConfiguration } from './convert_to_lens';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -46,6 +53,49 @@ export const withReplacedIds = (
   return vis;
 };
 
+async function withDefaultIndexPattern(
+  vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
+): Promise<Vis<TimeseriesVisParams>> {
+  const dataViews = getDataViewsStart();
+
+  const defaultIndex = await dataViews.getDefault();
+  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
+  vis.params.index_pattern = {
+    id: defaultIndex.id,
+  };
+  return vis;
+}
+
+async function resolveIndexPattern(
+  indexPatternValue: IndexPatternValue,
+  indexPatterns: DataViewsContract
+) {
+  if (!indexPatternValue) return;
+  if (isStringTypeIndexPattern(indexPatternValue)) {
+    return await indexPatterns.find(indexPatternValue, 1);
+  }
+
+  if (indexPatternValue.id) {
+    return [await indexPatterns.get(indexPatternValue.id)];
+  }
+}
+
+async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
+  const dataViews = getDataViewsStart();
+
+  const defaultIndex = await dataViews.getDefault();
+  const resolvedIndexPatterns: DataView[] = [];
+  const indexPatternValues = extractIndexPatternValues(params as Panel, defaultIndex?.id);
+  (
+    await Promise.all(
+      indexPatternValues.map((indexPatternValue) =>
+        resolveIndexPattern(indexPatternValue, dataViews)
+      )
+    )
+  ).forEach((patterns) => patterns && resolvedIndexPatterns.push(...patterns));
+  return resolvedIndexPatterns;
+}
+
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
@@ -58,11 +108,11 @@ export const metricsVisDefinition: VisTypeDefinition<
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: () => uuid(),
+      id: () => uuidv4(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: () => uuid(),
+          id: () => uuidv4(),
           color: TSVB_DEFAULT_COLOR,
           split_mode: 'everything',
           palette: {
@@ -71,7 +121,7 @@ export const metricsVisDefinition: VisTypeDefinition<
           },
           metrics: [
             {
-              id: () => uuid(),
+              id: () => uuidv4(),
               type: 'count',
             },
           ],
@@ -102,12 +152,11 @@ export const metricsVisDefinition: VisTypeDefinition<
       drop_last_bucket: 0,
     },
   },
-  setup: (vis) => Promise.resolve(withReplacedIds(vis)),
+  setup: (vis) => withDefaultIndexPattern(withReplacedIds(vis)),
   editorConfig: {
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: true,
     showFilterBar: true,
     showIndexSelection: false,
   },
@@ -118,24 +167,22 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  inspectorAdapters: {},
-  requiresSearch: true,
-  getUsedIndexPattern: async (params: VisParams) => {
-    const { indexPatterns } = getDataStart();
-    const indexPatternValue = params.index_pattern;
-
-    if (indexPatternValue) {
-      if (isStringTypeIndexPattern(indexPatternValue)) {
-        return await indexPatterns.find(indexPatternValue);
-      }
-
-      if (indexPatternValue.id) {
-        return [await indexPatterns.get(indexPatternValue.id)];
-      }
-    }
-
-    const defaultIndex = await indexPatterns.getDefault();
-
-    return defaultIndex ? [defaultIndex] : [];
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(
+        vis?.params
+          ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime())
+          : null
+      ),
+    };
   },
+  navigateToLens: async (vis, timeFilter) =>
+    vis?.params ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime()) : null,
+
+  inspectorAdapters: () => ({
+    requests: new RequestAdapter(),
+  }),
+  requiresSearch: true,
+  suppressWarnings: () => !getUISettings().get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS),
+  getUsedIndexPattern: getUsedIndexPatterns,
 };

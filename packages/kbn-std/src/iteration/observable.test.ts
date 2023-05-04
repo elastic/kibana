@@ -8,7 +8,6 @@
 
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
-import { lastValueFrom } from '../rxjs_7';
 
 import { map$, mapWithLimit$ } from './observable';
 import { list, sleep, generator } from './test_helpers';
@@ -23,7 +22,7 @@ describe('mapWithLimit$', () => {
     let active = 0;
     const limit = Math.random() > 0.5 ? 20 : 40;
 
-    const results = await lastValueFrom(
+    const results = await Rx.lastValueFrom(
       mapWithLimit$(list(100), limit, async (n) => {
         active += 1;
         if (active > maxConcurrency) {
@@ -50,7 +49,7 @@ describe('mapWithLimit$', () => {
     ['observable', Rx.of(1, 2, 3, 4, 5), [1, 2, 3, 4, 5]] as const,
   ])('works with %p', async (_, iter, expected) => {
     const mock = jest.fn(async (n) => n);
-    const results = await lastValueFrom(mapWithLimit$(iter, 1, mock).pipe(toArray()));
+    const results = await Rx.lastValueFrom(mapWithLimit$(iter, 1, mock).pipe(toArray()));
     expect(results).toEqual(expected);
   });
 });
@@ -60,7 +59,7 @@ describe('map$', () => {
     let maxConcurrency = 0;
     let active = 0;
 
-    const results = await lastValueFrom(
+    const results = await Rx.lastValueFrom(
       map$(list(100), async (n) => {
         active += 1;
         if (active > maxConcurrency) {

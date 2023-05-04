@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
+  CLOUD_SERVICE_NAME,
   CONTAINER_ID,
   KUBERNETES,
   SERVICE_NAME,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   HOST_OS_PLATFORM,
-} from '../../../common/elasticsearch_fieldnames';
+  LABEL_TELEMETRY_AUTO_VERSION,
+  AGENT_VERSION,
+  SERVICE_FRAMEWORK_NAME,
+} from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  ServerlessType,
+  getServerlessTypeFromCloudData,
+} from '../../../common/serverless';
 
 type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,
@@ -29,32 +37,34 @@ type ServiceMetadataIconsRaw = Pick<
 export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
+  serverlessType?: ServerlessType;
   cloudProvider?: string;
 }
 
 export const should = [
   { exists: { field: CONTAINER_ID } },
-  { exists: { field: POD_NAME } },
+  { exists: { field: KUBERNETES_POD_NAME } },
   { exists: { field: CLOUD_PROVIDER } },
   { exists: { field: HOST_OS_PLATFORM } },
   { exists: { field: AGENT_NAME } },
+  { exists: { field: AGENT_VERSION } },
+  { exists: { field: SERVICE_FRAMEWORK_NAME } },
+  { exists: { field: LABEL_TELEMETRY_AUTO_VERSION } },
 ];
 
 export async function getServiceMetadataIcons({
   serviceName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataIcons> {
-  const { apmEventClient } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...rangeQuery(start, end),
@@ -69,8 +79,15 @@ export async function getServiceMetadataIcons({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
-      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
+      _source: [
+        KUBERNETES,
+        CLOUD_PROVIDER,
+        CONTAINER_ID,
+        AGENT_NAME,
+        CLOUD_SERVICE_NAME,
+      ],
       query: { bool: { filter, should } },
     },
   };
@@ -85,6 +102,7 @@ export async function getServiceMetadataIcons({
       agentName: undefined,
       containerType: undefined,
       cloudProvider: undefined,
+      serverlessType: undefined,
     };
   }
 
@@ -98,9 +116,15 @@ export async function getServiceMetadataIcons({
     containerType = 'Docker';
   }
 
+  const serverlessType = getServerlessTypeFromCloudData(
+    cloud?.provider,
+    cloud?.service?.name
+  );
+
   return {
     agentName: agent?.name,
     containerType,
+    serverlessType,
     cloudProvider: cloud?.provider,
   };
 }

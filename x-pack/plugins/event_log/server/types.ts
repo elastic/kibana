@@ -6,14 +6,22 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
-import { FindOptionsType } from './event_log_client';
-import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-export type { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { AggregateOptionsType, FindOptionsType } from './event_log_client';
+import {
+  AggregateEventsBySavedObjectResult,
+  QueryEventsBySavedObjectResult,
+} from './es/cluster_client_adapter';
+
+export type {
+  QueryEventsBySavedObjectResult,
+  AggregateEventsBySavedObjectResult,
+} from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
@@ -49,29 +57,30 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+  findEventsWithAuthFilter(
+    type: string,
+    ids: string[],
+    authFilter: KueryNode,
+    namespace: string | undefined,
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
+  aggregateEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<AggregateOptionsType>,
+    legacyIds?: string[]
+  ): Promise<AggregateEventsBySavedObjectResult>;
+  aggregateEventsWithAuthFilter(
+    type: string,
+    authFilter: KueryNode,
+    options?: Partial<AggregateOptionsType>,
+    namespaces?: Array<string | undefined>,
+    includeSpaceAgnostic?: boolean
+  ): Promise<AggregateEventsBySavedObjectResult>;
 }
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
-  startTiming(event: IEvent): void;
+  startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
 }
-
-/**
- * @internal
- */
-export interface EventLogApiRequestHandlerContext {
-  getEventLogClient(): IEventLogClient;
-}
-
-/**
- * @internal
- */
-export interface EventLogRequestHandlerContext extends RequestHandlerContext {
-  eventLog: EventLogApiRequestHandlerContext;
-}
-
-/**
- * @internal
- */
-export type EventLogRouter = IRouter<EventLogRequestHandlerContext>;

@@ -11,8 +11,8 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
-import { Logger } from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 export function createHealthRoute(
   logger: Logger,

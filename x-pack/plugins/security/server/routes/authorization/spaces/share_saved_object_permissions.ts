@@ -7,11 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
-export function defineShareSavedObjectPermissionRoutes({ router, authz }: RouteDefinitionParams) {
+export function defineShareSavedObjectPermissionRoutes({
+  router,
+  authz,
+  license,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/_share_saved_object_permissions',
@@ -20,6 +24,10 @@ export function defineShareSavedObjectPermissionRoutes({ router, authz }: RouteD
     createLicensedRouteHandler(async (context, request, response) => {
       let shareToAllSpaces = true;
       const { type } = request.query;
+
+      if (!license.isEnabled()) {
+        return response.notFound();
+      }
 
       try {
         const checkPrivileges = authz.checkPrivilegesWithRequest(request);

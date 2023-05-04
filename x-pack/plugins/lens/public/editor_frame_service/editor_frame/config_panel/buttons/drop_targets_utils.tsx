@@ -5,101 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
-import classNames from 'classnames';
-import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { DropType } from '../../../../types';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import {
+  FramePublicAPI,
+  isOperation,
+  Visualization,
+  DragDropOperation,
+  VisualizationDimensionGroupConfig,
+} from '../../../../types';
 
-const getExtraDrop = ({
-  type,
-  isIncompatible,
-}: {
-  type: 'swap' | 'duplicate';
-  isIncompatible?: boolean;
-}) => {
+export interface OnVisDropProps<T> {
+  prevState: T;
+  target: DragDropOperation;
+  source: DragDropIdentifier;
+  frame: FramePublicAPI;
+  dropType: DropType;
+  group?: VisualizationDimensionGroupConfig;
+}
+
+export function shouldRemoveSource(source: DragDropIdentifier, dropType: DropType) {
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="spaceBetween"
-      alignItems="center"
-      className={classNames('lnsDragDrop__extraDrop', {
-        'lnsDragDrop-incompatibleExtraDrop': isIncompatible,
-      })}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type={type === 'duplicate' ? 'copy' : 'merge'} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj={`lnsDragDrop-${type}`}>
-            <EuiText size="s">
-              {type === 'duplicate'
-                ? i18n.translate('xpack.lens.dragDrop.duplicate', {
-                    defaultMessage: 'Duplicate',
-                  })
-                : i18n.translate('xpack.lens.dragDrop.swap', {
-                    defaultMessage: 'Swap',
-                  })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <code>
-            {' '}
-            {type === 'duplicate'
-              ? i18n.translate('xpack.lens.dragDrop.altOption', {
-                  defaultMessage: 'Alt/Option',
-                })
-              : i18n.translate('xpack.lens.dragDrop.shift', {
-                  defaultMessage: 'Shift',
-                })}
-          </code>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
   );
-};
+}
 
-const customDropTargetsMap: Partial<{ [dropType in DropType]: React.ReactElement }> = {
-  replace_duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
-  duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
-  swap_incompatible: getExtraDrop({ type: 'swap', isIncompatible: true }),
-  replace_duplicate_compatible: getExtraDrop({ type: 'duplicate' }),
-  duplicate_compatible: getExtraDrop({ type: 'duplicate' }),
-  swap_compatible: getExtraDrop({ type: 'swap' }),
-};
+export function onDropForVisualization<T, P = unknown>(
+  props: OnVisDropProps<T>,
+  activeVisualization: Visualization<T, P>
+) {
+  const { prevState, target, frame, source, group } = props;
+  const { layerId, columnId, groupId } = target;
 
-export const getCustomDropTarget = (dropType: DropType) => customDropTargetsMap?.[dropType] || null;
+  const previousColumn =
+    isOperation(source) && group?.requiresPreviousColumnOnDuplicate ? source.columnId : undefined;
 
-export const getAdditionalClassesOnEnter = (dropType?: string) => {
-  if (
-    dropType &&
-    [
-      'field_replace',
-      'replace_compatible',
-      'replace_incompatible',
-      'replace_duplicate_compatible',
-      'replace_duplicate_incompatible',
-    ].includes(dropType)
-  ) {
-    return 'lnsDragDrop-isReplacing';
-  }
-};
+  const newVisState = activeVisualization.setDimension({
+    columnId,
+    groupId,
+    layerId,
+    prevState,
+    previousColumn,
+    frame,
+  });
 
-export const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (
-    dropType &&
-    [
-      'move_incompatible',
-      'replace_incompatible',
-      'swap_incompatible',
-      'duplicate_incompatible',
-      'replace_duplicate_incompatible',
-    ].includes(dropType)
-  ) {
-    return 'lnsDragDrop-notCompatible';
-  }
-};
+  return newVisState;
+}

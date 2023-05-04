@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { canUserChangePassword } from '../../../common/model';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
@@ -59,7 +59,8 @@ export function defineChangeUserPasswordRoutes({
         : undefined;
 
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.changePassword(
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.changePassword(
           { username, body: { password: newPassword } },
           options
         );
@@ -77,10 +78,10 @@ export function defineChangeUserPasswordRoutes({
       // user with the new password and update session. We check this since it's possible to update
       // password even if user is authenticated via HTTP headers and hence doesn't have an active
       // session and in such cases we shouldn't create a new one.
-      if (isUserChangingOwnPassword && currentSession) {
+      if (isUserChangingOwnPassword && currentSession?.value) {
         try {
           const authenticationResult = await getAuthenticationService().login(request, {
-            provider: { name: currentSession.provider.name },
+            provider: { name: currentSession.value.provider.name },
             value: { username, password: newPassword },
           });
 

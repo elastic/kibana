@@ -37,7 +37,7 @@ interface Props {
  * Given a pathname, redirect to that location, preserving the search and maintaining
  * backward-compatibilty with legacy (pre-7.9) hash-based URLs.
  */
-function RenderRedirectTo(props: Props) {
+export function RenderRedirectTo(props: Props) {
   const { location } = props;
   let search = location.search;
   let pathname = props.pathname;

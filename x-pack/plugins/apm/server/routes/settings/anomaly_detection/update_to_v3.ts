@@ -7,23 +7,26 @@
 import { Logger } from '@kbn/logging';
 import { uniq } from 'lodash';
 import pLimit from 'p-limit';
-import { ElasticsearchClient } from '../../../../../../../src/core/server';
-import { JOB_STATE } from '../../../../../ml/common';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function updateToV3({
   logger,
-  setup,
+  indices,
+  mlClient,
   esClient,
 }: {
   logger: Logger;
-  setup: Setup;
+  mlClient?: MlClient;
+  indices: ApmIndicesConfig;
   esClient: ElasticsearchClient;
 }) {
-  const allJobs = await getAnomalyDetectionJobs(setup);
+  const allJobs = await getAnomalyDetectionJobs(mlClient);
 
   const v2Jobs = allJobs.filter((job) => job.version === 2);
 
@@ -54,7 +57,13 @@ export async function updateToV3({
     );
   }
 
-  await createAnomalyDetectionJobs(setup, environments, logger);
+  await createAnomalyDetectionJobs({
+    mlClient,
+    esClient,
+    indices,
+    environments,
+    logger,
+  });
 
   return true;
 }

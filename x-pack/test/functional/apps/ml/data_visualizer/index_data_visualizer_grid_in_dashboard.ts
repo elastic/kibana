@@ -122,6 +122,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     runTests(farequoteLuceneFiltersSearchTestData);

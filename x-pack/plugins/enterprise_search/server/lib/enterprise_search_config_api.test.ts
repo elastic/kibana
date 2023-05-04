@@ -6,18 +6,18 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
-import '../__mocks__/http_agent.mock.ts';
+import '../__mocks__/http_agent.mock';
 
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
-jest.mock('@kbn/utils', () => ({
+jest.mock('@kbn/repo-info', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   callEnterpriseSearchConfigAPI,
@@ -29,6 +29,8 @@ describe('callEnterpriseSearchConfigAPI', () => {
     host: 'http://localhost:3002',
     accessCheckTimeout: 200,
     accessCheckTimeoutWarning: 100,
+    hasNativeConnectors: true,
+    hasWebCrawler: true,
   };
   const mockRequest = {
     headers: { authorization: '==someAuth' },
@@ -120,11 +122,14 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       ...DEFAULT_INITIAL_APP_DATA,
-      errorConnectingMessage: undefined,
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
       },
       publicUrl: 'http://some.vanity.url',
     });
@@ -138,6 +143,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       access: {
         hasAppSearchAccess: false,
         hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
       },
       publicUrl: undefined,
       readOnlyMode: false,
@@ -191,10 +200,28 @@ describe('callEnterpriseSearchConfigAPI', () => {
     });
   });
 
-  it('returns early if config.host is not set', async () => {
-    const config = { host: '' };
+  it('returns access & features if config.host is not set', async () => {
+    const config = {
+      hasConnectors: false,
+      hasDefaultIngestPipeline: false,
+      hasNativeConnectors: false,
+      hasWebCrawler: false,
+      host: '',
+    };
 
-    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({});
+    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasConnectors: false,
+        hasDefaultIngestPipeline: false,
+        hasNativeConnectors: false,
+        hasWebCrawler: false,
+      },
+      kibanaVersion: '1.0.0',
+    });
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -208,12 +235,23 @@ describe('callEnterpriseSearchConfigAPI', () => {
     (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve('Bad Data'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
-      'Could not perform access check to Enterprise Search: TypeError: response.json is not a function'
+      'Could not perform access check to Enterprise Search: 500'
     );
+
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(
+      Promise.resolve(
+        new Response('{}', {
+          status: 500,
+          statusText: 'I failed',
+        })
+      )
+    );
+    const expected = { responseStatus: 500, responseStatusText: 'I failed' };
+    expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual(expected);
   });
 
   it('handles timeouts', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
     callEnterpriseSearchConfigAPI(mockDependencies);

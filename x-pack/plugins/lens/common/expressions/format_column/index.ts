@@ -11,6 +11,7 @@ export interface FormatColumnArgs {
   format: string;
   columnId: string;
   decimals?: number;
+  suffix?: string;
   parentFormat?: string;
 }
 
@@ -31,6 +32,10 @@ export const formatColumn: FormatColumnExpressionFunction = {
     },
     decimals: {
       types: ['number'],
+      help: '',
+    },
+    suffix: {
+      types: ['string'],
       help: '',
     },
     parentFormat: {

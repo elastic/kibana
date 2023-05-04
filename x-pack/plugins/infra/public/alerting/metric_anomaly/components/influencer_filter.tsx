@@ -136,6 +136,7 @@ export const InfluencerFilter = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiSelect
+              data-test-subj="infraInfluencerFilterSelect"
               id="selectInfluencerFieldName"
               value={fieldName}
               onChange={onSelectFieldName}

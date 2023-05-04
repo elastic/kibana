@@ -5,84 +5,93 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useMemo } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../utils/use_index_pattern';
-import { withQueryParams } from '../../utils/with_query_params';
-import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { DiscoverRouteProps } from '../types';
 import { Doc } from './components/doc';
-
-export interface SingleDocRouteProps extends DiscoverRouteProps {
-  /**
-   * Document id
-   */
-  id: string;
-}
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getScopedHistory } from '../../kibana_services';
+import { DiscoverError } from '../../components/common/error_alert';
+import { useDataView } from '../../hooks/use_data_view';
+import { DocHistoryLocationState } from './locator';
 
 export interface DocUrlParams {
-  indexPatternId: string;
+  dataViewId: string;
   index: string;
 }
 
-const SingleDoc = (props: SingleDocRouteProps) => {
-  const { id, services } = props;
-  const { chrome, timefilter } = services;
+export const SingleDocRoute = () => {
+  const { timefilter, core } = useDiscoverServices();
+  const { search } = useLocation();
+  const { dataViewId, index } = useParams<DocUrlParams>();
 
-  const { indexPatternId, index } = useParams<DocUrlParams>();
-  const breadcrumb = useMainRouteBreadcrumb();
+  const query = useMemo(() => new URLSearchParams(search), [search]);
+  const id = query.get('id');
 
-  useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(breadcrumb),
-      {
-        text: `${index}#${id}`,
-      },
-    ]);
-  }, [chrome, index, id, breadcrumb]);
+  const locationState = useMemo(
+    () => getScopedHistory().location.state as DocHistoryLocationState | undefined,
+    []
+  );
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'single-doc',
+    id: dataViewId,
+  });
 
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();
     timefilter.disableTimeRangeSelector();
-  });
+  }, [timefilter]);
 
-  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { dataView, error } = useDataView({
+    index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
+  });
 
   if (error) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <FormattedMessage
             id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
-            values={{ indexPatternId }}
+            defaultMessage="No matching data view for id {dataViewId}"
+            values={{ dataViewId }}
           />
         }
       />
     );
   }
 
-  if (!indexPattern) {
+  if (!dataView) {
     return <LoadingIndicator />;
   }
 
-  return (
-    <div className="app-container">
-      <Doc id={id} index={index} indexPattern={indexPattern} />
-    </div>
-  );
-};
+  if (!id) {
+    return (
+      <DiscoverError
+        error={
+          new Error(
+            i18n.translate('discover.discoverError.missingIdParamError', {
+              defaultMessage:
+                'No document ID provided. Return to Discover to select another document.',
+            })
+          )
+        }
+      />
+    );
+  }
 
-export const SingleDocRoute = withQueryParams(SingleDoc, ['id']);
+  return <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />;
+};

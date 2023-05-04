@@ -17,12 +17,18 @@ import {
 } from '@elastic/eui';
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface Option {
   name?: string | ReactNode;
   value: string;
   checked?: 'on' | 'off';
+  disabled?: boolean;
 }
+
+const SELECT_PICKER_HEIGHT = '250px';
 
 const NoFilterItems = () => {
   return (
@@ -41,13 +47,21 @@ const NoFilterItems = () => {
   );
 };
 
+interface MultiSelectPickerStyles {
+  filterGroup?: SerializedStyles;
+  filterItemContainer?: SerializedStyles;
+}
 export const MultiSelectPicker: FC<{
   options: Option[];
   onChange?: (items: string[]) => void;
   title?: string;
   checkedOptions: string[];
   dataTestSubj: string;
-}> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
+  postfix?: React.ReactElement;
+  cssStyles?: MultiSelectPickerStyles;
+}> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix, cssStyles }) => {
+  const euiTheme = useCurrentEuiTheme();
+
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -68,6 +82,7 @@ export const MultiSelectPicker: FC<{
 
   const closePopover = () => {
     setIsPopoverOpen(false);
+    setSearchTerm('');
   };
 
   const handleOnChange = (index: number) => {
@@ -98,7 +113,7 @@ export const MultiSelectPicker: FC<{
   );
 
   return (
-    <EuiFilterGroup data-test-subj={dataTestSubj} style={{ marginLeft: 8 }}>
+    <EuiFilterGroup data-test-subj={dataTestSubj} css={cssStyles?.filterGroup}>
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestSubj}-popover`}
@@ -114,7 +129,15 @@ export const MultiSelectPicker: FC<{
             data-test-subj={`${dataTestSubj}-searchInput`}
           />
         </EuiPopoverTitle>
-        <div style={{ maxHeight: 250, overflow: 'auto' }}>
+        <div
+          css={
+            cssStyles?.filterItemContainer ??
+            css`
+              max-height: ${SELECT_PICKER_HEIGHT};
+              overflow: auto;
+            `
+          }
+        >
           {Array.isArray(items) && items.length > 0 ? (
             items.map((item, index) => {
               const checked =
@@ -126,7 +149,13 @@ export const MultiSelectPicker: FC<{
                   checked={checked ? 'on' : undefined}
                   key={index}
                   onClick={() => handleOnChange(index)}
-                  style={{ flexDirection: 'row' }}
+                  style={{
+                    flexDirection: 'row',
+                    color:
+                      item.disabled === true
+                        ? euiTheme.euiColorDisabledText
+                        : euiTheme.euiTextColor,
+                  }}
                   data-test-subj={`${dataTestSubj}-option-${item.value}${
                     checked ? '-checked' : ''
                   }`}
@@ -140,6 +169,7 @@ export const MultiSelectPicker: FC<{
           )}
         </div>
       </EuiPopover>
+      {postfix ? postfix : null}
     </EuiFilterGroup>
   );
 };

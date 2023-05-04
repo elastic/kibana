@@ -22,10 +22,39 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const DUCOMENT_SUMMARY = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.documentSummary',
+export const HIGHLIGHTED_FIELDS = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
-    defaultMessage: 'Document Summary',
+    defaultMessage: 'Highlighted fields',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
+  {
+    defaultMessage: 'Alert prevalence',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
+  {
+    defaultMessage:
+      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
   }
 );
 
@@ -35,6 +64,14 @@ export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table',
 
 export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
   defaultMessage: 'JSON',
+});
+
+export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.osqueryView', {
+  defaultMessage: 'Osquery Results',
+});
+
+export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails.endpointView', {
+  defaultMessage: 'Endpoint Results',
 });
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
@@ -49,21 +86,10 @@ export const DESCRIPTION = i18n.translate('xpack.securitySolution.eventDetails.d
   defaultMessage: 'Description',
 });
 
-export const BLANK = i18n.translate('xpack.securitySolution.eventDetails.blank', {
-  defaultMessage: ' ',
-});
-
 export const PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.eventDetails.filter.placeholder',
   {
     defaultMessage: 'Filter by Field, Value, or Description...',
-  }
-);
-
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.eventDetails.copyToClipboard',
-  {
-    defaultMessage: 'Copy to Clipboard',
   }
 );
 
@@ -84,6 +110,17 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
   defaultMessage: 'Agent status',
 });
 
+export const QUARANTINED_FILE_PATH = i18n.translate(
+  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
+  {
+    defaultMessage: 'Quarantined file path',
+  }
+);
+
+export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
+  defaultMessage: 'Rule type',
+});
+
 export const MULTI_FIELD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
   {
@@ -102,20 +139,10 @@ export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table
   defaultMessage: 'Actions',
 });
 
-export const REASON = i18n.translate('xpack.securitySolution.eventDetails.reason', {
-  defaultMessage: 'Reason',
+export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.alertReason', {
+  defaultMessage: 'Alert reason',
 });
 
-export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
-  'xpack.securitySolution.eventDetails.viewRuleDetailPage',
-  {
-    defaultMessage: 'View Rule detail page',
-  }
-);
-
-export const VIEW_ALL_DOCUMENT_FIELDS = i18n.translate(
-  'xpack.securitySolution.eventDetails.viewAllDocumentFields',
-  {
-    defaultMessage: 'View all document fields in table',
-  }
-);
+export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
+  defaultMessage: 'View all fields in table',
+});

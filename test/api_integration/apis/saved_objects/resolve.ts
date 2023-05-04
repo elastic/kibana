@@ -8,19 +8,12 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
   describe('resolve', () => {
-    let KIBANA_VERSION: string;
-
-    before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
-    });
-
     describe('with kibana index', () => {
       before(async () => {
         await kibanaServer.importExport.load(
@@ -39,15 +32,19 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200)
           .then((resp) => {
             resp.body.saved_object.updated_at = '2015-01-01T00:00:00.000Z';
+            resp.body.saved_object.created_at = '2015-01-01T00:00:00.000Z';
 
             expect(resp.body).to.eql({
               saved_object: {
                 id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                 type: 'visualization',
                 updated_at: '2015-01-01T00:00:00.000Z',
+                created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_object.version,
                 migrationVersion: resp.body.saved_object.migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_object.typeMigrationVersion,
+                managed: resp.body.saved_object.managed,
                 attributes: {
                   title: 'Count of requests',
                   description: '',
@@ -69,6 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
               outcome: 'exactMatch',
             });
             expect(resp.body.saved_object.migrationVersion).to.be.ok();
+            expect(resp.body.saved_object.typeMigrationVersion).to.be.ok();
+            expect(resp.body.saved_object.managed).to.not.be.ok();
           }));
 
       describe('doc does not exist', () => {

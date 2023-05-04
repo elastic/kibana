@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -15,11 +17,9 @@ import {
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
 } from './services';
-import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
-import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
 export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
@@ -31,9 +31,12 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly sampleDataRegistry: SampleDataRegistry;
   private customIntegrations?: CustomIntegrationsPluginSetup;
 
+  private readonly isDevMode: boolean;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
     this.tutorialsRegistry = new TutorialsRegistry(this.initContext);
+    this.isDevMode = this.initContext.env.mode.dev;
   }
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
@@ -48,7 +51,12 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
       sampleData: {
-        ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations),
+        ...this.sampleDataRegistry.setup(
+          core,
+          plugins.usageCollection,
+          plugins.customIntegrations,
+          this.isDevMode
+        ),
       },
     };
   }

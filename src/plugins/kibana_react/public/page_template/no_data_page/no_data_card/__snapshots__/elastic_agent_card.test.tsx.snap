@@ -13,21 +13,32 @@ exports[`ElasticAgentCard props button 1`] = `
   }
 >
   <EuiCard
-    betaBadgeProps={
-      Object {
-        "label": undefined,
-      }
-    }
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
+        color="primary"
         fill={true}
+        size="m"
       >
         Button
       </EuiButton>
     }
     href="/app/integrations/browse"
-    image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+    image={
+      <EuiImage
+        alt=""
+        size="fullWidth"
+        style={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
     paddingSize="l"
     title={
       <EuiScreenReaderOnly>
@@ -53,21 +64,32 @@ exports[`ElasticAgentCard props category 1`] = `
   }
 >
   <EuiCard
-    betaBadgeProps={
-      Object {
-        "label": undefined,
-      }
-    }
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
+        color="primary"
         fill={true}
+        size="m"
       >
         Add Elastic Agent
       </EuiButton>
     }
     href="/app/integrations/browse/custom"
-    image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+    image={
+      <EuiImage
+        alt=""
+        size="fullWidth"
+        style={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
     paddingSize="l"
     title={
       <EuiScreenReaderOnly>
@@ -93,21 +115,32 @@ exports[`ElasticAgentCard props href 1`] = `
   }
 >
   <EuiCard
-    betaBadgeProps={
-      Object {
-        "label": undefined,
-      }
-    }
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
+        color="primary"
         fill={true}
+        size="m"
       >
         Button
       </EuiButton>
     }
     href="#"
-    image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+    image={
+      <EuiImage
+        alt=""
+        size="fullWidth"
+        style={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
     paddingSize="l"
     title={
       <EuiScreenReaderOnly>
@@ -141,13 +174,29 @@ exports[`ElasticAgentCard props recommended 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
+        color="primary"
         fill={true}
+        size="m"
       >
         Add Elastic Agent
       </EuiButton>
     }
     href="/app/integrations/browse"
-    image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+    image={
+      <EuiImage
+        alt=""
+        size="fullWidth"
+        style={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
     paddingSize="l"
     title={
       <EuiScreenReaderOnly>
@@ -173,21 +222,32 @@ exports[`ElasticAgentCard renders 1`] = `
   }
 >
   <EuiCard
-    betaBadgeProps={
-      Object {
-        "label": undefined,
-      }
-    }
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
+        color="primary"
         fill={true}
+        size="m"
       >
         Add Elastic Agent
       </EuiButton>
     }
     href="/app/integrations/browse"
-    image="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+    image={
+      <EuiImage
+        alt=""
+        size="fullWidth"
+        style={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
     paddingSize="l"
     title={
       <EuiScreenReaderOnly>

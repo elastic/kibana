@@ -28,15 +28,13 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpStart, IBasePath } from 'src/core/public';
-import {
-  IndexPatternsContract,
-  IndexPattern,
-  DataPublicPluginStart,
-} from '../../../../../data/public';
+import { HttpStart, IBasePath } from '@kbn/core/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import {
   importFile,
@@ -56,11 +54,12 @@ export interface FlyoutProps {
   close: () => void;
   done: () => void;
   newIndexPatternUrl: string;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   http: HttpStart;
   basePath: IBasePath;
-  search: DataPublicPluginStart['search'];
+  search: ISearchStart;
   allowedTypes: SavedObjectManagementTypeInfo[];
+  showPlainSpinner?: boolean;
 }
 
 export interface FlyoutState {
@@ -73,7 +72,7 @@ export interface FlyoutState {
   error?: string;
   file?: File;
   importCount: number;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   importMode: ImportMode;
   loadingMessage?: string;
   status: string;
@@ -121,7 +120,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = (await this.props.indexPatterns.getCache())?.map((savedObject) => ({
+    const indexPatterns = (await this.props.dataViews.getCache())?.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
     }));
@@ -149,11 +148,18 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   import = async () => {
     const { http } = this.props;
     const { file, importMode } = this.state;
+    if (file === undefined) {
+      this.setState({
+        status: 'error',
+        error: 'missing_file',
+      });
+      return;
+    }
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode);
+      const response = await importFile(http, file, importMode);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -283,7 +289,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         ),
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnIdDescription',
-          { defaultMessage: 'ID of the index pattern' }
+          { defaultMessage: 'ID of the data view' }
         ),
         sortable: true,
       },
@@ -325,7 +331,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         field: 'existingIndexPatternId',
         name: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
-          { defaultMessage: 'New index pattern' }
+          { defaultMessage: 'New data view' }
         ),
         render: (id: string) => {
           const options = [
@@ -409,7 +415,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderBody() {
-    const { allowedTypes } = this.props;
+    const { allowedTypes, showPlainSpinner } = this.props;
     const {
       status,
       loadingMessage,
@@ -423,7 +429,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingElastic size="xl" />
+            {showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />}
             <EuiSpacer size="m" />
             <EuiText>
               <p>{loadingMessage}</p>
@@ -489,7 +495,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { status } = this.state;
+    const { status, file } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
@@ -524,6 +530,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           onClick={this.import}
           size="s"
           fill
+          isDisabled={file === undefined}
           isLoading={status === 'loading'}
           data-test-subj="importSavedObjectsImportBtn"
         >
@@ -568,7 +575,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           title={
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-              defaultMessage="Index Pattern Conflicts"
+              defaultMessage="Data Views Conflicts"
             />
           }
           color="warning"
@@ -577,15 +584,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <p>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
-              defaultMessage="The following saved objects use index patterns that do not exist.
-              Please select the index patterns you'd like re-associated with
+              defaultMessage="The following saved objects use data views that do not exist.
+              Please select the data views you'd like re-associated with
               them. You can {indexPatternLink} if necessary."
               values={{
                 indexPatternLink: (
                   <EuiLink href={this.props.newIndexPatternUrl}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                      defaultMessage="create a new index pattern"
+                      defaultMessage="create a new data view"
                     />
                   </EuiLink>
                 ),
@@ -613,7 +620,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   render() {
-    const { close } = this.props;
+    const { close, allowedTypes } = this.props;
 
     let confirmOverwriteModal: ReactNode;
     const { conflictingRecord } = this.state;
@@ -621,7 +628,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       const { conflict } = conflictingRecord;
       const onFinish = (overwrite: boolean, destinationId?: string) =>
         conflictingRecord.done([overwrite, destinationId]);
-      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish }} />;
+      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish, allowedTypes }} />;
     }
 
     return (

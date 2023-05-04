@@ -21,8 +21,10 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
       ? baseEmbeddableMigrations[version](state)
       : state;
 
-    if (factory?.migrations[version]) {
-      updatedInput = factory.migrations[version](updatedInput);
+    const factoryMigrations =
+      typeof factory?.migrations === 'function' ? factory?.migrations() : factory?.migrations || {};
+    if (factoryMigrations[version]) {
+      updatedInput = factoryMigrations[version](updatedInput);
     }
 
     if (factory?.isContainerType) {
@@ -35,8 +37,12 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
       const enhancementDefinition = embeddables.getEnhancement(key);
-      const migratedEnhancement = enhancementDefinition?.migrations?.[version]
-        ? enhancementDefinition.migrations[version](enhancements[key] as SerializableRecord)
+      const enchantmentMigrations =
+        typeof enhancementDefinition?.migrations === 'function'
+          ? enhancementDefinition?.migrations()
+          : enhancementDefinition?.migrations || {};
+      const migratedEnhancement = enchantmentMigrations[version]
+        ? enchantmentMigrations[version](enhancements[key] as SerializableRecord)
         : enhancements[key];
       (updatedInput.enhancements! as Record<string, {}>)[key] = migratedEnhancement;
     });

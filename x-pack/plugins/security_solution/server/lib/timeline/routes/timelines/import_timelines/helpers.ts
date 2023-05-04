@@ -6,28 +6,29 @@
  */
 
 import { has, chunk, omit } from 'lodash/fp';
-import { Readable } from 'stream';
-import uuid from 'uuid';
+import type { Readable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
 import {
-  ImportTimelineResultSchema,
   importTimelineResultSchema,
   TimelineStatus,
 } from '../../../../../../common/types/timeline';
 
-import { createBulkErrorObject, BulkError } from '../../../../detection_engine/routes/utils';
+import type { BulkError } from '../../../../detection_engine/routes/utils';
+import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';
 
 import { createTimelines } from '../create_timelines';
-import { FrameworkRequest } from '../../../../framework';
+import type { FrameworkRequest } from '../../../../framework';
 
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
 import { TimelineStatusActions } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelinesStreamFromNdJson } from './create_timelines_stream_from_ndjson';
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
-import {
+import type {
   ImportedTimeline,
   ImportRegular,
   ImportTimelineResponse,
@@ -78,7 +79,7 @@ export const setTimeline = (
     templateTimelineVersion: isTemplateTimeline
       ? parsedTimeline.templateTimelineVersion ?? 1
       : null,
-    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid.v4() : null,
+    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuidv4() : null,
   };
 };
 

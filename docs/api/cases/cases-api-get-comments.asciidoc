@@ -1,0 +1,86 @@
+[[cases-api-get-comments]]
+== Get comments API
+++++
+<titleabbrev>Get comments</titleabbrev>
+++++
+
+Gets a comment or all comments for a case.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
+=== {api-request-title}
+
+`GET <kibana host>:<port>/api/cases/<case ID>/comments/<comment ID>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>/comments/<comment ID>`
+
+`GET <kibana host>:<port>/api/cases/<case_id>/comments` deprecated:[8.1.0]
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments` deprecated:[8.1.0]
+
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases with the comments you're seeking.
+
+=== {api-path-parms-title}
+
+`<case_id>`::
+(Required, string) The identifier for the case. To retrieve case IDs, use 
+<<cases-api-find-cases>>.
+
+`<comment_id>`::
+(Optional, string) The identifier for the comment. To retrieve comment IDs, use
+<<cases-api-get-case>>.
++
+If it is not specified, all comments are retrieved.
+deprecated:[8.1.0,The comment identifier will no longer be optional.]
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== {api-response-codes-title}
+
+`200`::
+   Indicates a successful call.
+
+=== {api-examples-title}
+
+Retrieves comment ID `8048b460-fe2b-11ec-b15d-779a7c8bbcc3` from case ID
+`ecbf8a20-fe2a-11ec-b15d-779a7c8bbcc3`:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/ecbf8a20-fe2a-11ec-b15d-779a7c8bbcc3/comments/8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+--------------------------------------------------
+// KIBANA
+
+The API returns the requested comment JSON object. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "id":"8048b460-fe2b-11ec-b15d-779a7c8bbcc3",
+  "version":"WzIzLDFd",
+  "type":"user",
+  "owner":"cases",
+  "comment":"A new comment",
+  "created_at":"2022-07-07T19:32:13.104Z",
+  "created_by":{
+    "email":null,
+    "full_name":null,
+    "username":"elastic"
+  },
+  "pushed_at":null,
+  "pushed_by":null,
+  "updated_at":null,
+  "updated_by":null
+}
+--------------------------------------------------

@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { resolve } from 'path';
-import fs from 'fs';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { KIBANA_ROOT } from '@kbn/test';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
-
-  // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
-  const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
-  const examples = examplesFiles.filter((file) =>
-    fs.statSync(resolve(KIBANA_ROOT, 'examples', file)).isDirectory()
-  );
-
-  const xpackExamplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'x-pack/examples'));
-  const xpackExamples = xpackExamplesFiles.filter((file) =>
-    fs.statSync(resolve(KIBANA_ROOT, 'x-pack/examples', file)).isDirectory()
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
   );
 
   return {
@@ -37,6 +27,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./search_examples'),
       require.resolve('./embedded_lens'),
       require.resolve('./reporting_examples'),
+      require.resolve('./screenshotting'),
+      require.resolve('./triggers_actions_ui_examples'),
     ],
 
     kbnTestServer: {
@@ -46,12 +38,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-        ...examples.map(
-          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
-        ),
-        ...xpackExamples.map(
-          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'x-pack/examples', exampleDir)}`
-        ),
+        ...findTestPluginPaths([
+          resolve(KIBANA_ROOT, 'examples'),
+          resolve(KIBANA_ROOT, 'x-pack/examples'),
+        ]),
       ],
     },
   };

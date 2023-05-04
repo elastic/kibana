@@ -7,7 +7,8 @@
 
 import { flatten } from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/server';
+
 import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeApiBuilder } from './api';
@@ -20,6 +21,7 @@ import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
 import { FeaturePrivilegeUIBuilder } from './ui';
 
+export type { CasesSupportedOperations } from './cases';
 export type { FeaturePrivilegeBuilder };
 
 export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivilegeBuilder => {

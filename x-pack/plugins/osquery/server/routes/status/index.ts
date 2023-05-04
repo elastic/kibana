@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { createStatusRoute } from './create_status_route';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const initStatusRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createStatusRoute(router, context);

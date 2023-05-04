@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/test').startServersCli(require.resolve('../test/functional/config.js'));
+require('@kbn/test').startServersCli();

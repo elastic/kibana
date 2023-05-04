@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApplicationStart, ToastsSetup } from 'src/core/public';
-import { LicensingPluginSetup } from '../../../licensing/public';
+import { ApplicationStart, ToastsSetup } from '@kbn/core/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
@@ -15,7 +15,7 @@ import type { SharePluginSetup } from '../shared_imports';
 export interface ListingProps {
   apiClient: ReportingAPIClient;
   capabilities: ApplicationStart['capabilities'];
-  license$: LicensingPluginSetup['license$']; // FIXME: license$ is deprecated
+  license$: LicensingPluginStart['license$'];
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];

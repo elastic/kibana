@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
-import { createCase, deleteCasesByESQuery, getReporters } from '../../../../../common/lib/utils';
+import { createCase, deleteCasesByESQuery, getReporters } from '../../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,
@@ -74,17 +74,17 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const scenario of [
           {
             user: globalRead,
-            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
           },
           {
             user: superUser,
-            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
           },
           { user: secOnlyRead, expectedReporters: [getUserInfo(secOnly)] },
           { user: obsOnlyRead, expectedReporters: [getUserInfo(obsOnly)] },
           {
             user: obsSecRead,
-            expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
           },
         ]) {
           const reporters = await getReporters({

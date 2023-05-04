@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { ServiceStatus, ServiceStatusLevels } from '../../../../src/core/server';
+import type { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import { FtrProviderContext } from '../../services/types';
 
 type ServiceStatusSerialized = Omit<ServiceStatus, 'level'> & { level: string };

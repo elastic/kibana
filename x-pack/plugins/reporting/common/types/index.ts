@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
+import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobParamsPNG } from './export_types/png';
+export type {
+  JobParamsCsvFromSavedObject,
+  TaskPayloadCsvFromSavedObject,
+} from './export_types/csv_v2';
+export type { JobParamsPNGDeprecated } from './export_types/png';
 export type { JobParamsPNGV2 } from './export_types/png_v2';
-export type { JobAppParamsPDF, JobParamsPDF } from './export_types/printable_pdf';
+export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';
 export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,
@@ -33,11 +39,13 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
-export interface TaskRunResult {
-  content_type: string | null;
-  csv_contains_formulas?: boolean;
-  max_size_reached?: boolean;
-  warnings?: string[];
+export type PngMetrics = PngScreenshotResult['metrics'];
+
+export type PdfMetrics = PdfScreenshotResult['metrics'];
+
+export interface ReportFields {
+  queue_time_ms?: number[]; // runtime field: started_at - created_at
+  execution_time_ms?: number[]; // runtime field: completed_at - started_at
 }
 
 export interface ReportSource {
@@ -75,6 +83,7 @@ export interface ReportSource {
   started_at?: string; // timestamp in UTC
   completed_at?: string; // timestamp in UTC
   process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
+  metrics?: TaskRunMetrics;
 }
 
 /*
@@ -106,6 +115,8 @@ export type JobStatus =
 interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
   payload: Omit<ReportSource['payload'], 'headers'>;
   output?: Omit<ReportOutput, 'content'>; // is undefined for report jobs that are not completed
+  queue_time_ms?: number;
+  execution_time_ms?: number;
 }
 
 /*
@@ -128,6 +139,7 @@ export interface JobSummary {
   status: JobStatus;
   jobtype: ReportSource['jobtype'];
   title: ReportSource['payload']['title'];
+  errorCode?: ReportOutput['error_code'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }

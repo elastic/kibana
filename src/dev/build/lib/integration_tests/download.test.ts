@@ -13,12 +13,8 @@ import { readFileSync } from 'fs';
 
 import del from 'del';
 import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createStripAnsiSerializer,
-  createReplaceSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 
 import { mkdirp } from '../fs';
 import { downloadToDisk, downloadToString } from '../download';
@@ -146,10 +142,12 @@ describe('downloadToDisk', () => {
       expect(logWritter.messages).toMatchInlineSnapshot(`
         Array [
           " debg [1/2] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.1 seconds",
           " debg [2/2] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 3 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Downloaded TEST_SERVER_URL and verified checksum",
         ]
       `);
@@ -171,14 +169,17 @@ describe('downloadToDisk', () => {
       expect(logWritter.messages).toMatchInlineSnapshot(`
         Array [
           " debg [1/3] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.1 seconds",
           " debg [2/3] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 3 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Downloaded checksum fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9 does not match the expected sha256 checksum.",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.2 seconds",
           " debg [3/3] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 3 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Downloaded TEST_SERVER_URL and verified checksum",
         ]
       `);
@@ -195,27 +196,32 @@ describe('downloadToDisk', () => {
         retryDelaySecMultiplier: 0.1,
       });
       await expect(promise).rejects.toMatchInlineSnapshot(
-        `[Error: Request failed with status code 500]`
+        `[AxiosError: Request failed with status code 500]`
       );
       expect(logWritter.messages).toMatchInlineSnapshot(`
         Array [
           " debg [1/5] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.1 seconds",
           " debg [2/5] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.2 seconds",
           " debg [3/5] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.30000000000000004 seconds",
           " debg [4/5] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.4 seconds",
           " debg [5/5] Attempting download of TEST_SERVER_URL sha256",
+          " debg Downloaded 0 bytes to TMP_DIR/__tmp_download_js_test_file__",
           " debg Download failed: Request failed with status code 500",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
         ]
@@ -263,7 +269,7 @@ describe('downloadToString', () => {
       maxAttempts: 1,
     });
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Request failed with status code 200]`
+      `[AxiosError: Request failed with status code 200]`
     );
     expect(logWritter.messages).toMatchInlineSnapshot(`
       Array [

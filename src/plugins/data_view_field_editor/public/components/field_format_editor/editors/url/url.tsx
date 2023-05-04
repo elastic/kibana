@@ -6,26 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-
 import {
+  EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
   EuiSelect,
   EuiSwitch,
-  EuiFieldNumber,
 } from '@elastic/eui';
-
+import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DefaultFormatEditor } from '../default/default';
-
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
-import { formatId } from './constants';
-
-import { context as contextType } from '../../../../../../kibana_react/public';
+import { DefaultFormatEditor } from '../default/default';
 import { FormatEditorProps } from '../types';
-import { UrlFormat } from '../../../../../../field_formats/common';
+import { formatId } from './constants';
 
 interface OnChangeParam {
   type: string;
@@ -34,12 +30,13 @@ interface OnChangeParam {
   urlTemplate?: string;
 }
 
-interface UrlFormatEditorFormatParams {
+export interface UrlFormatEditorFormatParams {
   openLinkInCurrentTab: boolean;
   urlTemplate: string;
   labelTemplate: string;
   width: string;
   height: string;
+  type?: string;
 }
 
 interface UrlFormatEditorFormatState {
@@ -59,7 +56,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   static contextType = contextType;
   static formatId = formatId;
   private get sampleIconPath() {
-    const sampleIconPath = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
+    const sampleIconPath = `/plugins/dataViewFieldEditor/assets/icons/{{value}}.png`;
     return this.context?.services.http
       ? this.context.services.http.basePath.prepend(sampleIconPath)
       : sampleIconPath;
@@ -148,7 +145,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
     const { formatParams, format } = this.props;
     const { error, samples, sampleConverterType } = this.state;
 
-    const urlType = formatParams.type ?? format.getParamDefaults().type;
+    const urlType = formatParams.type ?? `${format.getParamDefaults().type}`;
     return (
       <Fragment>
         <EuiFormRow

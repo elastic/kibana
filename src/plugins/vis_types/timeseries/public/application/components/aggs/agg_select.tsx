@@ -9,8 +9,8 @@
 import React, { useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+
+import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils';
 import type { Agg } from '../../../../common/agg_utils';
@@ -64,7 +64,7 @@ export function AggSelect(props: AggSelectUiProps) {
   } else {
     const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,
-      disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions),
+      disabled: !enablePipelines || !isMetricEnabled(agg.value as string, uiRestrictions),
     });
 
     options = [

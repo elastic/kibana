@@ -12,7 +12,7 @@ import { debounce } from 'lodash';
 import type { monaco } from '@kbn/monaco';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { ExpressionInputProps } from '../types';
 import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
@@ -33,6 +33,7 @@ export const ExpressionInput = (props: ExpressionInputProps) => {
     height,
     style,
     editorRef,
+    onEditorDidMount,
     ...rest
   } = props;
   const [expression, setExpression] = useState(initialExpression);
@@ -54,6 +55,8 @@ export const ExpressionInput = (props: ExpressionInputProps) => {
   const editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     const model = editor.getModel();
     model?.updateOptions({ tabSize: 2 });
+
+    onEditorDidMount?.(editor);
 
     if (editorRef) {
       editorRef.current = editor;

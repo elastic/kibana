@@ -6,13 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON } from '../common/constants';
-import { getAppTitle } from '../common/i18n_getters';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { APP_ID, APP_ICON, APP_NAME } from '../common/constants';
 
 export const featureCatalogueEntry = {
   id: APP_ID,
-  title: getAppTitle(),
+  title: APP_NAME,
   subtitle: i18n.translate('xpack.maps.featureCatalogue.mapsSubtitle', {
     defaultMessage: 'Plot geographic data.',
   }),
@@ -22,7 +21,7 @@ export const featureCatalogueEntry = {
   icon: APP_ICON,
   path: '/app/maps',
   showOnHomePage: false,
-  category: FeatureCatalogueCategory.DATA,
+  category: 'data' as FeatureCatalogueCategory,
   solutionId: 'kibana',
   order: 400,
 };

@@ -22,7 +22,7 @@ import {
   createSignalIndex,
   createHostIsolation,
 } from './api';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

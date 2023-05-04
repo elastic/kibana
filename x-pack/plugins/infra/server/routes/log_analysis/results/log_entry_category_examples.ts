@@ -14,11 +14,13 @@ import {
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
-import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initGetLogEntryCategoryExamplesRoute = ({
+  framework,
+  getStartServices,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -32,31 +34,25 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: Inf
         data: {
           categoryId,
           exampleCount,
-          sourceId,
+          logView,
           timeRange: { startTime, endTime },
         },
       } = request.body;
 
-      const sourceConfiguration = await sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
-      const resolvedSourceConfiguration = await resolveLogSourceConfiguration(
-        sourceConfiguration.configuration,
-        await framework.getIndexPatternsServiceWithRequestContext(requestContext)
-      );
+      const [, , { logViews }] = await getStartServices();
+      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const { data: logEntryCategoryExamples, timing } = await getLogEntryCategoryExamples(
-          requestContext,
-          sourceId,
+          { infra: await infraMlContext.infra, core: await infraMlContext.core },
+          logView,
           startTime,
           endTime,
           categoryId,
           exampleCount,
-          resolvedSourceConfiguration
+          resolvedLogView
         );
 
         return response.ok({

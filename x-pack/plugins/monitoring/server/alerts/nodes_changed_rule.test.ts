@@ -9,7 +9,7 @@ import { NodesChangedRule } from './nodes_changed_rule';
 import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -19,13 +19,6 @@ jest.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => ({
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
-jest.mock('moment', () => {
-  return function () {
-    return {
-      format: () => 'THE_DATE',
-    };
-  };
-});
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -34,7 +27,6 @@ jest.mock('../static_globals', () => ({
       config: {
         ui: {
           ccs: { enabled: true },
-          metricbeat: { index: 'metricbeat-*' },
           container: { elasticsearch: { enabled: false } },
         },
       },
@@ -72,6 +64,7 @@ describe('NodesChangedAlert', () => {
 
   describe('execute', () => {
     function FakeDate() {}
+
     FakeDate.prototype.valueOf = () => 1;
 
     const nodeUuid = 'myNodeUuid';
@@ -138,13 +131,15 @@ describe('NodesChangedAlert', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
-          return {
-            replaceState,
-            scheduleActions,
-            getState,
-          };
-        }),
+        alertFactory: {
+          create: jest.fn().mockImplementation(() => {
+            return {
+              replaceState,
+              scheduleActions,
+              getState,
+            };
+          }),
+        },
       },
       state: {},
     };
@@ -172,7 +167,6 @@ describe('NodesChangedAlert', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
@@ -235,7 +229,6 @@ describe('NodesChangedAlert', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
@@ -328,7 +321,6 @@ describe('NodesChangedAlert', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});

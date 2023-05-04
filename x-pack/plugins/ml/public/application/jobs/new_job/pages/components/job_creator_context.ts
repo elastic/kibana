@@ -10,6 +10,7 @@ import { Field, Aggregation } from '../../../../../../common/types/fields';
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
@@ -19,6 +20,7 @@ export interface JobCreatorContextValue {
   jobCreatorUpdate: () => void;
   jobCreator: JobCreatorType;
   chartLoader: ChartLoader;
+  mapLoader: MapLoader;
   resultsLoader: ResultsLoader;
   chartInterval: TimeBuckets;
   jobValidator: JobValidator;
@@ -33,6 +35,7 @@ export const JobCreatorContext = createContext<JobCreatorContextValue>({
   jobCreatorUpdate: () => {},
   jobCreator: {} as SingleMetricJobCreator,
   chartLoader: {} as ChartLoader,
+  mapLoader: {} as MapLoader,
   resultsLoader: {} as ResultsLoader,
   chartInterval: {} as TimeBuckets,
   jobValidator: {} as JobValidator,

@@ -20,25 +20,11 @@ To manage API keys, open the main menu, then click *Stack Management > API Keys*
 image:images/api-keys.png["API Keys UI"]
 
 [float]
-[[api-keys-service]]
-=== {es} API key service
-
-The {es} API key service is automatically enabled when you configure
-{ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
-This ensures that clients are unable to send API keys in clear-text.
-
-When HTTPS connections are not enabled between {kib} and {es},
-you cannot create or manage API keys, and you get an error message.
-For more information, see the
-{ref}/security-api-create-api-key.html[{es} API key documentation],
-or contact your system administrator.
-
-[float]
 [[api-keys-security-privileges]]
 === Security privileges
 
 You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` 
-cluster privileges to use API keys in {kib}. To manage roles, open the main menu, then click 
+cluster privileges to use API keys in {kib}.  API keys can also be seen in a readonly view with access to the page and the `read_security` cluster privilege. To manage roles, open the main menu, then click 
 *Stack Management > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
 
 
@@ -59,6 +45,20 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 --header 'kbn-xsrf: true' \
 --header 'Authorization: ApiKey aVZlLUMzSUJuYndxdDJvN0k1bU46aGxlYUpNS2lTa2FKeVZua1FnY1VEdw==' \
 
+
+[IMPORTANT]
+============================================================================
+API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
+============================================================================
+
+[float]
+[[udpate-api-key]]
+=== Update an API key
+
+To update an API key, open the main menu, click *Stack Management > API Keys*, and then click on the name of the key.
+
+You can only update the `Restrict privileges` and `metadata` fields.
+
 [float]
 [[view-api-keys]]
 === View and delete API keys
@@ -71,6 +71,3 @@ created by which user in which realm.
 If you have only the `manage_own_api_key` permission, you see only a list of your own keys.
 
 You can delete API keys individually or in bulk.
-
-You cannot modify an API key. If you need additional privileges,
-you must create a new key with the desired configuration and invalidate the old key.

@@ -39,6 +39,8 @@ export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256,
           isDraggable={isDraggable}
           iconType="number"
           value={fileHashSha256}
+          isAggregatable={true}
+          fieldType="keyword"
         />
       </TokensFlexItem>
     </HashFlexGroup>

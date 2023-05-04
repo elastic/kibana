@@ -1,6 +1,7 @@
 get:
-  summary: Packages - Info
-  tags: []
+  summary: Get package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -21,10 +22,20 @@ get:
                       - install_failed
                       - not_installed
                   savedObject:
+                    type: object
+                  latestVersion:
+                    type: string
+                  keepPoliciesUpToDate:
+                    type: boolean
+                  notice:
+                    type: string
+                  licensePath:
                     type: string
                 required:
                   - status
                   - savedObject
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-package
   security:
     - basicAuth: []
@@ -39,9 +50,27 @@ parameters:
     name: pkgVersion
     in: path
     required: true
+  - schema:
+      type: boolean
+    name: ignoreUnverified
+    description: 'Ignore if the package is fails signature verification'
+    in: query
+  - schema:
+      type: boolean
+    name: full
+    description: 'Return all fields from the package manifest, not just those supported by the Elastic Package Registry'
+    in: query
+  - in: query
+    name: prerelease
+    schema:
+      type: boolean
+      default: false
+    description: >-
+      Whether to return prerelease versions of packages (e.g. beta, rc, preview)
 post:
-  summary: Packages - Install
-  tags: []
+  summary: Install package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -64,8 +93,19 @@ post:
                   required:
                     - id
                     - type
+              _meta:
+                type: object
+                properties:
+                  install_source:
+                    type: string
+                    enum:
+                      - registry
+                      - upload
+                      - bundled
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: install-package
   description: ''
   parameters:
@@ -78,9 +118,12 @@ post:
           properties:
             force:
               type: boolean
+            ignore_constraints:
+              type: boolean
 put:
-  summary: Packages - Update
-  tags: []
+  summary: Update package settings
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -105,19 +148,10 @@ put:
                     - type
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: update-package
   description: ''
-  parameters:
-    - schema:
-        type: string
-      name: pkgName
-      in: path
-      required: true
-    - schema:
-        type: string
-      name: pkgVersion
-      in: path
-      required: true
   requestBody:
     content:
       application/json:
@@ -127,8 +161,9 @@ put:
             keepPoliciesUpToDate:
               type: boolean
 delete:
-  summary: Packages - Delete
-  tags: []
+  summary: Delete package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -153,6 +188,8 @@ delete:
                     - type
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: delete-package
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

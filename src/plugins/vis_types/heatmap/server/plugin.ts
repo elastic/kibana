@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, Plugin, UiSettingsParams } from 'kibana/server';
+import { CoreSetup, Plugin, UiSettingsParams } from '@kbn/core/server';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 
@@ -23,13 +23,23 @@ export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>
       }
     ),
     requiresPageReload: true,
-    value: true,
+    value: false,
     description: i18n.translate(
       'visTypeHeatmap.advancedSettings.visualization.legacyHeatmapChartsLibrary.description',
       {
         defaultMessage: 'Enables legacy charts library for heatmap charts in visualize.',
       }
     ),
+    deprecation: {
+      message: i18n.translate(
+        'visTypeHeatmap.advancedSettings.visualization.legacyHeatmapChartsLibrary.deprecation',
+        {
+          defaultMessage:
+            'The legacy charts library for heatmap in visualize is deprecated and will not be supported in a future version.',
+        }
+      ),
+      docLinksKey: 'visualizationSettings',
+    },
     category: ['visualization'],
     schema: schema.boolean(),
   },

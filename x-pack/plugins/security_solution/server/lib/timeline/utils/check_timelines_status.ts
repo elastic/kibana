@@ -7,18 +7,14 @@
 
 import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
-import {
-  TimelineSavedToReturnObjectRuntimeType,
-  TimelineSavedObject,
-} from '../../../../common/types/timeline';
+import type { TimelineSavedObject } from '../../../../common/types/timeline';
+import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline';
 
-import {
-  ImportTimelinesSchema,
-  ImportTimelinesSchemaRt,
-} from '../schemas/timelines/import_timelines_schema';
+import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
+import { ImportTimelinesSchemaRt } from '../schemas/timelines/import_timelines_schema';
 import { unionWithNullType } from '../../../../common/utility_types';
 
-import { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../framework';
 
 import { getExistingPrepackagedTimelines } from '../saved_object/timelines';
 
@@ -70,7 +66,10 @@ export const checkTimelinesStatus = async (
     timeline: TimelineSavedObject[];
   };
   const dir = resolve(
-    join(__dirname, filePath ?? '../../detection_engine/rules/prepackaged_timelines')
+    join(
+      __dirname,
+      filePath ?? '../../detection_engine/prebuilt_rules/content/prepackaged_timelines'
+    )
   );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);

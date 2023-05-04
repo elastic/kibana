@@ -7,10 +7,7 @@
 
 import Mustache from 'mustache';
 import React from 'react';
-import {
-  SectionLink,
-  SectionLinks,
-} from '../../../../../../observability/public';
+import { SectionLink, SectionLinks } from '@kbn/observability-plugin/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
@@ -20,7 +17,7 @@ export function CustomLinkList({
   transaction,
 }: {
   customLinks: CustomLink[];
-  transaction: Transaction;
+  transaction?: Transaction;
 }) {
   return (
     <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
@@ -39,7 +36,7 @@ export function CustomLinkList({
   );
 }
 
-function getHref(link: CustomLink, transaction: Transaction) {
+function getHref(link: CustomLink, transaction?: Transaction) {
   try {
     return Mustache.render(link.url, transaction);
   } catch (e) {

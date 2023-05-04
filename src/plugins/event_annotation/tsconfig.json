@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/data-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/datemath",
+    "@kbn/ui-theme",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

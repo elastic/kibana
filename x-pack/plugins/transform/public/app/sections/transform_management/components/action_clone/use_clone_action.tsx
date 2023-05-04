@@ -21,24 +21,23 @@ export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
   const history = useHistory();
   const appDeps = useAppDependencies();
-  const savedObjectsClient = appDeps.savedObjects.client;
-  const indexPatterns = appDeps.data.indexPatterns;
+  const dataViewsContract = appDeps.data.dataViews;
   const toastNotifications = useToastNotifications();
 
-  const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
+  const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
 
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        await loadIndexPatterns(savedObjectsClient, indexPatterns);
+        await loadDataViews(dataViewsContract);
         const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const indexPatternId = getIndexPatternIdByTitle(dataViewTitle);
+        const dataViewId = getDataViewIdByTitle(dataViewTitle);
 
-        if (indexPatternId === undefined) {
+        if (dataViewId === undefined) {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.clone.noDataViewErrorPromptText', {
               defaultMessage:
@@ -47,9 +46,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
             })
           );
         } else {
-          history.push(
-            `/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?indexPatternId=${indexPatternId}`
-          );
+          history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?dataViewId=${dataViewId}`);
         }
       } catch (e) {
         toastNotifications.addError(e, {
@@ -59,14 +56,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
         });
       }
     },
-    [
-      history,
-      savedObjectsClient,
-      indexPatterns,
-      toastNotifications,
-      loadIndexPatterns,
-      getIndexPatternIdByTitle,
-    ]
+    [history, dataViewsContract, toastNotifications, loadDataViews, getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(

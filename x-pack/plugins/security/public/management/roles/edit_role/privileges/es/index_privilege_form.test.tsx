@@ -8,80 +8,134 @@
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CodeEditorField, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import {
-  CodeEditorField,
-  KibanaContextProvider,
-} from '../../../../../../../../../src/plugins/kibana_react/public';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 
 test('it renders without crashing', () => {
-  const props = {
-    indexPrivilege: {
-      names: [],
-      privileges: [],
-      query: '',
-      field_security: {
-        grant: [],
-      },
-    },
-    formIndex: 0,
-    indexPatterns: [],
-    indicesAPIClient: indicesAPIClientMock.create(),
-    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    isRoleReadOnly: false,
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
-    validator: new RoleValidator(),
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
-    intl: {} as any,
-  };
-
-  const wrapper = shallowWithIntl(<IndexPrivilegeForm {...props} />);
+  const wrapper = shallowWithIntl(
+    <IndexPrivilegeForm
+      indexType="indices"
+      indexPrivilege={{
+        names: [],
+        privileges: [],
+        query: '',
+        field_security: {
+          grant: [],
+        },
+      }}
+      formIndex={0}
+      indexPatterns={[]}
+      indicesAPIClient={indicesAPIClientMock.create()}
+      availableIndexPrivileges={['all', 'read', 'write', 'index']}
+      isRoleReadOnly={false}
+      allowDocumentLevelSecurity
+      allowFieldLevelSecurity
+      validator={new RoleValidator()}
+      onChange={jest.fn()}
+      onDelete={jest.fn()}
+    />
+  );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('it allows for custom index privileges', () => {
-  const props = {
-    indexPrivilege: {
-      names: ['foo'],
-      privileges: ['existing-custom', 'read'],
-      query: '',
-      field_security: {
-        grant: [],
-      },
-    },
-    formIndex: 0,
-    indexPatterns: [],
-    indicesAPIClient: indicesAPIClientMock.create(),
-    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    isRoleReadOnly: false,
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
-    validator: new RoleValidator(),
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
-    intl: {} as any,
-  };
-
-  const wrapper = mountWithIntl(<IndexPrivilegeForm {...props} />);
+  const onChange = jest.fn();
+  const wrapper = mountWithIntl(
+    <IndexPrivilegeForm
+      indexType="indices"
+      indexPrivilege={{
+        names: ['foo'],
+        privileges: ['existing-custom', 'read'],
+        query: '',
+        field_security: {
+          grant: [],
+        },
+      }}
+      formIndex={0}
+      indexPatterns={[]}
+      indicesAPIClient={indicesAPIClientMock.create()}
+      availableIndexPrivileges={['all', 'read', 'write', 'index']}
+      isRoleReadOnly={false}
+      allowDocumentLevelSecurity={true}
+      allowFieldLevelSecurity={true}
+      validator={new RoleValidator()}
+      onChange={onChange}
+      onDelete={jest.fn()}
+    />
+  );
 
   const indexPrivsSelect = wrapper.find('EuiComboBox[data-test-subj="privilegesInput0"]');
 
   (indexPrivsSelect.props() as any).onCreateOption('custom-index-privilege');
 
-  expect(props.onChange).toHaveBeenCalledWith(
+  expect(onChange).toHaveBeenCalledWith(
     expect.objectContaining({ privileges: ['existing-custom', 'read', 'custom-index-privilege'] })
   );
 });
 
+test('should not render clusters field for local indices', () => {
+  const wrapper = shallowWithIntl(
+    <IndexPrivilegeForm
+      indexType="indices"
+      indexPrivilege={{
+        names: [],
+        privileges: [],
+        query: '',
+        field_security: {
+          grant: [],
+        },
+      }}
+      formIndex={0}
+      indexPatterns={[]}
+      indicesAPIClient={indicesAPIClientMock.create()}
+      availableIndexPrivileges={['all', 'read', 'write', 'index']}
+      isRoleReadOnly={false}
+      allowDocumentLevelSecurity
+      allowFieldLevelSecurity
+      validator={new RoleValidator()}
+      onChange={jest.fn()}
+      onDelete={jest.fn()}
+    />
+  );
+  expect(wrapper.find('[data-test-subj="clustersInput0"]')).toHaveLength(0);
+});
+
+test('should render clusters field for remote indices', () => {
+  const wrapper = shallowWithIntl(
+    <IndexPrivilegeForm
+      indexType="remote_indices"
+      indexPrivilege={{
+        clusters: [],
+        names: [],
+        privileges: [],
+        query: '',
+        field_security: {
+          grant: [],
+        },
+      }}
+      formIndex={0}
+      indexPatterns={[]}
+      indicesAPIClient={indicesAPIClientMock.create()}
+      availableIndexPrivileges={['all', 'read', 'write', 'index']}
+      isRoleReadOnly={false}
+      allowDocumentLevelSecurity
+      allowFieldLevelSecurity
+      validator={new RoleValidator()}
+      onChange={jest.fn()}
+      onDelete={jest.fn()}
+    />
+  );
+  expect(wrapper.find('[data-test-subj="clustersInput0"]')).toHaveLength(1);
+});
+
 describe('delete button', () => {
   const props = {
+    indexType: 'indices' as const,
     indexPrivilege: {
       names: [],
       privileges: [],
@@ -134,6 +188,7 @@ describe('delete button', () => {
 
 describe(`document level security`, () => {
   const props = {
+    indexType: 'indices' as const,
     indexPrivilege: {
       names: [],
       privileges: [],
@@ -181,13 +236,9 @@ describe(`document level security`, () => {
   });
 
   test('both inputs are shown when allowed, and query is not empty', () => {
-    const testProps = {
-      ...props,
-    };
-
     const wrapper = mountWithIntl(
       <KibanaContextProvider services={coreMock.createStart()}>
-        <IndexPrivilegeForm {...testProps} />
+        <IndexPrivilegeForm {...props} />
       </KibanaContextProvider>
     );
     expect(wrapper.find('EuiSwitch[data-test-subj="restrictDocumentsQuery0"]')).toHaveLength(1);
@@ -197,6 +248,7 @@ describe(`document level security`, () => {
 
 describe('field level security', () => {
   const props = {
+    indexType: 'indices' as const,
     indexPrivilege: {
       names: [],
       privileges: [],
@@ -262,7 +314,7 @@ describe('field level security', () => {
   });
 
   test('does not query for available fields when a request is already in flight', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const testProps = {
       ...props,
@@ -383,11 +435,7 @@ describe('field level security', () => {
   });
 
   test('it does not display a warning when fields are granted', () => {
-    const testProps = {
-      ...props,
-    };
-
-    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...props} />);
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(0);

@@ -5,34 +5,22 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import React from 'react';
 import { useFormattedDate } from './use_formatted_date';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { uiSetting } from '../../mocks/ui_setting';
 
 describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(
   'dateFormat'
 )}" and the "dateFormat:tz" setting is "${uiSetting('dateFormat:tz')}"`, () => {
-  let formattedDate: (date: ConstructorParameters<typeof Date>[0] | Date | undefined) => string;
-
-  beforeEach(async () => {
-    const mockCoreStart = coreMock.createStart();
-    mockCoreStart.uiSettings.get.mockImplementation(uiSetting);
-
-    function Test({ date }: { date: ConstructorParameters<typeof Date>[0] | Date | undefined }) {
-      return <>{useFormattedDate(date)}</>;
-    }
-
-    formattedDate = (date: ConstructorParameters<typeof Date>[0] | Date | undefined): string =>
-      mount(
-        <KibanaContextProvider services={mockCoreStart}>
-          <Test date={date} />
-        </KibanaContextProvider>
-      ).text();
-  });
+  function Test({ date }: { date: ConstructorParameters<typeof Date>[0] | Date | undefined }) {
+    return <span data-test-subj="useFormattedDateTest">{useFormattedDate(date)}</span>;
+  }
+  const mockCoreStart = coreMock.createStart();
+  mockCoreStart.uiSettings.get.mockImplementation(uiSetting);
 
   it.each([
     ['randomString', 'an invalid string', 'Invalid Date'],
@@ -51,6 +39,11 @@ describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(
     ],
     [new Date(1600863932316), 'a defined Date object', 'Sep 23, 2020 @ 08:25:32.316'],
   ])('when the provided date is %p (%s) it should return %p', (value, _explanation, expected) => {
-    expect(formattedDate(value)).toBe(expected);
+    render(
+      <KibanaContextProvider services={mockCoreStart}>
+        <Test date={value} />
+      </KibanaContextProvider>
+    );
+    expect(screen.queryByTestId('useFormattedDateTest')?.textContent).toBe(expected);
   });
 });

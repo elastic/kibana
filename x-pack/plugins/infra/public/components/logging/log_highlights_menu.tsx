@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {
@@ -77,7 +77,13 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   const clearHighlightTerm = useCallback(() => setHighlightTerm(''), [setHighlightTerm]);
 
   const button = (
-    <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>
+    <EuiButtonEmpty
+      data-test-subj="infraLogHighlightsMenuButton"
+      color="text"
+      size="xs"
+      iconType="brush"
+      onClick={togglePopover}
+    >
       <FormattedMessage
         id="xpack.infra.logs.highlights.highlightsPopoverButtonLabel"
         defaultMessage="Highlights"
@@ -97,6 +103,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiFieldText
+              data-test-subj="infraLogHighlightsMenuFieldText"
               placeholder={termsFieldLabel}
               fullWidth={true}
               value={highlightTerm}
@@ -169,7 +176,7 @@ const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
   size: 'm',
   color: theme?.eui.euiColorAccent,
 }))`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 const LogHighlightsMenuContent = euiStyled.div`

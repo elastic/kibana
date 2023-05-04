@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search Sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
+        await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
         await retry.tryForTime(10000, async () => {
@@ -43,14 +44,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
         await PageObjects.dashboard.waitForRenderComplete();
         await searchSessions.expectState('completed');
-        const searchSessionName = `Session - ${uuid()}`;
+        const searchSessionName = `Session - ${uuidv4()}`;
         await searchSessions.save({ searchSessionName });
         await searchSessions.expectState('backgroundCompleted');
 
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();
 
-        await retry.waitFor(`wait for first item to complete`, async function () {
+        await retry.waitFor(`first item to complete`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
           if (!s[0]) {
             log.warning(`Expected item is not in the table!`);
@@ -122,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               "[eCommerce] Orders Test 6",
               "16 Feb, 2021, 00:00:00",
               "--",
-              "error",
+              "expired",
             ],
             Array [
               "lens",

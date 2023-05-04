@@ -6,23 +6,31 @@
  */
 
 import * as t from 'io-ts';
-import { getTransactionDurationChartPreview } from './chart_preview/get_transaction_duration';
-import { getTransactionErrorCountChartPreview } from './chart_preview/get_transaction_error_count';
-import { getTransactionErrorRateChartPreview } from './chart_preview/get_transaction_error_rate';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import {
+  getTransactionDurationChartPreview,
+  TransactionDurationChartPreviewResponse,
+} from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
+import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
+import {
+  getTransactionErrorRateChartPreview,
+  TransactionErrorRateChartPreviewResponse,
+} from './rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, rangeRt } from '../default_api_types';
+import { AggregationType } from '../../../common/rules/apm_rule_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const alertParamsRt = t.intersection([
   t.partial({
     aggregationType: t.union([
-      t.literal('avg'),
-      t.literal('95th'),
-      t.literal('99th'),
+      t.literal(AggregationType.Avg),
+      t.literal(AggregationType.P95),
+      t.literal(AggregationType.P99),
     ]),
     serviceName: t.string,
+    errorGroupingKey: t.string,
     transactionType: t.string,
+    transactionName: t.string,
   }),
   environmentRt,
   rangeRt,
@@ -34,16 +42,21 @@ const alertParamsRt = t.intersection([
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({
-  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
+  endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
+  handler: async (
+    resources
+  ): Promise<{
+    errorRateChartPreview: TransactionErrorRateChartPreviewResponse;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
     const { _inspect, ...alertParams } = params.query;
 
     const errorRateChartPreview = await getTransactionErrorRateChartPreview({
-      setup,
+      config,
+      apmEventClient,
       alertParams,
     });
 
@@ -52,17 +65,19 @@ const transactionErrorRateChartPreview = createApmServerRoute({
 });
 
 const transactionErrorCountChartPreview = createApmServerRoute({
-  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
+  endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
+  handler: async (
+    resources
+  ): Promise<{ errorCountChartPreview: Array<{ x: number; y: number }> }> => {
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
 
     const { _inspect, ...alertParams } = params.query;
 
     const errorCountChartPreview = await getTransactionErrorCountChartPreview({
-      setup,
+      apmEventClient,
       alertParams,
     });
 
@@ -71,28 +86,33 @@ const transactionErrorCountChartPreview = createApmServerRoute({
 });
 
 const transactionDurationChartPreview = createApmServerRoute({
-  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
+  endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
+  handler: async (
+    resources
+  ): Promise<{
+    latencyChartPreview: TransactionDurationChartPreviewResponse;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { params } = resources;
+    const { params, config } = resources;
 
     const { _inspect, ...alertParams } = params.query;
 
     const latencyChartPreview = await getTransactionDurationChartPreview({
       alertParams,
-      setup,
+      config,
+      apmEventClient,
     });
 
     return { latencyChartPreview };
   },
 });
 
-export const alertsChartPreviewRouteRepository =
-  createApmServerRouteRepository()
-    .add(transactionErrorRateChartPreview)
-    .add(transactionDurationChartPreview)
-    .add(transactionErrorCountChartPreview)
-    .add(transactionDurationChartPreview);
+export const alertsChartPreviewRouteRepository = {
+  ...transactionErrorRateChartPreview,
+  ...transactionDurationChartPreview,
+  ...transactionErrorCountChartPreview,
+  ...transactionDurationChartPreview,
+};

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');

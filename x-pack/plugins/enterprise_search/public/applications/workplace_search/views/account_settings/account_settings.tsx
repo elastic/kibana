@@ -9,7 +9,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import type { AuthenticatedUser } from '../../../../../../security/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/public';
+
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { PersonalDashboardLayout } from '../../components/layout';
 import { ACCOUNT_SETTINGS_TITLE } from '../../constants';

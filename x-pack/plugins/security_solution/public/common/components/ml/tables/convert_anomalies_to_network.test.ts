@@ -8,7 +8,7 @@
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { convertAnomaliesToNetwork, getNetworkFromEntity } from './convert_anomalies_to_network';
-import { AnomaliesByNetwork } from '../types';
+import type { AnomaliesByNetwork } from '../types';
 
 describe('convert_anomalies_to_hosts', () => {
   let anomalies = cloneDeep(mockAnomalies);
@@ -20,7 +20,7 @@ describe('convert_anomalies_to_hosts', () => {
   test('it returns expected anomalies from a network if is part of the entityName and is a source.ip', () => {
     anomalies.anomalies[0].entityName = 'source.ip';
     anomalies.anomalies[0].entityValue = '127.0.0.1';
-    const entities = convertAnomaliesToNetwork(anomalies);
+    const entities = convertAnomaliesToNetwork(anomalies, {});
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -64,6 +64,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -72,7 +73,7 @@ describe('convert_anomalies_to_hosts', () => {
   test('it returns expected anomalies from a network if is part of the entityName and is a destination.ip', () => {
     anomalies.anomalies[0].entityName = 'destination.ip';
     anomalies.anomalies[0].entityValue = '127.0.0.1';
-    const entities = convertAnomaliesToNetwork(anomalies);
+    const entities = convertAnomaliesToNetwork(anomalies, {});
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -116,6 +117,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -125,7 +127,7 @@ describe('convert_anomalies_to_hosts', () => {
     anomalies.anomalies[0].entityName = 'not-an-ip';
     anomalies.anomalies[0].entityValue = 'not-an-ip';
     anomalies.anomalies[0].influencers = [{ 'source.ip': '127.0.0.1' }];
-    const entities = convertAnomaliesToNetwork(anomalies);
+    const entities = convertAnomaliesToNetwork(anomalies, {});
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -165,6 +167,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -174,7 +177,7 @@ describe('convert_anomalies_to_hosts', () => {
     anomalies.anomalies[0].entityName = 'not-an-ip';
     anomalies.anomalies[0].entityValue = 'not-an-ip';
     anomalies.anomalies[0].influencers = [{ 'destination.ip': '127.0.0.1' }];
-    const entities = convertAnomaliesToNetwork(anomalies);
+    const entities = convertAnomaliesToNetwork(anomalies, {});
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -214,13 +217,14 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
   });
 
   test('it returns empty anomalies if sent in a null', () => {
-    const entities = convertAnomaliesToNetwork(null);
+    const entities = convertAnomaliesToNetwork(null, {});
     const expected: AnomaliesByNetwork[] = [];
     expect(entities).toEqual(expected);
   });
@@ -233,7 +237,7 @@ describe('convert_anomalies_to_hosts', () => {
       { 'process.name': 'du' },
       { 'user.name': 'root' },
     ];
-    const entities = convertAnomaliesToNetwork(anomalies, '127.0.0.1');
+    const entities = convertAnomaliesToNetwork(anomalies, {}, '127.0.0.1');
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -277,6 +281,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -290,7 +295,7 @@ describe('convert_anomalies_to_hosts', () => {
       { 'process.name': 'du' },
       { 'user.name': 'root' },
     ];
-    const entities = convertAnomaliesToNetwork(anomalies, '127.0.0.1');
+    const entities = convertAnomaliesToNetwork(anomalies, {}, '127.0.0.1');
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -334,6 +339,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -347,7 +353,7 @@ describe('convert_anomalies_to_hosts', () => {
       { 'process.name': 'du' },
       { 'user.name': 'root' },
     ];
-    const entities = convertAnomaliesToNetwork(anomalies, '127.0.0.1');
+    const entities = convertAnomaliesToNetwork(anomalies, {}, '127.0.0.1');
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -391,6 +397,7 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'source.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
@@ -404,7 +411,7 @@ describe('convert_anomalies_to_hosts', () => {
       { 'process.name': 'du' },
       { 'user.name': 'root' },
     ];
-    const entities = convertAnomaliesToNetwork(anomalies, '127.0.0.1');
+    const entities = convertAnomaliesToNetwork(anomalies, {}, '127.0.0.1');
     const expected: AnomaliesByNetwork[] = [
       {
         anomaly: {
@@ -448,13 +455,14 @@ describe('convert_anomalies_to_hosts', () => {
         },
         ip: '127.0.0.1',
         type: 'destination.ip',
+        jobName: 'job-1',
       },
     ];
     expect(entities).toEqual(expected);
   });
 
   test('it returns empty anomalies if sent in the name of one that does not exist', () => {
-    const entities = convertAnomaliesToNetwork(anomalies, 'some-made-up-name-here-for-you');
+    const entities = convertAnomaliesToNetwork(anomalies, {}, 'some-made-up-name-here-for-you');
     const expected: AnomaliesByNetwork[] = [];
     expect(entities).toEqual(expected);
   });

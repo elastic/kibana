@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { formatnumber } from './formatnumber';
 
 describe('formatnumber', () => {

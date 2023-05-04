@@ -15,17 +15,9 @@ export class WatchStatus {
     this.state = get(props, 'state');
     this.comment = get(props, 'comment');
     this.isActive = get(props, 'isActive');
-    this.lastFired = getMoment(get(props, 'lastFired'));
+    this.lastExecution = getMoment(get(props, 'lastExecution'));
     this.lastChecked = getMoment(get(props, 'lastChecked'));
     this.lastMetCondition = getMoment(get(props, 'lastMetCondition'));
-
-    if (this.lastFired) {
-      this.lastFiredHumanized = this.lastFired.fromNow();
-    }
-
-    if (this.lastChecked) {
-      this.lastCheckedHumanized = this.lastChecked.fromNow();
-    }
 
     const actionStatuses = get(props, 'actionStatuses', []);
     this.actionStatuses = actionStatuses.map((actionStatus) =>

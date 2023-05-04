@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
+import { persistedLogViewReferenceRT } from '../../../log_views';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
@@ -92,6 +93,37 @@ export const ComparatorToi18nMap = {
   ),
 };
 
+export const ComparatorToi18nSymbolsMap = {
+  [Comparator.GT]: '>',
+  [Comparator.GT_OR_EQ]: '≥',
+  [Comparator.LT]: '<',
+  [Comparator.LT_OR_EQ]: '≤',
+  [Comparator.EQ]: '=',
+  [Comparator.NOT_EQ]: '≠',
+  [`${Comparator.EQ}:number`]: '=',
+  [`${Comparator.NOT_EQ}:number`]: '≠',
+
+  // TODO: We could need to update the next messages to use symbols.
+  [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.match', {
+    defaultMessage: 'matches',
+  }),
+  [Comparator.NOT_MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.notMatch', {
+    defaultMessage: 'does not match',
+  }),
+  [Comparator.MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.symbol.matchPhrase',
+    {
+      defaultMessage: 'matches phrase',
+    }
+  ),
+  [Comparator.NOT_MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.symbol.notMatchPhrase',
+    {
+      defaultMessage: 'does not match phrase',
+    }
+  ),
+};
+
 // Alert parameters //
 export enum AlertStates {
   OK,
@@ -149,6 +181,7 @@ const RequiredRuleParamsRT = rt.type({
   count: ThresholdRT,
   timeUnit: timeUnitRT,
   timeSize: timeSizeRT,
+  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
 });
 
 const partialRequiredRuleParamsRT = rt.partial(RequiredRuleParamsRT.props);
@@ -237,10 +270,24 @@ const chartPreviewHistogramBucket = rt.type({
   doc_count: rt.number,
 });
 
+const AdditionalContext = rt.type({
+  hits: rt.type({
+    hits: rt.array(
+      rt.type({
+        fields: rt.record(rt.string, rt.array(rt.unknown)),
+      })
+    ),
+  }),
+});
+
 const ChartPreviewBucketsRT = rt.partial({
   histogramBuckets: rt.type({
     buckets: rt.array(chartPreviewHistogramBucket),
   }),
+});
+
+const additionalContextRT = rt.partial({
+  additionalContext: AdditionalContext,
 });
 
 // ES query responses //
@@ -266,7 +313,7 @@ export const UngroupedSearchQueryResponseRT = rt.intersection([
       hits: hitsRT,
     }),
     rt.partial({
-      aggregations: ChartPreviewBucketsRT,
+      aggregations: rt.intersection([ChartPreviewBucketsRT, additionalContextRT]),
     }),
   ]),
 ]);
@@ -287,6 +334,7 @@ export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
                   doc_count: rt.number,
                 }),
                 ChartPreviewBucketsRT,
+                additionalContextRT,
               ]),
             })
           ),
@@ -308,7 +356,9 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
     aggregations: rt.type({
       groups: rt.intersection([
         rt.type({
-          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT])),
+          buckets: rt.array(
+            rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT, additionalContextRT])
+          ),
         }),
         afterKeyRT,
       ]),
@@ -351,3 +401,8 @@ export const isOptimizableGroupedThreshold = (
     return false;
   }
 };
+
+export interface ExecutionTimeRange {
+  gte?: number;
+  lte: number;
+}

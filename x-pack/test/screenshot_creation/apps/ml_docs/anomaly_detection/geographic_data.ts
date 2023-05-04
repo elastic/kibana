@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
-import { ECOMMERCE_INDEX_PATTERN, LOGS_INDEX_PATTERN } from '../index';
+import { ECOMMERCE_INDEX_PATTERN, LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
-  const maps = getPageObject('maps');
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
   const renderable = getService('renderable');
+  const maps = getPageObject('maps');
+  const timePicker = getPageObject('timePicker');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
@@ -76,9 +77,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('geographic data', function () {
     before(async () => {
+      // Stop the sample data feed about three months after the current date to capture anomaly
+      const dateStopString = new Date(Date.now() + 131400 * 60 * 1000).toISOString();
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         ecommerceGeoJobConfig as Job,
-        ecommerceGeoDatafeedConfig as Datafeed
+        ecommerceGeoDatafeedConfig as Datafeed,
+        { end: dateStopString }
       );
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         weblogGeoJobConfig as Job,
@@ -103,11 +107,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('set data visualizer options');
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
       await ml.dataVisualizerIndexBased.clickUseFullDataButton('14,074');
-      await ml.dataVisualizerTable.setSampleSizeInputValue(
-        'all',
-        'geo.coordinates',
-        '14074 (100%)'
-      );
       await ml.dataVisualizerTable.setFieldTypeFilter([ML_JOB_FIELD_TYPES.GEO_POINT]);
 
       await ml.testExecution.logTestStep('set maps options and take screenshot');
@@ -119,7 +118,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await maps.setView(44.1, -68.9, 4.5);
       await maps.closeLegend();
 
-      await mlScreenshots.takeScreenshot('weblogs-data-visualizer-geopoint', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'weblogs-data-visualizer-geopoint',
+        screenshotDirectories
+      );
     });
 
     it('ecommerce wizard screenshot', async () => {
@@ -163,8 +165,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
         'ecommerce-advanced-wizard-geopoint',
         screenshotDirectories
       );
@@ -217,22 +219,30 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('weblogs-advanced-wizard-geopoint', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
+        'weblogs-advanced-wizard-geopoint',
+        screenshotDirectories
+      );
     });
 
-    // the job stopped to produce an anomaly, needs investigation
-    it.skip('ecommerce anomaly explorer screenshots', async () => {
+    it('ecommerce anomaly explorer screenshots', async () => {
       await ml.testExecution.logTestStep('navigate to job list');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(ecommerceGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+      await ml.testExecution.logTestStep('Choose time range...');
+      await timePicker.setCommonlyUsedTime('sample_data range');
+
+      await ml.testExecution.logTestStep('open anomaly list actions and take screenshot');
+      await ml.anomaliesTable.scrollTableIntoView();
+      await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
+      await commonScreenshots.takeScreenshot('view-in-maps', screenshotDirectories);
 
       await ml.testExecution.logTestStep('select swim lane tile');
       const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
@@ -242,12 +252,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         y: sampleCell.y + cellSize,
       });
       await ml.swimLane.waitForSwimLanesToLoad();
-
-      await ml.testExecution.logTestStep('take screenshot');
+      await ml.testExecution.logTestStep('open anomaly list details and take screenshot');
       await ml.anomaliesTable.ensureDetailsOpen(0);
       await ml.anomalyExplorer.scrollChartsContainerIntoView();
-
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'ecommerce-anomaly-explorer-geopoint',
         screenshotDirectories
       );
@@ -260,7 +268,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(weblogGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(weblogGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -268,7 +275,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('select swim lane tile');
       const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
       const sampleCell1 = cells[11];
-      const sampleCell2 = cells[12];
+      const sampleCell2 = cells[cells.length - 1];
       await ml.swimLane.selectCells(overallSwimLaneTestSubj, {
         x1: sampleCell1.x + cellSize,
         y1: sampleCell1.y + cellSize,
@@ -283,9 +290,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // clickFitToData only works with displayed legend
       await maps.openLegend();
       await maps.clickFitToData();
+      await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await maps.closeLegend();
 
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'weblogs-anomaly-explorer-geopoint',
         screenshotDirectories
       );

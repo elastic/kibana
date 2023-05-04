@@ -10,11 +10,13 @@ import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';
-import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../common/types/timeline';
+import type { TimelineTypeLiteralWithNull } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
-import { TimelineTabsStyle, TimelineTab } from './types';
+import type { TimelineTab } from './types';
+import { TimelineTabsStyle } from './types';
 import { useKibana } from '../../../common/lib/kibana';
 export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;

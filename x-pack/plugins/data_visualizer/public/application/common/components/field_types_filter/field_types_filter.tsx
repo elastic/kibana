@@ -8,13 +8,14 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getFieldTypeName } from '@kbn/unified-field-list-plugin/public';
+import { FieldTypesHelpPopover } from './field_types_help_popover';
 import { MultiSelectPicker, Option } from '../multi_select_picker';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
 } from '../../../../../common/types/field_vis_config';
 import { FieldTypeIcon } from '../field_type_icon';
-import { jobTypeLabels } from '../../util/field_types_utils';
 
 interface Props {
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>;
@@ -39,9 +40,8 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
     const fieldTypesTracker = new Set();
     const fieldTypes: Option[] = [];
     fields.forEach(({ type }) => {
-      if (type !== undefined && !fieldTypesTracker.has(type) && jobTypeLabels[type] !== undefined) {
-        const label = jobTypeLabels[type];
-
+      const label = getFieldTypeName(type);
+      if (type !== undefined && !fieldTypesTracker.has(type) && label !== undefined) {
         fieldTypesTracker.add(type);
         fieldTypes.push({
           value: type,
@@ -67,6 +67,7 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
       onChange={setVisibleFieldTypes}
       checkedOptions={visibleFieldTypes}
       dataTestSubj={'dataVisualizerFieldTypeSelect'}
+      postfix={<FieldTypesHelpPopover fieldTypes={options.map((f) => f.value)} />}
     />
   );
 };

@@ -23,7 +23,7 @@ import {
   AlertConditionsGroup,
   RuleTypeModel,
   RuleTypeParamsExpressionProps,
-} from '../../../../plugins/triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   AlwaysFiringParams,
   AlwaysFiringActionGroupIds,

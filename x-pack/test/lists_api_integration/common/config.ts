@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
@@ -54,10 +53,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

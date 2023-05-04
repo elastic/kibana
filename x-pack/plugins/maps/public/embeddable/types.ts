@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '../../../../../src/plugins/data/common';
+import { Observable } from 'rxjs';
+import type { DataView } from '@kbn/data-plugin/common';
 import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
-import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { MapSettings } from '../reducers/map';
+} from '@kbn/embeddable-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
+import type { MapAttributes } from '../../common/content_management';
 
 export interface MapEmbeddableConfig {
   editable: boolean;
@@ -32,20 +32,22 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
+  filterByMapExtent?: boolean;
+  isMovementSynchronized?: boolean;
 }
 export type MapByValueInput = {
-  attributes: MapSavedObjectAttributes;
-} & EmbeddableInput & { filterByMapExtent?: boolean } & MapEmbeddableState;
-export type MapByReferenceInput = SavedObjectEmbeddableInput & {
-  filterByMapExtent?: boolean;
-} & MapEmbeddableState;
+  attributes: MapAttributes;
+} & EmbeddableInput &
+  MapEmbeddableState;
+export type MapByReferenceInput = SavedObjectEmbeddableInput & MapEmbeddableState;
 export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
 export type MapEmbeddableOutput = EmbeddableOutput & {
-  indexPatterns: IndexPattern[];
+  indexPatterns: DataView[];
 };
 
 export type MapEmbeddableType = Embeddable<MapEmbeddableInput, MapEmbeddableOutput> & {
-  setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void;
+  getOnRenderComplete$(): Observable<void>;
   setIsSharable(isSharable: boolean): void;
 };

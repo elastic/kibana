@@ -1,0 +1,76 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-solution-plugin",
+  "owner": "@elastic/security-solution",
+  "plugin": {
+    "id": "securitySolution",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "securitySolution"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "cases",
+      "cloud",
+      "cloudDefend",
+      "cloudSecurityPosture",
+      "dashboard",
+      "data",
+      "ecsDataQualityDashboard",
+      "dataViews",
+      "embeddable",
+      "eventLog",
+      "features",
+      "guidedOnboarding",
+      "inspector",
+      "kubernetesSecurity",
+      "lens",
+      "licensing",
+      "maps",
+      "ruleRegistry",
+      "sessionView",
+      "spaces",
+      "taskManager",
+      "threatIntelligence",
+      "timelines",
+      "triggersActionsUi",
+      "uiActions",
+      "unifiedSearch",
+      "files",
+      "controls",
+      "dataViews",
+      "savedObjectsManagement",
+    ],
+    "optionalPlugins": [
+      "cloudExperiments",
+      "encryptedSavedObjects",
+      "fleet",
+      "ml",
+      "newsfeed",
+      "security",
+      "usageCollection",
+      "lists",
+      "home",
+      "telemetry",
+      "dataViewFieldEditor",
+      "osquery",
+      "savedObjectsTaggingOss"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "fleet",
+      "kibanaUtils",
+      "kibanaReact",
+      "usageCollection",
+      "lists",
+      "ml",
+      "unifiedSearch"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

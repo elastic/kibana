@@ -1,0 +1,29 @@
+{
+  "description": "Security: Linux - Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
+  "groups": ["security", "linux"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare destination ports.",
+        "function": "rare",
+        "by_field_name": "destination.port",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "process.name", "user.name", "destination.ip"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-linux-v3",
+    "security_app_display_name": "Unusual Linux Network Port Activity",
+    "managed": true,
+    "job_revision": 4
+  }
+}

@@ -9,10 +9,10 @@ import type { ListsRequestHandlerContext } from '../../types';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
 
-export const getExceptionListClient = (
+export const getExceptionListClient = async (
   context: ListsRequestHandlerContext
-): ExceptionListClient => {
-  const exceptionLists = context.lists?.getExceptionListClient();
+): Promise<ExceptionListClient> => {
+  const exceptionLists = (await context.lists)?.getExceptionListClient();
   if (exceptionLists == null) {
     throw new ErrorWithStatusCode('Exception lists is not found as a plugin', 404);
   } else {

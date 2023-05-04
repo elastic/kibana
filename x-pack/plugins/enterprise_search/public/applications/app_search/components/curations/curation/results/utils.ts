@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { Result } from '../../../result/types';
+import type { SearchResult } from '@elastic/search-ui';
+
+import { ResultMeta } from '../../../result/types';
 import { CurationResult } from '../../types';
 
 /**
@@ -19,24 +21,42 @@ import { CurationResult } from '../../types';
  * remove this file when that happens
  */
 
-export const convertToResultFormat = (document: CurationResult): Result => {
-  const result = {} as Result;
+const mergeMetas = (partialMeta: ResultMeta, secondPartialMeta: ResultMeta): ResultMeta => {
+  return {
+    ...(partialMeta || {}),
+    ...secondPartialMeta,
+  };
+};
 
+const isNestedObject = (value: unknown): boolean => {
+  if (Array.isArray(value)) {
+    return value.reduce(
+      (isNested: boolean, currentValue) => isNested || isNestedObject(currentValue),
+      false
+    );
+  }
+
+  return value === null || typeof value === 'object';
+};
+
+export const convertToResultFormat = (document: CurationResult): SearchResult => {
   // Convert `key: 'value'` into `key: { raw: 'value' }`
-  Object.entries(document).forEach(([key, value]) => {
-    result[key] = {
-      raw: value,
-      snippet: null, // Don't try to provide a snippet, we can't really guesstimate it
+  const result = Object.entries(document).reduce((acc, [key, value]) => {
+    return {
+      ...acc,
+      [key]:
+        isNestedObject(value) || Object.prototype.hasOwnProperty.call(value, 'raw')
+          ? value
+          : { raw: value },
     };
-  });
+  }, {} as SearchResult);
 
-  // Add the _meta obj needed by Result
-  result._meta = convertIdToMeta(document.id);
+  result._meta = mergeMetas(result._meta, convertIdToMeta(document.id));
 
   return result;
 };
 
-export const convertIdToMeta = (id: string): Result['_meta'] => {
+export const convertIdToMeta = (id: string): SearchResult['_meta'] => {
   const splitId = id.split('|');
   const isMetaEngine = splitId.length > 1;
 
@@ -45,7 +65,7 @@ export const convertIdToMeta = (id: string): Result['_meta'] => {
         engine: splitId[0],
         id: splitId[1],
       }
-    : ({ id } as Result['_meta']);
+    : ({ id } as SearchResult['_meta']);
   // Note: We're casting this as _meta even though `engine` is missing,
   // since for source engines the engine shouldn't matter / be displayed,
   // but if needed we could likely populate this from EngineLogic.values

@@ -1,0 +1,54 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "stresstest",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "6244bd06-f711-44db-b756-bc25e4a32a60",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-04-13T09:07:56.793Z",
+  "version": "WzQwLDFd"
+}
+
+{
+  "attributes": {
+      "title": "Stresstest",
+      "hits": 0,
+      "description": "",
+      "panelsJSON": "[{\"version\":\"8.5.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"2899b65a-9186-4573-942a-04036669b73c\"},\"panelIndex\":\"2899b65a-9186-4573-942a-04036669b73c\",\"embeddableConfig\":{\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"6244bd06-f711-44db-b756-bc25e4a32a60\",\"name\":\"indexpattern-datasource-layer-591b8a11-31f9-41e5-87ba-f0b6f5face08\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"None\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"bar_stacked\",\"layers\":[{\"layerId\":\"591b8a11-31f9-41e5-87ba-f0b6f5face08\",\"accessors\":[\"532742da-8bea-4357-a5e1-9319111a61e7\"],\"position\":\"top\",\"seriesType\":\"bar_stacked\",\"showGridlines\":false,\"layerType\":\"data\",\"xAccessor\":\"5bcdbfd2-c4c0-4b27-891e-d848ea468cbe\",\"splitAccessor\":\"fed7a521-30ac-4696-bf2d-85a26ba6db58\"}]},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"591b8a11-31f9-41e5-87ba-f0b6f5face08\":{\"columns\":{\"5bcdbfd2-c4c0-4b27-891e-d848ea468cbe\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"scale\":\"interval\",\"params\":{\"interval\":\"ms\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"532742da-8bea-4357-a5e1-9319111a61e7\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"scale\":\"ratio\",\"sourceField\":\"___records___\",\"params\":{\"emptyAsNull\":true}},\"fed7a521-30ac-4696-bf2d-85a26ba6db58\":{\"label\":\"Top 1000 values of field0\",\"dataType\":\"string\",\"operationType\":\"terms\",\"scale\":\"ordinal\",\"sourceField\":\"field0\",\"isBucketed\":true,\"params\":{\"size\":1000,\"orderBy\":{\"type\":\"column\",\"columnId\":\"532742da-8bea-4357-a5e1-9319111a61e7\"},\"orderDirection\":\"desc\",\"otherBucket\":false,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"}}}},\"columnOrder\":[\"fed7a521-30ac-4696-bf2d-85a26ba6db58\",\"5bcdbfd2-c4c0-4b27-891e-d848ea468cbe\",\"532742da-8bea-4357-a5e1-9319111a61e7\"],\"incompleteColumns\":{}}}}},\"internalReferences\":[],\"adHocDataViews\":{}}},\"enhancements\":{}}}]",
+      "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+      "version": 1,
+      "timeRestore": true,
+      "timeTo": "2022-09-07T10:55:09.280Z",
+      "timeFrom": "2022-09-07T10:53:30.262Z",
+      "refreshInterval": {
+          "pause": true,
+          "value": 0
+      },
+      "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      }
+  },
+  "references": [
+      {
+          "type": "index-pattern",
+          "id": "6244bd06-f711-44db-b756-bc25e4a32a60",
+          "name": "2899b65a-9186-4573-942a-04036669b73c:indexpattern-datasource-layer-591b8a11-31f9-41e5-87ba-f0b6f5face08"
+      }
+  ],
+  "type": "dashboard",
+  "updated_at": "2022-04-13T09:07:56.793Z",
+  "version": "WzQwLDFd",
+  "coreMigrationVersion": "8.3.0",
+  "id": "92b143a0-2e9c-11ed-b1b6-a504560b392c",
+  "migrationVersion": {
+    "dashboard": "7.17.3"
+  }
+}

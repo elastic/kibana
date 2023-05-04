@@ -12,12 +12,14 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFormControlLayout,
+  transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 import * as I18n from './translations';
 
@@ -27,17 +29,20 @@ interface ScheduleItemProps {
   idAria: string;
   isDisabled: boolean;
   minimumValue?: number;
+  timeTypes?: string[];
+  fullWidth?: boolean;
 }
 
 const timeTypeOptions = [
   { value: 's', text: I18n.SECONDS },
   { value: 'm', text: I18n.MINUTES },
   { value: 'h', text: I18n.HOURS },
+  { value: 'd', text: I18n.DAYS },
 ];
 
 // move optional label to the end of input
 const StyledLabelAppend = styled(EuiFlexItem)`
-  &.euiFlexItem.euiFlexItem--flexGrowZero {
+  &.euiFlexItem {
     margin-left: 31px;
   }
 `;
@@ -46,12 +51,27 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
   .euiFormControlLayout {
-    max-width: 200px !important;
+    max-width: auto;
+    width: auto;
   }
 
   .euiFormControlLayout__childrenWrapper > *:first-child {
     box-shadow: none;
     height: 38px;
+    width: 100%;
+  }
+
+  .euiFormControlLayout__childrenWrapper > select {
+    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiFormControlLayout--group .euiFormControlLayout {
+    min-width: 100px;
+  }
+
+  .euiFormControlLayoutIcons {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 
   .euiFormControlLayout:not(:first-child) {
@@ -63,12 +83,12 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-const getNumberFromUserInput = (input: string, defaultValue = 0): number => {
+const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
   const number = parseInt(input, 10);
   if (Number.isNaN(number)) {
-    return defaultValue;
+    return minimumValue;
   } else {
-    return Math.min(number, Number.MAX_SAFE_INTEGER);
+    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
   }
 };
 
@@ -78,8 +98,10 @@ export const ScheduleItem = ({
   idAria,
   isDisabled,
   minimumValue = 0,
+  timeTypes = ['s', 'm', 'h'],
+  fullWidth = false,
 }: ScheduleItemProps) => {
-  const [timeType, setTimeType] = useState('s');
+  const [timeType, setTimeType] = useState(timeTypes[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
@@ -116,13 +138,13 @@ export const ScheduleItem = ({
       if (
         !isEmpty(filterTimeType) &&
         filterTimeType != null &&
-        ['s', 'm', 'h'].includes(filterTimeType[0]) &&
+        timeTypes.includes(filterTimeType[0]) &&
         filterTimeType[0] !== timeType
       ) {
         setTimeType(filterTimeType[0]);
       }
     }
-  }, [timeType, timeVal, value]);
+  }, [timeType, timeTypes, timeVal, value]);
 
   // EUI missing some props
   const rest = { disabled: isDisabled };
@@ -146,7 +168,7 @@ export const ScheduleItem = ({
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
-      fullWidth={false}
+      fullWidth={fullWidth}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
@@ -154,7 +176,7 @@ export const ScheduleItem = ({
         append={
           <MyEuiSelect
             fullWidth={false}
-            options={timeTypeOptions}
+            options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
             value={timeType}
             data-test-subj="timeType"

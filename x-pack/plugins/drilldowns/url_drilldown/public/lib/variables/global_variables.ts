@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import { UrlDrilldownGlobalScope } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
-import { UrlDrilldownGlobalScope } from '../../../../../ui_actions_enhanced/public';
-import type { UrlTemplateEditorVariable } from '../../../../../../../src/plugins/kibana_react/public';
 
 const kind = monaco.languages.CompletionItemKind.Constant;
 const sortPrefix = '3.';

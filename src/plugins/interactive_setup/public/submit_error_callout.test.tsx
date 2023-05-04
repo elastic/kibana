@@ -19,7 +19,7 @@ import {
   ERROR_OUTSIDE_PREBOOT_STAGE,
   ERROR_PING_FAILURE,
 } from '../common';
-import { interactiveSetupMock } from '../server/mocks'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { interactiveSetupMock } from '../server/mocks';
 import { SubmitErrorCallout } from './submit_error_callout';
 
 describe('SubmitErrorCallout', () => {
@@ -102,7 +102,9 @@ describe('SubmitErrorCallout', () => {
         }
       >
         <EuiButton
+          color="primary"
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue to Kibana"
@@ -180,7 +182,9 @@ describe('SubmitErrorCallout', () => {
         }
       >
         <EuiButton
+          color="primary"
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue to Kibana"
@@ -338,7 +342,9 @@ describe('SubmitErrorCallout', () => {
         }
       >
         <EuiButton
+          color="primary"
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue to Kibana"

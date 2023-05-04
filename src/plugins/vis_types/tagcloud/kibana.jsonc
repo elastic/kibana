@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-tagcloud-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Registers the tagcloud visualization. It is based on elastic-charts wordcloud.",
+  "plugin": {
+    "id": "visTypeTagcloud",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "expressions",
+      "visualizations",
+      "charts"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "visDefaultEditor"
+    ]
+  }
+}

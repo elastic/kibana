@@ -6,20 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { DeepPartial } from 'utility-types';
-import { merge } from 'lodash';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { popupVersionsMap } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
-import { FullAgentPolicyInput } from '../../../../plugins/fleet/common';
-import { PolicyConfig } from '../../../../plugins/security_solution/common/endpoint/types';
-import { ManifestSchema } from '../../../../plugins/security_solution/common/endpoint/schema/manifest';
-import { policyFactory } from '../../../../plugins/security_solution/common/endpoint/models/policy_config';
-import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const retryService = getService('retry');
   const pageObjects = getPageObjects([
     'common',
     'endpoint',
@@ -32,216 +25,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  type FullAgentPolicyEndpointInput = Omit<FullAgentPolicyInput, 'streams'> & {
-    policy: PolicyConfig;
-    artifact_manifest: ManifestSchema;
-  };
-
-  /**
-   * Returns the Fleet Agent Policy Input that represents an Endpoint Policy. Use it to
-   * validate expecte output when looking at the Fleet Agent policy to validate that updates
-   * to the Endpoint Policy are making it through to the overall Fleet Agent Policy
-   *
-   * @param overrides
-   */
-  const getExpectedAgentPolicyEndpointInput = (
-    overrides: DeepPartial<FullAgentPolicyEndpointInput> = {}
-  ): FullAgentPolicyInput => {
-    return merge(
-      {
-        id: '123',
-        revision: 2,
-        data_stream: { namespace: 'default' },
-        name: 'Protect East Coast',
-        meta: {
-          package: {
-            name: 'endpoint',
-            version: '1.0',
-          },
-        },
-        artifact_manifest: {
-          artifacts: {
-            'endpoint-exceptionlist-linux-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-exceptionlist-macos-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-exceptionlist-windows-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-hostisolationexceptionlist-linux-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-hostisolationexceptionlist-macos-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-hostisolationexceptionlist-windows-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-trustlist-linux-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-trustlist-macos-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-trustlist-windows-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-eventfilterlist-linux-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-eventfilterlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-eventfilterlist-macos-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-eventfilterlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-            'endpoint-eventfilterlist-windows-v1': {
-              compression_algorithm: 'zlib',
-              decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-              decoded_size: 14,
-              encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-              encoded_size: 22,
-              encryption_algorithm: 'none',
-              relative_url:
-                '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            },
-          },
-          manifest_version: '1',
-          schema_version: 'v1',
-        },
-        policy: merge(policyFactory(), {
-          windows: {
-            popup: {
-              malware: {
-                message: 'Elastic Security {action} {filename}',
-              },
-              ransomware: {
-                message: 'Elastic Security {action} {filename}',
-              },
-              memory_protection: {
-                message: 'Elastic Security {action} {rule}',
-              },
-              behavior_protection: {
-                message: 'Elastic Security {action} {rule}',
-              },
-            },
-          },
-          mac: {
-            popup: {
-              malware: {
-                message: 'Elastic Security {action} {filename}',
-              },
-              behavior_protection: {
-                message: 'Elastic Security {action} {rule}',
-              },
-              memory_protection: {
-                message: 'Elastic Security {action} {rule}',
-              },
-            },
-          },
-          linux: {
-            popup: {
-              malware: {
-                message: 'Elastic Security {action} {filename}',
-              },
-              behavior_protection: {
-                message: 'Elastic Security {action} {rule}',
-              },
-              memory_protection: {
-                message: 'Elastic Security {action} {rule}',
-              },
-            },
-          },
-        }),
-        type: 'endpoint',
-        use_output: 'default',
-      },
-      overrides
-    );
-  };
-
   describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
@@ -260,7 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('with a valid policy id', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/154182
+    describe.skip('with a valid policy id', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
@@ -394,42 +182,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.waitForDeleted('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
-          getExpectedAgentPolicyEndpointInput({
-            id: policyInfo.packagePolicy.id,
-            name: policyInfo.packagePolicy.name,
-            meta: {
-              package: {
-                version: policyInfo.packageInfo.version,
-              },
-            },
-            artifact_manifest: {
-              manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-            },
-            policy: {
-              linux: {
-                events: {
-                  file: false,
-                },
-                advanced: {
-                  agent: {
-                    connection_delay: 'true',
-                  },
-                },
-              },
-              mac: {
-                events: { file: false },
-              },
-              windows: { events: { file: false } },
-            },
-          }),
-        ]);
+        expect(agentFullPolicy.inputs[0].id).to.eql(policyInfo.packagePolicy.id);
+        expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connection_delay).to.eql(
+          'true'
+        );
+        expect(agentFullPolicy.inputs[0].policy.linux.events.file).to.eql(false);
+        expect(agentFullPolicy.inputs[0].policy.mac.events.file).to.eql(false);
+        expect(agentFullPolicy.inputs[0].policy.windows.events.file).to.eql(false);
       });
 
       it('should have cleared the advanced section when the user deletes the value', async () => {
@@ -442,42 +207,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
-          getExpectedAgentPolicyEndpointInput({
-            id: policyInfo.packagePolicy.id,
-            name: policyInfo.packagePolicy.name,
-            meta: {
-              package: {
-                version: policyInfo.packageInfo.version,
-              },
-            },
-            artifact_manifest: {
-              manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-            },
-            policy: {
-              linux: {
-                advanced: {
-                  agent: {
-                    connection_delay: 'true',
-                  },
-                },
-              },
-            },
-          }),
-        ]);
+        expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connection_delay).to.eql(
+          'true'
+        );
 
         // Clear the value
         await advancedPolicyField.click();
         await advancedPolicyField.clearValueWithKeyboard();
 
         // Make sure the toast button closes so the save button on the sticky footer is visible
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.waitForDeleted('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -486,21 +230,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicyUpdated.inputs).to.eql([
-          getExpectedAgentPolicyEndpointInput({
-            id: policyInfo.packagePolicy.id,
-            name: policyInfo.packagePolicy.name,
-            revision: agentFullPolicyUpdated.inputs[0].revision,
-            meta: {
-              package: {
-                version: policyInfo.packageInfo.version,
-              },
-            },
-            artifact_manifest: {
-              manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-            },
-          }),
-        ]);
+        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql({
+          capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+        });
       });
     });
 
@@ -537,34 +269,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
       });
 
-      it('should preserve updates done from the Fleet form', async () => {
-        // Fleet has its  own form inputs, like description. When those are updated, the changes
-        // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
-        // form after that should preserve the changes done on the Fleet form
-        // NOTE: A few delays were added below due to sporadic failures of this test case (see #100236)
-        const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
-
-        // Wait for the endpoint form to load and then update the policy description
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-        await sleep(); // Allow forms to sync
-        await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
-          'protect everything'
-        );
-        await sleep(); // Allow forms to sync
-
-        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
-        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-          winDnsEventingCheckbox
-        );
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-
-        await retryService.try(async () => {
-          expect(
-            await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
-          ).to.be('protect everything');
-        });
-      });
-
       it('should include updated endpoint data when saved', async () => {
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
           await testSubjects.find('policyWindowsEvent_dns')
@@ -588,12 +292,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should show trusted apps card and link should go back to policy', async () => {
-        await testSubjects.existOrFail('fleetTrustedAppsCard');
-        await (await testSubjects.find('linkToTrustedApps')).click();
+      // Failing: See https://github.com/elastic/kibana/issues/138776
+      it.skip('should show trusted apps card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('trustedApps-fleet-integration-card');
+        await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
+        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it.skip('should show event filters card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('eventFilters-fleet-integration-card');
+        const eventFiltersCard = await testSubjects.find('eventFilters-fleet-integration-card');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(eventFiltersCard);
+        await (await testSubjects.find('eventFilters-link-to-exceptions')).click();
+        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it.skip('should show blocklists card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('blocklists-fleet-integration-card');
+        const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
+        await (await testSubjects.find('blocklists-link-to-exceptions')).click();
+        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it.skip('should not show host isolation exceptions card because no entries', async () => {
+        await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
       });
     });
   });

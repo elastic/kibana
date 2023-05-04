@@ -6,14 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext } from 'src/core/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginSetup } from 'src/plugins/share/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { PLUGIN } from '../common/constants';
 
@@ -83,7 +80,7 @@ export class SnapshotRestoreUIPlugin {
           icon: 'storage',
           path: '/app/management/data/snapshot_restore',
           showOnHomePage: true,
-          category: FeatureCatalogueCategory.ADMIN,
+          category: 'admin',
           order: 630,
         });
       }
@@ -97,5 +94,6 @@ export class SnapshotRestoreUIPlugin {
   }
 
   public start() {}
+
   public stop() {}
 }

@@ -7,7 +7,7 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { HostsUncommonProcessesRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import type { HostsUncommonProcessesRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './dsl/query.dsl';
 import { uncommonProcesses } from '.';
 import {

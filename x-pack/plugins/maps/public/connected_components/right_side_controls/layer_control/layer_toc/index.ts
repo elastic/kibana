@@ -9,21 +9,33 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { LayerTOC } from './layer_toc';
-import { updateLayerOrder } from '../../../../actions';
+import {
+  createLayerGroup,
+  moveLayerToBottom,
+  moveLayerToLeftOfTarget,
+  setLayerParent,
+} from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
-import { getIsReadOnly } from '../../../../selectors/ui_selectors';
+import { getIsReadOnly, getOpenTOCDetails } from '../../../../selectors/ui_selectors';
 import { MapStoreState } from '../../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
     layerList: getLayerList(state),
+    openTOCDetails: getOpenTOCDetails(state),
   };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    updateLayerOrder: (newOrder: number[]) => dispatch(updateLayerOrder(newOrder)),
+    createLayerGroup: (draggedLayerId: string, combineWithLayerId: string) =>
+      dispatch(createLayerGroup(draggedLayerId, combineWithLayerId)),
+    moveLayerToBottom: (moveLayerId: string) => dispatch(moveLayerToBottom(moveLayerId)),
+    moveLayerToLeftOfTarget: (moveLayerId: string, targetLayerId: string) =>
+      dispatch(moveLayerToLeftOfTarget(moveLayerId, targetLayerId)),
+    setLayerParent: (layerId: string, parent: string | undefined) =>
+      dispatch(setLayerParent(layerId, parent)),
   };
 }
 

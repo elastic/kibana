@@ -1,0 +1,879 @@
+{
+  "id": "@kbn/repo-linter",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/repo-linter",
+        "id": "def-common.LintTarget",
+        "type": "Class",
+        "tags": [],
+        "label": "LintTarget",
+        "description": [],
+        "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.LintTarget.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "repoRel",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.LintTarget.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.LintTarget.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "dir",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.LintTarget.Unnamed.$4",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.resolve",
+            "type": "Function",
+            "tags": [],
+            "label": "resolve",
+            "description": [
+              "\nTurn a relative path (relative to the target's dir) into an absolute path"
+            ],
+            "signature": [
+              "(pkgRel: string) => string"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.LintTarget.resolve.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgRel",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.getRel",
+            "type": "Function",
+            "tags": [],
+            "label": "getRel",
+            "description": [
+              "\nTurn an absolute path into a relative path from the dir of the target"
+            ],
+            "signature": [
+              "(abs: string) => string"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.LintTarget.getRel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "abs",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.isPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "isPackage",
+            "description": [],
+            "signature": [
+              "() => this is ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.PackageLintTarget",
+                "text": "PackageLintTarget"
+              }
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.isTsProject",
+            "type": "Function",
+            "tags": [],
+            "label": "isTsProject",
+            "description": [],
+            "signature": [
+              "() => this is ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.TsProjectLintTarget",
+                "text": "TsProjectLintTarget"
+              }
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.getTsProject",
+            "type": "Function",
+            "tags": [],
+            "label": "getTsProject",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.TsProject",
+                "text": "TsProject"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.LintTarget.getPkg",
+            "type": "Function",
+            "tags": [],
+            "label": "getPkg",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Package",
+              " | undefined"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/repo-linter",
+        "id": "def-common.PackageLintTarget",
+        "type": "Class",
+        "tags": [],
+        "label": "PackageLintTarget",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.PackageLintTarget",
+            "text": "PackageLintTarget"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.LintTarget",
+            "text": "LintTarget"
+          }
+        ],
+        "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.PackageLintTarget.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.PackageLintTarget.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "pkg",
+                "description": [],
+                "signature": [
+                  "Package"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.PackageLintTarget.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "tsProject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ts-projects",
+                    "scope": "common",
+                    "docId": "kibKbnTsProjectsPluginApi",
+                    "section": "def-common.TsProject",
+                    "text": "TsProject"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.PackageLintTarget.hasTsProject",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTsProject",
+            "description": [],
+            "signature": [
+              "() => this is ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.PackageLintTarget",
+                "text": "PackageLintTarget"
+              },
+              " & { tsProject: ",
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.TsProject",
+                "text": "TsProject"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/repo-linter",
+        "id": "def-common.PackageRule",
+        "type": "Class",
+        "tags": [],
+        "label": "PackageRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.PackageRule",
+            "text": "PackageRule"
+          },
+          " extends ",
+          "Rule",
+          "<",
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.PackageLintTarget",
+            "text": "PackageLintTarget"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-repo-linter/lib/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.PackageRule.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(name: string, options: { check: ",
+              "CheckFn",
+              "<",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.PackageLintTarget",
+                "text": "PackageLintTarget"
+              },
+              ">; }) => ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.PackageRule",
+                "text": "PackageRule"
+              }
+            ],
+            "path": "packages/kbn-repo-linter/lib/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.PackageRule.create.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.PackageRule.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/repo-linter",
+                    "id": "def-common.PackageRule.create.$2.check",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "check",
+                    "description": [],
+                    "signature": [
+                      "(this: ",
+                      "RuleContext",
+                      ", project: ",
+                      {
+                        "pluginId": "@kbn/repo-linter",
+                        "scope": "common",
+                        "docId": "kibKbnRepoLinterPluginApi",
+                        "section": "def-common.PackageLintTarget",
+                        "text": "PackageLintTarget"
+                      },
+                      ") => string | void | ",
+                      "Violation",
+                      " | ",
+                      "Violation",
+                      "[] | Promise<string | void | ",
+                      "Violation",
+                      " | ",
+                      "Violation",
+                      "[]>"
+                    ],
+                    "path": "packages/kbn-repo-linter/lib/rule.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "returnComment": [],
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/repo-linter",
+                        "id": "def-common.PackageRule.create.$2.check.$1",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "project",
+                        "description": [],
+                        "signature": [
+                          "T"
+                        ],
+                        "path": "packages/kbn-repo-linter/lib/rule.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/repo-linter",
+        "id": "def-common.TsProjectLintTarget",
+        "type": "Class",
+        "tags": [],
+        "label": "TsProjectLintTarget",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.TsProjectLintTarget",
+            "text": "TsProjectLintTarget"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.LintTarget",
+            "text": "LintTarget"
+          }
+        ],
+        "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.TsProjectLintTarget.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.TsProjectLintTarget.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tsProject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ts-projects",
+                    "scope": "common",
+                    "docId": "kibKbnTsProjectsPluginApi",
+                    "section": "def-common.TsProject",
+                    "text": "TsProject"
+                  }
+                ],
+                "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.TsProjectLintTarget.hasTsProject",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTsProject",
+            "description": [],
+            "signature": [
+              "() => this is ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.PackageLintTarget",
+                "text": "PackageLintTarget"
+              },
+              " & { tsProject: ",
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.TsProject",
+                "text": "TsProject"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/repo-linter",
+        "id": "def-common.TsProjectRule",
+        "type": "Class",
+        "tags": [],
+        "label": "TsProjectRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.TsProjectRule",
+            "text": "TsProjectRule"
+          },
+          " extends ",
+          "Rule",
+          "<",
+          {
+            "pluginId": "@kbn/repo-linter",
+            "scope": "common",
+            "docId": "kibKbnRepoLinterPluginApi",
+            "section": "def-common.TsProjectLintTarget",
+            "text": "TsProjectLintTarget"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-repo-linter/lib/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.TsProjectRule.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(name: string, options: { check: ",
+              "CheckFn",
+              "<",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.TsProjectLintTarget",
+                "text": "TsProjectLintTarget"
+              },
+              ">; }) => ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.TsProjectRule",
+                "text": "TsProjectRule"
+              }
+            ],
+            "path": "packages/kbn-repo-linter/lib/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.TsProjectRule.create.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-linter",
+                "id": "def-common.TsProjectRule.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/repo-linter",
+                    "id": "def-common.TsProjectRule.create.$2.check",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "check",
+                    "description": [],
+                    "signature": [
+                      "(this: ",
+                      "RuleContext",
+                      ", project: ",
+                      {
+                        "pluginId": "@kbn/repo-linter",
+                        "scope": "common",
+                        "docId": "kibKbnRepoLinterPluginApi",
+                        "section": "def-common.TsProjectLintTarget",
+                        "text": "TsProjectLintTarget"
+                      },
+                      ") => string | void | ",
+                      "Violation",
+                      " | ",
+                      "Violation",
+                      "[] | Promise<string | void | ",
+                      "Violation",
+                      " | ",
+                      "Violation",
+                      "[]>"
+                    ],
+                    "path": "packages/kbn-repo-linter/lib/rule.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "returnComment": [],
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/repo-linter",
+                        "id": "def-common.TsProjectRule.create.$2.check.$1",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "project",
+                        "description": [],
+                        "signature": [
+                          "T"
+                        ],
+                        "path": "packages/kbn-repo-linter/lib/rule.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/repo-linter",
+        "id": "def-common.runLintRules",
+        "type": "Function",
+        "tags": [],
+        "label": "runLintRules",
+        "description": [],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ", targets: T[], rules: R[], options: ",
+          "LintOptions",
+          "<T>) => Promise<{ lintingErrorCount: number; }>"
+        ],
+        "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.runLintRules.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.runLintRules.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "targets",
+            "description": [],
+            "signature": [
+              "T[]"
+            ],
+            "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.runLintRules.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "signature": [
+              "R[]"
+            ],
+            "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/repo-linter",
+            "id": "def-common.runLintRules.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "LintOptions",
+              "<T>"
+            ],
+            "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

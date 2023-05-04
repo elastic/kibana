@@ -1,0 +1,184 @@
+{
+  "id": "@kbn/core-test-helpers-http-setup-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
+        "id": "def-common.setup",
+        "type": "Function",
+        "tags": [],
+        "label": "setup",
+        "description": [],
+        "signature": [
+          "(tap: ",
+          {
+            "pluginId": "@kbn/core-test-helpers-http-setup-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersHttpSetupBrowserPluginApi",
+            "section": "def-common.SetupTap",
+            "text": "SetupTap"
+          },
+          ") => { httpService: ",
+          "HttpService",
+          "; injectedMetadata: jest.Mocked<",
+          "InternalInjectedMetadataSetup",
+          ">; fatalErrors: jest.Mocked<",
+          {
+            "pluginId": "@kbn/core-fatal-errors-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+            "section": "def-common.FatalErrorsSetup",
+            "text": "FatalErrorsSetup"
+          },
+          ">; http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
+            "id": "def-common.setup.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "tap",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-test-helpers-http-setup-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersHttpSetupBrowserPluginApi",
+                "section": "def-common.SetupTap",
+                "text": "SetupTap"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
+        "id": "def-common.SetupTap",
+        "type": "Type",
+        "tags": [],
+        "label": "SetupTap",
+        "description": [],
+        "signature": [
+          "(injectedMetadata: jest.Mocked<",
+          "InternalInjectedMetadataSetup",
+          ">, fatalErrors: jest.Mocked<",
+          {
+            "pluginId": "@kbn/core-fatal-errors-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+            "section": "def-common.FatalErrorsSetup",
+            "text": "FatalErrorsSetup"
+          },
+          ">) => void"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
+            "id": "def-common.SetupTap.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "injectedMetadata",
+            "description": [],
+            "signature": [
+              "{ getBasePath: jest.MockInstance<string, []>; getServerBasePath: jest.MockInstance<string, []>; getPublicBaseUrl: jest.MockInstance<string | undefined, []>; getKibanaBuildNumber: jest.MockInstance<number, []>; getKibanaBranch: jest.MockInstance<string, []>; getKibanaVersion: jest.MockInstance<string, []>; getCspConfig: jest.MockInstance<{ warnLegacyBrowsers: boolean; }, []>; getExternalUrlConfig: jest.MockInstance<{ policy: ",
+              "InjectedMetadataExternalUrlPolicy",
+              "[]; }, []>; getTheme: jest.MockInstance<{ darkMode: boolean; version: \"v8\"; }, []>; getElasticsearchInfo: jest.MockInstance<",
+              "InjectedMetadataClusterInfo",
+              ", []>; getPlugins: jest.MockInstance<",
+              "InjectedMetadataPlugin",
+              "[], []>; getAnonymousStatusPage: jest.MockInstance<boolean, []>; getLegacyMetadata: jest.MockInstance<{ uiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; globalUiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; }, []>; getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]>; getInjectedVars: jest.MockInstance<{ [key: string]: unknown; }, []>; getCustomBranding: jest.MockInstance<",
+              {
+                "pluginId": "@kbn/core-custom-branding-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
+                "section": "def-common.CustomBranding",
+                "text": "CustomBranding"
+              },
+              ", []>; } & ",
+              "InternalInjectedMetadataSetup"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-http-setup-browser",
+            "id": "def-common.SetupTap.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fatalErrors",
+            "description": [],
+            "signature": [
+              "{ add: jest.MockInstance<never, [error: string | Error, source?: string | undefined]>; get$: jest.MockInstance<",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-fatal-errors-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+                "section": "def-common.FatalErrorInfo",
+                "text": "FatalErrorInfo"
+              },
+              ">, []>; } & ",
+              {
+                "pluginId": "@kbn/core-fatal-errors-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+                "section": "def-common.FatalErrorsSetup",
+                "text": "FatalErrorsSetup"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

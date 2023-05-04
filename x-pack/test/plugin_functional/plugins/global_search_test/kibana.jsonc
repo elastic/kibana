@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/global-search-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "globalSearchTest",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "global_search_test"
+    ],
+    "requiredPlugins": [
+      "globalSearch"
+    ]
+  }
+}

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface LogSearchInputProps {
   className?: string;

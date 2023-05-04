@@ -24,6 +24,9 @@ export const convertLogRetentionFromServerToClient = (
   [LogRetentionOptions.API]: convertLogRetentionSettingsFromServerToClient(
     logRetention[LogRetentionOptions.API]
   ),
+  [LogRetentionOptions.Audit]: convertLogRetentionSettingsFromServerToClient(
+    logRetention[LogRetentionOptions.Audit]
+  ),
   [LogRetentionOptions.Crawler]: convertLogRetentionSettingsFromServerToClient(
     logRetention[LogRetentionOptions.Crawler]
   ),

@@ -5,24 +5,86 @@
  * 2.0.
  */
 
-// / <reference types="cypress" />
-// ***********************************************************
-// This example plugins/index.js can be used to load plugins
-//
-// You can change the location of this file or turn off loading
-// the plugins file with the 'pluginsFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/plugins-guide
-// ***********************************************************
+import { promisify } from 'util';
 
-// This function is called when a project is opened or re-opened (e.g. due to
-// the project's config changing)
+import fs from 'fs';
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (_on: any, _config: any) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
+import fetch from 'node-fetch';
+import { createEsClientForTesting } from '@kbn/test';
+
+const plugin: Cypress.PluginConfig = (on, config) => {
+  const client = createEsClientForTesting({
+    esUrl: config.env.ELASTICSEARCH_URL,
+  });
+
+  async function kibanaFetch(opts: {
+    method: string;
+    path: string;
+    body?: any;
+    contentType?: string;
+  }) {
+    const { method, path, body, contentType } = opts;
+    const Authorization = `Basic ${Buffer.from(
+      `elastic:${config.env.ELASTICSEARCH_PASSWORD}`
+    ).toString('base64')}`;
+
+    const url = `${config.env.KIBANA_URL}${path}`;
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'kbn-xsrf': 'cypress',
+        'Content-Type': contentType || 'application/json',
+        Authorization,
+      },
+      ...(body ? { body } : {}),
+    });
+
+    return res.json();
+  }
+  on('task', {
+    async insertDoc({ index, doc, id }: { index: string; doc: any; id: string }) {
+      return client.create({ id, document: doc, index, refresh: 'wait_for' });
+    },
+    async insertDocs({ index, docs }: { index: string; docs: any[] }) {
+      const operations = docs.flatMap((doc) => [{ index: { _index: index } }, doc]);
+
+      return client.bulk({ operations, refresh: 'wait_for' });
+    },
+    async deleteDocsByQuery({
+      index,
+      query,
+      ignoreUnavailable = false,
+    }: {
+      index: string;
+      query: any;
+      ignoreUnavailable?: boolean;
+    }) {
+      return client.deleteByQuery({
+        index,
+        query,
+        ignore_unavailable: ignoreUnavailable,
+        refresh: true,
+        conflicts: 'proceed',
+      });
+    },
+    async installTestPackage(packageName: string) {
+      const zipPath = require.resolve('../packages/' + packageName + '.zip');
+      const zipContent = await promisify(fs.readFile)(zipPath, 'base64');
+      return kibanaFetch({
+        method: 'POST',
+        path: '/api/fleet/epm/packages',
+        body: Buffer.from(zipContent, 'base64'),
+        contentType: 'application/zip',
+      });
+    },
+
+    async uninstallTestPackage(packageName: string) {
+      return kibanaFetch({
+        method: 'DELETE',
+        path: `/api/fleet/epm/packages/${packageName}`,
+      });
+    },
+  });
 };
+
+module.exports = plugin;

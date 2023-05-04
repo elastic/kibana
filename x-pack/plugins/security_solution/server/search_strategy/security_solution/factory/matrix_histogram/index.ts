@@ -7,25 +7,23 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   FactoryQueryTypes,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
+  MatrixHistogramDataConfig,
+} from '../../../../../common/search_strategy/security_solution';
+import {
   MatrixHistogramQuery,
   MatrixHistogramType,
-  MatrixHistogramDataConfig,
-  MatrixHistogramQueryEntities,
 } from '../../../../../common/search_strategy/security_solution';
 import { inspectStringifyObject } from '../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { getGenericData } from './helpers';
 import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';
-import {
-  authenticationsMatrixHistogramConfig,
-  authenticationsMatrixHistogramEntitiesConfig,
-} from './authentications';
+import { authenticationsMatrixHistogramConfig } from './authentications';
 import { dnsMatrixHistogramConfig } from './dns';
 import { eventsMatrixHistogramConfig } from './events';
 import { previewMatrixHistogramConfig } from './preview';
@@ -34,7 +32,6 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.alerts]: alertsMatrixHistogramConfig,
   [MatrixHistogramType.anomalies]: anomaliesMatrixHistogramConfig,
   [MatrixHistogramType.authentications]: authenticationsMatrixHistogramConfig,
-  [MatrixHistogramType.authenticationsEntities]: authenticationsMatrixHistogramEntitiesConfig,
   [MatrixHistogramType.dns]: dnsMatrixHistogramConfig,
   [MatrixHistogramType.events]: eventsMatrixHistogramConfig,
   [MatrixHistogramType.preview]: previewMatrixHistogramConfig,
@@ -76,46 +73,9 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
   },
 };
 
-export const matrixHistogramEntities: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
-  buildDsl: (options: MatrixHistogramRequestOptions) => {
-    const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
-    if (myConfig == null) {
-      throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
-    }
-    return myConfig.buildDsl(options);
-  },
-  parse: async (
-    options: MatrixHistogramRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<MatrixHistogramStrategyResponse> => {
-    const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
-    if (myConfig == null) {
-      throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
-    }
-    const totalCount = response.rawResponse.hits.total || 0;
-    const matrixHistogramData = getOr([], myConfig.aggName, response.rawResponse);
-    const inspect = {
-      dsl: [inspectStringifyObject(myConfig.buildDsl(options))],
-    };
-    const dataParser = myConfig.parser ?? getGenericData;
-
-    return {
-      ...response,
-      inspect,
-      matrixHistogramData: dataParser<typeof options.histogramType>(
-        matrixHistogramData,
-        myConfig.parseKey
-      ),
-      // @ts-expect-error code doesn't handle TotalHits
-      totalCount,
-    };
-  },
-};
-
 export const matrixHistogramFactory: Record<
-  typeof MatrixHistogramQuery | typeof MatrixHistogramQueryEntities,
+  typeof MatrixHistogramQuery,
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   [MatrixHistogramQuery]: matrixHistogram,
-  [MatrixHistogramQueryEntities]: matrixHistogramEntities,
 };

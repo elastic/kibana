@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
+Array [
+  Array [
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [Function],
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
+      <GlobalToastList
+        dismissToast={[Function]}
+        toasts$={
+          Observable {
+            "source": BehaviorSubject {
+              "_value": Array [],
+              "closed": false,
+              "currentObservers": null,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          }
+        }
+      />
+    </CoreContextProvider>,
+    <div
+      test="target-dom-element"
+    />,
+  ],
+]
+`;
+
+exports[`#stop() unmounts the GlobalToastList from the targetDomElement 1`] = `
+Array [
+  Array [
+    <div
+      test="target-dom-element"
+    />,
+  ],
+]
+`;

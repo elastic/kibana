@@ -5,34 +5,49 @@
  * 2.0.
  */
 import { merge } from 'lodash';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
-import { Setup } from '../../lib/helpers/setup_request';
+} from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Agent } from '../../../typings/es_schemas/ui/fields/agent';
+import { Service } from '../../../typings/es_schemas/raw/fields/service';
+import { Container } from '../../../typings/es_schemas/raw/fields/container';
+import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
+import { Host } from '../../../typings/es_schemas/raw/fields/host';
+import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
+
+export interface ServiceInstanceMetadataDetailsResponse {
+  '@timestamp': string;
+  agent?: Agent;
+  service?: Service;
+  container?: Container;
+  kubernetes?: Kubernetes;
+  host?: Host;
+  cloud?: Cloud;
+}
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
   serviceNodeName,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
-  const { apmEventClient } = setup;
+}): Promise<ServiceInstanceMetadataDetailsResponse> {
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [SERVICE_NODE_NAME]: serviceNodeName } },
@@ -47,6 +62,7 @@ export async function getServiceInstanceMetadataDetails({
           events: [ProcessorEvent.metric],
         },
         body: {
+          track_total_hits: false,
           terminate_after: 1,
           size: 1,
           query: {
@@ -69,6 +85,7 @@ export async function getServiceInstanceMetadataDetails({
           events: [ProcessorEvent.transaction],
         },
         body: {
+          track_total_hits: false,
           terminate_after: 1,
           size: 1,
           query: { bool: { filter } },
@@ -87,6 +104,7 @@ export async function getServiceInstanceMetadataDetails({
           events: [getProcessorEventForTransactions(true)],
         },
         body: {
+          track_total_hits: false,
           terminate_after: 1,
           size: 1,
           query: {

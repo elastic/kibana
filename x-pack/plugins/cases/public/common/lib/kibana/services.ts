@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { CasesUiConfigType } from '../../../../common/ui/types';
+import type { CoreStart } from '@kbn/core/public';
+import type { CasesUiConfigType } from '../../../../common/ui/types';
 
 type GlobalServices = Pick<CoreStart, 'http'>;
 
@@ -19,7 +19,10 @@ export class KibanaServices {
     http,
     kibanaVersion,
     config,
-  }: GlobalServices & { kibanaVersion: string; config: CasesUiConfigType }) {
+  }: GlobalServices & {
+    kibanaVersion: string;
+    config: CasesUiConfigType;
+  }) {
     this.services = { http };
     this.kibanaVersion = kibanaVersion;
     this.config = config;

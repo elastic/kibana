@@ -6,5 +6,8 @@ currently manually curated). This assumes the targeted schema files will be in
 `public/editor/osquery_schema`.
 
 ```
-node scripts/schema_formatter --schema_version=v4.6.0
+node ecs.js --schema_version=4.6.0                  // (filename without .json extension)
+Possibly it's going to be necessary to transform fields' names into lower case, because CSV exports Fields with Capital Letters. 
+
+node osquery.js --schema_version=4.6.0              // (filename without .json extension)
 ```

@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
 
-import { HttpSetup, HttpFetchOptions } from '../../../../../src/core/public';
+import { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { SendRequestConfig, SendRequestResponse } from './send_request';
 import { useRequest, UseRequestResponse, UseRequestConfig } from './use_request';
 
@@ -49,7 +49,7 @@ const errorWithBodyResponse = { body: errorValue };
 export const createUseRequestHelpers = (): UseRequestHelpers => {
   // The behavior we're testing involves state changes over time, so we need finer control over
   // timing.
-  jest.useFakeTimers();
+  jest.useFakeTimers({ legacyFakeTimers: true });
 
   const flushPromiseJobQueue = async () => {
     // See https://stackoverflow.com/questions/52177631/jest-timer-and-promise-dont-work-well-settimeout-and-async-function

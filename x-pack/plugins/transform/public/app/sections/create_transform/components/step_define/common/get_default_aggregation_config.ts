@@ -5,17 +5,16 @@
  * 2.0.
  */
 
+import { getTermsAggConfig } from './terms_agg';
 import { EsFieldName } from '../../../../../../../common/types/fields';
 import {
   PivotSupportedAggs,
   PIVOT_SUPPORTED_AGGS,
 } from '../../../../../../../common/types/pivot_aggs';
-import {
-  PERCENTILES_AGG_DEFAULT_PERCENTS,
-  PivotAggsConfigWithUiSupport,
-} from '../../../../../common';
+import { PivotAggsConfigWithUiSupport } from '../../../../../common';
 import { getFilterAggConfig } from './filter_agg/config';
-import { getTopMetricsAggConfig } from './top_metrics_agg/config';
+import { getPercentilesAggConfig } from './percentiles_agg';
+import { getTopMetricsAggConfig } from './top_metrics_agg';
 
 /**
  * Provides a configuration based on the aggregation type.
@@ -35,11 +34,7 @@ export function getDefaultAggregationConfig(
 
   switch (agg) {
     case PIVOT_SUPPORTED_AGGS.PERCENTILES:
-      return {
-        ...commonConfig,
-        agg,
-        percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
-      };
+      return getPercentilesAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.TOP_METRICS:
@@ -48,6 +43,8 @@ export function getDefaultAggregationConfig(
         // top_metrics agg has different naming convention by default
         aggName: PIVOT_SUPPORTED_AGGS.TOP_METRICS,
       });
+    case PIVOT_SUPPORTED_AGGS.TERMS:
+      return getTermsAggConfig(commonConfig);
     default:
       return commonConfig;
   }

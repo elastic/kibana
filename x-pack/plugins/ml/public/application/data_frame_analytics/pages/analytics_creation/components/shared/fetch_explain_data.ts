@@ -5,20 +5,17 @@
  * 2.0.
  */
 
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorProperties } from '../../../../../../../common/util/errors';
-import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+import {
+  DfAnalyticsExplainResponse,
+  FieldSelectionItem,
+} from '../../../../../../../common/types/data_frame_analytics';
 import {
   getJobConfigFromFormState,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-
-export interface FetchExplainDataReturnType {
-  success: boolean;
-  expectedMemory: string;
-  fieldSelection: FieldSelectionItem[];
-  errorMessage: string;
-}
 
 export const fetchExplainData = async (formState: State['form']) => {
   const jobConfig = getJobConfigFromFormState(formState);
@@ -32,6 +29,7 @@ export const fetchExplainData = async (formState: State['form']) => {
   try {
     delete jobConfig.dest;
     delete jobConfig.model_memory_limit;
+    delete jobConfig.analyzed_fields;
     const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
       jobConfig
     );

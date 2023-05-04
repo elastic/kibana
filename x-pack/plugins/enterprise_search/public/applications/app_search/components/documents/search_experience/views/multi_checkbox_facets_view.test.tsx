@@ -9,6 +9,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import type { FacetValue } from '@elastic/search-ui';
+
 import { MultiCheckboxFacetsView } from './multi_checkbox_facets_view';
 
 describe('MultiCheckboxFacetsView', () => {
@@ -23,7 +25,7 @@ describe('MultiCheckboxFacetsView', () => {
         value: 'value2',
         selected: false,
       },
-    ],
+    ] as FacetValue[],
     showMore: true,
     onMoreClick: jest.fn(),
     onRemove: jest.fn(),
@@ -65,7 +67,7 @@ describe('MultiCheckboxFacetsView', () => {
               value: 'value2',
               selected: true,
             },
-          ],
+          ] as FacetValue[],
         }}
       />
     );
@@ -87,7 +89,7 @@ describe('MultiCheckboxFacetsView', () => {
               value: '',
               selected: false,
             },
-          ],
+          ] as FacetValue[],
         }}
       />
     );

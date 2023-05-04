@@ -13,15 +13,16 @@ export function time(filter) {
   if (!filter.column) {
     throw new Error('column is required for Elasticsearch range filters');
   }
+  const { from, to, column, filterGroup: group } = filter;
   return {
-    range: {
-      [filter.column]: { gte: filter.from, lte: filter.to },
-    },
+    group,
+    range: { [column]: { gte: from, lte: to } },
   };
 }
 
 export function luceneQueryString(filter) {
   return {
+    group: filter.filterGroup,
     query_string: {
       query: filter.query || '*',
     },
@@ -30,6 +31,7 @@ export function luceneQueryString(filter) {
 
 export function exactly(filter) {
   return {
+    group: filter.filterGroup,
     term: {
       [filter.column]: {
         value: filter.value,

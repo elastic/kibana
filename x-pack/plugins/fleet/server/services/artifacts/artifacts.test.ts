@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
@@ -23,6 +23,7 @@ import {
   setEsClientMethodResponseToError,
 } from './mocks';
 import {
+  bulkCreateArtifacts,
   createArtifact,
   deleteArtifact,
   encodeArtifactContent,
@@ -44,11 +45,7 @@ describe('When using the artifacts services', () => {
   describe('and calling `getArtifact()`', () => {
     it('should get artifact using id', async () => {
       // @ts-expect-error not full interface
-      esClientMock.get.mockImplementation(() => {
-        return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          generateArtifactEsGetSingleHitMock()
-        );
-      });
+      esClientMock.get.mockResponse(generateArtifactEsGetSingleHitMock());
 
       expect(await getArtifact(esClientMock, '123')).toEqual(generateArtifactMock());
       expect(esClientMock.get).toHaveBeenCalledWith({
@@ -118,6 +115,68 @@ describe('When using the artifacts services', () => {
     });
   });
 
+  describe('and calling `bulkCreateArtifacts()`', () => {
+    let newArtifact: NewArtifact;
+
+    beforeEach(() => {
+      const { id, created, ...artifact } = generateArtifactMock();
+      newArtifact = artifact;
+    });
+
+    it('should create and return artifacts', async () => {
+      const { artifacts } = await bulkCreateArtifacts(esClientMock, [newArtifact]);
+      const artifact = artifacts![0];
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        refresh: false,
+        body: [
+          {
+            create: {
+              _id: `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newArtifact),
+            created: expect.any(String),
+          },
+        ],
+      });
+
+      expect(artifact).toEqual({
+        ...newArtifact,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+    });
+
+    it('should ignore 409 errors from elasticsearch', async () => {
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { status: 409 } as any }],
+      } as any);
+      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
+        newArtifact,
+      ]);
+
+      expect(responseErrors).toBeUndefined();
+      expect(artifacts?.length).toEqual(1);
+    });
+
+    it('should return error if one is encountered', async () => {
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { status: 400, error: { reason: 'error' } } as any }],
+      } as any);
+      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
+        newArtifact,
+      ]);
+
+      expect(responseErrors).toEqual([new Error('error')]);
+      expect(artifacts).toBeUndefined();
+    });
+  });
+
   describe('and calling `deleteArtifact()`', () => {
     it('should delete the artifact', async () => {
       deleteArtifact(esClientMock, '123');
@@ -140,11 +199,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `listArtifacts()`', () => {
     beforeEach(() => {
-      esClientMock.search.mockImplementation(() => {
-        return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          generateArtifactEsSearchResultHitsMock()
-        );
-      });
+      esClientMock.search.mockResponse(generateArtifactEsSearchResultHitsMock());
     });
 
     it('should use defaults when options is not provided', async () => {
@@ -156,6 +211,8 @@ describe('When using the artifacts services', () => {
         q: '',
         from: 0,
         size: 20,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
         body: {
           sort: [{ created: { order: 'asc' } }],
         },
@@ -190,6 +247,8 @@ describe('When using the artifacts services', () => {
         ignore_unavailable: true,
         from: 450,
         size: 50,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
         body: {
           sort: [{ identifier: { order: 'desc' } }],
         },

@@ -7,3 +7,32 @@
  */
 
 export const EXPRESSION_METRIC_NAME = 'metricVis';
+export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
+
+export const DEFAULT_TRENDLINE_NAME = 'default';
+
+export const LabelPosition = {
+  BOTTOM: 'bottom',
+  TOP: 'top',
+} as const;
+
+export const AvailableMetricIcons = {
+  EMPTY: 'empty',
+  SORTUP: 'sortUp',
+  SORTDOWN: 'sortDown',
+  COMPUTE: 'compute',
+  ASTERISK: 'asterisk',
+  ALERT: 'alert',
+  BELL: 'bell',
+  BOLT: 'bolt',
+  BUG: 'bug',
+  EDITOR_COMMENT: 'editorComment',
+  FLAG: 'flag',
+  HEART: 'heart',
+  MAP_MARKER: 'mapMarker',
+  PIN: 'pin',
+  STAR_EMPTY: 'starEmpty',
+  TAG: 'tag',
+  GLOBE: 'globe',
+  TEMPERATURE: 'temperature',
+} as const;

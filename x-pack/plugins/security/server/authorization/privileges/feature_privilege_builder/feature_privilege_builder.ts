@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/server';
+
 import type { Actions } from '../../actions';
 
 export interface FeaturePrivilegeBuilder {

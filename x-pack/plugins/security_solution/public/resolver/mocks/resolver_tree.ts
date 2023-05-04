@@ -6,7 +6,7 @@
  */
 
 import { mockEndpointEvent } from './endpoint_event';
-import {
+import type {
   SafeResolverEvent,
   NewResolverTree,
   ResolverNode,

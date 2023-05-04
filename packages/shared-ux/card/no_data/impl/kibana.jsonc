@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-card-no-data",
+  "owner": "@elastic/appex-sharedux"
+}

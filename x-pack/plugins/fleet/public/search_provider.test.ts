@@ -8,7 +8,7 @@
 import { TestScheduler } from 'rxjs/testing';
 import { NEVER } from 'rxjs';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { createPackageSearchProvider, toSearchResult } from './search_provider';
 import type { GetPackagesResponse } from './types';
@@ -47,6 +47,68 @@ const testResponse: GetPackagesResponse['items'] = [
     status: 'not_installed',
     title: 'test1',
     version: 'test1',
+  },
+  {
+    description: 'testWithPolicyTemplate',
+    download: 'testWithPolicyTemplate',
+    id: 'testWithPolicyTemplate',
+    name: 'testWithPolicyTemplate',
+    path: 'testWithPolicyTemplate',
+    release: 'ga',
+    status: 'not_installed',
+    title: 'testWithPolicyTemplate',
+    version: 'testWithPolicyTemplate',
+    policy_templates: [
+      {
+        description: 'testPolicyTemplate1',
+        name: 'testPolicyTemplate1',
+        icons: [
+          {
+            src: 'testPolicyTemplate1',
+            path: 'testPolicyTemplate1',
+          },
+        ],
+        title: 'testPolicyTemplate1',
+        type: 'testPolicyTemplate1',
+      },
+      {
+        description: 'testPolicyTemplate2',
+        name: 'testPolicyTemplate2',
+        icons: [
+          {
+            src: 'testPolicyTemplate2',
+            path: 'testPolicyTemplate2',
+          },
+        ],
+        title: 'testPolicyTemplate2',
+        type: 'testPolicyTemplate2',
+      },
+    ],
+  },
+  {
+    description: 'testWithASinglePolicyTemplate',
+    download: 'testWithASinglePolicyTemplate',
+    id: 'testWithASinglePolicyTemplate',
+    name: 'testWithASinglePolicyTemplate',
+    path: 'testWithASinglePolicyTemplate',
+    release: 'ga',
+    status: 'not_installed',
+    title: 'testWithASinglePolicyTemplate',
+    version: 'testWithASinglePolicyTemplate',
+    policy_templates: [
+      {
+        description: 'singlePolicyTemplate1',
+        name: 'singlePolicyTemplate1',
+        icons: [
+          {
+            src: 'singlePolicyTemplate1',
+            path: 'singlePolicyTemplate1',
+          },
+        ],
+        title: 'singlePolicyTemplate1',
+        type: 'singlePolicyTemplate1',
+      },
+    ],
   },
 ];
 
@@ -103,6 +165,46 @@ describe('Package search provider', () => {
               type: 'integration',
               url: {
                 path: 'undefined/detail/test1/overview',
+                prependBasePath: false,
+              },
+            },
+            {
+              id: 'testWithPolicyTemplate',
+              score: 80,
+              title: 'testWithPolicyTemplate',
+              type: 'integration',
+              url: {
+                path: 'undefined/detail/testWithPolicyTemplate/overview',
+                prependBasePath: false,
+              },
+            },
+            {
+              id: 'testPolicyTemplate1',
+              score: 80,
+              title: 'testPolicyTemplate1',
+              type: 'integration',
+              url: {
+                path: 'undefined/detail/testWithPolicyTemplate/overview?integration=testPolicyTemplate1',
+                prependBasePath: false,
+              },
+            },
+            {
+              id: 'testPolicyTemplate2',
+              score: 80,
+              title: 'testPolicyTemplate2',
+              type: 'integration',
+              url: {
+                path: 'undefined/detail/testWithPolicyTemplate/overview?integration=testPolicyTemplate2',
+                prependBasePath: false,
+              },
+            },
+            {
+              id: 'testWithASinglePolicyTemplate',
+              score: 80,
+              title: 'testWithASinglePolicyTemplate',
+              type: 'integration',
+              url: {
+                path: 'undefined/detail/testWithASinglePolicyTemplate/overview',
                 prependBasePath: false,
               },
             },
@@ -245,6 +347,46 @@ describe('Package search provider', () => {
                   prependBasePath: false,
                 },
               },
+              {
+                id: 'testWithPolicyTemplate',
+                score: 80,
+                title: 'testWithPolicyTemplate',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplate/overview',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testPolicyTemplate1',
+                score: 80,
+                title: 'testPolicyTemplate1',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplate/overview?integration=testPolicyTemplate1',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testPolicyTemplate2',
+                score: 80,
+                title: 'testPolicyTemplate2',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithPolicyTemplate/overview?integration=testPolicyTemplate2',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'testWithASinglePolicyTemplate',
+                score: 80,
+                title: 'testWithASinglePolicyTemplate',
+                type: 'integration',
+                url: {
+                  path: 'undefined/detail/testWithASinglePolicyTemplate/overview',
+                  prependBasePath: false,
+                },
+              },
             ],
           });
         });
@@ -299,7 +441,7 @@ describe('Package search provider', () => {
         ...testResponse[0],
         icons: [{ type: 'image/svg+xml', src: '/img_nginx.svg', path: '' }],
       };
-      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath)[0];
       expect(icon).toMatchInlineSnapshot(`"/api/fleet/epm/packages/test/test/img_nginx.svg"`);
     });
 
@@ -309,7 +451,7 @@ describe('Package search provider', () => {
         ...testResponse[0],
         icons: [{ type: 'image/svg+xml', src: '/img_nginx.svg', path: '' }],
       };
-      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath)[0];
       expect(icon).toMatchInlineSnapshot(`"/foo/api/fleet/epm/packages/test/test/img_nginx.svg"`);
     });
 
@@ -320,7 +462,7 @@ describe('Package search provider', () => {
         name: 'elasticsearch',
         icons: [{ type: 'image/jpg', src: '/img_nginx.svg', path: '' }],
       };
-      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath);
+      const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath)[0];
       expect(icon).toMatchInlineSnapshot(`"logoElasticsearch"`);
     });
   });

@@ -7,12 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
-import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -22,6 +23,18 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from './services';
 
+import type { v1 } from '../common';
+
+import { SavedObjectManagementTypeInfo } from './types';
+import {
+  getAllowedTypes,
+  getRelationships,
+  getSavedObjectLabel,
+  getDefaultTitle,
+  parseQuery,
+  getTagFindReferences,
+} from './lib';
+
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
@@ -30,6 +43,16 @@ export interface SavedObjectsManagementPluginSetup {
 export interface SavedObjectsManagementPluginStart {
   actions: SavedObjectsManagementActionServiceStart;
   columns: SavedObjectsManagementColumnServiceStart;
+  getAllowedTypes: () => Promise<SavedObjectManagementTypeInfo[]>;
+  getRelationships: (
+    type: string,
+    id: string,
+    savedObjectTypes: string[]
+  ) => Promise<v1.RelationshipsResponseHTTP>;
+  getSavedObjectLabel: typeof getSavedObjectLabel;
+  getDefaultTitle: typeof getDefaultTitle;
+  parseQuery: typeof parseQuery;
+  getTagFindReferences: typeof getTagFindReferences;
 }
 
 export interface SetupDependencies {
@@ -39,6 +62,7 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spaces?: SpacesPluginStart;
 }
@@ -74,7 +98,7 @@ export class SavedObjectsManagementPlugin
         icon: 'savedObjectsApp',
         path: '/app/management/kibana/objects',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
@@ -107,6 +131,13 @@ export class SavedObjectsManagementPlugin
     return {
       actions: actionStart,
       columns: columnStart,
+      getAllowedTypes: () => getAllowedTypes(_core.http),
+      getRelationships: (type: string, id: string, savedObjectTypes: string[]) =>
+        getRelationships(_core.http, type, id, savedObjectTypes),
+      getSavedObjectLabel,
+      getDefaultTitle,
+      parseQuery,
+      getTagFindReferences,
     };
   }
 }

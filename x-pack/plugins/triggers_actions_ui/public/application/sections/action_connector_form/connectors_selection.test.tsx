@@ -7,11 +7,11 @@
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
+import { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
 
 describe('connectors_selection', () => {
@@ -45,6 +45,7 @@ describe('connectors_selection', () => {
       group: 'group',
       class: 'test class',
     },
+    uuid: '123-456',
   };
 
   const actionTypeIndex: Record<string, ActionType> = {
@@ -55,6 +56,7 @@ describe('connectors_selection', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
     },
   };
 
@@ -66,6 +68,7 @@ describe('connectors_selection', () => {
       },
       id: 'testId',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'test pagerduty',
       secrets: {},
     },
@@ -75,9 +78,6 @@ describe('connectors_selection', () => {
     id: '.pagerduty',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);

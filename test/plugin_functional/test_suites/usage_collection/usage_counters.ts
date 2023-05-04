@@ -7,18 +7,18 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
 import {
   UsageCountersSavedObject,
   serializeCounterKey,
-} from '../../../../src/plugins/usage_collection/server/usage_counters';
+} from '@kbn/usage-collection-plugin/server/usage_counters';
+import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
   async function getSavedObjectCounters() {
     // wait until ES indexes the counter SavedObject;
-    await new Promise((res) => setTimeout(res, 7 * 1000));
+    await new Promise((res) => setTimeout(res, 10 * 1000));
 
     return await supertest
       .get('/api/saved_objects/_find?type=usage-counters')

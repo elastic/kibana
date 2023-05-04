@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { coreMock, notificationServiceMock, overlayServiceMock } from 'src/core/public/mocks';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { coreMock, notificationServiceMock, overlayServiceMock } from '@kbn/core/public/mocks';
 import { observabilityPublicPluginsStartMock } from '../observability_public_plugins_start.mock';
 
 export const kibanaStartMock = {
@@ -17,6 +18,7 @@ export const kibanaStartMock = {
         ...coreMock.createStart(),
         ...observabilityPublicPluginsStartMock.createStart(),
         storage: coreMock.createStorage(),
+        cases: { ...casesPluginMock.createStartContract() },
       },
     };
   },

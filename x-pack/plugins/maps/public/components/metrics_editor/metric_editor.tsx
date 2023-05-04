@@ -11,15 +11,17 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
 import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { ValidatedNumberInput } from '../validated_number_input';
+import { getMaskI18nLabel } from '../../classes/layers/vector_layer/mask';
+import { MaskExpression } from './mask_expression';
 
-function filterFieldsForAgg(fields: IndexPatternField[], aggType: AGG_TYPE) {
+function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   if (!fields) {
     return [];
   }
@@ -34,13 +36,19 @@ function filterFieldsForAgg(fields: IndexPatternField[], aggType: AGG_TYPE) {
   }
 
   return fields.filter((field) => {
-    return field.aggregatable && metricAggFieldTypes.includes(field.type);
+    return (
+      field.aggregatable &&
+      metricAggFieldTypes.includes(field.type) &&
+      (field.timeSeriesMetric !== 'counter' || ['min', 'max'].includes(aggType))
+    );
   });
 }
 
 interface Props {
+  bucketsName?: string;
+  isJoin: boolean;
   metric: AggDescriptor;
-  fields: IndexPatternField[];
+  fields: DataViewField[];
   onChange: (metric: AggDescriptor) => void;
   onRemove: () => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
@@ -48,7 +56,9 @@ interface Props {
 }
 
 export function MetricEditor({
+  bucketsName,
   fields,
+  isJoin,
   metricsFilter,
   metric,
   onChange,
@@ -60,6 +70,8 @@ export function MetricEditor({
       return;
     }
 
+    // Intentionally not adding mask.
+    // Changing aggregation likely changes value range so keeping old mask does not seem relevent
     const descriptor = {
       type: metricAggregationType,
       label: metric.label,
@@ -89,6 +101,8 @@ export function MetricEditor({
     if (!fieldName || metric.type === AGG_TYPE.COUNT) {
       return;
     }
+    // Intentionally not adding mask.
+    // Changing field likely changes value range so keeping old mask does not seem relevent
     onChange({
       label: metric.label,
       type: metric.type,
@@ -219,6 +233,11 @@ export function MetricEditor({
       {fieldSelect}
       {percentileSelect}
       {labelInput}
+
+      <EuiFormRow label={getMaskI18nLabel({ bucketsName, isJoin })} display="columnCompressed">
+        <MaskExpression fields={fields} isJoin={isJoin} metric={metric} onChange={onChange} />
+      </EuiFormRow>
+
       {removeButton}
     </Fragment>
   );

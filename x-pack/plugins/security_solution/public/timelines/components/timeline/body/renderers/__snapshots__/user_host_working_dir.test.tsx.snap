@@ -10,7 +10,9 @@ exports[`UserHostWorkingDir rendering it renders against shallow snapshot 1`] = 
       contextId="context-123"
       eventId="event-123"
       field="user.name"
+      fieldType="keyword"
       iconType="user"
+      isAggregatable={true}
       value="[userName-123]"
     />
   </TokensFlexItem>
@@ -29,6 +31,8 @@ exports[`UserHostWorkingDir rendering it renders against shallow snapshot 1`] = 
       contextId="context-123"
       eventId="event-123"
       field="user.domain"
+      fieldType="keyword"
+      isAggregatable={true}
       value="[userDomain-123]"
     />
   </TokensFlexItem>

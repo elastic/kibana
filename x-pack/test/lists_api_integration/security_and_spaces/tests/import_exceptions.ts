@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import {
   toNdJsonString,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
-} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
+} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllExceptions } from '../../utils';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import sinon from 'sinon';
 import { shouldBeOneOf, mustBeAllOf } from './query_clauses';
 
 import {
@@ -13,12 +13,23 @@ import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
+  EnabledTask,
 } from './mark_available_tasks_as_claimed';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 
+let clock: sinon.SinonFakeTimers;
+
 describe('mark_available_tasks_as_claimed', () => {
+  beforeEach(() => {
+    clock = sinon.useFakeTimers();
+  });
+
+  afterEach(() => {
+    clock.restore();
+  });
+
   test('generates query matching tasks to be claimed when polling for tasks', () => {
     const definitions = new TaskTypeDictionary(mockLogger());
     definitions.registerTaskDefinitions({
@@ -32,7 +43,6 @@ describe('mark_available_tasks_as_claimed', () => {
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
       },
     });
-    const claimTasksById = undefined;
     const defaultMaxAttempts = 1;
     const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
     const claimOwnershipUntil = '2019-02-12T21:01:22.479Z';
@@ -43,24 +53,37 @@ describe('mark_available_tasks_as_claimed', () => {
 
     expect({
       query: mustBeAllOf(
+        // Task must be enabled
+        EnabledTask,
         // Either a task with idle status and runAt <= now or
         // status running or claiming with a retryAt <= now.
         shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
       ),
-      script: updateFieldsAndMarkAsFailed(
+      script: updateFieldsAndMarkAsFailed({
         fieldUpdates,
-        claimTasksById || [],
-        definitions.getAllTypes(),
-        [],
-        Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
+        claimableTaskTypes: definitions.getAllTypes(),
+        skippedTaskTypes: [],
+        unusedTaskTypes: [],
+        taskMaxAttempts: Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
           return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
-        }, {})
-      ),
+        }, {}),
+      }),
       sort: SortByRunAtAndRetryAt,
     }).toEqual({
       query: {
         bool: {
           must: [
+            {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.enabled': true,
+                    },
+                  },
+                ],
+              },
+            },
             // Either a task with idle status and runAt <= now or
             // status running or claiming with a retryAt <= now.
             {
@@ -115,31 +138,29 @@ if (doc['task.runAt'].size()!=0) {
       script: {
         source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
-      if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-          .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-          .join(' ')}
-      } else {
-        ctx._source.task.status = "failed";
-      }
-    } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
-      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-        .join(' ')}
-    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+      if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+    ctx._source.task.scheduledAt=ctx._source.task.retryAt;
+  } else {
+    ctx._source.task.scheduledAt=ctx._source.task.runAt;
+  }
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
+    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
     }`,
         lang: 'painless',
         params: {
+          now: 0,
           fieldUpdates: {
             ownerId: taskManagerId,
             retryAt: claimOwnershipUntil,
           },
-          claimTasksById: [],
           claimableTaskTypes: ['sampleTask', 'otherTask'],
           skippedTaskTypes: [],
+          unusedTaskTypes: [],
           taskMaxAttempts: {
             sampleTask: 5,
             otherTask: 1,
@@ -150,60 +171,6 @@ if (doc['task.runAt'].size()!=0) {
   });
 
   describe(`script`, () => {
-    test('it supports claiming specific tasks by id', async () => {
-      const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
-      const claimOwnershipUntil = '2019-02-12T21:01:22.479Z';
-      const fieldUpdates = {
-        ownerId: taskManagerId,
-        retryAt: claimOwnershipUntil,
-      };
-
-      const claimTasksById = [
-        '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-        'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-      ];
-
-      expect(
-        updateFieldsAndMarkAsFailed(fieldUpdates, claimTasksById, ['foo', 'bar'], [], {
-          foo: 5,
-          bar: 2,
-        })
-      ).toMatchObject({
-        source: `
-    if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
-      if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-          .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-          .join(' ')}
-      } else {
-        ctx._source.task.status = "failed";
-      }
-    } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
-      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-        .join(' ')}
-    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
-      ctx._source.task.status = "unrecognized";
-    } else {
-      ctx.op = "noop";
-    }`,
-        lang: 'painless',
-        params: {
-          fieldUpdates,
-          claimTasksById: [
-            '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-            'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-          ],
-          claimableTaskTypes: ['foo', 'bar'],
-          skippedTaskTypes: [],
-          taskMaxAttempts: {
-            foo: 5,
-            bar: 2,
-          },
-        },
-      });
-    });
-
     test('it marks the update as a noop if the type is skipped', async () => {
       const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
       const claimOwnershipUntil = '2019-02-12T21:01:22.479Z';
@@ -213,9 +180,15 @@ if (doc['task.runAt'].size()!=0) {
       };
 
       expect(
-        updateFieldsAndMarkAsFailed(fieldUpdates, [], ['foo', 'bar'], [], {
-          foo: 5,
-          bar: 2,
+        updateFieldsAndMarkAsFailed({
+          fieldUpdates,
+          claimableTaskTypes: ['foo', 'bar'],
+          skippedTaskTypes: [],
+          unusedTaskTypes: [],
+          taskMaxAttempts: {
+            foo: 5,
+            bar: 2,
+          },
         }).source
       ).toMatch(/ctx.op = "noop"/);
     });

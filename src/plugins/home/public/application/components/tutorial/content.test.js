@@ -17,5 +17,5 @@ test('should render content with markdown', () => {
       text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

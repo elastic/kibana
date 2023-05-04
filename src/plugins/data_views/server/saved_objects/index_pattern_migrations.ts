@@ -7,9 +7,12 @@
  */
 
 import { flow, omit } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({
+const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<
+  { type?: string; typeMeta?: string },
+  unknown
+> = (doc) => ({
   ...doc,
   attributes: {
     ...doc.attributes,
@@ -18,11 +21,14 @@ const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any>
   },
 });
 
-const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> = (doc) => {
+const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<
+  { fields?: string },
+  unknown
+> = (doc) => {
   if (!doc.attributes.fields) return doc;
 
   const fieldsString = doc.attributes.fields;
-  const fields = JSON.parse(fieldsString) as any[];
+  const fields = JSON.parse(fieldsString) as Array<{ subType?: string; parent?: string }>;
   const migratedFields = fields.map((field) => {
     if (field.subType === 'multi') {
       return {
@@ -43,7 +49,7 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
   };
 };
 
-const addAllowNoIndex: SavedObjectMigrationFn<any, any> = (doc) => ({
+const addAllowNoIndex: SavedObjectMigrationFn<{}, unknown> = (doc) => ({
   ...doc,
   attributes: {
     ...doc.attributes,

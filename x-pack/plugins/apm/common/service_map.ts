@@ -23,7 +23,7 @@ import { ServiceAnomalyStats } from './anomaly_detection';
 //   SPAN_DESTINATION_SERVICE_RESOURCE,
 //   SPAN_SUBTYPE,
 //   SPAN_TYPE,
-// } from './elasticsearch_fieldnames';
+// } from './es_fields/apm';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   'service.name': string;

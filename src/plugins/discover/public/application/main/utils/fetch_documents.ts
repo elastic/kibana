@@ -7,7 +7,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/common';
+import { lastValueFrom } from 'rxjs';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import type { RecordsFetchResponse, EsHitRecord } from '../../../types';
+import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 
@@ -17,26 +20,23 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services, savedSearch }: FetchDeps
-) => {
+  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
+): Promise<RecordsFetchResponse> => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
   if (searchSource.getField('index')?.type === 'rollup') {
-    // We treat that index pattern as "normal" even if it was a rollup index pattern,
+    // We treat that data view as "normal" even if it was a rollup data view,
     // since the rollup endpoint does not support querying individual documents, but we
-    // can get them from the regular _search API that will be used if the index pattern
-    // not a rollup index pattern.
+    // can get them from the regular _search API that will be used if the data view
+    // not a rollup data view.
     searchSource.setOverwriteDataViewType(undefined);
   }
+  const dataView = searchSource.getField('index')!;
 
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch documents',
-    url: window.location.pathname,
-    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
@@ -56,8 +56,10 @@ export const fetchDocuments = (
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
-      map((res) => res.rawResponse.hits.hits)
+      map((res) => {
+        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
+      })
     );
 
-  return fetch$.toPromise();
+  return lastValueFrom(fetch$).then((records) => ({ records }));
 };

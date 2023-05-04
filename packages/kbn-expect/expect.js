@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable @kbn/eslint/require-license-header,no-var,prettier/prettier,eqeqeq,block-scoped-var,no-redeclare,one-var,no-loop-func,dot-notation,no-nested-ternary,camelcase,no-unused-vars,no-undef */
 
 var exports = module.exports;
 

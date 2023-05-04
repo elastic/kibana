@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "fields": "[]",
+    "title": "recipes"
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "5c620ea0-dc4f-11ec-972a-bf98ce1eebd7",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-05-25T17:23:15.216Z",
+  "version": "WzE4NywxXQ=="
+}

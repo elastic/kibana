@@ -7,13 +7,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
-import { Query } from '../..';
-import { Filter } from '../../es_query';
-import { IndexPattern } from '../..';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { AggConfigSerialized, IAggConfigs, ISearchOptions } from '../../../public';
 import type { SearchSource } from './search_source';
-import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**
  * search source interface
@@ -38,6 +39,9 @@ export interface ISearchStartSearchSource
   createEmpty: () => ISearchSource;
 }
 
+/**
+ * @deprecated use {@link estypes.SortResults} instead.
+ */
 export type EsQuerySearchAfter = [string | number, string | number];
 
 export enum SortDirection {
@@ -77,7 +81,7 @@ export interface SearchSourceFields {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
@@ -110,10 +114,14 @@ export interface SearchSourceFields {
   /**
    * {@link IndexPatternService}
    */
-  index?: IndexPattern;
-  searchAfter?: EsQuerySearchAfter;
+  index?: DataView;
   timeout?: string;
   terminate_after?: number;
+  searchAfter?: estypes.SortResults;
+  /**
+   * Allow querying to use a point-in-time ID for paging results
+   */
+  pit?: estypes.SearchPointInTimeReference;
 
   parent?: SearchSourceFields;
 }
@@ -124,7 +132,7 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
@@ -158,8 +166,8 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link IndexPatternService}
    */
-  index?: string;
-  searchAfter?: EsQuerySearchAfter;
+  index?: string | DataViewSpec;
+  searchAfter?: estypes.SortResults;
   timeout?: string;
   terminate_after?: number;
 
@@ -215,4 +223,33 @@ export interface ShardFailure {
     type: string;
   };
   shard: number;
+}
+
+export function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields {
+  return (
+    typeof maybeSerializedSearchSource === 'object' &&
+    maybeSerializedSearchSource !== null &&
+    !Array.isArray(maybeSerializedSearchSource)
+  );
+}
+
+export interface IInspectorInfo {
+  adapter?: RequestAdapter;
+  title: string;
+  id?: string;
+  description?: string;
+}
+
+export interface SearchSourceSearchOptions extends ISearchOptions {
+  /**
+   * Inspector integration options
+   */
+  inspector?: IInspectorInfo;
+
+  /**
+   * Disable default warnings of shard failures
+   */
+  disableShardFailureWarning?: boolean;
 }

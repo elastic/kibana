@@ -8,12 +8,14 @@
 import { resolve } from 'path';
 import Url from 'url';
 
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
+import { getLatestAvailableAgentVersion } from '../defend_workflows_cypress/utils';
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
@@ -21,42 +23,32 @@ async function withFleetAgent(
 ) {
   const log = getService('log');
   const config = getService('config');
+  const kbnClient = getService('kibanaServer');
 
-  const esHost = Url.format(config.get('servers.elasticsearch'));
-  const esConfig = {
-    user: config.get('servers.elasticsearch.username'),
-    password: config.get('servers.elasticsearch.password'),
-    esHost,
-    port: config.get('servers.elasticsearch.port'),
-  };
-  const fleetManager = new FleetManager(esConfig, log);
+  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
+  const kibanaUrl = Url.format(config.get('servers.kibana'));
+  const username = config.get('servers.elasticsearch.username');
+  const password = config.get('servers.elasticsearch.password');
 
-  const agentManager = new AgentManager(
-    {
-      ...esConfig,
-      kibanaUrl: Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: config.get('servers.kibana.port'),
-      }),
-    },
-    log
-  );
-
-  // Since the managers will create uncaughtException event handlers we need to exit manually
-  process.on('uncaughtException', (err) => {
-    // eslint-disable-next-line no-console
-    console.error('Encountered error; exiting after cleanup.', err);
-    process.exit(1);
+  await startRuntimeServices({
+    log,
+    elasticUrl,
+    kibanaUrl,
+    username,
+    password,
+    version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  await agentManager.setup();
+  const fleetManager = new FleetManager(kbnClient, log);
+  const agentManager = new AgentManager(kbnClient, log);
+
   await fleetManager.setup();
+  await agentManager.setup();
   try {
     await runner({});
   } finally {
-    fleetManager.cleanup();
     agentManager.cleanup();
+    fleetManager.cleanup();
   }
 }
 
@@ -80,7 +72,11 @@ function startOsqueryCypress(context: FtrProviderContext, cypressCommand: string
         env: {
           FORCE_COLOR: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
+          CYPRESS_baseUrl: Url.format({
+            protocol: config.get('servers.kibana.protocol'),
+            hostname: config.get('servers.kibana.hostname'),
+            port: config.get('servers.kibana.port'),
+          }),
           // eslint-disable-next-line @typescript-eslint/naming-convention
           CYPRESS_protocol: config.get('servers.kibana.protocol'),
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -88,8 +84,8 @@ function startOsqueryCypress(context: FtrProviderContext, cypressCommand: string
           // eslint-disable-next-line @typescript-eslint/naming-convention
           CYPRESS_configport: config.get('servers.kibana.port'),
           CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-          CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-          CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+          CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+          CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
           CYPRESS_KIBANA_URL: Url.format({
             protocol: config.get('servers.kibana.protocol'),
             hostname: config.get('servers.kibana.hostname'),

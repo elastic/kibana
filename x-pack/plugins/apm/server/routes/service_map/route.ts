@@ -7,17 +7,27 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
-import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_info';
-import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
+import {
+  getServiceMapDependencyNodeInfo,
+  ServiceMapServiceDependencyInfoResponse,
+} from './get_service_map_dependency_node_info';
+import {
+  getServiceMapServiceNodeInfo,
+  ServiceMapServiceNodeInfoResponse,
+} from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
-import { environmentRt, offsetRt, rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
+import { getServiceGroup } from '../service_groups/get_service_group';
+import { offsetRt } from '../../../common/comparison_rt';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { TransformServiceMapResponse } from './transform_service_map_responses';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -25,46 +35,78 @@ const serviceMapRoute = createApmServerRoute({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
+        serviceGroup: t.string,
+        kuery: kueryRt.props.kuery,
       }),
       environmentRt,
       rangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<TransformServiceMapResponse> => {
     const { config, context, params, logger } = resources;
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'serviceMaps',
     });
 
-    const setup = await setupRequest(resources);
     const {
-      query: { serviceName, environment, start, end },
+      query: {
+        serviceName,
+        serviceGroup: serviceGroupId,
+        environment,
+        start,
+        end,
+        kuery,
+      },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        serviceGroupId
+          ? getServiceGroup({
+              savedObjectsClient,
+              serviceGroupId,
+            })
+          : Promise.resolve(null),
+        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+      ]);
+
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
       start,
       end,
-      kuery: '',
+      kuery,
     });
     return getServiceMap({
-      setup,
+      mlClient,
+      config,
+      apmEventClient,
       serviceName,
       environment,
       searchAggregatedTransactions,
       logger,
       start,
       end,
+      maxNumberOfServices,
+      serviceGroupKuery: serviceGroup?.kuery,
+      kuery,
     });
   },
 });
@@ -78,90 +120,85 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     query: t.intersection([environmentRt, rangeRt, offsetRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<ServiceMapServiceNodeInfoResponse> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       path: { serviceName },
       query: { environment, start, end, offset },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
       start,
       end,
-      kuery: '',
     });
 
-    const commonProps = {
+    return getServiceMapServiceNodeInfo({
       environment,
-      setup,
+      apmEventClient,
       serviceName,
       searchAggregatedTransactions,
       start,
       end,
-    };
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceMapServiceNodeInfo(commonProps),
-      offset
-        ? getServiceMapServiceNodeInfo({ ...commonProps, offset })
-        : undefined,
-    ]);
-
-    return { currentPeriod, previousPeriod };
+      offset,
+    });
   },
 });
 
-const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/backend',
+const serviceMapDependencyNodeRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({ dependencyName: t.string }),
       environmentRt,
       rangeRt,
       offsetRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<ServiceMapServiceDependencyInfoResponse> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { backendName, environment, start, end, offset },
+      query: { dependencyName, environment, start, end, offset },
     } = params;
 
-    const commonProps = { environment, setup, backendName, start, end };
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceMapBackendNodeInfo(commonProps),
-      offset
-        ? getServiceMapBackendNodeInfo({ ...commonProps, offset })
-        : undefined,
-    ]);
-
-    return { currentPeriod, previousPeriod };
+    return getServiceMapDependencyNodeInfo({
+      apmEventClient,
+      dependencyName,
+      start,
+      end,
+      environment,
+      offset,
+    });
   },
 });
 
-export const serviceMapRouteRepository = createApmServerRouteRepository()
-  .add(serviceMapRoute)
-  .add(serviceMapServiceNodeRoute)
-  .add(serviceMapBackendNodeRoute);
+export const serviceMapRouteRepository = {
+  ...serviceMapRoute,
+  ...serviceMapServiceNodeRoute,
+  ...serviceMapDependencyNodeRoute,
+};

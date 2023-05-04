@@ -6,60 +6,89 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { Overview } from './';
-import { TestProviders } from '../../../../common/mock';
+import { act, render } from '@testing-library/react';
+import { Overview } from '.';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../utils', () => ({
   useThrottledResizeObserver: () => ({ width: 400 }), // force row-chunking
 }));
 
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+  })
+);
+
 describe('Event Details Overview Cards', () => {
-  it('renders all cards', () => {
-    const { getByText } = render(
-      <TestProviders>
-        <Overview {...props} />
-      </TestProviders>
-    );
+  it('renders all cards', async () => {
+    await act(async () => {
+      const { getByText } = render(
+        <TestProviders>
+          <Overview {...props} />
+        </TestProviders>
+      );
 
-    getByText('Status');
-    getByText('Severity');
-    getByText('Risk Score');
-    getByText('Rule');
+      getByText('Status');
+      getByText('Severity');
+      getByText('Risk Score');
+      getByText('Rule');
+    });
   });
 
-  it('renders all cards it has data for', () => {
-    const { getByText, queryByText } = render(
-      <TestProviders>
-        <Overview {...propsWithoutSeverity} />
-      </TestProviders>
-    );
+  it('renders only readOnly cards', async () => {
+    await act(async () => {
+      const { getByText, queryByText } = render(
+        <TestProviders>
+          <Overview {...propsWithReadOnly} />
+        </TestProviders>
+      );
 
-    getByText('Status');
-    getByText('Risk Score');
-    getByText('Rule');
+      getByText('Severity');
+      getByText('Risk Score');
 
-    expect(queryByText('Severity')).not.toBeInTheDocument();
+      expect(queryByText('Status')).not.toBeInTheDocument();
+      expect(queryByText('Rule')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders rows and spacers correctly', () => {
-    const { asFragment } = render(
-      <TestProviders>
-        <Overview {...propsWithoutSeverity} />
-      </TestProviders>
-    );
+  it('renders all cards it has data for', async () => {
+    await act(async () => {
+      const { getByText, queryByText } = render(
+        <TestProviders>
+          <Overview {...propsWithoutSeverity} />
+        </TestProviders>
+      );
 
-    expect(asFragment()).toMatchSnapshot();
+      getByText('Status');
+      getByText('Risk Score');
+      getByText('Rule');
+
+      expect(queryByText('Severity')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders rows and spacers correctly', async () => {
+    await act(async () => {
+      const { asFragment } = render(
+        <TestProviders>
+          <Overview {...propsWithoutSeverity} />
+        </TestProviders>
+      );
+
+      expect(asFragment()).toMatchSnapshot();
+    });
   });
 });
 
 const props = {
   handleOnEventClosed: jest.fn(),
-  contextId: 'detections-page',
+  contextId: 'alerts-page',
   eventId: 'testId',
   indexName: 'testIndex',
-  timelineId: 'page',
+  scopeId: 'page',
   data: [
     {
       category: 'kibana',
@@ -193,4 +222,9 @@ const propsWithoutSeverity = {
   ...props,
   browserFields: { kibana: { fields: fieldsWithoutSeverity } },
   data: dataWithoutSeverity,
+};
+
+const propsWithReadOnly = {
+  ...props,
+  isReadOnly: true,
 };

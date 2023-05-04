@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, mergeWith } from 'lodash';
+import { mapValues, trimEnd, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
-import {
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-} from '../../../../../../src/core/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
-import { CommentType, AssociationType } from '../../../common/api';
+} from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { CommentType } from '../../../common/api';
+import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
   isLensMarkdownNode,
-  LensMarkdownNode,
-  MarkdownNode,
   parseCommentString,
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
-import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
 import { logError } from './utils';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
+import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface UnsanitizedComment {
   comment: string;
@@ -40,24 +43,38 @@ interface SanitizedComment {
   type: CommentType;
 }
 
-interface SanitizedCommentForSubCases {
+enum AssociationType {
+  case = 'case',
+}
+
+interface SanitizedCommentWithAssociation {
   associationType: AssociationType;
   rule?: { id: string | null; name: string | null };
 }
 
 export interface CreateCommentsMigrationsDeps {
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
+  const lensMigrations = migrationDeps.lensEmbeddableFactory().migrations;
+  const lensMigrationObject =
+    typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+
   const embeddableMigrations = mapValues<
     MigrateFunctionsObject,
     SavedObjectMigrationFn<{ comment?: string }>
+  >(lensMigrationObject, migrateByValueLensVisualizations) as MigrateFunctionsObject;
+
+  const persistableStateAttachmentMigrations = mapValues<
+    MigrateFunctionsObject,
+    SavedObjectMigrationFn<AttachmentPersistedAttributes>
   >(
-    migrationDeps.lensEmbeddableFactory().migrations,
-    migrateByValueLensVisualizations
+    getAllPersistableAttachmentMigrations(migrationDeps.persistableStateAttachmentTypeRegistry),
+    migratePersistableStateAttachments
   ) as MigrateFunctionsObject;
 
   const commentsMigrations = {
@@ -75,8 +92,8 @@ export const createCommentsMigrations = (
     },
     '7.12.0': (
       doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-    ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
-      let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+    ): SavedObjectSanitizedDoc<unknown> => {
+      let attributes: SanitizedCommentWithAssociation & UnsanitizedComment = {
         ...doc.attributes,
         associationType: AssociationType.case,
       };
@@ -98,16 +115,52 @@ export const createCommentsMigrations = (
     ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
       return addOwnerToSO(doc);
     },
+    /*
+     * This is to fix the issue here: https://github.com/elastic/kibana/issues/123089
+     * Instead of migrating the rule information in the references array which was risky for 8.0
+     * we decided to remove the information since the UI will do the look up for the rule information if
+     * the backend returns it as null.
+     *
+     * The downside is it incurs extra query overhead.
+     **/
+    '8.0.0': removeRuleInformation,
+    '8.1.0': removeAssociationType,
   };
 
-  return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
+  return mergeSavedObjectMigrationMaps(
+    persistableStateAttachmentMigrations,
+    mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations)
+  );
 };
 
-export const migrateByValueLensVisualizations =
+export const migratePersistableStateAttachments =
   (
-    migrate: MigrateFunction,
-    version: string
-  ): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
+    migrate: MigrateFunction
+  ): SavedObjectMigrationFn<AttachmentPersistedAttributes, AttachmentPersistedAttributes> =>
+  (doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>) => {
+    if (doc.attributes.type !== CommentType.persistableState) {
+      return doc;
+    }
+
+    const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = doc.attributes;
+
+    const migratedState = migrate({
+      persistableStateAttachmentState,
+      persistableStateAttachmentTypeId,
+    }) as PersistableStateAttachmentState;
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
+      },
+      references: doc.references ?? [],
+    };
+  };
+
+export const migrateByValueLensVisualizations =
+  (migrate: MigrateFunction): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
   (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
     if (doc.attributes.comment == null) {
       return doc;
@@ -156,22 +209,38 @@ export const stringifyCommentWithoutTrailingNewline = (
   return trimEnd(stringifiedComment, '\n');
 };
 
-/**
- * merge function maps adds the context param from the original implementation at:
- * src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts
- *  */
-export const mergeMigrationFunctionMaps = (
-  // using the saved object framework types here because they include the context, this avoids type errors in our tests
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
-) => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
-    }
-    return (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(doc, context), context);
-  };
+export const removeRuleInformation = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<unknown> => {
+  if (doc.attributes.type === CommentType.alert || doc.attributes.type === GENERATED_ALERT) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        rule: {
+          id: null,
+          name: null,
+        },
+      },
+      references: doc.references ?? [],
+    };
+  }
 
-  return mergeWith({ ...obj1 }, obj2, customizer);
+  return {
+    ...doc,
+    references: doc.references ?? [],
+  };
+};
+
+export const removeAssociationType = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<Record<string, unknown>> => {
+  const docCopy = cloneDeep(doc);
+  unset(docCopy, 'attributes.associationType');
+
+  return {
+    ...docCopy,
+    references:
+      docCopy.references?.filter((reference) => reference.type !== SUB_CASE_SAVED_OBJECT) ?? [],
+  };
 };

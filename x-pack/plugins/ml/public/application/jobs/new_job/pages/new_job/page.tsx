@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment } from 'react';
+import React, { FC, useEffect, Fragment, useMemo } from 'react';
 import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
+import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -25,6 +22,7 @@ import {
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -32,16 +30,17 @@ import {
   DEFAULT_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { MlPageHeader } from '../../../../components/page_header';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -53,15 +52,30 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
+  const timefilter = useTimefilter();
   const mlContext = useMlContext();
-  const jobCreator = jobCreatorFactory(jobType)(
-    mlContext.currentDataView,
-    mlContext.currentSavedSearch,
-    mlContext.combinedQuery
+  const {
+    services: { maps: mapsPlugin },
+  } = useMlKibana();
+
+  const chartInterval = useTimeBuckets();
+
+  const jobCreator = useMemo(
+    () =>
+      jobCreatorFactory(jobType)(
+        mlContext.currentDataView,
+        mlContext.deprecatedSavedSearchObj,
+        mlContext.combinedQuery
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [jobType]
   );
+
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
+
   const { displayErrorToast } = useToastNotificationService();
 
-  const { from, to } = getTimeFilterRange();
+  const { from, to } = getTimeFilterRange(timefilter);
   jobCreator.setTimeRange(from, to);
 
   let firstWizardStep =
@@ -69,7 +83,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
       : WIZARD_STEPS.TIME_RANGE;
 
-  let autoSetTimeRange = false;
+  let autoSetTimeRange = mlJobService.tempJobCloningObjects.autoSetTimeRange;
+  mlJobService.tempJobCloningObjects.autoSetTimeRange = false;
 
   if (
     mlJobService.tempJobCloningObjects.job !== undefined &&
@@ -108,7 +123,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     } else {
       // if not start and end times are set and this is an advanced job,
       // auto set the time range based on the index
-      autoSetTimeRange = isAdvancedJobCreator(jobCreator);
+      autoSetTimeRange = autoSetTimeRange || isAdvancedJobCreator(jobCreator);
     }
 
     if (mlJobService.tempJobCloningObjects.calendars) {
@@ -133,7 +148,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelChangeAnnotations = true;
     }
 
-    if (mlContext.currentSavedSearch !== null) {
+    if (mlContext.selectedSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
@@ -150,7 +165,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
+  if (autoSetTimeRange) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
     jobCreator.autoSetTimeRange().catch((error) => {
@@ -176,19 +191,30 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       const rare = newJobCapsService.getAggById('rare');
       const freqRare = newJobCapsService.getAggById('freq_rare');
       jobCreator.setDefaultDetectorProperties(rare, freqRare);
+    } else if (isGeoJobCreator(jobCreator)) {
+      const geo = newJobCapsService.getAggById('lat_long');
+      jobCreator.setDefaultDetectorProperties(geo);
     }
   }
 
-  const chartInterval = getTimeBucketsFromCache();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
-  const chartLoader = new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery);
+  const chartLoader = useMemo(
+    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
+    [mlContext.currentDataView, jobCreator.query]
+  );
 
-  const jobValidator = new JobValidator(jobCreator);
+  const mapLoader = useMemo(
+    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
+    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
+  );
 
-  const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
+  const resultsLoader = useMemo(
+    () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
+    [jobCreator, chartInterval, chartLoader]
+  );
 
   useEffect(() => {
     return () => {
@@ -200,43 +226,33 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.ml.newJob.page.createJob"
-                      defaultMessage="Create job"
-                    />
-                    : {jobCreatorTitle}
-                  </h1>
-                </EuiTitle>
+      <MlPageHeader>
+        <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+        {jobCreatorTitle}
+      </MlPageHeader>
 
-                <FormattedMessage
-                  id="xpack.ml.newJob.page.createJob.dataViewName"
-                  defaultMessage="Using data view {dataViewName}"
-                  values={{ dataViewName: jobCreator.indexPatternTitle }}
-                />
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
+      <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.dataViewName"
+              defaultMessage="Using data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
 
-            <EuiPageContentBody>
-              <Wizard
-                jobCreator={jobCreator}
-                chartLoader={chartLoader}
-                resultsLoader={resultsLoader}
-                chartInterval={chartInterval}
-                jobValidator={jobValidator}
-                existingJobsAndGroups={existingJobsAndGroups}
-                firstWizardStep={firstWizardStep}
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+        <Wizard
+          jobCreator={jobCreator}
+          chartLoader={chartLoader}
+          mapLoader={mapLoader}
+          resultsLoader={resultsLoader}
+          chartInterval={chartInterval}
+          jobValidator={jobValidator}
+          existingJobsAndGroups={existingJobsAndGroups}
+          firstWizardStep={firstWizardStep}
+        />
+      </div>
     </Fragment>
   );
 };

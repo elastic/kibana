@@ -13,6 +13,7 @@ export class RollupPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly retry = this.ctx.getService('retry');
 
   async createNewRollUpJob(
     jobName: string,
@@ -54,6 +55,13 @@ export class RollupPageObject extends FtrService {
     // Step 6: saveJob and verify the name in the list
     await this.verifyStepIsActive(stepNum);
     await this.saveJob(startImmediately);
+  }
+
+  async clickRollupJobsTab() {
+    await this.testSubjects.click('rollup_jobs');
+    await this.retry.waitFor('create policy button to be visible', async () => {
+      return await this.testSubjects.isDisplayed('createRollupJobButton');
+    });
   }
 
   async verifyStepIsActive(stepNumber = 0) {
@@ -106,6 +114,16 @@ export class RollupPageObject extends FtrService {
     }
     await this.testSubjects.click('rollupJobSaveButton');
     await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('detail flyout', async () => {
+      return await this.testSubjects.isDisplayed('rollupJobDetailsFlyoutTitle');
+    });
+  }
+
+  async closeFlyout() {
+    await this.testSubjects.click('euiFlyoutCloseButton');
+    await this.retry.waitFor('rollup list table', async () => {
+      return await this.testSubjects.isDisplayed('rollupJobsListTable');
+    });
   }
 
   async getJobList() {

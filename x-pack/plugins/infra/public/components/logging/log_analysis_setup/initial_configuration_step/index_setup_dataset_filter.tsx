@@ -65,7 +65,6 @@ export const IndexSetupDatasetFilter: React.FC<{
       isSelected={isVisible}
       onClick={show}
       iconType="arrowDown"
-      size="s"
     >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
@@ -109,5 +108,5 @@ const DatasetWarningMarker: React.FC<{ warnings: QualityWarning[] }> = ({ warnin
       : []
   );
 
-  return <EuiIconTip content={warningDescriptions} type="alert" color="warning" />;
+  return <EuiIconTip content={warningDescriptions} type="warning" color="warning" />;
 };

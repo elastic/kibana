@@ -51,7 +51,12 @@ function groupFieldsByOrigin(fields: StyleField[]) {
   function fieldsListToOptions(fieldsList: StyleField[]) {
     return fieldsList
       .map((field) => {
-        return { value: field, label: field.label };
+        return {
+          value: field,
+          label: field.label,
+          disabled: field.isUnsupported,
+          title: field.unsupportedMsg,
+        };
       })
       .sort((a, b) => {
         return a.label.toLowerCase().localeCompare(b.label.toLowerCase());

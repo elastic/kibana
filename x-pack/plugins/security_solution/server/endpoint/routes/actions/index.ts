@@ -5,21 +5,34 @@
  * 2.0.
  */
 
-import { SecuritySolutionPluginRouter } from '../../../types';
-import { EndpointAppContext } from '../../types';
-import { registerHostIsolationRoutes } from './isolation';
+import { registerActionFileInfoRoute } from './file_info_handler';
+import { registerActionFileDownloadRoutes } from './file_download_handler';
+import { registerActionDetailsRoutes } from './details';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { EndpointAppContext } from '../../types';
 import { registerActionStatusRoutes } from './status';
+import { registerActionStateRoutes } from './state';
 import { registerActionAuditLogRoutes } from './audit_log';
-
-export * from './isolation';
+import { registerActionListRoutes } from './list';
+import { registerResponseActionRoutes } from './response_actions';
 
 // wrap route registration
 
 export function registerActionRoutes(
   router: SecuritySolutionPluginRouter,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  canEncrypt?: boolean
 ) {
-  registerHostIsolationRoutes(router, endpointContext);
   registerActionStatusRoutes(router, endpointContext);
+  registerActionStateRoutes(router, endpointContext, canEncrypt);
   registerActionAuditLogRoutes(router, endpointContext);
+  registerActionListRoutes(router, endpointContext);
+  registerActionDetailsRoutes(router, endpointContext);
+  registerResponseActionRoutes(router, endpointContext);
+
+  // APIs specific to `get-file` are behind FF
+  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
+    registerActionFileDownloadRoutes(router, endpointContext);
+    registerActionFileInfoRoute(router, endpointContext);
+  }
 }

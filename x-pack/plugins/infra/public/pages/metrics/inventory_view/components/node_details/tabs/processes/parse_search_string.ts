@@ -36,4 +36,4 @@ export const parseSearchString = (query: string) => {
 };
 
 const escapeReservedCharacters = (clause: string) =>
-  clause.replace(/([+-=!\(\)\{\}\[\]^"~*?:\\/!]|&&|\|\|)/g, '\\$1');
+  clause.replace(/([+\-=!\(\)\{\}\[\]^"~*?:\\/!]|&&|\|\|)/g, '\\$1');

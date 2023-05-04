@@ -6,9 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export type JobId = string;
-export type BucketSpan = string;
+export type BucketSpan = estypes.Duration;
 
 // temporary Job override, waiting for es client to have correct types
 export type Job = estypes.MlJob;
@@ -33,3 +34,9 @@ export interface PerPartitionCategorization {
 }
 
 export type CustomSettings = estypes.MlCustomSettings;
+
+export function isAnomalyDetectionJob(arg: unknown): arg is Job {
+  return (
+    isPopulatedObject(arg) && typeof arg.job_id === 'string' && arg.analysis_config !== undefined
+  );
+}

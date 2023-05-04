@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../common/endpoint/types';
 
 /**
  * Simple mock endpoint event that works for tree layouts.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
@@ -13,14 +13,13 @@ import type {
   InstallablePackage,
   RegistryDataStream,
 } from '../../../../../common/types/models';
-import { getInstallation } from '../../packages';
-import { saveInstalledEsRefs } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/install';
 import { getAsset } from '../transform/common';
 
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
-import { deleteIlmRefs, deleteIlms } from './remove';
+import { deleteIlms } from './remove';
 
 interface IlmInstallation {
   installationName: string;
@@ -37,24 +36,39 @@ export const installIlmForDataStream = async (
   paths: string[],
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  logger: Logger,
+  esReferences: EsAssetReference[]
 ) => {
-  const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
-  let previousInstalledIlmEsAssets: EsAssetReference[] = [];
-  if (installation) {
-    previousInstalledIlmEsAssets = installation.installed_es.filter(
-      ({ type, id }) => type === ElasticsearchAssetType.dataStreamIlmPolicy
-    );
-  }
+  const previousInstalledIlmEsAssets = esReferences.filter(
+    ({ type }) => type === ElasticsearchAssetType.dataStreamIlmPolicy
+  );
 
   // delete all previous ilm
   await deleteIlms(
     esClient,
     previousInstalledIlmEsAssets.map((asset) => asset.id)
   );
+
+  if (previousInstalledIlmEsAssets.length > 0) {
+    // remove the saved object reference
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      registryPackage.name,
+      esReferences,
+      {
+        assetsToRemove: previousInstalledIlmEsAssets,
+      }
+    );
+  }
+
   // install the latest dataset
   const dataStreams = registryPackage.data_streams;
-  if (!dataStreams?.length) return [];
+  if (!dataStreams?.length)
+    return {
+      installedIlms: [],
+      esReferences,
+    };
+
   const dataStreamIlmPaths = paths.filter((path) => isDataStreamIlm(path));
   let installedIlms: EsAssetReference[] = [];
   if (dataStreamIlmPaths.length > 0) {
@@ -77,12 +91,17 @@ export const installIlmForDataStream = async (
       return acc;
     }, []);
 
-    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, ilmRefs);
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      registryPackage.name,
+      esReferences,
+      { assetsToAdd: ilmRefs }
+    );
 
     const ilmInstallations: IlmInstallation[] = ilmPathDatasets.map(
       (ilmPathDataset: IlmPathDataset) => {
         const content = JSON.parse(getAsset(ilmPathDataset.path).toString('utf-8'));
-        content.policy._meta = getESAssetMetadata({ packageName: installation?.name });
+        content.policy._meta = getESAssetMetadata({ packageName: registryPackage.name });
 
         return {
           installationName: getIlmNameForInstallation(ilmPathDataset),
@@ -98,22 +117,7 @@ export const installIlmForDataStream = async (
     installedIlms = await Promise.all(installationPromises).then((results) => results.flat());
   }
 
-  if (previousInstalledIlmEsAssets.length > 0) {
-    const currentInstallation = await getInstallation({
-      savedObjectsClient,
-      pkgName: registryPackage.name,
-    });
-
-    // remove the saved object reference
-    await deleteIlmRefs(
-      savedObjectsClient,
-      currentInstallation?.installed_es || [],
-      registryPackage.name,
-      previousInstalledIlmEsAssets.map((asset) => asset.id),
-      installedIlms.map((installed) => installed.id)
-    );
-  }
-  return installedIlms;
+  return { installedIlms, esReferences };
 };
 
 async function handleIlmInstall({

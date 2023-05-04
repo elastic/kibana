@@ -6,83 +6,37 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 
-import { SavedObject } from 'kibana/public';
-import { Actions, ActionTypes, AssociationType, CommentAttributes } from '../../../common/api';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
-import { CasesClientArgs } from '../types';
+import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
+import { Actions, ActionTypes } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
+import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
-import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Operations } from '../../authorization';
+import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
- * Parameters for deleting all comments of a case or sub case.
- */
-export interface DeleteAllArgs {
-  /**
-   * The case ID to delete all attachments for
-   */
-  caseID: string;
-  /**
-   * If specified the caseID will be ignored and this value will be used to find a sub case for deleting all the attachments
-   */
-  subCaseID?: string;
-}
-
-/**
- * Parameters for deleting a single attachment of a case or sub case.
- */
-export interface DeleteArgs {
-  /**
-   * The case ID to delete an attachment from
-   */
-  caseID: string;
-  /**
-   * The attachment ID to delete
-   */
-  attachmentID: string;
-  /**
-   * If specified the caseID will be ignored and this value will be used to find a sub case for deleting the attachment
-   */
-  subCaseID?: string;
-}
-
-/**
- * Delete all comments for a case or sub case.
- *
- * @ignore
+ * Delete all comments for a case.
  */
 export async function deleteAll(
-  { caseID, subCaseID }: DeleteAllArgs,
+  { caseID }: DeleteAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> {
   const {
     user,
-    unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
-    userActionService,
+    services: { caseService, attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseID);
-
-    const id = subCaseID ?? caseID;
-    const comments = await caseService.getCommentsByAssociation({
-      unsecuredSavedObjectsClient,
-      id,
-      associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
+    const comments = await caseService.getAllCaseComments({
+      id: caseID,
     });
 
     if (comments.total <= 0) {
-      throw Boom.notFound(`No comments found for ${id}.`);
+      throw Boom.notFound(`No comments found for ${caseID}.`);
     }
 
     await authorization.ensureAuthorized({
@@ -93,21 +47,13 @@ export async function deleteAll(
       })),
     });
 
-    const mapper = async (comment: SavedObject<CommentAttributes>) =>
-      attachmentService.delete({
-        unsecuredSavedObjectsClient,
-        attachmentId: comment.id,
-      });
-
-    // Ensuring we don't too many concurrent deletions running.
-    await pMap(comments.saved_objects, mapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
+    await attachmentService.bulkDelete({
+      attachmentIds: comments.saved_objects.map((so) => so.id),
+      refresh: false,
     });
 
-    await userActionService.bulkCreateAttachmentDeletion({
-      unsecuredSavedObjectsClient,
+    await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId: caseID,
-      subCaseId: subCaseID,
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
         owner: comment.attributes.owner,
@@ -115,9 +61,13 @@ export async function deleteAll(
       })),
       user,
     });
+
+    const attachments = comments.saved_objects.map((comment) => comment.attributes);
+
+    await handleAlerts({ alertsService, attachments, caseId: caseID });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete all comments case id: ${caseID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to delete all comments case id: ${caseID}: ${error}`,
       error,
       logger,
     });
@@ -126,68 +76,80 @@ export async function deleteAll(
 
 /**
  * Deletes an attachment
- *
- * @ignore
  */
 export async function deleteComment(
-  { caseID, attachmentID, subCaseID }: DeleteArgs,
+  { caseID, attachmentID }: DeleteArgs,
   clientArgs: CasesClientArgs
 ) {
   const {
     user,
-    unsecuredSavedObjectsClient,
-    attachmentService,
-    userActionService,
+    services: { attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseID);
-
-    const myComment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const attachment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
-    if (myComment == null) {
+    if (attachment == null) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.deleteComment,
     });
 
-    const type = subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-    const id = subCaseID ?? caseID;
+    const type = CASE_SAVED_OBJECT;
+    const id = caseID;
 
-    const caseRef = myComment.references.find((c) => c.type === type);
+    const caseRef = attachment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
 
-    await attachmentService.delete({
-      unsecuredSavedObjectsClient,
-      attachmentId: attachmentID,
+    await attachmentService.bulkDelete({
+      attachmentIds: [attachmentID],
+      refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.delete,
-      unsecuredSavedObjectsClient,
       caseId: id,
-      subCaseId: subCaseID,
       attachmentId: attachmentID,
-      payload: { attachment: { ...myComment.attributes } },
+      payload: { attachment: { ...attachment.attributes } },
       user,
-      owner: myComment.attributes.owner,
+      owner: attachment.attributes.owner,
     });
+
+    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
       error,
       logger,
     });
   }
 }
+
+interface HandleAlertsArgs {
+  alertsService: CasesClientArgs['services']['alertsService'];
+  attachments: CommentRequest[];
+  caseId: string;
+}
+
+const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
+  const alertAttachments = attachments.filter((attachment): attachment is CommentRequestAlertType =>
+    isCommentRequestTypeAlert(attachment)
+  );
+
+  if (alertAttachments.length === 0) {
+    return;
+  }
+
+  const alerts = getAlertInfoFromComments(alertAttachments);
+  await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+};

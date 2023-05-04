@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { mockGlobalState } from '../../mock';
+import { mockGlobalState, mockSourcererState } from '../../mock';
 import { SourcererScopeName } from './model';
 import { getScopePatternListSelection, validateSelectedPatterns } from './helpers';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
@@ -16,9 +17,9 @@ const dataView = {
   title: `auditbeat-*,packetbeat-*,${signalIndexName}`,
   patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}`],
 };
-const patternListNoSignals = mockGlobalState.sourcerer.defaultDataView.patternList
-  .filter((p) => p !== signalIndexName)
-  .sort();
+const patternListNoSignals = sortWithExcludesAtEnd(
+  mockGlobalState.sourcerer.defaultDataView.patternList.filter((p) => p !== signalIndexName)
+);
 
 describe('sourcerer store helpers', () => {
   describe('getScopePatternListSelection', () => {
@@ -207,6 +208,72 @@ describe('sourcerer store helpers', () => {
             missingPatterns: ['journalbeat-*'],
           },
         });
+      });
+    });
+
+    it('does not attempt to validate when missing patterns', () => {
+      const state = {
+        ...mockGlobalState.sourcerer,
+        defaultDataView: {
+          ...mockSourcererState.defaultDataView,
+          patternList: [],
+        },
+        kibanaDataViews: [
+          {
+            ...mockSourcererState.defaultDataView,
+            patternList: [],
+          },
+        ],
+      };
+      const result = validateSelectedPatterns(
+        state,
+        {
+          ...payload,
+          id: SourcererScopeName.default,
+          selectedPatterns: ['auditbeat-*', 'yoohoo'],
+        },
+        true
+      );
+      expect(result).toEqual({
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          missingPatterns: ['yoohoo'],
+          selectedPatterns: ['auditbeat-*', 'yoohoo'],
+        },
+      });
+    });
+
+    it('does not attempt to validate if non-default data view has not been initialized', () => {
+      const state = {
+        ...mockGlobalState.sourcerer,
+        defaultDataView: {
+          ...mockSourcererState.defaultDataView,
+          patternList: [],
+        },
+        kibanaDataViews: [
+          {
+            ...mockSourcererState.defaultDataView,
+            id: 'wow',
+            patternList: [],
+          },
+        ],
+      };
+      const result = validateSelectedPatterns(
+        state,
+        {
+          ...payload,
+          id: SourcererScopeName.default,
+          selectedDataViewId: 'wow',
+          selectedPatterns: ['auditbeat-*', 'yoohoo'],
+        },
+        true
+      );
+      expect(result).toEqual({
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          selectedDataViewId: 'wow',
+          selectedPatterns: ['auditbeat-*', 'yoohoo'],
+        },
       });
     });
   });

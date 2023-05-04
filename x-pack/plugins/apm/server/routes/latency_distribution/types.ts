@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import type {
-  FieldValuePair,
-  CorrelationsClientParams,
-} from '../../../common/correlations/types';
-
-import { Setup } from '../../lib/helpers/setup_request';
-
-export interface OverallLatencyDistributionOptions
-  extends CorrelationsClientParams {
-  percentileThreshold: number;
-  termFilters?: FieldValuePair[];
-  setup: Setup;
-}
-
 export interface OverallLatencyDistributionResponse {
-  percentileThresholdValue?: number;
+  durationMin?: number;
+  durationMax?: number;
+  totalDocCount?: number;
+  percentileThresholdValue?: number | null;
   overallHistogram?: Array<{
     key: number;
     doc_count: number;

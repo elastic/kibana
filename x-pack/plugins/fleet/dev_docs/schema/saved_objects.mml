@@ -50,7 +50,6 @@ classDiagram
     policy_id
     enabled
     package
-    output_id
     // Inputs
     inputs.type
     inputs.enabled

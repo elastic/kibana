@@ -7,27 +7,27 @@
  */
 
 import { uiActionsPluginMock } from '../mocks';
-import { createHelloWorldAction } from '../tests/test_samples';
-import { Action, createAction } from '../actions';
+import { createHelloWorldAction } from './test_samples';
+import { ActionDefinition } from '../actions';
 import { Trigger } from '../triggers';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 
-let action: Action<{ name: string }>;
+let action: ActionDefinition<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
 beforeEach(() => {
   uiActions = uiActionsPluginMock.createPlugin();
-  action = createAction({
+  action = {
     id: 'test',
     type: 'test',
     execute: () => Promise.resolve(),
-  });
+  };
 
-  uiActions.setup.registerAction(action);
+  uiActions.setup.registerAction(action as ActionDefinition);
   uiActions.setup.registerTrigger({
     id: 'trigger',
     title: 'trigger',
   });
-  uiActions.setup.addTriggerAction('trigger', action);
+  uiActions.setup.addTriggerAction('trigger', action as ActionDefinition);
 });
 
 test('can register action', async () => {
@@ -59,14 +59,14 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 
 test('filters out actions not applicable based on the context', async () => {
   const { setup, doStart } = uiActions;
-  const action1 = createAction({
+  const action1 = {
     id: 'test1',
     type: 'test1',
     isCompatible: async (context: { accept: boolean }) => {
       return Promise.resolve(context.accept);
     },
     execute: () => Promise.resolve(),
-  });
+  };
 
   const testTrigger: Trigger = {
     id: 'MY-TRIGGER2',

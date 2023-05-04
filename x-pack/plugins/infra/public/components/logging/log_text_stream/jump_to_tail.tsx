@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface LogTextStreamJumpToTailProps {
   onClickJump?: () => void;
@@ -29,7 +29,12 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
             />
           </EuiText>
         </MessageWrapper>
-        <EuiButtonEmpty size="xs" onClick={onClickJump} iconType="arrowDown">
+        <EuiButtonEmpty
+          data-test-subj="infraJumpToMostRecentEntriesButton"
+          size="xs"
+          onClick={onClickJump}
+          iconType="arrowDown"
+        >
           <FormattedMessage
             id="xpack.infra.logs.jumpToTailText"
             defaultMessage="Jump to most recent entries"

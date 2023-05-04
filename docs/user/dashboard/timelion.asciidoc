@@ -13,8 +13,6 @@ The syntax enables some features that classical point series charts don't offer,
 [role="screenshot"]
 image:dashboard/images/timelion.png[Timelion]
 
-deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In 7.16 and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to <<migrate-timelion-app-worksheets,Migrate Timelion app worksheets>>."]
-
 [float]
 ==== Timelion expressions
 
@@ -273,9 +271,9 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 [float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
@@ -408,9 +406,9 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 [float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
@@ -596,8 +594,8 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 For more information about *Timelion* conditions, refer to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].

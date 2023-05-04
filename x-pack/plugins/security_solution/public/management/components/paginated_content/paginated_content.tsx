@@ -5,35 +5,29 @@
  * 2.0.
  */
 
-import React, {
+import type {
   ComponentProps,
   ComponentType,
   FunctionComponent,
   Key,
-  memo,
   ReactElement,
   ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
 } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import type { CommonProps, EuiTablePaginationProps, Pagination } from '@elastic/eui';
 import {
-  CommonProps,
   EuiEmptyPrompt,
   EuiIcon,
   EuiProgress,
   EuiSpacer,
   EuiTablePagination,
-  EuiTablePaginationProps,
   EuiText,
-  Pagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { v4 as generateUUI } from 'uuid';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
-import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,10 +76,10 @@ interface TypedGenericComponentMemo {
 
 const RootContainer = styled.div`
   position: relative;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 
   .body {
-    min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
+    min-height: ${({ theme }) => theme.eui.euiSizeXXL};
 
     &-content {
       position: relative;
@@ -93,18 +87,21 @@ const RootContainer = styled.div`
   }
 `;
 
-const DefaultNoItemsFound = memo(() => {
-  return (
-    <EuiEmptyPrompt
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
-          defaultMessage="No items found"
-        />
-      }
-    />
-  );
-});
+const DefaultNoItemsFound = memo<{ 'data-test-subj'?: string }>(
+  ({ 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={dataTestSubj}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
+            defaultMessage="No items found"
+          />
+        }
+      />
+    );
+  }
+);
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
 
@@ -191,6 +188,9 @@ export const PaginatedContent = memo(
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
+        if (error instanceof Error) {
+          return <ErrorMessage message={error.message} data-test-subj={getTestId('error')} />;
+        }
         return 'string' === typeof error ? (
           <ErrorMessage message={error} data-test-subj={getTestId('error')} />
         ) : (
@@ -227,7 +227,8 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
+      if (!loading)
+        return noItemsMessage || <DefaultNoItemsFound data-test-subj={getTestId('noResults')} />;
     }, [
       ItemComponent,
       error,
@@ -266,7 +267,7 @@ export const PaginatedContent = memo(
               itemsPerPage={pagination.pageSize}
               itemsPerPageOptions={pagination.pageSizeOptions}
               pageCount={pageCount}
-              hidePerPageOptions={pagination.hidePerPageOptions}
+              showPerPageOptions={pagination.showPerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
             />

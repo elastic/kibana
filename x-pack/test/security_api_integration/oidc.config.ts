@@ -11,9 +11,13 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
-  const plugin = resolve(__dirname, './fixtures/oidc/oidc_provider');
+  const plugin = resolve(__dirname, './plugins/oidc_provider');
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const jwksPath = resolve(__dirname, './fixtures/oidc/jwks.json');
+  const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
+
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+
+  const auditLogPath = resolve(__dirname, './packages/helpers/audit/oidc.log');
 
   return {
     testFiles: [require.resolve('./tests/oidc/authorization_code_flow')],
@@ -50,8 +54,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
+        `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authProviders=${JSON.stringify(['oidc', 'basic'])}`,
         '--xpack.security.authc.oidc.realm="oidc1"',
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };

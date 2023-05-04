@@ -22,12 +22,10 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
-import { filterTypeToText } from './utils';
+import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Raise the popovers above GuidePageSideNav
-const POPOVER_STYLE = { zIndex: '200' };
+import { filterTypeToText } from './utils';
 
 function getFilterListOptions(filterListIds) {
   return filterListIds.map((filterId) => ({ value: filterId, text: filterId }));
@@ -76,7 +74,7 @@ export class ScopeExpression extends Component {
     const { filterId, filterType, filterListIds } = this.props;
 
     return (
-      <div style={POPOVER_STYLE}>
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
@@ -90,8 +88,14 @@ export class ScopeExpression extends Component {
                 value={filterType}
                 onChange={this.onChangeFilterType}
                 options={[
-                  { value: FILTER_TYPE.INCLUDE, text: filterTypeToText(FILTER_TYPE.INCLUDE) },
-                  { value: FILTER_TYPE.EXCLUDE, text: filterTypeToText(FILTER_TYPE.EXCLUDE) },
+                  {
+                    value: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
+                    text: filterTypeToText(ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE),
+                  },
+                  {
+                    value: ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE,
+                    text: filterTypeToText(ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE),
+                  },
                 ]}
               />
             </EuiFlexItem>
@@ -156,7 +160,7 @@ export class ScopeExpression extends Component {
               }
               isOpen={this.state.isFilterListOpen}
               closePopover={this.closeFilterList}
-              panelPaddingSize="none"
+              panelPaddingSize="s"
               ownFocus
               anchorPosition="downLeft"
             >
@@ -171,7 +175,10 @@ export class ScopeExpression extends Component {
 ScopeExpression.propTypes = {
   fieldName: PropTypes.string.isRequired,
   filterId: PropTypes.string,
-  filterType: PropTypes.oneOf([FILTER_TYPE.INCLUDE, FILTER_TYPE.EXCLUDE]),
+  filterType: PropTypes.oneOf([
+    ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
+    ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE,
+  ]),
   enabled: PropTypes.bool.isRequired,
   filterListIds: PropTypes.array.isRequired,
   updateScope: PropTypes.func.isRequired,

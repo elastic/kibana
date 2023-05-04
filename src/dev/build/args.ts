@@ -7,7 +7,7 @@
  */
 
 import getopts from 'getopts';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
 import { BuildOptions } from './build_distributables';
 
@@ -20,40 +20,50 @@ export function readCliArgs(argv: string[]) {
       'skip-generic-folders',
       'skip-platform-folders',
       'skip-os-packages',
+      'skip-canvas-shareable-runtime',
       'rpm',
       'deb',
+      'docker-context-use-local-artifact',
+      'docker-cross-compile',
       'docker-images',
       'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-ubuntu',
       'skip-docker-cloud',
+      'skip-docker-serverless',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
       'verbose',
       'debug',
       'all-platforms',
-      'example-plugins',
       'verbose',
       'quiet',
       'silent',
       'debug',
       'help',
+      'with-test-plugins',
+      'with-example-plugins',
     ],
+    string: ['docker-namespace', 'epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
     },
     default: {
       debug: true,
-      'example-plugins': false,
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-context-use-local-artifact': null,
+      'docker-cross-compile': false,
       'docker-push': false,
+      'docker-tag': null,
       'docker-tag-qualifier': null,
+      'docker-namespace': null,
       'version-qualifier': '',
+      'epr-registry': 'snapshot',
     },
     unknown: (flag) => {
       unknownFlags.push(flag);
@@ -95,10 +105,26 @@ export function readCliArgs(argv: string[]) {
     return Boolean(flags[name]);
   }
 
+  const eprRegistry = flags['epr-registry'];
+  if (eprRegistry !== 'snapshot' && eprRegistry !== 'production') {
+    log.error(
+      `Invalid value for --epr-registry, must be 'production' or 'snapshot', got ${eprRegistry}`
+    );
+    return {
+      log,
+      showHelp: true,
+      unknownFlags: [],
+    };
+  }
+
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerContextUseLocalArtifact: flags['docker-context-use-local-artifact'],
+    dockerCrossCompile: Boolean(flags['docker-cross-compile']),
+    dockerNamespace: flags['docker-namespace'],
     dockerPush: Boolean(flags['docker-push']),
+    dockerTag: flags['docker-tag'],
     dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
@@ -106,15 +132,20 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
-    createExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerServerless:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    eprRegistry: flags['epr-registry'],
+    buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
+    withExamplePlugins: Boolean(flags['with-example-plugins']),
+    withTestPlugins: Boolean(flags['with-test-plugins']),
   };
 
   return {

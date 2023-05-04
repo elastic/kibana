@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateSignalsMigrationSchema } from './create_signals_migration_schema';
+import type { CreateSignalsMigrationSchema } from './create_signals_migration_schema';
 
 export const getCreateSignalsMigrationSchemaMock = (
   index: string = 'signals-index'

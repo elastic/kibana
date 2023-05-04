@@ -9,11 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -28,9 +29,18 @@ import {
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
+  ROW_HEIGHT_OPTION,
+  ENABLE_SQL,
 } from '../common';
+import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
-export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
+const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
+  defaultMessage: 'technical preview',
+});
+
+export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup
+) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
@@ -56,11 +66,24 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
-      defaultMessage: 'Number of rows',
+      defaultMessage: 'Maximum rows per table',
     }),
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
-      defaultMessage: 'The number of rows to show in the table',
+      defaultMessage: 'Sets the maximum number of rows for the entire document table.',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
+  },
+  [SAMPLE_ROWS_PER_PAGE_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.sampleRowsPerPageTitle', {
+      defaultMessage: 'Rows per page',
+    }),
+    value: DEFAULT_ROWS_PER_PAGE,
+    options: ROWS_PER_PAGE_OPTIONS,
+    type: 'select',
+    description: i18n.translate('discover.advancedSettings.sampleRowsPerPageText', {
+      defaultMessage: 'Limits the number of rows per page in the document table.',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -161,11 +184,20 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
       defaultMessage: 'Document Explorer or classic view',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
         'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
+      values: {
+        documentExplorerDocs:
+          `<a href=${docLinks.links.discover.documentExplorer} style="font-weight: 600;"
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
+            defaultMessage: 'Document Explorer',
+          }) +
+          '</a>',
+      },
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -211,10 +243,19 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate(
       'discover.advancedSettings.discover.showFieldStatisticsDescription',
       {
-        defaultMessage: `Enable "Field statistics" table in Discover.`,
+        defaultMessage: `Enable the {fieldStatisticsDocs} to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.`,
+        values: {
+          fieldStatisticsDocs:
+            `<a href=${docLinks.links.discover.fieldStatistics}
+            target="_blank" rel="noopener">` +
+            i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
+              defaultMessage: 'Field statistics view',
+            }) +
+            '</a>',
+        },
       }
     ),
-    value: false,
+    value: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
@@ -230,7 +271,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
       values: {
         multiFields:
-          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+          `<a href=${docLinks.links.elasticsearch.mappingMultifields}
             target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
             defaultMessage: 'multi-fields',
@@ -242,16 +283,51 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [ROW_HEIGHT_OPTION]: {
+    name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
+      defaultMessage: 'Row height in the Document Explorer',
+    }),
+    value: 3,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
+      defaultMessage:
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
+    }),
+    schema: schema.number({ min: -1 }),
+  },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum table cell height',
+      defaultMessage: 'Maximum cell height in the classic table',
     }),
     value: 115,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [ENABLE_SQL]: {
+    name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
+      defaultMessage: 'Enable SQL',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables SQL as a text-based query language in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
+      values: {
+        link:
+          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.enableSQL.discussLinkText', {
+            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
+          }) +
+          '</a>',
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    requiresPageReload: true,
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 });

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from 'src/plugins/data/public';
+import type { IEsSearchResponse } from '@kbn/data-plugin/public';
 
-import {
-  CtiEnrichment,
-  CtiEventEnrichmentRequestOptions,
-  CtiEventEnrichmentStrategyResponse,
-  CtiQueries,
-} from '.';
+import type { CtiEnrichment, CtiEventEnrichmentRequestOptions } from '.';
+import { CtiQueries } from '.';
 
 export const buildEventEnrichmentRequestOptionsMock = (
   overrides: Partial<CtiEventEnrichmentRequestOptions> = {}
@@ -147,15 +143,5 @@ export const buildEventEnrichmentMock = (
   'threat.indicator.file.type': ['html'],
   'threat.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
   'threat.indicator.type': ['file'],
-  ...overrides,
-});
-
-export const buildEventEnrichmentResponseMock = (
-  overrides: Partial<CtiEventEnrichmentStrategyResponse> = {}
-): CtiEventEnrichmentStrategyResponse => ({
-  ...buildEventEnrichmentRawResponseMock(),
-  enrichments: [buildEventEnrichmentMock()],
-  inspect: { dsl: ['{"mocked": "json"}'] },
-  totalCount: 0,
   ...overrides,
 });

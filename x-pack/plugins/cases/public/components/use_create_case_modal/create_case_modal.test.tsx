@@ -61,7 +61,7 @@ describe('CreateCaseModal', () => {
       </TestProviders>
     );
 
-    wrapper.find('.euiModal__closeIcon').first().simulate('click');
+    wrapper.find('button.euiModal__closeIcon').first().simulate('click');
     expect(onCloseCaseModal).toBeCalled();
   });
 

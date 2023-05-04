@@ -10,17 +10,17 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { LicenseService } from '../../../../common/license';
-import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { PolicyWatcher } from './license_watch';
-import { ILicense } from '../../../../../licensing/common/types';
-import { licenseMock } from '../../../../../licensing/common/licensing.mock';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { PackagePolicy } from '../../../../../fleet/common';
-import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
-import { PolicyConfig } from '../../../../common/endpoint/types';
+import type { PolicyConfig } from '../../../../common/endpoint/types';
 
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();
@@ -37,7 +37,7 @@ describe('Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
   const soStartMock = savedObjectsServiceMock.createStartContract();
   const esStartMock = elasticsearchServiceMock.createStart();
-  let packagePolicySvcMock: jest.Mocked<PackagePolicyServiceInterface>;
+  let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
 
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });

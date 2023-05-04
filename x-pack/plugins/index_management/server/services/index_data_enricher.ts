@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { Index } from '../index';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { Index } from '..';
 
 export type Enricher = (indices: Index[], client: IScopedClusterClient) => Promise<Index[]>;
 

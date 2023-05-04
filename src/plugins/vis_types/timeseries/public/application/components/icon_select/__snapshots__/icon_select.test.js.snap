@@ -50,10 +50,6 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
         "value": "fa-bug",
       },
       Object {
-        "label": "Exclamation Circle",
-        "value": "fa-exclamation-circle",
-      },
-      Object {
         "label": "Exclamation Triangle",
         "value": "fa-exclamation-triangle",
       },
@@ -139,10 +135,6 @@ Array [
   Object {
     "label": "Bug",
     "value": "fa-bug",
-  },
-  Object {
-    "label": "Exclamation Circle",
-    "value": "fa-exclamation-circle",
   },
   Object {
     "label": "Exclamation Triangle",

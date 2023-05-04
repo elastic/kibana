@@ -42,6 +42,14 @@ export const ResolverNoProcessEvents = () => (
     </EuiText>
     <EuiSpacer size="m" />
     <EuiText size="s">
+      {i18n.translate('xpack.securitySolution.resolver.noProcessEvents.dataView', {
+        defaultMessage: `In case you selected a different data view,
+          make sure your data view contains all of the indices that are stored in the source event at "{field}".`,
+        values: { field: 'kibana.alert.rule.parameters.index' },
+      })}
+    </EuiText>
+    <EuiSpacer size="m" />
+    <EuiText size="s">
       {i18n.translate('xpack.securitySolution.resolver.noProcessEvents.eventCategory', {
         defaultMessage: `You may also add the below to your timeline query to check for process events.
             If none are listed, a graph cannot be created from events found in that query.`,

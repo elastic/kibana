@@ -8,12 +8,10 @@
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
 
-interface SecurityHasPrivilegesResponse {
-  cluster: {
-    manage_security: boolean;
-    manage_api_key: boolean;
-    manage_own_api_key: boolean;
-  };
+export interface AgentKeysPrivilegesResponse {
+  areApiKeysEnabled: boolean;
+  isAdmin: boolean;
+  canManage: boolean;
 }
 
 export async function getAgentKeysPrivileges({
@@ -22,25 +20,22 @@ export async function getAgentKeysPrivileges({
 }: {
   context: ApmPluginRequestHandlerContext;
   securityPluginStart: NonNullable<APMPluginStartDependencies['security']>;
-}) {
+}): Promise<AgentKeysPrivilegesResponse> {
+  const esClient = (await context.core).elasticsearch.client;
   const [securityHasPrivilegesResponse, areApiKeysEnabled] = await Promise.all([
-    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<SecurityHasPrivilegesResponse>(
-      {
-        body: {
-          cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
-        },
-      }
-    ),
+    esClient.asCurrentUser.security.hasPrivileges({
+      body: {
+        cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
+      },
+    }),
     securityPluginStart.authc.apiKeys.areAPIKeysEnabled(),
   ]);
 
   const {
-    body: {
-      cluster: {
-        manage_security: manageSecurity,
-        manage_api_key: manageApiKey,
-        manage_own_api_key: manageOwnApiKey,
-      },
+    cluster: {
+      manage_security: manageSecurity,
+      manage_api_key: manageApiKey,
+      manage_own_api_key: manageOwnApiKey,
     },
   } = securityHasPrivilegesResponse;
 

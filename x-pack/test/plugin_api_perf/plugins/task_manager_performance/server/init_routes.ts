@@ -13,12 +13,9 @@ import {
   IKibanaResponse,
   IRouter,
   CoreSetup,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { range, chunk } from 'lodash';
-import {
-  TaskManagerStartContract,
-  ConcreteTaskInstance,
-} from '../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PerfApi, PerfResult } from './types';
 
 const scope = 'perf-testing';
@@ -78,9 +75,9 @@ export function initRoutes(
         }, Promise.resolve<ConcreteTaskInstance[] | undefined>(undefined));
 
       return res.ok({
-        body: await new Promise((resolve) => {
+        body: await new Promise<PerfResult>((resolve) => {
           setTimeout(() => {
-            performanceApi.endCapture().then((perf: PerfResult) => resolve(perf));
+            performanceApi.endCapture().then((perf) => resolve(perf));
           }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);
         }),
       });

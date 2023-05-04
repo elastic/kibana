@@ -13,7 +13,6 @@ import React from 'react';
 import { ML_TYPE_DESCRIPTION } from './translations';
 
 interface MlCardDescriptionProps {
-  subscriptionUrl: string;
   hasValidLicense?: boolean;
 }
 
@@ -22,7 +21,6 @@ const SmallText = styled.span`
 `;
 
 const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
-  subscriptionUrl,
   hasValidLicense = false,
 }) => (
   <SmallText>
@@ -34,7 +32,7 @@ const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
         defaultMessage="Access to ML requires a {subscriptionsLink}."
         values={{
           subscriptionsLink: (
-            <EuiLink href={subscriptionUrl} target="_blank">
+            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
               <FormattedMessage
                 id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
                 defaultMessage="Platinum subscription"

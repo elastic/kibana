@@ -176,6 +176,68 @@ describe('engine routes', () => {
     });
   });
 
+  describe('POST /internal/app_search/elasticsearch/engines', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/app_search/elasticsearch/engines',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      mockRouter.callRoute({
+        body: {
+          name: 'some-elasticindexed-engine',
+          search_index: { type: 'elasticsearch', index_name: 'search-elastic-index' },
+        },
+      });
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines',
+      });
+    });
+
+    describe('validates', () => {
+      describe('indexed engines', () => {
+        it('correctly', () => {
+          const request = {
+            body: {
+              name: 'some-engine',
+              search_index: { type: 'elasticsearch', index_name: 'search-elastic-index' },
+            },
+          };
+          mockRouter.shouldValidate(request);
+        });
+
+        it('missing name', () => {
+          const request = {
+            body: {
+              search_index: { type: 'elasticsearch', index_name: 'search-elastic-index' },
+            },
+          };
+          mockRouter.shouldThrow(request);
+        });
+
+        it('missing index_name', () => {
+          const request = {
+            name: 'some-engine',
+            body: {
+              search_index: { type: 'elasticsearch' },
+            },
+          };
+          mockRouter.shouldThrow(request);
+        });
+      });
+    });
+  });
+
   describe('GET /internal/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 

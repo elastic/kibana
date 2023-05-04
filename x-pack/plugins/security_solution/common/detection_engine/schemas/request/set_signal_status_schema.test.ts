@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setSignalsStatusSchema, SetSignalsStatusSchema } from './set_signal_status_schema';
+import type { SetSignalsStatusSchema } from './set_signal_status_schema';
+import { setSignalsStatusSchema } from './set_signal_status_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';

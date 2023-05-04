@@ -1,0 +1,554 @@
+{
+  "id": "@kbn/ui-shared-deps-src",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ui-shared-deps-src",
+        "id": "def-common.cssDistFilename",
+        "type": "string",
+        "tags": [],
+        "label": "cssDistFilename",
+        "description": [
+          "\nFilename of the main bundle file in the distributable directory"
+        ],
+        "signature": [
+          "\"kbn-ui-shared-deps-src.css\""
+        ],
+        "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-shared-deps-src",
+        "id": "def-common.distDir",
+        "type": "string",
+        "tags": [],
+        "label": "distDir",
+        "description": [
+          "\nAbsolute path to the distributable directory"
+        ],
+        "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-shared-deps-src",
+        "id": "def-common.jsFilename",
+        "type": "string",
+        "tags": [],
+        "label": "jsFilename",
+        "description": [
+          "\nFilename of the main bundle file in the distributable directory"
+        ],
+        "signature": [
+          "\"kbn-ui-shared-deps-src.js\""
+        ],
+        "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ui-shared-deps-src",
+        "id": "def-common.externals",
+        "type": "Object",
+        "tags": [],
+        "label": "externals",
+        "description": [
+          "\nExternals mapping inteded to be used in a webpack config"
+        ],
+        "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnuitheme",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/ui-theme'",
+            "description": [
+              "/**\n   * stateful deps\n   */"
+            ],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbni18n",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/i18n'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbni18nreact",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/i18n-react'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.emotioncache",
+            "type": "string",
+            "tags": [],
+            "label": "'@emotion/cache'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.emotionreact",
+            "type": "string",
+            "tags": [],
+            "label": "'@emotion/react'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.jquery",
+            "type": "string",
+            "tags": [],
+            "label": "jquery",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.moment",
+            "type": "string",
+            "tags": [],
+            "label": "moment",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.momenttimezone",
+            "type": "string",
+            "tags": [],
+            "label": "'moment-timezone'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.react",
+            "type": "string",
+            "tags": [],
+            "label": "react",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactdom",
+            "type": "string",
+            "tags": [],
+            "label": "'react-dom'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactdomserver",
+            "type": "string",
+            "tags": [],
+            "label": "'react-dom/server'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactrouter",
+            "type": "string",
+            "tags": [],
+            "label": "'react-router'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactrouterdom",
+            "type": "string",
+            "tags": [],
+            "label": "'react-router-dom'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.styledcomponents",
+            "type": "string",
+            "tags": [],
+            "label": "'styled-components'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnmonaco",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/monaco'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.monacoeditoresmvseditoreditor.api",
+            "type": "string",
+            "tags": [],
+            "label": "'monaco-editor/esm/vs/editor/editor.api'",
+            "description": [
+              "// this is how plugins/consumers from npm load monaco"
+            ],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.rxjs",
+            "type": "string",
+            "tags": [],
+            "label": "rxjs",
+            "description": [
+              "/**\n   * big deps which are locked to a single version\n   */"
+            ],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.rxjsoperators",
+            "type": "string",
+            "tags": [],
+            "label": "'rxjs/operators'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.numeral",
+            "type": "string",
+            "tags": [],
+            "label": "numeral",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticnumeral",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/numeral'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticcharts",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/charts'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbndatemath",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/datemath'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeui",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuilibservices",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui/lib/services'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuilibservicesformat",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui/lib/services/format'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuidisteui_charts_theme",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui/dist/eui_charts_theme'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactbeautifuldnd",
+            "type": "string",
+            "tags": [],
+            "label": "'react-beautiful-dnd'",
+            "description": [
+              "// transient dep of eui"
+            ],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.lodash",
+            "type": "string",
+            "tags": [],
+            "label": "lodash",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.lodashfp",
+            "type": "string",
+            "tags": [],
+            "label": "'lodash/fp'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.fflate",
+            "type": "string",
+            "tags": [],
+            "label": "fflate",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.tslib",
+            "type": "string",
+            "tags": [],
+            "label": "tslib",
+            "description": [
+              "/**\n   * runtime deps which don't need to be copied across all bundles\n   */"
+            ],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnanalytics",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/analytics'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnesquery",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/es-query'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnstd",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/std'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnsaferlodashset",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/safer-lodash-set'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnrison",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/rison'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.history",
+            "type": "string",
+            "tags": [],
+            "label": "history",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.classnames",
+            "type": "string",
+            "tags": [],
+            "label": "classnames",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.tanstackreactquery",
+            "type": "string",
+            "tags": [],
+            "label": "'@tanstack/react-query'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.tanstackreactquerydevtools",
+            "type": "string",
+            "tags": [],
+            "label": "'@tanstack/react-query-devtools'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -3,6 +3,11 @@
 exports[`telemetry_ops_stats should return something when there is a metric 1`] = `
 Object {
   "concurrent_connections": 1,
+  "elasticsearch_client": Object {
+    "totalActiveSockets": 25,
+    "totalIdleSockets": 2,
+    "totalQueuedRequests": 0,
+  },
   "os": Object {
     "load": Object {
       "15m": 1,
@@ -21,6 +26,11 @@ Object {
   "process": Object {
     "event_loop_delay": 1,
     "event_loop_delay_histogram": Any<Object>,
+    "event_loop_utilization": Object {
+      "active": 1,
+      "idle": 1,
+      "utilization": 1,
+    },
     "memory": Object {
       "heap": Object {
         "size_limit": 1,
@@ -35,6 +45,11 @@ Object {
     Object {
       "event_loop_delay": 1,
       "event_loop_delay_histogram": Any<Object>,
+      "event_loop_utilization": Object {
+        "active": 1,
+        "idle": 1,
+        "utilization": 1,
+      },
       "memory": Object {
         "heap": Object {
           "size_limit": 1,

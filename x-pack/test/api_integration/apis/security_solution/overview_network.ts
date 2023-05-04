@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   NetworkOverviewStrategyResponse,
   NetworkQueries,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -52,7 +52,6 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
           },
           strategy: 'securitySolutionSearchStrategy',
@@ -95,7 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
           },
           strategy: 'securitySolutionSearchStrategy',
@@ -137,7 +135,6 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
           },
           strategy: 'securitySolutionSearchStrategy',

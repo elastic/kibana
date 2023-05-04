@@ -11,14 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import {
-  useCapabilities,
-  useGetPackageInstallStatus,
-  useInstallPackage,
-} from '../../../../../hooks';
+import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
-
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
   disabled?: boolean;
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
@@ -30,14 +25,13 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> &
 };
 export function InstallButton(props: InstallationButtonProps) {
   const { name, numOfAssets, title, version } = props;
-  const hasWriteCapabilites = useCapabilities().write;
+  const canInstallPackages = useAuthz().integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
 
   const isInstalling = installationStatus === InstallStatus.installing;
   const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
-
   const toggleInstallModal = useCallback(() => {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
@@ -56,9 +50,14 @@ export function InstallButton(props: InstallationButtonProps) {
     />
   );
 
-  return hasWriteCapabilites ? (
+  return canInstallPackages ? (
     <Fragment>
-      <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
+      <EuiButton
+        iconType={'importAction'}
+        isLoading={isInstalling}
+        onClick={toggleInstallModal}
+        data-test-subj="installAssetsButton"
+      >
         {isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"

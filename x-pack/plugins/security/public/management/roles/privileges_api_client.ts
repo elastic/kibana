@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import type { BuiltinESPrivileges, RawKibanaPrivileges } from '../../../common/model';
 
 export class PrivilegesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  async getAll({ includeActions }: { includeActions: boolean }) {
+  /*
+   * respectLicenseLevel is an internal optional parameter soley for getting all sub-feature
+   * privilieges to use in the UI. It is not meant for any other use.
+   */
+  async getAll({
+    includeActions,
+    respectLicenseLevel = true,
+  }: {
+    includeActions: boolean;
+    respectLicenseLevel: boolean;
+  }) {
     return await this.http.get<RawKibanaPrivileges>('/api/security/privileges', {
-      query: { includeActions },
+      query: { includeActions, respectLicenseLevel },
     });
   }
 

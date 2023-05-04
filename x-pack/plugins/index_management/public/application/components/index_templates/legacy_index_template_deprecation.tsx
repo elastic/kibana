@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { reactRouterNavigate } from '../../../shared_imports';
 import { documentationService } from '../../services/documentation';
 
@@ -29,7 +29,7 @@ export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = (
           'Legacy index templates are deprecated in favor of composable index templates',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="legacyIndexTemplateDeprecationWarning"
     >
       {showCta && history && (

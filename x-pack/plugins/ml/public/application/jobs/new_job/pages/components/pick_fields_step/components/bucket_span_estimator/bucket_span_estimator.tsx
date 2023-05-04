@@ -19,19 +19,21 @@ interface Props {
 }
 
 export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { status, estimateBucketSpan } = useEstimateBucketSpan();
   const [noDetectors, setNoDetectors] = useState(jobCreator.detectors.length === 0);
   const [isUsingMlCategory, setIsUsingMlCategory] = useState(checkIsUsingMlCategory());
 
   useEffect(() => {
     setEstimating(status === ESTIMATE_STATUS.RUNNING);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {
     setNoDetectors(jobCreator.detectors.length === 0);
     setIsUsingMlCategory(checkIsUsingMlCategory());
-  }, [jobCreatorUpdate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
 
   function checkIsUsingMlCategory() {
     return (

@@ -14,5 +14,6 @@ export async function getKibanaVersion(getService: FtrProviderContext['getServic
   const kibanaVersion = await kibanaServer.version.get();
   expect(typeof kibanaVersion).to.eql('string');
   expect(kibanaVersion.length).to.be.greaterThan(0);
-  return kibanaVersion;
+  // mimic SavedObjectsService.stripVersionQualifier()
+  return kibanaVersion.split('-')[0];
 }

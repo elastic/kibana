@@ -41,13 +41,6 @@ Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encr
 See <<monitoring-kibana>>.
 
 
-[role="exclude",id="settings-xpack-kb"]
-== {xpack} Settings in {kib}
-
-include::{asciidoc-dir}/../../shared/settings.asciidoc[]
-
-For more {kib} configuration settings, see <<settings>>.
-
 [role="exclude",id="uptime-security"]
 == Uptime security
 
@@ -329,7 +322,7 @@ This content has moved. Refer to <<kuery-query>>.
 [role="exclude",id="discover-document-context"]
 == View surrounding documents
 
-This content has moved. Refer to <<discover-view-surrounding-documents>>.
+This content has moved. Refer to <<document-explorer>>.
 
 [role="exclude",id="field-formatters-string"]
 == String field formatters
@@ -381,67 +374,42 @@ This content has moved. Refer to <<data-views>>.
 
 This content has moved. Refer to <<managing-data-views>>.
 
-[role="exclude",id="index-patterns-api"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api>>.
-
-[role="exclude",id="index-patterns-api-create"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-create>>.
-
-[role="exclude",id="index-patterns-api-default-get"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-default-get>>.
-
-[role="exclude",id="index-patterns-api-default-set"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-default-set>>.
-
-[role="exclude",id="index-patterns-api-delete"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-delete>>.
-
-[role="exclude",id="index-patterns-api-get"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-get>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-create"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-create>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-delete"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-delete>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-get"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-get>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-update"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-update>>.
-
-[role="exclude",id="index-patterns-runtime-field-api-upsert"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
-
-[role="exclude",id="index-patterns-api-update"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-api-update>>.
-
 [role="exclude",id="xpack-kibana-role-management"]
 == Kibana role management.
 
 This content has moved. Refer to <<kibana-role-management>>.
+
+[role="exclude",id="upgrade-migrations"]
+== Upgrade migrations
+
+This content has moved. Refer to <<saved-object-migrations>>.
+
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
+
+[role="exclude",id="brew"]
+== Install {kib} on macOS with Homebrew
+
+This page has been deleted. Refer to <<install>>.
+
+[role="exclude",id="discover-view-document"]
+== View a document
+
+This page has been deleted. Refer to <<document-explorer>>.
+
+[role="exclude",id="advanced-osquery"]
+== Advanced Osquery
+
+This page has been deleted. Refer to <<osquery>>.
+
+[role="exclude",id="ml-sync"]
+== Sync machine learning objects API
+
+This page has been deleted. Refer to <<machine-learning-api-sync>>.
+
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.

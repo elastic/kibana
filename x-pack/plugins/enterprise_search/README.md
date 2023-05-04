@@ -6,13 +6,13 @@ This plugin provides Kibana user interfaces for managing the Enterprise Search s
 
 ### App Search
 
-<img src="./public/applications/enterprise_search/assets/app_search.png" width="400" height="255">
+<img src="./public/applications/enterprise_search_overview/assets/app_search.png" width="400" height="255">
 
 Add rich, relevant search to your apps and websites. https://www.elastic.co/app-search/
 
 ### Workplace Search
 
-<img src="./public/applications/enterprise_search/assets/workplace_search.png" width="400" height="255">
+<img src="./public/applications/enterprise_search_overview/assets/workplace_search.png" width="400" height="255">
 
 Unify all your team's content into a personalized search experience. https://www.elastic.co/workplace-search/
 
@@ -25,17 +25,23 @@ Problems? If you're an Elastic Enterprise Search engineer, please reach out to @
 
 Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
+### Server development
+
+Kibana runs both a frontend and a backend/middleware server. For server development guidelines, see [SERVER.md](SERVER.md).
+
 ### Kea
 
-Enterprise Search uses [Kea.js](https://github.com/keajs/kea) to manage our React/Redux state for us. Kea state is handled in our `*Logic` files and exposes [values](https://kea.js.org/docs/guide/concepts#values) and [actions](https://kea.js.org/docs/guide/concepts#actions) for our components to get and set state with.
+Enterprise Search uses [Kea.js](https://github.com/keajs/kea) to manage our React/Redux state for us. Kea state is handled in our `*Logic` files and exposes [values](https://v2.keajs.org/docs/guide/concepts#values) and [actions](https://v2.keajs.org/docs/guide/concepts#actions) for our components to get and set state with.
+
+For extended guidelines, please check [KEA.md](KEA.md)
 
 #### Advanced Kea usage
 
-For the most part, we stick to the functionality described in Kea's [core concepts](https://kea.js.org/docs/guide/concepts). However, in some files, we also take advantage of [props](https://kea.js.org/docs/guide/additional#props) and [events](https://kea.js.org/docs/guide/additional#events), as well as [manually mounting](https://kea.js.org/docs/guide/advanced#mounting-and-unmounting) some shared logic files on plugin init outside of React.
+For the most part, we stick to the functionality described in Kea's [core concepts](https://v2.keajs.org/docs/guide/concepts). However, in some files, we also take advantage of [props](https://v2.keajs.org/docs/guide/additional#props) and [events](https://v2.keajs.org/docs/guide/additional#events), as well as [manually mounting](https://v2.keajs.org/docs/guide/advanced#mounting-and-unmounting) some shared logic files on plugin init outside of React.
 
 #### Debugging Kea
 
-To debug Kea state in-browser, Kea recommends [Redux Devtools](https://kea.js.org/docs/guide/debugging). To facilitate debugging, we use the [path](https://kea.js.org/docs/guide/debugging/#setting-the-path-manually) key with `snake_case`d paths. The path key should always end with the logic filename (e.g. `['enterprise_search', 'some_logic']`) to make it easy for devs to quickly find/jump to files via IDE tooling.
+To debug Kea state in-browser, Kea recommends [Redux Devtools](https://v2.keajs.org/docs/guide/debugging). To facilitate debugging, we use the [path](https://v2.keajs.org/docs/guide/debugging/#setting-the-path-manually) key with `snake_case`d paths. The path key should always end with the logic filename (e.g. `['enterprise_search', 'some_logic']`) to make it easy for devs to quickly find/jump to files via IDE tooling.
 
 ## Testing
 
@@ -43,11 +49,14 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://kea.js.or
 
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-Jest tests can be run directly from the `x-pack/plugins/enterprise_search` folder. This also works for any subfolders or subcomponents.
+Jest tests can be run from the root kibana directory, however, since the tests take so long to run you will likely want to apply the appropriate Jest configuration file to test only your changes. For example:
+- `x-pack/plugins/enterprise_search/common/jest.config.js`
+- `x-pack/plugins/enterprise_search/public/jest.config.js`
+- `x-pack/plugins/enterprise_search/server/jest.config.js`
 
 ```bash
-yarn test:jest
-yarn test:jest --watch
+yarn test:jest --config {YOUR_JEST_CONFIG_FILE}
+yarn test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
 ```
 
 Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific file or folder and only get coverage numbers for that file or folder:
@@ -80,29 +89,13 @@ Cypress tests can be run directly from the `x-pack/plugins/enterprise_search` fo
 
 ```bash
 # Basic syntax
-sh cypress.sh {run|open} {suite}
+sh cypress.sh {run|open|dev}
 
 # Examples
-sh cypress.sh run overview   # run Enterprise Search overview tests
-sh cypress.sh open overview  # open Enterprise Search overview tests
+sh cypress.sh run    # run Enterprise Search tests
+sh cypress.sh open   # open Enterprise Search tests
+sh cypress.sh dev    # run "cypress only" with Enterprise Search config
 
-sh cypress.sh run as         # run App Search tests
-sh cypress.sh open as        # open App Search tests
-
-sh cypress.sh run ws         # run Workplace Search tests
-sh cypress.sh open ws        # open Workplace Search tests
-
-# Overriding env variables
-sh cypress.sh open as --env username=enterprise_search password=123
-
-# Overriding config settings, e.g. changing the base URL to a dev path, or enabling video recording
-sh cypress.sh open as --config baseUrl=http://localhost:5601/xyz video=true
-
-# Only run a single specific test file
-sh cypress.sh run ws --spec '**/example.spec.ts'
-
-# Opt to run Chrome headlessly
-sh cypress.sh run ws --headless
 ```
 
 There are 3 ways you can spin up the required environments to run our Cypress tests:
@@ -117,13 +110,8 @@ There are 3 ways you can spin up the required environments to run our Cypress te
    - Enterprise Search:
      - Nothing extra is required to run Cypress tests, only what is already needed to run Kibana/Enterprise Search locally.
 2. Running Cypress against Kibana's functional test server:
-   - :information_source: While we won't use the runner, we can still make use of Kibana's functional test server to help us spin up Elasticsearch and Kibana instances.
-     - NOTE: We recommend stopping any other local dev processes, to reduce issues with memory/performance
-   - From the `x-pack/` project folder, run `node scripts/functional_tests_server --config test/functional_enterprise_search/cypress.config.ts`
-   - Kibana:
-     - You will need to pass `--config baseUrl=http://localhost:5620` into your Cypress command.
-   - Enterprise Search:
-     - :warning: TODO: We _currently_ do not have a way of spinning up Enterprise Search from Kibana's FTR - for now, you can use local Enterprise Search (pointed at the FTR's `http://localhost:9220` Elasticsearch host instance)
+   - Make sure docker is up and running in you system
+   - From the `x-pack/` project folder, run `sh cypress.sh` which will spin up Kibana, Elasticsearch through functional test runners and Enterprise Search instance in Docker.
 3. Running Cypress against Enterprise Search dockerized stack scripts
    - :warning: This is for Enterprise Search devs only, as this requires access to our closed source Enterprise Search repo
    - `stack_scripts/start-with-es-native-auth.sh --with-kibana`

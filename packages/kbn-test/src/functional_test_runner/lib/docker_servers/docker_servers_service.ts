@@ -10,7 +10,7 @@ import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
@@ -101,7 +101,7 @@ export class DockerServersService {
 
   private async startServer(server: DockerServer) {
     const { log, lifecycle } = this;
-    const { image, name, waitFor, waitForLogLine } = server;
+    const { image, name, waitFor, waitForLogLine, waitForLogLineTimeoutMs } = server;
 
     // pull image from registry
     log.info(`[docker:${name}] pulling docker image "${image}"`);
@@ -200,7 +200,8 @@ export class DockerServersService {
                   : line.includes(waitForLogLine)
               )
             ),
-            `waitForLogLine didn't emit anything`
+            `waitForLogLine didn't emit anything`,
+            waitForLogLineTimeoutMs
           )
     ).toPromise();
   }

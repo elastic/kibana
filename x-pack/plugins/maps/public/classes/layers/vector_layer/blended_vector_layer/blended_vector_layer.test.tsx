@@ -10,6 +10,7 @@ import { BlendedVectorLayer } from './blended_vector_layer';
 import { ESSearchSource } from '../../../sources/es_search_source';
 import {
   AbstractESSourceDescriptor,
+  CustomIcon,
   ESGeoGridSourceDescriptor,
 } from '../../../../../common/descriptor_types';
 
@@ -22,6 +23,8 @@ jest.mock('../../../../kibana_services', () => {
 });
 
 const mapColors: string[] = [];
+
+const customIcons: CustomIcon[] = [];
 
 const notClusteredDataRequest = {
   data: { isSyncClustered: false },
@@ -51,6 +54,7 @@ describe('getSource', () => {
           },
           mapColors
         ),
+        customIcons,
       });
 
       const source = blendedVectorLayer.getSource();
@@ -72,6 +76,7 @@ describe('getSource', () => {
           },
           mapColors
         ),
+        customIcons,
       });
 
       const source = blendedVectorLayer.getSource();
@@ -112,6 +117,7 @@ describe('getSource', () => {
           },
           mapColors
         ),
+        customIcons,
       });
 
       const source = blendedVectorLayer.getSource();
@@ -132,9 +138,12 @@ describe('cloneDescriptor', () => {
           },
           mapColors
         ),
+        customIcons,
       });
 
-      const clonedLayerDescriptor = await blendedVectorLayer.cloneDescriptor();
+      const clones = await blendedVectorLayer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedLayerDescriptor = clones[0];
       expect(clonedLayerDescriptor.sourceDescriptor!.type).toBe(SOURCE_TYPES.ES_SEARCH);
       expect(clonedLayerDescriptor.label).toBe('Clone of myIndexPattern');
     });
@@ -151,9 +160,12 @@ describe('cloneDescriptor', () => {
           },
           mapColors
         ),
+        customIcons,
       });
 
-      const clonedLayerDescriptor = await blendedVectorLayer.cloneDescriptor();
+      const clones = await blendedVectorLayer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedLayerDescriptor = clones[0];
       expect(clonedLayerDescriptor.sourceDescriptor!.type).toBe(SOURCE_TYPES.ES_SEARCH);
       expect(clonedLayerDescriptor.label).toBe('Clone of myIndexPattern');
     });

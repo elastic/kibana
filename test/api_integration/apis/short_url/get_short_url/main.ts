@@ -23,6 +23,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response2.body).to.eql(response1.body);
     });
 
+    it('returns 404 error when short URL does not exist', async () => {
+      const response = await supertest.get('/api/short_url/NotExistingID');
+
+      expect(response.status).to.be(404);
+    });
+
     it('supports legacy short URLs', async () => {
       const id = 'abcdefghjabcdefghjabcdefghjabcdefghj';
       await supertest.post('/api/saved_objects/url/' + id).send({

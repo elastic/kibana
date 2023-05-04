@@ -8,11 +8,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
-import type { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
-import { extractSearchSourceReferences } from '../../../data/public';
-import type { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
+import {
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 
 import {
   EmbeddableFactoryDefinition,
@@ -20,7 +25,9 @@ import {
   ErrorEmbeddable,
   IContainer,
   AttributeService,
-} from '../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
 import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
@@ -49,8 +56,6 @@ import {
 } from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { checkForDuplicateTitle } from '../../../saved_objects/public';
-import type { StartServicesGetter } from '../../../kibana_utils/public';
 import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -103,15 +108,19 @@ export class VisualizeEmbeddableFactory
       })`;
     },
     showSavedObject: (savedObject) => {
-      const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-      const visType = getTypes().get(typeName);
-      if (!visType) {
+      try {
+        const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+        const visType = getTypes().get(typeName);
+        if (!visType) {
+          return false;
+        }
+        if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
+          return true;
+        }
+        return visType.stage !== 'experimental';
+      } catch {
         return false;
       }
-      if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
-        return true;
-      }
-      return visType.stage !== 'experimental';
     },
     getSavedObjectSubType: (savedObject) => {
       return JSON.parse(savedObject.attributes.visState).type;
@@ -126,7 +135,7 @@ export class VisualizeEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('visualizations.displayName', {
-      defaultMessage: 'Visualization',
+      defaultMessage: 'visualization',
     });
   }
 
@@ -263,17 +272,17 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async checkTitle(props: OnSaveProps): Promise<true> {
+  public async checkTitle(props: OnSaveProps): Promise<boolean> {
     const savedObjectsClient = await this.deps.start().core.savedObjects.client;
     const overlays = await this.deps.start().core.overlays;
+
     return checkForDuplicateTitle(
       {
         title: props.newTitle,
-        copyOnSave: false,
         lastSavedTitle: '',
         getEsType: () => this.type,
-        getDisplayName: this.getDisplayName || (() => this.type),
       },
+      false,
       props.isTitleDuplicateConfirmed,
       props.onTitleDuplicate,
       {
@@ -284,7 +293,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public inject(_state: EmbeddableStateWithType, references: SavedObjectReference[]) {
-    const state = _state as unknown as VisualizeInput;
+    let state = _state as unknown as VisualizeInput;
 
     const { type, params } = state.savedVis ?? {};
 
@@ -293,20 +302,39 @@ export class VisualizeEmbeddableFactory
       injectTimeSeriesReferences(type, params, references);
     }
 
-    return _state;
+    if (state.savedVis?.data.searchSource) {
+      let extractedSearchSource = state.savedVis?.data
+        .searchSource as SerializedSearchSourceFields & {
+        indexRefName: string;
+      };
+      if (!('indexRefName' in state.savedVis.data.searchSource)) {
+        // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
+        extractedSearchSource = extractSearchSourceReferences(
+          extractedSearchSource
+        )[0] as SerializedSearchSourceFields & {
+          indexRefName: string;
+        };
+      }
+      const injectedSearchSource = injectSearchSourceReferences(extractedSearchSource, references);
+      state = {
+        ...state,
+        savedVis: {
+          ...state.savedVis,
+          data: {
+            ...state.savedVis.data,
+            searchSource: injectedSearchSource,
+            savedSearchId: references.find((r) => r.name === 'search_0')?.id,
+          },
+        },
+      };
+    }
+
+    return state as EmbeddableStateWithType;
   }
 
   public extract(_state: EmbeddableStateWithType) {
-    const state = _state as unknown as VisualizeInput;
+    let state = _state as unknown as VisualizeInput;
     const references = [];
-
-    if (state.savedVis?.data.searchSource) {
-      const [, searchSourceReferences] = extractSearchSourceReferences(
-        state.savedVis.data.searchSource
-      );
-
-      references.push(...searchSourceReferences);
-    }
 
     if (state.savedVis?.data.savedSearchId) {
       references.push({
@@ -316,6 +344,25 @@ export class VisualizeEmbeddableFactory
       });
     }
 
+    if (state.savedVis?.data.searchSource) {
+      const [extractedSearchSource, searchSourceReferences] = extractSearchSourceReferences(
+        state.savedVis.data.searchSource
+      );
+
+      references.push(...searchSourceReferences);
+      state = {
+        ...state,
+        savedVis: {
+          ...state.savedVis,
+          data: {
+            ...state.savedVis.data,
+            searchSource: extractedSearchSource,
+            savedSearchId: undefined,
+          },
+        },
+      };
+    }
+
     const { type, params } = state.savedVis ?? {};
 
     if (type && params) {
@@ -323,6 +370,6 @@ export class VisualizeEmbeddableFactory
       extractTimeSeriesReferences(type, params, references, `metrics_${state.id}`);
     }
 
-    return { state: _state, references };
+    return { state: state as EmbeddableStateWithType, references };
   }
 }

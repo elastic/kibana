@@ -5,111 +5,63 @@
  * 2.0.
  */
 
-import { fakeServer } from 'sinon';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { API_BASE_PATH } from '../../../../common/constants';
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server) => {
-  const mockResponse = (defaultResponse, response) => [
-    200,
-    { 'Content-Type': 'application/json' },
-    JSON.stringify({ ...defaultResponse, ...response }),
-  ];
+const registerHttpRequestMockHelpers = (httpSetup) => {
+  const mockResponses = new Map(
+    ['GET', 'PUT', 'DELETE', 'POST'].map((method) => [method, new Map()])
+  );
 
-  const setLoadFollowerIndicesResponse = (response) => {
-    const defaultResponse = { indices: [] };
-
-    server.respondWith(
-      'GET',
-      '/api/cross_cluster_replication/follower_indices',
-      mockResponse(defaultResponse, response)
-    );
+  const mockMethodImplementation = (method, path) => {
+    return mockResponses.get(method)?.get(path) ?? Promise.resolve({});
   };
 
-  const setLoadAutoFollowPatternsResponse = (response) => {
-    const defaultResponse = { patterns: [] };
+  httpSetup.get.mockImplementation((path) => mockMethodImplementation('GET', path));
+  httpSetup.delete.mockImplementation((path) => mockMethodImplementation('DELETE', path));
+  httpSetup.post.mockImplementation((path) => mockMethodImplementation('POST', path));
+  httpSetup.put.mockImplementation((path) => mockMethodImplementation('PUT', path));
 
-    server.respondWith(
-      'GET',
-      '/api/cross_cluster_replication/auto_follow_patterns',
-      mockResponse(defaultResponse, response)
-    );
-  };
-
-  const setDeleteAutoFollowPatternResponse = (response) => {
-    const defaultResponse = { errors: [], itemsDeleted: [] };
-
-    server.respondWith(
-      'DELETE',
-      /\/api\/cross_cluster_replication\/auto_follow_patterns/,
-      mockResponse(defaultResponse, response)
-    );
-  };
-
-  const setAutoFollowStatsResponse = (response) => {
-    const defaultResponse = {
-      numberOfFailedFollowIndices: 0,
-      numberOfFailedRemoteClusterStateRequests: 0,
-      numberOfSuccessfulFollowIndices: 0,
-      recentAutoFollowErrors: [],
-      autoFollowedClusters: [
-        {
-          clusterName: 'new-york',
-          timeSinceLastCheckMillis: 13746,
-          lastSeenMetadataVersion: 22,
-        },
-      ],
+  const mockResponse = (method, path, response, error) => {
+    const defuse = (promise) => {
+      promise.catch(() => {});
+      return promise;
     };
 
-    server.respondWith(
-      'GET',
-      '/api/cross_cluster_replication/stats/auto_follow',
-      mockResponse(defaultResponse, response)
+    return mockResponses
+      .get(method)
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
+  };
+
+  const setLoadFollowerIndicesResponse = (response = { indices: [] }, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/follower_indices`, response, error);
+
+  const setLoadAutoFollowPatternsResponse = (response = { patterns: [] }, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/auto_follow_patterns`, response, error);
+
+  const setDeleteAutoFollowPatternResponse = (autoFollowId, response, error) =>
+    mockResponse(
+      'DELETE',
+      `${API_BASE_PATH}/auto_follow_patterns/${autoFollowId}`,
+      response,
+      error
     );
-  };
 
-  const setLoadRemoteClustersResponse = (response = [], error) => {
-    if (error) {
-      server.respondWith('GET', '/api/remote_clusters', [
-        error.status || 400,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify(error.body),
-      ]);
-    } else {
-      server.respondWith('GET', '/api/remote_clusters', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify(response),
-      ]);
-    }
-  };
+  const setAutoFollowStatsResponse = (response, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/stats/auto_follow`, response, error);
 
-  const setGetAutoFollowPatternResponse = (response) => {
-    const defaultResponse = {};
+  const setLoadRemoteClustersResponse = (response = [], error) =>
+    mockResponse('GET', '/api/remote_clusters', response, error);
 
-    server.respondWith(
-      'GET',
-      /\/api\/cross_cluster_replication\/auto_follow_patterns\/.+/,
-      mockResponse(defaultResponse, response)
-    );
-  };
+  const setGetAutoFollowPatternResponse = (patternId, response = {}, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/auto_follow_patterns/${patternId}`, response, error);
 
-  const setGetClusterIndicesResponse = (response = []) => {
-    server.respondWith('GET', '/api/index_management/indices', [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
+  const setGetClusterIndicesResponse = (response = [], error) =>
+    mockResponse('GET', '/api/index_management/indices', response, error);
 
-  const setGetFollowerIndexResponse = (response) => {
-    const defaultResponse = {};
-
-    server.respondWith(
-      'GET',
-      /\/api\/cross_cluster_replication\/follower_indices\/.+/,
-      mockResponse(defaultResponse, response)
-    );
-  };
+  const setGetFollowerIndexResponse = (patternId, response = {}, error) =>
+    mockResponse('GET', `${API_BASE_PATH}/follower_indices/${patternId}`, response, error);
 
   return {
     setLoadFollowerIndicesResponse,
@@ -124,15 +76,10 @@ const registerHttpRequestMockHelpers = (server) => {
 };
 
 export const init = () => {
-  const server = fakeServer.create();
-  server.respondImmediately = true;
-
-  // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, '']);
+  const httpSetup = httpServiceMock.createSetupContract();
 
   return {
-    server,
-    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server),
+    httpSetup,
+    httpRequestsMockHelpers: registerHttpRequestMockHelpers(httpSetup),
   };
 };

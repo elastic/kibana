@@ -10,9 +10,17 @@ import { pageObjects } from './page_objects';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const xPackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
+  const kibanaCommonTestsConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
   return {
+    // common test config
+    ...kibanaCommonTestsConfig.getAll(),
+
     // default to the xpack functional config
     ...xPackFunctionalConfig.getAll(),
     services,

@@ -39,6 +39,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
@@ -100,6 +101,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     jobCreatorUpdate();
     loadCharts();
     setIsValid(aggFieldPairList.length > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aggFieldPairList.length]);
 
   // watch for changes in by field values
@@ -108,6 +110,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   // if the split field or by fields have changed
   useEffect(() => {
     loadCharts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(fieldValuesPerDetector), populationField, pageReady]);
 
   // watch for change in jobCreator
@@ -139,6 +142,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
       setAggFieldPairList(newList);
       updateByFields();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   // watch for changes in split field or by fields.
@@ -146,6 +150,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   // changes to fieldValues here will trigger the card effect via setFieldValuesPerDetector
   useEffect(() => {
     loadFieldExamples();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [populationField, byFieldsUpdated]);
 
   async function loadCharts() {

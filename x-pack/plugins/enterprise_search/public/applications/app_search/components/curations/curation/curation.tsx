@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EnterpriseSearchPageTemplate } from '../../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper } from '../../../../shared/layout';
 
 import { AutomatedCuration } from './automated_curation';
 import { CurationLogic } from './curation_logic';
@@ -26,7 +26,7 @@ export const Curation: React.FC = () => {
   }, [curationId]);
 
   if (dataLoading) {
-    return <EnterpriseSearchPageTemplate isLoading />;
+    return <EnterpriseSearchPageTemplateWrapper isLoading />;
   }
   return isAutomated ? <AutomatedCuration /> : <ManualCuration />;
 };

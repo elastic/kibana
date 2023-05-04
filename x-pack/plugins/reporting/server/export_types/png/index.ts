@@ -9,7 +9,7 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
 } from '../../../common/constants';
@@ -17,10 +17,10 @@ import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPNG, TaskPayloadPNG } from './types';
+import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  CreateJobFn<JobParamsPNG>,
+  CreateJobFn<JobParamsPNGDeprecated>,
   RunTaskFn<TaskPayloadPNG>
 > => ({
   ...metadata,
@@ -31,7 +31,7 @@ export const getExportType = (): ExportTypeDefinition<
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
-    LICENSE_TYPE_STANDARD,
+    LICENSE_TYPE_CLOUD_STANDARD,
     LICENSE_TYPE_GOLD,
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,

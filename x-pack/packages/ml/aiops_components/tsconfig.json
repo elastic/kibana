@@ -1,0 +1,29 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "stripInternal": false,
+    "types": [
+      "@types/d3-brush",
+      "@types/d3-scale",
+      "@types/d3-selection",
+      "@types/d3-transition",
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/aiops-utils",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

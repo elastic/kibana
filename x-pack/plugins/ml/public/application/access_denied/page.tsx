@@ -9,8 +9,13 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
-import { NavigationMenu } from '../components/navigation_menu';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiSpacer,
+} from '@elastic/eui';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -21,13 +26,12 @@ export const Page = () => {
   const helpLink = docLinks.links.ml.guide;
   return (
     <>
-      <NavigationMenu tabId="access-denied" />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
             <EuiEmptyPrompt
-              iconType="alert"
+              iconType="warning"
               title={
                 <h2>
                   <FormattedMessage

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { InstallablePackage } from '../../../../types';
+import type { EsAssetReference, InstallablePackage } from '../../../../types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
+import { updateEsAssetReferences } from '../../packages/install';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
@@ -18,25 +19,40 @@ export async function installILMPolicy(
   packageInfo: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  logger: Logger
-) {
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger,
+  esReferences: EsAssetReference[]
+): Promise<EsAssetReference[]> {
   const ilmPaths = paths.filter((path) => isILMPolicy(path));
-  if (!ilmPaths.length) return;
+  if (!ilmPaths.length) return esReferences;
+
+  const ilmPolicies = ilmPaths.map((path) => {
+    const body = JSON.parse(getAsset(path).toString('utf-8'));
+
+    body.policy._meta = getESAssetMetadata({ packageName: packageInfo.name });
+
+    const { file } = getPathParts(path);
+    const name = file.substr(0, file.lastIndexOf('.'));
+
+    return { name, body };
+  });
+
+  esReferences = await updateEsAssetReferences(savedObjectsClient, packageInfo.name, esReferences, {
+    assetsToAdd: ilmPolicies.map((policy) => ({
+      type: ElasticsearchAssetType.ilmPolicy,
+      id: policy.name,
+    })),
+  });
+
   await Promise.all(
-    ilmPaths.map(async (path) => {
-      const body = JSON.parse(getAsset(path).toString('utf-8'));
-
-      body.policy._meta = getESAssetMetadata({ packageName: packageInfo.name });
-
-      const { file } = getPathParts(path);
-      const name = file.substr(0, file.lastIndexOf('.'));
+    ilmPolicies.map(async (policy) => {
       try {
         await retryTransientEsErrors(
           () =>
             esClient.transport.request({
               method: 'PUT',
-              path: '/_ilm/policy/' + name,
-              body,
+              path: '/_ilm/policy/' + policy.name,
+              body: policy.body,
             }),
           { logger }
         );
@@ -45,6 +61,8 @@ export async function installILMPolicy(
       }
     })
   );
+
+  return esReferences;
 }
 
 const isILMPolicy = (path: string) => {

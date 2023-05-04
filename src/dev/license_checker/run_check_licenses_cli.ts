@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
-import { run } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { run } from '@kbn/dev-cli-runner';
 import { getInstalledPackages } from '../npm';
 
-import { LICENSE_ALLOWED, DEV_ONLY_LICENSE_ALLOWED, LICENSE_OVERRIDES } from './config';
+import {
+  LICENSE_ALLOWED,
+  DEV_ONLY_LICENSE_ALLOWED,
+  LICENSE_OVERRIDES,
+  PER_PACKAGE_ALLOWED_LICENSES,
+} from './config';
 import { assertLicensesValid } from './valid';
 
 run(
@@ -26,6 +31,7 @@ run(
     assertLicensesValid({
       packages: packages.filter((pkg) => !pkg.isDevOnly),
       validLicenses: LICENSE_ALLOWED,
+      perPackageOverrides: PER_PACKAGE_ALLOWED_LICENSES,
     });
     log.success('All production dependency licenses are allowed');
 
@@ -35,6 +41,7 @@ run(
       assertLicensesValid({
         packages: packages.filter((pkg) => pkg.isDevOnly),
         validLicenses: LICENSE_ALLOWED.concat(DEV_ONLY_LICENSE_ALLOWED),
+        perPackageOverrides: PER_PACKAGE_ALLOWED_LICENSES,
       });
       log.success('All development dependency licenses are allowed');
     }

@@ -57,9 +57,9 @@ describe('getDocumentPayload', () => {
         expect.objectContaining({
           contentType: 'application/pdf',
           content: expect.any(Readable),
+          filename: 'Some PDF report.pdf',
           headers: expect.objectContaining({
-            'Content-Disposition': 'inline; filename="Some PDF report.pdf"',
-            'Content-Length': 1024,
+            'Content-Length': '1024',
           }),
           statusCode: 200,
         })
@@ -85,9 +85,9 @@ describe('getDocumentPayload', () => {
         expect.objectContaining({
           contentType: 'text/csv',
           content: expect.any(Readable),
+          filename: 'Some CSV report.csv',
           headers: expect.objectContaining({
-            'Content-Disposition': 'inline; filename="Some CSV report.csv"',
-            'Content-Length': 1024,
+            'Content-Length': '1024',
             'kbn-csv-contains-formulas': true,
             'kbn-max-size-reached': true,
           }),
@@ -137,7 +137,7 @@ describe('getDocumentPayload', () => {
           contentType: 'text/plain',
           content: 'pending',
           headers: {
-            'retry-after': 30,
+            'retry-after': '30',
           },
           statusCode: 503,
         })

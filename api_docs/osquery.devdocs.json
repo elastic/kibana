@@ -1,0 +1,413 @@
+{
+  "id": "osquery",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "osquery",
+      "id": "def-public.OsqueryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "OsqueryPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/osquery/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "osquery",
+      "id": "def-public.OsqueryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "OsqueryPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/osquery/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryAction",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryAction",
+          "description": [],
+          "signature": [
+            "((props: ",
+            "OsqueryActionProps",
+            " & { ecsData?: ",
+            {
+              "pluginId": "@kbn/securitysolution-ecs",
+              "scope": "common",
+              "docId": "kibKbnSecuritysolutionEcsPluginApi",
+              "section": "def-common.EcsSecurityExtension",
+              "text": "EcsSecurityExtension"
+            },
+            " | undefined; }) => JSX.Element) | undefined"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryResults",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryResults",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "OsqueryActionResultsProps",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.OsqueryResults.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "OsqueryActionResultsProps"
+              ],
+              "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_results.tsx",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.LiveQueryField",
+          "type": "Function",
+          "tags": [],
+          "label": "LiveQueryField",
+          "description": [],
+          "signature": [
+            "(({ formMethods, ...props }: ",
+            "LiveQueryQueryFieldProps",
+            " & { formMethods: ",
+            "UseFormReturn",
+            "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any>; }) => JSX.Element) | undefined"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.isOsqueryAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "isOsqueryAvailable",
+          "description": [],
+          "signature": [
+            "(props: { agentId: string; }) => boolean"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.isOsqueryAvailable.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "path": "x-pack/plugins/osquery/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "osquery",
+                  "id": "def-public.OsqueryPluginStart.isOsqueryAvailable.$1.agentId",
+                  "type": "string",
+                  "tags": [],
+                  "label": "agentId",
+                  "description": [],
+                  "path": "x-pack/plugins/osquery/public/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.fetchInstallationStatus",
+          "type": "Function",
+          "tags": [],
+          "label": "fetchInstallationStatus",
+          "description": [],
+          "signature": [
+            "() => { loading: boolean; disabled: boolean; permissionDenied: boolean; }"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryResponseActionTypeForm",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryResponseActionTypeForm",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "OsqueryResponseActionsParamsFormProps",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.OsqueryResponseActionTypeForm.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "OsqueryResponseActionsParamsFormProps"
+              ],
+              "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.fetchAllLiveQueries",
+          "type": "Function",
+          "tags": [],
+          "label": "fetchAllLiveQueries",
+          "description": [],
+          "signature": [
+            "(config: ",
+            "UseAllLiveQueriesConfig",
+            ") => ",
+            "UseQueryResult",
+            "<{ data: Omit<",
+            "ActionsStrategyResponse",
+            ", \"edges\"> & { items: ",
+            "SearchHit",
+            "<object>[]; }; }, Error>"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.fetchAllLiveQueries.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "UseAllLiveQueriesConfig"
+              ],
+              "path": "x-pack/plugins/osquery/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "osquery",
+      "id": "def-server.OsqueryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "OsqueryPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/osquery/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "osquery",
+          "id": "def-server.OsqueryPluginSetup.osqueryCreateAction",
+          "type": "Function",
+          "tags": [],
+          "label": "osqueryCreateAction",
+          "description": [],
+          "signature": [
+            "(payload: { agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }, alertData?: OutputOf<SetOptional<{ readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> | undefined) => void"
+          ],
+          "path": "x-pack/plugins/osquery/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.osqueryCreateAction.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "payload",
+              "description": [],
+              "signature": [
+                "{ agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }"
+              ],
+              "path": "x-pack/plugins/osquery/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.osqueryCreateAction.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "alertData",
+              "description": [],
+              "signature": [
+                "OutputOf<SetOptional<{ readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> | undefined"
+              ],
+              "path": "x-pack/plugins/osquery/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "osquery",
+      "id": "def-server.OsqueryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "OsqueryPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/osquery/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/osquery\""
+        ],
+        "path": "x-pack/plugins/osquery/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.DEFAULT_DARK_MODE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_DARK_MODE",
+        "description": [],
+        "signature": [
+          "\"theme:darkMode\""
+        ],
+        "path": "x-pack/plugins/osquery/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.OSQUERY_INTEGRATION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OSQUERY_INTEGRATION_NAME",
+        "description": [],
+        "signature": [
+          "\"osquery_manager\""
+        ],
+        "path": "x-pack/plugins/osquery/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"osquery\""
+        ],
+        "path": "x-pack/plugins/osquery/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Osquery\""
+        ],
+        "path": "x-pack/plugins/osquery/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

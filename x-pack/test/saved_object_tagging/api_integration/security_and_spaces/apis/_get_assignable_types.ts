@@ -8,27 +8,40 @@
 import expect from '@kbn/expect';
 import { USERS, User } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
+import { createTestSpaces, deleteTestSpaces, createTags, deleteTags } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const supertest = getService('supertestWithoutAuth');
+export default function (ftrContext: FtrProviderContext) {
+  const supertest = ftrContext.getService('supertestWithoutAuth');
 
   describe('GET /internal/saved_objects_tagging/assignments/_assignable_types', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
-      );
+      await createTestSpaces(ftrContext);
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
-      );
+      await deleteTestSpaces(ftrContext);
+    });
+
+    beforeEach(async () => {
+      await createTags(ftrContext);
+    });
+
+    afterEach(async () => {
+      await deleteTags(ftrContext);
     });
 
     const assignablePerUser = {
-      [USERS.SUPERUSER.username]: ['dashboard', 'visualization', 'map', 'lens'],
+      [USERS.SUPERUSER.username]: [
+        'dashboard',
+        'visualization',
+        'map',
+        'lens',
+        'search',
+        'osquery-pack',
+        'osquery-pack-asset',
+        'osquery-saved-query',
+      ],
       [USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER.username]: [],

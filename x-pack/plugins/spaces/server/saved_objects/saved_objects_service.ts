@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '../spaces_service';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { spaceMigrations, usageStatsMigrations } from './migrations';
-import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
+import { SavedObjectsSpacesExtension } from './saved_objects_spaces_extension';
+import { SpacesSavedObjectSchemas } from './schemas';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
@@ -25,6 +26,7 @@ export class SpacesSavedObjectsService {
       hidden: true,
       namespaceType: 'agnostic',
       mappings: SpacesSavedObjectMappings,
+      schemas: SpacesSavedObjectSchemas,
       migrations: {
         '6.6.0': spaceMigrations.migrateTo660,
       },
@@ -40,10 +42,11 @@ export class SpacesSavedObjectsService {
       },
     });
 
-    core.savedObjects.addClientWrapper(
-      Number.MIN_SAFE_INTEGER,
-      'spaces',
-      spacesSavedObjectsClientWrapperFactory(getSpacesService)
-    );
+    core.savedObjects.setSpacesExtension(({ request }) => {
+      const spacesService = getSpacesService();
+      const spacesClient = spacesService.createSpacesClient(request);
+      const activeSpaceId = spacesService.getSpaceId(request);
+      return new SavedObjectsSpacesExtension({ spacesClient, activeSpaceId });
+    });
   }
 }

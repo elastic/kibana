@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
-  ActionResultsStrategyResponse,
+import type {
   ActionResultsRequestOptions,
+  ActionResultsStrategyResponse,
   OsqueryQueries,
 } from '../../../../../../common/search_strategy/osquery';
 
 import { inspectStringifyObject } from '../../../../../../common/utils/build_query';
-import { OsqueryFactory } from '../../types';
+import type { OsqueryFactory } from '../../types';
 import { buildActionResultsQuery } from './query.action_results.dsl';
 
 export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
@@ -22,13 +21,14 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
+
     return buildActionResultsQuery(options);
   },
+  // @ts-expect-error update types
   parse: async (
-    options: ActionResultsRequestOptions,
-    response: IEsSearchResponse<object>
+    options,
+    response: ActionResultsStrategyResponse
   ): Promise<ActionResultsStrategyResponse> => {
-    const { activePage } = options.pagination;
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],
     };
@@ -37,13 +37,6 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
-      // @ts-expect-error doesn't handle case when total TotalHits
-      totalCount: response.rawResponse.hits.total,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
     };
   },
 };

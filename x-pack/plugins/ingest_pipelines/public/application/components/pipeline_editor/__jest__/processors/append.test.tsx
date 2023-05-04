@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const APPEND_TYPE = 'append';
 
@@ -14,8 +14,10 @@ describe('Processor: Append', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
+  const { httpSetup } = setupEnvironment();
+
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -26,7 +28,7 @@ describe('Processor: Append', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         value: {
           processors: [],
         },
@@ -103,6 +105,7 @@ describe('Processor: Append', () => {
       find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
       component.update();
     });
+    form.toggleEuiSwitch('allowDuplicatesSwitch.input');
 
     form.toggleEuiSwitch('ignoreFailureSwitch.input');
     // Save the field with new changes
@@ -113,6 +116,44 @@ describe('Processor: Append', () => {
       field: 'field_1',
       ignore_failure: true,
       value: ['Some_Value'],
+      allow_duplicates: false,
+    });
+  });
+
+  test('should allow to set media_type when value is a template snippet', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      find,
+      component,
+      exists,
+    } = testBed;
+
+    // Add "field" value (required)
+    form.setInputValue('fieldNameField.input', 'sample_field');
+
+    // Shouldn't be able to set media_type if value is not a template string
+    await act(async () => {
+      find('appendValueField.input').simulate('change', [{ label: 'value_1' }]);
+    });
+    component.update();
+    expect(exists('mediaTypeSelectorField')).toBe(false);
+
+    // Set value to a template snippet and media_type to a non-default value
+    await act(async () => {
+      find('appendValueField.input').simulate('change', [{ label: '{{{value_2}}}' }]);
+    });
+    component.update();
+    form.setSelectValue('mediaTypeSelectorField', 'text/plain');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    expect(processors[0][APPEND_TYPE]).toEqual({
+      field: 'sample_field',
+      value: ['{{{value_2}}}'],
+      media_type: 'text/plain',
     });
   });
 });

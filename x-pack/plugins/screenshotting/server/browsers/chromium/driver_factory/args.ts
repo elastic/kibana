@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import os from 'os';
 import type { ConfigType } from '../../../config';
 
-interface Viewport {
+interface WindowSize {
   height: number;
   width: number;
 }
@@ -16,12 +17,17 @@ type Proxy = ConfigType['browser']['chromium']['proxy'];
 
 interface LaunchArgs {
   userDataDir: string;
-  viewport?: Viewport;
+  windowSize?: WindowSize;
   disableSandbox?: boolean;
   proxy: Proxy;
 }
 
-export const args = ({ userDataDir, disableSandbox, viewport, proxy: proxyConfig }: LaunchArgs) => {
+export const args = ({
+  userDataDir,
+  disableSandbox,
+  windowSize,
+  proxy: proxyConfig,
+}: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -43,18 +49,17 @@ export const args = ({ userDataDir, disableSandbox, viewport, proxy: proxyConfig
     // Skip first run wizards
     '--no-first-run',
     `--user-data-dir=${userDataDir}`,
-    '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
   ];
 
-  if (viewport) {
+  if (windowSize) {
     // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
     // The viewport may later need to be resized depending on the position of the clip area.
     // These numbers come from the job parameters, so this is a close guess.
-    flags.push(`--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`);
+    flags.push(`--window-size=${Math.floor(windowSize.width)},${Math.floor(windowSize.height)}`);
   }
 
   if (proxyConfig.enabled) {
@@ -68,7 +73,18 @@ export const args = ({ userDataDir, disableSandbox, viewport, proxy: proxyConfig
     flags.push('--no-sandbox');
   }
 
-  if (process.platform === 'linux') {
+  // Since chromium v111 headless mode in arm based macs is not working with `--disable-gpu`
+  // This is a known issue: headless uses swiftshader by default and swiftshader's support for WebGL is currently disabled on Arm pending the resolution of https://issuetracker.google.com/issues/165000222.
+  // As a workaround, we force hardware GL drivers on mac.
+  // The best way to do this starting with v112 is by passing --enable-gpu,
+  // v111 and older versions should work with --use-angle.
+  if (os.arch() === 'arm64' && process.platform === 'darwin') {
+    flags.push('--use-angle');
+  } else {
+    flags.push('--disable-gpu');
+  }
+
+  if (os.arch() === 'linux') {
     flags.push('--disable-setuid-sandbox');
   }
 

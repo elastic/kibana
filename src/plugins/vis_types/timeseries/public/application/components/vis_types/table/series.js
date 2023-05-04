@@ -70,6 +70,7 @@ function TableSeriesUI(props) {
           model={props.model}
           onChange={props.onChange}
           indexPatternForQuery={props.indexPatternForQuery}
+          uiRestrictions={props.uiRestrictions}
         />
       );
     }

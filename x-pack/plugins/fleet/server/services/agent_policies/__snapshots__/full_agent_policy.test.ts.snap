@@ -3,6 +3,10 @@
 exports[`getFullAgentPolicy should support a different data output 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -10,6 +14,11 @@ Object {
       "namespace": "default",
       "use_output": "default",
     },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
+    },
   },
   "fleet": Object {
     "hosts": Array [
@@ -46,16 +55,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "default": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
@@ -63,18 +68,31 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
 exports[`getFullAgentPolicy should support a different monitoring output 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -112,16 +130,12 @@ Object {
   },
   "outputs": Object {
     "default": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
@@ -129,18 +143,31 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
 exports[`getFullAgentPolicy should support both different outputs for data and monitoring  1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -178,16 +205,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
@@ -195,5 +218,9 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;

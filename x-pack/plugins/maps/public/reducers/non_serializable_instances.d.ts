@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { AnyAction } from 'redux';
 import { MapStoreState } from './store';
 
@@ -16,6 +16,7 @@ export type NonSerializableState = {
   cancelRequestCallbacks: Map<symbol, () => {}>; // key is request token, value is cancel callback
   eventHandlers: Partial<EventHandlers>;
   chartsPaletteServiceGetColor: (value: string) => string | null;
+  onMapMove?: (lat: number, lon: number, zoom: number) => void;
 };
 
 export interface ResultMeta {
@@ -72,3 +73,11 @@ export function cancelRequest(requestToken?: symbol): AnyAction;
 export function registerCancelCallback(requestToken: symbol, callback: () => void): AnyAction;
 
 export function unregisterCancelCallback(requestToken: symbol): AnyAction;
+
+export function getOnMapMove(
+  state: MapStoreState
+): ((lat: number, lon: number, zoom: number) => void) | undefined;
+
+export function setOnMapMove(
+  onMapMove: (lat: number, lon: number, zoom: number) => void
+): AnyAction;

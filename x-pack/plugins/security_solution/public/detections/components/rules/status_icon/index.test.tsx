@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
-import { RuleStatusIcon } from './index';
+import { RuleStatusIcon } from '.';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleStatusIcon', () => {

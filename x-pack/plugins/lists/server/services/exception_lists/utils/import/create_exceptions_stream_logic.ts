@@ -12,7 +12,9 @@ import { has } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import {
+  CreateCommentsArray,
   ExportExceptionDetails,
+  ImportCommentsArray,
   ImportExceptionListItemSchema,
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
@@ -121,6 +123,24 @@ export const sortExceptionsStream = (): Transform => {
 };
 
 /**
+ * Updates any comments associated with exception items to resemble
+ * comment creation schema.
+ * See issue for context https://github.com/elastic/kibana/issues/124742#issuecomment-1033082093
+ * @returns {array} comments reformatted properly for import
+ */
+export const manageExceptionComments = (
+  comments: ImportCommentsArray | undefined
+): CreateCommentsArray => {
+  if (comments == null || !comments.length) {
+    return [];
+  } else {
+    return comments.map(({ comment }) => ({
+      comment,
+    }));
+  }
+};
+
+/**
  *
  * Validating exceptions logic
  *
@@ -206,8 +226,9 @@ export const validateExceptionsItems = (
 
   return items.map((item: ImportExceptionListItemSchema | Error) => {
     if (!(item instanceof Error)) {
-      const decodedItem = importExceptionListItemSchema.decode(item);
-      const checkedItem = exactCheck(item, decodedItem);
+      const itemWithUpdatedComments = { ...item, comments: manageExceptionComments(item.comments) };
+      const decodedItem = importExceptionListItemSchema.decode(itemWithUpdatedComments);
+      const checkedItem = exactCheck(itemWithUpdatedComments, decodedItem);
 
       return pipe(checkedItem, fold(onLeft, onRight));
     } else {

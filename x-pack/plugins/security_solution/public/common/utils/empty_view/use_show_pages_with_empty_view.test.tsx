@@ -15,10 +15,12 @@ jest.mock('../route/use_route_spy', () => ({
     .mockImplementationOnce(() => [{ pageName: 'rules' }])
     .mockImplementationOnce(() => [{ pageName: 'network' }]),
 }));
-jest.mock('../../../common/containers/sourcerer', () => ({
+jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest
     .fn()
     .mockImplementationOnce(() => [{ indicesExist: false }])
+    .mockImplementationOnce(() => [{ indicesExist: false }])
+    .mockImplementationOnce(() => [{ indicesExist: true }])
     .mockImplementationOnce(() => [{ indicesExist: false }])
     .mockImplementationOnce(() => [{ indicesExist: true }]),
 }));

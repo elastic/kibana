@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { createQueryAlertType } from './create_query_alert_type';
@@ -14,11 +13,14 @@ import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
-import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { sampleDocNoSortId } from '../__mocks__/es_results';
+import { getQueryRuleParams } from '../../rule_schema/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
-jest.mock('../../signals/utils', () => ({
-  ...jest.requireActual('../../signals/utils'),
+jest.mock('../utils/utils', () => ({
+  ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
 }));
 
@@ -29,18 +31,21 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../rule_execution_log/rule_execution_log_client');
-
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
+  const licensing = licensingMock.createSetup();
+  const publicBaseUrl = 'http://somekibanabaseurl.com';
+
   const { dependencies, executor, services } = mocks;
-  const { alerting, eventLogService, lists, logger, ruleDataClient } = dependencies;
+  const { alerting, lists, logger, ruleDataClient } = dependencies;
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     lists,
     logger,
     config: createMockConfig(),
     ruleDataClient,
-    eventLogService,
+    ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
+    version: '8.3',
+    publicBaseUrl,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -52,15 +57,19 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
+        licensing,
+        scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
       })
     );
 
     alerting.registerType(queryAlertType);
 
-    services.search.asCurrentUser.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
@@ -88,7 +97,7 @@ describe('Custom Query Alerts', () => {
       params,
     });
 
-    expect(ruleDataClient.getWriter().bulk).not.toHaveBeenCalled();
+    expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
     expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
   });
 
@@ -96,15 +105,19 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
+        licensing,
+        scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
       })
     );
 
     alerting.registerType(queryAlertType);
 
-    services.search.asCurrentUser.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [sampleDocNoSortId()],
@@ -130,7 +143,7 @@ describe('Custom Query Alerts', () => {
 
     await executor({ params });
 
-    expect(ruleDataClient.getWriter().bulk).toHaveBeenCalled();
+    expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
     expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
   });
 });

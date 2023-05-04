@@ -13,7 +13,8 @@
  */
 
 import moment from 'moment';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
 // Formats the value of an actual or typical field from a machine learning anomaly record.
@@ -28,7 +29,7 @@ export function formatValue(
   value: number[] | number,
   mlFunction: string,
   fieldFormat?: any,
-  record?: AnomalyRecordDoc
+  record?: MlAnomalyRecordDoc
 ) {
   // actual and typical values in anomaly record results will be arrays.
   // Unless the array is multi-valued (as it will be for multi-variate analyses such as lat_long),
@@ -58,25 +59,32 @@ export function formatSingleValue(
   value: number,
   mlFunction?: string,
   fieldFormat?: any,
-  record?: AnomalyRecordDoc
+  record?: MlAnomalyRecordDoc
 ) {
   if (value === undefined || value === null) {
     return '';
   }
 
-  // If the analysis function is time_of_week/day, format as day/time.
-  // For time_of_week / day, actual / typical is the UTC offset in seconds from the
-  // start of the week / day, so need to manipulate to UTC moment of the start of the week / day
-  // that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
-  // revert back to configured timezone for formatting.
   if (mlFunction === 'time_of_week') {
-    const d =
+    const date =
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)
         : new Date();
-    const utcMoment = moment.utc(d).startOf('week').add(value, 's');
+    /**
+     * For time_of_week we model "time in UTC" modulo "duration of week in seconds".
+     * This means the numbers we output from the backend are seconds after a whole number of weeks after 1/1/1970 in UTC.
+     */
+    const remainder = moment(date).unix() % moment.duration(1, 'week').asSeconds();
+    const offset = moment.duration(remainder, 'seconds');
+    const utcMoment = moment.utc(date).subtract(offset).startOf('day').add(value, 's');
     return moment(utcMoment.valueOf()).format('ddd HH:mm');
   } else if (mlFunction === 'time_of_day') {
+    /**
+     * For time_of_day, actual / typical is the UTC offset in seconds from the
+     * start of the day, so need to manipulate to UTC moment of the start of the day
+     * that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
+     * revert to configured timezone for formatting.
+     */
     const d =
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)

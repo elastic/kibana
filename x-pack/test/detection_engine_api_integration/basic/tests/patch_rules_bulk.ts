@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
@@ -42,14 +42,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', name: 'some other name' }])
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch both rule names
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { rule_id: 'rule-1', name: 'some other name' },
@@ -70,11 +70,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule1 = getSimpleRuleOutput();
         outputRule1.name = 'some other name';
-        outputRule1.version = 2;
+        outputRule1.revision = 1;
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
-        outputRule2.version = 2;
+        outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
@@ -87,14 +87,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ id: createRuleBody.id, name: 'some other name' }])
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch both rule names
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { id: createRule1.id, name: 'some other name' },
@@ -115,11 +115,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
         outputRule1.name = 'some other name';
-        outputRule1.version = 2;
+        outputRule1.revision = 1;
 
         const outputRule2 = getSimpleRuleOutputWithoutRuleId('rule-2');
         outputRule2.name = 'some other name';
-        outputRule2.version = 2;
+        outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
@@ -132,24 +132,24 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ id: createdBody.id, name: 'some other name' }])
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should not change the version of a rule when it patches only enabled', async () => {
+      it('should not change the revision of a rule when it patches only enabled', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', enabled: false }])
           .expect(200);
@@ -161,12 +161,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it patches enabled and another property', async () => {
+      it('should change the revision of a rule when it patches enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', severity: 'low', enabled: false }])
           .expect(200);
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
@@ -185,14 +185,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch a simple rule's timeline_title
         await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' }])
           .expect(200);
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', name: 'some other name' }])
           .expect(200);
@@ -201,7 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.name = 'some other name';
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
-        outputRule.version = 3;
+        outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
@@ -209,7 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' }])
           .expect(200);
@@ -227,7 +227,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 200 but give a 404 in the message if it is given a fake rule_id', async () => {
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'fake_id', name: 'some other name' }])
           .expect(200);
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch one rule name and give a fake id for the second
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { rule_id: 'rule-1', name: 'some other name' },
@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
@@ -275,7 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // patch one rule name and give a fake id for the second
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { id: createdBody.id, name: 'some other name' },
@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([

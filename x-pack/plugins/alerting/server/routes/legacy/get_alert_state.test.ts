@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { getAlertStateRoute } from './get_alert_state';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../../rules_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../lib/license_api_access.ts', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

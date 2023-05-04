@@ -12,9 +12,9 @@ import {
   Direction,
   TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getDocValueFields, getFieldsToRequest, getFilterValue } from './utils';
+import { getFieldsToRequest, getFilterValue } from './utils';
 
 const TO = '3000-01-01T00:00:00.000Z';
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   const getPostBody = (): JsonObject => ({
     defaultIndex: ['auditbeat-*'],
-    docValueFields: getDocValueFields(),
     factoryQueryType: TimelineEventsQueries.all,
     entityType: 'events',
     fieldRequested: getFieldsToRequest(),
@@ -49,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         field: '@timestamp',
         direction: Direction.desc,
-        type: 'number',
+        esTypes: ['date'],
       },
     ],
     timerange: {

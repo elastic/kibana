@@ -21,8 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
   const FLIGHTS_CANVAS_APPLINK_PATH =
     '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0'; // includes default ID of the flights canvas applink path
 
-  // Failing: See https://github.com/elastic/kibana/issues/121051
-  describe.skip('sample data apis', () => {
+  const includesPathInAppLinks = (appLinks: Array<{ path: string }>, path: string): boolean => {
+    return appLinks.some((item) => item.path === path);
+  };
+
+  describe('sample data apis', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });
@@ -42,7 +45,9 @@ export default function ({ getService }: FtrProviderContext) {
           // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
           // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-          expect(flightsData.appLinks[0].path).to.be(FLIGHTS_CANVAS_APPLINK_PATH);
+          expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
+            true
+          );
         });
       });
 
@@ -59,26 +64,27 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(resp.body).to.eql({
             elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
-            kibanaSavedObjectsLoaded: 11,
+            kibanaSavedObjectsLoaded: 8,
           });
         });
 
-        it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-          const resp = await es.search<{ timestamp: string }>({
-            index: 'kibana_sample_data_flights',
-            body: {
-              sort: [{ timestamp: { order: 'desc' } }],
-            },
+        // Failing: See https://github.com/elastic/kibana/issues/121051
+        describe.skip('dates', () => {
+          it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
+            const resp = await es.search<{ timestamp: string }>({
+              index: 'kibana_sample_data_flights',
+              body: {
+                sort: [{ timestamp: { order: 'desc' } }],
+              },
+            });
+
+            const doc = resp.hits.hits[0];
+            const docMilliseconds = Date.parse(doc._source!.timestamp);
+            const nowMilliseconds = Date.now();
+            const delta = Math.abs(nowMilliseconds - docMilliseconds);
+            expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 5);
           });
 
-          const doc = resp.hits.hits[0];
-          const docMilliseconds = Date.parse(doc._source!.timestamp);
-          const nowMilliseconds = Date.now();
-          const delta = Math.abs(nowMilliseconds - docMilliseconds);
-          expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 5);
-        });
-
-        describe('parameters', () => {
           it('should load elasticsearch index containing sample data with dates relative to now parameter', async () => {
             const nowString = `2000-01-01T00:00:00`;
             await supertest.post(`${apiPath}/flights?now=${nowString}`).set('kbn-xsrf', 'kibana');
@@ -109,11 +115,15 @@ export default function ({ getService }: FtrProviderContext) {
           // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           if (space === 'default') {
             expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-            expect(flightsData.appLinks[0].path).to.be(FLIGHTS_CANVAS_APPLINK_PATH);
+            expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
+              true
+            );
           } else {
             // the sample data objects installed in the 'other' space had their IDs regenerated upon import
             expect(flightsData.overviewDashboard).not.to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-            expect(flightsData.appLinks[0].path).not.to.be(FLIGHTS_CANVAS_APPLINK_PATH);
+            expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
+              false
+            );
           }
         });
       });
@@ -145,7 +155,9 @@ export default function ({ getService }: FtrProviderContext) {
           // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
           // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-          expect(flightsData.appLinks[0].path).to.be(FLIGHTS_CANVAS_APPLINK_PATH);
+          expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
+            true
+          );
         });
       });
     }

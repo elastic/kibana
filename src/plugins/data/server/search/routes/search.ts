@@ -8,8 +8,8 @@
 
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
+import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { getRequestAbortedSignal } from '../../lib';
-import { reportServerError } from '../../../../kibana_utils/server';
 import type { DataPluginRouter } from '../types';
 
 export function registerSearchRoute(router: DataPluginRouter): void {
@@ -21,8 +21,6 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           strategy: schema.string(),
           id: schema.maybe(schema.string()),
         }),
-
-        query: schema.object({}, { unknowns: 'allow' }),
 
         body: schema.object(
           {
@@ -47,8 +45,9 @@ export function registerSearchRoute(router: DataPluginRouter): void {
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const response = await context
-          .search!.search(
+        const search = await context.search;
+        const response = await search
+          .search(
             { ...searchRequest, id },
             {
               abortSignal,
@@ -77,15 +76,14 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           strategy: schema.string(),
           id: schema.string(),
         }),
-
-        query: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {
       const { strategy, id } = request.params;
 
       try {
-        await context.search!.cancel(id, { strategy });
+        const search = await context.search;
+        await search.cancel(id, { strategy });
         return res.ok();
       } catch (err) {
         return reportServerError(res, err);

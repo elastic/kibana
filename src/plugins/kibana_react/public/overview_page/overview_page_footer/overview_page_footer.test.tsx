@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),

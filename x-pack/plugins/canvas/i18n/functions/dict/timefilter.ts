@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { timefilter } from '../../../canvas_plugin_src/functions/common/timefilter';
+import type { timefilter } from '../../../canvas_plugin_src/functions/common/timefilter';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { ISO8601, ELASTICSEARCH, DATEMATH } from '../../constants';

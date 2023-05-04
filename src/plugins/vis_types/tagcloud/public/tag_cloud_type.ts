@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
@@ -38,8 +38,10 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
         },
       },
     },
+    fetchDatatable: true,
     toExpressionAst,
     editorConfig: {
+      enableDataViewChange: true,
       optionsTemplate: getTagCloudOptions({
         palettes,
       }),
@@ -61,6 +63,7 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
             '!geo_centroid',
             '!filtered_metric',
             '!single_percentile',
+            '!single_percentile_rank',
           ],
           defaults: [{ schema: 'metric', type: 'count' }],
         },

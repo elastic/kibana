@@ -8,13 +8,14 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIconTip,
   EuiTitle,
   EuiButtonEmpty,
   EuiText,
@@ -24,35 +25,30 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { DiscoverServices } from '../../build_services';
-import { useNavigationProps } from '../../utils/use_navigation_props';
-import { ElasticSearchHit } from '../../types';
+import { useNavigationProps } from '../../hooks/use_navigation_props';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
-interface Props {
+export interface DiscoverGridFlyoutProps {
+  savedSearchId?: string;
+  filters?: Filter[];
   columns: string[];
-  hit: ElasticSearchHit;
-  hits?: ElasticSearchHit[];
-  indexPattern: IndexPattern;
+  hit: DataTableRecord;
+  hits?: DataTableRecord[];
+  dataView: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  services: DiscoverServices;
-  setExpandedDoc: (doc: ElasticSearchHit) => void;
+  setExpandedDoc: (doc: DataTableRecord) => void;
 }
 
-type ElasticSearchHitWithRouting = ElasticSearchHit & { _routing?: string };
-
-function getDocFingerprintId(doc: ElasticSearchHitWithRouting) {
-  const routing = doc._routing || '';
-  return [doc._index, doc._id, routing].join('||');
-}
-
-function getIndexByDocId(hits: ElasticSearchHit[], id: string) {
+function getIndexByDocId(hits: DataTableRecord[], id: string) {
   return hits.findIndex((h) => {
-    return getDocFingerprintId(h) === id;
+    return h.id === id;
   });
 }
 /**
@@ -61,20 +57,22 @@ function getIndexByDocId(hits: ElasticSearchHit[], id: string) {
 export function DiscoverGridFlyout({
   hit,
   hits,
-  indexPattern,
+  dataView,
   columns,
+  savedSearchId,
+  filters,
   onFilter,
   onClose,
   onRemoveColumn,
   onAddColumn,
-  services,
   setExpandedDoc,
-}: Props) {
+}: DiscoverGridFlyoutProps) {
+  const services = useDiscoverServices();
   // Get actual hit with updated highlighted searches
-  const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
+  const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
   const activePage = useMemo<number>(() => {
-    const id = getDocFingerprintId(hit);
+    const id = hit.id;
     if (!hits || pageCount <= 1) {
       return -1;
     }
@@ -83,9 +81,9 @@ export function DiscoverGridFlyout({
   }, [hits, hit, pageCount]);
 
   const setPage = useCallback(
-    (pageIdx: number) => {
-      if (hits && hits[pageIdx]) {
-        setExpandedDoc(hits[pageIdx]);
+    (index: number) => {
+      if (hits && hits[index]) {
+        setExpandedDoc(hits[index]);
       }
     },
     [hits, setExpandedDoc]
@@ -102,14 +100,9 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { singleDocProps, surrDocsProps } = useNavigationProps({
-    indexPatternId: indexPattern.id!,
-    rowIndex: hit._index,
-    rowId: hit._id,
-    filterManager: services.filterManager,
-    addBasePath: services.addBasePath,
-    columns,
-  });
+  const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
+    { dataView, rowIndex: hit.raw._index, rowId: hit.raw._id, columns, filters, savedSearchId }
+  );
 
   return (
     <EuiPortal>
@@ -147,32 +140,60 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem grow={false}>
+              {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
-                size="xs"
+                size="s"
+                iconSize="s"
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
-                {...singleDocProps}
+                href={singleDocHref}
+                onClick={onOpenSingleDoc}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="documents"
-                  flush="left"
-                  {...surrDocsProps}
-                  data-test-subj="docTableRowAction"
-                >
-                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
-                    defaultMessage: 'Surrounding documents',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+            {dataView.isTimeBased() && dataView.id && (
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButtonEmpty
+                    size="s"
+                    iconSize="s"
+                    iconType="documents"
+                    flush="left"
+                    onClick={onOpenContextView}
+                    href={contextViewHref}
+                    data-test-subj="docTableRowAction"
+                  >
+                    {i18n.translate(
+                      'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
+                      {
+                        defaultMessage: 'Surrounding documents',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'discover.grid.tableRow.viewSurroundingDocumentsHover',
+                      {
+                        defaultMessage:
+                          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+                      }
+                    )}
+                    type="questionInCircle"
+                    color="subdued"
+                    position="right"
+                    iconProps={{
+                      className: 'eui-alignTop',
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
@@ -195,15 +216,8 @@ export function DiscoverGridFlyout({
           <DocViewer
             hit={actualHit}
             columns={columns}
-            indexPattern={indexPattern}
-            filter={(mapping, value, mode) => {
-              onFilter(mapping, value, mode);
-              services.toastNotifications.addSuccess(
-                i18n.translate('discover.grid.flyout.toastFilterAdded', {
-                  defaultMessage: `Filter was added`,
-                })
-              );
-            }}
+            dataView={dataView}
+            filter={onFilter}
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
               services.toastNotifications.addSuccess(

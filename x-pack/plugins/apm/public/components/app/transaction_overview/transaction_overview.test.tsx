@@ -7,9 +7,9 @@
 
 import { queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
@@ -20,9 +20,12 @@ import * as useServiceAgentNameHook from '../../../context/apm_service/use_servi
 import {
   disableConsoleWarning,
   renderWithTheme,
-} from '../../../utils/testHelpers';
-import { fromQuery } from '../../shared/Links/url_helpers';
-import { TransactionOverview } from './';
+} from '../../../utils/test_helpers';
+import { fromQuery } from '../../shared/links/url_helpers';
+import { TransactionOverview } from '.';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
@@ -48,7 +51,10 @@ function setup({
   // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
-    .mockReturnValue(serviceTransactionTypes);
+    .mockReturnValue({
+      transactionTypes: serviceTransactionTypes,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   // mock agent
   jest
@@ -56,6 +62,7 @@ function setup({
     .mockReturnValue({
       agentName: 'nodejs',
       runtimeName: 'node',
+      serverlessType: undefined,
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });
@@ -63,15 +70,21 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper history={history}>
-        <UrlParamsProvider>
-          <ApmServiceContextProvider>
-            <TransactionOverview />
-          </ApmServiceContextProvider>
-        </UrlParamsProvider>
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <IntlProvider locale="en">
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper history={history}>
+          <UrlParamsProvider>
+            <MockTimeRangeContextProvider>
+              <ApmTimeRangeMetadataContextProvider>
+                <ApmServiceContextProvider>
+                  <TransactionOverview />
+                </ApmServiceContextProvider>
+              </ApmTimeRangeMetadataContextProvider>
+            </MockTimeRangeContextProvider>
+          </UrlParamsProvider>
+        </MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
+    </IntlProvider>
   );
 }
 

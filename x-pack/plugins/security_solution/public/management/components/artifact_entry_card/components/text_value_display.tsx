@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { CommonProps, EuiText, EuiToolTip } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
@@ -43,7 +45,7 @@ export const TextValueDisplay = memo<TextValueDisplayProps>(
     }, [bold, children]);
 
     return (
-      <EuiText size={size} data-test-subj={dataTestSubj}>
+      <EuiText className={cssClassNames} size={size} data-test-subj={dataTestSubj}>
         {withTooltip &&
         'string' === typeof children &&
         children.length > 0 &&

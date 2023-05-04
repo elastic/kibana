@@ -14,6 +14,20 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
+export const SAVED_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
+  {
+    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
+  }
+);
+
+export const EQL_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
+  {
+    defaultMessage: 'An EQL query is required.',
+  }
+);
+
 export const INVALID_CUSTOM_QUERY = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
   {
@@ -64,6 +78,22 @@ export const EQL_QUERY_BAR_LABEL = i18n.translate(
   }
 );
 
+export const SAVED_QUERY_FORM_ROW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryFormRowLabel',
+  {
+    defaultMessage: 'Saved query',
+  }
+);
+
+export const getSavedQueryCheckboxLabel = (savedQueryName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldShouldLoadQueryDynamicallyLabel',
+    {
+      defaultMessage: 'Load saved query "{savedQueryName}" dynamically on each rule execution',
+      values: { savedQueryName },
+    }
+  );
+
 export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
   {
@@ -82,5 +112,68 @@ export const THREAT_MATCH_EMPTIES = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError',
   {
     defaultMessage: 'All matches require both a field and threat index field.',
+  }
+);
+
+export const SOURCE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.source',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const DATA_SOURCE_GUIDE_SUB_TITLE = i18n.translate(
+  'xpack.securitySolution.detections.dataSource.popover.title',
+  {
+    defaultMessage: 'Select a data source',
+  }
+);
+
+export const DATA_SOURCE_GUIDE_TITLE = i18n.translate(
+  'xpack.securitySolution.detections.dataSource.popover.subTitle',
+  {
+    defaultMessage: 'Data sources',
+  }
+);
+
+export const DATA_SOURCE_GUIDE_CONTENT = i18n.translate(
+  'xpack.securitySolution.detections.dataSource.popover.content',
+  {
+    defaultMessage: 'Rules can now query index patterns or data views.',
+  }
+);
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule Preview',
+  }
+);
+
+export const ALERT_SUPPRESSION_ACCORDION_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionAccordionButtonLabel',
+  {
+    defaultMessage: 'Suppression Configuration',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsLabel',
+  {
+    defaultMessage: 'If “Suppress by” field does not exist',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsSuppressLabel',
+  {
+    defaultMessage: 'Suppress on missing field value',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
+  {
+    defaultMessage: 'Do not suppress',
   }
 );

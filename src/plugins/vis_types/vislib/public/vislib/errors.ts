@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n } from '@kbn/i18n';
-import { KbnError } from '../../../../kibana_utils/public';
+import { KbnError } from '@kbn/kibana-utils-plugin/public';
 
 export class VislibError extends KbnError {
   constructor(message: string) {
@@ -30,12 +30,6 @@ export class InvalidLogScaleValues extends VislibError {
 export class ContainerTooSmall extends VislibError {
   constructor() {
     super('This container is too small to render the visualization');
-  }
-}
-
-export class PieContainsAllZeros extends VislibError {
-  constructor() {
-    super('No results displayed because all values equal 0.');
   }
 }
 

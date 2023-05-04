@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { IEvent } from '@kbn/event-log-plugin/server';
 import { AlertInstanceState } from '../types';
-import { IEvent } from '../../../event_log/server';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;
 
 interface CreateAlertEventLogRecordParams {
+  executionId?: string;
   ruleId: string;
   ruleType: UntypedNormalizedRuleType;
   action: string;
+  spaceId?: string;
+  consumer?: string;
   ruleName?: string;
   instanceId?: string;
   message?: string;
   state?: AlertInstanceState;
   group?: string;
-  subgroup?: string;
   namespace?: string;
   timestamp?: string;
+  alertUuid?: string;
   task?: {
     scheduled?: string;
     scheduleDelay?: number;
@@ -33,17 +36,50 @@ interface CreateAlertEventLogRecordParams {
     typeId: string;
     relation?: string;
   }>;
+  flapping?: boolean;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
+  maintenanceWindowIds?: string[];
+  ruleRevision?: number;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
-  const { ruleType, action, state, message, task, ruleId, group, subgroup, namespace } = params;
+  const {
+    executionId,
+    ruleType,
+    action,
+    state,
+    message,
+    task,
+    ruleId,
+    group,
+    namespace,
+    consumer,
+    spaceId,
+    flapping,
+    alertUuid,
+    alertSummary,
+    maintenanceWindowIds,
+    ruleRevision,
+  } = params;
   const alerting =
-    params.instanceId || group || subgroup
+    params.instanceId || group || alertSummary
       ? {
           alerting: {
             ...(params.instanceId ? { instance_id: params.instanceId } : {}),
             ...(group ? { action_group_id: group } : {}),
-            ...(subgroup ? { action_subgroup: subgroup } : {}),
+            ...(alertSummary
+              ? {
+                  summary: {
+                    new: { count: alertSummary.new },
+                    ongoing: { count: alertSummary.ongoing },
+                    recovered: { count: alertSummary.recovered },
+                  },
+                }
+              : {}),
           },
         }
       : undefined;
@@ -55,9 +91,26 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       category: [ruleType.producer],
       ...(state?.start ? { start: state.start as string } : {}),
       ...(state?.end ? { end: state.end as string } : {}),
-      ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+      ...(state?.duration !== undefined ? { duration: state.duration as string } : {}),
     },
     kibana: {
+      alert: {
+        ...(flapping !== undefined ? { flapping } : {}),
+        ...(maintenanceWindowIds ? { maintenance_window_ids: maintenanceWindowIds } : {}),
+        ...(alertUuid ? { uuid: alertUuid } : {}),
+        rule: {
+          revision: ruleRevision,
+          rule_type_id: ruleType.id,
+          ...(consumer ? { consumer } : {}),
+          ...(executionId
+            ? {
+                execution: {
+                  uuid: executionId,
+                },
+              }
+            : {}),
+        },
+      },
       ...(alerting ? alerting : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
@@ -66,6 +119,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         type_id: so.typeId,
         namespace,
       })),
+      ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
     },
     ...(message ? { message } : {}),

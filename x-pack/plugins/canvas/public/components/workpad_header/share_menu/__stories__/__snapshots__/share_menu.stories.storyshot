@@ -3,14 +3,14 @@
 exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
 <div>
   <div
-    className="euiPopover euiPopover--anchorDownLeft"
+    className="euiPopover emotion-euiPopover"
   >
     <div
-      className="euiPopover__anchor"
+      className="euiPopover__anchor css-16vtueo-render"
     >
       <button
         aria-label="Share this workpad"
-        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
         data-test-subj="shareTopNavButton"
         disabled={false}
         onClick={[Function]}
@@ -34,14 +34,14 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
 exports[`Storyshots components/WorkpadHeader/ShareMenu with Reporting 1`] = `
 <div>
   <div
-    className="euiPopover euiPopover--anchorDownLeft"
+    className="euiPopover emotion-euiPopover"
   >
     <div
-      className="euiPopover__anchor"
+      className="euiPopover__anchor css-16vtueo-render"
     >
       <button
         aria-label="Share this workpad"
-        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
         data-test-subj="shareTopNavButton"
         disabled={false}
         onClick={[Function]}

@@ -46,7 +46,8 @@ a|Format dates. Supports relative dates expressions (for example,  "now-15d"). R
 Example:
 
 `{{date event.from “YYYY MM DD”}}` +
-`{{date “now-15”}}`
+`{{date “now-15d”}}` + 
+`{{date “now/d” roundUp=true}}`
 
 |formatNumber
 a|Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.

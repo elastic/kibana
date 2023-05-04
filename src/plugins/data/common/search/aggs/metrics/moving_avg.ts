@@ -12,14 +12,21 @@ import { aggMovingAvgFnName } from './moving_avg_fn';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
-export interface AggParamsMovingAvg extends BaseAggParams {
+export interface CommonAggParamsMovingAvg extends BaseAggParams {
   buckets_path?: string;
   window?: number;
   script?: string;
-  customMetric?: AggConfigSerialized;
   metricAgg?: string;
+}
+
+export interface AggParamsMovingAvgSerialized extends CommonAggParamsMovingAvg {
+  customMetric?: AggConfigSerialized;
+}
+
+export interface AggParamsMovingAvg extends CommonAggParamsMovingAvg {
+  customMetric?: IAggConfig;
 }
 
 const movingAvgTitle = i18n.translate('data.search.aggs.metrics.movingAvgTitle', {

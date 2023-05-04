@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/public';
-import type { VisualizationsSetup } from '../../../visualizations/public';
-import type { ChartsPluginSetup } from '../../../charts/public';
-import type { FieldFormatsStart } from '../../../field_formats/public';
-import type { UsageCollectionSetup } from '../../../usage_collection/public';
-import type { DataPublicPluginStart } from '../../../data/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 import { heatmapVisType } from './vis_type';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypeHeatmapSetupDependencies {
@@ -28,27 +30,28 @@ export interface VisTypeHeatmapPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
+/** @internal */
+export interface VisTypeHeatmapStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
+}
+
 export class VisTypeHeatmapPlugin {
   setup(
     core: CoreSetup<VisTypeHeatmapPluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies
   ) {
     if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
-      const trackUiMetric = usageCollection?.reportUiCounter.bind(
-        usageCollection,
-        'vis_type_heatmap'
-      );
-
       visualizations.createBaseVisualization(
         heatmapVisType({
           showElasticChartsOptions: true,
           palettes: charts.palettes,
-          trackUiMetric,
         })
       );
     }
     return {};
   }
 
-  start() {}
+  start(core: CoreStart, { dataViews }: VisTypeHeatmapStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
 }

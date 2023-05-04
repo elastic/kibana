@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/detect_logstash_management';
+import fixture from './fixtures/detect_logstash_management.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

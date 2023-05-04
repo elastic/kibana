@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ServiceName } from '../../types';
 import { ElasticsearchAssetType, KibanaAssetType } from '../../types';
 
-// only allow Kibana assets for the kibana key, ES asssets for elasticsearch, etc
+// only allow Kibana assets for the kibana key, ES assets for elasticsearch, etc
 type ServiceNameToAssetTypes = Record<Extract<ServiceName, 'kibana'>, KibanaAssetType[]> &
   Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetType[]>;
 
@@ -34,6 +34,9 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   }),
   transform: i18n.translate('xpack.fleet.epm.assetTitles.transforms', {
     defaultMessage: 'Transforms',
+  }),
+  index: i18n.translate('xpack.fleet.epm.assetTitles.indices', {
+    defaultMessage: 'Indices',
   }),
   index_pattern: i18n.translate('xpack.fleet.epm.assetTitles.indexPatterns', {
     defaultMessage: 'Index patterns',
@@ -62,6 +65,12 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   security_rule: i18n.translate('xpack.fleet.epm.assetTitles.securityRules', {
     defaultMessage: 'Security rules',
   }),
+  osquery_pack_asset: i18n.translate('xpack.fleet.epm.assetTitles.osqueryPackAssets', {
+    defaultMessage: 'Osquery packs',
+  }),
+  osquery_saved_query: i18n.translate('xpack.fleet.epm.assetTitles.osquerySavedQuery', {
+    defaultMessage: 'Osquery saved queries',
+  }),
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'ML modules',
   }),
@@ -74,6 +83,12 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   tag: i18n.translate('xpack.fleet.epm.assetTitles.tag', {
     defaultMessage: 'Tag',
   }),
+  csp_rule_template: i18n.translate(
+    'xpack.fleet.epm.assetTitles.cloudSecurityPostureRuleTemplate',
+    {
+      defaultMessage: 'Cloud Security Posture rule template',
+    }
+  ),
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -89,8 +104,11 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   map: 'emsApp',
   lens: 'lensApp',
   security_rule: 'securityApp',
+  csp_rule_template: 'securityApp', // TODO ICON
   ml_module: 'mlApp',
   tag: 'tagApp',
+  osquery_pack_asset: 'osqueryApp',
+  osquery_saved_query: 'osqueryApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

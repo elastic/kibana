@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
 import { GraphPlugin } from './plugin';

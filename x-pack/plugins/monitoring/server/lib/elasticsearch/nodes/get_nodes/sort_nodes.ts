@@ -9,7 +9,10 @@ import { orderBy } from 'lodash';
 
 type Node = Record<string, any>;
 
-export function sortNodes(nodes: Node[], sort?: { field: string; direction: 'asc' | 'desc' }) {
+export function sortNodes<T extends Node>(
+  nodes: T[],
+  sort?: { field: string; direction: 'asc' | 'desc' }
+) {
   if (!sort || !sort.field) {
     return nodes;
   }

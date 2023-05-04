@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "groups": ["uptime"],
   "description": "Uptime Heartbeat: Identify periods of increased latency across geographical regions.",
   "analysis_config": {

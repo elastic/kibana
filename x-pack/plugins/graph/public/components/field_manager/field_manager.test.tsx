@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, MouseEvent } from 'react';
 import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
@@ -98,6 +98,7 @@ describe('field_manager', () => {
   });
 
   it('should select fields from picker', () => {
+    const event = {} as MouseEvent;
     expect(
       getInstance()
         .find(FieldPicker)
@@ -108,9 +109,11 @@ describe('field_manager', () => {
     ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
-      getInstance().find(FieldPicker).dive().find(EuiSelectable).prop('onChange')!([
-        { checked: 'on', label: 'field3' },
-      ]);
+      getInstance().find(FieldPicker).dive().find(EuiSelectable).prop('onChange')!(
+        [{ checked: 'on', label: 'field3' }],
+        event,
+        { checked: 'on', label: 'field3' }
+      );
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({

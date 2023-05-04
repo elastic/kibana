@@ -7,31 +7,32 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
-import { Query } from '@kbn/es-query';
-import {
-  buildBaseFilterCriteria,
-  buildSamplerAggregation,
-  getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
+import type { Query } from '@kbn/es-query';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { AggCardinality } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import { IKibanaSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
-import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
+import type { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
+import type {
+  Aggs,
+  OverallStatsSearchStrategyParams,
+  SamplingOption,
+} from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
-  aggregatableFields: string[],
-  samplerShardSize: number,
+  aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'],
+  samplingOption: SamplingOption,
   timeFieldName: string | undefined,
   earliestMs?: number,
   latestMs?: number,
   datafeedConfig?: estypes.MlDatafeed,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
   const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
@@ -48,23 +49,28 @@ export const checkAggregatableFieldsExistRequest = (
       : {}),
   };
 
-  aggregatableFields.forEach((field, i) => {
+  aggregatableFields.forEach(({ name: field, supportedAggs }, i) => {
     const safeFieldName = getSafeAggregationName(field, i);
-    aggs[`${safeFieldName}_count`] = {
-      filter: { exists: { field } },
-    };
 
-    let cardinalityField: AggCardinality;
-    if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
-      cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
-        cardinality: { script: datafeedConfig?.script_fields[field].script },
-      };
-    } else {
-      cardinalityField = {
-        cardinality: { field },
+    if (supportedAggs.has('count')) {
+      aggs[`${safeFieldName}_count`] = {
+        filter: { exists: { field } },
       };
     }
-    aggs[`${safeFieldName}_cardinality`] = cardinalityField;
+
+    if (supportedAggs.has('cardinality')) {
+      let cardinalityField: AggCardinality;
+      if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+        cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
+          cardinality: { script: datafeedConfig?.script_fields[field].script },
+        };
+      } else {
+        cardinalityField = {
+          cardinality: { field },
+        };
+      }
+      aggs[`${safeFieldName}_cardinality`] = cardinalityField;
+    }
   });
 
   const searchBody = {
@@ -73,7 +79,9 @@ export const checkAggregatableFieldsExistRequest = (
         filter: filterCriteria,
       },
     },
-    ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
+    ...(isPopulatedObject(aggs)
+      ? { aggs: buildAggregationWithSamplingOption(aggs, samplingOption) }
+      : {}),
     ...(isPopulatedObject(combinedRuntimeMappings)
       ? { runtime_mappings: combinedRuntimeMappings }
       : {}),
@@ -81,23 +89,37 @@ export const checkAggregatableFieldsExistRequest = (
 
   return {
     index,
-    track_total_hits: true,
+    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
+    track_total_hits: false,
     size,
     body: searchBody,
   };
 };
 
 export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
-  aggregatableFields: string[];
+  aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'];
 }
+
+export type NonAggregatableFieldOverallStats = IKibanaSearchResponse;
+
+export function isAggregatableFieldOverallStats(
+  arg: unknown
+): arg is AggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
+export function isNonAggregatableFieldOverallStats(
+  arg: unknown
+): arg is NonAggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['rawResponse']);
+}
+
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
-  aggregatableFields: string[],
-  samplerShardSize: number,
+  aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'],
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
-    totalCount: 0,
     aggregatableExistsFields: [] as AggregatableField[],
     aggregatableNotExistsFields: [] as AggregatableField[],
   };
@@ -106,27 +128,30 @@ export const processAggregatableFieldsExistResponse = (
 
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
-    const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
-    stats.totalCount = totalCount as number;
 
-    const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-    const sampleCount =
-      samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
-    aggregatableFieldsChunk.forEach((field, i) => {
+    const aggsPath = ['sample'];
+    const sampleCount = aggregations.sample.doc_count;
+    aggregatableFieldsChunk.forEach(({ name: field, supportedAggs }, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
+      // Sampler agg will yield doc_count that's bigger than the actual # of sampled records
+      // because it uses the stored _doc_count if available
+      // https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-doc-count-field.html
+      // therefore we need to correct it by multiplying by the sampled probability
       const count = get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
+      const multiplier =
+        count > sampleCount ? get(aggregations, [...aggsPath, 'probability'], 1) : 1;
       if (count > 0) {
-        const cardinality = get(
-          aggregations,
-          [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
-          0
-        );
+        const cardinality = get(aggregations, [
+          ...aggsPath,
+          `${safeFieldName}_cardinality`,
+          'value',
+        ]);
         stats.aggregatableExistsFields.push({
           fieldName: field,
           existsInDocs: true,
           stats: {
             sampleCount,
-            count,
+            count: count * multiplier,
             cardinality,
           },
         });
@@ -135,11 +160,11 @@ export const processAggregatableFieldsExistResponse = (
           datafeedConfig?.script_fields?.hasOwnProperty(field) ||
           datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
         ) {
-          const cardinality = get(
-            aggregations,
-            [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
-            0
-          );
+          const cardinality = get(aggregations, [
+            ...aggsPath,
+            `${safeFieldName}_cardinality`,
+            'value',
+          ]);
           stats.aggregatableExistsFields.push({
             fieldName: field,
             existsInDocs: true,
@@ -161,14 +186,13 @@ export const processAggregatableFieldsExistResponse = (
   });
 
   return stats as {
-    totalCount: number;
     aggregatableExistsFields: AggregatableField[];
     aggregatableNotExistsFields: AggregatableField[];
   };
 };
 
 export const checkNonAggregatableFieldExistsRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   field: string,
   timeFieldName: string | undefined,
@@ -176,7 +200,7 @@ export const checkNonAggregatableFieldExistsRequest = (
   latestMs: number | undefined,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
@@ -194,8 +218,12 @@ export const checkNonAggregatableFieldExistsRequest = (
 
   return {
     index,
+    // @ts-expect-error `size` not allowed at top level for `typesWithBodyKey`
     size,
     body: searchBody,
+    // Small es optimization
+    // Since we only need to know if at least 1 doc exists for the query
+    track_total_hits: 1,
   };
 };
 

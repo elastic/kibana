@@ -7,7 +7,7 @@
 
 import { PaginationBuilder } from './pagination';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { SafeEndpointEvent } from '../../../../../common/endpoint/types';
+import type { SafeEndpointEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,
   timestampSafeVersion,
@@ -22,7 +22,9 @@ describe('Pagination', () => {
   };
   describe('cursor', () => {
     const root = generator.generateEvent();
-    const events = Array.from(generator.relatedEventsGenerator({ node: root, relatedEvents: 5 }));
+    const events = Array.from(
+      generator.relatedEventsGenerator({ node: root, relatedEvents: 5, sessionEntryLeader: 'test' })
+    );
 
     it('does build a cursor when received the same number of events as was requested', () => {
       expect(PaginationBuilder.buildCursorRequestLimit(4, events)).not.toBeNull();
@@ -59,7 +61,7 @@ describe('Pagination', () => {
       const builder = PaginationBuilder.createBuilder(100);
       expect(builder.buildQueryFields('a', 'desc').sort).toStrictEqual([
         { '@timestamp': 'desc' },
-        { a: 'asc' },
+        { a: { order: 'asc', unmapped_type: 'keyword' } },
       ]);
     });
   });

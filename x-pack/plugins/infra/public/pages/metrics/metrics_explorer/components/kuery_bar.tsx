@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
-import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 
 type LoadSuggestionsFn = (
   e: string,
@@ -28,6 +28,7 @@ interface Props {
   value?: string | null;
   placeholder?: string;
   curryLoadSuggestions?: CurryLoadSuggestionsType;
+  compressed?: boolean;
 }
 
 function validateQuery(query: string) {
@@ -46,6 +47,7 @@ export const MetricsExplorerKueryBar = ({
   value,
   placeholder,
   curryLoadSuggestions = defaultCurryLoadSuggestions,
+  compressed,
 }: Props) => {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
@@ -81,6 +83,7 @@ export const MetricsExplorerKueryBar = ({
     <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
+          compressed={compressed}
           aria-label={placeholder}
           isLoadingSuggestions={isLoadingSuggestions}
           isValid={isValid}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
 import { configSchema } from './config';
 import { AlertsConfigType } from './types';
@@ -18,27 +18,35 @@ export type {
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
-  AlertExecutorOptions,
-  AlertActionParams,
-  AlertServices,
-  AlertTypeState,
-  AlertTypeParams,
-  PartialAlert,
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleActionParams,
+  RuleTypeState,
+  RuleTypeParams,
+  PartialRule,
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
+  GetSummarizedAlertsFnOpts,
+  ExecutorType,
+  IRuleTypeAlerts,
 } from './types';
+export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type { FindResult } from './rules_client';
-export type { PublicAlertInstance as AlertInstance } from './alert_instance';
-export { parseDuration } from './lib';
-export { getEsErrorMessage } from './lib/errors';
 export type {
-  IAbortableEsClient,
-  IAbortableClusterClient,
-} from './lib/create_abortable_es_client_factory';
+  FindResult,
+  BulkEditOperation,
+  BulkOperationError,
+  BulkEditOptions,
+  BulkEditOptionsFilter,
+  BulkEditOptionsIds,
+} from './rules_client';
+export type { PublicAlert as Alert } from './alert';
+export { parseDuration, isRuleSnoozed } from './lib';
+export { getEsErrorMessage } from './lib/errors';
+export type { AlertingRulesConfig } from './config';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,
@@ -46,12 +54,27 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+export {
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+  ECS_COMPONENT_TEMPLATE_NAME,
+  ECS_CONTEXT,
+  TOTAL_FIELDS_LIMIT,
+  getComponentTemplate,
+  type PublicFrameworkAlertsService,
+  createOrUpdateIlmPolicy,
+  createOrUpdateComponentTemplate,
+  getIndexTemplate,
+  createOrUpdateIndexTemplate,
+  createConcreteWriteIndex,
+  installWithTimeout,
+} from './alerts_service';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
@@ -63,5 +86,12 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerting.invalidateApiKeysTask.removalDelay',
       { level: 'warning' }
     ),
+    renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
+      level: 'warning',
+    }),
+    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
+    }),
   ],
 };

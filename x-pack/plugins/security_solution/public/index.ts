@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import { PluginSetup } from './types';
+import type { PluginSetup, PluginStart } from './types';
 export type { TimelineModel } from './timelines/store/timeline/model';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
-export type { PluginSetup };
+export type { PluginSetup, PluginStart };
 export { Plugin };

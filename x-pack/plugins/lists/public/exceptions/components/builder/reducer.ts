@@ -16,6 +16,8 @@ import {
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
 
+export type EntryFieldError = Record<string, boolean>;
+
 export interface State {
   disableAnd: boolean;
   disableNested: boolean;
@@ -24,7 +26,8 @@ export interface State {
   addNested: boolean;
   exceptions: ExceptionsBuilderExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
-  errorExists: number;
+  errors: EntryFieldError;
+  warningExists: number;
 }
 
 export type Action =
@@ -55,7 +58,11 @@ export type Action =
     }
   | {
       type: 'setErrorsExist';
-      errorExists: boolean;
+      error: EntryFieldError;
+    }
+  | {
+      type: 'setWarningsExist';
+      warningExists: boolean;
     };
 
 export const exceptionsBuilderReducer =
@@ -120,12 +127,23 @@ export const exceptionsBuilderReducer =
         };
       }
       case 'setErrorsExist': {
-        const { errorExists } = state;
-        const errTotal = action.errorExists ? errorExists + 1 : errorExists - 1;
+        const newErrorsState = {
+          ...state.errors,
+          ...action.error,
+        };
 
         return {
           ...state,
-          errorExists: errTotal < 0 ? 0 : errTotal,
+          errors: newErrorsState,
+        };
+      }
+      case 'setWarningsExist': {
+        const { warningExists } = state;
+        const warnTotal = action.warningExists ? warningExists + 1 : warningExists - 1;
+
+        return {
+          ...state,
+          warningExists: warnTotal < 0 ? 0 : warnTotal,
         };
       }
       default:

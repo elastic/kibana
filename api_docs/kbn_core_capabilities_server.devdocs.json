@@ -1,0 +1,404 @@
+{
+  "id": "@kbn/core-capabilities-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-capabilities-server",
+        "id": "def-common.CapabilitiesSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "CapabilitiesSetup",
+        "description": [
+          "\nAPIs to manage the {@link Capabilities} that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
+        ],
+        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesSetup.registerProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "registerProvider",
+            "description": [
+              "\nRegister a {@link CapabilitiesProvider} to be used to provide {@link Capabilities}\nwhen resolving them.\n"
+            ],
+            "signature": [
+              "(provider: ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-common.CapabilitiesProvider",
+                "text": "CapabilitiesProvider"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-capabilities-server",
+                "id": "def-common.CapabilitiesSetup.registerProvider.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-capabilities-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                    "section": "def-common.CapabilitiesProvider",
+                    "text": "CapabilitiesProvider"
+                  }
+                ],
+                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesSetup.registerSwitcher",
+            "type": "Function",
+            "tags": [],
+            "label": "registerSwitcher",
+            "description": [
+              "\nRegister a {@link CapabilitiesSwitcher} to be used to change the default state\nof the {@link Capabilities} entries when resolving them.\n\nA capabilities switcher can only change the state of existing capabilities.\nCapabilities added or removed when invoking the switcher will be ignored.\n"
+            ],
+            "signature": [
+              "(switcher: ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-common.CapabilitiesSwitcher",
+                "text": "CapabilitiesSwitcher"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-capabilities-server",
+                "id": "def-common.CapabilitiesSetup.registerSwitcher.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "switcher",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-capabilities-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                    "section": "def-common.CapabilitiesSwitcher",
+                    "text": "CapabilitiesSwitcher"
+                  }
+                ],
+                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-capabilities-server",
+        "id": "def-common.CapabilitiesStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CapabilitiesStart",
+        "description": [
+          "\nAPIs to access the application {@link Capabilities}.\n"
+        ],
+        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesStart.resolveCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveCapabilities",
+            "description": [
+              "\nResolve the {@link Capabilities} to be used for given request"
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, options?: ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-common.ResolveCapabilitiesOptions",
+                "text": "ResolveCapabilitiesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
+              ">"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-capabilities-server",
+                "id": "def-common.CapabilitiesStart.resolveCapabilities.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-capabilities-server",
+                "id": "def-common.CapabilitiesStart.resolveCapabilities.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-capabilities-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                    "section": "def-common.ResolveCapabilitiesOptions",
+                    "text": "ResolveCapabilitiesOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-capabilities-server",
+        "id": "def-common.ResolveCapabilitiesOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResolveCapabilitiesOptions",
+        "description": [
+          "\nDefines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.\n"
+        ],
+        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.ResolveCapabilitiesOptions.useDefaultCapabilities",
+            "type": "boolean",
+            "tags": [],
+            "label": "useDefaultCapabilities",
+            "description": [
+              "\nIndicates if capability switchers are supposed to return a default set of capabilities."
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-capabilities-server",
+        "id": "def-common.CapabilitiesProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "CapabilitiesProvider",
+        "description": [
+          "\nSee {@link CapabilitiesSetup}"
+        ],
+        "signature": [
+          "() => Partial<",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
+          ">"
+        ],
+        "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-capabilities-server",
+        "id": "def-common.CapabilitiesSwitcher",
+        "type": "Type",
+        "tags": [],
+        "label": "CapabilitiesSwitcher",
+        "description": [
+          "\nSee {@link CapabilitiesSetup}"
+        ],
+        "signature": [
+          "(request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, uiCapabilities: ",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
+          ", useDefaultCapabilities: boolean) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<Partial<",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
+          ">>"
+        ],
+        "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesSwitcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesSwitcher.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "uiCapabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesSwitcher.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "useDefaultCapabilities",
+            "description": [],
+            "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

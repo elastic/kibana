@@ -7,9 +7,11 @@
 
 import React, { useEffect } from 'react';
 
-import { Route, Switch, useLocation, useParams } from 'react-router-dom';
+import { Switch, useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
@@ -25,7 +27,7 @@ import {
   getContentSourcePath as sourcePath,
   getSourcesPath,
 } from '../../routes';
-import { NotFound } from '../../views/not_found';
+import { NotFound } from '../not_found';
 
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export interface IdToDataProvider {
   [id: string]: DataProvider;

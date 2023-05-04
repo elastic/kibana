@@ -6,13 +6,16 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { ILicense } from '../../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { MlClientLicense } from './ml_client_license';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 describe('MlClientLicense', () => {
+  const startApplicationContractMock = applicationServiceMock.createStartContract();
+
   test('should miss the license update when initialized without postInitFunction', () => {
-    const mlLicense = new MlClientLicense();
+    const mlLicense = new MlClientLicense(startApplicationContractMock);
 
     // upon instantiation the full license doesn't get set
     expect(mlLicense.isFullLicense()).toBe(false);
@@ -35,21 +38,19 @@ describe('MlClientLicense', () => {
   });
 
   test('should not miss the license update when initialized with postInitFunction', (done) => {
-    const mlLicense = new MlClientLicense();
+    const mlLicense = new MlClientLicense(startApplicationContractMock);
 
     // upon instantiation the full license doesn't get set
     expect(mlLicense.isFullLicense()).toBe(false);
 
     const license$ = new Subject();
 
-    mlLicense.setup(license$ as Observable<ILicense>, [
-      (license) => {
-        // when passed in via postInitFunction callback, the license should be valid
-        // even if the license$ observable gets triggered after this setup.
-        expect(license.isFullLicense()).toBe(true);
-        done();
-      },
-    ]);
+    mlLicense.setup(license$ as Observable<ILicense>, (license) => {
+      // when passed in via postInitFunction callback, the license should be valid
+      // even if the license$ observable gets triggered after this setup.
+      expect(license.isFullLicense()).toBe(true);
+      done();
+    });
 
     license$.next({
       check: () => ({ state: 'valid' }),

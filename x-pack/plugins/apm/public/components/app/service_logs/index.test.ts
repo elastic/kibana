@@ -4,55 +4,73 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getInfrastructureKQLFilter } from './';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getInfrastructureKQLFilter } from '.';
 
 describe('service logs', () => {
   const serviceName = 'opbeans-node';
+  const environment = 'production';
 
   describe('getInfrastructureKQLFilter', () => {
-    it('filter by service name', () => {
+    it('filter by service name and environment', () => {
       expect(
-        getInfrastructureKQLFilter(
-          {
-            serviceInfrastructure: {
-              containerIds: [],
-              hostNames: [],
-            },
+        getInfrastructureKQLFilter({
+          data: {
+            containerIds: [],
+            hostNames: [],
+            podNames: [],
           },
-          serviceName
-        )
+          serviceName,
+          environment,
+        })
+      ).toEqual(
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *)'
+      );
+    });
+
+    it('does not filter by environment all', () => {
+      expect(
+        getInfrastructureKQLFilter({
+          data: {
+            containerIds: [],
+            hostNames: [],
+            podNames: [],
+          },
+          serviceName,
+          environment: ENVIRONMENT_ALL.value,
+        })
       ).toEqual('service.name: "opbeans-node"');
     });
 
     it('filter by container id as fallback', () => {
       expect(
-        getInfrastructureKQLFilter(
-          {
-            serviceInfrastructure: {
-              containerIds: ['foo', 'bar'],
-              hostNames: ['baz', `quz`],
-            },
+        getInfrastructureKQLFilter({
+          data: {
+            containerIds: ['foo', 'bar'],
+            hostNames: ['baz', `quz`],
+            podNames: [],
           },
-          serviceName
-        )
+          serviceName,
+          environment,
+        })
       ).toEqual(
-        'service.name: "opbeans-node" or (not service.name and (container.id: "foo" or container.id: "bar"))'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *) or ((container.id: "foo" or container.id: "bar") and not service.name: *)'
       );
     });
 
-    it('filter by host names as fallback', () => {
+    it('does not filter by host names as fallback', () => {
       expect(
-        getInfrastructureKQLFilter(
-          {
-            serviceInfrastructure: {
-              containerIds: [],
-              hostNames: ['baz', `quz`],
-            },
+        getInfrastructureKQLFilter({
+          data: {
+            containerIds: [],
+            hostNames: ['baz', `quz`],
+            podNames: [],
           },
-          serviceName
-        )
+          serviceName,
+          environment,
+        })
       ).toEqual(
-        'service.name: "opbeans-node" or (not service.name and (host.name: "baz" or host.name: "quz"))'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *)'
       );
     });
   });

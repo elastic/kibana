@@ -11,13 +11,6 @@ export const CATEGORY = i18n.translate('xpack.securitySolution.draggables.field.
   defaultMessage: 'Category',
 });
 
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.eventDetails.copyToClipboardTooltip',
-  {
-    defaultMessage: 'Copy to Clipboard',
-  }
-);
-
 export const FIELD = i18n.translate('xpack.securitySolution.draggables.field.fieldLabel', {
   defaultMessage: 'Field',
 });
@@ -25,10 +18,3 @@ export const FIELD = i18n.translate('xpack.securitySolution.draggables.field.fie
 export const TYPE = i18n.translate('xpack.securitySolution.draggables.field.typeLabel', {
   defaultMessage: 'Type',
 });
-
-export const VIEW_CATEGORY = i18n.translate(
-  'xpack.securitySolution.draggables.field.viewCategoryTooltip',
-  {
-    defaultMessage: 'View Category',
-  }
-);

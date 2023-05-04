@@ -6,12 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
 import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
@@ -21,19 +21,29 @@ import { SecurityPlugin } from './plugin';
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
 export type {
+  CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
+  ValidateAPIKeyParams,
   AuthenticationServiceStart,
 } from './authentication';
-export type { CheckPrivilegesPayload } from './authorization';
+export { HTTPAuthorizationHeader } from './authentication';
+export type { CheckPrivilegesPayload, CasesSupportedOperations } from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
-export type { AuditLogger, AuditEvent } from './audit';
+export type { AuditLogger, AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
 export type { AuditServiceSetup } from './audit';
+export type {
+  UserProfileServiceStart,
+  UserProfileBulkGetParams,
+  UserProfileSuggestParams,
+  UserProfileRequiredPrivileges,
+  UserProfileGetCurrentParams,
+} from './user_profile';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
@@ -42,6 +52,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     loginAssistanceMessage: true,
     showInsecureClusterWarning: true,
     sameSiteCookies: true,
+    showNavLinks: true,
   },
 };
 export const plugin: PluginInitializer<

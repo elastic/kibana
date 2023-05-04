@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CompleteTimeline } from '../../objects/timeline';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
   cy.request({
@@ -40,8 +40,8 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           },
         },
         dateRange: {
-          end: '1577881376000',
-          start: '1514809376000',
+          end: '2022-04-01T12:22:56.000Z',
+          start: '2018-01-01T12:22:56.000Z',
         },
         description: timeline.description,
         title: timeline.title,
@@ -98,24 +98,6 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
-  });
-
-export const deleteTimeline = (timelineId: string) => {
-  cy.request({
-    method: 'POST',
-    url: 'api/timeline',
-    body: {
-      id: [timelineId],
-    },
-    headers: { 'kbn-xsrf': 'delete-signals' },
-  });
-};
-
-export const getTimelineById = (timelineId: string) =>
-  cy.request({
-    method: 'GET',
-    url: `api/timeline?id=${timelineId}`,
-    headers: { 'kbn-xsrf': 'timeline-by-id' },
   });
 
 export const loadPrepackagedTimelineTemplates = () =>

@@ -1,0 +1,36 @@
+# For collecting logs from Elasticearch launched from a kibana clone on the docker host
+
+http.enabled: true
+http.host: "0.0.0.0"
+http.port: 5067
+
+filebeat.modules:
+  - module: elasticsearch
+    server:
+      enabled: true
+      var.paths:
+        - /es/8.*/logs/*.log
+        - /es/8.*/logs/*_server.json
+    gc:
+      var.paths:
+        - /es/8.*/logs/gc.log.[0-9]*
+        - /es/8.*/logs/gc.log
+    audit:
+      var.paths:
+        - /es/8.*/logs/*_access.log
+        - /es/8.*/logs/*_audit.json
+    slowlog:
+      var.paths:
+        - /es/8.*/logs/*_index_search_slowlog.log
+        - /es/8.*/logs/*_index_indexing_slowlog.log
+        - /es/8.*/logs/*_index_search_slowlog.json
+        - /es/8.*/logs/*_index_indexing_slowlog.json
+    deprecation:
+      var.paths:
+        - /es/8.*/logs/*_deprecation.log
+        - /es/8.*/logs/*_deprecation.json
+
+output.elasticsearch:
+  hosts: [ "host.docker.internal:9200" ]
+  username: "elastic"
+  password: "changeme"

@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
-import { ButtonColor } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiButtonColor } from '@elastic/eui';
 import { useMemo } from 'react';
-import { ResolverProcessType, NodeDataStatus } from '../types';
+import type { ResolverProcessType, NodeDataStatus } from '../types';
 import { useSymbolIDs } from './use_symbol_ids';
 import { useColors } from './use_colors';
 
@@ -145,6 +145,6 @@ interface NodeStyleConfig {
   descriptionFill: string;
   descriptionText: string;
   isLabelFilled: boolean;
-  labelButtonFill: ButtonColor;
+  labelButtonFill: EuiButtonColor;
   strokeColor: string;
 }

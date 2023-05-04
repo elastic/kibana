@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '../../../common';
 
@@ -28,8 +28,7 @@ export const createSavedQueryService = (http: HttpStart) => {
   // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
     const { savedQueries } = await http.post<{ savedQueries: SavedQuery[] }>(
-      '/api/saved_query/_find',
-      { body: JSON.stringify({ perPage: 10000 }) }
+      '/api/saved_query/_all'
     );
     return savedQueries;
   };

@@ -7,7 +7,8 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { RouteComponentProps, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 

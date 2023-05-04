@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "keystore/**/*",
+    "utils/**/*",
+    "*.js",
+  ],
+  "kbn_references": [
+    { "path": "../setup_node_env/tsconfig.json" },
+    { "path": "../cli/tsconfig.json" },
+    { "path": "../cli_plugin/tsconfig.json" },
+    "@kbn/utils",
+    "@kbn/repo-info",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

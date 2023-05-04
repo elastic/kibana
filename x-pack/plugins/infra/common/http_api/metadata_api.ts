@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ItemTypeRT } from '../../common/inventory_models/types';
+import { ItemTypeRT } from '../inventory_models/types';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
@@ -37,8 +37,8 @@ export const InfraMetadataHostRT = rt.partial({
   name: rt.string,
   hostname: rt.string,
   id: rt.string,
-  ip: rt.array(rt.string),
-  mac: rt.array(rt.string),
+  ip: rt.union([rt.array(rt.string), rt.string]),
+  mac: rt.union([rt.array(rt.string), rt.string]),
   os: InfraMetadataOSRT,
   architecture: rt.string,
   containerized: rt.boolean,

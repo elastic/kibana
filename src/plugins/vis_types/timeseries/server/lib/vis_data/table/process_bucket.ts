@@ -13,8 +13,9 @@ import { buildTableResponse } from './build_response_body';
 import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
 
 import type { Panel } from '../../../../common/types';
+import type { PanelDataArray } from '../../../../common/types/vis_data';
 import type { TableSearchRequestMeta } from '../request_processors/table/types';
-import { PanelDataArray } from '../../../../common/types/vis_data';
+import type { TableResponseProcessorsParams } from '../response_processors/table/types';
 
 function trendSinceLastBucket(data: PanelDataArray[]) {
   if (data.length < 2) {
@@ -36,23 +37,22 @@ export function processBucket({ panel, extractFields }: ProcessTableBucketParams
   return async (bucket: Record<string, unknown>) => {
     const resultSeries = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
-        const timeseries = get(bucket, `${series.id}.timeseries`);
-        const buckets = get(bucket, `${series.id}.buckets`);
-        let meta: TableSearchRequestMeta = {};
+        const response: TableResponseProcessorsParams['response'] = {
+          aggregations: {
+            [series.id]: get(bucket, `${series.id}`),
+          },
+        };
+        const meta = (response.aggregations[series.id]?.meta ?? {}) as TableSearchRequestMeta;
 
-        if (!timeseries && buckets) {
-          meta = get(bucket, `${series.id}.meta`) as TableSearchRequestMeta;
-
-          overwrite(bucket, series.id, {
-            meta,
-            timeseries: {
-              buckets: get(bucket, `${series.id}.buckets`),
-            },
+        if (meta.normalized && !get(response, `aggregations.${series.id}.timeseries`)) {
+          overwrite(response, `aggregations.${series.id}.timeseries`, {
+            buckets: get(bucket, `${series.id}.buckets`),
           });
+          delete response.aggregations[series.id].buckets;
         }
 
         const [result] = await buildTableResponse({
-          bucket,
+          response,
           panel,
           series,
           meta,

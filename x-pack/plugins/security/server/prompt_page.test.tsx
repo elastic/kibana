@@ -8,10 +8,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+
 import { PromptPage } from './prompt_page';
 
-jest.mock('src/core/server/rendering/views/fonts', () => ({
+jest.mock('@kbn/core-rendering-server-internal', () => ({
   Fonts: () => <>MockedFonts</>,
 }));
 
@@ -28,6 +29,7 @@ describe('PromptPage', () => {
         basePath={mockCoreSetup.http.basePath}
         title="Some Title"
         body={<div>Some Body</div>}
+        customBranding={{}}
         actions={[<span>Action#1</span>, <span>Action#2</span>]}
       />
     );
@@ -48,6 +50,7 @@ describe('PromptPage', () => {
         scriptPaths={['/some/script1.js', '/some/script2.js']}
         title="Some Title"
         body={<div>Some Body</div>}
+        customBranding={{}}
         actions={[<span>Action#1</span>, <span>Action#2</span>]}
       />
     );

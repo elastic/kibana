@@ -6,10 +6,14 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { SetStateAction, useEffect, useState } from 'react';
-
-import { fetchQueryAlerts, fetchQueryRuleRegistryAlerts } from './api';
-import { AlertSearchResponse } from './types';
+import { useMemo, useEffect, useState } from 'react';
+import type { SetStateAction } from 'react';
+import type React from 'react';
+import type { fetchQueryRuleRegistryAlerts } from './api';
+import { fetchQueryAlerts } from './api';
+import type { AlertSearchResponse, QueryAlerts } from './types';
+import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
+import type { ALERTS_QUERY_NAMES } from './constants';
 
 type Func = () => Promise<void>;
 
@@ -22,12 +26,44 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
   refetch: Func | null;
 }
 
-interface AlertsQueryParams {
-  fetchMethod?: typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
+type AlertsQueryName = typeof ALERTS_QUERY_NAMES[keyof typeof ALERTS_QUERY_NAMES];
+
+type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
+export interface AlertsQueryParams {
+  fetchMethod?: FetchMethod;
   query: object;
   indexName?: string | null;
   skip?: boolean;
+  /**
+   * The query name is used for performance monitoring with APM
+   */
+  queryName: AlertsQueryName;
 }
+
+/**
+ * Wrapped `fetchMethod` hook that integrates
+ * http-request monitoring using APM transactions.
+ */
+const useTrackedFetchMethod = (fetchMethod: FetchMethod, queryName: string): FetchMethod => {
+  const { startTracking } = useTrackHttpRequest();
+
+  const monitoredFetchMethod = useMemo<FetchMethod>(() => {
+    return async <Hit, Aggs>(params: QueryAlerts) => {
+      const { endTracking } = startTracking({ name: queryName });
+      let result: AlertSearchResponse<Hit, Aggs>;
+      try {
+        result = await fetchMethod<Hit, Aggs>(params);
+        endTracking('success');
+      } catch (err) {
+        endTracking(params.signal.aborted ? 'aborted' : 'error');
+        throw err;
+      }
+      return result;
+    };
+  }, [fetchMethod, queryName, startTracking]);
+
+  return monitoredFetchMethod;
+};
 
 /**
  * Hook for fetching Alerts from the Detection Engine API
@@ -40,6 +76,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   query: initialQuery,
   indexName,
   skip,
+  queryName,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -53,6 +90,8 @@ export const useQueryAlerts = <Hit, Aggs>({
   });
   const [loading, setLoading] = useState(false);
 
+  const fetchAlerts = useTrackedFetchMethod(fetchMethod, queryName);
+
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -61,7 +100,7 @@ export const useQueryAlerts = <Hit, Aggs>({
       try {
         setLoading(true);
 
-        const alertResponse = await fetchMethod<Hit, Aggs>({
+        const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
         });
@@ -94,11 +133,17 @@ export const useQueryAlerts = <Hit, Aggs>({
     if (!isEmpty(query) && !skip) {
       fetchData();
     }
+    if (skip) {
+      setLoading(false);
+      isSubscribed = false;
+      abortCtrl.abort();
+    }
+
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, indexName, skip, fetchMethod]);
+  }, [query, indexName, skip, fetchAlerts]);
 
   return { loading, ...alerts };
 };

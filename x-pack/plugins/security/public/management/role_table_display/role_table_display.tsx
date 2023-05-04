@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import type { ApplicationStart } from 'src/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import type { Role } from '../../../common/model';
 import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';
@@ -31,7 +31,7 @@ export const RoleTableDisplay = ({ role, navigateToApp }: Props) => {
         data-test-subj="roleDeprecationTooltip"
       >
         <div>
-          {role.name} <EuiIcon type="alert" color="warning" size="s" className={'eui-alignTop'} />
+          {role.name} <EuiIcon type="warning" color="warning" size="s" className={'eui-alignTop'} />
         </div>
       </EuiToolTip>
     );

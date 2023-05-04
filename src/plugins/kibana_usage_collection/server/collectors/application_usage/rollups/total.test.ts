@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../../usage_collection/common/constants';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from '../saved_objects_types';
 import { rollTotals } from './total';
 

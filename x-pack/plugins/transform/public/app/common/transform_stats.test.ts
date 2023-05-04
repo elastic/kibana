@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TRANSFORM_STATE } from '../../../common/constants';
+
 import mockTransformListRow from './__mocks__/transform_list_row.json';
 import mockTransformStats from './__mocks__/transform_stats.json';
 
@@ -33,10 +35,26 @@ describe('Transform: Transform stats.', () => {
     expect(getTransformProgress(getRow('transform-completed'))).toBe(100);
   });
 
-  test('isCompletedBatchTransform()', () => {
+  test('isCompletedBatchTransform() — Mock #1', () => {
     expect(isCompletedBatchTransform(getRow('transform-created'))).toBe(false);
     expect(isCompletedBatchTransform(getRow('transform-created-started-stopped'))).toBe(false);
     expect(isCompletedBatchTransform(getRow('transform-running'))).toBe(false);
     expect(isCompletedBatchTransform(getRow('transform-completed'))).toBe(true);
+  });
+
+  test('isCompletedBatchTransform() — Mock #2', () => {
+    // check the transform config/state against the conditions
+    // that will be used by isCompletedBatchTransform()
+    // followed by a call to isCompletedBatchTransform() itself
+    // @ts-expect-error mock data is too loosely typed
+    const row = mockTransformListRow as TransformListRow;
+    expect(row.stats.checkpointing.last.checkpoint === 1).toBe(true);
+    expect(row.config.sync === undefined).toBe(true);
+    expect(row.stats.state === TRANSFORM_STATE.STOPPED).toBe(true);
+    expect(isCompletedBatchTransform(row)).toBe(true);
+
+    // adapt the mock config to resemble a non-completed transform.
+    row.stats.checkpointing.last.checkpoint = 0;
+    expect(isCompletedBatchTransform(row)).toBe(false);
   });
 });

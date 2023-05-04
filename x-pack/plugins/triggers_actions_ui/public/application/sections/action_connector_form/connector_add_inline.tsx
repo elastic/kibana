@@ -22,8 +22,10 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiIconTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
-import { AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { betaBadgeProps } from './beta_badge_props';
+import { RuleAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
@@ -32,7 +34,7 @@ import { ConnectorsSelection } from './connectors_selection';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   connectors: ActionConnector[];
   index: number;
   onAddConnector: () => void;
@@ -63,6 +65,7 @@ export const AddConnectorInline = ({
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
+  const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((subtype) => subtype.id);
   const connectorDropdownErrors = useMemo(
     () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
     [actionTypeRegistered.actionTypeTitle]
@@ -88,7 +91,12 @@ export const AddConnectorInline = ({
   );
 
   useEffect(() => {
-    const filteredConnectors = getValidConnectors(connectors, actionItem, actionTypesIndex);
+    const filteredConnectors = getValidConnectors(
+      connectors,
+      actionItem,
+      actionTypesIndex,
+      allowGroupConnector
+    );
 
     if (filteredConnectors.length > 0) {
       setHasConnectors(true);
@@ -132,6 +140,7 @@ export const AddConnectorInline = ({
         actionTypeRegistered={actionTypeRegistered}
         connectors={connectors}
         onConnectorSelected={onSelectConnector}
+        allowGroupConnector={allowGroupConnector}
       />
     </EuiFormRow>
   );
@@ -155,7 +164,7 @@ export const AddConnectorInline = ({
                 <div>
                   <FormattedMessage
                     defaultMessage="{actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.connectorAddInline.newAlertActionTypeEditTitle"
+                    id="xpack.triggersActionsUI.sections.connectorAddInline.newRuleActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionTypeRegistered.actionTypeTitle,
                     }}
@@ -166,7 +175,7 @@ export const AddConnectorInline = ({
             {!isEmptyActionId && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  type="alert"
+                  type="warning"
                   size="m"
                   color="danger"
                   data-test-subj={`alertActionAccordionErrorTooltip`}
@@ -176,6 +185,14 @@ export const AddConnectorInline = ({
                       id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle'"
                     />
                   }
+                />
+              </EuiFlexItem>
+            )}
+            {actionTypeRegistered && actionTypeRegistered.isExperimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={betaBadgeProps.label}
+                  tooltipContent={betaBadgeProps.tooltipContent}
                 />
               </EuiFlexItem>
             )}

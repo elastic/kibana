@@ -8,14 +8,15 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RouteValidatorConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { RouteValidatorConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
@@ -129,7 +130,14 @@ describe('copy to space', () => {
     it(`records usageStats data`, async () => {
       const createNewCopies = Symbol();
       const overwrite = Symbol();
-      const payload = { spaces: ['a-space'], objects: [], createNewCopies, overwrite };
+      const compatibilityMode = Symbol();
+      const payload = {
+        spaces: ['a-space'],
+        objects: [],
+        createNewCopies,
+        overwrite,
+        compatibilityMode,
+      };
 
       const { copyToSpace, usageStatsClient } = await setup();
 
@@ -144,6 +152,7 @@ describe('copy to space', () => {
         headers: request.headers,
         createNewCopies,
         overwrite,
+        compatibilityMode,
       });
     });
 
@@ -163,7 +172,7 @@ describe('copy to space', () => {
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedWrappers: ['spaces'],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
     });
 
@@ -208,6 +217,23 @@ describe('copy to space', () => {
       expect(() =>
         (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"cannot use [overwrite] with [createNewCopies]"`);
+    });
+
+    it(`does not allow "compatibilityMode" to be used with "createNewCopies"`, async () => {
+      const payload = {
+        spaces: ['a-space'],
+        objects: [{ type: 'foo', id: 'bar' }],
+        compatibilityMode: true,
+        createNewCopies: true,
+      };
+
+      const { copyToSpace } = await setup();
+
+      expect(() =>
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use [compatibilityMode] with [createNewCopies]"`
+      );
     });
 
     it(`requires objects to be unique`, async () => {
@@ -261,6 +287,46 @@ describe('copy to space', () => {
         namespace: 'b-space',
       });
     });
+
+    it('properly forwards compatibility mode setting', async () => {
+      const payload = {
+        spaces: ['a-space', 'b-space'],
+        objects: [{ type: 'visualization', id: 'bar' }],
+        compatibilityMode: true,
+      };
+
+      const { copyToSpace, savedObjectsImporter } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await copyToSpace.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
+
+      const { status } = response;
+
+      expect(status).toEqual(200);
+      expect(savedObjectsImporter.import).toHaveBeenCalledTimes(2);
+      expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          namespace: 'a-space',
+          compatibilityMode: true,
+        })
+      );
+      expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          namespace: 'b-space',
+          compatibilityMode: true,
+        })
+      );
+    });
   });
 
   describe('POST /api/spaces/_resolve_copy_saved_objects_errors', () => {
@@ -285,7 +351,8 @@ describe('copy to space', () => {
 
     it(`records usageStats data`, async () => {
       const createNewCopies = Symbol();
-      const payload = { retries: {}, objects: [], createNewCopies };
+      const compatibilityMode = Symbol();
+      const payload = { retries: {}, objects: [], createNewCopies, compatibilityMode };
 
       const { resolveConflicts, usageStatsClient } = await setup();
 
@@ -299,6 +366,7 @@ describe('copy to space', () => {
       expect(usageStatsClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
         headers: request.headers,
         createNewCopies,
+        compatibilityMode,
       });
     });
 
@@ -326,7 +394,7 @@ describe('copy to space', () => {
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedWrappers: ['spaces'],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
     });
 
@@ -367,6 +435,32 @@ describe('copy to space', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[retries.key(\\"invalid-space-id!@#$%^&*()\\")]: Invalid space id: invalid-space-id!@#$%^&*()"`
       );
+    });
+
+    it(`does not allow "compatibilityMode" to be used with "createNewCopies"`, async () => {
+      const payload = {
+        objects: [{ type: 'visualization', id: 'bar' }],
+        retries: {
+          ['a-space']: [
+            {
+              type: 'visualization',
+              id: 'bar',
+              overwrite: true,
+            },
+          ],
+        },
+        compatibilityMode: true,
+        createNewCopies: true,
+      };
+
+      const { resolveConflicts, savedObjectsImporter } = await setup();
+
+      expect(() =>
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use [createNewCopies] with [compatibilityMode]"`
+      );
+      expect(savedObjectsImporter.resolveImportErrors).not.toHaveBeenCalled();
     });
 
     it('resolves conflicts for multiple spaces', async () => {
@@ -416,6 +510,61 @@ describe('copy to space', () => {
         savedObjectsImporter.resolveImportErrors.mock.calls[1];
 
       expect(resolveImportErrorsSecondCallOptions).toMatchObject({ namespace: 'b-space' });
+    });
+
+    it('properly forwards compatibility mode setting', async () => {
+      const payload = {
+        compatibilityMode: true,
+        objects: [{ type: 'visualization', id: 'bar' }],
+        retries: {
+          ['a-space']: [
+            {
+              type: 'visualization',
+              id: 'bar',
+              overwrite: true,
+            },
+          ],
+          ['b-space']: [
+            {
+              type: 'globalType',
+              id: 'bar',
+              overwrite: true,
+            },
+          ],
+        },
+      };
+
+      const { resolveConflicts, savedObjectsImporter } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await resolveConflicts.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
+
+      const { status } = response;
+
+      expect(status).toEqual(200);
+      expect(savedObjectsImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
+      expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          namespace: 'a-space',
+          compatibilityMode: true,
+        })
+      );
+      expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          namespace: 'b-space',
+          compatibilityMode: true,
+        })
+      );
     });
   });
 });

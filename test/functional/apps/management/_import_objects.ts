@@ -17,7 +17,6 @@ function uniq<T>(input: T[]): T[] {
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
@@ -25,14 +24,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await esArchiver.load('test/functional/fixtures/es_archiver/management');
+        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('test/functional/fixtures/es_archiver/management');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('should import saved objects', async function () {
@@ -206,6 +205,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const objects = await PageObjects.savedObjects.getRowTitles();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
         expect(isSavedObjectImported).to.be(true);
+      });
+
+      it('should not allow import without a file added', async function () {
+        const importActionDisabled = await PageObjects.savedObjects.importDisabled();
+        expect(importActionDisabled).to.eql('true');
       });
     });
   });

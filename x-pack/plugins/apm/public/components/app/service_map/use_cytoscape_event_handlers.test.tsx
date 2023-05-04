@@ -8,12 +8,12 @@
 import { renderHook } from '@testing-library/react-hooks';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { useUiTracker } from '../../../../../observability/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import lodash from 'lodash';
 
-jest.mock('../../../../../observability/public');
+jest.mock('@kbn/observability-plugin/public');
 
 cytoscape.use(dagre);
 

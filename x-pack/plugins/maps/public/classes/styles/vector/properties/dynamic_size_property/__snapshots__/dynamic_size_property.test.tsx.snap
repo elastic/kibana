@@ -1,0 +1,236 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderLegendDetailRow Should render icon size scale 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        display="inlineBlock"
+        position="top"
+        title="Symbol size"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <svg
+    height={27}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g
+      key="0"
+    >
+      <line
+        style={
+          Object {
+            "stroke": "#d3dae6",
+          }
+        }
+        x1={11}
+        x2={24.75}
+        y1={26}
+        y2={26}
+      />
+      <RightAlignedText
+        setWidth={[Function]}
+        style={
+          Object {
+            "fill": "#343741",
+            "fontSize": 10,
+          }
+        }
+        value="0_format"
+        x={29.75}
+        y={31}
+      />
+      <circle
+        cx={11}
+        cy={26}
+        r={0}
+        style={
+          Object {
+            "fillOpacity": 0,
+            "stroke": "#343741",
+            "strokeWidth": 1,
+          }
+        }
+      />
+    </g>
+    <g
+      key="5"
+    >
+      <line
+        style={
+          Object {
+            "stroke": "#d3dae6",
+          }
+        }
+        x1={11}
+        x2={24.75}
+        y1={16}
+        y2={16}
+      />
+      <RightAlignedText
+        setWidth={[Function]}
+        style={
+          Object {
+            "fill": "#343741",
+            "fontSize": 10,
+          }
+        }
+        value="25_format"
+        x={29.75}
+        y={21}
+      />
+      <circle
+        cx={11}
+        cy={21}
+        r={5}
+        style={
+          Object {
+            "fillOpacity": 0,
+            "stroke": "#343741",
+            "strokeWidth": 1,
+          }
+        }
+      />
+    </g>
+    <g
+      key="10"
+    >
+      <line
+        style={
+          Object {
+            "stroke": "#d3dae6",
+          }
+        }
+        x1={11}
+        x2={24.75}
+        y1={6}
+        y2={6}
+      />
+      <RightAlignedText
+        setWidth={[Function]}
+        style={
+          Object {
+            "fill": "#343741",
+            "fontSize": 10,
+          }
+        }
+        value="100_format"
+        x={29.75}
+        y={11}
+      />
+      <circle
+        cx={11}
+        cy={16}
+        r={10}
+        style={
+          Object {
+            "fillOpacity": 0,
+            "stroke": "#343741",
+            "strokeWidth": 1,
+          }
+        }
+      />
+    </g>
+  </svg>
+</div>
+`;
+
+exports[`renderLegendDetailRow Should render line width simple range 1`] = `
+<RangedStyleLegendRow
+  fieldLabel="foobar_label"
+  header={
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      justifyContent="spaceBetween"
+    >
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "none",
+                "stroke": "grey",
+                "strokeWidth": "1px",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule
+            margin="xs"
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "none",
+                "stroke": "grey",
+                "strokeWidth": "2px",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule
+            margin="xs"
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "none",
+                "stroke": "grey",
+                "strokeWidth": "3px",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+    </EuiFlexGroup>
+  }
+  invert={false}
+  maxLabel="100_format"
+  minLabel="0_format"
+  propertyLabel="Border width"
+/>
+`;

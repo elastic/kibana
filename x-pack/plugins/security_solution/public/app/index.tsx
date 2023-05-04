@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
-import { RenderAppProps } from './types';
+import type { RenderAppProps } from './types';
 
 export const renderApp = ({
   element,
@@ -22,6 +23,7 @@ export const renderApp = ({
   store,
   usageCollection,
   subPluginRoutes,
+  theme$,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -32,6 +34,7 @@ export const renderApp = ({
       services={services}
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
+      theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
         <Switch>
@@ -46,5 +49,8 @@ export const renderApp = ({
     </SecurityApp>,
     element
   );
-  return () => unmountComponentAtNode(element);
+  return () => {
+    services.data.search.session.clear();
+    unmountComponentAtNode(element);
+  };
 };

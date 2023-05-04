@@ -12,14 +12,16 @@ import { isActiveGoldLicense } from '../../../../common/license_check';
 import { INVALID_LICENSE } from '../../../../common/custom_link';
 import { FILTER_OPTIONS } from '../../../../common/custom_link/custom_link_filter_options';
 import { notifyFeatureUsage } from '../../../feature';
-import { setupRequest } from '../../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 import { filterOptionsRt, payloadRt } from './custom_link_types';
 import { deleteCustomLink } from './delete_custom_link';
 import { getTransaction } from './get_transaction';
 import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../../apm_routes/create_apm_server_route_repository';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { createInternalESClientWithContext } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',
@@ -27,13 +29,13 @@ const customLinkTransactionRoute = createApmServerRoute({
   params: t.partial({
     query: filterOptionsRt,
   }),
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
+  handler: async (resources): Promise<Transaction> => {
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { query } = params;
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
-    return await getTransaction({ setup, filters });
+    return await getTransaction({ apmEventClient, filters });
   },
 });
 
@@ -43,18 +45,33 @@ const listCustomLinksRoute = createApmServerRoute({
   params: t.partial({
     query: filterOptionsRt,
   }),
-  handler: async (resources) => {
-    const { context, params } = resources;
-    if (!isActiveGoldLicense(context.licensing.license)) {
+  handler: async (
+    resources
+  ): Promise<{
+    customLinks: CustomLink[];
+  }> => {
+    const { context, params, request, config } = resources;
+    const licensingContext = await context.licensing;
+
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(resources);
 
     const { query } = params;
 
+    const internalESClient = await createInternalESClientWithContext({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
+
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
-    const customLinks = await listCustomLinks({ setup, filters });
+    const customLinks = await listCustomLinks({
+      internalESClient,
+      filters,
+    });
     return { customLinks };
   },
 });
@@ -65,20 +82,28 @@ const createCustomLinkRoute = createApmServerRoute({
     body: payloadRt,
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources) => {
-    const { context, params } = resources;
-    if (!isActiveGoldLicense(context.licensing.license)) {
+  handler: async (resources): Promise<void> => {
+    const { context, params, request, config } = resources;
+    const licensingContext = await context.licensing;
+
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(resources);
+
+    const internalESClient = await createInternalESClientWithContext({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
     const customLink = params.body;
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'customLinks',
     });
 
-    await createOrUpdateCustomLink({ customLink, setup });
+    await createOrUpdateCustomLink({ customLink, internalESClient });
   },
 });
 
@@ -93,13 +118,20 @@ const updateCustomLinkRoute = createApmServerRoute({
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  handler: async (resources) => {
-    const { params, context } = resources;
+  handler: async (resources): Promise<void> => {
+    const { params, context, request, config } = resources;
+    const licensingContext = await context.licensing;
 
-    if (!isActiveGoldLicense(context.licensing.license)) {
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(resources);
+
+    const internalESClient = await createInternalESClientWithContext({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
 
     const { id } = params.path;
     const customLink = params.body;
@@ -107,7 +139,7 @@ const updateCustomLinkRoute = createApmServerRoute({
     await createOrUpdateCustomLink({
       customLinkId: id,
       customLink,
-      setup,
+      internalESClient,
     });
   },
 });
@@ -122,25 +154,33 @@ const deleteCustomLinkRoute = createApmServerRoute({
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  handler: async (resources) => {
-    const { context, params } = resources;
+  handler: async (resources): Promise<{ result: string }> => {
+    const { context, params, request, config } = resources;
+    const licensingContext = await context.licensing;
 
-    if (!isActiveGoldLicense(context.licensing.license)) {
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(resources);
+
+    const internalESClient = await createInternalESClientWithContext({
+      context,
+      request,
+      debug: resources.params.query._inspect,
+      config,
+    });
     const { id } = params.path;
     const res = await deleteCustomLink({
       customLinkId: id,
-      setup,
+      internalESClient,
     });
     return res;
   },
 });
 
-export const customLinkRouteRepository = createApmServerRouteRepository()
-  .add(customLinkTransactionRoute)
-  .add(listCustomLinksRoute)
-  .add(createCustomLinkRoute)
-  .add(updateCustomLinkRoute)
-  .add(deleteCustomLinkRoute);
+export const customLinkRouteRepository = {
+  ...customLinkTransactionRoute,
+  ...listCustomLinksRoute,
+  ...createCustomLinkRoute,
+  ...updateCustomLinkRoute,
+  ...deleteCustomLinkRoute,
+};

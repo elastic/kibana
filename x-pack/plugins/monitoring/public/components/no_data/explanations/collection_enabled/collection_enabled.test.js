@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainCollectionEnabled } from './collection_enabled';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -26,7 +26,7 @@ describe('ExplainCollectionEnabled', () => {
 
   test('should explain about xpack.monitoring.collection.enabled setting', () => {
     const rendered = mountWithIntl(component);
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   test('should have a button that triggers ajax action', () => {

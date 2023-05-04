@@ -10,7 +10,7 @@ import { get } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   DragEffects,
   DraggableWrapper,
@@ -18,7 +18,8 @@ import {
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
 import { Provider } from '../../../data_providers/provider';
-import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provider';
+import type { QueryOperator } from '../../../data_providers/data_provider';
+import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
@@ -106,7 +107,13 @@ export const DraggableZeekElement = React.memo<{
 
   return value != null ? (
     <TokensFlexItem grow={false}>
-      <DraggableWrapper dataProvider={dataProviderProp} isDraggable={isDraggable} render={render} />
+      <DraggableWrapper
+        dataProvider={dataProviderProp}
+        isDraggable={isDraggable}
+        render={render}
+        isAggregatable={true}
+        fieldType={'keyword'}
+      />
     </TokensFlexItem>
   ) : null;
 });

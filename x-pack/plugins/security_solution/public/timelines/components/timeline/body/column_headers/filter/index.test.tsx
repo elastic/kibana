@@ -8,10 +8,10 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { ColumnHeaderType } from '../../../../../../timelines/store/timeline/model';
 import { defaultHeaders } from '../default_headers';
 
 import { Filter } from '.';
+import type { ColumnHeaderType } from '../../../../../../../common/types';
 
 const textFilter: ColumnHeaderType = 'text-filter';
 const notFiltered: ColumnHeaderType = 'not-filtered';

@@ -12,7 +12,7 @@ import {
   EuiIcon,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -181,6 +181,13 @@ export function NoData(props) {
                 id="xpack.monitoring.noData.noMonitoringDataFound"
                 defaultMessage="Have you set up monitoring yet? If so, make sure that the selected time period in
                 the upper right includes monitoring data."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.noData.remoteCollectionNotice"
+                defaultMessage="If you have configured monitoring data to be sent to a dedicated monitoring
+                cluster you should access that data with the Kibana instance attached to the monitoring cluster."
               />
             </p>
           </EuiText>

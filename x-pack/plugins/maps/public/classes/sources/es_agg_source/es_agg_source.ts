@@ -6,27 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
-import { IESSource } from '../es_source';
+import { DataView } from '@kbn/data-plugin/common';
+import type { IESAggSource } from './types';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
-import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { getAggDisplayName } from './get_agg_display_name';
+import { BUCKETS } from '../../layers/vector_layer/mask';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
-
-export interface IESAggSource extends IESSource {
-  getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
-  getMetricFields(): IESAggField[];
-  getMetricFieldForName(fieldName: string): IESAggField | null;
-  getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
-}
 
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
   private readonly _metricFields: IESAggField[];
@@ -43,8 +36,8 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     };
   }
 
-  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters?: Adapters) {
-    super(descriptor, inspectorAdapters);
+  constructor(descriptor: AbstractESAggSourceDescriptor) {
+    super(descriptor);
     this._metricFields = [];
     if (descriptor.metrics) {
       descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {
@@ -53,6 +46,10 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
         );
       });
     }
+  }
+
+  getBucketsName() {
+    return BUCKETS;
   }
 
   getFieldByName(fieldName: string): IField | null {
@@ -89,17 +86,17 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
+  async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
     switch (aggType) {
       case AGG_TYPE.COUNT:
-        return COUNT_PROP_LABEL;
+        return getAggDisplayName(aggType);
       case AGG_TYPE.TERMS:
         return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
-          defaultMessage: `Top {fieldLabel}`,
+          defaultMessage: `top {fieldLabel}`,
           values: { fieldLabel },
         });
       default:
-        return `${aggType} ${fieldLabel}`;
+        return `${getAggDisplayName(aggType)} ${fieldLabel}`;
     }
   }
 
@@ -107,14 +104,18 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     return this.getMetricFields();
   }
 
-  getValueAggsDsl(indexPattern: IndexPattern) {
+  getValueAggsDsl(indexPattern: DataView, metricsFilter?: (metric: IESAggField) => boolean) {
     const valueAggsDsl: { [key: string]: unknown } = {};
-    this.getMetricFields().forEach((esAggMetric) => {
-      const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
-      if (aggDsl) {
-        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
-      }
-    });
+    this.getMetricFields()
+      .filter((esAggMetric) => {
+        return metricsFilter ? metricsFilter(esAggMetric) : true;
+      })
+      .forEach((esAggMetric) => {
+        const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
+        if (aggDsl) {
+          valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
+        }
+      });
     return valueAggsDsl;
   }
 
@@ -135,5 +136,13 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     });
 
     return await Promise.all(promises);
+  }
+
+  isGeoGridPrecisionAware(): boolean {
+    return false;
+  }
+
+  getGeoGridPrecision(zoom: number): number {
+    return 0;
   }
 }

@@ -12,9 +12,9 @@ import {
   EuiContextMenuItemIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactoryDefinition } from '../../../../../../../src/plugins/embeddable/public';
-import { BaseVisType, VisTypeAlias } from '../../../../../../../src/plugins/visualizations/public';
-import { SolutionToolbarPopover } from '../../../../../../../src/plugins/presentation_util/public';
+import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 
 const strings = {
   getEditorMenuButtonLabel: () =>
@@ -145,11 +145,9 @@ export const EditorMenu: FC<Props> = ({
   ];
 
   return (
-    <SolutionToolbarPopover
+    <ToolbarPopover
       ownFocus
       label={strings.getEditorMenuButtonLabel()}
-      iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
@@ -165,6 +163,6 @@ export const EditorMenu: FC<Props> = ({
           data-test-subj="canvasEditorContextMenu"
         />
       )}
-    </SolutionToolbarPopover>
+    </ToolbarPopover>
   );
 };

@@ -1,0 +1,1 @@
+{"stats":{"total":1,"types":[{"type":"Metricbeat","count":1}],"stats":{"totalEvents":238,"bytesSent":249724}},"listing":[{"uuid":"52bac4f9-2985-467e-b00c-b3e9ca53fc57","name":"768578f6a263","type":"Metricbeat","output":"Elasticsearch","total_events_rate":1.3222222222222222,"bytes_sent_rate":1387.3555555555556,"errors":0,"memory":12066528,"version":"8.7.0"}]}

@@ -6,29 +6,26 @@
  */
 
 import {
-  CommentSchemaType,
-  ContextTypeGeneratedAlertType,
-  createAlertsString,
-  isCommentGeneratedAlert,
-  transformConnectorComment,
-} from '../../../../plugins/cases/server/connectors';
-import {
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CommentResponse,
+  Comment,
   ConnectorTypes,
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentType,
   CaseStatuses,
-  CaseType,
-  CasesClientPostRequest,
-  SubCaseResponse,
-  AssociationType,
-  SubCasesFindResponse,
   CommentRequest,
-} from '../../../../plugins/cases/common/api';
+  CommentRequestActionsType,
+  CaseSeverity,
+  ExternalReferenceStorageType,
+  CommentRequestExternalReferenceSOType,
+  CommentRequestExternalReferenceNoSOType,
+  CommentRequestPersistableStateType,
+  FILE_ATTACHMENT_TYPE,
+  FileAttachmentMetadata,
+} from '@kbn/cases-plugin/common/api';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
@@ -40,6 +37,7 @@ export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   tags: ['defacement'],
+  severity: CaseSeverity.LOW,
   connector: {
     id: 'none',
     name: 'none',
@@ -50,6 +48,7 @@ export const postCaseReq: CasePostRequest = {
     syncAlerts: true,
   },
   owner: 'securitySolutionFixture',
+  assignees: [],
 };
 
 /**
@@ -59,22 +58,6 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
   ...postCaseReq,
   ...req,
 });
-
-/**
- * The fields for creating a collection style case.
- */
-export const postCollectionReq: CasePostRequest = {
-  ...postCaseReq,
-  type: CaseType.collection,
-};
-
-/**
- * This is needed because the post api does not allow specifying the case type. But the response will include the type.
- */
-export const userActionPostResp: CasesClientPostRequest = {
-  ...postCaseReq,
-  type: CaseType.individual,
-};
 
 export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
@@ -90,25 +73,102 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
-  alerts: createAlertsString([
-    { _id: 'test-id', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
-    { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
-  ]),
-  type: CommentType.generatedAlert,
+export const postCommentAlertMultipleIdsReq: CommentRequestAlertType = {
+  alertId: ['test-id-1', 'test-id-2'],
+  index: ['test-index', 'test-index-2'],
+  rule: { id: 'test-rule-id', name: 'test-index-id' },
+  type: CommentType.alert,
   owner: 'securitySolutionFixture',
+};
+
+export const postCommentActionsReq: CommentRequestActionsType = {
+  comment: 'comment text',
+  actions: {
+    targets: [
+      {
+        hostname: 'host-name',
+        endpointId: 'endpoint-id',
+      },
+    ],
+    type: 'isolate',
+  },
+  type: CommentType.actions,
+  owner: 'securitySolutionFixture',
+};
+
+export const postCommentActionsReleaseReq: CommentRequestActionsType = {
+  comment: 'comment text',
+  actions: {
+    targets: [
+      {
+        hostname: 'host-name',
+        endpointId: 'endpoint-id',
+      },
+    ],
+    type: 'unisolate',
+  },
+  type: CommentType.actions,
+  owner: 'securitySolutionFixture',
+};
+
+export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType = {
+  type: CommentType.externalReference,
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceId: 'my-id',
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: 'securitySolutionFixture',
+};
+
+export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
+  ...postExternalReferenceESReq,
+  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
+};
+
+export const fileMetadata = () => ({
+  name: 'test_file',
+  extension: 'png',
+  mimeType: 'image/png',
+  created: '2023-02-27T20:26:54.345Z',
+});
+
+export const fileAttachmentMetadata: FileAttachmentMetadata = {
+  files: [fileMetadata()],
+};
+
+export const getFilesAttachmentReq = (
+  req?: Partial<CommentRequestExternalReferenceSOType>
+): CommentRequestExternalReferenceSOType => {
+  return {
+    ...postExternalReferenceSOReq,
+    externalReferenceStorage: {
+      type: ExternalReferenceStorageType.savedObject,
+      soType: FILE_SO_TYPE,
+    },
+    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceMetadata: { ...fileAttachmentMetadata },
+    ...req,
+  };
+};
+
+export const persistableStateAttachment: CommentRequestPersistableStateType = {
+  type: CommentType.persistableState,
+  owner: 'securitySolutionFixture',
+  persistableStateAttachmentTypeId: '.test',
+  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
 
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<CaseResponse> => ({
+): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
+  duration: null,
+  severity: req.severity ?? CaseSeverity.LOW,
   totalAlerts: 0,
   totalComment: 0,
-  type: req.type ?? CaseType.individual,
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
@@ -118,16 +178,14 @@ export const postCaseResp = (
 
 interface CommentRequestWithID {
   id: string;
-  comment: CommentSchemaType | CommentRequest;
+  comment: CommentRequest;
 }
 
 export const commentsResp = ({
   comments,
-  associationType,
 }: {
   comments: CommentRequestWithID[];
-  associationType: AssociationType;
-}): Array<Partial<CommentResponse>> => {
+}): Array<Partial<Comment>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
       id,
@@ -137,41 +195,12 @@ export const commentsResp = ({
       updated_by: null,
     };
 
-    if (isCommentGeneratedAlert(comment)) {
-      return {
-        associationType,
-        ...transformConnectorComment(comment),
-        ...baseFields,
-      };
-    } else {
-      return {
-        associationType,
-        ...comment,
-        ...baseFields,
-      };
-    }
+    return {
+      ...comment,
+      ...baseFields,
+    };
   });
 };
-
-export const subCaseResp = ({
-  id,
-  totalAlerts,
-  totalComment,
-  status = CaseStatuses.open,
-}: {
-  id: string;
-  status?: CaseStatuses;
-  totalAlerts: number;
-  totalComment: number;
-}): Partial<SubCaseResponse> => ({
-  status,
-  id,
-  totalAlerts,
-  totalComment,
-  closed_by: null,
-  created_by: defaultUser,
-  updated_by: defaultUser,
-});
 
 const findCommon = {
   page: 1,
@@ -185,9 +214,4 @@ const findCommon = {
 export const findCasesResp: CasesFindResponse = {
   ...findCommon,
   cases: [],
-};
-
-export const findSubCasesResp: SubCasesFindResponse = {
-  ...findCommon,
-  subCases: [],
 };

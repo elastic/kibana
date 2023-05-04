@@ -40,12 +40,12 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+      async ({ client, mlClient, request, response, mlSavedObjectService }) => {
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
           const { jobId } = request.params;
           const { from, start, end } = request.query;
-          const resp = await getJobAuditMessages(jobSavedObjectService, {
+          const resp = await getJobAuditMessages(mlSavedObjectService, {
             jobId,
             from,
             start,
@@ -82,11 +82,11 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+      async ({ client, mlClient, request, response, mlSavedObjectService }) => {
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
           const { from } = request.query;
-          const resp = await getJobAuditMessages(jobSavedObjectService, { from });
+          const resp = await getJobAuditMessages(mlSavedObjectService, { from });
 
           return response.ok({
             body: resp,
@@ -118,7 +118,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       },
     },
     routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+      async ({ client, mlClient, request, response, mlSavedObjectService }) => {
         try {
           const { clearJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
           const { jobId, notificationIndices } = request.body;

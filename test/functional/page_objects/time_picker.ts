@@ -29,6 +29,7 @@ export class TimePickerPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly quickSelectTimeMenuToggle = this.ctx.getService('menuToggle').create({
@@ -39,15 +40,21 @@ export class TimePickerPageObject extends FtrService {
 
   public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
   public readonly defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-  public readonly defaultStartTimeUTC = '2015-09-18T06:31:44.000Z';
+  public readonly defaultStartTimeUTC = '2015-09-19T06:31:44.000Z';
   public readonly defaultEndTimeUTC = '2015-09-23T18:31:44.000Z';
 
   async setDefaultAbsoluteRange() {
     await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
   }
 
+  async waitForNoDataPopover() {
+    await this.testSubjects.find('noDataPopoverDismissButton');
+  }
+
   async ensureHiddenNoDataPopover() {
-    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton');
+    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
+      timeout: 100,
+    });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
     }
@@ -68,7 +75,7 @@ export class TimePickerPageObject extends FtrService {
 
   private async getTimePickerPanel() {
     return await this.retry.try(async () => {
-      return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
+      return await this.find.byCssSelector('div.euiPopover__panel[data-popover-open]');
     });
   }
 
@@ -102,22 +109,39 @@ export class TimePickerPageObject extends FtrService {
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-    const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton');
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerShowDatesButton');
-    }
-    await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
-    // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-    }
+    await this.retry.tryForTime(5000, async () => {
+      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
+        timeout: 50,
+      });
+      if (isShowDatesButton) {
+        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
+      }
+      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
+      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
+      if (isShowDatesButton) {
+        await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+      }
+    });
   }
 
   /**
    * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
    * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
+   * @param {Boolean} force time picker force update, default is false
    */
-  public async setAbsoluteRange(fromTime: string, toTime: string) {
+  public async setAbsoluteRange(fromTime: string, toTime: string, force = false) {
+    if (!force) {
+      const currentUrl = decodeURI(await this.browser.getCurrentUrl());
+      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
+      const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
+      if (currentUrl.includes(`time:(from:'${startMoment}',to:'${endMoment}'`)) {
+        this.log.debug(
+          `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
+        );
+        return;
+      }
+    }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
     let panel!: WebElementWrapper;
@@ -155,11 +179,12 @@ export class TimePickerPageObject extends FtrService {
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
+      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
     });
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
-      'superDatePickerApplyTimeButton'
+      'superDatePickerApplyTimeButton',
+      { timeout: 100 }
     );
     if (superDatePickerApplyButtonExists) {
       // Timepicker is in top nav
@@ -245,6 +270,9 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.click('superDatePickerAbsoluteTab');
     const end = await this.testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
 
+    // Wait until closing popover again to avoid https://github.com/elastic/eui/issues/5619
+    await this.common.sleep(2000);
+
     // get from time
     await this.testSubjects.click('superDatePickerstartDatePopoverButton');
     await this.waitPanelIsGone(panel);
@@ -274,7 +302,14 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('superDatePickerToggleRefreshButton');
     }
 
-    await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
+    await this.retry.waitFor('auto refresh to be set correctly', async () => {
+      await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
+      return (
+        (await this.testSubjects.getAttribute('superDatePickerRefreshIntervalInput', 'value')) ===
+        intervalS.toString()
+      );
+    });
+
     await this.quickSelectTimeMenuToggle.close();
   }
 

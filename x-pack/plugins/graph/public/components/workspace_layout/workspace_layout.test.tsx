@@ -8,12 +8,19 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { WorkspaceLayoutComponent } from '.';
-import { coreMock } from 'src/core/public/mocks';
-import { spacesPluginMock } from '../../../../spaces/public/mocks';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
-import { GraphSavePolicy, GraphWorkspaceSavedObject, IndexPatternProvider } from '../../types';
-import { OverlayStart, Capabilities } from 'kibana/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import {
+  GraphSavePolicy,
+  GraphWorkspaceSavedObject,
+  IndexPatternProvider,
+  Workspace,
+} from '../../types';
+import { OverlayStart, Capabilities } from '@kbn/core/public';
 import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
+import { GraphVisualization } from '../graph_visualization';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -45,6 +52,15 @@ describe('workspace_layout', () => {
       aliasTargetId: '',
     } as SharingSavedObjectProps,
     spaces: spacesPluginMock.createStartContract(),
+    inspect: { open: jest.fn() } as unknown as InspectorStart,
+    requestAdapter: {
+      start: () => ({
+        stats: jest.fn(),
+        json: jest.fn(),
+      }),
+      reset: jest.fn(),
+    } as unknown as RequestAdapter,
+    workspace: {} as unknown as Workspace,
   };
   it('should display conflict notification if outcome is conflict', () => {
     shallow(
@@ -59,5 +75,45 @@ describe('workspace_layout', () => {
       otherObjectId: 'conflictId',
       otherObjectPath: '#/workspace/conflictId?query={}',
     });
+  });
+  it('should not show GraphVisualization when workspaceInitialized is false, savedWorkspace.id is undefined, and savedWorkspace.isSaving is false', () => {
+    const component = shallow(
+      <WorkspaceLayoutComponent
+        {...defaultProps}
+        workspaceInitialized={false}
+        savedWorkspace={{ id: undefined, isSaving: false } as GraphWorkspaceSavedObject}
+      />
+    );
+    expect(component.find(GraphVisualization).exists()).toBe(false);
+  });
+  it('should show GraphVisualization when workspaceInitialized is true', () => {
+    const component = shallow(
+      <WorkspaceLayoutComponent
+        {...defaultProps}
+        workspaceInitialized={true}
+        savedWorkspace={{ id: undefined, isSaving: false } as GraphWorkspaceSavedObject}
+      />
+    );
+    expect(component.find(GraphVisualization).exists()).toBe(true);
+  });
+  it('should show GraphVisualization when savedWorkspace.id is defined', () => {
+    const component = shallow(
+      <WorkspaceLayoutComponent
+        {...defaultProps}
+        workspaceInitialized={false}
+        savedWorkspace={{ id: 'test', isSaving: false } as GraphWorkspaceSavedObject}
+      />
+    );
+    expect(component.find(GraphVisualization).exists()).toBe(true);
+  });
+  it('should show GraphVisualization when savedWorkspace.isSaving is true', () => {
+    const component = shallow(
+      <WorkspaceLayoutComponent
+        {...defaultProps}
+        workspaceInitialized={false}
+        savedWorkspace={{ id: undefined, isSaving: true } as GraphWorkspaceSavedObject}
+      />
+    );
+    expect(component.find(GraphVisualization).exists()).toBe(true);
   });
 });

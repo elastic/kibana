@@ -7,7 +7,8 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+
 import { SecurityLicenseService } from './license_service';
 
 describe('license features', function () {
@@ -24,10 +25,12 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
       layout: 'error-es-unavailable',
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
   });
 
@@ -46,10 +49,12 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
       layout: 'error-xpack-unavailable',
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
   });
 
@@ -75,7 +80,9 @@ describe('license features', function () {
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
             "allowRoleFieldLevelSecurity": false,
+            "allowRoleRemoteIndexPrivileges": false,
             "allowSubFeaturePrivileges": false,
+            "allowUserProfileCollaboration": false,
             "layout": "error-xpack-unavailable",
             "showLinks": false,
             "showLogin": true,
@@ -96,7 +103,9 @@ describe('license features', function () {
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
             "allowRoleFieldLevelSecurity": true,
+            "allowRoleRemoteIndexPrivileges": true,
             "allowSubFeaturePrivileges": true,
+            "allowUserProfileCollaboration": true,
             "showLinks": true,
             "showLogin": true,
             "showRoleMappingsManagement": true,
@@ -127,9 +136,11 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -152,13 +163,41 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
   });
 
-  it('should allow role mappings, access agreement, sub-feature privileges and audit logging, but not DLS/FLS if license = gold', () => {
+  it('should user profile collaboration, but not role mappings, access agreement, sub-feature privileges, audit logging, and DLS/FLS if license = standard', () => {
+    const mockRawLicense = licenseMock.createLicense({
+      license: { mode: 'standard', type: 'standard' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const serviceSetup = new SecurityLicenseService().setup({
+      license$: of(mockRawLicense),
+    });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
+      showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRbac: true,
+      allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
+      allowUserProfileCollaboration: true,
+    });
+  });
+
+  it('should allow role mappings, access agreement, sub-feature privileges, user profile collaboration and audit logging, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -176,13 +215,15 @@ describe('license features', function () {
       allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowUserProfileCollaboration: true,
     });
   });
 
-  it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, and DLS if license >= platinum', () => {
+  it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, user profile collaboration, and DLS if license >= platinum', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'platinum', type: 'platinum' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -200,9 +241,11 @@ describe('license features', function () {
       allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: true,
       allowRoleFieldLevelSecurity: true,
+      allowRoleRemoteIndexPrivileges: true,
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowUserProfileCollaboration: true,
     });
   });
 });

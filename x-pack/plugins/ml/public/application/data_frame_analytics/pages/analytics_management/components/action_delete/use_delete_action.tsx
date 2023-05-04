@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
@@ -117,6 +117,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     checkIndexPatternExists();
     // Check if an user has permission to delete the index & data view
     checkUserIndexPermission();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalVisible]);
 
   const closeModal = () => setModalVisible(false);
@@ -168,6 +169,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       onClick: (i: DataFrameAnalyticsListRow) => openDeleteJobCheckModal(i),
       'data-test-subj': 'mlAnalyticsJobDeleteButton',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

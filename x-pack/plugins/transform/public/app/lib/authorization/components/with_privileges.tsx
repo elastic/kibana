@@ -7,7 +7,11 @@
 
 import React, { useContext, FC } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiPageContent } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,7 +21,11 @@ import { SectionLoading } from '../../../components';
 
 import { AuthorizationContext } from './authorization_provider';
 import { NotAuthorizedSection } from './not_authorized_section';
-import { hasPrivilegeFactory, toArray, Privilege } from './common';
+import {
+  hasPrivilegeFactory,
+  toArray,
+  Privilege,
+} from '../../../../../common/privilege/has_privilege_factory';
 
 interface Props {
   /**

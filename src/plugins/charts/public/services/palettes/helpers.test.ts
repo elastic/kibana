@@ -73,7 +73,7 @@ describe('workoutColorForValue', () => {
           {
             ...DEFAULT_PROPS,
             continuity: 'all',
-            rangeMax: 100,
+            rangeMax: Infinity,
             stops: [20, 40, 60, 80],
           },
           { min: 0, max: 200 }

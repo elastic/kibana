@@ -1,0 +1,46 @@
+---
+id: kibDevDocsOpsBazelRunner
+slug: /kibana-dev-docs/ops/bazel-runner
+title: "@kbn/bazel-runner"
+description: A package holding helpers to invoke Bazel
+date: 2022-05-24
+tags: ['kibana', 'dev', 'contributor', 'operations', 'bazel', 'runner']
+---
+
+This is a package with helpers for invoking bazel and iBazel commands, used everywhere we programmatically run bazel.
+
+## API
+
+### async runBazel(args: string[], options: BazelRunOptions)
+
+It runs bazel on the background with the given options
+
+### async runIBazel(args: string[], options: BazelRunOptions)
+
+It runs a IBazel on the background with the given options
+
+#### BazelRunOptions
+
+```
+{
+  // a logger to print the command output
+  log: SomeDevLog;
+  // run bazel with the no connection compatible config or not
+  offline?: boolean;
+  // environment variables to set in process running Bazel
+  env?: Record<string, string>;
+  // directory to run bazel in
+  cwd?: string;
+  // text to include at the beginning on each line of log output produced by bazel
+  logPrefix?: string;
+  // handler to implement custom error handling
+  onErrorExit?: (code: number) => void;
+}
+```
+
+
+## NOTE:
+
+This code is needed in order to properly bootstrap the repository. As such, it can't have any NPM dependencies or require being built. This code is loaded directly into the node.js process that boostraps the repository from source while also being built into a package and exposed to the rest of the package system. Please consider this when making any changes to the source.
+
+The code is still type-checked as JS with JSDoc comments, and a single .ts file which provides interfaces to the JS validation and are publically available to package consumers.

@@ -7,21 +7,21 @@
 
 import { pick } from 'lodash';
 import { createRuleRoute } from './create_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { CreateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib';
+import { RuleTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
-import { SanitizedAlert } from '../types';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { SanitizedRule } from '../types';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -33,7 +33,7 @@ describe('createRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
 
-  const mockedAlert: SanitizedAlert<{ bar: boolean }> = {
+  const mockedAlert: SanitizedRule<{ bar: boolean }> = {
     alertTypeId: '1',
     consumer: 'bar',
     name: 'abc',
@@ -51,6 +51,19 @@ describe('createRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+          },
+          timeframe: {
+            days: [1],
+            hours: { start: '08:00', end: '17:00' },
+            timezone: 'UTC',
+          },
+        },
       },
     ],
     enabled: true,
@@ -67,6 +80,7 @@ describe('createRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
   };
 
   const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
@@ -78,11 +92,15 @@ describe('createRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        alerts_filter: {
+          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql, filters: [] },
+          timeframe: mockedAlert.actions[0].alertsFilter?.timeframe!,
+        },
       },
     ],
   };
 
-  const createResult: AsApiContract<SanitizedAlert<{ bar: boolean }>> = {
+  const createResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
     ...ruleToCreate,
     mute_all: mockedAlert.muteAll,
     created_by: mockedAlert.createdBy,
@@ -92,6 +110,7 @@ describe('createRuleRoute', () => {
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
     id: mockedAlert.id,
+    revision: mockedAlert.revision,
     execution_status: {
       status: mockedAlert.executionStatus.status,
       last_execution_date: mockedAlert.executionStatus.lastExecutionDate,
@@ -99,7 +118,12 @@ describe('createRuleRoute', () => {
     actions: [
       {
         ...ruleToCreate.actions[0],
+        alerts_filter: {
+          query: mockedAlert.actions[0].alertsFilter?.query!,
+          timeframe: mockedAlert.actions[0].alertsFilter!.timeframe!,
+        },
         connector_type_id: 'test',
+        uuid: '123-456',
       },
     ],
   };
@@ -142,6 +166,22 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "filters": Array [],
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -223,6 +263,22 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "filters": Array [],
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -305,6 +361,22 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "filters": Array [],
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -387,6 +459,22 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "filters": Array [],
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -471,7 +559,7 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.create.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: ruleToCreate }, [
       'ok',

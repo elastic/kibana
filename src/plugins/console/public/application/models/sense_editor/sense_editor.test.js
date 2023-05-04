@@ -10,15 +10,20 @@ import './sense_editor.test.mocks';
 
 import $ from 'jquery';
 import _ from 'lodash';
+import { URL } from 'url';
 
 import { create } from './create';
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import editorInput1 from './__fixtures__/editor_input1.txt';
+import { setStorage, createStorage } from '../../../services';
 
 const { collapseLiteralStrings } = XJson;
 
 describe('Editor', () => {
   let input;
+  let oldUrl;
+  let olldWindow;
+  let storage;
 
   beforeEach(function () {
     // Set up our document body
@@ -31,10 +36,27 @@ describe('Editor', () => {
     input = create(document.querySelector('#ConAppEditor'));
     $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
+    oldUrl = global.URL;
+    olldWindow = { ...global.window };
+    global.URL = URL;
+    global.window = Object.create(window);
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'http://localhost:5620',
+      },
+    });
+    storage = createStorage({
+      engine: global.window.localStorage,
+      prefix: 'console_test',
+    });
+    setStorage(storage);
   });
   afterEach(function () {
+    global.URL = oldUrl;
+    global.window = olldWindow;
     $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
+    setStorage(null);
   });
 
   let testCount = 0;
@@ -61,9 +83,10 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, async function (done) {
-      await input.update(data, true);
-      testToRun(done);
+    test('Utils test ' + id + ' : ' + name, function (done) {
+      input.update(data, true).then(() => {
+        testToRun(done);
+      });
     });
   }
 
@@ -455,11 +478,11 @@ describe('Editor', () => {
     editorInput1,
     { start: { lineNumber: 7 }, end: { lineNumber: 14 } },
     `
-curl -XGET "http://localhost:9200/_stats?level=shards"
+curl -XGET "http://localhost:9200/_stats?level=shards" -H "kbn-xsrf: reporting"
 
 #in between comment
 
-curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/index_1/type1/1" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -d'
 {
   "f": 1
 }'`.trim()
@@ -470,10 +493,126 @@ curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application
     editorInput1,
     { start: { lineNumber: 29 }, end: { lineNumber: 33 } },
     `
-curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:9200/_sql?format=txt" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -d'
 {
   "query": "SELECT prenom FROM claude_index WHERE prenom = '\\''claude'\\'' ",
   "fetch_size": 1
 }'`.trim()
   );
+
+  multiReqCopyAsCurlTest(
+    'with date math index',
+    editorInput1,
+    { start: { lineNumber: 35 }, end: { lineNumber: 35 } },
+    `
+    curl -XGET "http://localhost:9200/%3Cindex_1-%7Bnow%2Fd-2d%7D%3E%2C%3Cindex_1-%7Bnow%2Fd-1d%7D%3E%2C%3Cindex_1-%7Bnow%2Fd%7D%3E%2F_search?pretty" -H "kbn-xsrf: reporting"`.trim()
+  );
+
+  multiReqCopyAsCurlTest(
+    'with Kibana API request',
+    editorInput1,
+    { start: { lineNumber: 37 }, end: { lineNumber: 37 } },
+    `
+curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.trim()
+  );
+
+  describe('getRequestsAsCURL', () => {
+    it('should return empty string if no requests', async () => {
+      input?.getCoreEditor().setValue('', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 1 },
+      });
+      expect(curl).toEqual('');
+    });
+
+    it('should replace variables in the URL', async () => {
+      storage.set('variables', [{ name: 'exampleVariableA', value: 'valueA' }]);
+      input?.getCoreEditor().setValue('GET ${exampleVariableA}', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 1 },
+      });
+      expect(curl).toContain('valueA');
+    });
+
+    it('should replace variables in the body', async () => {
+      storage.set('variables', [{ name: 'exampleVariableB', value: 'valueB' }]);
+      console.log(storage.get('variables'));
+      input
+        ?.getCoreEditor()
+        .setValue('GET _search\n{\t\t"query": {\n\t\t\t"${exampleVariableB}": ""\n\t}\n}', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 6 },
+      });
+      expect(curl).toContain('valueB');
+    });
+
+    it('should strip comments in the URL', async () => {
+      input?.getCoreEditor().setValue('GET _search // comment', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 6 },
+      });
+      expect(curl).not.toContain('comment');
+    });
+
+    it('should strip comments in the body', async () => {
+      input
+        ?.getCoreEditor()
+        .setValue('{\n\t"query": {\n\t\t"match_all": {} // comment \n\t}\n}', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 8 },
+      });
+      console.log('curl', curl);
+      expect(curl).not.toContain('comment');
+    });
+
+    it('should strip multi-line comments in the body', async () => {
+      input
+        ?.getCoreEditor()
+        .setValue('{\n\t"query": {\n\t\t"match_all": {} /* comment */\n\t}\n}', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 8 },
+      });
+      console.log('curl', curl);
+      expect(curl).not.toContain('comment');
+    });
+
+    it('should replace multiple variables in the URL', async () => {
+      storage.set('variables', [
+        { name: 'exampleVariableA', value: 'valueA' },
+        { name: 'exampleVariableB', value: 'valueB' },
+      ]);
+      input?.getCoreEditor().setValue('GET ${exampleVariableA}/${exampleVariableB}', false);
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 1 },
+      });
+      expect(curl).toContain('valueA');
+      expect(curl).toContain('valueB');
+    });
+
+    it('should replace multiple variables in the body', async () => {
+      storage.set('variables', [
+        { name: 'exampleVariableA', value: 'valueA' },
+        { name: 'exampleVariableB', value: 'valueB' },
+      ]);
+      input
+        ?.getCoreEditor()
+        .setValue(
+          'GET _search\n{\t\t"query": {\n\t\t\t"${exampleVariableA}": "${exampleVariableB}"\n\t}\n}',
+          false
+        );
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 6 },
+      });
+      expect(curl).toContain('valueA');
+      expect(curl).toContain('valueB');
+    });
+  });
 });

@@ -89,21 +89,22 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...CASES.ALIAS_CONFLICT_OBJ,
       initialNamespaces: ['*'],
       ...fail409(),
-      fail409Param: 'aliasConflictAllSpaces', // first try fails because an alias exists in space_x and space_1 (but not space_y because that alias is disabled)
+      fail409Param: 'aliasConflictAllSpaces', // first try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
     },
     {
       ...CASES.ALIAS_CONFLICT_OBJ,
-      ...(spaceId === SPACE_1_ID ? { ...fail409(), fail409Param: 'aliasConflictSpace1' } : {}), // second try fails if this is space_1 because an alias exists in space_1
+      // second try fails if this is the default space or space_1, because an alias exists in those spaces
+      ...(spaceId === DEFAULT_SPACE_ID
+        ? { ...fail409(), fail409Param: 'aliasConflictDefaultSpace' }
+        : {}),
+      ...(spaceId === SPACE_1_ID ? { ...fail409(), fail409Param: 'aliasConflictSpace1' } : {}),
       expectedNamespaces,
     },
   ];
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(context);
   const createTests = (overwrite: boolean, spaceId: string) => {
     const testCases = createTestCases(overwrite, spaceId);
     return createTestDefinitions(testCases, false, overwrite, {
@@ -112,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
+  // Failing: See https://github.com/elastic/kibana/issues/141782
   describe('_bulk_create', () => {
     getTestScenarios([false, true]).spaces.forEach(({ spaceId, modifier: overwrite }) => {
       const suffix = overwrite ? ' with overwrite enabled' : '';

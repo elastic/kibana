@@ -16,7 +16,7 @@ import { EuiEmptyPrompt, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
 
-import { HiddenDocuments } from './';
+import { HiddenDocuments } from '.';
 
 describe('HiddenDocuments', () => {
   const values = {

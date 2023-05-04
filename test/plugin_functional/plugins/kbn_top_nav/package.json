@@ -1,5 +1,5 @@
 {
-  "name": "kbn_top_nav",
+  "name": "@kbn/kbn-top-nav-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/kbn_top_nav",
   "kibana": {

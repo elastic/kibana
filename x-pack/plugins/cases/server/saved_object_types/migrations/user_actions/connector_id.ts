@@ -7,17 +7,17 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { CaseAttributes, CaseConnector } from '../../../../common/api';
 import {
-  CaseAttributes,
-  CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
   NONE_CONNECTOR_ID,
@@ -27,8 +27,7 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../../common/utils';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../../actions/server';
-import { UserActionUnmigratedConnectorDocument } from './types';
+import type { UserActionVersion800 } from './types';
 import { logError } from '../utils';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 
@@ -306,7 +305,7 @@ export function isConnectorUserAction(action?: string, actionFields?: string[]):
 }
 
 export function formatDocumentWithConnectorReferences(
-  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>
+  doc: SavedObjectUnsanitizedDoc<UserActionVersion800>
 ): SavedObjectSanitizedDoc<unknown> {
   const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
   const { references = [] } = doc;
@@ -342,7 +341,7 @@ export function formatDocumentWithConnectorReferences(
 
 // 8.1.0 migration util functions
 export function userActionsConnectorIdMigration(
-  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>,
+  doc: SavedObjectUnsanitizedDoc<UserActionVersion800>,
   context: SavedObjectMigrationContext
 ): SavedObjectSanitizedDoc<unknown> {
   const originalDocWithReferences = { ...doc, references: doc.references ?? [] };

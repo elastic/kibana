@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SYNONYMS_DOCS_URL } from '../../../routes';
 
-import { SynonymModal, SynonymIcon } from './';
+import { SynonymModal, SynonymIcon } from '.';
 
 export const EmptyState: React.FC = () => {
   return (

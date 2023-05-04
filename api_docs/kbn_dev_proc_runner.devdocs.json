@@ -1,0 +1,321 @@
+{
+  "id": "@kbn/dev-proc-runner",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/dev-proc-runner",
+        "id": "def-common.ProcRunner",
+        "type": "Class",
+        "tags": [
+          "class"
+        ],
+        "label": "ProcRunner",
+        "description": [
+          "\n Helper for starting and managing processes. In many ways it resembles the\n API from `grunt_run`, processes are named and can be started, waited for,\n backgrounded once they log something matching a RegExp...\n"
+        ],
+        "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.ProcRunner.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-proc-runner",
+                "id": "def-common.ProcRunner.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.ProcRunner.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [
+              "\n Start a process, tracking it by `name`"
+            ],
+            "signature": [
+              "(name: string, options: RunOptions) => Promise<void>"
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-proc-runner",
+                "id": "def-common.ProcRunner.run.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-proc-runner",
+                "id": "def-common.ProcRunner.run.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "RunOptions"
+                ],
+                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.ProcRunner.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\n Stop a named proc"
+            ],
+            "signature": [
+              "(name: string, signal?: NodeJS.Signals) => Promise<void>"
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-proc-runner",
+                "id": "def-common.ProcRunner.stop.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dev-proc-runner",
+                "id": "def-common.ProcRunner.stop.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "NodeJS.Signals"
+                ],
+                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.ProcRunner.waitForAllToStop",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "waitForAllToStop",
+            "description": [
+              "\n Wait for all running processes to stop naturally"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.ProcRunner.teardown",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "teardown",
+            "description": [
+              "\n Close the ProcRunner and stop all running\n processes with `signal`\n"
+            ],
+            "signature": [
+              "(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-proc-runner",
+                "id": "def-common.ProcRunner.teardown.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "\"exit\" | NodeJS.Signals"
+                ],
+                "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dev-proc-runner",
+        "id": "def-common.withProcRunner",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "withProcRunner",
+        "description": [
+          "\n Create a ProcRunner and pass it to an async function. When\n the async function finishes the ProcRunner is torn-down\n automatically\n"
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ", fn: (procs: ",
+          {
+            "pluginId": "@kbn/dev-proc-runner",
+            "scope": "common",
+            "docId": "kibKbnDevProcRunnerPluginApi",
+            "section": "def-common.ProcRunner",
+            "text": "ProcRunner"
+          },
+          ") => Promise<void>) => Promise<void>"
+        ],
+        "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.withProcRunner.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dev-proc-runner",
+            "id": "def-common.withProcRunner.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(procs: ",
+              {
+                "pluginId": "@kbn/dev-proc-runner",
+                "scope": "common",
+                "docId": "kibKbnDevProcRunnerPluginApi",
+                "section": "def-common.ProcRunner",
+                "text": "ProcRunner"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -10,7 +10,10 @@ import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 
-export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
+export function useBreadcrumb(
+  callback: () => Breadcrumb | Breadcrumb[],
+  fnDeps: any[]
+) {
   const api = useContext(BreadcrumbsContext);
 
   if (!api) {
@@ -21,22 +24,22 @@ export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
 
   const matchedRoute = useRef(match?.route);
 
-  if (matchedRoute.current && matchedRoute.current !== match?.route) {
-    api.unset(matchedRoute.current);
-  }
-
-  matchedRoute.current = match?.route;
-
-  if (matchedRoute.current) {
-    api.set(matchedRoute.current, castArray(breadcrumb));
-  }
-
   useEffect(() => {
+    if (matchedRoute.current && matchedRoute.current !== match?.route) {
+      api.unset(matchedRoute.current);
+    }
+
+    matchedRoute.current = match?.route;
+
+    if (matchedRoute.current) {
+      api.set(matchedRoute.current, castArray(callback()));
+    }
+
     return () => {
       if (matchedRoute.current) {
         api.unset(matchedRoute.current);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [match, ...fnDeps]);
 }

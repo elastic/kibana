@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { TOGGLE_NAVIGATION_BTN } from '../screens/navigation';
-
 export const INTEGRATIONS = 'app/integrations#/';
 export const FLEET = 'app/fleet/';
+export const LOGIN_API_ENDPOINT = '/internal/security/login';
+export const LOGOUT_API_ENDPOINT = '/api/security/logout';
+export const LOGIN_URL = '/login';
+export const LOGOUT_URL = '/logout';
+
+export const hostDetailsUrl = (hostName: string) =>
+  `/app/security/hosts/${hostName}/authentications`;
 
 export const navigateTo = (page: string) => {
   cy.visit(page);
-};
-
-export const openNavigationFlyout = () => {
-  cy.get(TOGGLE_NAVIGATION_BTN).click();
 };

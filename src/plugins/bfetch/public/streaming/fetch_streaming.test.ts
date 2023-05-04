@@ -22,6 +22,7 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 const setup = () => {
   const { xhr, XMLHttpRequest } = mockXMLHttpRequest();
   window.XMLHttpRequest = XMLHttpRequest;
+  (xhr as any).status = 200;
   return { xhr };
 };
 
@@ -270,7 +271,7 @@ test('promise throws when request errors', async () => {
   expect(spy).toHaveBeenCalledTimes(1);
   expect(spy.mock.calls[0][0]).toBeInstanceOf(Error);
   expect(spy.mock.calls[0][0].message).toMatchInlineSnapshot(
-    `"Batch request failed with status 400"`
+    `"Check your network connection and try again. Code 400"`
   );
 });
 
@@ -299,7 +300,7 @@ test('stream observable errors when request errors', async () => {
   expect(spy).toHaveBeenCalledTimes(1);
   expect(spy.mock.calls[0][0]).toBeInstanceOf(Error);
   expect(spy.mock.calls[0][0].message).toMatchInlineSnapshot(
-    `"Batch request failed with status 400"`
+    `"Check your network connection and try again. Code 400"`
   );
 });
 

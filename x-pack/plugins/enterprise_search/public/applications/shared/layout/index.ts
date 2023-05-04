@@ -6,5 +6,6 @@
  */
 
 export type { PageTemplateProps } from './page_template';
-export { EnterpriseSearchPageTemplate } from './page_template';
+export { EnterpriseSearchPageTemplateWrapper } from './page_template';
 export { generateNavLink } from './nav_link_helpers';
+export { useEnterpriseSearchNav, useEnterpriseSearchEngineNav } from './nav';

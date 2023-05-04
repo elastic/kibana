@@ -6,14 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs<JobType extends string> {
   spaceId: string;
-  sourceId: string;
+  logViewId: string;
   jobTypes: JobType[];
 }
 
@@ -21,12 +21,12 @@ export const callJobsSummaryAPI = async <JobType extends string>(
   requestArgs: RequestArgs<JobType>,
   fetch: HttpHandler
 ) => {
-  const { spaceId, sourceId, jobTypes } = requestArgs;
+  const { spaceId, logViewId, jobTypes } = requestArgs;
   const response = await fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType)),
+        jobIds: jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType)),
       })
     ),
   });
@@ -47,6 +47,7 @@ const datafeedStateRT = rt.keyof({
   '': null,
 });
 
+// this is the union of the ML API's job state and block reasons
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
@@ -54,6 +55,8 @@ const jobStateRT = rt.keyof({
   failed: null,
   opened: null,
   opening: null,
+  resetting: null,
+  reverting: null,
 });
 
 const jobAnalysisConfigRT = rt.partial({

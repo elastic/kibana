@@ -8,14 +8,17 @@
 import Boom from '@hapi/boom';
 
 // @ts-ignore
+import {
+  type createRoot,
+  request as kbnTestServerRequest,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { kibanaTestUser } from '@kbn/test';
-import type { CoreSetup, IBasePath, IRouter } from 'src/core/server';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import type { KibanaFeature } from '../../../../features/server';
-import { featuresPluginMock } from '../../../../features/server/mocks';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { spacesClientServiceMock } from '../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../spaces_service';
@@ -24,7 +27,7 @@ import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
 describe.skip('onPostAuthInterceptor', () => {
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  let root: ReturnType<typeof createRoot>;
   jest.setTimeout(30000);
 
   const headers = {
@@ -39,7 +42,7 @@ describe.skip('onPostAuthInterceptor', () => {
    * https://github.com/facebook/jest/issues/8379
 
    beforeEach(async () => {
-    root = kbnTestServer.createRoot();
+    root = createRoot();
   });
 
    afterEach(async () => await root.shutdown());
@@ -153,13 +156,13 @@ describe.skip('onPostAuthInterceptor', () => {
       getSpacesService: () => spacesServiceStart,
     });
 
-    const router = http.createRouter('/');
+    const router = http.createRouter<RequestHandlerContext>('/');
 
     initKbnServer(router, http.basePath);
 
     await root.start();
 
-    const response = await kbnTestServer.request.get(root, path);
+    const response = await kbnTestServerRequest.get(root, path);
 
     return {
       response,

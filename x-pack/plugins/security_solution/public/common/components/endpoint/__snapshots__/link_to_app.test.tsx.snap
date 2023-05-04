@@ -10,12 +10,219 @@ exports[`LinkToApp component should render with href 1`] = `
     onClick={[Function]}
   >
     <a
-      className="euiLink euiLink--primary"
+      css="unknown styles"
       href="/app/fleet"
       onClick={[Function]}
       rel="noreferrer"
     >
-      link
+      <Insertion
+        cache={
+          Object {
+            "insert": [Function],
+            "inserted": Object {
+              "zxmf4e-euiLink-primary": true,
+            },
+            "key": "css",
+            "nonce": undefined,
+            "registered": Object {},
+            "sheet": StyleSheet {
+              "_alreadyInsertedOrderInsensitiveRule": true,
+              "_insertTag": [Function],
+              "before": null,
+              "container": <head>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus{outline:2px solid currentColor;outline-offset:2px;-webkit-text-decoration:underline;text-decoration:underline;text-decoration-thickness:2px!important;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:focus-visible{outline-style:auto;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:not(:focus-visible){outline:none;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary[target='_blank']{position:relative;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover,.emotion-euiLink-primary:focus,.emotion-euiLink-primary:target{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:target{color:darken(#006bb8, 10%);}
+                </style>
+                <style
+                  data-styled="active"
+                  data-styled-version="5.1.0"
+                />
+                <style
+                  data-styled="active"
+                  data-styled-version="5.1.0"
+                />
+              </head>,
+              "ctr": 8,
+              "insertionPoint": undefined,
+              "isSpeedy": false,
+              "key": "css",
+              "nonce": undefined,
+              "prepend": undefined,
+              "tags": Array [
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus{outline:2px solid currentColor;outline-offset:2px;-webkit-text-decoration:underline;text-decoration:underline;text-decoration-thickness:2px!important;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:focus-visible{outline-style:auto;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:not(:focus-visible){outline:none;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary[target='_blank']{position:relative;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover,.emotion-euiLink-primary:focus,.emotion-euiLink-primary:target{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:target{color:darken(#006bb8, 10%);}
+                </style>,
+              ],
+            },
+          }
+        }
+        isStringTag={true}
+        serialized={
+          Object {
+            "map": undefined,
+            "name": "zxmf4e-euiLink-primary",
+            "next": undefined,
+            "styles": "
+    font-weight: 500;
+    text-align: start;
+
+    &:hover {
+      
+    text-decoration: underline;
+  
+    }
+
+    &:focus {
+      
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+
+    // 👀 Chrome respects :focus-visible and allows coloring the \`auto\` style
+    &:focus-visible {
+      outline-style: auto;
+    }
+
+    // 🙅‍♀️ But Chrome also needs to have the outline forcefully removed from regular \`:focus\` state
+    &:not(:focus-visible) {
+      outline: none;
+    }
+  
+      
+    text-decoration: underline;
+    text-decoration-thickness: 2px !important;
+  
+    }
+   user-select:text;&[target='_blank']{position:relative;};label:euiLink;;;;
+    color: #006bb8;
+
+    &:hover,
+    &:focus,
+    &:target {
+      text-decoration: underline;
+    }
+
+    &:target {
+      color: darken(#006bb8, 10%);
+    }
+  ;label:primary;;;",
+            "toString": [Function],
+          }
+        }
+      />
+      <a
+        className="euiLink emotion-euiLink-primary"
+        href="/app/fleet"
+        onClick={[Function]}
+        rel="noreferrer"
+      >
+        link
+      </a>
     </a>
   </EuiLink>
 </Memo()>
@@ -29,12 +236,215 @@ exports[`LinkToApp component should render with minimum input 1`] = `
     onClick={[Function]}
   >
     <button
-      className="euiLink euiLink--primary"
+      css="unknown styles"
       disabled={false}
       onClick={[Function]}
       type="button"
     >
-      link
+      <Insertion
+        cache={
+          Object {
+            "insert": [Function],
+            "inserted": Object {
+              "zxmf4e-euiLink-primary": true,
+            },
+            "key": "css",
+            "nonce": undefined,
+            "registered": Object {},
+            "sheet": StyleSheet {
+              "_alreadyInsertedOrderInsensitiveRule": true,
+              "_insertTag": [Function],
+              "before": null,
+              "container": <head>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus{outline:2px solid currentColor;outline-offset:2px;-webkit-text-decoration:underline;text-decoration:underline;text-decoration-thickness:2px!important;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:focus-visible{outline-style:auto;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:not(:focus-visible){outline:none;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary[target='_blank']{position:relative;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover,.emotion-euiLink-primary:focus,.emotion-euiLink-primary:target{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:target{color:darken(#006bb8, 10%);}
+                </style>
+                <style
+                  data-styled="active"
+                  data-styled-version="5.1.0"
+                />
+              </head>,
+              "ctr": 8,
+              "insertionPoint": undefined,
+              "isSpeedy": false,
+              "key": "css",
+              "nonce": undefined,
+              "prepend": undefined,
+              "tags": Array [
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary{font-weight:500;text-align:start;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;color:#006bb8;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus{outline:2px solid currentColor;outline-offset:2px;-webkit-text-decoration:underline;text-decoration:underline;text-decoration-thickness:2px!important;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:focus-visible{outline-style:auto;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:focus:not(:focus-visible){outline:none;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary[target='_blank']{position:relative;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:hover,.emotion-euiLink-primary:focus,.emotion-euiLink-primary:target{-webkit-text-decoration:underline;text-decoration:underline;}
+                </style>,
+                <style
+                  data-emotion="css"
+                  data-s=""
+                >
+                  
+                  .emotion-euiLink-primary:target{color:darken(#006bb8, 10%);}
+                </style>,
+              ],
+            },
+          }
+        }
+        isStringTag={true}
+        serialized={
+          Object {
+            "map": undefined,
+            "name": "zxmf4e-euiLink-primary",
+            "next": undefined,
+            "styles": "
+    font-weight: 500;
+    text-align: start;
+
+    &:hover {
+      
+    text-decoration: underline;
+  
+    }
+
+    &:focus {
+      
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+
+    // 👀 Chrome respects :focus-visible and allows coloring the \`auto\` style
+    &:focus-visible {
+      outline-style: auto;
+    }
+
+    // 🙅‍♀️ But Chrome also needs to have the outline forcefully removed from regular \`:focus\` state
+    &:not(:focus-visible) {
+      outline: none;
+    }
+  
+      
+    text-decoration: underline;
+    text-decoration-thickness: 2px !important;
+  
+    }
+   user-select:text;&[target='_blank']{position:relative;};label:euiLink;;;;
+    color: #006bb8;
+
+    &:hover,
+    &:focus,
+    &:target {
+      text-decoration: underline;
+    }
+
+    &:target {
+      color: darken(#006bb8, 10%);
+    }
+  ;label:primary;;;",
+            "toString": [Function],
+          }
+        }
+      />
+      <button
+        className="euiLink emotion-euiLink-primary"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        link
+      </button>
     </button>
   </EuiLink>
 </Memo()>

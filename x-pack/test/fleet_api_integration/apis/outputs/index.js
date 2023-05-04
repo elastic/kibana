@@ -8,5 +8,6 @@
 export default function loadTests({ loadTestFile }) {
   describe('Output Endpoints', () => {
     loadTestFile(require.resolve('./crud'));
+    loadTestFile(require.resolve('./logstash_api_keys'));
   });
 }

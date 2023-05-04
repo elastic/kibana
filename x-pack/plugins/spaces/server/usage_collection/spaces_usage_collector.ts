@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   CollectorFetchContext,
   UsageCollectionSetup,
-} from 'src/plugins/usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
@@ -46,7 +46,7 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-  const { body: resp } = (await esClient.search({
+  const resp = (await esClient.search({
     index: kibanaIndex,
     body: {
       track_total_hits: true,
@@ -68,7 +68,7 @@ async function getSpacesUsage(
       },
       size: 0,
     },
-  })) as { body: SpacesAggregationResponse };
+  })) as SpacesAggregationResponse;
 
   const { hits, aggregations } = resp;
 
@@ -149,7 +149,7 @@ export interface UsageData extends UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndex: string;
+  getIndexForType: (type: string) => Promise<string>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
@@ -382,6 +382,20 @@ export function getSpacesUsageCollector(
             'The number of times the "Copy Saved Objects" API has been called with "overwrite" set to false.',
         },
       },
+      'apiCalls.copySavedObjects.compatibilityModeEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "compatibilityMode" set to true.',
+        },
+      },
+      'apiCalls.copySavedObjects.compatibilityModeEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "compatibilityMode" set to false.',
+        },
+      },
       'apiCalls.resolveCopySavedObjectsErrors.total': {
         type: 'long',
         _meta: {
@@ -417,6 +431,20 @@ export function getSpacesUsageCollector(
             'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
         },
       },
+      'apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "compatibilityMode" set to true.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "compatibilityMode" set to false.',
+        },
+      },
       'apiCalls.disableLegacyUrlAliases.total': {
         type: 'long',
         _meta: {
@@ -425,11 +453,12 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
-      const license = await licensing.license$.pipe(take(1)).toPromise();
+      const { licensing, getIndexForType, features, usageStatsServicePromise } = deps;
+      const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
+      const spaceIndex = await getIndexForType('space');
+      const usageData = await getSpacesUsage(esClient, spaceIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);
 
       return {

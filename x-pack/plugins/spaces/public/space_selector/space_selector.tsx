@@ -9,27 +9,27 @@ import './space_selector.scss';
 
 import {
   EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
+  EuiImage,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
   EuiPanel,
+  EuiPortal,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
+import type { Observable, Subscription } from 'rxjs';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AppMountParameters, CoreStart } from 'src/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
@@ -38,6 +38,7 @@ import { SpaceCards } from './components';
 interface Props {
   spacesManager: SpacesManager;
   serverBasePath: string;
+  customBranding$: Observable<CustomBranding>;
 }
 
 interface State {
@@ -45,10 +46,13 @@ interface State {
   searchTerm: string;
   spaces: Space[];
   error?: Error;
+  customLogo?: string;
 }
 
 export class SpaceSelector extends Component<Props, State> {
   private headerRef?: HTMLElement | null;
+  private customBrandingSubscription?: Subscription;
+
   constructor(props: Props) {
     super(props);
 
@@ -71,6 +75,13 @@ export class SpaceSelector extends Component<Props, State> {
     if (this.state.spaces.length === 0) {
       this.loadSpaces();
     }
+    this.customBrandingSubscription = this.props.customBranding$.subscribe((next) => {
+      this.setState({ ...this.state, customLogo: next.logo });
+    });
+  }
+
+  public componentWillUnmount() {
+    this.customBrandingSubscription?.unsubscribe();
   }
 
   public loadSpaces() {
@@ -106,84 +117,104 @@ export class SpaceSelector extends Component<Props, State> {
     }
 
     return (
-      <EuiPage className="spcSpaceSelector" data-test-subj="kibanaSpaceSelector">
-        <EuiPageBody>
-          <EuiPageHeader className="spcSpaceSelector__heading">
-            <EuiSpacer size="xxl" />
-            <span className="spcSpaceSelector__logo">
-              <EuiIcon size="xxl" type={`logoElastic`} />
-            </span>
+      <KibanaPageTemplate
+        className="spcSpaceSelector"
+        data-test-subj="kibanaSpaceSelector"
+        panelled
+      >
+        {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
+        <EuiPortal>
+          <div className="spcSelectorBackground" role="presentation" />
+        </EuiPortal>
 
-            <EuiTitle size="l">
-              <h1 tabIndex={0} ref={this.setHeaderRef}>
+        <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
+          <EuiText textAlign="center" size="s">
+            <EuiSpacer size="xxl" />
+            {this.state.customLogo ? (
+              <EuiImage
+                src={this.state.customLogo}
+                size={64}
+                alt={i18n.translate('xpack.spaces.spaceSelector.customLogoAlt', {
+                  defaultMessage: 'Custom logo',
+                })}
+              />
+            ) : (
+              <KibanaSolutionAvatar name="Elastic" size="xl" />
+            )}
+            <EuiSpacer size="xxl" />
+            <EuiTextColor color="subdued">
+              <h1
+                // plain `eui` class undos forced focus style on non-EUI components
+                className="eui spcSpaceSelector__pageHeader"
+                tabIndex={0}
+                ref={this.setHeaderRef}
+              >
                 <FormattedMessage
                   id="xpack.spaces.spaceSelector.selectSpacesTitle"
                   defaultMessage="Select your space"
                 />
               </h1>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-                  defaultMessage="You can change your space at anytime"
+                  defaultMessage="You can change your space at anytime."
                 />
               </p>
-            </EuiText>
-          </EuiPageHeader>
-          <EuiPageContent className="spcSpaceSelector__pageContent">
-            <EuiFlexGroup
-              // @ts-ignore
-              direction="column"
-              alignItems="center"
-              responsive={false}
-            >
-              {this.getSearchField()}
-            </EuiFlexGroup>
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="xl" />
 
-            <EuiSpacer size="xl" />
+          {this.getSearchField()}
 
-            {this.state.loading && <EuiLoadingSpinner size="xl" />}
+          {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-            {!this.state.loading && (
-              <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
-            )}
+          {!this.state.loading && (
+            <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+          )}
 
-            {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
-              <Fragment>
-                <EuiSpacer />
-                <EuiText color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
-                    defaultMessage="No spaces match search criteria"
-                  />
-                </EuiText>
-              </Fragment>
-            )}
+          {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
+            <Fragment>
+              <EuiSpacer />
+              <EuiPanel className="spcSpaceSelector__errorPanel" color="subdued">
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate(
+                      'xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription',
+                      {
+                        defaultMessage: 'No spaces match {searchTerm}',
+                        values: { searchTerm: `"${this.state.searchTerm}"` },
+                      }
+                    )}
+                  </h2>
+                </EuiTitle>
+              </EuiPanel>
+            </Fragment>
+          )}
 
-            {!this.state.loading && this.state.error && (
-              <Fragment>
-                <EuiSpacer />
-                <EuiPanel className="spcSpaceSelector__errorPanel">
-                  <EuiText color="danger" style={{ textAlign: 'center' }}>
+          {!this.state.loading && this.state.error && (
+            <Fragment>
+              <EuiSpacer />
+              <EuiPanel color="danger" className="spcSpaceSelector__errorPanel">
+                <EuiText size="s" color="danger">
+                  <h2>
                     <FormattedMessage
                       id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
                       defaultMessage="Error loading spaces ({message})"
                       values={{ message: this.state.error.message }}
                     />
-                  </EuiText>
-                  <EuiText style={{ textAlign: 'center' }}>
+                  </h2>
+                  <p>
                     <FormattedMessage
                       id="xpack.spaces.spaceSelector.contactSysAdminDescription"
                       defaultMessage="Contact your system administrator."
                     />
-                  </EuiText>
-                </EuiPanel>
-              </Fragment>
-            )}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+                  </p>
+                </EuiText>
+              </EuiPanel>
+            </Fragment>
+          )}
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
     );
   }
 
@@ -191,19 +222,23 @@ export class SpaceSelector extends Component<Props, State> {
     if (!this.state.spaces || this.state.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
       return null;
     }
+
+    const inputLabel = i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
+      defaultMessage: 'Find a space',
+    });
+
     return (
-      <EuiFlexItem className="spcSpaceSelector__searchHolder">
-        {
+      <>
+        <div className="spcSpaceSelector__searchHolder">
           <EuiFieldSearch
-            className="spcSpaceSelector__searchField"
-            placeholder={i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
-              defaultMessage: 'Find a space',
-            })}
+            placeholder={inputLabel}
+            aria-label={inputLabel}
             incremental={true}
             onSearch={this.onSearch}
           />
-        }
-      </EuiFlexItem>
+        </div>
+        <EuiSpacer size="xl" />
+      </>
     );
   };
 

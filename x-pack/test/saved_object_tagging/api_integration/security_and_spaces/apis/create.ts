@@ -8,23 +8,27 @@
 import expect from '@kbn/expect';
 import { USERS, User, ExpectedResponse } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
+import { createTestSpaces, deleteTestSpaces, createTags, deleteTags } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const supertest = getService('supertestWithoutAuth');
+export default function (ftrContext: FtrProviderContext) {
+  const supertest = ftrContext.getService('supertestWithoutAuth');
 
   describe('POST /api/saved_objects_tagging/tags/create', () => {
+    before(async () => {
+      await createTestSpaces(ftrContext);
+    });
+
+    after(async () => {
+      await deleteTestSpaces(ftrContext);
+    });
+
     beforeEach(async () => {
-      await esArchiver.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
-      );
+      await createTags(ftrContext);
     });
 
     afterEach(async () => {
-      await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
-      );
+      await deleteTags(ftrContext);
     });
 
     const responses: Record<string, ExpectedResponse> = {

@@ -1,62 +1,544 @@
 [[create-connector-api]]
-=== Create connector API
+== Create connector API
 ++++
 <titleabbrev>Create connector</titleabbrev>
 ++++
 
 Creates a connector.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
 [[create-connector-api-request]]
-==== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/actions/connector`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
 
+=== {api-prereq-title}
+
+You must have `all` privileges for the *{connectors-feature}* feature in the
+*Management* section of the <<kibana-feature-privileges,{kib} feature privileges>>.
+
 [[create-connector-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided
+  in the URL, the default space is used.
 
+[role="child_attributes"]
 [[create-connector-api-request-body]]
-==== Request body
-
-`name`::
-  (Required, string) The display name for the connector.
-
-`connector_type_id`::
-  (Required, string) The connector type ID for the connector.
+=== {api-request-body-title}
 
 `config`::
-  (Required, object) The configuration for the connector. Configuration properties vary depending on
-  the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The configuration for the connector. Configuration properties
+vary depending on the connector type. For example:
++
+--
+// tag::connector-config[]
+.Config properties
+[%collapsible%open]
+====
+
+.{ibm-r} connectors
+[%collapsible%open]
+=====
+`apiUrl`::
+(Required, string) The {ibm-r} instance URL.
+
+`orgId`::
+(Required, string) The {ibm-r} organization ID.
+
+For more information, refer to <<resilient-action-type>>.
+=====
+
+.Index connectors
+[%collapsible%open]
+=====
+
+`executionTimeField`::
+(Optional, string) Specifies a field that will contain the time the alert
+condition was detected. The default value is `null`.
+
+`index`::
+(Required, string) The {es} index to be written to.
+
+`refresh`::
+(Optional, boolean) The {ref}/docs-refresh.html[refresh] policy for the write
+request. The default value is `false`.
+
+For more information, refer to <<index-action-type>>.
+=====
+
+.{jira} connectors
+[%collapsible%open]
+=====
+
+`apiUrl`::
+(Required, string) The {jira} instance URL.
+
+`projectKey`::
+(Required, string) The {jira} project key.
+
+For more information, refer to <<jira-action-type>>.
+=====
+
+.Opsgenie connectors
+[%collapsible%open]
+=====
+
+`apiUrl`::
+(Required, string) The Opsgenie URL. For example, `https://api.opsgenie.com` or
+`https://api.eu.opsgenie.com`. If you are using the `xpack.actions.allowedHosts`
+setting, make sure the hostname is added to the allowed hosts.
+
+For more information, refer to <<opsgenie-action-type>>.
+=====
+
+.{sn-itom}, {sn-itsm}, and {sn-sir} connectors
+[%collapsible%open]
+=====
+`apiUrl`::
+(Required, string) The {sn} instance URL.
+
+`clientId`::
+(Required^*^, string) The client ID assigned to your OAuth application. This
+property is required when `isOAuth` is `true`.
+
+`isOAuth`::
+(Optional, string) The type of authentication to use. The default value is
+`false`, which means basic authentication is used instead of open authorization
+(OAuth).
+
+`jwtKeyId`::
+(Required^*^, string) The key identifier assigned to the JWT verifier map of
+your OAuth application. This property is required when `isOAuth` is `true`.
+
+`userIdentifierValue`::
+(Required^*^, string) The identifier to use for OAuth authentication. This
+identifier should be the user field you selected when you created an OAuth
+JWT API endpoint for external clients in your {sn} instance. For example, if
+the selected user field is `Email`, the user identifier should be the user's
+email address. This property is required when `isOAuth` is `true`.
+
+`usesTableApi`::
+(Optional, boolean) Determines whether the connector uses the Table API or the
+Import Set API. This property is supported only for {sn-itsm} and {sn-sir}
+connectors. The default value is `true`.
++
+NOTE: If this property is set to false, the Elastic application should be
+installed in {sn}.
+=====
+
+.{swimlane} connectors
+[%collapsible%open]
+=====
+`apiUrl`::
+(Required, string) The {swimlane} instance URL.
+
+`appId`::
+(Required, string) The {swimlane} application ID.
+
+`connectorType`::
+(Required, String) The type of the connector. Valid values are: `all`, `alerts`, `cases`.
+
+`mappings`::
+(Optional, object) The field mapping.
++
+.Mappings properties
+[%collapsible%open]
+======
+
+`alertIdConfig`:::
+(Optional, object) Mapping for the alert ID.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+`caseIdConfig`:::
+(Optional, object) Mapping for the case ID.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+`caseNameConfig`:::
+(Optional, object) Mapping for the case name.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+`commentsConfig`:::
+(Optional, object) Mapping for the case comments.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+`descriptionConfig`:::
+(Optional, object) Mapping for the case description.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+`ruleNameConfig`:::
+(Optional, object) Mapping for the name of the alert's rule.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+`severityConfig`:::
+(Optional, object) Mapping for the severity.
+
+`fieldType`::::
+(Required, string) The type of the field in {swimlane}.
+
+`id`::::
+(Required, string) The id of the field in {swimlane}.
+
+`key`::::
+(Required, string) The key of the field in {swimlane}.
+
+`name`::::
+(Required, string) The name of the field in {swimlane}.
+
+======
+For more information, refer to <<swimlane-action-type>>.
+=====
+
+.{webhook-cm} connectors
+[%collapsible%open]
+=====
+
+`createCommentJson`::
+(Optional, string) A JSON payload sent to the create comment URL to create a
+case comment. You can use variables to add Kibana Cases data to the payload. The
+required variable is `case.comment`. For example:
++
+[source,json]
+----
+{
+  "body": {{{case.comment}}}
+}
+----
++
+NOTE: Due to Mustache template variables (the text enclosed in triple braces,
+for example, `{{{case.title}}}`), the JSON is not validated when you create the
+connector. The JSON is validated once the Mustache variables have been placed
+when the REST method runs. Manually ensure that the JSON is valid,
+disregarding the Mustache variables, so the later validation will pass.
+
+`createCommentMethod`::
+(Optional, string) The REST API HTTP request method to create a case comment in
+the third-party system. Valid values are either `patch`, `post`, and `put`. The
+default value is `put`.
+
+`createCommentUrl`::
+(Optional, string) The REST API URL to create a case comment by ID in the
+third-party system. You can use a variable to add the external system ID to the
+URL. If you are using the `xpack.actions.allowedHosts` setting, make sure the
+hostname is added to the allowed hosts. For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment
+----
+
+`createIncidentJson`::
+(Required, string) A JSON payload sent to the create case URL to create a case. You
+can use variables to add case data to the payload. Required variables are
+`case.title` and `case.description`. For example:
++
+[source,json]
+----
+{
+	"fields": {
+	  "summary": {{{case.title}}},
+	  "description": {{{case.description}}},
+	  "labels": {{{case.tags}}}
+	}
+}
+----
++
+NOTE: Due to Mustache template variables (which is the text enclosed in triple
+braces, for example, `{{{case.title}}}`), the JSON is not validated when you
+create the connector. The JSON is validated after the Mustache variables have
+been placed when REST method runs. Manually ensure that the JSON is valid to
+avoid future validation errors; disregard Mustache variables during your review.
+
+`createIncidentMethod`::
+(Optional, string) The REST API HTTP request method to create a case in the
+third-party system. Valid values are `patch`, `post`, and `put`. The default
+value is `post`.
+
+`createIncidentResponseKey`::
+(Required, string) The JSON key in the create case response that contains the
+external case ID.
+
+`createIncidentUrl`::
+(Required, string) The REST API URL to create a case in the third-party system.
+If you are using the `xpack.actions.allowedHosts` setting, make sure the
+hostname is added to the allowed hosts.
+
+`getIncidentResponseExternalTitleKey`::
+(Required, string) The JSON key in get case response that contains the external
+case title.
+
+`getIncidentUrl`::
+(Required, string) The REST API URL to get the case by ID from the third-party
+system. If you are using the `xpack.actions.allowedHosts` setting, make sure the
+hostname is added to the allowed hosts. You can use a variable to add the
+external system ID to the URL. For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}
+----
++
+NOTE: Due to Mustache template variables (the text enclosed in triple braces,
+for example, `{{{case.title}}}`), the JSON is not validated when you create the
+connector. The JSON is validated after the Mustache variables have been placed
+when REST method runs. Manually ensure that the JSON is valid, disregarding the
+Mustache variables, so the later validation will pass.
+
+`hasAuth`::
+(Optional, boolean) If true, a username and password for login type authentication
+must be provided. The default value is `true`.
+
+`headers`::
+(Optional, string) A set of key-value pairs sent as headers with the request
+URLs for the create case, update case, get case, and create comment methods.
+
+`updateIncidentJson`::
+(Required, string) The JSON payload sent to the update case URL to update the
+case. You can use variables to add Kibana Cases data to the payload. Required
+variables are `case.title` and `case.description`. For example:
++
+[source,json]
+----
+{
+	"fields": {
+	  "summary": {{{case.title}}},
+	  "description": {{{case.description}}},
+	  "labels": {{{case.tags}}}
+	}
+}
+----
++
+NOTE: Due to Mustache template variables (which is the text enclosed in triple
+braces, for example, `{{{case.title}}}`), the JSON is not validated when you
+create the connector. The JSON is validated after the Mustache variables have
+been placed when REST method runs. Manually ensure that the JSON is valid to
+avoid future validation errors; disregard Mustache variables during your review.
+
+`updateIncidentMethod`::
+(Optional, string) The REST API HTTP request method to update the case in the
+third-party system. Valid values are `patch`, `post`, and `put`. The default
+value is `put`.
+
+`updateIncidentUrl`::
+(Required, string) The REST API URL to update the case by ID in the third-party
+system. You can use a variable to add the external system ID to the URL. If you
+are using the `xpack.actions.allowedHosts` setting, make sure the hostname is
+added to the allowed hosts. For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}
+----
+     
+`viewIncidentUrl`::
+(Required, string) The URL to view the case in the external system. You can use
+variables to add the external system ID or external system title to the URL.For example:
++
+[source,text]
+----
+https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
+----
+
+For more information, refer to <<cases-webhook-action-type>>.
+=====
+
+This object is not required for server log connectors.
+
+For more configuration properties, refer to <<action-types>>.
+====
+// end::connector-config[]  
+--
+
+`connector_type_id`::
+(Required, string) The connector type ID for the connector. For example,
+`.cases-webhook`, `.index`, `.jira`, `.opsgenie`, `.server-log`, or `.servicenow-itom`.
+
+`name`::
+(Required, string) The display name for the connector.
 
 `secrets`::
-  (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
-  depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The secrets configuration for the connector. Secrets
+configuration properties vary depending on the connector type. For information
+about the secrets configuration properties, refer to <<action-types>>.
 +
+--
 WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
 
+// tag::connector-secrets[]
+.Secrets properties
+[%collapsible%open]
+====
+
+.{ibm-r} connectors
+[%collapsible%open]
+=====
+`apiKeyId`::
+(Required, string) The authentication key ID for HTTP Basic authentication.
+
+`apiKeySecret`::
+(Required, string) The authentication key secret for HTTP Basic authentication.
+=====
+
+.{jira} connectors
+[%collapsible%open]
+=====
+`apiToken`::
+(Required, string) The {jira} API authentication token for HTTP basic
+authentication.
+
+`email`::
+(Required, string) The account email for HTTP Basic authentication.
+=====
+
+.Opsgenie connectors
+[%collapsible%open]
+=====
+`apiKey`::
+(Required, string) The Opsgenie API authentication key for HTTP Basic
+authentication.
+=====
+
+.{sn-itom}, {sn-itsm}, and {sn-sir} connectors
+[%collapsible%open]
+=====
+`clientSecret`::
+(Required^*^, string) The client secret assigned to your OAuth application. This
+property is required when `isOAuth` is `true`.
+
+`password`::
+(Required^*^, string) The password for HTTP basic authentication. This property
+is required when `isOAuth` is `false`.
+
+`privateKey`::
+(Required^*^, string) The RSA private key that you created for use in {sn}. This
+property is required when `isOAuth` is `true`.
+
+privateKeyPassword::
+(Required^*^, string) The password for the RSA private key. This property is
+required when `isOAuth` is `true` and you set a password on your private key.
+
+`username`::
+(Required^*^, string) The username for HTTP basic authentication. This property
+is required when `isOAuth` is `false`.
+
+=====
+
+.{swimlane} connectors
+[%collapsible%open]
+=====
+`apiToken`::
+(string) {swimlane} API authentication token.
+=====
+
+.{webhook-cm} connectors
+[%collapsible%open]
+=====
+`password`::
+(Optional, string) The password for HTTP basic authentication.
+
+`user`::
+(Optional, string) The username for HTTP basic authentication.
+=====
+This object is not required for index or server log connectors.
+====
+// end::connector-secrets[]  
+--
+
 [[create-connector-api-request-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[create-connector-api-example]]
-==== Example
+=== {api-examples-title}
+
+Create an index connector:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/actions/connector
 {
   "name": "my-connector",
   "connector_type_id": ".index",
   "config": {
     "index": "test-index"
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -74,6 +556,98 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
+  "is_deprecated": false,
   "is_missing_secrets": false
 }
 --------------------------------------------------
+
+Create a {jira} connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector
+{
+  "name": "my-jira-connector",
+  "connector_type_id": ".jira",
+  "config": {
+    "apiUrl": "https://elastic.atlassian.net",
+    "projectKey": "ES"
+  },
+  "secrets": {
+    "email": "myEmail",
+    "apiToken": "myToken"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Create an {ibm-r} connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector
+{
+  "name": "my-resilient-connector",
+  "connector_type_id": ".resilient",
+  "config": {
+    "apiUrl": "https://elastic.resilient.net",
+    "orgId": "201"
+  },
+  "secrets": {
+    "apiKeyId": "myKey",
+    "apiKeySecret": "myToken"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Create an {sn-itom} connector that uses open authorization:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector
+{
+  "name": "my-itom-connector",
+  "connector_type_id": ".servicenow-itom",
+  "config": {
+    "apiUrl": "https://exmaple.service-now.com/",
+    "clientId": "abcdefghijklmnopqrstuvwxyzabcdef",
+    "isOAuth": "true",
+    "jwtKeyId": "fedcbazyxwvutsrqponmlkjihgfedcba",
+    "userIdentifierValue": "testuser@email.com"
+  },
+  "secrets": {
+    "clientSecret": "secretsecret",
+    "privateKey": "-----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY-----"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Create a {swimlane} connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector
+{
+   "name":"my-swimlane-connector",
+   "connector_type_id": ".swimlane",
+   "config":{
+      "connectorType":"all",
+      "mappings":{
+         "ruleNameConfig":{
+            "id":"b6fst",
+            "name":"Alert Name",
+            "key":"alert-name",
+            "fieldType":"text"
+         }
+      },
+      "appId":"myAppID",
+      "apiUrl":"https://myswimlaneinstance.com"
+   },
+   "secrets":{
+      "apiToken":"myToken"
+   }
+}
+--------------------------------------------------
+// KIBANA

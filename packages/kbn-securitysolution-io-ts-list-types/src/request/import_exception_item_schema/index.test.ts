@@ -15,6 +15,7 @@ import {
   getImportExceptionsListItemSchemaDecodedMock,
   getImportExceptionsListItemSchemaMock,
 } from './index.mock';
+import { getCommentsArrayMock } from '../../common/comment/index.mock';
 
 describe('import_list_item_schema', () => {
   test('it should validate a typical item request', () => {
@@ -25,6 +26,35 @@ describe('import_list_item_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(getImportExceptionsListItemSchemaDecodedMock());
+  });
+
+  test('it should validate a typical item request with comments', () => {
+    const payload = {
+      ...getImportExceptionsListItemSchemaMock(),
+      comments: getCommentsArrayMock(),
+    };
+    const decoded = importExceptionListItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual({
+      ...getImportExceptionsListItemSchemaDecodedMock(),
+      comments: [
+        {
+          comment: 'some old comment',
+          created_at: '2020-04-20T15:25:31.830Z',
+          created_by: 'some user',
+          id: 'uuid_here',
+        },
+        {
+          comment: 'some old comment',
+          created_at: '2020-04-20T15:25:31.830Z',
+          created_by: 'some user',
+          id: 'uuid_here',
+        },
+      ],
+    });
   });
 
   test('it should NOT accept an undefined for "item_id"', () => {

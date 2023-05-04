@@ -3,10 +3,10 @@
 exports[`anomaly_scores renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiFlexItem
+    data-test-subj="anomaly-score"
     grow={false}
   >
-    <DraggableScore
-      id="anomaly-scores-job-key-1"
+    <Score
       index={0}
       score={
         Object {
@@ -88,7 +88,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       }
       closePopover={[Function]}
       data-test-subj="anomaly-score-popover"
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="anomaly-score-popover"
       isOpen={false}

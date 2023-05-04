@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';

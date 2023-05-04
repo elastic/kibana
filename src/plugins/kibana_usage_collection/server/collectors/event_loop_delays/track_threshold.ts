@@ -8,14 +8,14 @@
 
 import { takeUntil, finalize } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import type { Logger } from 'kibana/server';
-import type { UsageCounter } from '../../../../usage_collection/server';
+import type { Logger } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_THRESHOLD_START,
   MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
 } from './constants';
-import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 
 /**
  * The monitoring of the event loop starts immediately.
@@ -27,7 +27,7 @@ export function startTrackingEventLoopDelaysThreshold(
   eventLoopCounter: UsageCounter,
   logger: Logger,
   stopMonitoringEventLoop$: Observable<void>,
-  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
+  eventLoopDelaysMonitor: IEventLoopDelaysMonitor<IntervalHistogram>,
   configs: {
     warnThreshold?: number;
     collectionStartDelay?: number;

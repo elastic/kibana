@@ -18,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
-import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
@@ -33,6 +33,10 @@ import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 
+/**
+ * Properties for displaying a share menu with Reporting features, including
+ * internally-derived fields.
+ */
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
@@ -42,10 +46,13 @@ export interface ReportingPanelProps {
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
   layoutId?: string;
   objectId?: string;
+
   getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
+
   options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;
+  theme: ThemeServiceSetup;
 }
 
 export type Props = ReportingPanelProps & { intl: InjectedIntl };
@@ -55,6 +62,7 @@ interface State {
   absoluteUrl: string;
   layoutId: string;
   objectType: string;
+  isCreatingReportJob: boolean;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -71,6 +79,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
       objectType,
+      isCreatingReportJob: false,
     };
   }
 
@@ -128,7 +137,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return (
       <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
+          <EuiButton
+            color={isUnsaved ? 'warning' : 'primary'}
+            fullWidth
+            onClick={copy}
+            size="s"
+            data-test-subj="shareReportingCopyURL"
+          >
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
               defaultMessage="Copy POST URL"
@@ -193,6 +208,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             defaultMessage: 'Advanced options',
           })}
           paddingSize="none"
+          data-test-subj="shareReportingAdvancedOptionsButton"
         >
           <EuiSpacer size="s" />
           <EuiText size="s">
@@ -213,12 +229,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        disabled={isDisabled}
+        disabled={isDisabled || this.state.isCreatingReportJob}
         fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"
         size="s"
+        isLoading={this.state.isCreatingReportJob}
       >
         <FormattedMessage
           id="xpack.reporting.panelContent.generateButtonLabel"
@@ -266,6 +283,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
       this.props.getJobParams()
     );
 
+    this.setState({ isCreatingReportJob: true });
+
     return this.props.apiClient
       .createReportingJob(this.props.reportType, decoratedJobParams)
       .then(() => {
@@ -280,33 +299,43 @@ class ReportingPanelContentUi extends Component<Props, State> {
           text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in {path}"
+              defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={this.props.apiClient.getManagementLink()}>
                     <FormattedMessage
                       id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                      defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+                      defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
                 ),
               }}
-            />
+            />,
+            { theme$: this.props.theme.theme$ }
           ),
           'data-test-subj': 'queueReportSuccess',
         });
         if (this.props.onClose) {
           this.props.onClose();
         }
+        if (this.mounted) {
+          this.setState({ isCreatingReportJob: false });
+        }
       })
       .catch((error) => {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Failed to create report',
+            defaultMessage: 'Unable to create report',
           }),
-          toastMessage: error.body.message,
+          toastMessage: (
+            // eslint-disable-next-line react/no-danger
+            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+          ) as unknown as string,
         });
+        if (this.mounted) {
+          this.setState({ isCreatingReportJob: false });
+        }
       });
   };
 }

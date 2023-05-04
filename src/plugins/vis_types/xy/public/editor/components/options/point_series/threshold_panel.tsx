@@ -16,7 +16,7 @@ import {
   SelectOption,
   SwitchOption,
   RequiredNumberInputOption,
-} from '../../../../../../../vis_default_editor/public';
+} from '@kbn/vis-default-editor-plugin/public';
 import { ValidationVisOptionsProps } from '../../common';
 import { VisParams } from '../../../../types';
 import { getThresholdLineStyles } from '../../../collections';
@@ -66,6 +66,7 @@ function ThresholdPanel({
         paramName="show"
         value={stateParams.thresholdLine.show}
         setValue={setThresholdLine}
+        data-test-subj="xyShowThresholdLine"
       />
 
       {stateParams.thresholdLine.show && (

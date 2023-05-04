@@ -38,7 +38,6 @@ export const Groups: React.FC = () => {
       page: { total_results: numGroups },
     },
     filteredSources,
-    filteredUsers,
     filterValue,
   } = useValues(GroupsLogic);
 
@@ -47,7 +46,7 @@ export const Groups: React.FC = () => {
   useEffect(() => {
     getSearchResults(true);
     return resetGroups;
-  }, [filteredSources, filteredUsers, filterValue]);
+  }, [filteredSources, filterValue]);
 
   if (newGroup && hasMessages) {
     messages[0].description = (

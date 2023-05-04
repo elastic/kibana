@@ -76,6 +76,7 @@ export const Static = (props) => {
             }
           >
             <EuiFieldNumber
+              data-test-subj="staticValue"
               onChange={handleTextChange('value')}
               value={model.value === '' ? '' : Number(model.value)}
               step={0.1}

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { FeatureCatalogueCategory, FeatureCatalogueRegistry } from './feature_catalogue';
+export { FeatureCatalogueRegistry } from './feature_catalogue';
 
 export type {
+  FeatureCatalogueCategory,
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueRegistrySetup,
@@ -28,3 +29,6 @@ export type {
 
 export { AddDataService } from './add_data';
 export type { AddDataServiceSetup, AddDataTab } from './add_data';
+
+export { WelcomeService } from './welcome';
+export type { WelcomeServiceSetup, WelcomeRenderTelemetryNotice } from './welcome';

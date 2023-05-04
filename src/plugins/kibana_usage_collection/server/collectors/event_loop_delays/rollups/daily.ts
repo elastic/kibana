@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { ISavedObjectsRepository } from '../../../../../../core/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import { deleteHistogramSavedObjects } from '../saved_objects';
 
 /**

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
@@ -18,17 +18,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('no management privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_read'], true);
+        await security.testUser.setRoles(['global_dashboard_read']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -64,11 +64,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions', 'jobsListLink'],
+          sectionLinks: [
+            'triggersActions',
+            'cases',
+            'triggersActionsConnectors',
+            'jobsListLink',
+            'maintenanceWindows',
+          ],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: ['dataViews', 'objects', 'tags', 'search_sessions', 'spaces', 'settings'],
+          sectionLinks: [
+            'dataViews',
+            'filesManagement',
+            'objects',
+            'tags',
+            'search_sessions',
+            'spaces',
+            'settings',
+          ],
         });
       });
     });

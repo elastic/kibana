@@ -12,7 +12,7 @@ import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {
@@ -54,7 +54,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
       <EuiSpacer size="m" />
       <EuiCallOut
         color="warning"
-        iconType="alert"
+        iconType="warning"
         title={
           <FormattedMessage
             id="indexPatternManagement.scriptedFieldsDeprecatedTitle"

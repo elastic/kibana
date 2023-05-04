@@ -15,7 +15,7 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
@@ -23,7 +23,7 @@ import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descr
 
 interface Props {
   metrics: AggDescriptor[];
-  rightFields: IndexPatternField[];
+  rightFields: DataViewField[];
   onChange: (metrics: AggDescriptor[]) => void;
 }
 
@@ -66,6 +66,7 @@ export class MetricsExpression extends Component<Props, State> {
         metrics={this.props.metrics}
         onChange={this.props.onChange}
         allowMultipleMetrics={true}
+        isJoin={true}
       />
     );
   };

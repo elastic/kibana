@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'src/core/server';
+import { StartServicesAccessor } from '@kbn/core/server';
 import { LicensingPluginStart } from '../types';
 import { FeatureUsageServiceSetup } from '../services';
 import { registerInfoRoute } from './info';

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpStart } from 'src/core/public';
-
+import type { Capabilities, HttpStart } from '@kbn/core/public';
 import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
-} from '../../../../../src/plugins/share/common';
-import type { SharePluginSetup } from '../../../../../src/plugins/share/public';
+} from '@kbn/share-plugin/common';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
 const DEFAULT_ANONYMOUS_ACCESS_STATE = Object.freeze<AnonymousAccessState>({
   isEnabled: false,

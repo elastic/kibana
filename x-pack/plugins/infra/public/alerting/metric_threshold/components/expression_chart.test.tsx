@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
-import { MetricExpression } from '../types';
-import { DataViewBase } from '@kbn/es-query';
-import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import React from 'react';
-import { ExpressionChart } from './expression_chart';
+import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Aggregators, Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
+import { LineAnnotation, RectAnnotation } from '@elastic/charts';
+import { DataViewBase } from '@kbn/es-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
+import { MetricExpression } from '../types';
+import { ExpressionChart } from './expression_chart';
 
 const mockStartServices = mockCoreMock.createStart();
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
       ...mockStartServices,
+      charts: {
+        activeCursor: jest.fn(),
+      },
     },
   }),
 }));
@@ -35,11 +38,16 @@ const mockResponse = {
 };
 
 jest.mock('../hooks/use_metrics_explorer_chart_data', () => ({
-  useMetricsExplorerChartData: () => ({ loading: false, data: mockResponse }),
+  useMetricsExplorerChartData: () => ({ loading: false, data: { pages: [mockResponse] } }),
 }));
 
 describe('ExpressionChart', () => {
-  async function setup(expression: MetricExpression, filterQuery?: string, groupBy?: string) {
+  async function setup(
+    expression: MetricExpression,
+    filterQuery?: string,
+    groupBy?: string,
+    annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>
+  ) {
     const derivedIndexPattern: DataViewBase = {
       title: 'metricbeat-*',
       fields: [],
@@ -65,6 +73,7 @@ describe('ExpressionChart', () => {
         source={source}
         filterQuery={filterQuery}
         groupBy={groupBy}
+        annotations={annotations}
       />
     );
 

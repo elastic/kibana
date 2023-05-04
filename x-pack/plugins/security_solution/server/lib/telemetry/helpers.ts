@@ -7,14 +7,27 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { merge, set } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import { sha256 } from 'js-sha256';
+import { copyAllowlistedFields, filterList } from './filterlists';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
+import type {
+  ExceptionListItem,
+  ESClusterInfo,
+  ESLicense,
+  ListTemplate,
+  TelemetryEvent,
+  ValueListResponse,
+  TaskMetric,
+} from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
+  DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 
@@ -160,15 +173,23 @@ export const ruleExceptionListItemToTelemetryEvent = (
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
+export const templateExceptionList = (
+  listData: ExceptionListItem[],
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined,
+  listType: string
+) => {
   return listData.map((item) => {
     const template: ListTemplate = {
       '@timestamp': moment().toISOString(),
+      cluster_uuid: clusterInfo.cluster_uuid,
+      cluster_name: clusterInfo.cluster_name,
+      license_id: licenseInfo?.uid,
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListEventFields,
+      filterList.exceptionLists,
       item as unknown as TelemetryEvent
     );
 
@@ -202,6 +223,125 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
  * @param label_list the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
-export function createUsageCounterLabel(labelList: string[]): string {
-  return labelList.join('-');
+export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
+
+/**
+ * Resiliantly handles an edge case where the endpoint config details are not present
+ *
+ * @returns the endpoint policy configuration
+ */
+export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
+  const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
+  return epPolicyConfig ? epPolicyConfig : null;
+};
+
+export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {
+  return merge(DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS, policyConfig);
+};
+
+export const formatValueListMetaData = (
+  valueListResponse: ValueListResponse,
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined
+) => ({
+  '@timestamp': moment().toISOString(),
+  cluster_uuid: clusterInfo.cluster_uuid,
+  cluster_name: clusterInfo.cluster_name,
+  license_id: licenseInfo?.uid,
+  total_list_count:
+    valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count?.value ?? 0,
+  types:
+    valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map(
+      (breakdown) => ({
+        type: breakdown.key,
+        count: breakdown.doc_count,
+      })
+    ) ?? [],
+  lists:
+    valueListResponse.itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map(
+      (itemCount) => ({
+        id: itemCount.key,
+        count: itemCount.doc_count,
+      })
+    ) ?? [],
+  included_in_exception_lists_count:
+    valueListResponse.exceptionListMetricsResponse?.aggregations
+      ?.vl_included_in_exception_lists_count?.value ?? 0,
+  used_in_indicator_match_rule_count:
+    valueListResponse.indicatorMatchMetricsResponse?.aggregations
+      ?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+});
+
+export let isElasticCloudDeployment = false;
+export const setIsElasticCloudDeployment = (value: boolean) => {
+  isElasticCloudDeployment = value;
+};
+
+export const tlog = (logger: Logger, message: string) => {
+  if (isElasticCloudDeployment) {
+    logger.info(message);
+  } else {
+    logger.debug(message);
+  }
+};
+
+export const createTaskMetric = (
+  name: string,
+  passed: boolean,
+  startTime: number,
+  errorMessage?: string
+): TaskMetric => {
+  const endTime = Date.now();
+  return {
+    name,
+    passed,
+    time_executed_in_ms: endTime - startTime,
+    start_time: startTime,
+    end_time: endTime,
+    error_message: errorMessage,
+  };
+};
+
+function obfuscateString(clusterId: string, toHash: string): string {
+  const valueToObfuscate = toHash + clusterId;
+  return sha256.create().update(valueToObfuscate).hex();
 }
+
+function isAllowlistK8sUsername(username: string) {
+  return (
+    username === 'edit' ||
+    username === 'view' ||
+    username === 'admin' ||
+    username === 'elastic-agent' ||
+    username === 'cluster-admin' ||
+    username.startsWith('system')
+  );
+}
+
+export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): TelemetryEvent => {
+  // if there is no kubernetes key, return the event as is
+  if (event.kubernetes === undefined && event.kubernetes === null) {
+    return event;
+  }
+
+  const username = event?.kubernetes?.audit?.user?.username;
+  const impersonatedUser = event?.kubernetes?.audit?.impersonated_user?.username;
+
+  if (username !== undefined && username !== null && !isAllowlistK8sUsername(username)) {
+    set(event, 'kubernetes.audit.user.username', obfuscateString(clusterId, username));
+  }
+
+  if (
+    impersonatedUser !== undefined &&
+    impersonatedUser !== null &&
+    !isAllowlistK8sUsername(impersonatedUser)
+  ) {
+    set(
+      event,
+      'kubernetes.audit.impersonated_user.username',
+      obfuscateString(clusterId, impersonatedUser)
+    );
+  }
+
+  return event;
+};

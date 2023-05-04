@@ -13,7 +13,7 @@ export class ManagementMenuService extends FtrService {
 
   public async getSections() {
     const sectionsElements = await this.find.allByCssSelector(
-      '.kbnPageTemplateSolutionNav .euiSideNavItem--root'
+      '.kbnSolutionNav .euiSideNavItem--root'
     );
 
     const sections = [];

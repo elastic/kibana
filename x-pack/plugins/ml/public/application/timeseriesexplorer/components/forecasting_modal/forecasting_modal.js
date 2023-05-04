@@ -16,6 +16,11 @@ import React, { Component } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import { MESSAGE_LEVEL } from '../../../../../common/constants/message_levels';
 import { isJobVersionGte } from '../../../../../common/util/job_utils';
@@ -25,9 +30,6 @@ import { PROGRESS_STATES } from './progress_states';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlForecastService } from '../../../services/forecast_service';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 
@@ -178,8 +180,18 @@ export class ForecastingModalUI extends Component {
   runForecastErrorHandler = (resp, closeJob) => {
     this.setState({ forecastProgress: PROGRESS_STATES.ERROR });
     console.log('Time series forecast modal - error running forecast:', resp);
-    if (resp && resp.message) {
-      this.addMessage(resp.message, MESSAGE_LEVEL.ERROR, true);
+
+    const errorMessage = resp ? extractErrorMessage(resp) : undefined;
+
+    if (errorMessage && errorMessage.length > 0) {
+      this.addMessage(
+        i18n.translate('xpack.ml.timeSeriesExplorer.forecastingModal.errorRunningForecastMessage', {
+          defaultMessage: 'An error has occurred running the forecast: {errorMessage}',
+          values: { errorMessage },
+        }),
+        MESSAGE_LEVEL.ERROR,
+        true
+      );
     } else {
       this.addMessage(
         i18n.translate(

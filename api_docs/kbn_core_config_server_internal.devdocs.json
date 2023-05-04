@@ -1,0 +1,106 @@
+{
+  "id": "@kbn/core-config-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-common.coreDeprecationProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "coreDeprecationProvider",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigDeprecation",
+            "text": "ConfigDeprecation"
+          },
+          "[]"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/deprecation/core_deprecations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-common.ensureValidConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureValidConfiguration",
+        "description": [],
+        "signature": [
+          "(configService: ",
+          "ConfigService",
+          ", params: ",
+          "ConfigValidateParameters",
+          " | undefined) => Promise<void>"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-common.ensureValidConfiguration.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "configService",
+            "description": [],
+            "signature": [
+              "ConfigService"
+            ],
+            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-common.ensureValidConfiguration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "ConfigValidateParameters",
+              " | undefined"
+            ],
+            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

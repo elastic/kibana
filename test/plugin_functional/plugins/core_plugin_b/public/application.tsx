@@ -9,23 +9,24 @@
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
 
-import { CoreStart, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="barAppHome">

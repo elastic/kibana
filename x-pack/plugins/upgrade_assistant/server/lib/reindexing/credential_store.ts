@@ -8,18 +8,22 @@
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 
-import { SecurityPluginStart } from '../../../../security/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 
 export type Credential = Record<string, any>;
 
 // Generates a stable hash for the reindex operation's current state.
-const getHash = (reindexOp: ReindexSavedObject) =>
-  createHash('sha256')
-    .update(stringify({ id: reindexOp.id, ...reindexOp.attributes }))
+const getHash = (reindexOp: ReindexSavedObject) => {
+  // Remove reindexOptions from the SO attributes as it creates an unstable hash
+  // This needs further investigation, see: https://github.com/elastic/kibana/issues/123752
+  const { reindexOptions, ...attributes } = reindexOp.attributes;
+  return createHash('sha256')
+    .update(stringify({ id: reindexOp.id, ...attributes }))
     .digest('base64');
+};
 
 // Returns a base64-encoded API key string or undefined
 const getApiKey = async ({

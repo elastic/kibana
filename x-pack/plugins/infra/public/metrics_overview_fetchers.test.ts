@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
-import { createMetricsHasData, createMetricsFetchData } from './metrics_overview_fetchers';
-import { CoreStart } from 'kibana/public';
-import { InfraClientStartDeps, InfraClientStartExports } from './types';
+import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
+import { coreMock } from '@kbn/core/public/mocks';
+import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
+import { createInfraPluginStartMock } from './mocks';
 import { FAKE_OVERVIEW_RESPONSE } from './test_utils';
+import { InfraClientStartDeps, InfraClientStartExports } from './types';
 
 function setup() {
   const core = coreMock.createStart();
+  const pluginStart = createInfraPluginStartMock();
+
   const mockedGetStartServices = jest.fn(() => {
     const deps = {};
     return Promise.resolve([
       core as CoreStart,
       deps as InfraClientStartDeps,
-      void 0 as InfraClientStartExports,
+      pluginStart,
     ]) as Promise<[CoreStart, InfraClientStartDeps, InfraClientStartExports]>;
   });
   return { core, mockedGetStartServices };
@@ -31,21 +34,27 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
         hasData: true,
+        configuration: {
+          metricAlias: 'metric-*',
+        },
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
       expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(response).toBeTruthy();
+      expect(response.hasData).toBeTruthy();
     });
     it('should return false when false', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
         hasData: false,
+        configuration: {
+          metricAlias: 'metric-*',
+        },
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
       expect(core.http.get).toHaveBeenCalledTimes(1);
-      expect(response).toBeFalsy();
+      expect(response.hasData).toBeFalsy();
     });
   });
 

@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, Fragment, useMemo, useState } from 'react';
+import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
-import { HostEcs } from '../../../../common/ecs/host';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
 import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
+import type {
   AutonomousSystem,
   FlowTarget,
+  FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { DefaultDraggable } from '../../../common/components/draggables';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import {
-  HostDetailsLink,
-  ReputationLink,
-  WhoIsLink,
-  ReputationLinkSetting,
-} from '../../../common/components/links';
+import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
-import * as i18n from '../../../network/components/details/translations';
+import * as i18n from '../../../explore/network/components/details/translations';
+import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -46,7 +48,7 @@ export const locationRenderer = (
   isDraggable?: boolean
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
@@ -60,6 +62,8 @@ export const locationRenderer = (
                 isDraggable={isDraggable ?? false}
                 field={fieldName}
                 value={locationValue}
+                isAggregatable={true}
+                fieldType={'keyword'}
               />
             </EuiFlexItem>
           </Fragment>
@@ -76,7 +80,7 @@ export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
 
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
-  flowTarget: FlowTarget,
+  flowTarget: FlowTarget | FlowTargetSourceDest,
   contextID?: string,
   isDraggable?: boolean
 ): React.ReactElement =>
@@ -101,6 +105,8 @@ export const autonomousSystemRenderer = (
           isDraggable={false}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
+          isAggregatable={true}
+          fieldType={'number'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -133,6 +139,8 @@ export const hostIdRenderer = ({
           isDraggable={isDraggable}
           field="host.id"
           value={host.id[0]}
+          isAggregatable={true}
+          fieldType={'keyword'}
         >
           {noLink ? (
             <>{host.id}</>
@@ -166,6 +174,8 @@ export const hostNameRenderer = (
       isDraggable={isDraggable ?? false}
       field={'host.name'}
       value={host.name[0]}
+      isAggregatable={true}
+      fieldType={'keyword'}
     >
       <HostDetailsLink hostName={host.name[0]}>
         {host.name ? host.name : getEmptyTagValue()}
@@ -182,16 +192,14 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
 );
 
 interface DefaultFieldRendererProps {
-  rowItems: string[] | null | undefined;
   attrName: string;
+  displayCount?: number;
   idPrefix: string;
   isDraggable?: boolean;
-  render?: (item: string) => JSX.Element;
-  displayCount?: number;
   moreMaxHeight?: string;
+  render?: (item: string) => React.ReactNode;
+  rowItems: string[] | null | undefined;
 }
-
-type OverflowRenderer = (item: string | ReputationLinkSetting) => JSX.Element;
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
@@ -216,7 +224,14 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable id={id} isDraggable={isDraggable} field={attrName} value={rowItem}>
+            <DefaultDraggable
+              id={id}
+              isDraggable={isDraggable}
+              field={attrName}
+              value={rowItem}
+              isAggregatable={true}
+              fieldType={'keyword'}
+            >
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
           )}
@@ -225,15 +240,23 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
     });
 
     return draggables.length > 0 ? (
-      <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
+      <DraggableContainerFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        component="span"
+        data-test-subj="DefaultFieldRendererComponent"
+      >
         <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
-            rowItems={rowItems}
+            attrName={attrName}
+            fieldType="keyword"
             idPrefix={idPrefix}
-            render={render as OverflowRenderer}
-            overflowIndexStart={displayCount}
+            isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
+            overflowIndexStart={displayCount}
+            render={render}
+            rowItems={rowItems}
           />
         </EuiFlexItem>
       </DraggableContainerFlexGroup>
@@ -249,54 +272,125 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
-type RowItemTypes = string | ReputationLinkSetting;
 interface DefaultFieldRendererOverflowProps {
-  rowItems: string[] | ReputationLinkSetting[];
+  attrName: string;
+  fieldType: string;
+  rowItems: string[];
   idPrefix: string;
-  render?: (item: RowItemTypes) => React.ReactNode;
+  isAggregatable?: boolean;
+  render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
 
 interface MoreContainerProps {
+  fieldName: string;
+  fieldType: string;
+  values: string[];
   idPrefix: string;
-  render?: (item: RowItemTypes) => React.ReactNode;
-  rowItems: RowItemTypes[];
+  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
+  render?: (item: string) => React.ReactNode;
 }
 
-/** A container (with overflow) for showing "More" items in a popover */
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({ idPrefix, render, rowItems, moreMaxHeight, overflowIndexStart }) => (
-    <div
-      data-test-subj="more-container"
-      style={{
-        maxHeight: moreMaxHeight,
-        overflow: 'auto',
-        paddingRight: '2px',
-      }}
-    >
-      {rowItems.slice(overflowIndexStart).map((rowItem, i) => (
-        <EuiText key={`${idPrefix}-${rowItem}-${i}`} size="s">
-          {render ? render(rowItem) : rowItem}
-        </EuiText>
-      ))}
-    </div>
-  )
-);
+  ({
+    fieldName,
+    fieldType,
+    idPrefix,
+    isAggregatable,
+    moreMaxHeight,
+    overflowIndexStart,
+    render,
+    values,
+  }) => {
+    const { timelineId } = useContext(TimelineContext);
 
+    const moreItemsWithHoverActions = useMemo(
+      () =>
+        values.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, value, index) => {
+          const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
+
+          if (typeof value === 'string' && fieldName != null) {
+            acc.push(
+              <EuiFlexItem key={id}>
+                <SecurityCellActions
+                  key={id}
+                  mode={CellActionsMode.HOVER_DOWN}
+                  visibleCellActions={5}
+                  showActionTooltips
+                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  field={{
+                    name: fieldName,
+                    value,
+                    type: fieldType,
+                    aggregatable: isAggregatable,
+                  }}
+                  metadata={{
+                    scopeId: timelineId ?? undefined,
+                  }}
+                >
+                  <>{render ? render(value) : defaultToEmptyTag(value)}</>
+                </SecurityCellActions>
+              </EuiFlexItem>
+            );
+          }
+
+          return acc;
+        }, []),
+      [
+        fieldName,
+        fieldType,
+        idPrefix,
+        overflowIndexStart,
+        render,
+        values,
+        timelineId,
+        isAggregatable,
+      ]
+    );
+
+    return (
+      <div
+        data-test-subj="more-container"
+        className="eui-yScroll"
+        style={{
+          maxHeight: moreMaxHeight,
+          paddingRight: '2px',
+        }}
+      >
+        <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
+          {moreItemsWithHoverActions}
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+);
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
+  ({
+    attrName,
+    idPrefix,
+    moreMaxHeight,
+    overflowIndexStart = 5,
+    render,
+    rowItems,
+    fieldType,
+    isAggregatable,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
       () => (
         <>
           {' ,'}
-          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={togglePopover}
+            data-test-subj="DefaultFieldRendererOverflow-button"
+          >
             {`+${rowItems.length - overflowIndexStart} `}
             <FormattedMessage
               id="xpack.securitySolution.fieldRenderers.moreLabel"
@@ -317,13 +411,17 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             isOpen={isOpen}
             closePopover={togglePopover}
             repositionOnScroll
+            panelClassName="withHoverActions__popover"
           >
             <MoreContainer
+              fieldName={attrName}
               idPrefix={idPrefix}
               render={render}
-              rowItems={rowItems}
+              values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
+              fieldType={fieldType}
+              isAggregatable={isAggregatable}
             />
           </EuiPopover>
         )}

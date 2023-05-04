@@ -43,7 +43,7 @@ export const getSuperSelectOption = (
     <>
       <strong>{title}</strong>
       <EuiText size="s" color="subdued">
-        <p className="euiTextColor--subdued">{description}</p>
+        <p>{description}</p>
       </EuiText>
     </>
   ),

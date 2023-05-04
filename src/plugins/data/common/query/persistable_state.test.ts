@@ -6,35 +6,60 @@
  * Side Public License, v 1.
  */
 
-import { extract, inject } from './persistable_state';
+import { extract, inject, getAllMigrations } from './persistable_state';
 import { Filter } from '@kbn/es-query';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { QueryState } from './query_state';
 
-describe('filter manager persistable state tests', () => {
+describe('query service persistable state tests', () => {
   const filters: Filter[] = [
     { meta: { alias: 'test', disabled: false, negate: false, index: 'test' } },
   ];
+  const query = { language: 'kql', query: 'query' };
+  const time = { from: new Date().toISOString(), to: new Date().toISOString() };
+  const refreshInterval = { pause: false, value: 10 };
+
+  const queryState: QueryState = {
+    filters,
+    query,
+    time,
+    refreshInterval,
+  };
+
   describe('reference injection', () => {
     test('correctly inserts reference to filter', () => {
-      const updatedFilters = inject(filters, [
+      const updatedQueryState = inject(queryState, [
         { type: DATA_VIEW_SAVED_OBJECT_TYPE, name: 'test', id: '123' },
       ]);
-      expect(updatedFilters[0]).toHaveProperty('meta.index', '123');
+      expect(updatedQueryState.filters[0]).toHaveProperty('meta.index', '123');
+      expect(updatedQueryState.query).toEqual(queryState.query);
+      expect(updatedQueryState.time).toEqual(queryState.time);
+      expect(updatedQueryState.refreshInterval).toEqual(queryState.refreshInterval);
     });
 
-    test('drops index setting if reference is missing', () => {
-      const updatedFilters = inject(filters, [
+    test('drops index setting from filter if reference is missing', () => {
+      const updatedQueryState = inject(queryState, [
         { type: DATA_VIEW_SAVED_OBJECT_TYPE, name: 'test123', id: '123' },
       ]);
-      expect(updatedFilters[0]).toHaveProperty('meta.index', undefined);
+      expect(updatedQueryState.filters[0]).toHaveProperty('meta.index', 'test');
     });
   });
 
   describe('reference extraction', () => {
     test('correctly extracts references', () => {
-      const { state, references } = extract(filters);
-      expect(state[0]).toHaveProperty('meta.index');
+      const { state, references } = extract(queryState);
+      expect(state.filters[0]).toHaveProperty('meta.index');
       expect(references[0]).toHaveProperty('id', 'test');
+
+      expect(state.query).toEqual(queryState.query);
+      expect(state.time).toEqual(queryState.time);
+      expect(state.refreshInterval).toEqual(queryState.refreshInterval);
+    });
+  });
+
+  describe('migrations', () => {
+    test('getAllMigrations', () => {
+      expect(getAllMigrations()).toEqual({});
     });
   });
 });

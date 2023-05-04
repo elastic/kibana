@@ -10,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 
 import '../../../test/global_mocks';
 import * as fixtures from '../../../test/fixtures';
+import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, kibanaVersion } from '../helpers';
 
 import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
@@ -26,6 +27,23 @@ const MAPPING = {
     },
   },
 };
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const origial = jest.requireActual('@elastic/eui');
@@ -48,15 +66,14 @@ jest.mock('@elastic/eui', () => {
 describe('<TemplateEdit />', () => {
   let testBed: TemplateFormTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
   });
 
   afterAll(() => {
-    server.restore();
     jest.useRealTimers();
   });
 
@@ -71,12 +88,12 @@ describe('<TemplateEdit />', () => {
     });
 
     beforeAll(() => {
-      httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
+      httpRequestsMockHelpers.setLoadTemplateResponse('my_template', templateToEdit);
     });
 
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -117,24 +134,25 @@ describe('<TemplateEdit />', () => {
         actions.clickNextButton();
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
-      const expected = {
-        name: 'test',
-        indexPatterns: ['myPattern*'],
-        dataStream: {
-          hidden: true,
-          anyUnknownKey: 'should_be_kept',
-        },
-        version: 1,
-        _kbnMeta: {
-          type: 'default',
-          isLegacy: false,
-          hasDatastream: true,
-        },
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates/test`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'test',
+            indexPatterns: ['myPattern*'],
+            version: 1,
+            dataStream: {
+              hidden: true,
+              anyUnknownKey: 'should_be_kept',
+            },
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: true,
+              isLegacy: false,
+            },
+          }),
+        })
+      );
     });
   });
 
@@ -148,12 +166,12 @@ describe('<TemplateEdit />', () => {
     });
 
     beforeAll(() => {
-      httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
+      httpRequestsMockHelpers.setLoadTemplateResponse('my_template', templateToEdit);
     });
 
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
     });
@@ -194,6 +212,7 @@ describe('<TemplateEdit />', () => {
         // Make some changes to the mappings
         await act(async () => {
           actions.clickEditButtonAtField(0); // Select the first field to edit
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
         component.update();
 
@@ -203,6 +222,7 @@ describe('<TemplateEdit />', () => {
         // Change the field name
         await act(async () => {
           form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
 
         // Save changes on the field
@@ -225,40 +245,40 @@ describe('<TemplateEdit />', () => {
           actions.clickNextButton();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-        const { version } = templateToEdit;
-
-        const expected = {
-          name: TEMPLATE_NAME,
-          version,
-          priority: 3,
-          indexPatterns: UPDATED_INDEX_PATTERN,
-          template: {
-            mappings: {
-              properties: {
-                [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
-                  type: 'text',
-                  store: false,
-                  index: true,
-                  fielddata: false,
-                  eager_global_ordinals: false,
-                  index_phrases: false,
-                  norms: true,
-                  index_options: 'positions',
-                },
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: TEMPLATE_NAME,
+              indexPatterns: UPDATED_INDEX_PATTERN,
+              priority: 3,
+              version: templateToEdit.version,
+              _kbnMeta: {
+                type: 'default',
+                hasDatastream: false,
+                isLegacy: templateToEdit._kbnMeta.isLegacy,
               },
-            },
-            settings: SETTINGS,
-            aliases: ALIASES,
-          },
-          _kbnMeta: {
-            type: 'default',
-            isLegacy: templateToEdit._kbnMeta.isLegacy,
-            hasDatastream: false,
-          },
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+              template: {
+                settings: SETTINGS,
+                mappings: {
+                  properties: {
+                    [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
+                      type: 'text',
+                      index: true,
+                      eager_global_ordinals: false,
+                      index_phrases: false,
+                      norms: true,
+                      fielddata: false,
+                      store: false,
+                      index_options: 'positions',
+                    },
+                  },
+                },
+                aliases: ALIASES,
+              },
+            }),
+          })
+        );
       });
     });
   });
@@ -277,12 +297,12 @@ describe('<TemplateEdit />', () => {
       });
 
       beforeAll(() => {
-        httpRequestsMockHelpers.setLoadTemplateResponse(legacyTemplateToEdit);
+        httpRequestsMockHelpers.setLoadTemplateResponse('my_template', legacyTemplateToEdit);
       });
 
       beforeEach(async () => {
         await act(async () => {
-          testBed = await setup();
+          testBed = await setup(httpSetup);
         });
 
         testBed.component.update();
@@ -305,24 +325,25 @@ describe('<TemplateEdit />', () => {
           actions.clickNextButton();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
         const { version, template, name, indexPatterns, _kbnMeta, order } = legacyTemplateToEdit;
 
-        const expected = {
-          name,
-          indexPatterns,
-          version,
-          order,
-          template: {
-            aliases: undefined,
-            mappings: template!.mappings,
-            settings: undefined,
-          },
-          _kbnMeta,
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name,
+              indexPatterns,
+              version,
+              order,
+              template: {
+                aliases: undefined,
+                mappings: template!.mappings,
+                settings: undefined,
+              },
+              _kbnMeta,
+            }),
+          })
+        );
       });
     });
   }

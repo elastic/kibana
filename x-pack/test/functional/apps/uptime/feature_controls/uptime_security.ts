@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
@@ -65,14 +65,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('global_uptime_all_user');
       });
 
-      it('shows uptime navlink', async () => {
-        const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql([
-          'Overview',
-          'Alerts',
-          'Uptime',
-          'Stack Management',
-        ]);
+      it('shows Uptime navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Uptime');
       });
 
       it('can navigate to Uptime app', async () => {
@@ -121,9 +116,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('global_uptime_read_user');
       });
 
-      it('shows uptime navlink', async () => {
+      it('shows Uptime navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Stack Management']);
+        expect(navLinks).to.contain('Uptime');
       });
 
       it('can navigate to Uptime app', async () => {
@@ -136,8 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/104249
-    describe.skip('no uptime privileges', () => {
+    describe('no uptime privileges', () => {
       before(async () => {
         await security.role.create('no_uptime_privileges_role', {
           elasticsearch: {
@@ -173,7 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_uptime_privileges_user');
       });
 
-      it(`doesn't show uptime navlink`, async () => {
+      it(`doesn't show Uptime navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Uptime');
       });

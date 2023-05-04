@@ -10,8 +10,8 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { kibanaPackageJson } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
@@ -29,28 +29,36 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
+    baseImage: 'none' | 'ubi9' | 'ubi8' | 'ubuntu';
     context: boolean;
     image: boolean;
-    ubi?: boolean;
-    ubuntu?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
+    serverless?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  let baseOSImage = '';
-  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
-  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
-  const ubiVersionTag = 'ubi8';
+  let baseImageName = '';
+  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
+  if (flags.baseImage === 'ubi8') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi9') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
 
   let imageFlavor = '';
-  if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
+  if (flags.baseImage === 'ubi8') imageFlavor += `-ubi8`;
+  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
+  if (flags.serverless) imageFlavor += '-serverless';
 
   // General docker var config
   const license = 'Elastic License';
-  const imageTag = `docker.elastic.co/kibana${flags.cloud ? '-ci' : ''}/kibana`;
+  const configuredNamespace = config.getDockerNamespace();
+  const imageNamespace = configuredNamespace
+    ? configuredNamespace
+    : flags.cloud || flags.serverless
+    ? 'kibana-ci'
+    : 'kibana';
+  const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   const artifactPrefix = `kibana-${version}-linux`;
@@ -61,7 +69,6 @@ export async function runDockerGenerator(
   const artifactsDir = config.resolveFromTarget('.');
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
-  // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
@@ -75,7 +82,10 @@ export async function runDockerGenerator(
   ];
 
   const dockerPush = config.getDockerPush();
+  const dockerTag = config.getDockerTag();
   const dockerTagQualifier = config.getDockerTagQualfiier();
+  const dockerCrossCompile = config.getDockerCrossCompile();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
 
   const scope: TemplateContext = {
     artifactPrefix,
@@ -89,17 +99,20 @@ export async function runDockerGenerator(
     dockerBuildDir,
     dockerTargetFilename,
     dockerPush,
+    dockerTag,
     dockerTagQualifier,
-    baseOSImage,
+    dockerCrossCompile,
+    baseImageName,
     dockerBuildDate,
-    ubi: flags.ubi,
-    ubuntu: flags.ubuntu,
+    baseImage: flags.baseImage,
     cloud: flags.cloud,
+    serverless: flags.serverless,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -108,7 +121,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 
@@ -121,6 +134,14 @@ export async function runDockerGenerator(
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
   }
 
+  // Copy serverless-only configuration files
+  if (flags.serverless) {
+    await mkdirp(resolve(dockerBuildDir, 'config'));
+    await copyAll(config.resolveFromRepo('config'), resolve(dockerBuildDir, 'config'), {
+      select: ['serverless*.yml'],
+    });
+  }
+
   // Copy all the needed resources into kibana-docker folder
   // in order to build the docker image accordingly the dockerfile defined
   // under templates/kibana_yml.template/js
@@ -128,13 +149,6 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
-
-  if (flags.ironbank) {
-    await copyAll(
-      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
-      dockerBuildDir
-    );
-  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we

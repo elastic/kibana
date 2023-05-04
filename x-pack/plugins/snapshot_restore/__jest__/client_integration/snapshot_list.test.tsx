@@ -55,7 +55,7 @@ describe('<SnapshotList />', () => {
   let getSearchErrorText: SnapshotListTestBed['actions']['getSearchErrorText'];
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const snapshot = fixtures.getSnapshot({
       repository: REPOSITORY_NAME,
       snapshot: getRandomString(),
@@ -150,6 +150,17 @@ describe('<SnapshotList />', () => {
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'term_snapshot_search',
+            searchMatch: 'must',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('term search with a date is parsed', async () => {
+          await setSearchText('2022.02.10');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'snapshot',
+            searchValue: '2022.02.10',
             searchMatch: 'must',
             searchOperator: 'eq',
           });

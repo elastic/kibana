@@ -35,18 +35,20 @@ import { JobSelectionMaps } from './job_selector';
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
+export interface JobSelectionResult {
+  newSelection: string[];
+  jobIds: string[];
+  groups: Array<{ groupId: string; jobIds: string[] }>;
+  time: { from: string; to: string } | undefined;
+}
+
 export interface JobSelectorFlyoutProps {
   dateFormatTz: string;
   selectedIds?: string[];
   newSelection?: string[];
   onFlyoutClose: () => void;
   onJobsFetched?: (maps: JobSelectionMaps) => void;
-  onSelectionConfirmed: (payload: {
-    newSelection: string[];
-    jobIds: string[];
-    groups: Array<{ groupId: string; jobIds: string[] }>;
-    time: any;
-  }) => void;
+  onSelectionConfirmed: (payload: JobSelectionResult) => void;
   singleSelection: boolean;
   timeseriesOnly: boolean;
   maps: JobSelectionMaps;
@@ -114,6 +116,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       groups: groupSelection,
       time,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onSelectionConfirmed, newSelection, jobGroupsMaps, applyTimeRangeConfig]);
 
   function removeId(id: string) {
@@ -154,6 +157,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   // Fetch jobs list on flyout open
   useEffect(() => {
     fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchJobs() {
@@ -169,7 +173,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
       }
     } catch (e) {
-      console.error('Error fetching jobs with time range', e); // eslint-disable-line
+      console.error('Error fetching jobs with time range', e); // eslint-disable-line no-console
       const { toasts } = notifications;
       toasts.addDanger({
         title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {
@@ -192,7 +196,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody className="mlJobSelectorFlyoutBody">
+      <EuiFlyoutBody className="mlJobSelectorFlyoutBody" data-test-subj={'mlJobSelectorFlyoutBody'}>
         <EuiResizeObserver onResize={handleResize}>
           {(resizeRef) => (
             <div

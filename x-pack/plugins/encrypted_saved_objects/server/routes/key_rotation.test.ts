@@ -6,9 +6,9 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { EncryptionKeyRotationService } from '../crypto';
 import { routeDefinitionParamsMock } from './index.mock';

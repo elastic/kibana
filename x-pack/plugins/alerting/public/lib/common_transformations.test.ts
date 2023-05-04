@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiAlert, transformAlert } from './common_transformations';
-import { AlertExecutionStatusErrorReasons } from '../../common';
+import { ApiRule, transformRule } from './common_transformations';
+import { RuleExecutionStatusErrorReasons, RuleLastRunOutcomeValues } from '../../common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -16,8 +16,8 @@ const dateUpdated = new Date(dateFixed - 1000);
 const dateExecuted = new Date(dateFixed);
 
 describe('common_transformations', () => {
-  test('transformAlert() with all optional fields', () => {
-    const apiAlert: ApiAlert = {
+  test('transformRule() with all optional fields', () => {
+    const apiRule: ApiRule = {
       id: 'some-id',
       name: 'some-name',
       enabled: true,
@@ -31,6 +31,7 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: { foo: 'car', bar: [1, 2, 3] },
+          uuid: '123-456',
         },
       ],
       params: { bar: 'foo', numbers: { 1: [2, 3] } } as never,
@@ -45,17 +46,56 @@ describe('common_transformations', () => {
       notify_when: 'onActiveAlert',
       mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
+      revision: 0,
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
         last_duration: 42,
         status: 'error',
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.Unknown,
           message: 'this is just a test',
         },
       },
+      monitoring: {
+        run: {
+          history: [
+            {
+              timestamp: dateExecuted.getTime(),
+              duration: 42,
+              success: false,
+              outcome: RuleLastRunOutcomeValues[2],
+            },
+          ],
+          calculated_metrics: {
+            success_ratio: 0,
+            p50: 0,
+            p95: 42,
+            p99: 42,
+          },
+          last_run: {
+            timestamp: dateExecuted.toISOString(),
+            metrics: {
+              duration: 42,
+              total_search_duration_ms: 100,
+            },
+          },
+        },
+      },
+      last_run: {
+        outcome: RuleLastRunOutcomeValues[2],
+        outcome_order: 20,
+        outcome_msg: ['this is just a test'],
+        warning: RuleExecutionStatusErrorReasons.Unknown,
+        alerts_count: {
+          new: 1,
+          active: 2,
+          recovered: 3,
+          ignored: 4,
+        },
+      },
+      next_run: dateUpdated.toISOString(),
     };
-    expect(transformAlert(apiAlert)).toMatchInlineSnapshot(`
+    expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -70,6 +110,7 @@ describe('common_transformations', () => {
               ],
               "foo": "car",
             },
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -89,12 +130,52 @@ describe('common_transformations', () => {
           "status": "error",
         },
         "id": "some-id",
+        "lastRun": Object {
+          "alertsCount": Object {
+            "active": 2,
+            "ignored": 4,
+            "new": 1,
+            "recovered": 3,
+          },
+          "outcome": "failed",
+          "outcomeMsg": Array [
+            "this is just a test",
+          ],
+          "outcomeOrder": 20,
+          "warning": "unknown",
+        },
+        "monitoring": Object {
+          "run": Object {
+            "calculated_metrics": Object {
+              "p50": 0,
+              "p95": 42,
+              "p99": 42,
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "duration": 42,
+                "outcome": "failed",
+                "success": false,
+                "timestamp": 1639571696789,
+              },
+            ],
+            "last_run": Object {
+              "metrics": Object {
+                "duration": 42,
+                "total_search_duration_ms": 100,
+              },
+              "timestamp": "2021-12-15T12:34:56.789Z",
+            },
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [
           "bob",
           "jim",
         ],
         "name": "some-name",
+        "nextRun": 2021-12-15T12:34:55.789Z,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": "foo",
@@ -105,6 +186,7 @@ describe('common_transformations', () => {
             ],
           },
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },
@@ -120,8 +202,8 @@ describe('common_transformations', () => {
     `);
   });
 
-  test('transformAlert() with no optional fields', () => {
-    const apiAlert: ApiAlert = {
+  test('transformRule() with no optional fields', () => {
+    const apiRule: ApiRule = {
       id: 'some-id',
       name: 'some-name',
       enabled: true,
@@ -135,6 +217,7 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: {},
+          uuid: '123-456',
         },
       ],
       params: {} as never,
@@ -148,12 +231,51 @@ describe('common_transformations', () => {
       notify_when: 'onActiveAlert',
       mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
+      revision: 0,
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
         status: 'error',
       },
+      monitoring: {
+        run: {
+          history: [
+            {
+              timestamp: dateExecuted.getTime(),
+              duration: 42,
+              success: false,
+              outcome: 'failed',
+            },
+          ],
+          calculated_metrics: {
+            success_ratio: 0,
+            p50: 0,
+            p95: 42,
+            p99: 42,
+          },
+          last_run: {
+            timestamp: dateExecuted.toISOString(),
+            metrics: {
+              duration: 42,
+              total_search_duration_ms: 100,
+            },
+          },
+        },
+      },
+      last_run: {
+        outcome: 'failed',
+        outcome_order: 20,
+        outcome_msg: ['this is just a test'],
+        warning: RuleExecutionStatusErrorReasons.Unknown,
+        alerts_count: {
+          new: 1,
+          active: 2,
+          recovered: 3,
+          ignored: 4,
+        },
+      },
+      next_run: dateUpdated.toISOString(),
     };
-    expect(transformAlert(apiAlert)).toMatchInlineSnapshot(`
+    expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -161,6 +283,7 @@ describe('common_transformations', () => {
             "group": "some group",
             "id": "some-connector-id",
             "params": Object {},
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -176,14 +299,55 @@ describe('common_transformations', () => {
           "status": "error",
         },
         "id": "some-id",
+        "lastRun": Object {
+          "alertsCount": Object {
+            "active": 2,
+            "ignored": 4,
+            "new": 1,
+            "recovered": 3,
+          },
+          "outcome": "failed",
+          "outcomeMsg": Array [
+            "this is just a test",
+          ],
+          "outcomeOrder": 20,
+          "warning": "unknown",
+        },
+        "monitoring": Object {
+          "run": Object {
+            "calculated_metrics": Object {
+              "p50": 0,
+              "p95": 42,
+              "p99": 42,
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "duration": 42,
+                "outcome": "failed",
+                "success": false,
+                "timestamp": 1639571696789,
+              },
+            ],
+            "last_run": Object {
+              "metrics": Object {
+                "duration": 42,
+                "total_search_duration_ms": 100,
+              },
+              "timestamp": "2021-12-15T12:34:56.789Z",
+            },
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [
           "bob",
           "jim",
         ],
         "name": "some-name",
+        "nextRun": 2021-12-15T12:34:55.789Z,
         "notifyWhen": "onActiveAlert",
         "params": Object {},
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },

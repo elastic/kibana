@@ -11,10 +11,17 @@ import 'source-map-support/register';
 import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
+import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, BundleRefs } from '../common';
+import {
+  CompilerMsgs,
+  CompilerMsg,
+  maybeMap,
+  Bundle,
+  WorkerConfig,
+  BundleRemotes,
+} from '../common';
 import { getWebpackConfig } from './webpack.config';
-import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 
 const PLUGIN_NAME = '@kbn/optimizer';
 
@@ -27,7 +34,7 @@ const observeCompiler = (
   compiler: webpack.Compiler
 ): Rx.Observable<CompilerMsg> => {
   const compilerMsgs = new CompilerMsgs(bundle.id);
-  const done$ = new Rx.Subject();
+  const done$ = new Rx.Subject<void>();
   const { beforeRun, watchRun, done } = compiler.hooks;
 
   /**
@@ -97,10 +104,10 @@ const observeCompiler = (
 export const runCompilers = (
   workerConfig: WorkerConfig,
   bundles: Bundle[],
-  bundleRefs: BundleRefs
+  bundleRemotes: BundleRemotes
 ) => {
   const multiCompiler = webpack(
-    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
+    bundles.map((def) => getWebpackConfig(def, bundleRemotes, workerConfig))
   );
 
   return Rx.merge(

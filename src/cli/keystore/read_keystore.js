@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
-import { Keystore } from '../keystore';
-import { getKeystore } from '../../cli_keystore/get_keystore';
+import { Keystore } from '.';
+import { getKeystore } from './get_keystore';
 
 export function readKeystore(keystorePath = getKeystore()) {
   const keystore = new Keystore(keystorePath);

@@ -12,9 +12,16 @@ export const COMMENTS = i18n.translate('xpack.cases.recentCases.commentsTooltip'
 });
 
 export const MY_RECENTLY_REPORTED_CASES = i18n.translate(
-  'xpack.cases.recentCases.myRecentlyReportedCasesButtonLabel',
+  'xpack.cases.recentCases.myRecentlyReportedCasesLabel',
   {
-    defaultMessage: 'My recently reported cases',
+    defaultMessage: 'Created by me',
+  }
+);
+
+export const MY_RECENTLY_ASSIGNED_CASES = i18n.translate(
+  'xpack.cases.recentCases.myRecentlyAssignedCasesLabel',
+  {
+    defaultMessage: 'Assigned to me',
   }
 );
 
@@ -26,14 +33,21 @@ export const NO_CASES_READ_ONLY = i18n.translate('xpack.cases.recentCases.noCase
   defaultMessage: 'No cases have been created yet.',
 });
 
+export const NO_CASES_ASSIGNED_TO_ME = i18n.translate(
+  'xpack.cases.recentCases.noCasesMessageAssignedToMe',
+  {
+    defaultMessage: 'No cases have been recently assigned to you.',
+  }
+);
+
 export const RECENT_CASES = i18n.translate('xpack.cases.recentCases.recentCasesSidebarTitle', {
   defaultMessage: 'Recent cases',
 });
 
 export const RECENTLY_CREATED_CASES = i18n.translate(
-  'xpack.cases.recentCases.recentlyCreatedCasesButtonLabel',
+  'xpack.cases.recentCases.recentlyCreatedCasesLabel',
   {
-    defaultMessage: 'Recently created cases',
+    defaultMessage: 'Created by anyone',
   }
 );
 

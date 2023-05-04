@@ -13,8 +13,20 @@ export const ERROR_TITLE = i18n.translate('xpack.cases.containers.errorTitle', {
   defaultMessage: 'Error fetching data',
 });
 
+export const ERROR_CREATING_CASE = i18n.translate('xpack.cases.containers.errorCreatingCaseTitle', {
+  defaultMessage: 'Error creating case',
+});
+
 export const ERROR_DELETING = i18n.translate('xpack.cases.containers.errorDeletingTitle', {
   defaultMessage: 'Error deleting data',
+});
+
+export const ERROR_DELETING_FILE = i18n.translate('xpack.cases.containers.errorDeletingFile', {
+  defaultMessage: 'Error deleting file',
+});
+
+export const ERROR_UPDATING = i18n.translate('xpack.cases.containers.errorUpdatingTitle', {
+  defaultMessage: 'Error updating data',
 });
 
 export const UPDATED_CASE = (caseTitle: string) =>
@@ -23,48 +35,9 @@ export const UPDATED_CASE = (caseTitle: string) =>
     defaultMessage: 'Updated "{caseTitle}"',
   });
 
-export const DELETED_CASES = (totalCases: number, caseTitle?: string) =>
-  i18n.translate('xpack.cases.containers.deletedCases', {
-    values: { caseTitle, totalCases },
-    defaultMessage: 'Deleted {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
-  });
-
-export const CLOSED_CASES = ({
-  totalCases,
-  caseTitle,
-}: {
-  totalCases: number;
-  caseTitle?: string;
-}) =>
-  i18n.translate('xpack.cases.containers.closedCases', {
-    values: { caseTitle, totalCases },
-    defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
-  });
-
-export const REOPENED_CASES = ({
-  totalCases,
-  caseTitle,
-}: {
-  totalCases: number;
-  caseTitle?: string;
-}) =>
-  i18n.translate('xpack.cases.containers.reopenedCases', {
-    values: { caseTitle, totalCases },
-    defaultMessage: 'Opened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
-  });
-
-export const MARK_IN_PROGRESS_CASES = ({
-  totalCases,
-  caseTitle,
-}: {
-  totalCases: number;
-  caseTitle?: string;
-}) =>
-  i18n.translate('xpack.cases.containers.markInProgressCases', {
-    values: { caseTitle, totalCases },
-    defaultMessage:
-      'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
-  });
+export const UPDATED_CASES = i18n.translate('xpack.cases.containers.updatedCases', {
+  defaultMessage: 'Updated cases',
+});
 
 export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
   i18n.translate('xpack.cases.containers.pushToExternalService', {
@@ -81,6 +54,10 @@ export const SYNC_CASE = (caseTitle: string) =>
 export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
   'xpack.cases.containers.statusChangeToasterText',
   {
-    defaultMessage: 'Alerts in this case have been also had their status updated',
+    defaultMessage: 'Updated the statuses of attached alerts.',
   }
 );
+
+export const FILE_DELETE_SUCCESS = i18n.translate('xpack.cases.containers.deleteSuccess', {
+  defaultMessage: 'File deleted successfully',
+});

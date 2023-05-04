@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { AnomalyResultType } from './anomalies';
-import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import type { AlertTypeParams, Alert } from '../../../alerting/common';
+import type { RuleTypeParams, Rule } from '@kbn/alerting-plugin/common';
+import { type MlAnomalyResultType, ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
@@ -34,7 +33,7 @@ export interface PreviewResponse {
 }
 
 interface BaseAnomalyAlertDoc {
-  result_type: AnomalyResultType;
+  result_type: MlAnomalyResultType;
   job_id: string;
   /**
    * Rounded score
@@ -46,7 +45,7 @@ interface BaseAnomalyAlertDoc {
 }
 
 export interface RecordAnomalyAlertDoc extends BaseAnomalyAlertDoc {
-  result_type: typeof ANOMALY_RESULT_TYPE.RECORD;
+  result_type: typeof ML_ANOMALY_RESULT_TYPE.RECORD;
   function: string;
   field_name?: string;
   by_field_name?: string;
@@ -60,7 +59,7 @@ export interface RecordAnomalyAlertDoc extends BaseAnomalyAlertDoc {
 }
 
 export interface BucketAnomalyAlertDoc extends BaseAnomalyAlertDoc {
-  result_type: typeof ANOMALY_RESULT_TYPE.BUCKET;
+  result_type: typeof ML_ANOMALY_RESULT_TYPE.BUCKET;
   start: number;
   end: number;
   timestamp_epoch: number;
@@ -68,7 +67,7 @@ export interface BucketAnomalyAlertDoc extends BaseAnomalyAlertDoc {
 }
 
 export interface InfluencerAnomalyAlertDoc extends BaseAnomalyAlertDoc {
-  result_type: typeof ANOMALY_RESULT_TYPE.INFLUENCER;
+  result_type: typeof ML_ANOMALY_RESULT_TYPE.INFLUENCER;
   influencer_field_name: string;
   influencer_field_value: string | number;
   influencer_score: number;
@@ -77,15 +76,15 @@ export interface InfluencerAnomalyAlertDoc extends BaseAnomalyAlertDoc {
 export type AlertHitDoc = RecordAnomalyAlertDoc | BucketAnomalyAlertDoc | InfluencerAnomalyAlertDoc;
 
 export function isRecordAnomalyAlertDoc(arg: any): arg is RecordAnomalyAlertDoc {
-  return arg.hasOwnProperty('result_type') && arg.result_type === ANOMALY_RESULT_TYPE.RECORD;
+  return arg.hasOwnProperty('result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.RECORD;
 }
 
 export function isBucketAnomalyAlertDoc(arg: any): arg is BucketAnomalyAlertDoc {
-  return arg.hasOwnProperty('result_type') && arg.result_type === ANOMALY_RESULT_TYPE.BUCKET;
+  return arg.hasOwnProperty('result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.BUCKET;
 }
 
 export function isInfluencerAnomalyAlertDoc(arg: any): arg is InfluencerAnomalyAlertDoc {
-  return arg.hasOwnProperty('result_type') && arg.result_type === ANOMALY_RESULT_TYPE.INFLUENCER;
+  return arg.hasOwnProperty('result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
 }
 
 export type MlAnomalyDetectionAlertParams = {
@@ -94,18 +93,18 @@ export type MlAnomalyDetectionAlertParams = {
     groupIds?: string[];
   };
   severity: number;
-  resultType: AnomalyResultType;
+  resultType: MlAnomalyResultType;
   includeInterim: boolean;
   lookbackInterval: string | null | undefined;
   topNBuckets: number | null | undefined;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
   MlAnomalyDetectionAlertParams,
   'lookbackInterval' | 'topNBuckets'
 >;
 
-export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertParams>, 'apiKey'>;
+export type MlAnomalyDetectionAlertRule = Omit<Rule<MlAnomalyDetectionAlertParams>, 'apiKey'>;
 
 export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
@@ -140,7 +139,7 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
       | null;
     errorMessages?: CommonHealthCheckConfig | null;
   } | null;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type JobsHealthRuleTestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];
 

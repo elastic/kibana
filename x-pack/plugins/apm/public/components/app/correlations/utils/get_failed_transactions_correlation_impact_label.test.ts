@@ -6,19 +6,19 @@
  */
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
-import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
+import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 
 const EXPECTED_RESULT = {
   HIGH: {
-    impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+    impact: CORRELATIONS_IMPACT_THRESHOLD.HIGH,
     color: 'danger',
   },
   MEDIUM: {
-    impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
+    impact: CORRELATIONS_IMPACT_THRESHOLD.MEDIUM,
     color: 'warning',
   },
   LOW: {
-    impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+    impact: CORRELATIONS_IMPACT_THRESHOLD.LOW,
     color: 'default',
   },
 };

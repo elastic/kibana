@@ -11,7 +11,8 @@ import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
+import * as tabifyModule from '../../tabify/tabify_docs';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
@@ -70,13 +71,19 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      jest.fn()
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
     aggConfig = aggConfigs.aggs[0] as IMetricAggConfig;
     aggDsl = aggConfig.toDsl(aggConfigs);
   };
+
+  const flattenSpy = jest.spyOn(tabifyModule, 'flattenHit');
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should return a label prefixed with Last if sorting in descending order', () => {
     init({ fieldName: 'bytes' });
@@ -207,6 +214,7 @@ describe('Top hit metric', () => {
 
       init({ fieldName: '@tags' });
       expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toBe('aaa');
+      expect(flattenSpy).toHaveLastReturnedWith({ '@tags': 'aaa' });
     });
 
     it('should return the object if the field value is an object', () => {
@@ -231,6 +239,7 @@ describe('Top hit metric', () => {
       expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual({
         label: 'aaa',
       });
+      expect(flattenSpy).toHaveLastReturnedWith({ '@tags': { label: 'aaa' } });
     });
 
     it('should return an array if the field has more than one values', () => {
@@ -250,6 +259,7 @@ describe('Top hit metric', () => {
 
       init({ fieldName: '@tags' });
       expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual(['aaa', 'bbb']);
+      expect(flattenSpy).toHaveLastReturnedWith({ '@tags': ['aaa', 'bbb'] });
     });
 
     it('should return undefined if the field is not in the source nor in the doc_values field', () => {

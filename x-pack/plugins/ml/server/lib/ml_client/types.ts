@@ -5,13 +5,44 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { TransportRequestOptionsWithMeta } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
+export interface UpdateTrainedModelDeploymentRequest {
+  model_id: string;
+  deployment_id?: string;
+  number_of_allocations: number;
+}
+export interface UpdateTrainedModelDeploymentResponse {
+  acknowledge: boolean;
+}
 
-export interface MlClient extends OrigMlClient {
+export interface MlStopTrainedModelDeploymentRequest
+  extends estypes.MlStopTrainedModelDeploymentRequest {
+  deployment_id?: string;
+}
+
+export interface MlInferTrainedModelRequest extends estypes.MlInferTrainedModelRequest {
+  deployment_id?: string;
+}
+
+export interface MlClient
+  extends Omit<OrigMlClient, 'stopTrainedModelDeployment' | 'inferTrainedModel'> {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  updateTrainedModelDeployment: (
+    payload: UpdateTrainedModelDeploymentRequest
+  ) => Promise<UpdateTrainedModelDeploymentResponse>;
+  stopTrainedModelDeployment: (
+    p: MlStopTrainedModelDeploymentRequest,
+    options?: TransportRequestOptionsWithMeta
+  ) => Promise<estypes.MlStopTrainedModelDeploymentResponse>;
+  inferTrainedModel: (
+    p: MlInferTrainedModelRequest,
+    options?: TransportRequestOptionsWithMeta
+  ) => Promise<estypes.MlInferTrainedModelResponse>;
 }
 
 export type MlClientParams =
@@ -86,3 +117,11 @@ export type MlGetDFAParams =
   | Parameters<MlClient['getDataFrameAnalytics']>
   | Parameters<MlClient['getDataFrameAnalyticsStats']>
   | Parameters<MlClient['putDataFrameAnalytics']>;
+
+export type MlGetTrainedModelParams =
+  | Parameters<MlClient['putTrainedModel']>
+  | Parameters<MlClient['deleteTrainedModel']>
+  | Parameters<MlClient['getTrainedModels']>
+  | Parameters<MlClient['getTrainedModelsStats']>
+  | Parameters<MlClient['startTrainedModelDeployment']>
+  | Parameters<MlClient['stopTrainedModelDeployment']>;

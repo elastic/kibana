@@ -4,13 +4,11 @@ exports[`Table render conflict summary modal  1`] = `
 <React.Fragment>
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <h1>
-        <FormattedMessage
-          defaultMessage="This field has a type conflict"
-          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-          values={Object {}}
-        />
-      </h1>
+      <FormattedMessage
+        defaultMessage="This field has a type conflict"
+        id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+        values={Object {}}
+      />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -68,8 +66,10 @@ exports[`Table render conflict summary modal  1`] = `
   </EuiModalBody>
   <EuiModalFooter>
     <EuiButton
+      color="primary"
       fill={true}
       onClick={[Function]}
+      size="m"
     >
       <FormattedMessage
         defaultMessage="Close"
@@ -82,22 +82,22 @@ exports[`Table render conflict summary modal  1`] = `
 `;
 
 exports[`Table render name 1`] = `
-<span>
+<span
+  data-test-subj="field-name-customer"
+>
   customer
 </span>
 `;
 
 exports[`Table render name 2`] = `
-<span>
+<span
+  data-test-subj="field-name-customer"
+>
   customer
   <span>
      
     <EuiIconTip
-      content={
-        <span>
-          This field exists on the data view only.
-        </span>
-      }
+      content="This field exists on the data view only."
       title="Runtime field"
       type="indexRuntime"
     />
@@ -113,7 +113,7 @@ exports[`Table should render conflicting type 1`] = `
       color="warning"
       iconOnClick={[Function]}
       iconOnClickAriaLabel="Conflict Detail"
-      iconType="alert"
+      iconType="warning"
       onClick={[Function]}
       onClickAriaLabel="Conflict Detail"
     >
@@ -130,7 +130,9 @@ exports[`Table should render mixed, non-conflicting type 1`] = `
 `;
 
 exports[`Table should render normal field name 1`] = `
-<span>
+<span
+  data-test-subj="field-name-Elastic"
+>
   Elastic
 </span>
 `;
@@ -320,14 +322,17 @@ exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
 <span
-  aria-label="Is searchable"
   color="success"
   data-euiicon-type="dot"
-/>
+>
+  Is searchable
+</span>
 `;
 
 exports[`Table should render timestamp field name 1`] = `
-<span>
+<span
+  data-test-subj="field-name-timestamp"
+>
   timestamp
   <span>
      

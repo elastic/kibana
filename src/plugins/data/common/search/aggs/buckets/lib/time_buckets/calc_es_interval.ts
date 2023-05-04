@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import dateMath, { Unit } from '@elastic/datemath';
+import dateMath, { Unit } from '@kbn/datemath';
 
 import { parseEsInterval } from '../../../utils';
 

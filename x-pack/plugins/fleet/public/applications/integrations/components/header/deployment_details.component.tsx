@@ -25,7 +25,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
-  endpointUrl: string;
   cloudId: string;
   managementUrl?: string;
   learnMoreUrl: string;
@@ -35,7 +34,7 @@ const Description = styled(EuiText)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
-export const DeploymentDetails = ({ endpointUrl, cloudId, learnMoreUrl, managementUrl }: Props) => {
+export const DeploymentDetails = ({ cloudId, learnMoreUrl, managementUrl }: Props) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const button = (
@@ -70,29 +69,12 @@ export const DeploymentDetails = ({ endpointUrl, cloudId, learnMoreUrl, manageme
     >
       <div style={{ width: 450 }}>
         <Description>
-          Send data to Elastic from your applications by referencing your deployment and
-          Elasticsearch information.
+          {i18n.translate('xpack.fleet.integrations.deploymentDescription', {
+            defaultMessage:
+              'Send data to Elastic from your applications by referencing your deployment.',
+          })}
         </Description>
         <EuiForm component="div">
-          <EuiFormRow label="Elasticsearch endpoint" fullWidth isDisabled>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldText value={endpointUrl} fullWidth disabled />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiCopy textToCopy={endpointUrl}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copyClipboard"
-                      display="base"
-                      size="m"
-                    />
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
           <EuiFormRow label="Cloud ID" fullWidth>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>

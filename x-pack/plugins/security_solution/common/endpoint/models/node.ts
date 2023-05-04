@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolverNode } from '../types';
+import type { ResolverNode } from '../types';
 import { firstNonNullValue } from './ecs_safety_helpers';
 
 /**

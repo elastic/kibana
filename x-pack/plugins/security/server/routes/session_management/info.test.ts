@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
 
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { Session } from '../../session_management';
@@ -128,7 +128,7 @@ describe('Info session routes', () => {
       ];
 
       for (const [sessionInfo, expected] of assertions) {
-        session.get.mockResolvedValue(sessionMock.createValue(sessionInfo));
+        session.get.mockResolvedValue({ error: null, value: sessionMock.createValue(sessionInfo) });
 
         const expectedBody = {
           canBeExtended: expected.canBeExtended,
@@ -151,8 +151,6 @@ describe('Info session routes', () => {
     });
 
     it('returns empty response if session is not available.', async () => {
-      session.get.mockResolvedValue(null);
-
       await expect(
         routeHandler(
           {} as unknown as SecurityRequestHandlerContext,

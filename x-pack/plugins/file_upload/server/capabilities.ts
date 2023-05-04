@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { StartDeps } from './types';
 
@@ -22,7 +22,7 @@ export const setupCapabilities = (
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
     if (useDefaultCapabilities) {
-      return capabilities;
+      return {};
     }
     const [, { security }] = await core.getStartServices();
 
@@ -30,7 +30,7 @@ export const setupCapabilities = (
     const { hasImportPermission } = await checkFileUploadPrivileges({
       authorization: security?.authz,
       request,
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
     });
 
@@ -42,6 +42,6 @@ export const setupCapabilities = (
       };
     }
 
-    return capabilities;
+    return {};
   });
 };

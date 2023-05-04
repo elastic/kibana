@@ -11,12 +11,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { DataViewEditorProps } from '../types';
 
-const IndexPatternFlyoutContentContainer = lazy(
-  () => import('./data_view_flyout_content_container')
-);
+const DataViewFlyoutContentContainer = lazy(() => import('./data_view_flyout_content_container'));
 
 export const DataViewEditorLazy = (props: DataViewEditorProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-    <IndexPatternFlyoutContentContainer {...props} />
+    <DataViewFlyoutContentContainer {...props} />
   </Suspense>
 );

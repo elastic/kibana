@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-} from '../../../../../../src/core/server';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';
-export { userActionsMigrations } from './user_actions';
+export { createUserActionsMigrations } from './user_actions';
 export type { CreateCommentsMigrationsDeps } from './comments';
 export { createCommentsMigrations } from './comments';
 
@@ -33,14 +30,6 @@ export const addOwnerToSO = <T = Record<string, unknown>>(
 });
 
 export const connectorMappingsMigrations = {
-  '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-    return addOwnerToSO(doc);
-  },
-};
-
-export const subCasesMigrations = {
   '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {

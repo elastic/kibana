@@ -7,23 +7,19 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { NavigateToPath } from '../../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-
-import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
   checkPermission,
 } from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { getMlNodeCount } from '../../../ml_nodes_check';
 
 enum MODE {
   NEW,
@@ -38,17 +34,20 @@ export const newCalendarRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list/new_calendar',
+  path: createPath(ML_PAGES.CALENDARS_NEW),
+  title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
+    defaultMessage: 'Create Calendar',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/new_calendar', navigateToPath),
     },
   ],
 });
@@ -57,7 +56,10 @@ export const editCalendarRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list/edit_calendar/:calendarId',
+  path: createPath(ML_PAGES.CALENDARS_EDIT, '/:calendarId'),
+  title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
+    defaultMessage: 'Edit Calendar',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -67,7 +69,6 @@ export const editCalendarRouteFactory = (
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/edit_calendar', navigateToPath),
     },
   ],
 });
@@ -79,15 +80,20 @@ const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkFullLicense,
+      checkGetJobsCapabilities: () =>
+        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+      getMlNodeCount,
+    }
+  );
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 

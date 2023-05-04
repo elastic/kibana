@@ -27,7 +27,7 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   IBasePath,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 import './import_summary.scss';
@@ -167,7 +167,7 @@ const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
     case 'error':
       return (
         <EuiIconTip
-          type={'alert'}
+          type={'error'}
           color={'danger'}
           content={i18n.translate('savedObjectsManagement.importSummary.errorOutcomeLabel', {
             defaultMessage: '{errorMessage}',
@@ -232,7 +232,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
     <EuiCallOut
       color="warning"
       size="s"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="importSavedObjectsWarning"
       title={warning.message}
     >

@@ -7,9 +7,12 @@
 
 import React from 'react';
 
-import { Field, getUseField } from '../../common/shared_imports';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiPageSection } from '@elastic/eui';
 import * as i18n from './translations';
-import { CreateCaseForm, CreateCaseFormProps } from './form';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
 import { HeaderPage } from '../header_page';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
@@ -17,19 +20,11 @@ import { CasesDeepLinkId } from '../../common/navigation';
 export const CommonUseField = getUseField({ component: Field });
 
 export const CreateCase = React.memo<CreateCaseFormProps>(
-  ({
-    afterCaseCreated,
-    caseType,
-    hideConnectorServiceNowSir,
-    onCancel,
-    onSuccess,
-    timelineIntegration,
-    withSteps,
-  }) => {
+  ({ afterCaseCreated, onCancel, onSuccess, timelineIntegration, withSteps }) => {
     useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
 
     return (
-      <>
+      <EuiPageSection restrictWidth={true}>
         <HeaderPage
           showBackButton={true}
           data-test-subj="case-create-title"
@@ -37,14 +32,12 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
         />
         <CreateCaseForm
           afterCaseCreated={afterCaseCreated}
-          caseType={caseType}
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           onCancel={onCancel}
           onSuccess={onSuccess}
           timelineIntegration={timelineIntegration}
           withSteps={withSteps}
         />
-      </>
+      </EuiPageSection>
     );
   }
 );

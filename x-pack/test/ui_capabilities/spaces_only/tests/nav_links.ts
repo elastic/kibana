@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { SpaceScenarios } from '../scenarios';
 
 export default function navLinksTests({ getService }: FtrProviderContext) {
@@ -17,8 +18,10 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
   const featuresService: FeaturesService = getService('features');
 
   const uiCapabilitiesExceptions = [
-    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following 3 capabilities are disabled
+    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following capabilities are disabled
     'enterpriseSearch',
+    'enterpriseSearchContent',
+    'enterpriseSearchAnalytics',
     'appSearch',
     'workplaceSearch',
   ];

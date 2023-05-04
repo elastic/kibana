@@ -15,7 +15,7 @@ import { ChartData } from '../../../../common/types/field_histograms';
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
-import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED, INIT_MAX_COLUMNS } from './common';
+import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD, INIT_MAX_COLUMNS } from './common';
 import {
   ChartsVisible,
   ColumnId,
@@ -24,9 +24,14 @@ import {
   OnChangeItemsPerPage,
   OnChangePage,
   OnSort,
-  RowCountRelation,
+  RowCountInfo,
   UseDataGridReturnType,
 } from './types';
+
+const rowCountDefault: RowCountInfo = {
+  rowCount: 0,
+  rowCountRelation: undefined,
+};
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -40,13 +45,14 @@ export const useDataGrid = (
   const [noDataMessage, setNoDataMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
-  const [rowCount, setRowCount] = useState(0);
-  const [rowCountRelation, setRowCountRelation] = useState<RowCountRelation>(undefined);
+  const [rowCountInfo, setRowCountInfo] = useState<RowCountInfo>(rowCountDefault);
   const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [chartsVisible, setChartsVisible] = useState<ChartsVisible>(undefined);
+
+  const { rowCount, rowCountRelation } = rowCountInfo;
 
   const toggleChartVisibility = () => {
     if (chartsVisible !== undefined) {
@@ -80,6 +86,7 @@ export const useDataGrid = (
 
   useEffect(() => {
     setVisibleColumns(defaultVisibleColumns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultVisibleColumns.join()]);
 
   const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);
@@ -87,15 +94,15 @@ export const useDataGrid = (
   const onSort: OnSort = useCallback(
     (sc) => {
       // Check if an unsupported column type for sorting was selected.
-      const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
+      const updatedInvalidSortingColumns = sc.reduce<string[]>((arr, current) => {
         const columnType = columns.find((dgc) => dgc.id === current.id);
         if (columnType?.schema === 'json') {
           arr.push(current.id);
         }
         return arr;
       }, []);
-      setInvalidSortingColumnns(updatedInvalidSortingColumnns);
-      if (updatedInvalidSortingColumnns.length === 0) {
+      setInvalidSortingColumnns(updatedInvalidSortingColumns);
+      if (updatedInvalidSortingColumns.length === 0) {
         setSortingColumns(sc);
       }
     },
@@ -137,6 +144,7 @@ export const useDataGrid = (
       // If both columns are visible sort by their visible sorting order.
       return visibleColumns.indexOf(a.id) - visibleColumns.indexOf(b.id);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
 
   // Initialize the mini histogram charts toggle button.
@@ -146,7 +154,7 @@ export const useDataGrid = (
   useEffect(() => {
     if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
       setChartsVisible(
-        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED &&
+        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD &&
           rowCountRelation !== ES_CLIENT_TOTAL_HITS_RELATION.GTE
       );
     }
@@ -172,8 +180,7 @@ export const useDataGrid = (
     setErrorMessage,
     setNoDataMessage,
     setPagination,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setSortingColumns,
     setStatus,
     setTableItems,

@@ -30,7 +30,7 @@ If you’re installing dependencies and seeing an error that looks
 something like
 
 ....
-Unsupported URL Type: link:packages/elastic-eslint-config-kibana
+Unsupported URL Type: link:packages/kbn-eslint-config
 ....
 
 you’re likely running `npm`. To install dependencies in {kib} you
@@ -51,6 +51,11 @@ file if run with the `--dev` flag. This file behaves just like the
 non-dev version and accepts any of the
 https://www.elastic.co/guide/en/kibana/current/settings.html[standard
 settings].
+
+[discrete]
+=== Using an Alternate YML File
+
+To run Kibana with an alternate yml file, use the `--config` option to specify the path to the desired yml file. For example: `yarn start --config=config/my_config.yml`
 
 [discrete]
 === Potential Optimization Pitfalls

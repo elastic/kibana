@@ -39,9 +39,6 @@ import {
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   // FAILING: https://github.com/elastic/kibana/issues/110153
   describe.skip('rules security and spaces enabled: trial', function () {
-    // Fastest ciGroup for the moment.
-    this.tags('ciGroup5');
-
     before(async () => {
       await createSpaces(getService);
       await createUsersAndRoles(

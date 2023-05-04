@@ -8,8 +8,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiIcon, useResizeObserver, EuiPopover } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../../../expressions';
-import { withSuspense } from '../../../presentation_util/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { ErrorRendererConfig } from '../../common/types';
 import { LazyErrorComponent } from '.';
 
@@ -52,7 +52,7 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
               height: buttonSize,
               width: buttonSize,
             }}
-            type="alert"
+            type="warning"
           />
         }
         isOpen={isPopoverOpen}

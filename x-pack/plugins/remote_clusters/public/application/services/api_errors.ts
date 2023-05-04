@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'kibana/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { toasts, fatalError } from './notification';
 
 interface CommonErrorBody {

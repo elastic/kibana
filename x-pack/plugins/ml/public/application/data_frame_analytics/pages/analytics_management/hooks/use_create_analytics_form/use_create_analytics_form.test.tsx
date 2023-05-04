@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountHook } from '@kbn/test/jest';
+import { mountHook } from '@kbn/test-jest-helpers';
 
 import { MlContext } from '../../../../../contexts/ml';
 import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';

@@ -9,7 +9,7 @@
 import { promisify } from 'util';
 import { Observable } from 'rxjs';
 import { catchError, concatMap, finalize } from 'rxjs/operators';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
 import { constants, deflate } from 'zlib';
 
@@ -37,7 +37,7 @@ export const createCompressedStream = <Response>(
 ): Stream => {
   const output = new PassThrough();
 
-  const sub = results
+  results
     .pipe(
       concatMap((message: Response) => {
         const strMessage = JSON.stringify(message);
@@ -50,7 +50,6 @@ export const createCompressedStream = <Response>(
       }),
       finalize(() => {
         output.end();
-        sub.unsubscribe();
       })
     )
     .subscribe();

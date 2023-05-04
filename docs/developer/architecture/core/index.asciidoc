@@ -8,7 +8,7 @@ These API's are injected into your plugin's lifecycle methods and may be invoked
 
 [source,typescript]
 ----
-import type { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
 
 export class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -36,9 +36,3 @@ The services that core provides are:
 * <<logging-service, Logging service>>
 * <<saved-objects-service, Saved Objects service>>
 * <<ui-settings-service, UI settings service>>
-
-
-
-
-
-

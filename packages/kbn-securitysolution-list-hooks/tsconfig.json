@@ -1,19 +1,25 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-securitysolution-list-hooks/src",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/securitysolution-hook-utils",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-api",
+    "@kbn/securitysolution-list-utils",
+    "@kbn/securitysolution-utils",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

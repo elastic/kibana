@@ -1,0 +1,19 @@
+summary: A list of connectors
+value:
+  - id: preconfigured-email-connector
+    name: my-preconfigured-email-notification
+    connector_type_id: .email
+    is_preconfigured: true
+    is_deprecated: false
+    referenced_by_count: 0
+  - id: e07d0c80-8b8b-11ed-a780-3b746c987a81
+    name: my-index-connector
+    config:
+      index: test-index
+      refresh: false
+      executionTimeField: null
+    connector_type_id: .index
+    is_preconfigured: false
+    is_deprecated: false
+    referenced_by_count: 2
+    is_missing_secrets: false

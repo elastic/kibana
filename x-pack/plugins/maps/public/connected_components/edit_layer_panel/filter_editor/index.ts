@@ -8,15 +8,17 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { FilterEditor } from './filter_editor';
-import { getSelectedLayer } from '../../../selectors/map_selectors';
+import { getEditState, getSelectedLayer } from '../../../selectors/map_selectors';
 import { setLayerQuery, updateSourceProp } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
+  const layer = getSelectedLayer(state)!;
   return {
-    layer: getSelectedLayer(state)!,
+    layer,
+    isFeatureEditorOpenForLayer: getEditState(state)?.layerId === layer.getId(),
   };
 }
 

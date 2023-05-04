@@ -19,8 +19,6 @@
  * subtract([14, 42, 65, 108], [2, 7, 5, 12]) // returns [12, 35, 52, 96]
  */
 
-module.exports = { subtract };
-
 function subtract(a, b) {
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) throw new Error('Array length mismatch');
@@ -30,3 +28,4 @@ function subtract(a, b) {
   if (Array.isArray(b)) return b.map((b) => a - b);
   return a - b;
 }
+module.exports = { subtract };

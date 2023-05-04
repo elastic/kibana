@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, RequestHandler, RequestHandlerContext } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { IRouter, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from './index.mock';
 import { defineStatusRoute } from './status';

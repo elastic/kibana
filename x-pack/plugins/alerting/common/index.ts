@@ -8,18 +8,45 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { AlertsHealth } from './alert';
+import { AlertsHealth } from './rule';
 
-export * from './alert';
+export * from './rule';
+export * from './rules_settings';
 export * from './rule_type';
-export * from './alert_instance';
-export * from './rule_task_instance';
-export * from './alert_navigation';
+export type {
+  ThrottledActions,
+  LastScheduledActions,
+  AlertInstanceMeta,
+  AlertInstanceState,
+  AlertInstanceContext,
+  RawAlertInstance,
+  TrackedLifecycleAlertState,
+  WrappedLifecycleRuleState,
+  RuleTaskState,
+  RuleTaskParams,
+} from '@kbn/alerting-state-types';
+export {
+  rawAlertInstance,
+  DateFromString,
+  wrappedStateRt,
+  ActionsCompletion,
+  ruleStateSchema,
+  ruleParamsSchema,
+} from '@kbn/alerting-state-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
+export * from './bulk_edit';
 export * from './disabled_action_groups';
-export * from './alert_notify_when_type';
+export * from './rule_notify_when_type';
 export * from './parse_duration';
+export * from './execution_log_types';
+export * from './rule_snooze_type';
+export * from './rrule_type';
+export * from './maintenance_window';
+export * from './default_rule_aggregation';
+export * from './rule_tags_aggregation';
+
+export { mappingFromFieldMap, getComponentTemplateFromFieldMap } from './alert_schema';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
@@ -30,4 +57,13 @@ export interface AlertingFrameworkHealth {
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
+export const INTERNAL_ALERTING_API_FIND_RULES_PATH = `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`;
+
+export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;
+export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
+  `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
+
 export const ALERTS_FEATURE_ID = 'alerts';
+export const MONITORING_HISTORY_LIMIT = 200;
+export const ENABLE_MAINTENANCE_WINDOWS = true;

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { CallOutMessage } from './callout_types';
+import type { CallOutMessage } from './callout_types';
 import * as i18n from './translations';
 
 export interface CallOutDismissButtonProps {

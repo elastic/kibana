@@ -4,7 +4,9 @@
 <titleabbrev>Delete object</titleabbrev>
 ++++
 
-experimental[] Remove {kib} saved objects.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Remove {kib} saved objects.
 
 WARNING: Once you delete a saved object, _it cannot be recovered_.
 
@@ -47,6 +49,6 @@ Delete {a-data-source} object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/saved_objects/index-pattern/my-pattern
+$ curl -X DELETE api/index_patterns/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA

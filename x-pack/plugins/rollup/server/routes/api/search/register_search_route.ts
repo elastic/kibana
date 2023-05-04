@@ -27,16 +27,14 @@ export const registerSearchRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
       try {
         const requests = request.body.map(({ index, query }: { index: string; query?: any }) =>
-          clusterClient.asCurrentUser.rollup
-            .rollupSearch({
-              index,
-              rest_total_hits_as_int: true,
-              body: query,
-            })
-            .then(({ body }) => body)
+          clusterClient.asCurrentUser.rollup.rollupSearch({
+            index,
+            rest_total_hits_as_int: true,
+            body: query,
+          })
         );
         const data = await Promise.all(requests);
         return response.ok({ body: data });

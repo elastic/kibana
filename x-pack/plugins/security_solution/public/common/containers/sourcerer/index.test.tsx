@@ -12,8 +12,12 @@ import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
 import { mockPatterns } from './mocks';
-import { RouteSpyState } from '../../utils/route/types';
-import { DEFAULT_INDEX_PATTERN, SecurityPageName } from '../../../../common/constants';
+import type { RouteSpyState } from '../../utils/route/types';
+import {
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_INDEX_PATTERN,
+  SecurityPageName,
+} from '../../../../common/constants';
 import { createStore } from '../../store';
 import {
   useUserInfo,
@@ -25,9 +29,14 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   mockSourcererState,
+  TestProviders,
 } from '../../mock';
-import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
-import { postSourcererDataView } from './api';
+import type { SelectedDataView } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import * as source from '../source/use_data_view';
+import { sourcererActions } from '../../store/sourcerer';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -38,8 +47,10 @@ const mockRouteSpy: RouteSpyState = {
 };
 const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
+jest.mock('../../lib/apm/use_track_http_request');
 jest.mock('../../../detections/components/user_info');
-jest.mock('./api');
+jest.mock('./create_sourcerer_data_view');
+jest.mock('../../utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -52,13 +63,24 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
+(useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) => onInitialize({}));
+
 const mockSearch = jest.fn();
+
+const mockAddWarning = jest.fn();
+const mockAddError = jest.fn();
+const mockCreateSourcererDataView = jest.fn(() => {
+  const errToReturn = new Error('fake error');
+  errToReturn.name = 'AbortError';
+  throw errToReturn;
+});
 
 jest.mock('../../lib/kibana', () => ({
   useToasts: () => ({
-    addError: jest.fn(),
+    addError: mockAddError,
     addSuccess: jest.fn(),
-    addWarning: jest.fn(),
+    addWarning: mockAddWarning,
+    remove: jest.fn(),
   }),
   useKibana: () => ({
     services: {
@@ -70,17 +92,55 @@ jest.mock('../../lib/kibana', () => ({
         },
       },
       data: {
+        dataViews: {
+          get: mockSearch.mockImplementation(
+            async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+              Promise.resolve({
+                id: dataViewId,
+                matchedIndices: refreshFields
+                  ? ['hello', 'world', 'refreshed']
+                  : ['hello', 'world'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => 'hello*,world*,refreshed*',
+              })
+          ),
+        },
         indexPatterns: {
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
-        },
-        search: {
-          search: mockSearch.mockImplementation(() => ({
-            subscribe: jest.fn().mockImplementation(() => ({
-              error: jest.fn(),
-              next: jest.fn(),
-              unsubscribe: jest.fn(),
-            })),
-          })),
         },
       },
       notifications: {},
@@ -116,17 +176,7 @@ describe('Sourcerer Hooks', () => {
         payload: {
           id: 'timeline',
           selectedDataViewId: 'security-solution',
-          selectedPatterns: [
-            '.siem-signals-spacename',
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'traces-apm*',
-            'winlogbeat-*',
-          ],
+          selectedPatterns: ['.siem-signals-spacename', ...DEFAULT_INDEX_PATTERN],
         },
       });
     });
@@ -136,7 +186,7 @@ describe('Sourcerer Hooks', () => {
       defaultDataView: mockSourcererState.defaultDataView,
       kibanaDataViews: [mockSourcererState.defaultDataView],
     };
-    (postSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
+    (createSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
 
     store = createStore(
       {
@@ -190,11 +240,172 @@ describe('Sourcerer Hooks', () => {
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
-        expect(mockDispatch).toHaveBeenCalledTimes(7);
+        expect(mockDispatch).toHaveBeenCalledTimes(9);
         expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });
   });
+
+  it('initializes dataview with data from query string', async () => {
+    const selectedPatterns = ['testPattern-*'];
+    const selectedDataViewId = 'security-solution-default';
+    (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
+      onInitialize({
+        [SourcererScopeName.default]: {
+          id: selectedDataViewId,
+          selectedPatterns,
+        },
+      })
+    );
+
+    renderHook<string, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sourcererActions.setSelectedDataView({
+        id: SourcererScopeName.default,
+        selectedDataViewId,
+        selectedPatterns,
+      })
+    );
+  });
+
+  it('sets default selected patterns to the URL when there is no sorcerer URL param in the query string', async () => {
+    const updateUrlParam = jest.fn();
+    (useUpdateUrlParam as jest.Mock).mockReturnValue(updateUrlParam);
+    (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
+      onInitialize(null)
+    );
+
+    renderHook<string, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(updateUrlParam).toHaveBeenCalledWith({
+      [SourcererScopeName.default]: {
+        id: DEFAULT_DATA_VIEW_ID,
+        selectedPatterns: DEFAULT_INDEX_PATTERN,
+      },
+    });
+  });
+
+  it('calls addWarning if defaultDataView has an error', async () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            error: true,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenNthCalledWith(1, {
+          text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
+          title: 'Write role required to generate data',
+        });
+      });
+    });
+  });
+
+  it('does not call addError if updateSourcererDataView receives an AbortError', async () => {
+    // createSourcererDataView throws an 'AbortError' which
+    // puts us in the catch block, but the addError toast is not called
+    (createSourcererDataView as jest.Mock).mockImplementation(mockCreateSourcererDataView);
+
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            title: DEFAULT_INDEX_PATTERN.join(','),
+            patternList: DEFAULT_INDEX_PATTERN,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        loading: false,
+        signalIndexName: mockSourcererState.signalIndexName,
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitForNextUpdate();
+      rerender();
+
+      await waitFor(() => {
+        expect(mockCreateSourcererDataView).toHaveBeenCalled();
+        expect(mockAddError).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  it('does call addError if updateSourcererDataView receives a non-abort error', async () => {
+    // createSourcererDataView throws an 'AbortError' which
+    // puts us in the catch block, but the addError toast is not called
+    (createSourcererDataView as jest.Mock).mockImplementation(() => {
+      throw Error('fake error');
+    });
+
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            title: DEFAULT_INDEX_PATTERN.join(','),
+            patternList: DEFAULT_INDEX_PATTERN,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        loading: false,
+        signalIndexName: mockSourcererState.signalIndexName,
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitForNextUpdate();
+      rerender();
+
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalled();
+      });
+    });
+  });
+
   it('handles detections page', async () => {
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
@@ -262,26 +473,201 @@ describe('Sourcerer Hooks', () => {
       });
     });
   });
+  describe('initialization settings', () => {
+    const mockIndexFieldsSearch = jest.fn();
+    beforeAll(() => {
+      // 👇️ not using dot-notation + the ignore clears up a ts error
+      // @ts-ignore
+      // eslint-disable-next-line dot-notation
+      source['useDataView'] = jest.fn(() => ({
+        indexFieldsSearch: mockIndexFieldsSearch,
+      }));
+    });
+    it('does not needToBeInit if scope is default and selectedPatterns/missingPatterns have values', async () => {
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
+            dataViewId: mockSourcererState.defaultDataView.id,
+            needToBeInit: false,
+            scopeId: SourcererScopeName.default,
+          });
+        });
+      });
+    });
+
+    it('does needToBeInit if scope is default and selectedPatterns/missingPatterns are empty', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.default]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+                selectedPatterns: [],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
+            dataViewId: mockSourcererState.defaultDataView.id,
+            needToBeInit: true,
+            scopeId: SourcererScopeName.default,
+          });
+        });
+      });
+    });
+
+    it('does needToBeInit and skipScopeUpdate=false if scope is timeline and selectedPatterns/missingPatterns are empty', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            kibanaDataViews: [
+              ...mockGlobalState.sourcerer.kibanaDataViews,
+              { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
+            ],
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedDataViewId: 'something-weird',
+                selectedPatterns: [],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+            dataViewId: 'something-weird',
+            needToBeInit: true,
+            scopeId: SourcererScopeName.timeline,
+            skipScopeUpdate: false,
+          });
+        });
+      });
+    });
+
+    it('does needToBeInit and skipScopeUpdate=true if scope is timeline and selectedPatterns have value', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            kibanaDataViews: [
+              ...mockGlobalState.sourcerer.kibanaDataViews,
+              { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
+            ],
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedDataViewId: 'something-weird',
+                selectedPatterns: ['ohboy'],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+            dataViewId: 'something-weird',
+            needToBeInit: true,
+            scopeId: SourcererScopeName.timeline,
+            skipScopeUpdate: true,
+          });
+        });
+      });
+    });
+
+    it('does not needToBeInit if scope is timeline and data view has patternList', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            kibanaDataViews: [
+              ...mockGlobalState.sourcerer.kibanaDataViews,
+              {
+                ...mockSourcererState.defaultDataView,
+                id: 'something-weird',
+                patternList: ['ohboy'],
+              },
+            ],
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedDataViewId: 'something-weird',
+                selectedPatterns: [],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+            dataViewId: 'something-weird',
+            needToBeInit: false,
+            scopeId: SourcererScopeName.timeline,
+          });
+        });
+      });
+    });
+  });
 
   describe('useSourcererDataView', () => {
-    it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', async () => {
-      await act(async () => {
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          '-*elastic-cloud-logs-*',
-          ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
-        ]);
-      });
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', async () => {
+    it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
       await act(async () => {
         store = createStore(
           {
@@ -293,13 +679,15 @@ describe('Sourcerer Hooks', () => {
                 [SourcererScopeName.default]: {
                   ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
                   selectedPatterns: [
-                    'apm-*-transaction*',
-                    'auditbeat-*',
+                    '-packetbeat-*',
                     'endgame-*',
+                    'auditbeat-*',
                     'filebeat-*',
+                    'winlogbeat-*',
+                    '-filebeat-*',
                     'packetbeat-*',
                     'traces-apm*',
-                    'winlogbeat-*',
+                    'apm-*-transaction*',
                   ],
                 },
               },
@@ -325,57 +713,10 @@ describe('Sourcerer Hooks', () => {
           'packetbeat-*',
           'traces-apm*',
           'winlogbeat-*',
+          '-filebeat-*',
+          '-packetbeat-*',
         ]);
-      });
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', async () => {
-      await act(async () => {
-        store = createStore(
-          {
-            ...mockGlobalState,
-            sourcerer: {
-              ...mockGlobalState.sourcerer,
-              sourcererScopes: {
-                ...mockGlobalState.sourcerer.sourcererScopes,
-                [SourcererScopeName.default]: {
-                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-                  selectedPatterns: [
-                    'apm-*-transaction*',
-                    'auditbeat-*',
-                    'endgame-*',
-                    'filebeat-*',
-                    'packetbeat-*',
-                    'traces-apm*',
-                    'winlogbeat-*',
-                    'logs-endpoint.event-*',
-                  ],
-                },
-              },
-            },
-          },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        );
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-endpoint.event-*',
-          'packetbeat-*',
-          'traces-apm*',
-          'winlogbeat-*',
-        ]);
+        expect(result.current.indexPattern).toHaveProperty('getName');
       });
     });
   });

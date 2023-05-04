@@ -18,25 +18,29 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { uiToReactComponent } from '../../../../../kibana_react/public';
-import { CustomizePanelTitleAction } from '.';
+import { CustomizePanelAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
+  description?: string;
+  index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
   showPlaceholderTitle?: boolean;
-  customizeTitle?: CustomizePanelTitleAction;
+  customizePanel?: CustomizePanelAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -47,6 +51,7 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
       iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
       onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
       onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
+      data-test-subj={`embeddablePanelBadge-${badge.id}`}
     >
       {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
@@ -61,7 +66,7 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem), {
+      React.createElement(notification.MenuItem, {
         key: notification.id,
         context: {
           embeddable,
@@ -98,22 +103,10 @@ function renderNotifications(
   });
 }
 
-type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
-
-function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
-  if ('getDescription' in embeddable) {
-    const description = embeddable.getDescription();
-
-    if (description) {
-      return description;
-    }
-  }
-
-  return '';
-}
-
 export function PanelHeader({
   title,
+  description,
+  index,
   isViewMode,
   hidePanelTitle,
   getActionContextMenuPanel,
@@ -122,14 +115,12 @@ export function PanelHeader({
   notifications,
   embeddable,
   headerId,
-  customizeTitle,
+  customizePanel,
 }: PanelHeaderProps) {
-  const description = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title);
   const showPanelBar =
     !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
   const classes = classNames('embPanel__header', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
   const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
@@ -153,12 +144,13 @@ export function PanelHeader({
 
   if (!showPanelBar) {
     return (
-      <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
+      <div className={classes}>
         <PanelOptionsMenu
           getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
           title={title}
+          index={index}
         />
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
@@ -177,7 +169,7 @@ export function PanelHeader({
         >
           {title || placeholderTitle}
         </span>
-      ) : customizeTitle ? (
+      ) : customizePanel ? (
         <EuiLink
           color="text"
           data-test-subj={'embeddablePanelTitleLink'}
@@ -189,7 +181,7 @@ export function PanelHeader({
             defaultMessage: 'Click to edit title: {title}',
             values: { title: title || placeholderTitle },
           })}
-          onClick={() => customizeTitle.execute({ embeddable })}
+          onClick={() => customizePanel.execute({ embeddable })}
         >
           {title || placeholderTitle}
         </EuiLink>
@@ -211,25 +203,26 @@ export function PanelHeader({
     );
   };
 
+  const titleClasses = classNames('embPanel__title', { 'embPanel--dragHandle': !isViewMode });
+
   return (
-    <span data-test-subj="dashboardPanelTitle__wrapper">
-      <figcaption
-        className={classes}
-        data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
-      >
-        <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-          {renderTitle()}
-          {renderBadges(badges, embeddable)}
-        </h2>
-        {renderNotifications(notifications, embeddable)}
-        <PanelOptionsMenu
-          isViewMode={isViewMode}
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          closeContextMenu={closeContextMenu}
-          title={title}
-        />
-      </figcaption>
-    </span>
+    <figcaption
+      className={classes}
+      data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
+    >
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {renderTitle()}
+        {renderBadges(badges, embeddable)}
+      </h2>
+      {renderNotifications(notifications, embeddable)}
+      <PanelOptionsMenu
+        isViewMode={isViewMode}
+        getActionContextMenuPanel={getActionContextMenuPanel}
+        closeContextMenu={closeContextMenu}
+        title={title}
+        index={index}
+      />
+    </figcaption>
   );
 }

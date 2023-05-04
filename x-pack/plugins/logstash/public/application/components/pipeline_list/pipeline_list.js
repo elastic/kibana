@@ -12,7 +12,7 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';

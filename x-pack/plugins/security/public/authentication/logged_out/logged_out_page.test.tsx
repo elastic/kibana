@@ -8,8 +8,9 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { LoggedOutPage } from './logged_out_page';
 
@@ -23,7 +24,10 @@ describe('LoggedOutPage', () => {
 
   it('points to a base path if `next` parameter is not provided', async () => {
     const basePathMock = coreMock.createStart({ basePath: '/mock-base-path' }).http.basePath;
-    const wrapper = mountWithIntl(<LoggedOutPage basePath={basePathMock} />);
+    const customBranding = customBrandingServiceMock.createStartContract();
+    const wrapper = mountWithIntl(
+      <LoggedOutPage basePath={basePathMock} customBranding={customBranding} />
+    );
 
     expect(wrapper.find(EuiButton).prop('href')).toBe('/mock-base-path/');
   });
@@ -33,8 +37,11 @@ describe('LoggedOutPage', () => {
       '/mock-base-path/app/home#/?_g=()'
     )}`;
 
+    const customBranding = customBrandingServiceMock.createStartContract();
     const basePathMock = coreMock.createStart({ basePath: '/mock-base-path' }).http.basePath;
-    const wrapper = mountWithIntl(<LoggedOutPage basePath={basePathMock} />);
+    const wrapper = mountWithIntl(
+      <LoggedOutPage basePath={basePathMock} customBranding={customBranding} />
+    );
 
     expect(wrapper.find(EuiButton).prop('href')).toBe('/mock-base-path/app/home#/?_g=()');
   });

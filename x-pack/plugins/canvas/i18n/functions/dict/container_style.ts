@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { containerStyle } from '../../../canvas_plugin_src/functions/common/containerStyle';
+import type { containerStyle } from '../../../canvas_plugin_src/functions/common/containerStyle';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CSS } from '../../constants';

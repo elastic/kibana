@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { Note } from '../../lib/note';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { Note } from '../../lib/note';
 
 export type ErrorState = ErrorModel;
 

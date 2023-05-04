@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../../common';
+import {
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+} from '../../../common/constants';
 
 export const AgentTypeSchema = schema.oneOf([
   schema.literal(AGENT_TYPE_EPHEMERAL),
@@ -18,7 +22,6 @@ export const AgentTypeSchema = schema.oneOf([
 export const NewAgentActionSchema = schema.oneOf([
   schema.object({
     type: schema.oneOf([
-      schema.literal('POLICY_CHANGE'),
       schema.literal('UNENROLL'),
       schema.literal('UPGRADE'),
       schema.literal('POLICY_REASSIGN'),

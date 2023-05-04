@@ -9,8 +9,14 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
-import { EventStats } from '../../../common/endpoint/types';
+import type {
+  ResolverState,
+  IsometricTaxiLayout,
+  DataState,
+  VisibleEntites,
+  NodeData,
+} from '../types';
+import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
@@ -22,8 +28,9 @@ export const projectionMatrix = composeSelectors(
   cameraSelectors.projectionMatrix
 );
 
-export const clippingPlanes = composeSelectors(cameraStateSelector, cameraSelectors.clippingPlanes);
 export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
+
+export const detectedBounds = composeSelectors(dataStateSelector, dataSelectors.detectedBounds);
 
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
@@ -81,14 +88,6 @@ export const treeRequestParametersToAbort = composeSelectors(
 );
 
 /**
- * This should be the siem default indices to pass to the backend for querying data.
- */
-export const treeParameterIndices = composeSelectors(
-  dataStateSelector,
-  dataSelectors.treeParameterIndices
-);
-
-/**
  * An array of indices to use for resolver panel requests.
  */
 export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
@@ -114,13 +113,6 @@ export const relatedEventTotalCount: (
 ) => (nodeID: string) => number | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventTotalCount
-);
-
-export const relatedEventCountByCategory: (
-  state: ResolverState
-) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventCountByCategory
 );
 
 /**
@@ -206,11 +198,6 @@ export const hasMoreGenerations = composeSelectors(
   dataSelectors.hasMoreGenerations
 );
 
-/**
- * An array containing all the processes currently in the Resolver than can be graphed
- */
-export const graphableNodes = composeSelectors(dataStateSelector, dataSelectors.graphableNodes);
-
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
 const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
@@ -232,14 +219,9 @@ export const statsTotalForNode = composeSelectors(
 export const visibleNodesAndEdgeLines = createSelector(
   nodesAndEdgelines,
   boundingBox,
-  function (
-    /* eslint-disable @typescript-eslint/no-shadow */
-    nodesAndEdgelines,
-    boundingBox
-    /* eslint-enable @typescript-eslint/no-shadow */
-  ) {
+  function (nodesAndEdgelinesFn, boundingBoxFn) {
     // `boundingBox` and `nodesAndEdgelines` are each memoized.
-    return (time: number) => nodesAndEdgelines(boundingBox(time));
+    return (time: number) => nodesAndEdgelinesFn(boundingBoxFn(time));
   }
 );
 
@@ -261,12 +243,13 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
-export const ariaFlowtoNodeID: (
-  state: ResolverState
-) => (time: number) => (nodeID: string) => string | null = createSelector(
+export const ariaFlowtoNodeID = createSelector(
   visibleNodesAndEdgeLines,
   composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
-  (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
+  function (
+    visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
+    ariaFlowtoCandidate: (nodeId: string) => string | null
+  ) {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
@@ -299,14 +282,6 @@ export const panelViewAndParameters = composeSelectors(
 );
 
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
-
-/**
- * @deprecated use `useLinkProps`
- */
-export const relatedEventsRelativeHrefs = composeSelectors(
-  uiStateSelector,
-  uiSelectors.relatedEventsRelativeHrefs
-);
 
 /**
  * Total count of events related to `nodeID`.
@@ -390,7 +365,10 @@ export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<st
   createSelector(
     composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
     visibleNodesAndEdgeLines,
-    function (nodeData, visibleNodesAndEdgeLinesAtTime) {
+    function (
+      nodeData: Map<string, NodeData> | undefined,
+      visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites
+    ) {
       return defaultMemoize((time: number) => {
         const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 

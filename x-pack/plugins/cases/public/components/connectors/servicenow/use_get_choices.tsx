@@ -6,10 +6,10 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, IToasts } from 'kibana/public';
-import { ActionConnector } from '../../../../common/api';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type { ActionConnector } from '../../../../common/api';
 import { getChoices } from './api';
-import { Choice } from './types';
+import type { Choice } from './types';
 import * as i18n from './translations';
 
 export interface UseGetChoicesProps {

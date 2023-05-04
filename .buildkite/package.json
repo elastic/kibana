@@ -1,8 +1,33 @@
 {
   "name": "kibana-buildkite",
   "version": "1.0.0",
-  "private": true,
+  "description": "Kibana Buildkite",
+  "scripts": {
+    "test": "mocha",
+    "test:watch": "mocha --watch"
+  },
   "dependencies": {
-    "kibana-buildkite-library": "elastic/kibana-buildkite-library"
+    "@octokit/rest": "^18.10.0",
+    "axios": "^0.21.4",
+    "globby": "^11.1.0",
+    "js-yaml": "^4.1.0",
+    "minimatch": "^5.0.1",
+    "tslib": "*"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.3",
+    "@types/js-yaml": "^4.0.5",
+    "@types/minimatch": "^3.0.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^15.12.2",
+    "chai": "^4.3.6",
+    "mocha": "^10.2.0",
+    "nock": "^12.0.2",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.4"
+  },
+  "imports": {
+    "#pipeline-utils": "./pipeline-utils/index.ts",
+    "#pipeline-utils/*": "./pipeline-utils/*"
   }
 }

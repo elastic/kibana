@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 
+import { getPreviousTimeRange } from './get_time_range';
 import {
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -18,7 +19,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
 } from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
-import { Policy } from '../store/inputs/model';
+import type { Policy } from '../store/inputs/model';
 
 interface DefaultTimeRange {
   from?: string | null;
@@ -52,7 +53,10 @@ export const getTimeRangeSettings = (uiSettings = true) => {
   const toStr = (isString(timeRange?.to) && timeRange?.to) || DEFAULT_TO;
   const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
   const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
-  return { from, fromStr, to, toStr };
+
+  const socTrends = getPreviousTimeRange({ to, from });
+
+  return { from, fromStr, to, toStr, socTrends };
 };
 
 /**
@@ -75,14 +79,19 @@ export const getIntervalSettings = (uiSettings = true): Policy => {
  * Parses a date and returns the default if the date string is not valid.
  * @param dateString The date string to parse
  * @param defaultDate The defaultDate if we cannot parse the dateMath
+ * @param {Boolean} roundUp should relative timeranges be rounded up or down
+ * @param momentInstance A moment instance to use in place of the library's, will use independent locale settings.
+ * @param {Date} forceNow A valid date object to use in place of Date.now()
  * @returns The moment of the date time parsed
  */
 export const parseDateWithDefault = (
   dateString: string,
   defaultDate: moment.Moment,
-  roundUp: boolean = false
+  roundUp: boolean = false,
+  momentInstance?: typeof moment,
+  forceNow?: Date
 ): moment.Moment => {
-  const date = dateMath.parse(dateString, { roundUp });
+  const date = dateMath.parse(dateString, { roundUp, momentInstance, forceNow });
   if (date != null && date.isValid()) {
     return date;
   } else {

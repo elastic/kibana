@@ -5,33 +5,38 @@
  * 2.0.
  */
 
-import { JOB_FIELD_TYPES } from '../../../../../common';
-import type {
-  FileBasedFieldVisConfig,
-  FileBasedUnknownFieldVisConfig,
-} from '../../../../../common/types/field_vis_config';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
-export function filterFields(
-  fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>,
-  visibleFieldNames: string[],
-  visibleFieldTypes: string[]
+interface CommonFieldConfig {
+  type: string;
+  fieldName?: string;
+  secondaryType?: string;
+}
+
+export function matchFieldType<T extends CommonFieldConfig>(fieldType: string, config: T) {
+  return fieldType === config.secondaryType || fieldType === config.type;
+}
+export function filterFields<T extends CommonFieldConfig>(
+  fields: T[],
+  visibleFieldNames: string[] | undefined,
+  visibleFieldTypes: string[] | undefined
 ) {
   let items = fields;
 
   if (visibleFieldTypes && visibleFieldTypes.length > 0) {
     items = items.filter(
-      (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+      (config) => visibleFieldTypes.findIndex((fieldType) => matchFieldType(fieldType, config)) > -1
     );
   }
   if (visibleFieldNames && visibleFieldNames.length > 0) {
     items = items.filter((config) => {
-      return visibleFieldNames.findIndex((field) => field === config.fieldName) > -1;
+      return visibleFieldNames.findIndex((fieldName) => fieldName === config.fieldName) > -1;
     });
   }
 
   return {
     filteredFields: items,
     visibleFieldsCount: items.length,
-    visibleMetricsCount: items.filter((d) => d.type === JOB_FIELD_TYPES.NUMBER).length,
+    visibleMetricsCount: items.filter((d) => d.type === SUPPORTED_FIELD_TYPES.NUMBER).length,
   };
 }

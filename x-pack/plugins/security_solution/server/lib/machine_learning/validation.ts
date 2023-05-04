@@ -20,14 +20,14 @@ export class HttpAuthzError extends Error {
   }
 }
 
-export const toHttpError = (validation: Validation): HttpAuthzError | undefined => {
+export const toAuthzError = (validation: Validation): HttpAuthzError | undefined => {
   if (!validation.valid) {
     return new HttpAuthzError(validation.message);
   }
 };
 
-export const throwHttpError = (validation: Validation): void => {
-  const error = toHttpError(validation);
+export const throwAuthzError = (validation: Validation): void => {
+  const error = toAuthzError(validation);
   if (error) {
     throw error;
   }

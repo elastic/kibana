@@ -8,8 +8,8 @@
 
 import { Position } from '@elastic/charts';
 
-import { Vis } from '../../../../../../../visualizations/public';
-import { Style } from '../../../../../../../charts/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { Style } from '@kbn/charts-plugin/public';
 
 import {
   ValueAxis,

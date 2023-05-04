@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from 'src/plugins/expressions';
-import { FieldFormat } from '../../../field_formats/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {
@@ -83,5 +83,17 @@ describe('CSV exporter', () => {
         formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
       })
     ).toMatch('columnOne\r\n"\'=1"\r\n');
+  });
+
+  test('should escape text with csvSeparator char in it', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = 'a,b';
+    expect(
+      datatableToCSV(datatable, {
+        ...getDefaultOptions(),
+        escapeFormulaValues: true,
+        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+      })
+    ).toMatch('columnOne\r\n"a,b"\r\n');
   });
 });

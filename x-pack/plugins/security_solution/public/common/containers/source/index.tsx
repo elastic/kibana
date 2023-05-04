@@ -5,52 +5,71 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
+import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { Subscription } from 'rxjs';
+import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
+import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
-import {
-  BrowserField,
-  BrowserFields,
-  DocValueFields,
-  IndexField,
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '../../../../../timelines/common';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
+import { getDataViewStateFromIndexFields } from './use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
-export type { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields };
 
-export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
-  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
-    (acc, namespace) => [
-      ...acc,
-      ...Object.values(namespace.fields != null ? namespace.fields : {}),
-    ],
-    []
-  );
+export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
+  const result: Array<Partial<BrowserField>> = [];
+  for (const namespace of Object.values(browserFields)) {
+    if (namespace.fields) {
+      result.push(...Object.values(namespace.fields));
+    }
+  }
+  return result;
+}
 
+/**
+ * @deprecated use EcsFlat from `@kbn/ecs`
+ * @param browserFields
+ * @returns
+ */
 export const getAllFieldsByName = (
   browserFields: BrowserFields
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
+  (
+    title: string,
+    fields: IIndexPatternFieldList,
+    _includeUnmapped: boolean = false
+  ): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
+            pick(
+              [
+                'name',
+                'searchable',
+                'type',
+                'aggregatable',
+                'esTypes',
+                'subType',
+                'conflictDescriptions',
+              ],
+              field
+            )
           ),
           title,
         }
       : { fields: [], title },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 /**
@@ -68,51 +87,35 @@ export const getBrowserFields = memoizeOne(
 
     // We mutate this instead of using lodash/set to keep this as fast as possible
     return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
-      if (accumulator[field.category] == null) {
-        (accumulator as DangerCastForMutation)[field.category] = {};
+      const category = getCategory(field.name);
+      if (accumulator[category] == null) {
+        (accumulator as DangerCastForMutation)[category] = {};
       }
-      if (accumulator[field.category].fields == null) {
-        accumulator[field.category].fields = {};
+      if (accumulator[category].fields == null) {
+        accumulator[category].fields = {};
       }
-      accumulator[field.category].fields[field.name] = field as unknown as BrowserField;
+      accumulator[category].fields[field.name] = field as unknown as BrowserField;
       return accumulator;
     }, {});
   },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const indicesExistOrDataTemporarilyUnavailable = (
-  indicesExist: boolean | null | undefined
-) => indicesExist || isUndefined(indicesExist);
-
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
-
 interface FetchIndexReturn {
+  /**
+   * @deprecated use fields list on dataview / "indexPattern"
+   * about to use browserFields? Reconsider! Maybe you can accomplish
+   * everything you need via the `fields` property on the data view
+   * you are working with? Or perhaps you need a description for a
+   * particular field? Consider using the EcsFlat module from `@kbn/ecs`
+   */
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
+  dataView: DataView | undefined;
 }
 
 /**
@@ -121,72 +124,63 @@ interface FetchIndexReturn {
  */
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false
+  onlyCheckIfIndicesExist: boolean = false,
+  strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields',
+  includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
   const previousIndexesName = useRef<string[]>([]);
-  const [isLoading, setLoading] = useState(false);
 
-  const [state, setState] = useState<FetchIndexReturn>({
+  const [state, setState] = useState<FetchIndexReturn & { loading: boolean }>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
+    dataView: undefined,
+    loading: false,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
       const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
-            {
-              abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                const stringifyIndices = response.indicesExist.sort().join();
+        try {
+          setState({ ...state, loading: true });
+          abortCtrl.current = new AbortController();
+          const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+          const { browserFields } = getDataViewStateFromIndexFields(
+            iNames,
+            dv.fields,
+            includeUnmapped
+          );
 
-                previousIndexesName.current = response.indicesExist;
-                setLoading(false);
-                setState({
-                  browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                  indexes: response.indicesExist,
-                  indexExists: response.indicesExist.length > 0,
-                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
-                });
+          previousIndexesName.current = dv.getIndexPattern().split(',');
 
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
+          setState({
+            loading: false,
+            dataView: dv,
+            browserFields,
+            indexes: dv.getIndexPattern().split(','),
+            indexExists: dv.getIndexPattern().split(',').length > 0,
+            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
           });
+        } catch (exc) {
+          setState({
+            browserFields: DEFAULT_BROWSER_FIELDS,
+            indexes: indexNames,
+            indexExists: true,
+            indexPatterns: DEFAULT_INDEX_PATTERNS,
+            dataView: undefined,
+            loading: false,
+          });
+          addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
+        }
       };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
+    [addError, data.dataViews, includeUnmapped, indexNames, state]
   );
 
   useEffect(() => {
@@ -194,10 +188,10 @@ export const useFetchIndex = (
       indexFieldsSearch(indexNames);
     }
     return () => {
-      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexNames, previousIndexesName]);
 
-  return [isLoading, state];
+  return [state.loading, state];
 };

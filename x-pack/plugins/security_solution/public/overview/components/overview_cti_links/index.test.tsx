@@ -12,7 +12,8 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThreatIntelLinkPanel } from '.';
 import { ThemeProvider } from 'styled-components';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -22,6 +23,9 @@ import {
 import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
+import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 jest.mock('../../../common/lib/kibana');
 
@@ -49,7 +53,9 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} allIntegrationsInstalled={true} />
+            <MockKibanaContextProvider>
+              <ThreatIntelLinkPanel {...mockProps} />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -57,19 +63,7 @@ describe('ThreatIntelLinkPanel', () => {
 
     expect(wrapper.find('[data-test-subj="cti-enabled-module"]').length).toEqual(1);
     expect(wrapper.find('[data-test-subj="cti-enable-integrations-button"]').length).toEqual(0);
-  });
-
-  it('renders Enable source buttons when not all integrations installed', () => {
-    const wrapper = mount(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} allIntegrationsInstalled={false} />
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
-    );
-    expect(wrapper.find('[data-test-subj="cti-enable-integrations-button"]').length).not.toBe(0);
+    expect(wrapper.find('[data-test-subj="cti-view-indicators"]').length).toBeGreaterThan(0);
   });
 
   it('renders CtiDisabledModule when Threat Intel module is disabled', () => {
@@ -77,11 +71,9 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel
-              {...mockProps}
-              allTiDataSources={[]}
-              allIntegrationsInstalled={true}
-            />
+            <MockKibanaContextProvider>
+              <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>

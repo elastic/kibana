@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, HttpFetchError } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
@@ -15,10 +16,10 @@ import {
 } from '../common';
 
 export interface Services {
-  fetchRandomNumber: () => Promise<number | HttpFetchError>;
-  fetchRandomNumberBetween: (max: number) => Promise<number | HttpFetchError>;
-  postMessage: (message: string, id: string) => Promise<undefined | HttpFetchError>;
-  getMessageById: (id: string) => Promise<string | HttpFetchError>;
+  fetchRandomNumber: () => Promise<number | IHttpFetchError>;
+  fetchRandomNumberBetween: (max: number) => Promise<number | IHttpFetchError>;
+  postMessage: (message: string, id: string) => Promise<undefined | IHttpFetchError>;
+  getMessageById: (id: string) => Promise<string | IHttpFetchError>;
   addSuccessToast: (message: string) => void;
 }
 

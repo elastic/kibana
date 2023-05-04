@@ -10,6 +10,7 @@ import { useFetcher } from '../../hooks/use_fetcher';
 const INITIAL_STATE = {
   agentName: undefined,
   runtimeName: undefined,
+  serverlessType: undefined,
 };
 
 export function useServiceAgentFetcher({
@@ -28,8 +29,7 @@ export function useServiceAgentFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/agent',
+        return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
           params: {
             path: { serviceName },
             query: { start, end },

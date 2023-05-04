@@ -12,12 +12,11 @@ import '../../../../common/mock/match_media';
 import '../../../../common/mock/react_beautiful_dnd';
 import { TestProviders } from '../../../../common/mock';
 
-import { EndpointOverview } from './index';
-import {
-  EndpointFields,
-  HostPolicyResponseActionStatus,
-} from '../../../../../common/search_strategy/security_solution/hosts';
+import { EndpointOverview } from '.';
+import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 import { HostStatus } from '../../../../../common/endpoint/types';
+import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -46,6 +45,15 @@ describe('EndpointOverview Component', () => {
       isolation: false,
       elasticAgentStatus: HostStatus.HEALTHY,
       pendingActions: {},
+      hostInfo: new EndpointMetadataGenerator('seed').generateHostInfo({
+        metadata: {
+          Endpoint: {
+            state: {
+              isolation: true,
+            },
+          },
+        },
+      }),
     };
   });
 
@@ -54,7 +62,7 @@ describe('EndpointOverview Component', () => {
     expect(findData.at(0).text()).toEqual(endpointData.endpointPolicy);
     expect(findData.at(1).text()).toEqual(endpointData.policyStatus);
     expect(findData.at(2).text()).toContain(endpointData.sensorVersion); // contain because drag adds a space
-    expect(findData.at(3).text()).toEqual('Healthy');
+    expect(findData.at(3).text()).toEqual('HealthyIsolated');
   });
 
   test('it renders with null data', () => {

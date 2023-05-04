@@ -8,22 +8,21 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
-// @ts-ignore
 import { Listing } from '../../../components/beats/listing';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { updateTotalItemCount, getPaginationTableProps } = useTable('beats.instances');
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;

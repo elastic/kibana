@@ -1,8 +1,8 @@
 {
   "name": "@kbn/i18n",
-  "browser": "./target_web/browser.js",
-  "main": "./target_node/index.js",
+  "browser": "./src/browser",
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0",
+  "author": "Kibana Core",
   "private": true
 }

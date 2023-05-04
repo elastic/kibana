@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -87,6 +87,11 @@ export default ({ getService }: FtrProviderContext): void => {
           missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
         });
       });
 

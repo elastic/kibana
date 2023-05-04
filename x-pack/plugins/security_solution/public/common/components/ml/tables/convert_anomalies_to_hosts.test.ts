@@ -8,7 +8,7 @@
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { convertAnomaliesToHosts, getHostNameFromEntity } from './convert_anomalies_to_hosts';
-import { AnomaliesByHost } from '../types';
+import type { AnomaliesByHost } from '../types';
 
 describe('convert_anomalies_to_hosts', () => {
   let anomalies = cloneDeep(mockAnomalies);
@@ -18,7 +18,7 @@ describe('convert_anomalies_to_hosts', () => {
   });
 
   test('it returns expected anomalies from a host', () => {
-    const entities = convertAnomaliesToHosts(anomalies);
+    const entities = convertAnomaliesToHosts(anomalies, {});
     const expected: AnomaliesByHost[] = [
       {
         anomaly: {
@@ -61,6 +61,7 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
+        jobName: 'job-1',
       },
       {
         anomaly: {
@@ -103,13 +104,14 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
   });
 
   test('it returns empty anomalies if sent in a null', () => {
-    const entities = convertAnomaliesToHosts(null);
+    const entities = convertAnomaliesToHosts(null, {});
     const expected: AnomaliesByHost[] = [];
     expect(entities).toEqual(expected);
   });
@@ -123,7 +125,7 @@ describe('convert_anomalies_to_hosts', () => {
       { 'user.name': 'root' },
     ];
 
-    const entities = convertAnomaliesToHosts(anomalies, 'zeek-iowa');
+    const entities = convertAnomaliesToHosts(anomalies, {}, 'zeek-iowa');
     const expected: AnomaliesByHost[] = [
       {
         anomaly: {
@@ -166,6 +168,7 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
@@ -182,7 +185,7 @@ describe('convert_anomalies_to_hosts', () => {
 
     anomalies.anomalies[1].entityName = 'something-else';
     anomalies.anomalies[1].entityValue = 'something-else';
-    const entities = convertAnomaliesToHosts(anomalies, 'zeek-iowa');
+    const entities = convertAnomaliesToHosts(anomalies, {}, 'zeek-iowa');
     const expected: AnomaliesByHost[] = [
       {
         anomaly: {
@@ -225,13 +228,14 @@ describe('convert_anomalies_to_hosts', () => {
           time: 1560664800000,
         },
         hostName: 'zeek-iowa',
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
   });
 
   test('it returns empty anomalies if sent in the name of one that does not exist', () => {
-    const entities = convertAnomaliesToHosts(anomalies, 'some-made-up-name-here-for-you');
+    const entities = convertAnomaliesToHosts(anomalies, {}, 'some-made-up-name-here-for-you');
     const expected: AnomaliesByHost[] = [];
     expect(entities).toEqual(expected);
   });

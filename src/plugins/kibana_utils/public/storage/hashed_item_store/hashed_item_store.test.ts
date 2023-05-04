@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { HashedItemStore } from './hashed_item_store';
 
 describe('hashedItemStore', () => {
@@ -109,7 +109,7 @@ describe('hashedItemStore', () => {
 
           beforeEach(() => {
             // Control time.
-            jest.useFakeTimers();
+            jest.useFakeTimers({ legacyFakeTimers: true });
 
             sessionStorage = new StubBrowserStorage();
             hashedItemStore = new HashedItemStore(sessionStorage);
@@ -199,7 +199,7 @@ describe('hashedItemStore', () => {
 
         beforeEach(() => {
           // Control time.
-          jest.useFakeTimers();
+          jest.useFakeTimers({ legacyFakeTimers: true });
 
           sessionStorage = new StubBrowserStorage();
           hashedItemStore = new HashedItemStore(sessionStorage);
@@ -350,7 +350,7 @@ describe('hashedItemStore', () => {
 
     beforeEach(() => {
       // Control time.
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       sessionStorage = new StubBrowserStorage();
       hashedItemStore = new HashedItemStore(sessionStorage);
     });

@@ -7,11 +7,11 @@
 
 import { useState, useCallback } from 'react';
 import { EuiTableSortingType } from '@elastic/eui';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { EUI_SORT_ASCENDING } from '../../../common/constants';
 
-interface Pagination {
+export interface Pagination {
   pageSize: number;
   initialPageSize: number;
   pageIndex: number;
@@ -25,7 +25,13 @@ interface Page {
   index: number;
 }
 
-type Sorting = EuiTableSortingType<string>;
+export interface TableChange {
+  page: Page;
+  sort: Sorting['sort'];
+  queryText: string;
+}
+
+export type Sorting = EuiTableSortingType<string>;
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -84,15 +90,7 @@ export function useTable(storageKey: string) {
 
   const [query, setQuery] = useState('');
 
-  const onTableChange = ({
-    page,
-    sort,
-    queryText,
-  }: {
-    page: Page;
-    sort: Sorting['sort'];
-    queryText: string;
-  }) => {
+  const onTableChange = ({ page, sort, queryText }: TableChange) => {
     setPagination({
       ...pagination,
       ...{

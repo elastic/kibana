@@ -6,11 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../../lib/helpers/setup_request';
-import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
+import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
+import { getServiceNodes, ServiceNodesResponse } from './get_service_nodes';
+import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -31,9 +33,13 @@ const metricsChartsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const { params } = resources;
-    const setup = await setupRequest(resources);
+  handler: async (
+    resources
+  ): Promise<{
+    charts: FetchAndTransformMetrics[];
+  }> => {
+    const { params, config } = resources;
+    const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
     const { agentName, environment, kuery, serviceNodeName, start, end } =
       params.query;
@@ -41,7 +47,8 @@ const metricsChartsRoute = createApmServerRoute({
     const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
-      setup,
+      config,
+      apmEventClient,
       serviceName,
       agentName,
       serviceNodeName,
@@ -53,5 +60,37 @@ const metricsChartsRoute = createApmServerRoute({
   },
 });
 
-export const metricsRouteRepository =
-  createApmServerRouteRepository().add(metricsChartsRoute);
+const serviceMetricsJvm = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{ serviceNodes: ServiceNodesResponse }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end } = params.query;
+
+    const serviceNodes = await getServiceNodes({
+      kuery,
+      apmEventClient,
+      serviceName,
+      environment,
+      start,
+      end,
+    });
+    return { serviceNodes };
+  },
+});
+
+export const metricsRouteRepository = {
+  ...metricsChartsRoute,
+  ...serviceMetricsJvm,
+  ...metricsServerlessRouteRepository,
+};

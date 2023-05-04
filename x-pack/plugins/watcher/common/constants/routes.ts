@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const API_BASE_PATH = '/api/watcher';
+
 export const ROUTES: { [key: string]: string } = {
-  API_ROOT: '/api/watcher',
+  API_ROOT: API_BASE_PATH,
 };

@@ -8,7 +8,7 @@
 import { PassThrough } from 'stream';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
@@ -65,7 +65,7 @@ export interface WriteNextResponseOptions {
   esClient: ElasticsearchClient;
   listItemIndex: string;
   stream: PassThrough;
-  searchAfter: string[] | undefined;
+  searchAfter: estypes.SortResults | undefined;
   stringToAppend: string | null | undefined;
 }
 
@@ -76,7 +76,7 @@ export const writeNextResponse = async ({
   listItemIndex,
   searchAfter,
   stringToAppend,
-}: WriteNextResponseOptions): Promise<string[] | undefined> => {
+}: WriteNextResponseOptions): Promise<estypes.SortResults | undefined> => {
   const response = await getResponse({
     esClient,
     listId,
@@ -96,8 +96,7 @@ export const getSearchAfterFromResponse = <T>({
   response,
 }: {
   response: estypes.SearchResponse<T>;
-}): string[] | undefined =>
-  // @ts-expect-error @elastic/elasticsearch SortResults contains null
+}): estypes.SortResults | undefined =>
   response.hits.hits.length > 0
     ? response.hits.hits[response.hits.hits.length - 1].sort
     : undefined;
@@ -105,7 +104,7 @@ export const getSearchAfterFromResponse = <T>({
 export interface GetResponseOptions {
   esClient: ElasticsearchClient;
   listId: string;
-  searchAfter: undefined | string[];
+  searchAfter: estypes.SortResults | undefined;
   listItemIndex: string;
   size?: number;
 }
@@ -117,22 +116,20 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return (
-    await esClient.search<SearchEsListItemSchema>({
-      body: {
-        query: {
-          term: {
-            list_id: listId,
-          },
+  return (await esClient.search<SearchEsListItemSchema>({
+    body: {
+      query: {
+        term: {
+          list_id: listId,
         },
-        search_after: searchAfter,
-        sort: [{ tie_breaker_id: 'asc' }],
       },
-      ignore_unavailable: true,
-      index: listItemIndex,
-      size,
-    })
-  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
+      search_after: searchAfter,
+      sort: [{ tie_breaker_id: 'asc' }],
+    },
+    ignore_unavailable: true,
+    index: listItemIndex,
+    size,
+  })) as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

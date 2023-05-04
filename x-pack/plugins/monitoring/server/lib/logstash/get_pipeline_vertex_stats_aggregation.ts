@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import {
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
+} from '../../../common/http_api/logstash';
 import { LegacyRequest, PipelineVersion } from '../../types';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
+import { Globals } from '../../static_globals';
 
 function scalarCounterAggregation(
   field: string,
@@ -56,18 +62,18 @@ function createAggsObjectFromAggsList(aggsList: any) {
   return aggsList.reduce((aggsSoFar: object, agg: object) => ({ ...aggsSoFar, ...agg }), {});
 }
 
-function createNestedVertexAgg(vertexId: string, maxBucketSize: number) {
-  const fieldPath = 'logstash_stats.pipelines.vertices';
-  const ephemeralIdField = 'logstash_stats.pipelines.vertices.pipeline_ephemeral_id';
+function createNestedVertexAgg(statsPath: string, vertexId: string, maxBucketSize: number) {
+  const fieldPath = `${statsPath}.pipelines.vertices`;
+  const ephemeralIdField = `${statsPath}.pipelines.vertices.pipeline_ephemeral_id`;
 
   return {
     vertices: {
-      nested: { path: 'logstash_stats.pipelines.vertices' },
+      nested: { path: `${statsPath}.pipelines.vertices` },
       aggs: {
         vertex_id: {
           filter: {
             term: {
-              'logstash_stats.pipelines.vertices.id': vertexId,
+              [`${statsPath}.pipelines.vertices.id`]: vertexId,
             },
           },
           aggs: {
@@ -92,34 +98,44 @@ function createNestedVertexAgg(vertexId: string, maxBucketSize: number) {
   };
 }
 
-function createTotalProcessorDurationStatsAgg() {
+function createTotalProcessorDurationStatsAgg(statsPath: string) {
   return {
     total_processor_duration_stats: {
       stats: {
-        field: 'logstash_stats.pipelines.events.duration_in_millis',
+        field: `${statsPath}.pipelines.events.duration_in_millis`,
       },
     },
   };
 }
 
-function createScopedAgg(pipelineId: string, pipelineHash: string, ...aggsList: object[]) {
-  return {
-    pipelines: {
-      nested: { path: 'logstash_stats.pipelines' },
+function createScopedAgg(
+  pipelineId: string,
+  pipelineHash: string,
+  vertexId: string,
+  maxBucketSize: number
+) {
+  return (statsPath: string) => {
+    const aggs = {
+      ...createNestedVertexAgg(statsPath, vertexId, maxBucketSize),
+      ...createTotalProcessorDurationStatsAgg(statsPath),
+    };
+
+    return {
+      nested: { path: `${statsPath}.pipelines` },
       aggs: {
         scoped: {
           filter: {
             bool: {
               filter: [
-                { term: { 'logstash_stats.pipelines.id': pipelineId } },
-                { term: { 'logstash_stats.pipelines.hash': pipelineHash } },
+                { term: { [`${statsPath}.pipelines.id`]: pipelineId } },
+                { term: { [`${statsPath}.pipelines.hash`]: pipelineHash } },
               ],
             },
           },
-          aggs: createAggsObjectFromAggsList(aggsList),
+          aggs,
         },
       },
-    },
+    };
   };
 }
 
@@ -137,7 +153,6 @@ function createTimeSeriesAgg(timeSeriesIntervalInSeconds: number, ...aggsList: o
 
 function fetchPipelineVertexTimeSeriesStats({
   query,
-  logstashIndexPattern,
   pipelineId,
   version,
   vertexId,
@@ -147,7 +162,6 @@ function fetchPipelineVertexTimeSeriesStats({
   req,
 }: {
   query: object;
-  logstashIndexPattern: string;
   pipelineId: string;
   version: PipelineVersion;
   vertexId: string;
@@ -156,20 +170,22 @@ function fetchPipelineVertexTimeSeriesStats({
   callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
   req: LegacyRequest;
 }) {
+  const pipelineAggregation = createScopedAgg(pipelineId, version.hash, vertexId, maxBucketSize);
   const aggs = {
-    ...createTimeSeriesAgg(
-      timeSeriesIntervalInSeconds,
-      createScopedAgg(
-        pipelineId,
-        version.hash,
-        createNestedVertexAgg(vertexId, maxBucketSize),
-        createTotalProcessorDurationStatsAgg()
-      )
-    ),
+    ...createTimeSeriesAgg(timeSeriesIntervalInSeconds, {
+      pipelines: pipelineAggregation('logstash_stats'),
+      pipelines_mb: pipelineAggregation('logstash.node.stats'),
+    }),
   };
 
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType: 'logstash',
+  });
+
   const params = {
-    index: logstashIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     filter_path: [
@@ -179,6 +195,11 @@ function fetchPipelineVertexTimeSeriesStats({
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.duration_in_millis_total',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.queue_push_duration_in_millis_total',
       'aggregations.timeseries.buckets.pipelines.scoped.total_processor_duration_stats',
+      'aggregations.timeseries.buckets.pipelines_mb.scoped.vertices.vertex_id.events_in_total',
+      'aggregations.timeseries.buckets.pipelines_mb.scoped.vertices.vertex_id.events_out_total',
+      'aggregations.timeseries.buckets.pipelines_mb.scoped.vertices.vertex_id.duration_in_millis_total',
+      'aggregations.timeseries.buckets.pipelines_mb.scoped.vertices.vertex_id.queue_push_duration_in_millis_total',
+      'aggregations.timeseries.buckets.pipelines_mb.scoped.total_processor_duration_stats',
     ],
     body: {
       query,
@@ -191,15 +212,17 @@ function fetchPipelineVertexTimeSeriesStats({
 
 export function getPipelineVertexStatsAggregation({
   req,
-  logstashIndexPattern,
   timeSeriesIntervalInSeconds,
   clusterUuid,
   pipelineId,
   version,
   vertexId,
 }: {
-  req: LegacyRequest;
-  logstashIndexPattern: string;
+  req: LegacyRequest<
+    PostLogstashPipelineRequestParams,
+    unknown,
+    PostLogstashPipelineRequestPayload
+  >;
   timeSeriesIntervalInSeconds: number;
   clusterUuid: string;
   pipelineId: string;
@@ -209,25 +232,45 @@ export function getPipelineVertexStatsAggregation({
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const filters = [
     {
-      nested: {
-        path: 'logstash_stats.pipelines',
-        query: {
-          bool: {
-            must: [
-              { term: { 'logstash_stats.pipelines.hash': version.hash } },
-              { term: { 'logstash_stats.pipelines.id': pipelineId } },
-            ],
+      bool: {
+        should: [
+          {
+            nested: {
+              path: 'logstash_stats.pipelines',
+              ignore_unmapped: true,
+              query: {
+                bool: {
+                  filter: [{ term: { 'logstash_stats.pipelines.id': pipelineId } }],
+                },
+              },
+            },
           },
-        },
+          {
+            nested: {
+              path: 'logstash.node.stats.pipelines',
+              ignore_unmapped: true,
+              query: {
+                bool: {
+                  filter: [{ term: { 'logstash.node.stats.pipelines.id': pipelineId } }],
+                },
+              },
+            },
+          },
+        ],
       },
     },
   ];
 
-  const start = version.firstSeen;
-  const end = version.lastSeen;
+  const start = req.payload.timeRange.min;
+  const end = req.payload.timeRange.max;
+
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
 
   const query = createQuery({
-    types: ['stats', 'logstash_stats'],
+    type,
+    dsDataset: getLogstashDataset(dataset),
+    metricset: dataset,
     start,
     end,
     metric: LogstashMetric.getMetricFields(),
@@ -235,18 +278,15 @@ export function getPipelineVertexStatsAggregation({
     filters,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
 
   return fetchPipelineVertexTimeSeriesStats({
     query,
-    logstashIndexPattern,
     pipelineId,
     version,
     vertexId,
     timeSeriesIntervalInSeconds,
-    // @ts-ignore not undefined, need to get correct config
-    // https://github.com/elastic/kibana/issues/112146
-    maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
+    maxBucketSize: config.ui.max_bucket_size,
     callWithRequest,
     req,
   });

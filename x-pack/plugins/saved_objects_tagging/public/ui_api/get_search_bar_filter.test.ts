@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { Tag } from '../../common/types';
 import { createTag } from '../../common/test_utils';
@@ -20,10 +20,12 @@ const expectTagOption = (tag: Tag, useName: boolean) => ({
 describe('getSearchBarFilter', () => {
   let cache: ReturnType<typeof tagsCacheMock.create>;
   let getSearchBarFilter: SavedObjectsTaggingApiUi['getSearchBarFilter'];
+  let getTagList: () => Tag[];
 
   beforeEach(() => {
     cache = tagsCacheMock.create();
-    getSearchBarFilter = buildGetSearchBarFilter({ cache });
+    getTagList = () => cache.getState();
+    getSearchBarFilter = buildGetSearchBarFilter({ getTagList });
   });
 
   it('has the correct base configuration', () => {
@@ -57,20 +59,6 @@ describe('getSearchBarFilter', () => {
 
     const fetched = await options();
     expect(fetched).toEqual(tags.map((tag) => expectTagOption(tag, true)));
-  });
-
-  it('sorts the tags by name', async () => {
-    const tag1 = createTag({ id: 'id-1', name: 'aaa' });
-    const tag2 = createTag({ id: 'id-2', name: 'ccc' });
-    const tag3 = createTag({ id: 'id-3', name: 'bbb' });
-
-    cache.getState.mockReturnValue([tag1, tag2, tag3]);
-
-    // EUI types for filters are incomplete
-    const { options } = getSearchBarFilter() as any;
-
-    const fetched = await options();
-    expect(fetched).toEqual([tag1, tag3, tag2].map((tag) => expectTagOption(tag, true)));
   });
 
   it('uses the `useName` option', async () => {

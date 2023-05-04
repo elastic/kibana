@@ -7,10 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { chain } from 'lodash';
 import { findRelationships } from '../lib';
-import { ISavedObjectsManagement } from '../services';
+import type { ISavedObjectsManagement } from '../services';
+import type { v1 } from '../../common';
 
 export const registerRelationshipsRoute = (
   router: IRouter,
@@ -32,7 +33,7 @@ export const registerRelationshipsRoute = (
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const managementService = await managementServicePromise;
-      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
       const { type, id } = req.params;
       const { size, savedObjectTypes: maybeArraySavedObjectTypes } = req.query;
       const savedObjectTypes = Array.isArray(maybeArraySavedObjectTypes)
@@ -48,7 +49,7 @@ export const registerRelationshipsRoute = (
 
       const client = getClient({ includedHiddenTypes });
 
-      const findRelationsResponse = await findRelationships({
+      const findRelationsResponse: v1.RelationshipsResponseHTTP = await findRelationships({
         type,
         id,
         client,

@@ -14,9 +14,9 @@ import { shallow, mount } from 'enzyme';
 
 import { EuiIconTip } from '@elastic/eui';
 
-import { LogRetentionOptions, LogRetentionMessage } from '../';
+import { LogRetentionOptions, LogRetentionMessage } from '..';
 
-import { LogRetentionTooltip } from './';
+import { LogRetentionTooltip } from '.';
 
 describe('LogRetentionTooltip', () => {
   const values = {

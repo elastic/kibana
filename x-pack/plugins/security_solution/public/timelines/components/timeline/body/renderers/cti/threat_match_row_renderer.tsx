@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/types/timeline';
 import { hasThreatMatchValue } from './helpers';
-import { ThreatMatchRows } from './threat_match_rows';
+import { renderThreatMatchRows } from './threat_match_rows';
 
 export const threatMatchRowRenderer: RowRenderer = {
   id: RowRendererId.threat_match,
   isInstance: hasThreatMatchValue,
-  renderRow: ThreatMatchRows,
+  renderRow: renderThreatMatchRows,
 };

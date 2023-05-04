@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { getExecuteConnectorUrl } from '../../../../common/utils/connectors_api';
-import {
-  ConnectorExecutorResult,
-  rewriteResponseToCamelCase,
-} from '../rewrite_response_to_camel_case';
-import { ResilientIncidentTypes, ResilientSeverity } from './types';
+import type { ConnectorExecutorResult } from '../rewrite_response_to_camel_case';
+import { rewriteResponseToCamelCase } from '../rewrite_response_to_camel_case';
+import type { ResilientIncidentTypes, ResilientSeverity } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 

@@ -8,28 +8,34 @@
 import React, { FC } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
+import { pick } from 'lodash';
 
-import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
+import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
+import { mlCapabilities } from './capabilities/check_capabilities';
+import { ML_STORAGE_KEYS } from '../../common/types/storage';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
+
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
-import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { mlUsageCollectionProvider } from './services/usage_collection';
-
 import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
-export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats'> &
+export type MlDependencies = Omit<
+  MlSetupDependencies,
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'
+> &
   MlStartDependencies;
 
 interface AppProps {
@@ -40,6 +46,12 @@ interface AppProps {
 
 const localStorage = new Storage(window.localStorage);
 
+// temporary function to hardcode the serverless state
+// this will be replaced by the true serverless information from kibana
+export function isServerless() {
+  return false;
+}
+
 /**
  * Provides global services available across the entire ML app.
  */
@@ -49,6 +61,8 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     httpService,
     mlApiServices: mlApiServicesProvider(httpService),
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
+    isServerless,
+    mlCapabilities,
   };
 }
 
@@ -68,10 +82,15 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   const pageDeps = {
     history: appMountParams.history,
+    setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     dataViewsContract: deps.data.dataViews,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     redirectToMlAccessDeniedPage,
+    getSavedSearchDeps: {
+      search: deps.data.search,
+      savedObjectsClient: coreStart.savedObjects.client,
+    },
   };
 
   const services = {
@@ -87,7 +106,21 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     dataVisualizer: deps.dataVisualizer,
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
+    dashboard: deps.dashboard,
+    charts: deps.charts,
+    cases: deps.cases,
+    unifiedSearch: deps.unifiedSearch,
+    licensing: deps.licensing,
+    lens: deps.lens,
+    savedObjectsManagement: deps.savedObjectsManagement,
     ...coreStart,
+  };
+
+  const datePickerDeps = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
   };
 
   const I18nContext = coreStart.i18n.Context;
@@ -95,24 +128,24 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   return (
-    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
-     * avoiding full page reload **/
-    <RedirectAppLinks application={coreStart.application}>
-      <ApplicationUsageTrackingProvider>
-        <I18nContext>
-          <KibanaThemeProvider theme$={appMountParams.theme$}>
-            <KibanaContextProvider
-              services={{
-                ...services,
-                mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-              }}
-            >
-              <MlRouter pageDeps={pageDeps} />
-            </KibanaContextProvider>
-          </KibanaThemeProvider>
-        </I18nContext>
-      </ApplicationUsageTrackingProvider>
-    </RedirectAppLinks>
+    <ApplicationUsageTrackingProvider>
+      <I18nContext>
+        <KibanaThemeProvider theme$={appMountParams.theme$}>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+            }}
+          >
+            <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <MlRouter pageDeps={pageDeps} />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </I18nContext>
+    </ApplicationUsageTrackingProvider>
   );
 };
 
@@ -124,7 +157,7 @@ export const renderApp = (
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
     fieldFormats: deps.fieldFormats,
-    autocomplete: deps.data.autocomplete,
+    autocomplete: deps.unifiedSearch.autocomplete,
     config: coreStart.uiSettings!,
     chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,
@@ -137,25 +170,27 @@ export const renderApp = (
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    urlGenerators: deps.share.urlGenerators,
+    dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,
+    share: deps.share,
+    lens: deps.lens,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  const mlLicense = setLicenseCache(deps.licensing, [
-    () =>
-      ReactDOM.render(
-        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
-        appMountParams.element
-      ),
-  ]);
+  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, () =>
+    ReactDOM.render(
+      <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+      appMountParams.element
+    )
+  );
 
   return () => {
     mlLicense.unsubscribe();
     clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
+    deps.data.search.session.clear();
   };
 };

@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 
-import type { ILicense } from '../../../licensing/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { IlmPolicyMigrationStatus } from '../../common/types';
 
 import { ListingProps as Props } from '.';

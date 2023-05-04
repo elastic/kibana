@@ -14,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
-import { AnnotationFlyout } from './index';
+import { AnnotationFlyout } from '.';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 jest.mock('../../../util/dependency_cache', () => ({

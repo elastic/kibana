@@ -6,8 +6,8 @@
  */
 
 import { useState, useCallback } from 'react';
-import { SavedObjectAttributes, SimpleSavedObject } from 'src/core/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { SavedObjectAttributes, SimpleSavedObject } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const useGetSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
   const kibana = useKibana();

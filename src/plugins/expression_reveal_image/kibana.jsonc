@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expression-reveal-image-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds 'revealImage' function and renderer to expressions",
+  "plugin": {
+    "id": "expressionRevealImage",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

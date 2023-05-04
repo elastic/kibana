@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { IRouter } from '@kbn/core/server';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(

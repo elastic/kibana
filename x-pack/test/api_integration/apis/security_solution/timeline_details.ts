@@ -11,7 +11,7 @@ import {
   TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
   TimelineKpiStrategyResponse,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -389,20 +389,6 @@ const EXPECTED_DATA = [
   },
   {
     category: 'source',
-    field: 'source.geo.location.lat',
-    values: ['47.6103'],
-    originalValue: ['47.6103'],
-    isObjectArray: false,
-  },
-  {
-    category: 'source',
-    field: 'source.geo.location.lon',
-    values: ['-122.3341'],
-    originalValue: ['-122.3341'],
-    isObjectArray: false,
-  },
-  {
-    category: 'source',
     field: 'source.geo.region_iso_code',
     values: ['US-WA'],
     originalValue: ['US-WA'],
@@ -689,7 +675,6 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         options: {
           factoryQueryType: TimelineEventsQueries.details,
-          docValueFields: [],
           indexName: INDEX_NAME,
           inspect: false,
           eventId: ID,
@@ -705,7 +690,6 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             factoryQueryType: TimelineEventsQueries.kpi,
-            docValueFields: [],
             indexName: INDEX_NAME,
             inspect: false,
             eventId: ID,

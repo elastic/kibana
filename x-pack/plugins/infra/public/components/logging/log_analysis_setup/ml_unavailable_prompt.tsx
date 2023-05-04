@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
   <EmptyPrompt
@@ -29,7 +29,11 @@ export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
           defaultMessage="Check the {machineLearningAppLink} for more information."
           values={{
             machineLearningAppLink: (
-              <EuiLink href="ml" target="_blank">
+              <EuiLink
+                data-test-subj="infraMlUnavailablePromptMachineLearningAppLink"
+                href="ml"
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.infra.logs.analysisPage.unavailable.mlAppLink"
                   defaultMessage="Machine Learning app"
@@ -41,7 +45,13 @@ export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
       </p>
     }
     actions={
-      <EuiButton target="_blank" href="ml" color="primary" fill>
+      <EuiButton
+        data-test-subj="infraMlUnavailablePromptOpenMachineLearningButton"
+        target="_blank"
+        href="ml"
+        color="primary"
+        fill
+      >
         {i18n.translate('xpack.infra.logs.analysis.mlAppButton', {
           defaultMessage: 'Open Machine Learning',
         })}

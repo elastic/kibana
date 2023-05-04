@@ -7,8 +7,8 @@
 
 import { interval, merge, of, Observable } from 'rxjs';
 import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { Logger } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 
 const FLUSH_MARKER = Symbol('flush');

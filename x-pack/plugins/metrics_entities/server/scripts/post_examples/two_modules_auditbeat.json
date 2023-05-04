@@ -1,4 +1,0 @@
-{
-  "modules": ["host_metrics", "host_entities"],
-  "indices": ["auditbeat-*"]
-}

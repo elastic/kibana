@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
-import { Adapters } from 'src/plugins/inspector/common';
-import { Filter } from '@kbn/es-query';
+import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
-import { unboxExpressionValue } from '../../../../expressions/common';
+import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/common';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
-import { SavedObjectReference } from '../../../../../core/types';
-import { SavedObjectsClientCommon } from '../..';
 
 export interface KibanaContextStartDependencies {
   savedObjectsClient: SavedObjectsClientCommon;
 }
 
 interface Arguments {
-  q?: KibanaQueryOutput | null;
+  q?: KibanaQueryOutput[] | null;
   filters?: KibanaFilter[] | null;
   timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
@@ -62,8 +62,8 @@ export const getKibanaContextFn = (
     args: {
       q: {
         types: ['kibana_query', 'null'],
+        multi: true,
         aliases: ['query', '_'],
-        default: null,
         help: i18n.translate('data.search.functions.kibana_context.q.help', {
           defaultMessage: 'Specify Kibana free form text query',
         }),
@@ -123,11 +123,10 @@ export const getKibanaContextFn = (
       const { savedObjectsClient } = await getStartDependencies(getKibanaRequest);
 
       const timeRange = args.timeRange || input?.timeRange;
-      let queries = mergeQueries(input?.query, args?.q || []);
-      let filters = [
-        ...(input?.filters || []),
-        ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),
-      ];
+      let queries = mergeQueries(input?.query, args?.q?.filter(Boolean) || []);
+      const filterFromArgs = (args?.filters?.map(unboxExpressionValue) || []) as Filter[];
+
+      let filters = [...(input?.filters || [])];
 
       if (args.savedSearchId) {
         const obj = await savedObjectsClient.get('search', args.savedSearchId);
@@ -141,6 +140,14 @@ export const getKibanaContextFn = (
           filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])];
         }
       }
+      const uniqueArgFilters = filterFromArgs.filter(
+        (argF) =>
+          !filters.some((f) => {
+            return isEqual(fromCombinedFilter(f).query, argF.query);
+          })
+      );
+
+      filters = [...filters, ...uniqueArgFilters];
 
       return {
         type: 'kibana_context',

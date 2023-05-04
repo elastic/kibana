@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-export const createAnomalyExplorerChartsServiceMock = () => ({
-  getCombinedJobs: jest.fn(),
-  getAnomalyData: jest.fn(),
-  setTimeRange: jest.fn(),
-  getTimeBounds: jest.fn(),
-  loadDataForCharts$: jest.fn(),
-});
+import type { AnomalyExplorerChartsService } from '../anomaly_explorer_charts_service';
+
+export const createAnomalyExplorerChartsServiceMock = () =>
+  ({
+    getCombinedJobs: jest.fn(),
+    getAnomalyData$: jest.fn(),
+    setTimeRange: jest.fn(),
+    getTimeBounds: jest.fn(),
+    loadDataForCharts$: jest.fn(),
+  } as unknown as jest.Mocked<AnomalyExplorerChartsService>);

@@ -6,7 +6,9 @@
  */
 
 import { Observable } from 'rxjs';
+import { useMemo } from 'react';
 import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 import type { Dictionary } from '../../../../common/types/common';
 import type {
@@ -20,6 +22,7 @@ import type {
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import type { Group } from '../../../../common/types/groups';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
   CategorizationAnalyzer,
@@ -42,6 +45,13 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       path: `${ML_BASE_PATH}/jobs/jobs_summary`,
       method: 'POST',
       body,
+    });
+  },
+
+  jobIdsWithGeo() {
+    return httpService.http<string[]>({
+      path: `${ML_BASE_PATH}/jobs/jobs_with_geo`,
+      method: 'GET',
     });
   },
 
@@ -76,7 +86,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   },
 
   groups() {
-    return httpService.http<any>({
+    return httpService.http<Group[]>({
       path: `${ML_BASE_PATH}/jobs/groups`,
       method: 'GET',
     });
@@ -114,8 +124,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  deleteJobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/delete_jobs`,
       method: 'POST',
@@ -132,8 +142,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  resetJobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  resetJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
     return httpService.http<ResetJobsResponse>({
       path: `${ML_BASE_PATH}/jobs/reset_jobs`,
       method: 'POST',
@@ -358,8 +368,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   ) {
     const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
     return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
+      success: boolean;
     }>({
       path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
       method: 'POST',
@@ -369,10 +378,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
     const body = JSON.stringify({ datafeedId, job, datafeed });
-    return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
-    }>({
+    return httpService.http<unknown[]>({
       path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
       method: 'POST',
       body,
@@ -388,3 +394,17 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 });
+
+export type JobsApiService = ReturnType<typeof jobsApiProvider>;
+
+/**
+ * Hooks for accessing {@link JobsApiService} in React components.
+ */
+export function useJobsApiService(): JobsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => jobsApiProvider(httpService), [httpService]);
+}

@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import {
+import type {
   Artifact,
   ArtifactsClientInterface,
   ListArtifactsProps,
-} from '../../../../../fleet/server';
-import { ListResult } from '../../../../../fleet/common';
+} from '@kbn/fleet-plugin/server';
+import type { ListResult } from '@kbn/fleet-plugin/common';
+import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
 
   createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;
+
+  bulkCreateArtifacts(
+    artifacts: InternalArtifactCompleteSchema[]
+  ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }>;
 
   deleteArtifact(id: string): Promise<void>;
 
@@ -71,6 +75,19 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     });
 
     return createdArtifact;
+  }
+
+  async bulkCreateArtifacts(
+    artifacts: InternalArtifactCompleteSchema[]
+  ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }> {
+    const optionsList = artifacts.map((artifact) => ({
+      content: Buffer.from(artifact.body, 'base64').toString(),
+      identifier: artifact.identifier,
+      type: this.parseArtifactId(artifact.identifier).type,
+    }));
+
+    const createdArtifacts = await this.fleetArtifacts.bulkCreateArtifacts(optionsList);
+    return createdArtifacts;
   }
 
   async deleteArtifact(id: string) {

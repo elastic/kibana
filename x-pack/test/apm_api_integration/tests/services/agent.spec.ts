@@ -11,18 +11,23 @@ import archives from '../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
-  const range = archives[archiveName];
-  const start = encodeURIComponent(range.start);
-  const end = encodeURIComponent(range.end);
+  const { start, end } = archives[archiveName];
 
   registry.when('Agent name when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await supertest.get(
-        `/internal/apm/services/opbeans-node/agent?start=${start}&end=${end}`
-      );
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/services/{serviceName}/agent',
+        params: {
+          path: { serviceName: 'opbeans-node' },
+          query: {
+            start,
+            end,
+          },
+        },
+      });
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({});
@@ -34,9 +39,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the agent name', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services/opbeans-node/agent?start=${start}&end=${end}`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/agent',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
 

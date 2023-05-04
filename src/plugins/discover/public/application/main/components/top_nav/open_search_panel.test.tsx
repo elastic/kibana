@@ -9,39 +9,39 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-const mockCapabilities = jest.fn().mockReturnValue({
-  savedObjectsManagement: {
-    edit: true,
-  },
-});
-
-jest.mock('../../../../kibana_services', () => {
-  return {
-    getServices: () => ({
-      core: { uiSettings: {}, savedObjects: {} },
-      addBasePath: (path: string) => path,
-      capabilities: mockCapabilities(),
-    }),
-  };
-});
-
-import { OpenSearchPanel } from './open_search_panel';
-
 describe('OpenSearchPanel', () => {
-  test('render', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  test('render', async () => {
+    jest.doMock('../../../../hooks/use_discover_services', () => ({
+      useDiscoverServices: jest.fn().mockImplementation(() => ({
+        addBasePath: (path: string) => path,
+        capabilities: { savedObjectsManagement: { edit: true } },
+        savedObjectsFinder: { Finder: jest.fn() },
+        core: {},
+      })),
+    }));
+    const { OpenSearchPanel } = await import('./open_search_panel');
+
     const component = shallow(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );
     expect(component).toMatchSnapshot();
   });
 
-  test('should not render manage searches button without permissions', () => {
-    mockCapabilities.mockReturnValue({
-      savedObjectsManagement: {
-        edit: false,
-        delete: false,
-      },
-    });
+  test('should not render manage searches button without permissions', async () => {
+    jest.doMock('../../../../hooks/use_discover_services', () => ({
+      useDiscoverServices: jest.fn().mockImplementation(() => ({
+        addBasePath: (path: string) => path,
+        capabilities: { savedObjectsManagement: { edit: false, delete: false } },
+        savedObjectsFinder: { Finder: jest.fn() },
+        core: {},
+      })),
+    }));
+    const { OpenSearchPanel } = await import('./open_search_panel');
+
     const component = shallow(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
@@ -28,7 +28,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/internal/osquery/packs/${packId}`), {
+  return useMutation(() => http.delete(`/api/osquery/packs/${packId}`), {
     onError: (error: { body: { error: string; message: string } }) => {
       setErrorToast(error, {
         title: error.body.error,
@@ -36,10 +36,11 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(PACKS_ID);
+      queryClient.invalidateQueries([PACKS_ID]);
       if (withRedirect) {
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
       }
+
       toasts.addSuccess(
         i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
           defaultMessage: 'Successfully deleted pack',

@@ -5,25 +5,35 @@
  * 2.0.
  */
 
-import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability
 // All settings except `transaction_sample_rate` and `transaction_max_spans` are stored as strings (they are stored as float and integer respectively)
 export function convertConfigSettingsToString(
   hit: SearchHit<AgentConfiguration>
-) {
-  const config = hit._source;
+): SearchHit<AgentConfiguration> {
+  const { settings } = hit._source;
 
-  if (config.settings?.transaction_sample_rate) {
-    config.settings.transaction_sample_rate =
-      config.settings.transaction_sample_rate.toString();
-  }
+  const convertedConfigSettings = {
+    ...settings,
+    ...(settings?.transaction_sample_rate
+      ? {
+          transaction_sample_rate: settings.transaction_sample_rate.toString(),
+        }
+      : {}),
+    ...(settings?.transaction_max_spans
+      ? {
+          transaction_max_spans: settings.transaction_max_spans.toString(),
+        }
+      : {}),
+  };
 
-  if (config.settings?.transaction_max_spans) {
-    config.settings.transaction_max_spans =
-      config.settings.transaction_max_spans.toString();
-  }
-
-  return hit;
+  return {
+    ...hit,
+    _source: {
+      ...hit._source,
+      settings: convertedConfigSettings,
+    },
+  };
 }

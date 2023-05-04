@@ -6,32 +6,43 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  Alerts,
+  createCaseAttachAlertAndDeleteAlert,
+  createSecuritySolutionAlerts,
+  getAlertById,
+  getSecuritySolutionAlerts,
+} from '../../../../common/lib/alerts';
+import {
+  createSignalsIndex,
+  deleteSignalsIndex,
+  deleteAllRules,
+} from '../../../../../detection_engine_api_integration/utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
-  deleteCaseAction,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   createCase,
   createComment,
   deleteComment,
-  deleteAllComments,
   superUserSpace1Auth,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadAlerts,
+  obsSec,
   obsSecRead,
   secOnly,
   secOnlyRead,
+  secOnlyReadAlerts,
+  secSolutionOnlyReadNoIndexAlerts,
   superUser,
 } from '../../../../common/lib/authentication/users';
 
@@ -39,6 +50,9 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
+  const log = getService('log');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete_comment', () => {
     afterEach(async () => {
@@ -93,96 +107,178 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 404,
         });
       });
-
-      it('should return a 400 when attempting to delete all comments when passing the `subCaseId` parameter', async () => {
-        const { body } = await supertest
-          .delete(`${CASES_URL}/case-id/comments?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(400);
-        // make sure the failure is because of the subCaseId
-        expect(body.message).to.contain('disabled');
-      });
-
-      it('should return a 400 when attempting to delete a single comment when passing the `subCaseId` parameter', async () => {
-        const { body } = await supertest
-          .delete(`${CASES_URL}/case-id/comments/comment-id?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(400);
-        // make sure the failure is because of the subCaseId
-        expect(body.message).to.contain('disabled');
-      });
     });
 
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub case comments', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
+    describe('alerts', () => {
+      describe('security_solution', () => {
+        let alerts: Alerts = [];
+
+        const getAlerts = async (_alerts: Alerts) => {
+          await es.indices.refresh({ index: _alerts.map((alert) => alert._index) });
+          const updatedAlerts = await getSecuritySolutionAlerts(
+            supertest,
+            alerts.map((alert) => alert._id)
+          );
+
+          return updatedAlerts.hits.hits.map((alert) => ({ ...alert._source }));
+        };
+
+        beforeEach(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await createSignalsIndex(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
+          alerts = [signals.hits.hits[0], signals.hits.hits[1]];
+        });
+
+        afterEach(async () => {
+          await deleteSignalsIndex(supertest, log);
+          await deleteAllRules(supertest, log);
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
+        it('removes a case from the alert schema when deleting an alert attachment', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
+          });
+        });
+
+        it('should remove only one case', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 3,
+            indexOfCaseToDelete: 1,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
+          });
+        });
+
+        it('should delete case ID from the alert schema when the user has write access to the indices and only read access to the siem solution', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
+            expectedHttpCode: 204,
+            deleteCommentAuth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
+
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
+            expectedHttpCode: 204,
+            deleteCommentAuth: { user: obsSec, space: 'space1' },
+          });
+        });
+
+        it('should delete the case ID from the alert schema when the user has read access to the kibana feature but no read access to the ES index', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
+            expectedHttpCode: 204,
+            deleteCommentAuth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
+          });
+        });
       });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
 
-      it('deletes a comment from a sub case', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
-          .delete(
-            `${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}?subCaseId=${
-              caseInfo.subCases![0].id
-            }`
-          )
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(204);
+      describe('observability', () => {
+        const alerts = [
+          { _id: 'NoxgpHkBqbdrfX07MqXV', _index: '.alerts-observability.apm.alerts' },
+          { _id: 'space1alert', _index: '.alerts-observability.apm.alerts' },
+        ];
 
-        const { body } = await supertest.get(
-          `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
-        );
+        const getAlerts = async (_alerts: Alerts) => {
+          await es.indices.refresh({ index: '.alerts-observability.apm.alerts' });
+          const updatedAlerts = await Promise.all(
+            _alerts.map((alert) =>
+              getAlertById({
+                supertest: supertestWithoutAuth,
+                id: alert._id,
+                index: alert._index,
+                auth: { user: superUser, space: 'space1' },
+              })
+            )
+          );
 
-        expect(body.length).to.eql(0);
-      });
+          return updatedAlerts as Array<Record<string, unknown>>;
+        };
 
-      it('deletes all comments from a sub case', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
+        beforeEach(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+        });
 
-        let { body: allComments } = await supertest.get(
-          `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
-        );
-        expect(allComments.length).to.eql(2);
+        afterEach(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+        });
 
-        await supertest
-          .delete(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(204);
+        it('removes a case from the alert schema when deleting an alert attachment', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
+          });
+        });
 
-        ({ body: allComments } = await supertest.get(
-          `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
-        ));
+        it('should remove only one case', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 3,
+            indexOfCaseToDelete: 1,
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
+          });
+        });
 
-        // no comments for the sub case
-        expect(allComments.length).to.eql(0);
+        it('should delete case ID from the alert schema when the user has read access only', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            expectedHttpCode: 204,
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
+            deleteCommentAuth: { user: obsOnlyReadAlerts, space: 'space1' },
+          });
+        });
 
-        ({ body: allComments } = await supertest.get(`${CASES_URL}/${caseInfo.id}/comments`));
-
-        // no comments for the collection
-        expect(allComments.length).to.eql(0);
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+          await createCaseAttachAlertAndDeleteAlert({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indexOfCaseToDelete: 0,
+            expectedHttpCode: 204,
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
+            deleteCommentAuth: { user: obsSec, space: 'space1' },
+          });
+        });
       });
     });
 
     describe('rbac', () => {
-      const supertestWithoutAuth = getService('supertestWithoutAuth');
-
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });
@@ -210,35 +306,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should delete multiple comments from the appropriate owner', async () => {
-        const secCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          { user: secOnly, space: 'space1' }
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
-          params: postCommentUserReq,
-          auth: { user: secOnly, space: 'space1' },
-        });
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
-          params: postCommentUserReq,
-          auth: { user: secOnly, space: 'space1' },
-        });
-
-        await deleteAllComments({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
-          auth: { user: secOnly, space: 'space1' },
-        });
-      });
-
       it('should not delete a comment from a different owner', async () => {
         const secCase = await createCase(
           supertestWithoutAuth,
@@ -258,13 +325,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           commentId: commentResp.comments![0].id,
-          auth: { user: obsOnly, space: 'space1' },
-          expectedHttpCode: 403,
-        });
-
-        await deleteAllComments({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
           auth: { user: obsOnly, space: 'space1' },
           expectedHttpCode: 403,
         });
@@ -295,13 +355,6 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user, space: 'space1' },
             expectedHttpCode: 403,
           });
-
-          await deleteAllComments({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            auth: { user, space: 'space1' },
-            expectedHttpCode: 403,
-          });
         });
       }
 
@@ -327,13 +380,6 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
-
-        await deleteAllComments({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          auth: { user: secOnly, space: 'space2' },
-          expectedHttpCode: 403,
-        });
       });
 
       it('should NOT delete a comment created in space2 by making a request to space1', async () => {
@@ -355,13 +401,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           commentId: commentResp.comments![0].id,
-          auth: { user: secOnly, space: 'space1' },
-          expectedHttpCode: 404,
-        });
-
-        await deleteAllComments({
-          supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
           auth: { user: secOnly, space: 'space1' },
           expectedHttpCode: 404,
         });

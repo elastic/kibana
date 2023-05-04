@@ -8,12 +8,12 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PageTemplate } from './page_template';
 import { License } from '../../components';
 import { GlobalStateContext } from '../contexts/global_state_context';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
@@ -22,7 +22,7 @@ export const LicensePage: React.FC<{}> = () => {
     defaultMessage: 'License',
   });
 
-  const { setIsDisabled } = useContext(MonitoringTimeContainer.Context);
+  const { setIsDisabled } = useMonitoringTimeContainerContext();
   useEffect(() => {
     setIsDisabled(true);
     return () => {

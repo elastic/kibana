@@ -1,0 +1,13 @@
+server:
+  port: ${PORT}
+  host: ${HOST}
+
+kibana:
+  hosts:
+    - ${KIBANA_URL}/api/status/ok
+    - ${KIBANA_URL}/api/status/not-found
+
+logging:
+  root:
+    appenders: ['console']
+    level: 'all'

@@ -11,66 +11,28 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import type { SavedObjectsFindOptions } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import {
+import type {
   PinnedEventSavedObject,
-  PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
   PinnedEvent as PinnedEventResponse,
   PinnedEventWithoutExternalRefs,
 } from '../../../../../common/types/timeline/pinned_event';
-import { FrameworkRequest } from '../../../framework';
+import { PinnedEventSavedObjectRuntimeType } from '../../../../../common/types/timeline/pinned_event';
+import type { FrameworkRequest } from '../../../framework';
 
-import { createTimeline } from '../../saved_object/timelines';
+import { createTimeline } from '../timelines';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';
 import { pinnedEventFieldsMigrator } from './field_migrator';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
-
-export interface PinnedEvent {
-  deletePinnedEventOnTimeline: (
-    request: FrameworkRequest,
-    pinnedEventIds: string[]
-  ) => Promise<void>;
-
-  deleteAllPinnedEventsOnTimeline: (request: FrameworkRequest, timelineId: string) => Promise<void>;
-
-  getPinnedEvent: (
-    request: FrameworkRequest,
-    pinnedEventId: string
-  ) => Promise<PinnedEventSavedObject>;
-
-  getAllPinnedEventsByTimelineId: (
-    request: FrameworkRequest,
-    timelineId: string
-  ) => Promise<PinnedEventSavedObject[]>;
-
-  persistPinnedEventOnTimeline: (
-    request: FrameworkRequest,
-    pinnedEventId: string | null, // pinned event saved object id
-    eventId: string,
-    timelineId: string | null
-  ) => Promise<PinnedEventResponse | null>;
-
-  convertSavedObjectToSavedPinnedEvent: (
-    savedObject: unknown,
-    timelineVersion?: string | undefined | null
-  ) => PinnedEventSavedObject;
-
-  pickSavedPinnedEvent: (
-    pinnedEventId: string | null,
-    savedPinnedEvent: SavedPinnedEvent,
-    userInfo: AuthenticatedUser | null
-  ) => // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any;
-}
 
 export const deletePinnedEventOnTimeline = async (
   request: FrameworkRequest,
   pinnedEventIds: string[]
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   await Promise.all(
     pinnedEventIds.map((pinnedEventId) =>
@@ -83,7 +45,7 @@ export const deleteAllPinnedEventsOnTimeline = async (
   request: FrameworkRequest,
   timelineId: string
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
     search: timelineId,
@@ -97,12 +59,7 @@ export const deleteAllPinnedEventsOnTimeline = async (
   );
 };
 
-export const getPinnedEvent = async (
-  request: FrameworkRequest,
-  pinnedEventId: string
-): Promise<PinnedEventSavedObject> => {
-  return getSavedPinnedEvent(request, pinnedEventId);
-};
+export const PINNED_EVENTS_PER_PAGE = 10000; // overrides the saved object client's FIND_DEFAULT_PER_PAGE (20)
 
 export const getAllPinnedEventsByTimelineId = async (
   request: FrameworkRequest,
@@ -111,6 +68,7 @@ export const getAllPinnedEventsByTimelineId = async (
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
     hasReference: { type: timelineSavedObjectType, id: timelineId },
+    perPage: PINNED_EVENTS_PER_PAGE,
   };
   return getAllSavedPinnedEvents(request, options);
 };
@@ -183,7 +141,7 @@ const getValidTimelineIdAndVersion = async (
     };
   }
 
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   // create timeline because it didn't exist
   const { timeline: timelineResult } = await createTimeline({
@@ -221,7 +179,7 @@ const createPinnedEvent = async ({
   timelineId: string;
   timelineVersion?: string;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const savedPinnedEvent: SavedPinnedEvent = {
     eventId,
@@ -248,23 +206,11 @@ const createPinnedEvent = async ({
   return convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion);
 };
 
-const getSavedPinnedEvent = async (request: FrameworkRequest, pinnedEventId: string) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
-  const savedObject = await savedObjectsClient.get<PinnedEventWithoutExternalRefs>(
-    pinnedEventSavedObjectType,
-    pinnedEventId
-  );
-
-  const populatedPinnedEvent = pinnedEventFieldsMigrator.populateFieldsFromReferences(savedObject);
-
-  return convertSavedObjectToSavedPinnedEvent(populatedPinnedEvent);
-};
-
 const getAllSavedPinnedEvents = async (
   request: FrameworkRequest,
   options: SavedObjectsFindOptions
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<PinnedEventWithoutExternalRefs>(options);
 
   return savedObjects.saved_objects.map((savedObject) => {
@@ -308,19 +254,11 @@ export const convertSavedObjectToSavedPinnedEvent = (
     }, identity)
   );
 
-// we have to use any here because the SavedObjectAttributes interface is like below
-// export interface SavedObjectAttributes {
-//   [key: string]: SavedObjectAttributes | string | number | boolean | null;
-// }
-// then this interface does not allow types without index signature
-// this is limiting us with our type for now so the easy way was to use any
-
 export const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
   savedPinnedEvent: SavedPinnedEvent,
   userInfo: AuthenticatedUser | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+) => {
   const dateNow = new Date().valueOf();
   if (pinnedEventId == null) {
     savedPinnedEvent.created = dateNow;

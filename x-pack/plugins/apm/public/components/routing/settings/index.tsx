@@ -4,146 +4,170 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import * as t from 'io-ts';
-import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
+import { Outlet } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
+import { environmentRt } from '../../../../common/environment_rt';
 import { Breadcrumb } from '../../app/breadcrumb';
+import { AgentConfigurations } from '../../app/settings/agent_configurations';
+import { AgentExplorer } from '../../app/settings/agent_explorer';
+import { AgentKeys } from '../../app/settings/agent_keys';
+import { AnomalyDetection } from '../../app/settings/anomaly_detection';
+import { ApmIndices } from '../../app/settings/apm_indices';
+import { CustomLinkOverview } from '../../app/settings/custom_link';
+import { GeneralSettings } from '../../app/settings/general_settings';
+import { Schema } from '../../app/settings/schema';
 import { SettingsTemplate } from '../templates/settings_template';
-import { AgentConfigurations } from '../../app/Settings/agent_configurations';
 import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
 import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
-import { ApmIndices } from '../../app/Settings/ApmIndices';
-import { CustomLinkOverview } from '../../app/Settings/custom_link';
-import { Schema } from '../../app/Settings/schema';
-import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
-import { AgentKeys } from '../../app/Settings/agent_keys';
 
-function page<TPath extends string>({
-  path,
+function page({
   title,
   tab,
   element,
 }: {
-  path: TPath;
   title: string;
   tab: React.ComponentProps<typeof SettingsTemplate>['selectedTab'];
   element: React.ReactElement;
 }): {
   element: React.ReactElement;
-  path: TPath;
 } {
   return {
-    path,
     element: (
-      <Breadcrumb title={title} href={`/settings${path}`}>
+      <Breadcrumb title={title} href={`/settings/${tab}`}>
         <SettingsTemplate selectedTab={tab}>{element}</SettingsTemplate>
       </Breadcrumb>
     ),
-  } as any;
+  };
 }
 
 export const settings = {
-  path: '/settings',
-  element: (
-    <Breadcrumb
-      href="/settings"
-      title={i18n.translate('xpack.apm.views.listSettings.title', {
-        defaultMessage: 'Settings',
-      })}
-    >
-      <Outlet />
-    </Breadcrumb>
-  ),
-  children: [
-    page({
-      path: '/settings/agent-configuration',
-      tab: 'agent-configurations',
-      title: i18n.translate(
-        'xpack.apm.views.settings.agentConfiguration.title',
-        { defaultMessage: 'Agent Configuration' }
-      ),
-      element: <AgentConfigurations />,
-    }),
-    {
-      ...page({
-        path: '/settings/agent-configuration/create',
+  '/settings': {
+    element: (
+      <Breadcrumb
+        href="/settings"
+        title={i18n.translate('xpack.apm.views.listSettings.title', {
+          defaultMessage: 'Settings',
+        })}
+      >
+        <Outlet />
+      </Breadcrumb>
+    ),
+    children: {
+      '/settings/general-settings': page({
         title: i18n.translate(
-          'xpack.apm.views.settings.createAgentConfiguration.title',
-          { defaultMessage: 'Create Agent Configuration' }
+          'xpack.apm.views.settings.generalSettings.title',
+          { defaultMessage: 'General settings' }
         ),
-        tab: 'agent-configurations',
-        element: <CreateAgentConfigurationRouteView />,
+        element: <GeneralSettings />,
+        tab: 'general-settings',
       }),
-      params: t.partial({
-        query: t.partial({
-          pageStep: agentConfigurationPageStepRt,
-        }),
-      }),
-    },
-    {
-      ...page({
-        path: '/settings/agent-configuration/edit',
+      '/settings/agent-configuration': page({
+        tab: 'agent-configuration',
         title: i18n.translate(
-          'xpack.apm.views.settings.editAgentConfiguration.title',
-          { defaultMessage: 'Edit Agent Configuration' }
+          'xpack.apm.views.settings.agentConfiguration.title',
+          { defaultMessage: 'Agent Configuration' }
         ),
-        tab: 'agent-configurations',
-        element: <EditAgentConfigurationRouteView />,
+        element: <AgentConfigurations />,
       }),
-      params: t.partial({
-        query: t.partial({
-          environment: t.string,
-          name: t.string,
-          pageStep: agentConfigurationPageStepRt,
+      '/settings/agent-configuration/create': {
+        ...page({
+          title: i18n.translate(
+            'xpack.apm.views.settings.createAgentConfiguration.title',
+            { defaultMessage: 'Create Agent Configuration' }
+          ),
+          tab: 'agent-configuration',
+          element: <CreateAgentConfigurationRouteView />,
         }),
+        params: t.partial({
+          query: t.partial({
+            pageStep: agentConfigurationPageStepRt,
+          }),
+        }),
+      },
+      '/settings/agent-configuration/edit': {
+        ...page({
+          title: i18n.translate(
+            'xpack.apm.views.settings.editAgentConfiguration.title',
+            { defaultMessage: 'Edit Agent Configuration' }
+          ),
+          tab: 'agent-configuration',
+          element: <EditAgentConfigurationRouteView />,
+        }),
+        params: t.partial({
+          query: t.partial({
+            environment: t.string,
+            name: t.string,
+            pageStep: agentConfigurationPageStepRt,
+          }),
+        }),
+      },
+      '/settings/apm-indices': page({
+        title: i18n.translate('xpack.apm.views.settings.indices.title', {
+          defaultMessage: 'Indices',
+        }),
+        tab: 'apm-indices',
+        element: <ApmIndices />,
       }),
+      '/settings/custom-links': page({
+        title: i18n.translate('xpack.apm.views.settings.customLink.title', {
+          defaultMessage: 'Custom Links',
+        }),
+        tab: 'custom-links',
+        element: <CustomLinkOverview />,
+      }),
+      '/settings/schema': page({
+        title: i18n.translate('xpack.apm.views.settings.schema.title', {
+          defaultMessage: 'Schema',
+        }),
+        element: <Schema />,
+        tab: 'schema',
+      }),
+      '/settings/anomaly-detection': page({
+        title: i18n.translate(
+          'xpack.apm.views.settings.anomalyDetection.title',
+          {
+            defaultMessage: 'Anomaly detection',
+          }
+        ),
+        element: <AnomalyDetection />,
+        tab: 'anomaly-detection',
+      }),
+      '/settings/agent-keys': page({
+        title: i18n.translate('xpack.apm.views.settings.agentKeys.title', {
+          defaultMessage: 'Agent keys',
+        }),
+        element: <AgentKeys />,
+        tab: 'agent-keys',
+      }),
+      '/settings/agent-explorer': {
+        ...page({
+          title: i18n.translate(
+            'xpack.apm.views.settings.agentExplorer.title',
+            {
+              defaultMessage: 'Agent explorer',
+            }
+          ),
+          element: <AgentExplorer />,
+          tab: 'agent-explorer',
+        }),
+        params: t.type({
+          query: t.intersection([
+            environmentRt,
+            t.type({
+              kuery: t.string,
+              agentLanguage: t.string,
+              serviceName: t.string,
+            }),
+          ]),
+        }),
+      },
+      '/settings': {
+        element: <Redirect to="/settings/general-settings" />,
+      },
     },
-    page({
-      path: '/settings/apm-indices',
-      title: i18n.translate('xpack.apm.views.settings.indices.title', {
-        defaultMessage: 'Indices',
-      }),
-      tab: 'apm-indices',
-      element: <ApmIndices />,
-    }),
-    page({
-      path: '/settings/custom-links',
-      title: i18n.translate('xpack.apm.views.settings.customLink.title', {
-        defaultMessage: 'Custom Links',
-      }),
-      tab: 'custom-links',
-      element: <CustomLinkOverview />,
-    }),
-    page({
-      path: '/settings/schema',
-      title: i18n.translate('xpack.apm.views.settings.schema.title', {
-        defaultMessage: 'Schema',
-      }),
-      element: <Schema />,
-      tab: 'schema',
-    }),
-    page({
-      path: '/settings/anomaly-detection',
-      title: i18n.translate('xpack.apm.views.settings.anomalyDetection.title', {
-        defaultMessage: 'Anomaly detection',
-      }),
-      element: <AnomalyDetection />,
-      tab: 'anomaly-detection',
-    }),
-    page({
-      path: '/settings/agent-keys',
-      title: i18n.translate('xpack.apm.views.settings.agentKeys.title', {
-        defaultMessage: 'Agent keys',
-      }),
-      element: <AgentKeys />,
-      tab: 'agent-keys',
-    }),
-    {
-      path: '/settings',
-      element: <Redirect to="/settings/agent-configuration" />,
-    },
-  ],
-} as const;
+  },
+};

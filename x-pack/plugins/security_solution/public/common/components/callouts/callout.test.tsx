@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { TestProviders } from '../../mock';
 import { CallOut } from './callout';
-import { CallOutMessage } from './callout_types';
+import type { CallOutMessage } from './callout_types';
 
 describe('callout', () => {
   let message: CallOutMessage = {
@@ -75,7 +75,7 @@ describe('callout', () => {
         <CallOut message={message} onDismiss={onDismiss} />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
     expect(onDismiss).toBeCalledWith(message);
   });
 

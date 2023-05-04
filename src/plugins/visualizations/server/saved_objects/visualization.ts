@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
-import { visualizationSavedObjectTypeMigrations } from '../migrations/visualization_saved_object_migrations';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
+import { SavedObjectsType } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 
-export const visualizationSavedObjectType: SavedObjectsType = {
+export const getVisualizationSavedObjectType = (
+  getSearchSourceMigrations: () => MigrateFunctionsObject
+): SavedObjectsType => ({
   name: 'visualization',
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -29,17 +35,26 @@ export const visualizationSavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false, // declared here to prevent indexing root level attribute fields
     properties: {
       description: { type: 'text' },
-      kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false } },
-      },
-      savedSearchRefName: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
-      uiStateJSON: { type: 'text', index: false },
       version: { type: 'integer' },
-      visState: { type: 'text', index: false },
+      kibanaSavedObjectMeta: {
+        properties: {},
+      },
     },
   },
-  migrations: visualizationSavedObjectTypeMigrations,
-};
+  schemas: {
+    '8.8.0': schema.object({
+      title: schema.string(),
+      description: schema.maybe(schema.string()),
+      version: schema.maybe(schema.number()),
+      kibanaSavedObjectMeta: schema.maybe(schema.object({ searchSourceJSON: schema.string() })),
+      uiStateJSON: schema.maybe(schema.string()),
+      visState: schema.maybe(schema.string()),
+      savedSearchRefName: schema.maybe(schema.string()),
+    }),
+  },
+  migrations: () => getAllMigrations(getSearchSourceMigrations()),
+});

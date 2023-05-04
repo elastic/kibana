@@ -7,12 +7,12 @@
 
 import { readFileSync as fsReadFileSync } from 'fs';
 import { resolve as pathResolve, join as pathJoin } from 'path';
-import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 import { ActionsConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
 
@@ -73,12 +73,7 @@ describe('custom_host_settings', () => {
       rejectUnauthorized: true,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration(60000),
-      cleanupFailedExecutionsTask: {
-        enabled: true,
-        cleanupInterval: schema.duration().validate('5m'),
-        idleInterval: schema.duration().validate('1h'),
-        pageSize: 100,
-      },
+      enableFooterInEmail: true,
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

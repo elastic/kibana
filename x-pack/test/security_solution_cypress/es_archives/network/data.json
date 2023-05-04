@@ -1,0 +1,108 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5uwBOpWiDweSth_L",
+    "index": "packetbeat-2022",
+    "source" : {
+      "@timestamp" : "2022-03-11T18:22:09.508Z",
+      "agent" : {
+        "type" : "packetbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "3eh1e15d-c6a2-40ef-b6ba-140aaf35b448",
+        "id" : "dcc3ab1f-763b-42a4-9081-27260a211458",
+        "name" : "test.local"
+      },
+      "server" : {
+        "ip" : "192.170.5.173"
+      },
+      "related" : {
+        "ip" : [
+          "192.170.1.1",
+          "192.170.5.173"
+        ]
+      },
+      "type" : "icmp",
+      "status" : "Error",
+      "event" : {
+        "kind" : "event",
+        "category" : [
+          "network"
+        ],
+        "type" : [
+          "connection"
+        ],
+        "dataset" : "icmp",
+        "start" : "2022-03-11T18:22:09.508Z"
+      },
+      "network" : {
+        "direction" : "ingress",
+        "community_id" : "1:U+JcWjHXJLTB0PG5kPtOYHdyGdk=",
+        "bytes" : 548,
+        "type" : "ipv4",
+        "transport" : "icmp"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      },
+      "source" : {
+        "bytes" : 548,
+        "ip" : "192.170.1.1"
+      },
+      "icmp" : {
+        "version" : 4,
+        "request" : {
+          "message" : "DestinationUnreachable(FragmentationNeeded)",
+          "type" : 3,
+          "code" : 4
+        }
+      },
+      "destination" : {
+        "ip" : "192.170.5.173",
+        "domain": ["aTest","myTest","myTest2"]
+      },
+      "path" : "192.170.5.173",
+      "client" : {
+        "ip" : "192.170.1.1",
+        "bytes" : 548
+      },
+      "host" : {
+        "ip" : [
+          "fe60::aede:48ff:fe00:1122",
+          "fe60::78:e1a8:8109:6c2e",
+          "192.170.5.173",
+          "fe60::bcbb:14ff:fe66:c5f4",
+          "fe60::bcbb:14ff:fe66:c5f4",
+          "fe60::9dbc:5f86:d100:cfda",
+          "fe60::9a6b:22e:593a:e8cd",
+          "fe60::ce81:b1c:bd2c:69e"
+        ],
+        "mac" : [
+          "ac:de:48:00:11:23",
+          "a6:83:e7:ae:5a:b4",
+          "a4:83:e7:ae:5a:a2b",
+          "be:aa:14:66:c5:f4",
+          "be:bb:17:66:c5:f4",
+          "82:70:c6:c3:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:70:c6:c2:3c:00",
+          "82:70:c6:c3:3c:04",
+          "82:70:c6:c4:3c:01"
+        ],
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "name" : "test.local",
+        "id" : "58426D64-73AB-548A-81DA-440AB8F5DDD2"
+      }
+    }
+  }
+}
+

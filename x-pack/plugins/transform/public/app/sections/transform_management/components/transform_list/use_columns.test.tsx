@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useColumns } from './use_columns';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 describe('Transform: Job List Columns', () => {
   test('useColumns()', async () => {
@@ -20,7 +20,7 @@ describe('Transform: Job List Columns', () => {
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
-    expect(columns).toHaveLength(9);
+    expect(columns).toHaveLength(10);
     expect(columns[0].isExpander).toBeTruthy();
     expect(columns[1].name).toBe('ID');
     expect(columns[2].id).toBe('alertRule');
@@ -29,6 +29,7 @@ describe('Transform: Job List Columns', () => {
     expect(columns[5].name).toBe('Status');
     expect(columns[6].name).toBe('Mode');
     expect(columns[7].name).toBe('Progress');
-    expect(columns[8].name).toBe('Actions');
+    expect(columns[8].name).toBe('Health');
+    expect(columns[9].name).toBe('Actions');
   });
 });

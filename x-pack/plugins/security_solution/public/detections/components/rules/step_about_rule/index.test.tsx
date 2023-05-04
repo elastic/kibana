@@ -7,31 +7,28 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { ThemeProvider } from 'styled-components';
 import { act } from '@testing-library/react';
 
-import { stubIndexPattern } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
+import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import {
+import type {
   AboutStepRule,
   RuleStepsFormHooks,
   RuleStep,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType, GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProviders } from '../../../../common/mock';
 
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorLightestShade: '#ece',
-  },
-});
-
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
+jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -44,8 +41,34 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// Failing with rule registry enabled
-describe.skip('StepAboutRuleComponent', () => {
+export const stepDefineStepMLRule: DefineStepRule = {
+  ruleType: 'machine_learning',
+  index: [],
+  queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
+  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip'],
+  anomalyThreshold: 50,
+  threshold: { cardinality: { value: '', field: [] }, value: '100', field: [] },
+  threatIndex: [],
+  threatQueryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
+  requiredFields: [],
+  relatedIntegrations: [],
+  threatMapping: [],
+  timeline: { id: null, title: null },
+  eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
+  groupByFields: ['host.name'],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    unit: 'm',
+    value: 5,
+  },
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
+};
+
+describe('StepAboutRuleComponent', () => {
+  let useGetInstalledJobMock: jest.Mock;
   let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
   const setFormHook = <K extends keyof RuleStepsFormHooks>(
     step: K,
@@ -62,6 +85,9 @@ describe.skip('StepAboutRuleComponent', () => {
         indexPatterns: stubIndexPattern,
       },
     ]);
+    useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
+      jobs: [],
+    }));
   });
 
   it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
@@ -80,16 +106,17 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('is invalid if description is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     await act(async () => {
@@ -108,17 +135,18 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('is invalid if threat match rule and threat_indicator_path is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          defineRuleData={{ ruleType: 'threat_match' } as DefineStepRule}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        defineRuleData={{ ruleType: 'threat_match' } as DefineStepRule}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     await act(async () => {
@@ -137,26 +165,32 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
+
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
 
     await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutThreatIndicatorPath"] input')
-        .first()
-        .simulate('change', { target: { value: '' } });
 
       const result = await formHook();
       expect(result?.isValid).toEqual(true);
@@ -165,16 +199,17 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('is invalid if no "name" is present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     await act(async () => {
@@ -193,16 +228,17 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('is valid if both "name" and "description" are present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -250,16 +286,17 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('it allows user to set the risk score as a number (and not a string)', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -313,16 +350,17 @@ describe.skip('StepAboutRuleComponent', () => {
 
   it('does not modify the provided risk score until the user changes the severity', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -353,5 +391,31 @@ describe.skip('StepAboutRuleComponent', () => {
       expect(result2?.isValid).toEqual(true);
       expect(result2?.data?.riskScore.value).toEqual(47);
     });
+  });
+
+  it('should use index based on ML jobs when editing ML rule', async () => {
+    (useFetchIndex as jest.Mock).mockClear();
+    useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
+      expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip']);
+      return { jobs: [{ results_index_name: 'shared' }] };
+    });
+
+    mount(
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        defineRuleData={stepDefineStepMLRule}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
+
+    const indexNames = ['.ml-anomalies-shared'];
+    expect(useFetchIndex).lastCalledWith(indexNames);
   });
 });

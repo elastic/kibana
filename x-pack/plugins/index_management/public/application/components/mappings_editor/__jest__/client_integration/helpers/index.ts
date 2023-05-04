@@ -12,8 +12,8 @@ import {
   getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 
-export type { TestBed } from '@kbn/test/jest';
-export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { nextTick, getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 export { kibanaVersion } from './setup_environment';
 
 export const componentHelpers = {

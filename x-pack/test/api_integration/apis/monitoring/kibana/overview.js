@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import overviewFixture from './fixtures/overview';
+import overviewFixture from './fixtures/overview.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -33,7 +33,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-
       expect(body).to.eql(overviewFixture);
     });
   });

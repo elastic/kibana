@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DeserializerOrUndefined,
   ListIdOrUndefined,

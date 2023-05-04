@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UiApi } from './';
+import type { UiApi } from '.';
 
 export const getUiApiMock = {
   createStart: (): jest.Mocked<UiApi> => ({

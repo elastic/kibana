@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fleetSetupRouteService } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { fleetSetupRouteService } from '../../../plugins/fleet/common';
 
 export function IngestManagerProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -9,8 +9,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { AlertFlyout } from './alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const readOnlyUserTooltipContent = i18n.translate(
@@ -27,24 +27,36 @@ const readOnlyUserTooltipTitle = i18n.translate(
   }
 );
 
+const inlineLogViewTooltipTitle = i18n.translate(
+  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle',
+  {
+    defaultMessage: 'Inline Log View',
+  }
+);
+
+const inlineLogViewTooltipContent = i18n.translate(
+  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent',
+  {
+    defaultMessage: 'Creating alerts is not supported with inline Log Views',
+  }
+);
+
 export const AlertDropdown = () => {
   const {
     services: {
       application: { capabilities },
+      observability,
     },
   } = useKibanaContextForPlugin();
-  const canCreateAlerts = capabilities?.logs?.save ?? false;
+  const { isPersistedLogView } = useLogViewContext();
+  const readOnly = !capabilities?.logs?.save;
+  const canCreateAlerts = (!readOnly && isPersistedLogView) ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const manageAlertsLinkProps = useLinkProps(
-    {
-      app: 'management',
-      pathname: '/insightsAndAlerting/triggersActions/alerts',
-    },
-    {
-      hrefOnly: true,
-    }
-  );
+
+  const manageRulesLinkProps = observability.useRulesLink({
+    hrefOnly: true,
+  });
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -66,22 +78,34 @@ export const AlertDropdown = () => {
         icon="bell"
         key="createLink"
         onClick={openFlyout}
-        toolTipContent={!canCreateAlerts ? readOnlyUserTooltipContent : undefined}
-        toolTipTitle={!canCreateAlerts ? readOnlyUserTooltipTitle : undefined}
+        toolTipContent={
+          !canCreateAlerts
+            ? readOnly
+              ? readOnlyUserTooltipContent
+              : inlineLogViewTooltipContent
+            : undefined
+        }
+        toolTipTitle={
+          !canCreateAlerts
+            ? readOnly
+              ? readOnlyUserTooltipTitle
+              : inlineLogViewTooltipTitle
+            : undefined
+        }
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"
           defaultMessage="Create rule"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
+      <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageRulesLinkProps}>
         <FormattedMessage
           id="xpack.infra.alerting.logs.manageAlerts"
           defaultMessage="Manage rules"
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageAlertsLinkProps, canCreateAlerts, openFlyout]);
+  }, [canCreateAlerts, openFlyout, readOnly, manageRulesLinkProps]);
 
   return (
     <>
@@ -109,3 +133,7 @@ export const AlertDropdown = () => {
     </>
   );
 };
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default AlertDropdown;

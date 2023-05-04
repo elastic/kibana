@@ -8,12 +8,31 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { setupEnvironment, pageHelpers } from './helpers';
+import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
 import { nestedProcessorsErrorFixture } from './fixtures';
 
 const { setup } = pageHelpers.pipelinesCreate;
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -35,16 +54,12 @@ jest.mock('@elastic/eui', () => {
 describe('<PipelinesCreate />', () => {
   let testBed: PipelinesCreateTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('on component mount', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -73,14 +88,41 @@ describe('<PipelinesCreate />', () => {
       expect(exists('versionField')).toBe(true);
     });
 
+    test('should toggle the _meta field', async () => {
+      const { exists, component, actions } = testBed;
+
+      // Meta editor should be hidden by default
+      expect(exists('metaEditor')).toBe(false);
+
+      await act(async () => {
+        actions.toggleMetaSwitch();
+      });
+
+      component.update();
+
+      expect(exists('metaEditor')).toBe(true);
+    });
+
     test('should show the request flyout', async () => {
       const { actions, find, exists } = testBed;
 
       await actions.clickShowRequestLink();
 
       // Verify request flyout opens
-      expect(exists('requestFlyout')).toBe(true);
-      expect(find('requestFlyout.title').text()).toBe('Request');
+      expect(exists('apiRequestFlyout')).toBe(true);
+      expect(find('apiRequestFlyout.apiRequestFlyoutTitle').text()).toBe('Request');
+    });
+
+    test('should allow to prepopulate the name field', async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup, '?name=test-pipeline');
+      });
+
+      testBed.component.update();
+
+      expect(testBed.exists('nameField.input')).toBe(true);
+      expect(testBed.find('nameField.input').props().disabled).toBe(true);
+      expect(testBed.find('nameField.input').props().value).toBe('test-pipeline');
     });
 
     describe('form validation', () => {
@@ -106,7 +148,7 @@ describe('<PipelinesCreate />', () => {
     describe('form submission', () => {
       beforeEach(async () => {
         await act(async () => {
-          testBed = await setup();
+          testBed = await setup(httpSetup);
         });
 
         testBed.component.update();
@@ -125,31 +167,45 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should send the correct payload', async () => {
-        const { actions } = testBed;
+        const { component, actions } = testBed;
+
+        await act(async () => {
+          actions.toggleMetaSwitch();
+        });
+        component.update();
+        const metaData = {
+          field1: 'hello',
+          field2: 10,
+        };
+        await act(async () => {
+          actions.setMetaField(metaData);
+        });
 
         await actions.clickSubmitButton();
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        const expected = {
-          name: 'my_pipeline',
-          description: 'pipeline description',
-          processors: [],
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          API_BASE_PATH,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: 'my_pipeline',
+              description: 'pipeline description',
+              _meta: metaData,
+              processors: [],
+            }),
+          })
+        );
       });
 
       test('should surface API errors from the request', async () => {
         const { actions, find, exists } = testBed;
 
         const error = {
-          status: 409,
+          statusCode: 409,
           error: 'Conflict',
           message: `There is already a pipeline with name 'my_pipeline'.`,
         };
 
-        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, error);
 
         await actions.clickSubmitButton();
 
@@ -160,7 +216,9 @@ describe('<PipelinesCreate />', () => {
       test('displays nested pipeline errors as a flat list', async () => {
         const { actions, find, exists, component } = testBed;
         httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
-          body: nestedProcessorsErrorFixture,
+          statusCode: 409,
+          message: 'Error',
+          ...nestedProcessorsErrorFixture,
         });
 
         await actions.clickSubmitButton();

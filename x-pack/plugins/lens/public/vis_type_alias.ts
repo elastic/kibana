@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { VisTypeAlias } from 'src/plugins/visualizations/public';
+import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { getBasePath, getEditPath } from '../common/constants';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
@@ -31,12 +31,13 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
       docTypes: ['lens'],
       searchFields: ['title^3'],
       toListItem(savedObject) {
-        const { id, type, attributes } = savedObject;
+        const { id, type, updatedAt, attributes } = savedObject;
         const { title, description } = attributes as { title: string; description?: string };
         return {
           id,
           title,
           description,
+          updatedAt,
           editUrl: getEditPath(id),
           editApp: 'lens',
           icon: 'lensApp',

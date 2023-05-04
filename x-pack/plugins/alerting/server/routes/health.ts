@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ILicenseState } from '../lib';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
@@ -30,13 +30,6 @@ const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
     execution_health: alertingFrameworkHealth.executionHealth,
     read_health: alertingFrameworkHealth.readHealth,
   },
-  alerting_framework_heath: {
-    // Legacy: pre-v8.0 typo
-    _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-    decryption_health: alertingFrameworkHealth.decryptionHealth,
-    execution_health: alertingFrameworkHealth.executionHealth,
-    read_health: alertingFrameworkHealth.readHealth,
-  },
 });
 
 export const healthRoute = (
@@ -52,15 +45,16 @@ export const healthRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
+          const alertingContext = await context.alerting;
           // Verify that user has access to at least one rule type
-          const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+          const ruleTypes = Array.from(await alertingContext.getRulesClient().listAlertTypes());
           if (ruleTypes.length > 0) {
-            const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
+            const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 
             const securityHealth = await getSecurityHealth(
               async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
               async () => encryptedSavedObjects.canEncrypt,
-              context.alerting.areApiKeysEnabled
+              alertingContext.areApiKeysEnabled
             );
 
             const frameworkHealth: AlertingFrameworkHealth = {

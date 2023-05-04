@@ -1,0 +1,30 @@
+{
+  "description": "Security: Linux - Rare and unusual users that are not normally active may indicate unauthorized changes or activity by an unauthorized user which may be credentialed access or lateral movement.",
+  "groups": ["linux", "security"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare usernames.",
+        "function": "rare",
+        "by_field_name": "user.name",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "process.name", "user.name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-linux-v3",
+    "security_app_display_name": "Unusual Linux Username",
+    "managed": true,
+    "job_revision": 4
+  }
+}

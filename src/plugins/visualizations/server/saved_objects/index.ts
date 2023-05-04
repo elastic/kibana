@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { visualizationSavedObjectType } from './visualization';
+export { getVisualizationSavedObjectType } from './visualization';

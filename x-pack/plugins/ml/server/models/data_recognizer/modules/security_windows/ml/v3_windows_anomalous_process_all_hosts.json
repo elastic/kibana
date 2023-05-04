@@ -1,0 +1,29 @@
+{
+  "description": "Security: Windows - Looks for processes that are unusual to all Windows hosts. Such unusual processes may indicate execution of unauthorized software, malware, or persistence mechanisms.",
+  "groups": ["security", "windows"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare process executable values.",
+        "function": "rare",
+        "by_field_name": "process.name",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "process.name", "user.name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-windows-v3",
+    "security_app_display_name": "Anomalous Process for a Windows Population",
+    "managed": true,
+    "job_revision": 4
+  }
+}

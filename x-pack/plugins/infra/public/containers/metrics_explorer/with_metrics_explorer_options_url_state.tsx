@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import React, { useContext, useMemo } from 'react';
+import { set } from '@kbn/safer-lodash-set';
+import React, { useMemo } from 'react';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
   MetricsExplorerOptions,
-  MetricsExplorerOptionsContainer,
+  useMetricsExplorerOptionsContainerContext,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
   metricExplorerOptionsRT,
@@ -30,10 +30,10 @@ export const WithMetricsExplorerOptionsUrlState = () => {
     options,
     chartOptions,
     setChartOptions,
-    currentTimerange,
+    timeRange,
     setOptions: setRawOptions,
     setTimeRange,
-  } = useContext(MetricsExplorerOptionsContainer.Context);
+  } = useMetricsExplorerOptionsContainerContext();
 
   const setOptions = (value: MetricsExplorerOptions) => {
     setRawOptions(value);
@@ -43,9 +43,9 @@ export const WithMetricsExplorerOptionsUrlState = () => {
     () => ({
       options,
       chartOptions,
-      timerange: currentTimerange,
+      timerange: timeRange,
     }),
-    [options, chartOptions, currentTimerange]
+    [options, chartOptions, timeRange]
   );
 
   const handleChange = (newUrlState: MetricsExplorerUrlState | undefined) => {

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   EuiForm,
   EuiButton,
@@ -22,13 +22,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface SelectedOption {
@@ -78,7 +78,7 @@ export const CustomMetricForm = withTheme(
       } else if (aggregation && field) {
         const newMetric: SnapshotCustomMetricInput = {
           type: 'custom',
-          id: uuid.v1(),
+          id: uuidv1(),
           label,
           aggregation,
           field,
@@ -144,6 +144,7 @@ export const CustomMetricForm = withTheme(
         <EuiForm>
           <EuiPopoverTitle>
             <EuiButtonEmpty
+              data-test-subj="infraCustomMetricFormButton"
               iconType="arrowLeft"
               onClick={onCancel}
               color="text"
@@ -157,7 +158,7 @@ export const CustomMetricForm = withTheme(
           </EuiPopoverTitle>
           <div
             style={{
-              padding: theme?.eui.paddingSizes.m,
+              padding: theme?.eui.euiSizeM,
               borderBottom: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
             }}
           >
@@ -171,6 +172,7 @@ export const CustomMetricForm = withTheme(
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiSelect
+                    data-test-subj="infraCustomMetricFormSelect"
                     onChange={handleAggregationChange}
                     value={aggregation}
                     options={aggregationOptions}
@@ -208,6 +210,7 @@ export const CustomMetricForm = withTheme(
               fullWidth
             >
               <EuiFieldText
+                data-test-subj="infraCustomMetricFormFieldText"
                 name="label"
                 placeholder={i18n.translate('xpack.infra.waffle.customMetrics.labelPlaceholder', {
                   defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
@@ -218,11 +221,12 @@ export const CustomMetricForm = withTheme(
               />
             </EuiFormRow>
           </div>
-          <div style={{ padding: theme?.eui.paddingSizes.m, textAlign: 'right' }}>
+          <div style={{ padding: theme?.eui.euiSizeM, textAlign: 'right' }}>
             <EuiButtonEmpty
+              data-test-subj="infraCustomMetricFormCancelButton"
               onClick={onCancel}
               size="s"
-              style={{ paddingRight: theme?.eui.paddingSizes.xl }}
+              style={{ paddingRight: theme?.eui.euiSizeXL }}
             >
               <FormattedMessage
                 id="xpack.infra.waffle.customMetrics.cancelLabel"
@@ -230,6 +234,7 @@ export const CustomMetricForm = withTheme(
               />
             </EuiButtonEmpty>
             <EuiButton
+              data-test-subj="infraCustomMetricFormSaveButton"
               type="submit"
               size="s"
               fill

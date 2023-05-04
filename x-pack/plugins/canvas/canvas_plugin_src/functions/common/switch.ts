@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Observable, combineLatest, defer, of } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -42,15 +41,21 @@ export function switchFn(): ExpressionFunctionDefinition<
         help: argHelp.default!,
       },
     },
-    fn(input, args) {
-      return combineLatest(args.case.map((item) => defer(() => item()))).pipe(
-        concatMap((items) => {
-          const item = items.find(({ matches }) => matches);
-          const item$ = item && of(item.result);
+    fn: function fn(input, args): Observable<unknown> {
+      return defer(() => {
+        if (!args.case.length) {
+          return args.default?.() ?? of(input);
+        }
 
-          return item$ ?? args.default?.() ?? of(input);
-        })
-      );
+        const [head$, ...tail$] = args.case;
+
+        return head$().pipe(
+          defaultIfEmpty(undefined),
+          switchMap((value) =>
+            value?.matches ? of(value.result) : fn(input, { ...args, case: tail$ })
+          )
+        );
+      });
     },
   };
 }

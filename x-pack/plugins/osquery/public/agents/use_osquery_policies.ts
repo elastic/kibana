@@ -6,8 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import { useQuery } from 'react-query';
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -16,7 +15,7 @@ export const useOsqueryPolicies = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
+  return useQuery(
     ['osqueryPolicies'],
     () =>
       http.get<{ items: Array<{ policy_id: string }> }>(
@@ -32,9 +31,5 @@ export const useOsqueryPolicies = () => {
           }),
         }),
     }
-  );
-  return useMemo(
-    () => ({ osqueryPoliciesLoading, osqueryPolicies }),
-    [osqueryPoliciesLoading, osqueryPolicies]
   );
 };

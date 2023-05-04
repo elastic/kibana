@@ -13,7 +13,8 @@ export type {
   FormSchema,
   ValidationError,
   ValidationFunc,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+  ArrayItem,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 export {
   getUseField,
   getFieldValidityAndErrorMessage,
@@ -26,7 +27,7 @@ export {
   useFormContext,
   useFormData,
   VALIDATION_TYPES,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-export { Field, SelectField } from '../../../../src/plugins/es_ui_shared/static/forms/components';
-export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
-export type { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+export { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+export type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';

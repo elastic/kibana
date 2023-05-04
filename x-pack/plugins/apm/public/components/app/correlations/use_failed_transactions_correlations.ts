@@ -8,9 +8,12 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 
-import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   DEBOUNCE_INTERVAL,
@@ -20,8 +23,9 @@ import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsResponse,
 } from '../../../../common/correlations/failed_transactions_correlations/types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 import {
   getInitialResponse,
@@ -33,9 +37,10 @@ import { useFetchParams } from './use_fetch_params';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;
-const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_ERROR_HISTOGRAM = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_FIELD_CANDIDATES = LOADED_ERROR_HISTOGRAM + 0.05;
 const LOADED_DONE = 1;
-const PROGRESS_STEP_P_VALUES = 0.9;
+const PROGRESS_STEP_P_VALUES = 0.9 - LOADED_FIELD_CANDIDATES;
 
 export function useFailedTransactionsCorrelations() {
   const fetchParams = useFetchParams();
@@ -66,8 +71,8 @@ export function useFailedTransactionsCorrelations() {
       failedTransactionsCorrelations: undefined,
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
+      totalDocCount: undefined,
       errorHistogram: undefined,
-      fieldStats: undefined,
     });
     setResponse.flush();
 
@@ -77,50 +82,40 @@ export function useFailedTransactionsCorrelations() {
       // and histogram data for statistically significant results.
       const responseUpdate: FailedTransactionsCorrelationsResponse = {
         ccsWarning: false,
+        fallbackResult: undefined,
       };
 
-      const [overallHistogramResponse, errorHistogramRespone] =
-        await Promise.all([
-          // Initial call to fetch the overall distribution for the log-log plot.
-          callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-              },
+      // Initial call to fetch the overall distribution for the log-log plot.
+      const overallHistogramResponse = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution/transactions',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              chartType:
+                LatencyDistributionChartType.failedTransactionsCorrelations,
             },
-          }),
-          callApmApi({
-            endpoint: 'POST /internal/apm/latency/overall_distribution',
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                termFilters: [
-                  {
-                    fieldName: EVENT_OUTCOME,
-                    fieldValue: EventOutcome.failure,
-                  },
-                ],
-              },
-            },
-          }),
-        ]);
-
-      const { overallHistogram, percentileThresholdValue } =
-        overallHistogramResponse;
-      const { overallHistogram: errorHistogram } = errorHistogramRespone;
-
-      responseUpdate.errorHistogram = errorHistogram;
-      responseUpdate.overallHistogram = overallHistogram;
-      responseUpdate.percentileThresholdValue = percentileThresholdValue;
+          },
+        }
+      );
 
       if (abortCtrl.current.signal.aborted) {
         return;
       }
+
+      const {
+        overallHistogram,
+        totalDocCount,
+        percentileThresholdValue,
+        durationMin,
+        durationMax,
+      } = overallHistogramResponse;
+
+      responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
+      responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       setResponse({
         ...responseUpdate,
@@ -128,13 +123,52 @@ export function useFailedTransactionsCorrelations() {
       });
       setResponse.flush();
 
-      const { fieldCandidates: candidates } = await callApmApi({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
-        signal: abortCtrl.current.signal,
-        params: {
-          query: fetchParams,
-        },
+      const errorHistogramResponse = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution/transactions',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              termFilters: [
+                {
+                  fieldName: EVENT_OUTCOME,
+                  fieldValue: EventOutcome.failure,
+                },
+              ],
+              durationMin,
+              durationMax,
+              chartType:
+                LatencyDistributionChartType.failedTransactionsCorrelations,
+            },
+          },
+        }
+      );
+
+      if (abortCtrl.current.signal.aborted) {
+        return;
+      }
+
+      const { overallHistogram: errorHistogram } = errorHistogramResponse;
+
+      responseUpdate.errorHistogram = errorHistogram;
+
+      setResponse({
+        ...responseUpdate,
+        loaded: LOADED_ERROR_HISTOGRAM,
       });
+      setResponse.flush();
+
+      const { fieldCandidates: candidates } = await callApmApi(
+        'GET /internal/apm/correlations/field_candidates/transactions',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            query: fetchParams,
+          },
+        }
+      );
 
       if (abortCtrl.current.signal.aborted) {
         return;
@@ -149,6 +183,7 @@ export function useFailedTransactionsCorrelations() {
 
       const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
         [];
+      let fallbackResult: FailedTransactionsCorrelation | undefined;
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
       let chunkLoadCounter = 0;
@@ -156,13 +191,20 @@ export function useFailedTransactionsCorrelations() {
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const pValues = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/p_values',
-          signal: abortCtrl.current.signal,
-          params: {
-            body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
-          },
-        });
+        const pValues = await callApmApi(
+          'POST /internal/apm/correlations/p_values/transactions',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                fieldCandidates: fieldCandidatesChunk,
+                durationMin,
+                durationMax,
+              },
+            },
+          }
+        );
 
         if (pValues.failedTransactionsCorrelations.length > 0) {
           pValues.failedTransactionsCorrelations.forEach((d) => {
@@ -175,6 +217,21 @@ export function useFailedTransactionsCorrelations() {
             getFailedTransactionsCorrelationsSortedByScore([
               ...failedTransactionsCorrelations,
             ]);
+        } else {
+          // If there's no significant correlations found and there's a fallback result
+          // Update the highest ranked/scored fall back result
+          if (pValues.fallbackResult) {
+            if (!fallbackResult) {
+              fallbackResult = pValues.fallbackResult;
+            } else {
+              if (
+                pValues.fallbackResult.normalizedScore >
+                fallbackResult.normalizedScore
+              ) {
+                fallbackResult = pValues.fallbackResult;
+              }
+            }
+          }
         }
 
         chunkLoadCounter++;
@@ -191,21 +248,12 @@ export function useFailedTransactionsCorrelations() {
         }
       }
 
-      setResponse.flush();
-
-      const { stats } = await callApmApi({
-        endpoint: 'POST /internal/apm/correlations/field_stats',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            fieldsToSample: [...fieldsToSample],
-          },
-        },
+      setResponse({
+        ...responseUpdate,
+        fallbackResult,
+        loaded: LOADED_DONE,
+        isRunning: false,
       });
-
-      responseUpdate.fieldStats = stats;
-      setResponse({ ...responseUpdate, loaded: LOADED_DONE, isRunning: false });
       setResponse.flush();
     } catch (e) {
       if (!abortCtrl.current.signal.aborted) {
@@ -242,7 +290,7 @@ export function useFailedTransactionsCorrelations() {
   const progress = useMemo(
     () => ({
       error,
-      loaded,
+      loaded: Math.round(loaded * 100) / 100,
       isRunning,
     }),
     [error, loaded, isRunning]

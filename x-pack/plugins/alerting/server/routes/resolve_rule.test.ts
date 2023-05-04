@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import { resolveRuleRoute } from './resolve_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -16,7 +16,7 @@ import { ResolvedSanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -44,6 +44,7 @@ describe('resolveRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     consumer: 'bar',
@@ -63,6 +64,7 @@ describe('resolveRuleRoute', () => {
     },
     outcome: 'aliasMatch',
     alias_target_id: '2',
+    revision: 0,
   };
 
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
@@ -87,6 +89,7 @@ describe('resolveRuleRoute', () => {
     created_at: mockedRule.createdAt,
     updated_at: mockedRule.updatedAt,
     id: mockedRule.id,
+    revision: mockedRule.revision,
     execution_status: {
       status: mockedRule.executionStatus.status,
       last_execution_date: mockedRule.executionStatus.lastExecutionDate,
@@ -97,6 +100,7 @@ describe('resolveRuleRoute', () => {
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
+        uuid: mockedRule.actions[0].uuid,
       },
     ],
     outcome: 'aliasMatch',

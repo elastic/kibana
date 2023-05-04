@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonProps,
-  EuiLink,
-  EuiLinkProps,
-  EuiToolTip,
-  PropsForAnchor,
-  PropsForButton,
-} from '@elastic/eui';
+import type { EuiButtonProps, EuiLinkProps, PropsForAnchor, PropsForButton } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation';
 import * as i18n from './translations';
@@ -25,10 +18,13 @@ export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = n
     : (arg: T) => Promise<void> | void;
 }
 
-export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+export const LinkButton: React.FC<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>> =
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
+  ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
@@ -36,29 +32,29 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
 export interface CaseDetailsLinkProps {
   children?: React.ReactNode;
   detailName: string;
-  subCaseId?: string;
   title?: string;
 }
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
   children,
   detailName,
-  subCaseId,
   title,
 }) => {
   const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
   const navigateToCaseViewClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToCaseView({ detailName, subCaseId });
+      navigateToCaseView({ detailName });
     },
-    [navigateToCaseView, detailName, subCaseId]
+    [navigateToCaseView, detailName]
   );
 
   return (
     <LinkAnchor
       onClick={navigateToCaseViewClick}
-      href={getCaseViewUrl({ detailName, subCaseId })}
+      href={getCaseViewUrl({ detailName })}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
@@ -77,6 +73,8 @@ export interface ConfigureCaseButtonProps {
   titleTooltip: string;
 }
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
   isDisabled,
   label,

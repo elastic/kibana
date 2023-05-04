@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   SavedObjectsImportResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
@@ -16,7 +16,7 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 export interface FailedImport {
   obj: Omit<SavedObjectsImportFailure, 'error'>;

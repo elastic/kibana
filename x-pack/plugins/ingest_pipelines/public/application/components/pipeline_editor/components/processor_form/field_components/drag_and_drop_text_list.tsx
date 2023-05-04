@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, memo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,7 +18,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiFieldText,
-  EuiIconTip,
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
@@ -75,8 +74,8 @@ function DragAndDropTextListComponent({
   textDeserializer,
   textSerializer,
 }: Props): JSX.Element {
-  const [droppableId] = useState(() => uuid.v4());
-  const [firstItemId] = useState(() => uuid.v4());
+  const [droppableId] = useState(() => uuidv4());
+  const [firstItemId] = useState(() => uuidv4());
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {
@@ -87,7 +86,12 @@ function DragAndDropTextListComponent({
     [onMove]
   );
   return (
-    <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
+    <EuiFormRow
+      isInvalid={typeof error === 'string'}
+      error={error}
+      fullWidth
+      data-test-subj="droppableList"
+    >
       <>
         {/* Label and help text. Also wire up the htmlFor so the label points to the first text field. */}
         <EuiFlexGroup
@@ -128,15 +132,14 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup
                           className="pipelineProcessorsEditor__form__dragAndDropList__item"
                           justifyContent="center"
-                          alignItems="center"
                           gutterSize="none"
                         >
                           <EuiFlexItem grow={false}>
-                            <div {...provided.dragHandleProps}>
-                              <EuiIcon
-                                className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
-                                type="grab"
-                              />
+                            <div
+                              {...provided.dragHandleProps}
+                              className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
+                            >
+                              <EuiIcon type="grab" />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>
@@ -155,30 +158,17 @@ function DragAndDropTextListComponent({
                                 const { isInvalid, errorMessage } =
                                   getFieldValidityAndErrorMessage(field);
                                 return (
-                                  <EuiFlexGroup gutterSize="none" alignItems="center">
-                                    <EuiFlexItem>
-                                      <EuiFieldText
-                                        id={idx === 0 ? firstItemId : undefined}
-                                        isInvalid={isInvalid}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        compressed
-                                        fullWidth
-                                      />
-                                    </EuiFlexItem>
-                                    {typeof errorMessage === 'string' && (
-                                      <EuiFlexItem grow={false}>
-                                        <div className="pipelineProcessorsEditor__form__dragAndDropList__errorIcon">
-                                          <EuiIconTip
-                                            aria-label={errorMessage}
-                                            content={errorMessage}
-                                            type="alert"
-                                            color="danger"
-                                          />
-                                        </div>
-                                      </EuiFlexItem>
-                                    )}
-                                  </EuiFlexGroup>
+                                  <EuiFormRow isInvalid={isInvalid} error={errorMessage} fullWidth>
+                                    <EuiFieldText
+                                      data-test-subj={`input-${idx}`}
+                                      id={idx === 0 ? firstItemId : undefined}
+                                      isInvalid={isInvalid}
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      compressed
+                                      fullWidth
+                                    />
+                                  </EuiFormRow>
                                 );
                               }}
                             </UseField>
@@ -191,6 +181,7 @@ function DragAndDropTextListComponent({
                                 iconType="minusInCircle"
                                 color="danger"
                                 onClick={() => onRemove(item.id)}
+                                size="s"
                               />
                             ) : (
                               // Render a no-op placeholder button
@@ -208,7 +199,7 @@ function DragAndDropTextListComponent({
               })}
             </EuiDroppable>
           </EuiDragDropContext>
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd}>
+          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

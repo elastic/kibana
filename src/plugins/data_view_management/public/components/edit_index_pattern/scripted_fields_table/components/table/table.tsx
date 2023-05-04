@@ -11,11 +11,11 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from '../../../../../../../data/public';
 
 interface TableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   items: ScriptedFieldItem[];
   editField: (field: ScriptedFieldItem) => void;
   deleteField: (field: ScriptedFieldItem) => void;

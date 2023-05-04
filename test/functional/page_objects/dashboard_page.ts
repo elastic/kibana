@@ -9,7 +9,10 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+import { CommonPageObject } from './common_page';
 
 interface SaveDashboardOptions {
   /**
@@ -24,12 +27,12 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
-  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
@@ -41,14 +44,26 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
 
-  async initTests({
-    kibanaIndex = 'test/functional/fixtures/es_archiver/dashboard/legacy',
-    defaultIndex = 'logstash-*',
-  } = {}) {
+  private readonly logstashIndex = this.config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
+    ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
+    : 'test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
+
+  async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    await this.esArchiver.load(kibanaIndex);
+    await this.kibanaServer.savedObjects.cleanStandardList();
+    await this.kibanaServer.importExport.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
+  }
+
+  public async expectAppStateRemovedFromURL() {
+    this.retry.try(async () => {
+      const url = await this.browser.getCurrentUrl();
+      expect(url.indexOf('_a')).to.be(-1);
+    });
   }
 
   public async preserveCrossAppState() {
@@ -60,7 +75,7 @@ export class DashboardPageObject extends FtrService {
   public async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
     await this.testSubjects.click('dashboardFullScreenMode');
-    await this.testSubjects.exists('exitFullScreenModeLogo');
+    await this.testSubjects.exists('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -84,15 +99,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   public async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   public async clickExitFullScreenLogoButton() {
-    await this.testSubjects.click('exitFullScreenModeLogo');
+    await this.testSubjects.click('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -134,10 +149,10 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
-    this.log.debug(`Click Unsaved Changes Discard for `, title);
-    await this.testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
-    await this.testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+  public async clickUnsavedChangesDiscard(testSubject: string, confirmDiscard = true) {
+    this.log.debug(`Click Unsaved Changes Discard for `, testSubject);
+    await this.testSubjects.existOrFail(testSubject);
+    await this.testSubjects.click(testSubject);
     if (confirmDiscard) {
       await this.common.clickConfirmOnModal();
     } else {
@@ -164,10 +179,14 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
   }
 
-  public async expectOnDashboard(dashboardTitle: string) {
+  public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
-      'last breadcrumb to have dashboard title',
-      async () => (await this.globalNav.getLastBreadcrumb()) === dashboardTitle
+      `last breadcrumb to have dashboard title: ${expectedTitle}`,
+      async () => {
+        const actualTitle = await this.globalNav.getLastBreadcrumb();
+        this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
+        return actualTitle === expectedTitle;
+      }
     );
   }
 
@@ -266,6 +285,13 @@ export class DashboardPageObject extends FtrService {
     return await this.testSubjects.exists('dashboardEditMode');
   }
 
+  public async ensureDashboardIsInEditMode() {
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+    }
+    await this.waitForRenderComplete();
+  }
+
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
     if (await this.getIsInViewMode()) return;
@@ -283,11 +309,48 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
+  public async clickDiscardChanges(accept = true) {
+    await this.retry.try(async () => {
+      await this.expectDiscardChangesButtonEnabled();
+      this.log.debug('clickDiscardChanges');
+      await this.testSubjects.click('dashboardDiscardChangesMenuItem');
+    });
+    await this.common.expectConfirmModalOpenState(true);
+    if (accept) {
+      await this.common.clickConfirmOnModal();
+    }
+  }
+
   public async clickQuickSave() {
     await this.retry.try(async () => {
       await this.expectQuickSaveButtonEnabled();
       this.log.debug('clickQuickSave');
       await this.testSubjects.click('dashboardQuickSaveMenuItem');
+    });
+  }
+
+  public async clearUnsavedChanges() {
+    this.log.debug('clearUnsavedChanges');
+    let switchMode = false;
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+      switchMode = true;
+    }
+    await this.retry.try(async () => {
+      // avoid flaky test by surrounding in retry
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.clickQuickSave();
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.click('toastCloseButton');
+    });
+    if (switchMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+  }
+
+  public async expectUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
     });
   }
 
@@ -301,7 +364,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -323,7 +386,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
       await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -335,23 +398,23 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('createDashboardPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getCreateDashboardPromptExists() {
-    return await this.testSubjects.exists('createDashboardPromptButton');
+    return this.testSubjects.exists('emptyListPrompt');
   }
 
-  public async isOptionsOpen() {
-    this.log.debug('isOptionsOpen');
-    return await this.testSubjects.exists('dashboardOptionsMenu');
+  public async isSettingsOpen() {
+    this.log.debug('isSettingsOpen');
+    return await this.testSubjects.exists('dashboardSettingsMenu');
   }
 
-  public async openOptions() {
-    this.log.debug('openOptions');
-    const isOpen = await this.isOptionsOpen();
+  public async openSettingsFlyout() {
+    this.log.debug('openSettingsFlyout');
+    const isOpen = await this.isSettingsOpen();
     if (!isOpen) {
-      return await this.testSubjects.click('dashboardOptionsButton');
+      return await this.testSubjects.click('dashboardSettingsButton');
     }
   }
 
@@ -363,37 +426,34 @@ export class DashboardPageObject extends FtrService {
     await this.gotoDashboardLandingPage();
   }
 
-  public async isMarginsOn() {
-    this.log.debug('isMarginsOn');
-    await this.openOptions();
-    return await this.testSubjects.getAttribute('dashboardMarginsCheckbox', 'checked');
-  }
-
-  public async useMargins(on = true) {
-    await this.openOptions();
-    const isMarginsOn = await this.isMarginsOn();
-    if (isMarginsOn !== 'on') {
-      return await this.testSubjects.click('dashboardMarginsCheckbox');
-    }
-  }
-
-  public async isColorSyncOn() {
-    this.log.debug('isColorSyncOn');
-    await this.openOptions();
-    return await this.testSubjects.getAttribute('dashboardSyncColorsCheckbox', 'checked');
-  }
-
-  public async useColorSync(on = true) {
-    await this.openOptions();
-    const isColorSyncOn = await this.isColorSyncOn();
-    if (isColorSyncOn !== 'on') {
-      return await this.testSubjects.click('dashboardSyncColorsCheckbox');
-    }
-  }
-
   public async gotoDashboardEditMode(dashboardName: string) {
     await this.loadSavedDashboard(dashboardName);
     await this.switchToEditMode();
+  }
+
+  public async gotoDashboardURL({
+    id,
+    args,
+    editMode,
+  }: {
+    id?: string;
+    editMode?: boolean;
+    args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
+  } = {}) {
+    let dashboardLocation = `/create`;
+    if (id) {
+      const edit = editMode ? `?_a=(viewMode:edit)` : '';
+      dashboardLocation = `/view/${id}${edit}`;
+    }
+    this.common.navigateToActualUrl('dashboard', dashboardLocation, args);
+  }
+
+  public async gotoDashboardListingURL({
+    args,
+  }: {
+    args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
+  } = {}) {
+    await this.common.navigateToActualUrl('dashboard', '/list', args);
   }
 
   public async renameDashboard(dashboardName: string) {
@@ -530,11 +590,13 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
+    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
-  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  /**
+   * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
+   */
   public async getVisibilityOfPanelTitles() {
     this.log.debug('in getVisibilityOfPanels');
     // only works if the dashboard is in view mode
@@ -543,9 +605,12 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
     const visibilities: boolean[] = [];
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
-    for (const titleObject of titleObjects) {
-      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+    const panels = await this.getDashboardPanels();
+    for (const panel of panels) {
+      const exists = await this.find.descendantExistsByCssSelector(
+        'figcaption.embPanel__header',
+        panel
+      );
       visibilities.push(exists);
     }
     // return to edit mode if a switch to view mode above was necessary
@@ -641,6 +706,11 @@ export class DashboardPageObject extends FtrService {
     await this.renderable.waitForRender(parseInt(count));
   }
 
+  public async verifyNoRenderErrors() {
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    expect(errorEmbeddables.length).to.be(0);
+  }
+
   public async getSharedContainerData() {
     this.log.debug('getSharedContainerData');
     const sharedContainer = await this.find.byCssSelector('[data-shared-items-container]');
@@ -665,12 +735,6 @@ export class DashboardPageObject extends FtrService {
       });
   }
 
-  public async checkHideTitle() {
-    this.log.debug('ensure that you can click on hide title checkbox');
-    await this.openOptions();
-    return await this.testSubjects.click('dashboardPanelTitlesCheckbox');
-  }
-
   public async expectMissingSaveOption() {
     await this.testSubjects.missingOrFail('dashboardSaveMenuItem');
   }
@@ -682,12 +746,30 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail('dashboardQuickSaveMenuItem');
   }
 
+  public async expectDiscardChangesButtonEnabled() {
+    this.log.debug('expectDiscardChangesButtonEnabled');
+    const quickSaveButton = await this.testSubjects.find('dashboardDiscardChangesMenuItem');
+    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    if (isDisabled) {
+      throw new Error('Discard changes button disabled');
+    }
+  }
+
   public async expectQuickSaveButtonEnabled() {
     this.log.debug('expectQuickSaveButtonEnabled');
     const quickSaveButton = await this.testSubjects.find('dashboardQuickSaveMenuItem');
     const isDisabled = await quickSaveButton.getAttribute('disabled');
     if (isDisabled) {
       throw new Error('Quick save button disabled');
+    }
+  }
+
+  public async expectQuickSaveButtonDisabled() {
+    this.log.debug('expectQuickSaveButtonDisabled');
+    const quickSaveButton = await this.testSubjects.find('dashboardQuickSaveMenuItem');
+    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    if (!isDisabled) {
+      throw new Error('Quick save button not disabled');
     }
   }
 
@@ -720,5 +802,16 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
+  }
+
+  public async isNotificationExists(panelIndex = 0) {
+    const panel = (await this.getDashboardPanels())[panelIndex];
+    try {
+      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
+      return Boolean(notification);
+    } catch (e) {
+      // if not found then this is false
+      return false;
+    }
   }
 }

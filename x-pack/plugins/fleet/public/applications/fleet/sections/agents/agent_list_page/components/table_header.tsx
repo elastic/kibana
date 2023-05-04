@@ -6,58 +6,65 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, SimplifiedAgentStatus } from '../../../../types';
 
 import { AgentStatusBar } from './status_bar';
-import { AgentBulkActions } from './bulk_actions';
+import { AgentsSelectionStatus } from './agents_selection_status';
 import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
-
-export type SelectionMode = 'manual' | 'query';
+import type { SelectionMode } from './types';
 
 export const AgentTableHeader: React.FunctionComponent<{
   agentStatus?: { [k in SimplifiedAgentStatus]: number };
   showInactive: boolean;
   totalAgents: number;
-  totalInactiveAgents: number;
   selectableAgents: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
-  currentQuery: string;
   selectedAgents: Agent[];
   setSelectedAgents: (agents: Agent[]) => void;
-  refreshAgents: () => void;
+  clearFilters: () => void;
+  isUsingFilter: boolean;
 }> = ({
   agentStatus,
   totalAgents,
-  totalInactiveAgents,
   selectableAgents,
   selectionMode,
   setSelectionMode,
-  currentQuery,
   selectedAgents,
   setSelectedAgents,
-  refreshAgents,
   showInactive,
+  clearFilters,
+  isUsingFilter,
 }) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <AgentBulkActions
-            totalAgents={totalAgents}
-            totalInactiveAgents={totalInactiveAgents}
-            selectableAgents={selectableAgents}
-            selectionMode={selectionMode}
-            setSelectionMode={setSelectionMode}
-            currentQuery={currentQuery}
-            selectedAgents={selectedAgents}
-            setSelectedAgents={setSelectedAgents}
-            refreshAgents={refreshAgents}
-          />
-        </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AgentsSelectionStatus
+              totalAgents={totalAgents}
+              selectableAgents={selectableAgents}
+              selectionMode={selectionMode}
+              setSelectionMode={setSelectionMode}
+              selectedAgents={selectedAgents}
+              setSelectedAgents={setSelectedAgents}
+            />
+          </EuiFlexItem>
+          {isUsingFilter ? (
+            <EuiFlexItem grow={false}>
+              <EuiLink onClick={() => clearFilters()}>
+                <FormattedMessage
+                  id="xpack.fleet.agentList.header.clearFiltersLinkText"
+                  defaultMessage="Clear filters"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {agentStatus && (
             <AgentStatusBadges showInactive={showInactive} agentStatus={agentStatus} />

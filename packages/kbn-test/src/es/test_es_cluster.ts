@@ -9,16 +9,18 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
-// @ts-expect-error in js
+import { v4 as uuidv4 } from 'uuid';
+import globby from 'globby';
+import createArchiver from 'archiver';
+import Fs from 'fs';
+import { pipeline } from 'stream/promises';
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
-import { convertToKibanaClient } from './client_to_kibana_client';
-
-import { KIBANA_ROOT } from '../';
 
 interface TestEsClusterNodesOptions {
   name: string;
@@ -33,27 +35,14 @@ interface TestEsClusterNodesOptions {
   dataArchive?: string;
 }
 
-interface Node {
-  installSource: (opts: Record<string, unknown>) => Promise<{ installPath: string }>;
-  installSnapshot: (opts: Record<string, unknown>) => Promise<{ installPath: string }>;
-  extractDataDirectory: (
-    installPath: string,
-    archivePath: string,
-    extractDirName?: string
-  ) => Promise<{ insallPath: string }>;
-  start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
-  stop: () => Promise<void>;
-}
-
 export interface ICluster {
   ports: number[];
-  nodes: Node[];
+  nodes: Cluster[];
   getStartTimeout: () => number;
   start: () => Promise<void>;
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
   getClient: () => Client;
-  getKibanaEsClient: () => KibanaClient;
   getHostUrls: () => string[];
 }
 
@@ -90,6 +79,7 @@ export interface CreateTestEsClusterOptions {
    */
   license?: 'basic' | 'gold' | 'trial'; // | 'oss'
   log: ToolingLog;
+  writeLogsToPath?: string;
   /**
    * Node-specific configuration if you wish to run a multi-node
    * cluster. One node will be added for each item in the array.
@@ -139,7 +129,20 @@ export interface CreateTestEsClusterOptions {
    * }
    */
   port?: number;
+  /**
+   * Should this ES cluster use SSL?
+   */
   ssl?: boolean;
+  /**
+   * Explicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'
+   * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
+   */
+  transportPort?: number | string;
+  /**
+   * Report to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing
+   * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
+   */
+  onEarlyExit?: (msg: string) => void;
 }
 
 export function createTestEsCluster<
@@ -150,7 +153,8 @@ export function createTestEsCluster<
     password = 'changeme',
     license = 'basic',
     log,
-    basePath = Path.resolve(KIBANA_ROOT, '.es'),
+    writeLogsToPath,
+    basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
     nodes = [{ name: 'node-01' }],
@@ -158,13 +162,15 @@ export function createTestEsCluster<
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    transportPort,
+    onEarlyExit,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
-    `transport.port=${esTestConfig.getTransportPort()}`,
+    `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
@@ -176,7 +182,7 @@ export function createTestEsCluster<
   const config = {
     version: esTestConfig.getVersion(),
     installPath: Path.resolve(basePath, clusterName),
-    sourcePath: Path.resolve(KIBANA_ROOT, '../elasticsearch'),
+    sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     password,
     license,
     basePath,
@@ -185,7 +191,7 @@ export function createTestEsCluster<
 
   return new (class TestCluster {
     ports: number[] = [];
-    nodes: Node[] = [];
+    nodes: Cluster[] = [];
 
     constructor() {
       for (let i = 0; i < nodes.length; i++) {
@@ -247,9 +253,12 @@ export function createTestEsCluster<
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
             // If we have multiple nodes, we shouldn't try setting up the native realm
-            // right away, or ES will complain as the cluster isn't ready. So we only
+            // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
+            onEarlyExit,
+            writeLogsToPath,
           });
         });
       }
@@ -261,22 +270,89 @@ export function createTestEsCluster<
     }
 
     async stop() {
-      const nodeStopPromises = [];
-      for (let i = 0; i < this.nodes.length; i++) {
-        nodeStopPromises.push(async () => {
+      const results = await Promise.allSettled(
+        this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
-          return await this.nodes[i].stop();
-        });
-      }
-      await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
+          await node.stop();
+        })
+      );
 
       log.info('[es] stopped');
+      await this.captureDebugFiles();
+      this.handleStopResults(results);
+    }
+
+    private handleStopResults(results: Array<PromiseSettledResult<void>>) {
+      const failures = results.flatMap((r) => (r.status === 'rejected' ? r : []));
+      if (failures.length === 1) {
+        throw failures[0].reason;
+      }
+      if (failures.length > 1) {
+        throw new Error(
+          `${failures.length} nodes failed:\n - ${failures
+            .map((f) => f.reason.message)
+            .join('\n - ')}`
+        );
+      }
+    }
+
+    async captureDebugFiles() {
+      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+        cwd: config.installPath,
+        absolute: true,
+      });
+
+      if (!debugFiles.length) {
+        log.info('[es] no debug files found, assuming es did not write any');
+        return;
+      }
+
+      const uuid = uuidv4();
+      const debugPath = Path.resolve(REPO_ROOT, `data/es_debug_${uuid}.tar.gz`);
+      log.error(`[es] debug files found, archiving install to ${debugPath}`);
+      const archiver = createArchiver('tar', { gzip: true });
+      const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
+
+      const archiveDirname = `es_debug_${uuid}`;
+      for (const name of Fs.readdirSync(config.installPath)) {
+        if (name === 'modules' || name === 'jdk') {
+          // drop these large and unnecessary directories
+          continue;
+        }
+
+        const src = Path.resolve(config.installPath, name);
+        const dest = Path.join(archiveDirname, name);
+        const stat = Fs.statSync(src);
+        if (stat.isDirectory()) {
+          archiver.directory(src, dest);
+        } else {
+          archiver.file(src, { name: dest });
+        }
+      }
+
+      archiver.finalize();
+      await promise;
+
+      // cleanup the captured debug files
+      for (const path of debugFiles) {
+        Fs.rmSync(path, { force: true });
+      }
     }
 
     async cleanup() {
-      await this.stop();
+      log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
+      const results = await Promise.allSettled(
+        this.nodes.map(async (node, i) => {
+          log.info(`[es] stopping node ${nodes[i].name}`);
+          // we are deleting this install, stop ES more aggressively
+          await node.kill();
+        })
+      );
+
+      await this.captureDebugFiles();
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
+      this.handleStopResults(results);
     }
 
     /**
@@ -287,13 +363,6 @@ export function createTestEsCluster<
         node: this.getHostUrls()[0],
         Connection: HttpConnection,
       });
-    }
-
-    /**
-     * Returns an ES Client to the configured cluster
-     */
-    getKibanaEsClient(): KibanaClient {
-      return convertToKibanaClient(this.getClient());
     }
 
     getUrl() {

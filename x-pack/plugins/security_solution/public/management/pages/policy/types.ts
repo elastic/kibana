@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { ILicense } from '../../../../../licensing/common/types';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import type {
   AppLocation,
   Immutable,
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
-  PostTrustedAppCreateResponse,
   MaybeImmutable,
-  GetTrustedAppsListResponse,
-  TrustedApp,
-  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
-import { AsyncResourceState } from '../../state';
-import { ImmutableMiddlewareAPI } from '../../../common/store';
-import { AppAction } from '../../../common/store/actions';
-import { TrustedAppsService } from '../trusted_apps/service';
+import type { ServerApiError } from '../../../common/types';
+import type { ImmutableMiddlewareAPI } from '../../../common/store';
+import type { AppAction } from '../../../common/store/actions';
 
 export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
@@ -44,7 +38,6 @@ export type MiddlewareRunner = (
 
 export interface MiddlewareRunnerContext {
   coreStart: CoreStart;
-  trustedAppsService: TrustedAppsService;
 }
 
 export type PolicyDetailsSelector<T = unknown> = (
@@ -65,7 +58,10 @@ export interface PolicyDetailsState {
   /** artifacts namespace inside policy details page */
   artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
+  agentStatusSummary?: Omit<
+    GetAgentStatusResponse['results'],
+    'updating' | 'inactive' | 'unenrolled'
+  >;
   /** Status of an update to the policy  */
   updateStatus?: {
     success: boolean;
@@ -75,49 +71,17 @@ export interface PolicyDetailsState {
   license?: ILicense;
 }
 
-export interface PolicyAssignedTrustedApps {
-  location: PolicyDetailsArtifactsPageListLocationParams;
-  artifacts: GetTrustedAppsListResponse;
-}
-
-export interface PolicyRemoveTrustedApps {
-  artifacts: TrustedApp[];
-  response: PutTrustedAppUpdateResponse[];
-}
-
 /**
  * Policy artifacts store state
  */
 export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
-  /** A list of artifacts can be linked to the policy  */
-  assignableList: AsyncResourceState<GetTrustedAppsListResponse>;
-  /** Represents if available trusted apps entries exist, regardless of whether the list is showing results  */
-  assignableListEntriesExist: AsyncResourceState<boolean>;
-  /** A list of trusted apps going to be updated  */
-  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
-  /** Represents if there is any trusted app existing  */
-  doesAnyTrustedAppExists: AsyncResourceState<GetTrustedAppsListResponse>;
-  /** Represents if there is any trusted app existing assigned to the policy (without filters)  */
-  hasTrustedApps: AsyncResourceState<GetTrustedAppsListResponse>;
-  /** List of artifacts currently assigned to the policy (body specific and global) */
-  assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
-  /** A list of all available polices */
-  policies: AsyncResourceState<GetPolicyListResponse>;
-  /** list of artifacts to remove. Holds the ids that were removed and the API response */
-  removeList: AsyncResourceState<PolicyRemoveTrustedApps>;
-}
-
-export enum OS {
-  windows = 'windows',
-  mac = 'mac',
-  linux = 'linux',
 }
 
 export interface PolicyDetailsArtifactsPageListLocationParams {
-  page_index: number;
-  page_size: number;
+  page: number;
+  pageSize: number;
   filter: string;
 }
 

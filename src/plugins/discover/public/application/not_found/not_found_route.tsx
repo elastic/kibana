@@ -10,20 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
-import { toMountPoint, wrapWithTheme } from '../../../../kibana_react/public';
-import { DiscoverServices } from '../../build_services';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { getUrlTracker } from '../../kibana_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-export interface NotFoundRouteProps {
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
-}
 let bannerId: string | undefined;
 
-export function NotFoundRoute(props: NotFoundRouteProps) {
-  const { services } = props;
+export function NotFoundRoute() {
+  const services = useDiscoverServices();
   const { urlForwarding, core, history } = services;
   const currentLocation = history().location.pathname;
 

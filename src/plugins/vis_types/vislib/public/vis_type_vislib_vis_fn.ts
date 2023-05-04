@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
@@ -17,12 +17,12 @@ import { BasicVislibParams, VislibChartType } from './types';
 export const vislibVisName = 'vislib_vis';
 
 interface Arguments {
-  type: Exclude<VislibChartType, 'pie'>;
+  type: VislibChartType;
   visConfig: string;
 }
 
 export interface VislibRenderValue {
-  visType: Exclude<VislibChartType, 'pie'>;
+  visType: VislibChartType;
   visData: unknown;
   visConfig: BasicVislibParams;
 }
@@ -54,7 +54,7 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
     },
   },
   fn(context, args, handlers) {
-    const visType = args.type as Exclude<VislibChartType, 'pie'>;
+    const visType = args.type as VislibChartType;
     const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
     const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
 

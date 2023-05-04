@@ -4,7 +4,7 @@ set -e
 ./check_env_variables.sh
 
 # Regenerates the index.ts that contains all of the timelines that are read in from json
-PREPACKAGED_TIMELINES_INDEX=../rules/prepackaged_timelines/index.ndjson
+PREPACKAGED_TIMELINES_INDEX=../prebuilt_rules/content/prepackaged_timelines/index.ndjson
 
 # Clear existing content
 echo "" > ${PREPACKAGED_TIMELINES_INDEX}
@@ -20,7 +20,7 @@ echo "/*
 // Do not hand edit. Run that script to regenerate package information instead
 " > ${PREPACKAGED_TIMELINES_INDEX}
 
-for f in ../rules/prepackaged_timelines/*.json ; do
+for f in ../prebuilt_rules/content/prepackaged_timelines/*.json ; do
   echo "converting $f"
   sed ':a;N;$!ba;s/\n/ /g' $f >> ${PREPACKAGED_TIMELINES_INDEX}
 done

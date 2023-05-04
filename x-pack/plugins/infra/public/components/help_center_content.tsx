@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface HelpCenterContentProps {
   feedbackLink: string;

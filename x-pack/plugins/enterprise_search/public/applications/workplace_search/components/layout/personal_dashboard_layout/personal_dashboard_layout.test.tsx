@@ -14,11 +14,10 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
+import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '..';
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome } from '../../../../shared/kibana_chrome';
 import { Loading } from '../../../../shared/loading';
-
-import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '../index';
 
 import { PersonalDashboardLayout } from './personal_dashboard_layout';
 

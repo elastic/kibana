@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { takeEvery } from 'redux-saga/effects';
 import { format, parse } from 'url';
 import { GraphState, GraphStoreDependencies } from './store';
@@ -23,8 +23,9 @@ import { matchesOne } from './helpers';
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
 export const loadTemplates = actionCreator<UrlTemplate[]>('LOAD_TEMPLATES');
-export const saveTemplate =
-  actionCreator<{ index: number; template: UrlTemplate }>('SAVE_TEMPLATE');
+export const saveTemplate = actionCreator<{ index: number; template: UrlTemplate }>(
+  'SAVE_TEMPLATE'
+);
 export const removeTemplate = actionCreator<UrlTemplate>('REMOVE_TEMPLATE');
 
 export type UrlTemplatesState = UrlTemplate[];
@@ -81,7 +82,19 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
       const customTemplates = templates.filter((template) => !template.isDefault);
       return [...customTemplates, generateDefaultTemplate(datasource, addBasePath)];
     })
-    .case(loadTemplates, (_currentTemplates, newTemplates) => newTemplates)
+    .case(loadTemplates, (_currentTemplates, newTemplates) => {
+      return newTemplates.map((template) =>
+        template.isDefault && template.url?.startsWith('/app/discover') // as in saved objects of sample data sets
+          ? {
+              ...template,
+              url: addBasePath(template.url).replace(
+                encodeURIComponent(urlTemplatePlaceholder),
+                urlTemplatePlaceholder
+              ),
+            }
+          : template
+      );
+    })
     .case(saveTemplate, (templates, { index: indexToUpdate, template: updatedTemplate }) => {
       // set default flag to false as soon as template is overwritten.
       const newTemplate = { ...updatedTemplate, isDefault: false };

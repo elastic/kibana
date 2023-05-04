@@ -25,8 +25,8 @@ const tar = require('tar');
 const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
-const OUTPUT_SERVER_DIRECTORY = resolve('server', 'utils', 'beat_schema');
-const BEATS_VERSION = '7.14.0';
+const OUTPUT_SERVER_DIRECTORY = resolve('../timelines', 'server', 'utils', 'beat_schema');
+const BEATS_VERSION = '8.0.0-rc1';
 
 const beats = [
   {
@@ -211,20 +211,12 @@ async function main() {
     }
     console.log('done for', myBeat.index);
   }
-  const body = `/*
-      * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-      * or more contributor license agreements. Licensed under the Elastic License
-      * 2.0; you may not use this file except in compliance with the Elastic License
-      * 2.0.
-      */
 
-      import { BeatFields } from '../../../common/search_strategy/index_fields';
-
-      /* eslint-disable @typescript-eslint/naming-convention */
-      export const fieldsBeat: BeatFields =
-        ${JSON.stringify(beatFields, null, 2)};
-  `;
-  fs.writeFileSync(`${OUTPUT_SERVER_DIRECTORY}/fields.ts`, body, 'utf-8');
+  fs.writeFileSync(
+    `${OUTPUT_SERVER_DIRECTORY}/fields.json`,
+    JSON.stringify({ fieldsBeat: beatFields }),
+    'utf-8'
+  );
 }
 
 if (require.main === module) {

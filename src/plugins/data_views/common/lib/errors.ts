@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable */
-
-import { KbnError } from '../../../kibana_utils/common';
+import { KbnError } from '@kbn/kibana-utils-plugin/common';
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned
@@ -17,14 +15,6 @@ export class DataViewMissingIndices extends KbnError {
   constructor(message: string) {
     const defaultMessage = "Data view's title does not match any indices";
 
-    super(
-      message && message.length ? `No matching indices found: ${message}` : defaultMessage
-    );
+    super(message && message.length ? `No matching indices found: ${message}` : defaultMessage);
   }
 }
-
-/**
- * @deprecated Use DataViewMissingIndices. All index pattern interfaces were renamed.
- */
-
-export class IndexPatternMissingIndices extends DataViewMissingIndices {}

@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
-import { IndexPattern, IndexPatternField } from '../../../../data/public';
-import { ElasticSearchHit } from '../../types';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataTableRecord } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 
 export interface FieldMapping {
@@ -27,14 +26,14 @@ export type DocViewFilterFn = (
 ) => void;
 
 export interface DocViewRenderProps {
-  hit: ElasticSearchHit;
-  indexPattern: IndexPattern;
+  hit: DataTableRecord;
+  dataView: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
-export type DocViewerComponent = ComponentType<DocViewRenderProps>;
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps
@@ -42,7 +41,7 @@ export type DocViewRenderFn = (
 
 export interface BaseDocViewInput {
   order: number;
-  shouldShow?: (hit: ElasticSearchHit) => boolean;
+  shouldShow?: (hit: DataTableRecord) => boolean;
   title: string;
 }
 
@@ -78,7 +77,7 @@ export interface FieldRecordLegacy {
     field: string;
     scripted: boolean;
     fieldType?: string;
-    fieldMapping?: IndexPatternField;
+    fieldMapping?: DataViewField;
   };
   value: {
     formattedValue: string;

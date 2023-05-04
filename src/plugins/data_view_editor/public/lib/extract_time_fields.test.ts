@@ -7,20 +7,20 @@
  */
 
 import { extractTimeFields } from './extract_time_fields';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {
     const fields = [
       { type: 'text', name: 'name' },
       { type: 'text', name: 'name' },
-    ] as IndexPatternField[];
+    ] as DataViewField[];
 
     expect(extractTimeFields(fields)).toEqual([]);
   });
 
   it('should add extra options', () => {
-    const fields = [{ type: 'date', name: '@timestamp' }] as IndexPatternField[];
+    const fields = [{ type: 'date', name: '@timestamp' }] as DataViewField[];
 
     // const extractedFields = extractTimeFields(fields);
     expect(extractTimeFields(fields)).toEqual([

@@ -1,0 +1,637 @@
+{
+  "id": "@kbn/core-logging-common-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.getLoggerContext",
+        "type": "Function",
+        "tags": [],
+        "label": "getLoggerContext",
+        "description": [
+          "\nHelper method that joins separate string context parts into single context string.\nIn case joined context is an empty string, `root` context name is returned."
+        ],
+        "signature": [
+          "(contextParts: string[]) => string"
+        ],
+        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.getLoggerContext.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "contextParts",
+            "description": [
+              "List of the context parts (e.g. ['parent', 'child']."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Joined context string (e.g. 'parent.child')."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.getParentLoggerContext",
+        "type": "Function",
+        "tags": [],
+        "label": "getParentLoggerContext",
+        "description": [
+          "\nHelper method that returns parent context for the specified one."
+        ],
+        "signature": [
+          "(context: string) => string"
+        ],
+        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.getParentLoggerContext.$1",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "Context to find parent for."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Name of the parent context or `root` if the context is the top level one."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.Conversion",
+        "type": "Interface",
+        "tags": [],
+        "label": "Conversion",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.Conversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.Conversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ", highlight: boolean) => string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.Conversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.Conversion.convert.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "highlight",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.Conversion.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "((input: string) => void) | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.Conversion.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.CONTEXT_SEPARATOR",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_SEPARATOR",
+        "description": [
+          "\nSeparator string that used within nested context name (eg. plugins.pid)."
+        ],
+        "signature": [
+          "\".\""
+        ],
+        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.DEFAULT_APPENDER_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_APPENDER_NAME",
+        "description": [
+          "\nName of the appender that is always presented and used by `root` logger by default."
+        ],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.ROOT_CONTEXT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ROOT_CONTEXT_NAME",
+        "description": [
+          "\nName of the `root` context that always exists and sits at the top of logger hierarchy."
+        ],
+        "signature": [
+          "\"root\""
+        ],
+        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.DateConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "DateConversion",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.DateConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.DateConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ", highlight: boolean, ...matched: any[]) => string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.DateConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.DateConversion.convert.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "highlight",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.DateConversion.convert.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "matched",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.DateConversion.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(rawString: string) => void"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.DateConversion.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "rawString",
+                "description": [],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.LevelConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "LevelConversion",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.LevelConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.LevelConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ") => string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.LevelConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.LoggerConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "LoggerConversion",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.LoggerConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.LoggerConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ") => string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.LoggerConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.MessageConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "MessageConversion",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.MessageConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.MessageConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ") => string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.MessageConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.MetaConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "MetaConversion",
+        "description": [],
+        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.MetaConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.MetaConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ") => string"
+            ],
+            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.MetaConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

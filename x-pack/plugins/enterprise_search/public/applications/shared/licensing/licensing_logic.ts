@@ -8,7 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 import { Observable, Subscription } from 'rxjs';
 
-import { ILicense } from '../../../../../licensing/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 
 interface LicensingValues {
   license: ILicense | null;

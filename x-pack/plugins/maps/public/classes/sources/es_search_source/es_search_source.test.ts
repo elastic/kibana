@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
+import { APP_ID, ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
-import { SearchSource } from 'src/plugins/data/public';
+import { SearchSource } from '@kbn/data-plugin/public';
 
 import { loadIndexSettings } from './util/load_index_settings';
 
@@ -37,6 +37,7 @@ describe('ESSearchSource', () => {
       const mockIndexPatternService = {
         get() {
           return {
+            getIndexPattern: () => 'foobar-title-*',
             title: 'foobar-title-*',
             fields: {
               getByName() {
@@ -87,7 +88,7 @@ describe('ESSearchSource', () => {
         });
       });
 
-      const searchFilters: VectorSourceRequestMeta = {
+      const requestMeta: VectorSourceRequestMeta = {
         isReadOnly: false,
         filters: [],
         zoom: 0,
@@ -106,17 +107,49 @@ describe('ESSearchSource', () => {
         applyGlobalTime: true,
         applyForceRefresh: true,
         isForceRefresh: false,
+        isFeatureEditorOpenForLayer: false,
+        executionContext: { name: APP_ID },
       };
 
-      it('Should only include required props', async () => {
+      it('should include required props', async () => {
         const esSearchSource = new ESSearchSource({
           geoField: geoFieldName,
           indexPatternId: 'ipId',
         });
-        const tileUrl = await esSearchSource.getTileUrl(searchFilters, '1234');
-        expect(tileUrl).toBe(
-          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))&token=1234`
+        const tileUrl = await esSearchSource.getTileUrl(requestMeta, '1234', false, 5);
+
+        const urlParts = tileUrl.split('?');
+        expect(urlParts[0]).toEqual('rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf');
+
+        const params = new URLSearchParams(urlParts[1]);
+        expect(Object.fromEntries(params)).toEqual({
+          buffer: '5',
+          geometryFieldName: 'bar',
+          hasLabels: 'false',
+          index: 'foobar-title-*',
+          requestBody:
+            "(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'1'%3A('0'%3Asize%2C'1'%3A1000)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A'tooltipField%3A%20foobar'))%2C'6'%3A('0'%3AfieldsFromSource%2C'1'%3A!(_id))%2C'7'%3A('0'%3Asource%2C'1'%3A!f)%2C'8'%3A('0'%3Afields%2C'1'%3A!(tooltipField%2CstyleField))))",
+          token: '1234',
+        });
+      });
+
+      it('should include executionContextId when provided', async () => {
+        const esSearchSource = new ESSearchSource({
+          geoField: geoFieldName,
+          indexPatternId: 'ipId',
+        });
+        const tileUrl = await esSearchSource.getTileUrl(
+          {
+            ...requestMeta,
+            executionContext: { name: APP_ID, id: 'map1234' },
+          },
+          '1234',
+          false,
+          5
         );
+        const urlParts = tileUrl.split('?');
+        const params = new URLSearchParams(urlParts[1]);
+        expect(Object.fromEntries(params).executionContextId).toEqual('map1234');
       });
     });
   });
@@ -146,14 +179,21 @@ describe('ESSearchSource', () => {
       });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
+    it('blended layer', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.CLUSTERS,
+      });
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(
+        'Joins are not supported when scaling by clusters'
+      );
+    });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by vector tiles'
-      );
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
   });
 });

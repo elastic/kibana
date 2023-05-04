@@ -15,7 +15,7 @@ import { EMSFileSource, getSourceTitle } from './ems_file_source';
 // @ts-ignore
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { EMSBoundariesLayerIcon } from '../../layers/wizards/icons/ems_boundaries_layer_icon';
 
 function getDescription() {
@@ -29,6 +29,8 @@ function getDescription() {
 }
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.EMS_BOUNDARIES,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();

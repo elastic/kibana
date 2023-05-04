@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index as IndexInterface } from '../../../index_management/common/types';
+import { Index as IndexInterface } from '@kbn/index-management-plugin/common/types';
 
 export type Phase = keyof Phases;
 
@@ -14,6 +14,8 @@ export type PhaseWithAllocation = 'warm' | 'cold';
 export type PhaseWithTiming = keyof Omit<Phases, 'hot'>;
 
 export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
+
+export type PhaseWithDownsample = 'hot' | 'warm' | 'cold';
 
 export interface SerializedPolicy {
   name: string;
@@ -80,6 +82,7 @@ export interface RolloverAction {
   max_age?: string;
   max_docs?: number;
   max_primary_shard_size?: string;
+  max_primary_shard_docs?: number;
   /**
    * @deprecated This will be removed in versions 8+ of the stack
    */
@@ -92,6 +95,7 @@ export interface SerializedHotPhase extends SerializedPhase {
     forcemerge?: ForcemergeAction;
     readonly?: {};
     shrink?: ShrinkAction;
+    downsample?: DownsampleAction;
 
     set_priority?: {
       priority: number | null;
@@ -109,6 +113,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
     readonly?: {};
+    downsample?: DownsampleAction;
     set_priority?: {
       priority: number | null;
     };
@@ -120,6 +125,7 @@ export interface SerializedColdPhase extends SerializedPhase {
   actions: {
     freeze?: {};
     readonly?: {};
+    downsample?: DownsampleAction;
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;
@@ -177,6 +183,10 @@ export interface ForcemergeAction {
   index_codec?: 'best_compression';
 }
 
+export interface DownsampleAction {
+  fixed_interval: string;
+}
+
 export interface LegacyPolicy {
   name: string;
   phases: {
@@ -229,7 +239,6 @@ export interface IndexLifecyclePolicy {
   step?: string;
   step_info?: {
     reason?: string;
-    stack_trace?: string;
     type?: string;
     message?: string;
   };

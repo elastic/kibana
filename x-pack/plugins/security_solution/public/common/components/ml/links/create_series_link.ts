@@ -6,7 +6,7 @@
  */
 
 import { createEntitiesFromScore } from '../score/create_entities_from_score';
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 
 export const createSeriesLink = (score: Anomaly, startDate: number, endDate: number): string => {
   const startDateIso = new Date(startDate).toISOString();

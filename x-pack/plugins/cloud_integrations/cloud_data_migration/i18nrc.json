@@ -1,0 +1,7 @@
+{
+  "prefix": "cloudDataMigration",
+  "paths": {
+    "cloudDataMigration": "."
+  },
+  "translations": []
+}

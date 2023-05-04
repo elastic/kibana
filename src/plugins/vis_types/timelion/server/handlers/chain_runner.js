@@ -10,10 +10,10 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
-import parseSheet from './lib/parse_sheet.js';
-import repositionArguments from './lib/reposition_arguments.js';
-import indexArguments from './lib/index_arguments.js';
-import validateTime from './lib/validate_time.js';
+import parseSheet from './lib/parse_sheet';
+import repositionArguments from './lib/reposition_arguments';
+import indexArguments from './lib/index_arguments';
+import validateTime from './lib/validate_time';
 import { calculateInterval } from '../../common/lib';
 
 export default function chainRunner(tlConfig) {

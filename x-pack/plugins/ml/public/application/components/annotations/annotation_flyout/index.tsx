@@ -29,6 +29,7 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
@@ -46,8 +47,6 @@ import {
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
-import { PartitionFieldsType } from '../../../../../common/types/anomalies';
-import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 interface ViewableDetector {
@@ -78,6 +77,8 @@ interface State {
 }
 
 export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
+  private deletionInProgress = false;
+
   public state: State = {
     isDeleteModalVisible: false,
     applyAnnotationToSeries: true,
@@ -121,12 +122,16 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public deleteHandler = async () => {
+    if (this.deletionInProgress) return;
+
     const { annotationState } = this.state;
     const toastNotifications = getToastNotifications();
 
     if (annotationState === null || annotationState._id === undefined) {
       return;
     }
+
+    this.deletionInProgress = true;
 
     try {
       await ml.annotations.deleteAnnotation(annotationState._id);
@@ -153,6 +158,8 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     }
 
     this.closeDeleteModal();
+
+    this.deletionInProgress = false;
 
     const { annotationUpdatesService } = this.props;
 
@@ -211,7 +218,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
       chartDetails.entityData.entities.forEach((entity: Entity) => {
         const { fieldName, fieldValue } = entity;
-        const fieldType = entity.fieldType as PartitionFieldsType;
+        const fieldType = entity.fieldType as MlPartitionFieldsType;
         annotation[getAnnotationFieldName(fieldType)] = fieldName;
         annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
       });
@@ -220,7 +227,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     // if unchecked, remove all the partitions before indexing
     if (!this.state.applyAnnotationToSeries) {
       delete annotation.detector_index;
-      PARTITION_FIELDS.forEach((fieldType) => {
+      ML_PARTITION_FIELDS.forEach((fieldType) => {
         delete annotation[getAnnotationFieldName(fieldType)];
         delete annotation[getAnnotationFieldValue(fieldType)];
       });
@@ -431,6 +438,7 @@ export const AnnotationFlyout: FC<any> = (props) => {
 
   const cancelEditingHandler = useCallback(() => {
     annotationUpdatesService.setValue(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (annotationProp === undefined || annotationProp === null) {

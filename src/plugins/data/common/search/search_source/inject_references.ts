@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from 'src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SerializedSearchSourceFields } from './types';
 
 export const injectReferences = (
@@ -24,6 +25,13 @@ export const injectReferences = (
     searchSourceReturnFields.index = reference.id;
     // @ts-ignore
     delete searchSourceReturnFields.indexRefName;
+  }
+
+  if (searchSourceFields.index && typeof searchSourceFields.index !== 'string') {
+    searchSourceFields.index = DataViewPersistableStateService.inject(
+      searchSourceFields.index,
+      references
+    );
   }
 
   if (searchSourceReturnFields.filter && Array.isArray(searchSourceReturnFields.filter)) {

@@ -5,429 +5,335 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
-import { StatefulEventsViewer } from '../../../common/components/events_viewer';
+import type { FC } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
+import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
-  displayErrorToast,
-  displaySuccessToast,
-  useStateToaster,
-} from '../../../common/components/toasters';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import { useKibana } from '../../../common/lib/kibana';
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import * as i18nCommon from '../../../common/translations';
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useLicense } from '../../../common/hooks/use_license';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
-import { updateAlertStatusAction } from './actions';
-import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
+import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
-  alertsDefaultModel,
-  buildAlertStatusFilter,
-  requiredFieldsForActions,
-} from './default_config';
+  useSessionView,
+  useSessionViewNavigation,
+} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import { inputsSelectors } from '../../../common/store';
+import { combineQueries } from '../../../common/lib/kuery';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useKibana } from '../../../common/lib/kibana';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { getColumns } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
+import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
+import type { State } from '../../../common/store';
 import * as i18n from './translations';
-import {
-  SetEventsDeletedProps,
-  SetEventsLoadingProps,
-  UpdateAlertsStatusCallback,
-  UpdateAlertsStatusProps,
-} from './types';
+import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 
-interface OwnProps {
-  defaultFilters?: Filter[];
-  from: string;
-  hasIndexMaintenance: boolean;
-  hasIndexWrite: boolean;
-  loading: boolean;
-  onRuleChange?: () => void;
-  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
-  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
-  showBuildingBlockAlerts: boolean;
-  showOnlyThreatIndicatorAlerts: boolean;
-  timelineId: TimelineIdLiteral;
-  to: string;
-  filterGroup?: Status;
+const { updateIsLoading, updateTotalCount } = dataTableActions;
+
+// Highlight rows with building block alerts
+const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
+
+const storage = new Storage(localStorage);
+
+interface GridContainerProps {
+  hideLastPage: boolean;
 }
 
-type AlertsTableComponentProps = OwnProps & PropsFromRedux;
+export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
 
-export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  clearSelected,
-  defaultFilters,
-  from,
-  globalFilters,
-  globalQuery,
-  hasIndexMaintenance,
-  hasIndexWrite,
-  isSelectAllChecked,
-  loading,
-  loadingEventIds,
+const EuiDataGridContainer = styled.div<GridContainerProps>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => {
+        return `${hideLastPage ? 'display:none' : ''}`;
+      }};
+    }
+  }
+  div .euiDataGridRowCell__contentByHeight {
+    height: auto;
+    align-self: center;
+  }
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
+    flex-grow: 0;
+    width: 100%;
+  }
+  div .siemEventsTable__trSupplement--summary {
+    display: block;
+  }
+  width: 100%;
+`;
+interface DetectionEngineAlertTableProps {
+  configId: string;
+  flyoutSize: EuiFlyoutSize;
+  inputFilters: Filter[];
+  tableId: TableId;
+  sourcererScope?: SourcererScopeName;
+  isLoading?: boolean;
+  onRuleChange?: () => void;
+}
+
+export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
+  configId,
+  flyoutSize,
+  inputFilters,
+  tableId = TableId.alertsOnAlertsPage,
+  sourcererScope = SourcererScopeName.detections,
+  isLoading,
   onRuleChange,
-  onShowBuildingBlockAlertsChanged,
-  onShowOnlyThreatIndicatorAlertsChanged,
-  selectedEventIds,
-  setEventsDeleted,
-  setEventsLoading,
-  showBuildingBlockAlerts,
-  showOnlyThreatIndicatorAlerts,
-  timelineId,
-  to,
-  filterGroup = 'open',
 }) => {
-  const dispatch = useDispatch();
-  const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-  const {
-    browserFields,
-    indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
-    selectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.detections);
-  const kibana = useKibana();
-  const [, dispatchToaster] = useStateToaster();
-  const { addWarning } = useAppToasts();
-  const ACTION_BUTTON_COUNT = 4;
+  const { triggersActionsUi, uiSettings } = useKibana().services;
 
-  const getGlobalQuery = useCallback(
-    (customFilters: Filter[]) => {
-      if (browserFields != null && indexPatterns != null) {
-        return combineQueries({
-          config: getEsQueryConfig(kibana.services.uiSettings),
-          dataProviders: [],
-          indexPattern: indexPatterns,
-          browserFields,
-          filters: [
-            ...(defaultFilters ?? []),
-            ...globalFilters,
-            ...customFilters,
-            ...buildTimeRangeFilter(from, to),
-          ],
-          kqlQuery: globalQuery,
-          kqlMode: globalQuery.language,
-          isEventViewer: true,
-        });
-      }
-      return null;
-    },
-    [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+  const { from, to, setQuery } = useGlobalTime();
+
+  const alertTableRefreshHandlerRef = useRef<(() => void) | null>(null);
+
+  const dispatch = useDispatch();
+
+  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+  const [activeStatefulEventContext] = useState({
+    timelineID: tableId,
+    tabType: 'query',
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    onRuleChange,
+  });
+  const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
+  const license = useLicense();
+
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+
+  const isDataTableInitialized = useShallowEqualSelector(
+    (state) => (getTable(state, tableId) ?? tableDefaults).initialized
   );
 
+  const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
+
+  const allFilters = useMemo(() => {
+    return [...inputFilters, ...(globalFilters ?? []), ...(timeRangeFilter ?? [])];
+  }, [inputFilters, globalFilters, timeRangeFilter]);
+
+  const {
+    dataTable: {
+      graphEventId, // If truthy, the graph viewer (Resolver) is showing
+      sessionViewConfig,
+      viewMode: tableView = eventsDefaultModel.viewMode,
+    } = eventsDefaultModel,
+  } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
+
+  const combinedQuery = useMemo(() => {
+    if (browserFields != null && indexPatterns != null) {
+      return combineQueries({
+        config: getEsQueryConfig(uiSettings),
+        dataProviders: [],
+        indexPattern: indexPatterns,
+        browserFields,
+        filters: [...allFilters],
+        kqlQuery: globalQuery,
+        kqlMode: globalQuery.language,
+      });
+    }
+    return null;
+  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+
   useInvalidFilterQuery({
-    id: timelineId,
-    filterQuery: getGlobalQuery([])?.filterQuery,
-    kqlError: getGlobalQuery([])?.kqlError,
+    id: tableId,
+    filterQuery: combinedQuery?.filterQuery,
+    kqlError: combinedQuery?.kqlError,
     query: globalQuery,
     startDate: from,
     endDate: to,
   });
 
-  const setEventsLoadingCallback = useCallback(
-    ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading({ id: timelineId, eventIds, isLoading });
-    },
-    [setEventsLoading, timelineId]
+  const finalBoolQuery: AlertsTableStateProps['query'] = useMemo(() => {
+    if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
+      return { bool: {} };
+    }
+    return { bool: { filter: JSON.parse(combinedQuery?.filterQuery) } };
+  }, [combinedQuery?.filterQuery, combinedQuery?.kqlError]);
+
+  const isEventRenderedView = tableView === VIEW_SELECTION.eventRenderedView;
+
+  const gridStyle = useMemo(
+    () =>
+      ({
+        border: 'none',
+        fontSize: 's',
+        header: 'underline',
+        stripes: isEventRenderedView,
+      } as EuiDataGridStyle),
+    [isEventRenderedView]
   );
 
-  const setEventsDeletedCallback = useCallback(
-    ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted({ id: timelineId, eventIds, isDeleted });
-    },
-    [setEventsDeleted, timelineId]
+  const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
+    if (isEventRenderedView) {
+      return {
+        defaultHeight: 'auto',
+      };
+    }
+    return undefined;
+  }, [isEventRenderedView]);
+
+  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
+  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
+  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
+
+  const finalBrowserFields = useMemo(
+    () => (isEventRenderedView ? {} : browserFields),
+    [isEventRenderedView, browserFields]
   );
 
-  const onAlertStatusUpdateSuccess = useCallback(
-    (updated: number, conflicts: number, status: Status) => {
-      if (conflicts > 0) {
-        // Partial failure
-        addWarning({
-          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
-        });
-      } else {
-        let title = '';
-        switch (status) {
-          case 'closed':
-            title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
-            break;
-          case 'open':
-            title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
-            break;
-          case 'acknowledged':
-          case 'in-progress':
-            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
-        }
-        displaySuccessToast(title, dispatchToaster);
-      }
-    },
-    [addWarning, dispatchToaster]
+  const finalColumns = useMemo(
+    () => (isEventRenderedView ? eventRenderedViewColumns : alertColumns),
+    [alertColumns, isEventRenderedView]
   );
 
-  const onAlertStatusUpdateFailure = useCallback(
-    (status: Status, error: Error) => {
-      let title = '';
-      switch (status) {
-        case 'closed':
-          title = i18n.CLOSED_ALERT_FAILED_TOAST;
-          break;
-        case 'open':
-          title = i18n.OPENED_ALERT_FAILED_TOAST;
-          break;
-        case 'acknowledged':
-        case 'in-progress':
-          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
-      }
-      displayErrorToast(title, [error.message], dispatchToaster);
-    },
-    [dispatchToaster]
-  );
-
-  // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
-  useEffect(() => {
-    if (isSelectAllChecked) {
+  const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
+    ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
       dispatch(
-        timelineActions.setTGridSelectAll({
-          id: timelineId,
-          selectAll: false,
+        updateIsLoading({
+          id: tableId,
+          isLoading: isAlertTableLoading,
         })
       );
-    } else {
-      setShowClearSelectionAction(false);
-    }
-  }, [dispatch, isSelectAllChecked, timelineId]);
 
-  // Callback for clearing entire selection from utility bar
-  const clearSelectionCallback = useCallback(() => {
-    clearSelected({ id: timelineId });
-    dispatch(
-      timelineActions.setTGridSelectAll({
-        id: timelineId,
-        selectAll: false,
-      })
-    );
-    setShowClearSelectionAction(false);
-  }, [clearSelected, dispatch, timelineId]);
-
-  // Callback for selecting all events on all pages from utility bar
-  // Dispatches to stateful_body's selectAll via TimelineTypeContext props
-  // as scope of response data required to actually set selectedEvents
-  const selectAllOnAllPagesCallback = useCallback(() => {
-    dispatch(
-      timelineActions.setTGridSelectAll({
-        id: timelineId,
-        selectAll: true,
-      })
-    );
-    setShowClearSelectionAction(true);
-  }, [dispatch, timelineId]);
-
-  const updateAlertsStatusCallback: UpdateAlertsStatusCallback = useCallback(
-    async (
-      refetchQuery: inputsModel.Refetch,
-      { status, selectedStatus }: UpdateAlertsStatusProps
-    ) => {
-      await updateAlertStatusAction({
-        query: showClearSelectionAction
-          ? getGlobalQuery(buildAlertStatusFilter(status))?.filterQuery
-          : undefined,
-        alertIds: Object.keys(selectedEventIds),
-        selectedStatus,
-        setEventsDeleted: setEventsDeletedCallback,
-        setEventsLoading: setEventsLoadingCallback,
-        onAlertStatusUpdateSuccess,
-        onAlertStatusUpdateFailure,
-      });
-      refetchQuery();
-    },
-    [
-      getGlobalQuery,
-      selectedEventIds,
-      setEventsDeletedCallback,
-      setEventsLoadingCallback,
-      showClearSelectionAction,
-      onAlertStatusUpdateSuccess,
-      onAlertStatusUpdateFailure,
-    ]
-  );
-
-  // Callback for creating the AlertsUtilityBar which receives totalCount from EventsViewer component
-  const utilityBarCallback = useCallback(
-    (refetchQuery: inputsModel.Refetch, totalCount: number) => {
-      return (
-        <AlertsUtilityBar
-          areEventsLoading={loadingEventIds.length > 0}
-          clearSelection={clearSelectionCallback}
-          currentFilter={filterGroup}
-          hasIndexMaintenance={hasIndexMaintenance}
-          hasIndexWrite={hasIndexWrite}
-          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-          onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
-          selectAll={selectAllOnAllPagesCallback}
-          selectedEventIds={selectedEventIds}
-          showBuildingBlockAlerts={showBuildingBlockAlerts}
-          showClearSelection={showClearSelectionAction}
-          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-          totalCount={totalCount}
-          updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
-        />
+      dispatch(
+        updateTotalCount({
+          id: tableId,
+          totalCount,
+        })
       );
+
+      alertTableRefreshHandlerRef.current = refresh;
+
+      // setting Query
+      setQuery({
+        id: tableId,
+        loading: isAlertTableLoading,
+        refetch: refresh,
+        inspect: null,
+      });
     },
+    [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
+  );
+
+  const alertStateProps: AlertsTableStateProps = useMemo(
+    () => ({
+      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
+      configurationId: configId,
+      // stores saperate configuration based on the view of the table
+      id: `detection-engine-alert-table-${configId}-${tableView}`,
+      flyoutSize,
+      featureIds: ['siem'],
+      query: finalBoolQuery,
+      showExpandToDetails: false,
+      gridStyle,
+      shouldHighlightRow,
+      rowHeightsOptions,
+      columns: finalColumns,
+      browserFields: finalBrowserFields,
+      onUpdate: onAlertTableUpdate,
+      toolbarVisibility: {
+        showColumnSelector: !isEventRenderedView,
+        showSortSelector: !isEventRenderedView,
+      },
+    }),
     [
-      clearSelectionCallback,
-      filterGroup,
-      hasIndexMaintenance,
-      hasIndexWrite,
-      loadingEventIds.length,
-      onShowBuildingBlockAlertsChanged,
-      onShowOnlyThreatIndicatorAlertsChanged,
-      selectAllOnAllPagesCallback,
-      selectedEventIds,
-      showBuildingBlockAlerts,
-      showClearSelectionAction,
-      showOnlyThreatIndicatorAlerts,
-      updateAlertsStatusCallback,
+      finalBoolQuery,
+      configId,
+      triggersActionsUi.alertsTableConfigurationRegistry,
+      flyoutSize,
+      gridStyle,
+      rowHeightsOptions,
+      finalColumns,
+      finalBrowserFields,
+      onAlertTableUpdate,
+      isEventRenderedView,
+      tableView,
     ]
   );
-
-  const additionalFiltersComponent = (
-    <AditionalFiltersAction
-      areEventsLoading={loadingEventIds.length > 0}
-      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-      showBuildingBlockAlerts={showBuildingBlockAlerts}
-      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
-      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-    />
-  );
-
-  const defaultFiltersMemo = useMemo(() => {
-    const alertStatusFilter = buildAlertStatusFilter(filterGroup);
-
-    if (isEmpty(defaultFilters)) {
-      return alertStatusFilter;
-    } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [...defaultFilters, ...alertStatusFilter];
-    }
-  }, [defaultFilters, filterGroup]);
-  const { filterManager } = useKibana().services.data.query;
-
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
   useEffect(() => {
+    if (isDataTableInitialized) return;
     dispatch(
-      timelineActions.initializeTGridSettings({
-        defaultColumns: columns.map((c) =>
-          !tGridEnabled && c.initialWidth == null
-            ? {
-                ...c,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              }
-            : c
-        ),
-        documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds as RowRendererId[],
-        filterManager,
-        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-        id: timelineId,
-        loadingText: i18n.LOADING_ALERTS,
-        selectAll: false,
-        queryFields: requiredFieldsForActions,
-        title: '',
-        showCheckboxes: true,
+      dataTableActions.initializeDataTableSettings({
+        id: tableId,
+        title: i18n.SESSIONS_TITLE,
+        defaultColumns: finalColumns.map((c) => ({
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          ...c,
+        })),
       })
     );
-  }, [dispatch, filterManager, tGridEnabled, timelineId]);
+  }, [dispatch, tableId, finalColumns, isDataTableInitialized]);
 
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const AlertTable = useMemo(
+    () => triggersActionsUi.getAlertsStateTable(alertStateProps),
+    [alertStateProps, triggersActionsUi]
+  );
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  const { Navigation } = useSessionViewNavigation({
+    scopeId: tableId,
+  });
+
+  const { DetailsPanel, SessionView } = useSessionView({
+    entityType: 'alerts',
+    scopeId: tableId,
+  });
+
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
+    return shouldShowOverlay ? (
+      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
+    ) : null;
+  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+
+  if (isLoading) {
     return null;
   }
 
   return (
-    <StatefulEventsViewer
-      additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
-      defaultCellActions={defaultCellActions}
-      defaultModel={alertsDefaultModel}
-      end={to}
-      entityType="events"
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
-      id={timelineId}
-      leadingControlColumns={leadingControlColumns}
-      onRuleChange={onRuleChange}
-      pageFilters={defaultFiltersMemo}
-      renderCellValue={RenderCellValue}
-      rowRenderers={defaultRowRenderers}
-      scopeId={SourcererScopeName.detections}
-      start={from}
-      utilityBar={utilityBarCallback}
-    />
+    <div>
+      {graphOverlay}
+      <FullWidthFlexGroupTable $visible={!graphEventId && graphOverlay == null} gutterSize="none">
+        <StatefulEventContext.Provider value={activeStatefulEventContext}>
+          <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
+        </StatefulEventContext.Provider>
+      </FullWidthFlexGroupTable>
+      {DetailsPanel}
+    </div>
   );
 };
-
-const makeMapStateToProps = () => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getGlobalInputs = inputsSelectors.globalSelector();
-  const mapStateToProps = (state: State, ownProps: OwnProps) => {
-    const { timelineId } = ownProps;
-    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
-
-    const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
-    const { query, filters } = globalInputs;
-    return {
-      globalQuery: query,
-      globalFilters: filters,
-      deletedEventIds,
-      isSelectAllChecked,
-      loadingEventIds,
-      selectedEventIds,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
-  setEventsLoading: ({
-    id,
-    eventIds,
-    isLoading,
-  }: {
-    id: string;
-    eventIds: string[];
-    isLoading: boolean;
-  }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
-  setEventsDeleted: ({
-    id,
-    eventIds,
-    isDeleted,
-  }: {
-    id: string;
-    eventIds: string[];
-    isDeleted: boolean;
-  }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
-});
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const AlertsTable = connector(React.memo(AlertsTableComponent));

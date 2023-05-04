@@ -1,0 +1,7 @@
+steps:
+  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    label: 'Build Storybooks'
+    agents:
+      queue: n2-4-spot
+    key: storybooks
+    timeout_in_minutes: 60

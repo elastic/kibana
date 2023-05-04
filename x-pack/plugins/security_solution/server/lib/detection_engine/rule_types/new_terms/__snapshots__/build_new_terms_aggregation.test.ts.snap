@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`aggregations buildDocFetchAgg builds a correct top hits aggregation 1`] = `
+Object {
+  "new_terms": Object {
+    "aggs": Object {
+      "docs": Object {
+        "top_hits": Object {
+          "size": 1,
+          "sort": Array [
+            Object {
+              "@timestamp": "asc",
+            },
+          ],
+        },
+      },
+    },
+    "terms": Object {
+      "field": "host.name",
+      "include": Array [
+        "myHost",
+      ],
+      "size": 10000,
+    },
+  },
+}
+`;
+
+exports[`aggregations buildNewTermsAggregation builds a correct aggregation with @timestamp 1`] = `
+Object {
+  "new_terms": Object {
+    "aggs": Object {
+      "filtering_agg": Object {
+        "bucket_selector": Object {
+          "buckets_path": Object {
+            "first_seen_value": "first_seen",
+          },
+          "script": Object {
+            "params": Object {
+              "start_time": 1650000000,
+            },
+            "source": "params.first_seen_value > params.start_time",
+          },
+        },
+      },
+      "first_seen": Object {
+        "min": Object {
+          "field": "@timestamp",
+        },
+      },
+    },
+    "terms": Object {
+      "field": "host.ip",
+      "include": Array [
+        "myHost",
+      ],
+      "size": 10000,
+    },
+  },
+}
+`;
+
+exports[`aggregations buildNewTermsAggregation builds a correct aggregation with event.ingested 1`] = `
+Object {
+  "new_terms": Object {
+    "aggs": Object {
+      "filtering_agg": Object {
+        "bucket_selector": Object {
+          "buckets_path": Object {
+            "first_seen_value": "first_seen",
+          },
+          "script": Object {
+            "params": Object {
+              "start_time": 1650935705,
+            },
+            "source": "params.first_seen_value > params.start_time",
+          },
+        },
+      },
+      "first_seen": Object {
+        "min": Object {
+          "field": "event.ingested",
+        },
+      },
+    },
+    "terms": Object {
+      "field": "host.name",
+      "include": Array [
+        "myHost",
+      ],
+      "size": 10000,
+    },
+  },
+}
+`;
+
+exports[`aggregations buildRecentTermsAgg builds a correct composite agg without \`after\` 1`] = `
+Object {
+  "new_terms": Object {
+    "composite": Object {
+      "after": undefined,
+      "size": 10000,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`aggregations buildRecentTermsAgg builds a correct composite aggregation with \`after\` 1`] = `
+Object {
+  "new_terms": Object {
+    "composite": Object {
+      "after": Object {
+        "host.name": "myHost",
+      },
+      "size": 10000,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`aggregations buildRecentTermsAgg builds a correct composite aggregation with multiple fields 1`] = `
+Object {
+  "new_terms": Object {
+    "composite": Object {
+      "after": undefined,
+      "size": 10000,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+        Object {
+          "host.port": Object {
+            "terms": Object {
+              "field": "host.port",
+            },
+          },
+        },
+        Object {
+          "host.url": Object {
+            "terms": Object {
+              "field": "host.url",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;

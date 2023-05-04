@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternField } from '../../../../../../../../../src/plugins/data/common';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import {
   FieldVisConfig,
   FileBasedFieldVisConfig,
@@ -13,5 +13,5 @@ import {
 
 export interface FieldDataRowProps {
   config: FieldVisConfig | FileBasedFieldVisConfig;
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }

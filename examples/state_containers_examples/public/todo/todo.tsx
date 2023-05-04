@@ -7,15 +7,16 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
+import { Link, Router, Switch, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
   EuiButton,
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -32,13 +33,13 @@ import {
   StateContainer,
   syncState,
   useContainerSelector,
-} from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;

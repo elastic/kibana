@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { AlertAction } from '../../../alerting/common';
-import { RuleAlertAction } from './types';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
+import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
+import type { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
   group,
   id,
-  action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
+  action_type_id: actionTypeId,
   params,
-}: RuleAlertAction): AlertAction => ({
+  uuid,
+  frequency,
+  alerts_filter: alertsFilter,
+}: RuleAlertAction): RuleAction => ({
   group,
   id,
   params,
-  actionTypeId: action_type_id,
+  actionTypeId,
+  ...(alertsFilter && { alertsFilter }),
+  ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -25,9 +33,65 @@ export const transformAlertToRuleAction = ({
   id,
   actionTypeId,
   params,
-}: AlertAction): RuleAlertAction => ({
+  uuid,
+  frequency,
+  alertsFilter,
+}: RuleAction): RuleAlertAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
+  ...(alertsFilter && { alerts_filter: alertsFilter }),
+  ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
 });
+
+export const transformRuleToAlertResponseAction = ({
+  action_type_id: actionTypeId,
+  params,
+}: ResponseAction): RuleResponseAction => {
+  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+    const {
+      saved_query_id: savedQueryId,
+      ecs_mapping: ecsMapping,
+      pack_id: packId,
+      ...rest
+    } = params;
+
+    return {
+      params: {
+        ...rest,
+        savedQueryId,
+        ecsMapping,
+        packId,
+      },
+      actionTypeId,
+    };
+  }
+  return {
+    params,
+    actionTypeId,
+  };
+};
+
+export const transformAlertToRuleResponseAction = ({
+  actionTypeId,
+  params,
+}: RuleResponseAction): ResponseAction => {
+  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+    const { savedQueryId, ecsMapping, packId, ...rest } = params;
+    return {
+      params: {
+        ...rest,
+        saved_query_id: savedQueryId,
+        ecs_mapping: ecsMapping,
+        pack_id: packId,
+      },
+      action_type_id: actionTypeId,
+    };
+  }
+  return {
+    params,
+    action_type_id: actionTypeId,
+  };
+};

@@ -65,16 +65,39 @@ export const CreateDockerUbuntu: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubuntu',
       context: false,
       image: true,
-      ubuntu: true,
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
+      baseImage: 'ubuntu',
       context: false,
       image: true,
-      ubuntu: true,
+      dockerBuildDate,
+    });
+  },
+};
+
+export const CreateDockerServerless: Task = {
+  description: 'Creating Docker Serverless image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubuntu',
+      context: false,
+      serverless: true,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'ubuntu',
+      context: false,
+      serverless: true,
+      image: true,
       dockerBuildDate,
     });
   },
@@ -86,8 +109,14 @@ export const CreateDockerUBI: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubi8',
       context: false,
-      ubi: true,
+      image: true,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubi9',
+      context: false,
       image: true,
     });
   },
@@ -99,16 +128,16 @@ export const CreateDockerCloud: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubuntu',
       context: false,
       cloud: true,
-      ubuntu: true,
       image: true,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
+      baseImage: 'ubuntu',
       context: false,
       cloud: true,
-      ubuntu: true,
       image: true,
     });
   },
@@ -119,23 +148,36 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
+      baseImage: 'ubuntu',
       context: true,
       image: false,
       dockerBuildDate,
     });
-
     await runDockerGenerator(config, log, build, {
-      ubi: true,
+      baseImage: 'ubi8',
+      context: true,
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'ubi9',
       context: true,
       image: false,
     });
     await runDockerGenerator(config, log, build, {
       ironbank: true,
+      baseImage: 'none',
       context: true,
       image: false,
     });
     await runDockerGenerator(config, log, build, {
+      baseImage: 'ubuntu',
       cloud: true,
+      context: true,
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'ubuntu',
+      serverless: true,
       context: true,
       image: false,
     });

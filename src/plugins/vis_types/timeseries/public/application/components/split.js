@@ -8,14 +8,14 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { get } from 'lodash';
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
 import { SplitByEverything } from './splits/everything';
 import { SplitUnsupported } from './splits/unsupported_split';
-import { isGroupByFieldsEnabled } from '../lib/check_ui_restrictions';
+import { isGroupByFieldsEnabled } from '../../../common/check_ui_restrictions';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 const SPLIT_MODES = {
@@ -33,7 +33,7 @@ export class Split extends Component {
         split_filters: [
           {
             color: model.color,
-            id: uuid.v1(),
+            id: uuidv1(),
             filter: {
               query: '',
               language: getDefaultQueryLanguage(),

@@ -11,8 +11,8 @@ jest.mock('./api_keys_grid', () => ({
 
 import { act } from '@testing-library/react';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
-import type { Unmount } from 'src/plugins/management/public/types';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import type { Unmount } from '@kbn/management-plugin/public/types';
 
 import { securityMock } from '../../mocks';
 import { apiKeysManagementApp } from './api_keys_management_app';
@@ -34,16 +34,27 @@ describe('apiKeysManagementApp', () => {
   });
 
   it('mount() works for the `grid` page', async () => {
-    const { getStartServices } = coreMock.createSetup();
+    const coreStart = coreMock.createSetup();
     const { authc } = securityMock.createSetup();
 
-    const startServices = await getStartServices();
+    const startServices = await coreStart.getStartServices();
+
+    const [{ application }] = startServices;
+    application.capabilities = {
+      ...application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
     const docTitle = startServices[0].chrome.docTitle;
 
     const container = document.createElement('div');
 
     const setBreadcrumbs = jest.fn();
+
     let unmount: Unmount;
+
     await act(async () => {
       unmount = await apiKeysManagementApp
         .create({ authc, getStartServices: () => Promise.resolve(startServices) as any })
@@ -84,12 +95,15 @@ describe('apiKeysManagementApp', () => {
             "anonymousPaths": {},
             "externalUrl": {}
           }
-        }
+        },
+        "readOnly": false
       }
       </div>
     `);
 
-    unmount!();
+    act(() => {
+      unmount!();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
     expect(container).toMatchInlineSnapshot(`<div />`);

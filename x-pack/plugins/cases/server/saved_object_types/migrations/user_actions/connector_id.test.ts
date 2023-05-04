@@ -7,13 +7,13 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectsMigrationLogger,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
@@ -24,7 +24,7 @@ import {
   createJiraConnector,
 } from '../../../services/test_utils';
 import { userActionsConnectorIdMigration } from './connector_id';
-import { UserActions } from './types';
+import type { UserActions } from './types';
 
 interface Pre810UserActionAttributes {
   new_value?: string;

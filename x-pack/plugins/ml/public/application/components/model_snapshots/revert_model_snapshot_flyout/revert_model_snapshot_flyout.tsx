@@ -78,6 +78,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
 
   useEffect(() => {
     createChartData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSnapshot]);
 
   useEffect(() => {
@@ -109,6 +110,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
       setAnomalies(anomalyData[0]);
     }
     setChartReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   function showRevertModal() {
@@ -204,7 +206,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                         <>
                           <strong>{s.snapshot_id}</strong>
                           <EuiText size="s" color="subdued">
-                            <p className="euiTextColor--subdued">{s.description}</p>
+                            <p>{s.description}</p>
                           </EuiText>
                         </>
                       ),
@@ -230,8 +232,8 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
             fadeChart={true}
             overlayRanges={[
               {
-                start: currentSnapshot.latest_record_time_stamp,
-                end: job.data_counts.latest_record_timestamp,
+                start: currentSnapshot.latest_record_time_stamp!,
+                end: job.data_counts.latest_record_timestamp!,
                 color: '#ff0000',
               },
             ]}
@@ -248,12 +250,12 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
               }
             )}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <FormattedMessage
               id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
               defaultMessage="All anomaly detection results after {date} will be deleted."
-              values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp) }}
+              values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp!) }}
             />
           </EuiCallOut>
 
@@ -333,8 +335,8 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                 <CreateCalendar
                   calendarEvents={calendarEvents}
                   setCalendarEvents={setCalendarEvents}
-                  minSelectableTimeStamp={snapshot.latest_record_time_stamp}
-                  maxSelectableTimeStamp={job.data_counts.latest_record_timestamp}
+                  minSelectableTimeStamp={snapshot.latest_record_time_stamp!}
+                  maxSelectableTimeStamp={job.data_counts.latest_record_timestamp!}
                   eventRateData={eventRateData}
                   anomalies={anomalies}
                   chartReady={chartReady}

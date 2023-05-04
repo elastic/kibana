@@ -7,15 +7,21 @@
 
 import moment from 'moment-timezone';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
-import { AuthenticatedUser } from '../../../../../security/common/model';
-import { convertToCamelCase } from '../../../containers/utils';
-import { StartServices } from '../../../types';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { NavigateToAppOptions } from '@kbn/core/public';
+import { getUICapabilities } from '../../../client/helpers/capabilities';
+import { convertToCamelCase } from '../../../api/utils';
+import {
+  FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
+import type { CasesPermissions } from '../../../../common';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
-import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -154,4 +160,59 @@ export const useNavigation = (appId: string) => {
   const { navigateTo } = useNavigateTo(appId);
   const { getAppUrl } = useAppUrl(appId);
   return { navigateTo, getAppUrl };
+};
+
+interface Capabilities {
+  crud: boolean;
+  read: boolean;
+}
+interface UseApplicationCapabilities {
+  actions: Capabilities;
+  generalCases: CasesPermissions;
+  visualize: Capabilities;
+  dashboard: Capabilities;
+}
+
+/**
+ * Returns the capabilities of various applications
+ *
+ */
+
+export const useApplicationCapabilities = (): UseApplicationCapabilities => {
+  const capabilities = useKibana().services?.application?.capabilities;
+  const casesCapabilities = capabilities[FEATURE_ID];
+  const permissions = getUICapabilities(casesCapabilities);
+
+  return useMemo(
+    () => ({
+      actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
+      generalCases: {
+        all: permissions.all,
+        create: permissions.create,
+        read: permissions.read,
+        update: permissions.update,
+        delete: permissions.delete,
+        push: permissions.push,
+      },
+      visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+      dashboard: {
+        crud: !!capabilities.dashboard?.createNew,
+        read: !!capabilities.dashboard?.show,
+      },
+    }),
+    [
+      capabilities.actions?.save,
+      capabilities.actions?.show,
+      capabilities.dashboard?.createNew,
+      capabilities.dashboard?.show,
+      capabilities.visualize?.save,
+      capabilities.visualize?.show,
+      permissions.all,
+      permissions.create,
+      permissions.read,
+      permissions.update,
+      permissions.delete,
+      permissions.push,
+    ]
+  );
 };

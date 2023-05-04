@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // delete the rule in bulk
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // delete that rule by its rule_id
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // delete that rule by its id
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // delete the rule in bulk
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // delete that rule by its rule_id
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -183,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // delete that rule by its id
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -194,7 +194,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
           .expect(200);

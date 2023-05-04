@@ -8,6 +8,11 @@
     "bool": {
       "filter": [
         {
+          "exists": {
+            "field": "source.ip"
+          }
+        },
+        {
           "term": {
             "event.category": "authentication"
           }

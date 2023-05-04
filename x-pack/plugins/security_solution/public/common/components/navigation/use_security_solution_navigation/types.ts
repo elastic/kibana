@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { TabNavigationProps } from '../tab_navigation/types';
+import type { TabNavigationProps } from '../tab_navigation/types';
+import type { GenericNavRecord } from '../types';
 
-export type PrimaryNavigationItemsProps = Omit<
-  TabNavigationProps,
-  'pathName' | 'pageName' | 'tabName'
-> & { selectedTabId: string };
+export interface PrimaryNavigationItemsProps {
+  navTabs: GenericNavRecord;
+  selectedTabId: string;
+}
 
-export type PrimaryNavigationProps = Omit<TabNavigationProps, 'pathName'>;
+export type PrimaryNavigationProps = Omit<TabNavigationProps, 'pathName' | 'tabName'>;

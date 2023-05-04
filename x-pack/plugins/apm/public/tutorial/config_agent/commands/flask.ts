@@ -6,11 +6,37 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
+
+export const flaskVariables = {
+  apmServiceName: 'SERVICE_NAME',
+  secretToken: 'SECRET_TOKEN',
+  apmServerUrl: 'SERVER_URL',
+  apmEnvironment: 'ENVIRONMENT',
+};
+
+export const flaskHighlightLang = 'py';
+
+export const flaskLineNumbers = {
+  start: 1,
+  highlight: '2-4, 7-18',
+  annotations: {
+    9: serviceNameHint,
+    11: secretTokenHint,
+    13: serverUrlHint,
+    15: serviceEnvironmentHint,
+  },
+};
 
 export const flask = `# ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment',
   {
-    defaultMessage: 'initialize using environment variables',
+    defaultMessage: 'Initialize using environment variables',
   }
 )}
 from elasticapm.contrib.flask import ElasticAPM
@@ -20,51 +46,18 @@ apm = ElasticAPM(app)
 # ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.configureElasticApmComment',
   {
-    defaultMessage:
-      "or configure to use ELASTIC_APM in your application's settings",
+    defaultMessage: "Or use ELASTIC_APM in your application's settings",
   }
 )}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
-  {
-    defaultMessage: 'Set the required service name. Allowed characters:',
-  }
-)}
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.allowedCharactersComment',
-  {
-    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-  }
-)}
-'SERVICE_NAME': '',
+  '${flaskVariables.apmServiceName}': '{{{apmServiceName}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a secret token',
-  }
-)}
-'SECRET_TOKEN': '{{{secretToken}}}',
+  '${flaskVariables.secretToken}': '{{{secretToken}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
-  {
-    defaultMessage:
-      'Set the custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  }
-)}
-'SERVER_URL': '{{{apmServerUrl}}}',
+  '${flaskVariables.apmServerUrl}': '{{{apmServerUrl}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.setServiceEnvironmentComment',
-  {
-    defaultMessage: 'Set the service environment',
-  }
-)}
-'ENVIRONMENT': 'production',
+  '${flaskVariables.apmEnvironment}': '{{{apmEnvironment}}}',
 }
 
 apm = ElasticAPM(app)`;

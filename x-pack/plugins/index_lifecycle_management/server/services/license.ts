@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '../../../licensing/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { LicenseType, ILicense } from '../shared_imports';
 
 export interface LicenseStatus {
@@ -57,12 +57,12 @@ export class License {
     });
   }
 
-  guardApiRoute(handler: RequestHandler) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
     const license = this;
 
     return function licenseCheck(
       ctx: RequestHandlerContext,
-      request: KibanaRequest,
+      request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {
       const licenseStatus = license.getStatus();

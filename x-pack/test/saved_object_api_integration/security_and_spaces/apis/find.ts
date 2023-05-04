@@ -6,7 +6,6 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { AUTHENTICATION } from '../../common/lib/authentication';
 import {
   getTestScenarios,
   isUserAuthorizedAtSpace,
@@ -33,16 +32,19 @@ const createTestCases = (currentSpace: string, crossSpaceSearch?: string[]) => {
     cases.pageBeyondTotal,
     cases.unknownSearchField,
     cases.filterWithNamespaceAgnosticType,
-    cases.filterWithDisallowedType,
   ];
+  const badRequestTypes = [cases.filterWithDisallowedType];
   const hiddenAndUnknownTypes = [
     cases.hiddenType,
     cases.unknownType,
     cases.filterWithHiddenType,
     cases.filterWithUnknownType,
   ];
-  const allTypes = normalTypes.concat(hiddenAndUnknownTypes);
-  return { normalTypes, hiddenAndUnknownTypes, allTypes };
+  return {
+    normalTypes,
+    badRequestTypes,
+    hiddenAndUnknownTypes,
+  };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -56,16 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
     const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
     const explicitCrossSpace = createTestCases(spaceId, EACH_SPACE);
     const wildcardCrossSpace = createTestCases(spaceId, ['*']);
-
-    if (user.username === AUTHENTICATION.SUPERUSER.username) {
-      return {
-        currentSpace: createTestDefinitions(currentSpaceCases.allTypes, false, { user }),
-        crossSpace: [
-          createTestDefinitions(explicitCrossSpace.allTypes, false, { user }),
-          createTestDefinitions(wildcardCrossSpace.allTypes, false, { user }),
-        ].flat(),
-      };
-    }
 
     const isAuthorizedExplicitCrossSpaces = EACH_SPACE.some(
       (s) => s !== spaceId && isUserAuthorizedAtSpace(user, s)
@@ -84,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           ),
         ].flat()
       : createTestDefinitions(
-          explicitCrossSpace.allTypes,
+          [explicitCrossSpace.normalTypes, explicitCrossSpace.hiddenAndUnknownTypes].flat(),
           { statusCode: 200, reason: 'unauthorized' },
           { user }
         );
@@ -98,27 +90,36 @@ export default function ({ getService }: FtrProviderContext) {
           ),
         ].flat()
       : createTestDefinitions(
-          wildcardCrossSpace.allTypes,
+          [wildcardCrossSpace.normalTypes, wildcardCrossSpace.hiddenAndUnknownTypes].flat(),
           { statusCode: 200, reason: 'unauthorized' },
           { user }
         );
 
+    const currentSpaceDefinitions = isUserAuthorizedAtSpace(user, spaceId)
+      ? [
+          createTestDefinitions(currentSpaceCases.normalTypes, false, { user }),
+          createTestDefinitions(
+            currentSpaceCases.hiddenAndUnknownTypes,
+            { statusCode: 200, reason: 'unauthorized' },
+            { user }
+          ),
+        ].flat()
+      : createTestDefinitions(
+          [currentSpaceCases.normalTypes, currentSpaceCases.hiddenAndUnknownTypes].flat(),
+          { statusCode: 200, reason: 'unauthorized' },
+          { user }
+        );
     return {
-      currentSpace: isUserAuthorizedAtSpace(user, spaceId)
-        ? [
-            createTestDefinitions(currentSpaceCases.normalTypes, false, {
-              user,
-            }),
-            createTestDefinitions(currentSpaceCases.hiddenAndUnknownTypes, {
-              statusCode: 200,
-              reason: 'unauthorized',
-            }),
-          ].flat()
-        : createTestDefinitions(currentSpaceCases.allTypes, {
-            statusCode: 200,
-            reason: 'unauthorized',
-          }),
-      crossSpace: [...explicitCrossSpaceDefinitions, ...wildcardCrossSpaceDefinitions],
+      currentSpace: [
+        currentSpaceDefinitions,
+        createTestDefinitions(currentSpaceCases.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
+      ].flat(),
+      crossSpace: [
+        explicitCrossSpaceDefinitions,
+        wildcardCrossSpaceDefinitions,
+        createTestDefinitions(explicitCrossSpace.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
+        createTestDefinitions(wildcardCrossSpace.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
+      ].flat(),
     };
   };
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { taggingApiMock } from '../../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTagReference, createSavedObject, createTag } from '../../common/test_utils';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
@@ -58,5 +58,11 @@ describe('getTableColumnDefinition', () => {
 
     // we know this returns a function even if the generic column signature allows other types
     expect((sortable as Function)(savedObject)).toEqual('Tag 1');
+  });
+
+  it('returns a non-sortable definition when `serverPaging` is `true`', () => {
+    const { sortable } = getTableColumnDefinition({ serverPaging: true });
+
+    expect(sortable).toEqual(false);
   });
 });

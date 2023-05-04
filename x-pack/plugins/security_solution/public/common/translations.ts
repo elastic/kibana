@@ -11,57 +11,9 @@ export const SOLUTION_NAME = i18n.translate('xpack.securitySolution.pages.common
   defaultMessage: 'Security',
 });
 
-export const EMPTY_ACTION_ELASTIC_AGENT = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionElasticAgent',
-  {
-    defaultMessage: 'Add data with Elastic Agent',
-  }
-);
-
-export const EMPTY_ACTION_ELASTIC_AGENT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionElasticAgentDescription',
-  {
-    defaultMessage:
-      'The Elastic Agent provides a simple, unified way to add monitoring to your hosts.',
-  }
-);
-
-export const EMPTY_ACTION_BEATS = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionBeats',
-  {
-    defaultMessage: 'Add data with Beats',
-  }
-);
-
-export const EMPTY_ACTION_BEATS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionBeatsDescription',
-  {
-    defaultMessage:
-      'Lightweight Beats can send data from hundreds or thousands of machines and systems',
-  }
-);
-
-export const EMPTY_ACTION_SECONDARY = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionSecondary',
-  {
-    defaultMessage: 'getting started guide.',
-  }
-);
-
-export const EMPTY_ACTION_ENDPOINT = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionEndpoint',
-  {
-    defaultMessage: 'Add Endpoint Security',
-  }
-);
-
-export const EMPTY_ACTION_ENDPOINT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionEndpointDescription',
-  {
-    defaultMessage:
-      'Protect your hosts with threat prevention, detection, and deep security data visibility.',
-  }
-);
+export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
+  defaultMessage: 'Beta',
+});
 
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
@@ -76,3 +28,33 @@ export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: 
     defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
          because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
   });
+
+export const UPGRADE_ENDPOINT_FOR_RESPONDER = i18n.translate(
+  'xpack.securitySolution.endpoint.actions.disabledResponder.tooltip',
+  {
+    defaultMessage:
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
+  }
+);
+
+export const INSUFFICIENT_PRIVILEGES_FOR_COMMAND = i18n.translate(
+  'xpack.securitySolution.endpoint.actions.insufficientPrivileges.error',
+  {
+    defaultMessage:
+      'You do not have sufficient privileges to use this command. Please contact your administrator for access.',
+  }
+);
+
+export const UNSAVED_TIMELINE_SAVE_PROMPT = i18n.translate(
+  'xpack.securitySolution.timeline.unsavedWorkMessage',
+  {
+    defaultMessage: 'Leave Timeline with unsaved work?',
+  }
+);
+
+export const UNSAVED_TIMELINE_SAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.unsavedWorkTitle',
+  {
+    defaultMessage: 'Unsaved changes',
+  }
+);

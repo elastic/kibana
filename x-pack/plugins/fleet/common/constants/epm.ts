@@ -16,23 +16,19 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
-export const KUBERNETES_RUN_INSTRUCTIONS =
-  'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
-export const STANDALONE_RUN_INSTRUCTIONS_LINUXMAC = 'sudo ./elastic-agent install';
-export const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = '.\\elastic-agent.exe install';
+export const FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE = 'profiler_symbolizer';
+export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
+export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 
+export const PACKAGE_TEMPLATE_SUFFIX = '@package';
+export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
+
+export const DATASET_VAR_NAME = 'data_stream.dataset';
 /*
  Package rules:
-|               | unremovablePackages | defaultPackages | autoUpdatePackages |
-|---------------|:---------------------:|:---------------:|:------------------:|
-| Removable     |         ❌             |        ✔️        |          ✔️         |
-| Auto-installs |         ❌             |        ✔️        |          ❌         |
-| Auto-updates  |         ❌             |        ✔️        |          ✔️         |
-
-`endpoint` is a special package. It needs to autoupdate, it needs to _not_ be
-removable, but it doesn't install by default. Following the table, it needs to
-be in `unremovablePackages` and in `autoUpdatePackages`, but not in
-`defaultPackages`.
+|               | autoUpdatePackages |
+|---------------|:------------------:|
+| Auto-updates  |          ✔️         |
 
 
 We also define "auto upgrade policies" packages below. These are packages that are considered "stack-aligned"
@@ -42,22 +38,24 @@ in their custom policy editor implementations.
 
 */
 
-export const unremovablePackages = [
-  FLEET_SYSTEM_PACKAGE,
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_SERVER_PACKAGE,
+export const autoUpdatePackages = [
   FLEET_ENDPOINT_PACKAGE,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
 ];
 
-export const defaultPackages = unremovablePackages.filter((p) => p !== FLEET_ENDPOINT_PACKAGE);
-
-export const autoUpdatePackages = [
+export const HIDDEN_API_REFERENCE_PACKAGES = [
   FLEET_ENDPOINT_PACKAGE,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
 ];
 
-export const autoUpgradePoliciesPackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
+export const autoUpgradePoliciesPackages = [
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+];
 
 export const agentAssetTypes = {
   Input: 'input',

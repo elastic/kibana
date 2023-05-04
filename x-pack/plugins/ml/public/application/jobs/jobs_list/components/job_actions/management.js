@@ -19,18 +19,23 @@ import {
   isResettable,
 } from '../utils';
 import { i18n } from '@kbn/i18n';
+import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
   showEditJobFlyout,
+  showDatafeedChartFlyout,
   showDeleteJobModal,
   showResetJobModal,
   showStartDatafeedModal,
+  showCloseJobsConfirmModal,
+  showStopDatafeedsConfirmModal,
   refreshJobs,
   showCreateAlertFlyout
 ) {
   const canCreateJob = checkPermission('canCreateJob') && mlNodesAvailable();
   const canUpdateJob = checkPermission('canUpdateJob');
   const canDeleteJob = checkPermission('canDeleteJob');
+  const canGetDatafeeds = checkPermission('canGetDatafeeds');
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
   const canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
@@ -65,7 +70,12 @@ export function actionsMenuContent(
       enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStoppable([item]),
       onClick: (item) => {
-        stopDatafeeds([item], refreshJobs);
+        if (isManagedJob(item)) {
+          showStopDatafeedsConfirmModal([item]);
+        } else {
+          stopDatafeeds([item], refreshJobs);
+        }
+
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonStopDatafeed',
@@ -97,7 +107,12 @@ export function actionsMenuContent(
       enabled: (item) => isJobBlocked(item) === false && canCloseJob,
       available: (item) => isClosable([item]),
       onClick: (item) => {
-        closeJobs([item], refreshJobs);
+        if (isManagedJob(item)) {
+          showCloseJobsConfirmModal([item]);
+        } else {
+          closeJobs([item], refreshJobs);
+        }
+
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloseJob',
@@ -138,6 +153,25 @@ export function actionsMenuContent(
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',
+    },
+    {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.viewDatafeedCountsLabel', {
+        defaultMessage: 'View datafeed counts',
+      }),
+      description: i18n.translate(
+        'xpack.ml.jobsList.managementActions.viewDatafeedCountsDescription',
+        {
+          defaultMessage: 'View datafeed counts',
+        }
+      ),
+      icon: 'visAreaStacked',
+      enabled: () => canGetDatafeeds,
+      available: () => canGetDatafeeds,
+      onClick: (item) => {
+        showDatafeedChartFlyout(item);
+        closeMenu();
+      },
+      'data-test-subj': 'mlActionButtonViewDatafeedChart',
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.editJobLabel', {

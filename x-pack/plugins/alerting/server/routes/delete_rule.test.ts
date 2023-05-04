@@ -6,7 +6,7 @@
  */
 
 import { deleteRuleRoute } from './delete_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -14,7 +14,7 @@ import { rulesClientMock } from '../rules_client.mock';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

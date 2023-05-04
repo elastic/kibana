@@ -9,7 +9,7 @@ import React from 'react';
 
 import { TERMINATED_PROCESS } from '../../timeline/body/renderers/system/translations';
 import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
-import { mockEndgameTerminationEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { demoEndgameTerminationEvent } from '../../../../common/demo_data/endgame_ecs/termination';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemExampleComponent: React.FC = () => {
@@ -21,10 +21,9 @@ const SystemExampleComponent: React.FC = () => {
   return (
     <>
       {systemRowRenderer.renderRow({
-        browserFields: {},
-        data: mockEndgameTerminationEvent,
+        data: demoEndgameTerminationEvent,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

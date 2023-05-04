@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { appRoutesService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
 
-import { sendRequest, useRequest } from './use_request';
+import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
-export const sendGetPermissionsCheck = () => {
+export const sendGetPermissionsCheck = (fleetServerSetup?: boolean) => {
   return sendRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
+    query: { fleetServerSetup },
   });
 };
 
@@ -22,6 +25,17 @@ export const sendGenerateServiceToken = () => {
     path: appRoutesService.getRegenerateServiceTokenPath(),
     method: 'post',
   });
+};
+
+export const usePermissionCheckQuery = () => {
+  return useQuery<CheckPermissionsResponse, CheckPermissionsResponse['error']>(
+    ['permissionsCheck'],
+    () =>
+      sendRequestForRq<CheckPermissionsResponse>({
+        path: appRoutesService.getCheckPermissionsPath(),
+        method: 'get',
+      })
+  );
 };
 
 export const usePermissionCheck = () => {

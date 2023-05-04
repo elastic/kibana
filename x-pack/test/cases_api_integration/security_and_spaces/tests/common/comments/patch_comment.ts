@@ -5,29 +5,27 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   AttributesTypeAlerts,
   AttributesTypeUser,
-  CaseResponse,
   CommentType,
-} from '../../../../../../plugins/cases/common/api';
+} from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
 import {
   defaultUser,
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
 } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
-  deleteCaseAction,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
@@ -35,7 +33,8 @@ import {
   createComment,
   updateComment,
   superUserSpace1Auth,
-} from '../../../../common/lib/utils';
+  removeServerGeneratedPropertiesFromSavedObject,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,105 +56,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteCasesUserActions(es);
-    });
-
-    it('should return a 400 when the subCaseId parameter is passed', async () => {
-      const { body } = await supertest
-        .patch(`${CASES_URL}/case-id}/comments?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: 'id',
-          version: 'version',
-          type: CommentType.alert,
-          alertId: 'test-id',
-          index: 'test-index',
-          rule: {
-            id: 'id',
-            name: 'name',
-          },
-          owner: 'securitySolutionFixture',
-        })
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub case comments', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
-      it('patches a comment for a sub case', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        const { body: patchedSubCase }: { body: CaseResponse } = await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-        const { body: patchedSubCaseUpdatedComment } = await supertest
-          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            id: patchedSubCase.comments![1].id,
-            version: patchedSubCase.comments![1].version,
-            comment: newComment,
-            type: CommentType.user,
-          })
-          .expect(200);
-
-        expect(patchedSubCaseUpdatedComment.comments.length).to.be(2);
-        expect(patchedSubCaseUpdatedComment.comments[0].type).to.be(CommentType.generatedAlert);
-        expect(patchedSubCaseUpdatedComment.comments[1].type).to.be(CommentType.user);
-        expect(patchedSubCaseUpdatedComment.comments[1].comment).to.be(newComment);
-      });
-
-      it('fails to update the generated alert comment type', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
-          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            id: caseInfo.comments![0].id,
-            version: caseInfo.comments![0].version,
-            type: CommentType.alert,
-            alertId: 'test-id',
-            index: 'test-index',
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-          })
-          .expect(400);
-      });
-
-      it('fails to update the generated alert comment by using another generated alert comment', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
-          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            id: caseInfo.comments![0].id,
-            version: caseInfo.comments![0].version,
-            type: CommentType.generatedAlert,
-            alerts: [{ _id: 'id1' }],
-            index: 'test-index',
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-          })
-          .expect(400);
-      });
     });
 
     it('should patch a comment', async () => {
@@ -432,10 +332,92 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('alert format', () => {
-      type AlertComment = CommentType.alert | CommentType.generatedAlert;
+    describe('files', () => {
+      it('should update the file attachment name to superfile', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
 
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed create a test case for generated alerts here
+        const attachmentWithUpdatedFileName = set(
+          getFilesAttachmentReq(),
+          'externalReferenceMetadata.files[0].name',
+          'superfile'
+        );
+
+        const updatedCase = await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...attachmentWithUpdatedFileName,
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+        });
+
+        const comparableAttachmentFields = removeServerGeneratedPropertiesFromSavedObject(
+          updatedCase.comments![0]
+        );
+
+        expect(comparableAttachmentFields).to.eql({
+          ...attachmentWithUpdatedFileName,
+          pushed_at: null,
+          pushed_by: null,
+          updated_by: defaultUser,
+          created_by: defaultUser,
+          owner: 'securitySolutionFixture',
+        });
+      });
+
+      it('should return a 400 when attempting to update a file attachment with empty metadata', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...getFilesAttachmentReq({ externalReferenceMetadata: {} }),
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('should return a 400 when attempting to update a file attachment with invalid metadata', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...getFilesAttachmentReq({
+              // intentionally creating an invalid format here by using foo instead of files
+              externalReferenceMetadata: { foo: fileAttachmentMetadata.files },
+            }),
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
+    describe('alert format', () => {
+      type AlertComment = CommentType.alert;
+
       for (const [alertId, index, type] of [
         ['1', ['index1', 'index2'], CommentType.alert],
         [['1', '2'], 'index', CommentType.alert],

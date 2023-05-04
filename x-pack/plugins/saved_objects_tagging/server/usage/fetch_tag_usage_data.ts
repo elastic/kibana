@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 
 /**
@@ -31,13 +31,13 @@ interface AggregatedTagUsage {
 
 export const fetchTagUsageData = async ({
   esClient,
-  kibanaIndex,
+  kibanaIndices,
 }: {
   esClient: ElasticsearchClient;
-  kibanaIndex: string;
+  kibanaIndices: string[];
 }): Promise<TaggingUsageData> => {
-  const { body } = await esClient.search({
-    index: [kibanaIndex],
+  const body = await esClient.search({
+    index: kibanaIndices,
     ignore_unavailable: true,
     filter_path: 'aggregations',
     body: {

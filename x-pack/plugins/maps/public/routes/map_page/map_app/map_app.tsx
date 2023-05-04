@@ -9,43 +9,53 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters } from 'kibana/public';
-import { Adapters } from 'src/plugins/embeddable/public';
+import {
+  AppLeaveAction,
+  AppMountParameters,
+  KibanaExecutionContext,
+  ScopedHistory,
+} from '@kbn/core/public';
+import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
-import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/common';
+import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
+import {
+  GlobalQueryStateFromUrl,
+  QueryState,
+  QueryStateChange,
+  SavedQuery,
+  syncGlobalQueryStateWithUrl,
+} from '@kbn/data-plugin/public';
+import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+  IKbnUrlStateStorage,
+} from '@kbn/kibana-utils-plugin/public';
 import {
   getData,
+  getExecutionContextService,
   getCoreChrome,
+  getIndexPatternService,
   getMapsCapabilities,
   getNavigation,
   getSpacesApi,
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
-import {
-  AppStateManager,
-  startAppStateSyncing,
-  getGlobalState,
-  updateGlobalState,
-  startGlobalStateSyncing,
-  MapsGlobalState,
-} from '../url_state';
-import {
-  esFilters,
-  SavedQuery,
-  QueryStateChange,
-  QueryState,
-} from '../../../../../../../src/plugins/data/public';
+import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { goToSpecifiedPath } from '../../../render_app';
-import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
-import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
+import {
+  getEditPath,
+  getFullPath,
+  APP_ID,
+  MAP_EMBEDDABLE_NAME,
+} from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
-  getInitialTimeFilters,
   SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
@@ -82,12 +92,13 @@ export interface Props {
   isSaveDisabled: boolean;
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  history: AppMountParameters['history'];
+  history: ScopedHistory;
+  setExecutionContext: (executionContext: KibanaExecutionContext) => void;
 }
 
 export interface State {
   initialized: boolean;
-  indexPatterns: IndexPattern[];
+  indexPatterns: DataView[];
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
@@ -101,6 +112,8 @@ export class MapApp extends React.Component<Props, State> {
   _appStateManager = new AppStateManager();
   _prevIndexPatternIds: string[] | null = null;
   _isMounted: boolean = false;
+  _kbnUrlStateStorage: IKbnUrlStateStorage;
+  _initialTimeFromUrl: TimeRange | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -110,10 +123,25 @@ export class MapApp extends React.Component<Props, State> {
       isRefreshPaused: true,
       refreshInterval: 0,
     };
+    this._kbnUrlStateStorage = createKbnUrlStateStorage({
+      useHash: false,
+      history: props.history,
+      ...withNotifyOnErrors(getToasts()),
+    });
   }
 
   componentDidMount() {
     this._isMounted = true;
+
+    const executionContext = {
+      type: 'application',
+      name: APP_ID,
+      url: window.location.pathname,
+      id: this.props.savedMap.getSavedObjectId() || 'new',
+      page: 'editor',
+    };
+    getExecutionContextService().set(executionContext); // set execution context in core ExecutionContextStartService
+    this.props.setExecutionContext(executionContext); // set execution context in redux store
 
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
@@ -127,8 +155,16 @@ export class MapApp extends React.Component<Props, State> {
       )
       .subscribe();
 
-    this._globalSyncUnsubscribe = startGlobalStateSyncing();
-    this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
+    // syncGlobalQueryStateWithUrl mutates global state by merging URL state with Kibana QueryStart state
+    // capture _initialTimeFromUrl before global state is mutated
+    this._initialTimeFromUrl = this._getGlobalState()?.time;
+    const { stop } = syncGlobalQueryStateWithUrl(getData().query, this._kbnUrlStateStorage);
+    this._globalSyncUnsubscribe = stop;
+
+    this._appSyncUnsubscribe = startAppStateSyncing(
+      this._appStateManager,
+      this._kbnUrlStateStorage
+    );
     this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
       this._updateFromGlobalState
     );
@@ -188,6 +224,20 @@ export class MapApp extends React.Component<Props, State> {
     this._onQueryChange({ time: globalState.time });
   };
 
+  _getGlobalState() {
+    return this._kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g') ?? {};
+  }
+
+  _updateGlobalState(newState: GlobalQueryStateFromUrl) {
+    this._kbnUrlStateStorage.set('_g', {
+      ...this._getGlobalState(),
+      ...newState,
+    });
+    if (!this.state.initialized) {
+      this._kbnUrlStateStorage.kbnUrlControls.flush(true);
+    }
+  }
+
   async _updateIndexPatterns() {
     const { nextIndexPatternIds } = this.props;
 
@@ -197,10 +247,28 @@ export class MapApp extends React.Component<Props, State> {
 
     this._prevIndexPatternIds = nextIndexPatternIds;
 
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-    if (this._isMounted) {
-      this.setState({ indexPatterns });
+    let indexPatterns: DataView[] = [];
+    if (nextIndexPatternIds.length === 0) {
+      // Use default data view to always show filter bar when filters are present
+      // Example scenario, global state has pinned filters and new map is created
+      const defaultDataView = await getIndexPatternService().getDefaultDataView();
+      if (defaultDataView) {
+        indexPatterns = [defaultDataView];
+      }
+    } else {
+      indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
     }
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    // ignore results for outdated requests
+    if (!_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
+      return;
+    }
+
+    this.setState({ indexPatterns });
   }
 
   _onQueryChange = ({
@@ -232,17 +300,27 @@ export class MapApp extends React.Component<Props, State> {
     });
 
     // sync globalState
-    const updatedGlobalState: MapsGlobalState = {
+    const updatedGlobalState: GlobalQueryStateFromUrl = {
       filters: filterManager.getGlobalFilters(),
     };
     if (time) {
       updatedGlobalState.time = time;
     }
-    updateGlobalState(updatedGlobalState, !this.state.initialized);
+    this._updateGlobalState(updatedGlobalState);
   };
 
+  _getInitialTime(serializedMapState?: SerializedMapState) {
+    if (this._initialTimeFromUrl) {
+      return this._initialTimeFromUrl;
+    }
+
+    return !this.props.savedMap.hasSaveAndReturnConfig() && serializedMapState?.timeFilters
+      ? serializedMapState.timeFilters
+      : getTimeFilter().getTime();
+  }
+
   _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
-    const globalState: MapsGlobalState = getGlobalState();
+    const globalState = this._getGlobalState();
 
     const savedObjectFilters = serializedMapState?.filters ? serializedMapState.filters : [];
     const appFilters = this._appStateManager.getFilters() || [];
@@ -258,10 +336,7 @@ export class MapApp extends React.Component<Props, State> {
     this._onQueryChange({
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
-      time: getInitialTimeFilters({
-        serializedMapState,
-        globalState,
-      }),
+      time: this._getInitialTime(serializedMapState),
     });
 
     this._onRefreshConfigChange(
@@ -283,15 +358,12 @@ export class MapApp extends React.Component<Props, State> {
       isRefreshPaused: isPaused,
       refreshInterval: interval,
     });
-    updateGlobalState(
-      {
-        refreshInterval: {
-          pause: isPaused,
-          value: interval,
-        },
+    this._updateGlobalState({
+      refreshInterval: {
+        pause: isPaused,
+        value: interval,
       },
-      !this.state.initialized
-    );
+    });
   }
 
   _updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -318,6 +390,24 @@ export class MapApp extends React.Component<Props, State> {
   };
 
   async _initMap() {
+    // Handle redirect with adhoc data view spec provided via history location state (MAPS_APP_LOCATOR)
+    const historyLocationState = this.props.history.location?.state as
+      | {
+          dataViewSpec: DataViewSpec;
+        }
+      | undefined;
+    if (historyLocationState?.dataViewSpec?.id) {
+      const dataViewService = getIndexPatternService();
+      try {
+        const dataView = await dataViewService.get(historyLocationState.dataViewSpec.id);
+        if (!dataView.isPersisted()) {
+          await dataViewService.create(historyLocationState.dataViewSpec);
+        }
+      } catch (error) {
+        // ignore errors, not a critical error for viewing map - layer(s) using data view will surface error
+      }
+    }
+
     try {
       await this.props.savedMap.whenReady();
     } catch (err) {
@@ -328,7 +418,7 @@ export class MapApp extends React.Component<Props, State> {
           }),
           text: `${err.message}`,
         });
-        goToSpecifiedPath('/');
+        this.props.history.push('/');
       }
       return;
     }
@@ -341,13 +431,17 @@ export class MapApp extends React.Component<Props, State> {
     const spaces = getSpacesApi();
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
       const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
-      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      await spaces.ui.redirectLegacyUrl({
+        path: newPath,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+        objectNoun: MAP_EMBEDDABLE_NAME,
+      });
       return;
     }
 
-    this.props.savedMap.setBreadcrumbs();
+    this.props.savedMap.setBreadcrumbs(this.props.history);
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
     if (savedObjectId) {
@@ -384,6 +478,7 @@ export class MapApp extends React.Component<Props, State> {
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
+      history: this.props.history,
     });
 
     const { TopNavMenu } = getNavigation().ui;
@@ -446,7 +541,7 @@ export class MapApp extends React.Component<Props, State> {
 
   _addFilter = async (newFilters: Filter[]) => {
     newFilters.forEach((filter) => {
-      filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+      filter.$state = { store: FilterStateStore.APP_STATE };
     });
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };
@@ -456,7 +551,7 @@ export class MapApp extends React.Component<Props, State> {
     const spaces = getSpacesApi();
     return spaces && sharingSavedObjectProps?.outcome === 'conflict'
       ? spaces.ui.components.getLegacyUrlConflict({
-          objectNoun: getMapEmbeddableDisplayName(),
+          objectNoun: MAP_EMBEDDABLE_NAME,
           currentObjectId: this.props.savedMap.getSavedObjectId()!,
           otherObjectId: sharingSavedObjectProps.aliasTargetId!,
           otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${

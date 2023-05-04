@@ -6,6 +6,7 @@
  */
 
 import React, { PureComponent } from 'react';
+// eslint-disable-next-line no-restricted-imports
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 

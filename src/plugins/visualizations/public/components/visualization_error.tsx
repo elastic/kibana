@@ -9,20 +9,20 @@
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 
-interface VisualizationNoResultsProps {
+interface VisualizationErrorProps {
   onInit?: () => void;
   error: string | Error;
 }
 
-export class VisualizationError extends React.Component<VisualizationNoResultsProps> {
+export class VisualizationError extends React.Component<VisualizationErrorProps> {
   public render() {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="visualization-error"
         body={
-          <EuiText size="xs">
+          <EuiText size="xs" data-test-subj="visualization-error-text">
             {typeof this.props.error === 'string' ? this.props.error : this.props.error.message}
           </EuiText>
         }

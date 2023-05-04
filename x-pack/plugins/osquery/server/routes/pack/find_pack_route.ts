@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
+import { filter, map, omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
 import { packSavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
+import type { PackSavedObjectAttributes } from '../../common/types';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const findPackRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/osquery/packs',
+      path: '/api/osquery/packs',
       validate: {
         query: schema.object(
           {
-            pageIndex: schema.maybe(schema.string()),
+            page: schema.maybe(schema.number()),
             pageSize: schema.maybe(schema.number()),
-            sortField: schema.maybe(schema.string()),
-            sortOrder: schema.maybe(schema.string()),
+            sort: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           },
           { unknowns: 'allow' }
         ),
@@ -33,35 +32,34 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
-      const soClientResponse = await savedObjectsClient.find<{
-        name: string;
-        description: string;
-        queries: Array<{ name: string; interval: number }>;
-        policy_ids: string[];
-      }>({
+      const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
         type: packSavedObjectType,
-        page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
+        page: request.query.page ?? 1,
         perPage: request.query.pageSize ?? 20,
-        sortField: request.query.sortField ?? 'updated_at',
-        // @ts-expect-error sortOrder type must be union of ['asc', 'desc']
+        sortField: request.query.sort ?? 'updated_at',
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 
-      soClientResponse.saved_objects.map((pack) => {
+      const packSavedObjects = map(soClientResponse.saved_objects, (pack) => {
         const policyIds = map(
           filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
 
-        // @ts-expect-error update types
-        pack.policy_ids = policyIds;
-        return pack;
+        return {
+          ...pack,
+          policy_ids: policyIds,
+        };
       });
 
       return response.ok({
-        body: soClientResponse,
+        body: {
+          ...omit(soClientResponse, 'saved_objects'),
+          data: packSavedObjects,
+        },
       });
     }
   );

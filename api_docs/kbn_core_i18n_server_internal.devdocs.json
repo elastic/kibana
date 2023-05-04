@@ -1,0 +1,166 @@
+{
+  "id": "@kbn/core-i18n-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-common.I18nService",
+        "type": "Class",
+        "tags": [],
+        "label": "I18nService",
+        "description": [],
+        "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-common.I18nService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-i18n-server-internal",
+                "id": "def-common.I18nService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-common.I18nService.preboot",
+            "type": "Function",
+            "tags": [],
+            "label": "preboot",
+            "description": [],
+            "signature": [
+              "({ pluginPaths, http }: ",
+              "PrebootDeps",
+              ") => Promise<void>"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-i18n-server-internal",
+                "id": "def-common.I18nService.preboot.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginPaths, http }",
+                "description": [],
+                "signature": [
+                  "PrebootDeps"
+                ],
+                "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-common.I18nService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ pluginPaths, http }: ",
+              "SetupDeps",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-i18n-server",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nServerPluginApi",
+                "section": "def-common.I18nServiceSetup",
+                "text": "I18nServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-i18n-server-internal",
+                "id": "def-common.I18nService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginPaths, http }",
+                "description": [],
+                "signature": [
+                  "SetupDeps"
+                ],
+                "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-common.I18nConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "I18nConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly locale: string; }"
+        ],
+        "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

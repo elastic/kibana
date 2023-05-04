@@ -15,9 +15,9 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 import { within } from '@testing-library/dom';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
 
 describe('Transform: Transform List <ExpandedRow />', () => {
@@ -60,7 +60,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
-      const tabContent = screen.getByTestId('transformDetailsTabContent');
+      const tabContent = screen.getByTestId('transformStatsTabContent');
       expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
     });
   });

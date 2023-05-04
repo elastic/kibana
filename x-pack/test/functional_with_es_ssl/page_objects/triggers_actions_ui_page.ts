@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   CustomCheerio,
   CustomCheerioStatic,
-} from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -18,20 +18,21 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const rules = getService('rules');
 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
-      name: $(row).findTestSubject('alertsTableCell-name').find('.euiTableCellContent').text(),
+      name: $(row).findTestSubject('rulesTableCell-name').find('.euiTableCellContent').text(),
       duration: $(row)
-        .findTestSubject('alertsTableCell-duration')
+        .findTestSubject('rulesTableCell-duration')
         .find('.euiTableCellContent')
         .text(),
       interval: $(row)
-        .findTestSubject('alertsTableCell-interval')
+        .findTestSubject('rulesTableCell-interval')
         .find('.euiTableCellContent')
         .text(),
       tags: $(row)
-        .findTestSubject('alertsTableCell-tagsPopover')
+        .findTestSubject('rulesTableCell-tagsPopover')
         .find('.euiTableCellContent')
         .text(),
     };
@@ -48,6 +49,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         await createBtn.click();
       }
     },
+    async getRulesListTitle() {
+      const noPermissionsTitle = await find.byCssSelector('[data-test-subj="rulesList"] .euiTitle');
+      return await noPermissionsTitle.getVisibleText();
+    },
     async clickCreateConnectorButton() {
       const createBtn = await testSubjects.find('createActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
@@ -56,6 +61,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       } else {
         await this.clickCreateFirstConnectorButton();
       }
+    },
+    async tableFinishedLoading() {
+      await find.byCssSelector(
+        '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
+      );
     },
     async searchConnectors(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
@@ -68,13 +78,13 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       );
     },
     async searchAlerts(searchText: string) {
-      const searchBox = await testSubjects.find('alertSearchField');
+      const searchBox = await testSubjects.find('ruleSearchField');
       await searchBox.click();
       await searchBox.clearValue();
       await searchBox.type(searchText);
       await searchBox.pressKeys(ENTER_KEY);
       await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
     },
     async getConnectorsList() {
@@ -96,42 +106,42 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         });
     },
     async getAlertsList() {
-      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('alert-row')
+      return $.findTestSubjects('rule-row')
         .toArray()
         .map((row) => {
           return getRowItemData(row, $);
         });
     },
     async getAlertsListWithStatus() {
-      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
       const $ = await table.parseDomContent();
-      return $.findTestSubjects('alert-row')
+      return $.findTestSubjects('rule-row')
         .toArray()
         .map((row) => {
           const rowItem = getRowItemData(row, $);
           return {
             ...rowItem,
             status: $(row)
-              .findTestSubject('alertsTableCell-status')
+              .findTestSubject('rulesTableCell-lastResponse')
               .find('.euiTableCellContent')
               .text(),
           };
         });
     },
     async isAlertsListDisplayed() {
-      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
       return table.isDisplayed();
     },
     async isAnEmptyAlertsListDisplayed() {
       await retry.try(async () => {
-        const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+        const table = await find.byCssSelector('[data-test-subj="rulesList"] table');
         const $ = await table.parseDomContent();
-        const rows = $.findTestSubjects('alert-row').toArray();
+        const rows = $.findTestSubjects('rule-row').toArray();
         expect(rows.length).to.eql(0);
         const emptyRow = await find.byCssSelector(
-          '[data-test-subj="alertsList"] table .euiTableRow'
+          '[data-test-subj="rulesList"] table .euiTableRow'
         );
         expect(await emptyRow.getVisibleText()).to.eql('No items found');
       });
@@ -139,7 +149,13 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
-      await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
+      await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
+    },
+    async maybeClickOnAlertTab() {
+      if (await testSubjects.exists('ruleDetailsTabbedContent')) {
+        const alertTab = await testSubjects.find('ruleAlertListTab');
+        await alertTab.click();
+      }
     },
     async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
@@ -149,17 +165,14 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await switchBtn.click();
     },
     async clickCreateAlertButton() {
-      const createBtn = await find.byCssSelector(
-        '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
-      );
-      await createBtn.click();
+      await rules.common.clickCreateAlertButton();
     },
     async setAlertName(value: string) {
-      await testSubjects.setValue('alertNameInput', value);
+      await testSubjects.setValue('ruleNameInput', value);
       await this.assertAlertName(value);
     },
     async assertAlertName(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute('alertNameInput', 'value');
+      const actualValue = await testSubjects.getAttribute('ruleNameInput', 'value');
       expect(actualValue).to.eql(expectedValue);
     },
     async setAlertInterval(value: number, unit?: 's' | 'm' | 'h' | 'd') {
@@ -178,22 +191,49 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       }
     },
     async saveAlert() {
-      await testSubjects.click('saveAlertButton');
-      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmAlertSaveModal');
+      await testSubjects.click('saveRuleButton');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmRuleSaveModal');
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
     },
-    async ensureRuleActionToggleApplied(
+    async ensureRuleActionStatusApplied(
       ruleName: string,
-      switchName: string,
-      shouldBeCheckedAsString: string
+      controlName: string,
+      expectedStatus: string
     ) {
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
-        const switchControl = await testSubjects.find(switchName);
-        const isChecked = await switchControl.getAttribute('aria-checked');
-        expect(isChecked).to.eql(shouldBeCheckedAsString);
+        const statusControl = await testSubjects.find(controlName);
+        const title = await statusControl.getAttribute('title');
+        expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
+    },
+    async ensureEventLogColumnExists(columnId: string) {
+      const columnsButton = await testSubjects.find('dataGridColumnSelectorButton');
+      await columnsButton.click();
+
+      const button = await testSubjects.find(
+        `dataGridColumnSelectorToggleColumnVisibility-${columnId}`
+      );
+      const isChecked = await button.getAttribute('aria-checked');
+
+      if (isChecked === 'false') {
+        await button.click();
+      }
+
+      await columnsButton.click();
+    },
+    async sortEventLogColumn(columnId: string, direction: string) {
+      await testSubjects.click(`dataGridHeaderCell-${columnId}`);
+      const popover = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnId}`);
+      const popoverListItems = await popover.findAllByCssSelector('li');
+
+      if (direction === 'asc') {
+        await popoverListItems[1].click();
+      }
+      if (direction === 'desc') {
+        await popoverListItems[2].click();
+      }
     },
   };
 }

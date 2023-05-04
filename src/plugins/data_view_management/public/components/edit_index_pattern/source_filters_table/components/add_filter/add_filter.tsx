@@ -38,12 +38,17 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
         <EuiFieldText
           fullWidth
           value={filter}
+          data-test-subj="fieldFilterInput"
           onChange={(e) => setFilter(e.target.value.trim())}
           placeholder={sourcePlaceholder}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton isDisabled={filter.length === 0} onClick={onAddButtonClick}>
+        <EuiButton
+          data-test-subj="addFieldFilterButton"
+          isDisabled={filter.length === 0}
+          onClick={onAddButtonClick}
+        >
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
             defaultMessage="Add"

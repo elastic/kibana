@@ -10,10 +10,7 @@ import {
   getEventVariableList,
   ValueClickTriggerEventScope,
 } from './event_variables';
-import {
-  RowClickContext,
-  ROW_CLICK_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { createPoint, rowClickData } from '../test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {

@@ -26,6 +26,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response2.body).to.eql(response1.body);
     });
 
+    it('returns 404 error when short URL does not exist', async () => {
+      const response = await supertest.get('/api/short_url/_slug/not-existing-slug');
+
+      expect(response.status).to.be(404);
+    });
+
     it('can resolve a short URL by its slug, when slugs are similar', async () => {
       const rnd = Math.round(Math.random() * 1e6) + 1;
       const now = Date.now();

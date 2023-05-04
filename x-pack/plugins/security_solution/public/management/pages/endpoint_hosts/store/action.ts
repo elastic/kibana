@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { Action } from 'redux';
-import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
-import {
+import type {
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { ServerApiError } from '../../../../common/types';
-import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointState } from '../types';
+import type { ServerApiError } from '../../../../common/types';
+import type { GetPolicyListResponse } from '../../policy/types';
+import type { EndpointState } from '../types';
 
 export interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
@@ -147,49 +146,14 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
-export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
-  payload: EndpointState['endpointDetails']['activityLog']['logData'];
-};
-
 export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
   payload: EndpointState['endpointPendingActions'];
 };
-
-export interface EndpointDetailsActivityLogUpdatePaging {
-  type: 'endpointDetailsActivityLogUpdatePaging';
-  payload: {
-    // disable paging when no more data after paging
-    disabled?: boolean;
-    page: number;
-    pageSize: number;
-    startDate: string;
-    endDate: string;
-  };
-}
-
-export interface UserUpdatedActivityLogRefreshOptions {
-  type: 'userUpdatedActivityLogRefreshOptions';
-  payload: {
-    autoRefreshOptions: { enabled: boolean; duration: number };
-  };
-}
-
-export interface UserUpdatedActivityLogRecentlyUsedDateRanges {
-  type: 'userUpdatedActivityLogRecentlyUsedDateRanges';
-  payload: EuiSuperDatePickerRecentRange[];
-}
 
 export interface EndpointDetailsLoad {
   type: 'endpointDetailsLoad';
   payload: {
     endpointId: string;
-  };
-}
-
-export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
-  type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
-  payload: {
-    isInvalidDateRange?: boolean;
   };
 }
 
@@ -204,11 +168,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
-  | EndpointDetailsActivityLogUpdatePaging
-  | EndpointDetailsActivityLogUpdateIsInvalidDateRange
-  | EndpointDetailsActivityLogChanged
-  | UserUpdatedActivityLogRefreshOptions
-  | UserUpdatedActivityLogRecentlyUsedDateRanges
   | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse

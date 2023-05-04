@@ -53,7 +53,7 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
           type,
           version,
         } = request.body;
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         if (id == null && listId == null) {
           return siemResponse.error({
             body: 'either id or list_id need to be defined',

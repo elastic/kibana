@@ -7,11 +7,10 @@
 
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CoreSetup } from 'src/core/server';
-import { LevelLogger } from '../lib';
 import { ReportingConfigType } from './schema';
 
 /*
@@ -22,9 +21,9 @@ import { ReportingConfigType } from './schema';
 export function createConfig$(
   core: CoreSetup,
   config$: Observable<ReportingConfigType>,
-  parentLogger: LevelLogger
+  parentLogger: Logger
 ) {
-  const logger = parentLogger.clone(['config']);
+  const logger = parentLogger.get('config');
   return config$.pipe(
     map((config) => {
       // encryption key

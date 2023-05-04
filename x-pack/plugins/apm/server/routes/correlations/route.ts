@@ -9,33 +9,43 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
+import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
-import { setupRequest } from '../../lib/helpers/setup_request';
-import {
-  fetchPValues,
-  fetchSignificantCorrelations,
-  fetchTransactionDurationFieldCandidates,
-  fetchTransactionDurationFieldValuePairs,
-  fetchFieldValueFieldStats,
-} from './queries';
-import { fetchFieldsStats } from './queries/field_stats/get_fields_stats';
-
-import { withApmSpan } from '../../utils/with_apm_span';
-
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import {
+  DurationFieldCandidatesResponse,
+  fetchDurationFieldCandidates,
+} from './queries/fetch_duration_field_candidates';
+import {
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/es_fields/apm';
+import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
+import {
+  fetchFieldValuePairs,
+  FieldValuePairsResponse,
+} from './queries/fetch_field_value_pairs';
+import {
+  fetchSignificantCorrelations,
+  SignificantCorrelationsResponse,
+} from './queries/fetch_significant_correlations';
+import { fetchPValues, PValuesResponse } from './queries/fetch_p_values';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { TopValuesStats } from '../../../common/correlations/field_stats_types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
     'To use the correlations API, you must be subscribed to an Elastic Platinum license.',
 });
 
-const fieldCandidatesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/correlations/field_candidates',
+const fieldCandidatesTransactionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
   params: t.type({
     query: t.intersection([
       t.partial({
@@ -49,78 +59,56 @@ const fieldCandidatesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<DurationFieldCandidatesResponse> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const apmEventClient = await getApmEventClient(resources);
 
-    return withApmSpan(
-      'get_correlations_field_candidates',
-      async () =>
-        await fetchTransactionDurationFieldCandidates(esClient, {
-          ...resources.params.query,
-          index: indices.transaction,
-        })
-    );
+    const {
+      query: {
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        environment,
+        kuery,
+      },
+    } = resources.params;
+
+    return fetchDurationFieldCandidates({
+      eventType: ProcessorEvent.transaction,
+      start,
+      end,
+      environment,
+      kuery,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
+      apmEventClient,
+    });
   },
 });
 
-const fieldStatsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/field_stats',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-      }),
-      t.type({
-        fieldsToSample: t.array(t.string),
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
-      throw Boom.forbidden(INVALID_LICENSE);
-    }
-
-    const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
-
-    const { fieldsToSample, ...params } = resources.params.body;
-
-    return withApmSpan(
-      'get_correlations_field_stats',
-      async () =>
-        await fetchFieldsStats(
-          esClient,
-          {
-            ...params,
-            index: indices.transaction,
-          },
-          fieldsToSample
-        )
-    );
-  },
-});
-
-const fieldValueStatsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/correlations/field_value_stats',
+const fieldValueStatsTransactionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/correlations/field_value_stats/transactions',
   params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        samplerShardSize: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -132,34 +120,60 @@ const fieldValueStatsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<TopValuesStats> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { fieldName, fieldValue, ...params } = resources.params.query;
+    const {
+      query: {
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        environment,
+        kuery,
+        fieldName,
+        fieldValue,
+        samplerShardSize: samplerShardSizeStr,
+      },
+    } = resources.params;
 
-    return withApmSpan(
-      'get_correlations_field_value_stats',
-      async () =>
-        await fetchFieldValueFieldStats(
-          esClient,
-          {
-            ...params,
-            index: indices.transaction,
-          },
-          { fieldName, fieldValue }
-        )
-    );
+    const samplerShardSize = samplerShardSizeStr
+      ? parseInt(samplerShardSizeStr, 10)
+      : undefined;
+    return fetchFieldValueFieldStats({
+      apmEventClient,
+      eventType: ProcessorEvent.transaction,
+      start,
+      end,
+      environment,
+      kuery,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
+      field: {
+        fieldName,
+        fieldValue,
+      },
+      samplerShardSize,
+    });
   },
 });
 
-const fieldValuePairsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/field_value_pairs',
+const fieldValuePairsTransactionsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations/field_value_pairs/transactions',
   params: t.type({
     body: t.intersection([
       t.partial({
@@ -176,40 +190,60 @@ const fieldValuePairsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<FieldValuePairsResponse> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { fieldCandidates, ...params } = resources.params.body;
+    const {
+      body: {
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        environment,
+        kuery,
+        fieldCandidates,
+      },
+    } = resources.params;
 
-    return withApmSpan(
-      'get_correlations_field_value_pairs',
-      async () =>
-        await fetchTransactionDurationFieldValuePairs(
-          esClient,
-          {
-            ...params,
-            index: indices.transaction,
-          },
-          fieldCandidates
-        )
-    );
+    return fetchFieldValuePairs({
+      apmEventClient,
+      eventType: ProcessorEvent.transaction,
+      start,
+      end,
+      environment,
+      kuery,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
+      fieldCandidates,
+    });
   },
 });
 
-const significantCorrelationsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/significant_correlations',
+const significantCorrelationsTransactionsRoute = createApmServerRoute({
+  endpoint:
+    'POST /internal/apm/correlations/significant_correlations/transactions',
   params: t.type({
     body: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -225,42 +259,55 @@ const significantCorrelationsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
-      throw Boom.forbidden(INVALID_LICENSE);
-    }
+  handler: async (resources): Promise<SignificantCorrelationsResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const {
+      body: {
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        environment,
+        kuery,
+        durationMin,
+        durationMax,
+        fieldValuePairs,
+      },
+    } = resources.params;
 
-    const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
-
-    const { fieldValuePairs, ...params } = resources.params.body;
-
-    const paramsWithIndex = {
-      ...params,
-      index: indices.transaction,
-    };
-
-    return withApmSpan(
-      'get_significant_correlations',
-      async () =>
-        await fetchSignificantCorrelations(
-          esClient,
-          paramsWithIndex,
-          fieldValuePairs
-        )
-    );
+    return fetchSignificantCorrelations({
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
+      durationMinOverride: durationMin,
+      durationMaxOverride: durationMax,
+      fieldValuePairs,
+    });
   },
 });
 
-const pValuesRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/p_values',
+const pValuesTransactionsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/correlations/p_values/transactions',
   params: t.type({
     body: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -271,33 +318,50 @@ const pValuesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
-      throw Boom.forbidden(INVALID_LICENSE);
-    }
+  handler: async (resources): Promise<PValuesResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const {
+      body: {
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        environment,
+        kuery,
+        durationMin,
+        durationMax,
+        fieldCandidates,
+      },
+    } = resources.params;
 
-    const { fieldCandidates, ...params } = resources.params.body;
-
-    const paramsWithIndex = {
-      ...params,
-      index: indices.transaction,
-    };
-
-    return withApmSpan(
-      'get_p_values',
-      async () => await fetchPValues(esClient, paramsWithIndex, fieldCandidates)
-    );
+    return fetchPValues({
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+          ],
+        },
+      },
+      durationMin,
+      durationMax,
+      fieldCandidates,
+    });
   },
 });
 
-export const correlationsRouteRepository = createApmServerRouteRepository()
-  .add(pValuesRoute)
-  .add(fieldCandidatesRoute)
-  .add(fieldStatsRoute)
-  .add(fieldValueStatsRoute)
-  .add(fieldValuePairsRoute)
-  .add(significantCorrelationsRoute);
+export const correlationsRouteRepository = {
+  ...fieldCandidatesTransactionsRoute,
+  ...fieldValueStatsTransactionsRoute,
+  ...fieldValuePairsTransactionsRoute,
+  ...significantCorrelationsTransactionsRoute,
+  ...pValuesTransactionsRoute,
+};

@@ -7,7 +7,7 @@ Currently with Cypress you can develop `functional` tests and coming soon `CCS` 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
 - Functional Tests:
-  - Gloria Hornero, Frank Hassanabad and Patryk Kopycinsky 
+  - Gloria Hornero and Patryk Kopycinsky 
   
 - CCS Tests:
   - Technical questions around the https://github.com/elastic/integration-test repo:
@@ -64,6 +64,18 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
+Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism` 
+
+```yml
+    ...
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 4
+    ...
+```
+
 #### Custom Targets
 
 This configuration runs cypress tests against an arbitrary host.
@@ -71,7 +83,7 @@ This configuration runs cypress tests against an arbitrary host.
 
 #### integration-test (CI)
 
-This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_integration).
+This configuration is driven by [elastic/integration-test](https://github.com/elastic/integration-test) which, as part of a bigger set of tests, provisions one VM with two instances configured in CCS mode and runs the [CCS Cypress test specs](./ccs_e2e).
 
 The two clusters are named `admin` and `data` and are reachable as follows:
 
@@ -203,7 +215,7 @@ yarn kbn bootstrap
 
 # load auditbeat data needed for test execution (which FTR normally does for us)
 cd x-pack/plugins/security_solution
-node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
@@ -221,7 +233,7 @@ yarn kbn bootstrap
 
 # load auditbeat data needed for test execution (which FTR normally does for us)
 cd x-pack/plugins/security_solution
-node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
@@ -268,13 +280,13 @@ If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long
 
 Below you can find the folder structure used on our Cypress tests.
 
-### ccs_integration/
+### ccs_e2e/
 
 Contains the specs that are executed in a Cross Cluster Search configuration.
 
-### integration/
+### e2e/
 
-Cypress convention. Contains the specs that are going to be executed.
+Cypress convention starting version 10 (previously known as integration). Contains the specs that are going to be executed.
 
 ### fixtures/
 
@@ -331,7 +343,7 @@ The data the tests need:
 - Is generated on the fly using our application APIs (preferred way)
 - Is ingested on the ELS instance using the `es_archiver` utility
 
-By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
+By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: a set of auditbeat data (the `auditbeat` archive). This is usually enough to cover most of the scenarios that we are testing.
 
 ### How to generate a new archive
 
@@ -344,13 +356,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/security_solution`
 
 ```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.
@@ -404,16 +416,16 @@ Similar approach should be used in defining all index patterns, rules, and queri
 ## Development Best Practices
 Below you will a set of best practices that should be followed when writing Cypress tests.
 
-### Make sure your test fail
+### Write easy to maintain tests
+Consider to extract all the elements you need to interact with to the `screens` folder. In this way in case the locator changes, we just need to update the value in one place.
 
-Before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
+### Write easy to read tests
+Consider to extract all the tasks a user should perfom into the `tasks` folder. In this way is going to be easier to undertsand what are we trying to mimic from the user perspective. Also in case there is change on the way the user has to perform the action, we just need to update the value in one place.
 
-### Clean up the state 
-
-Remember to clean up the state of the test after its execution, typically with the `cleanKibana` function. Be mindful of failure scenarios, as well: if your test fails, will it leave the environment in a recoverable state?
+### Make sure your test fails
+Before open a PR with a new test, please first make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ### Minimize the use of es_archive
-
 When possible, create all the data that you need for executing the tests using the application APIS or the UI.
 
 ### Speed up test execution time
@@ -424,6 +436,7 @@ taken into consideration until another solution is implemented:
 - Group the tests that are similar in different contexts.
 - For every context login only once, clean the state between tests if needed without re-loading the page.
 - All tests in a spec file must be order-independent.
+- Clean up the state and data just when needed using `cleanKibana` function.  Executing this function takes a lot of time, so consider if you really need to clean the data before the execution. I.e: If you are just checking that a modal can be opened, you may not need to clean the data.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 

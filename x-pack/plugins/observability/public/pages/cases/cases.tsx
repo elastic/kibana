@@ -5,69 +5,30 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useState } from 'react';
+import React from 'react';
 
-import { useKibana } from '../../utils/kibana_react';
-import { useFetchAlertData, useFetchAlertDetail } from './helpers';
-import { CASES_OWNER, CASES_PATH } from './constants';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { LazyAlertsFlyout } from '../..';
+import { useHasData } from '../../hooks/use_has_data';
+import { Cases } from './components/cases';
+import { LoadingObservability } from '../../components/loading_observability';
+import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
 
-interface CasesProps {
-  userCanCrud: boolean;
-}
-export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
-  const {
-    cases: casesUi,
-    application: { getUrlForApp, navigateToApp },
-  } = useKibana().services;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
-  const [selectedAlertId, setSelectedAlertId] = useState<string>('');
+export function CasesPage() {
+  const userCasesPermissions = useGetUserCasesPermissions();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
-  const handleFlyoutClose = useCallback(() => {
-    setSelectedAlertId('');
-  }, []);
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
 
-  const [alertLoading, alert] = useFetchAlertDetail(selectedAlertId);
+  if (!hasAnyData && !isAllRequestsComplete) {
+    return <LoadingObservability />;
+  }
 
-  return (
-    <>
-      {alertLoading === false && alert && selectedAlertId !== '' && (
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alert={alert}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
-          />
-        </Suspense>
-      )}
-      {casesUi.getCases({
-        basePath: CASES_PATH,
-        userCanCrud,
-        owner: [CASES_OWNER],
-        features: { alerts: { sync: false } },
-        useFetchAlertData,
-        showAlertDetails: (alertId: string) => {
-          setSelectedAlertId(alertId);
-        },
-        ruleDetailsNavigation: {
-          href: (ruleId) => {
-            return getUrlForApp('management', {
-              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-            });
-          },
-          onClick: async (ruleId, ev) => {
-            if (ev != null) {
-              ev.preventDefault();
-            }
-            return navigateToApp('management', {
-              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-            });
-          },
-        },
-      })}
-    </>
+  return userCasesPermissions.read ? (
+    <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
+      <Cases permissions={userCasesPermissions} />
+    </ObservabilityPageTemplate>
+  ) : (
+    <CaseFeatureNoPermissions />
   );
-});
-
-Cases.displayName = 'Cases';
+}

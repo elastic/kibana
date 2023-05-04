@@ -17,11 +17,10 @@
  * size(100) // returns 1
  */
 
-module.exports = { size };
-
 function size(a) {
   if (Array.isArray(a)) return a.length;
   throw new Error('Must pass an array');
 }
 
 size.skipNumberValidation = true;
+module.exports = { size };

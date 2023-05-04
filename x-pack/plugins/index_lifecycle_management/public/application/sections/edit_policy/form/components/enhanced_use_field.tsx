@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 
 // We wrap this component for edit policy so we do not export it from the "shared_imports" dir to avoid
 // accidentally using the non-enhanced version.
-import { UseField } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { Phases } from '../../../../../../common/types';
 

@@ -10,12 +10,12 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import '../../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { zeekRowRenderer } from './zeek_row_renderer';
+import { TimelineId } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -41,10 +41,9 @@ describe('zeek_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = zeekRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: nonZeek,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const wrapper = shallow(<span>{children}</span>);
@@ -61,17 +60,21 @@ describe('zeek_row_renderer', () => {
 
   test('should render a zeek row', () => {
     const children = zeekRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: zeek,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+
+    const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+      'External link',
+      ''
+    );
+    expect(extractEuiIconText).toContain(
       'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });

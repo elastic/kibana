@@ -69,6 +69,16 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
         });
       }
 
+      if (url.pathname === '/_cluster/health') {
+        return send(
+          200,
+          {
+            status: 'green',
+          },
+          { 'x-elastic-product': 'Elasticsearch' }
+        );
+      }
+
       return send(404, {
         error: {
           reason: 'not found',

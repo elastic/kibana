@@ -9,8 +9,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const NoCompatibleRealms: React.FunctionComponent = () => {
   const docLinks = useKibana().services.docLinks!;
@@ -23,7 +22,7 @@ export const NoCompatibleRealms: React.FunctionComponent = () => {
         />
       }
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <FormattedMessage
         id="xpack.security.management.roleMappings.noCompatibleRealmsErrorDescription"

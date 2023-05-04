@@ -5,22 +5,21 @@
  * 2.0.
  */
 
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { RowRendererId } from '..';
-import { Ecs } from '../../../ecs';
-import { BrowserFields } from '../../../search_strategy/index_fields';
 
 export interface RowRenderer {
   id: RowRendererId;
   isInstance: (data: Ecs) => boolean;
   renderRow: ({
-    browserFields,
+    contextId,
     data,
     isDraggable,
-    timelineId,
+    scopeId,
   }: {
-    browserFields: BrowserFields;
+    contextId?: string;
     data: Ecs;
     isDraggable: boolean;
-    timelineId: string;
+    scopeId: string;
   }) => React.ReactNode;
 }

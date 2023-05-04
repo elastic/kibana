@@ -8,10 +8,10 @@
 import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { CaseActionConnector } from '../types';
-import { ConnectorFieldsProps } from './types';
+import type { CaseActionConnector } from '../types';
+import type { ConnectorFieldsProps } from './types';
 import { getCaseConnectors } from '.';
-import { ConnectorTypeFields } from '../../../common/api';
+import type { ConnectorTypeFields } from '../../../common/api';
 
 interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
   connector: CaseActionConnector | null;
@@ -51,5 +51,6 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onCh
     </>
   );
 };
+ConnectorFieldsFormComponent.displayName = 'ConnectorFieldsForm';
 
 export const ConnectorFieldsForm = memo(ConnectorFieldsFormComponent);

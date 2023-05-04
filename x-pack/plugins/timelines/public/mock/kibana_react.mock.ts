@@ -8,10 +8,10 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
-import { CoreStart } from '../../../../../src/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { CoreStart } from '@kbn/core/public';
 
 export const mockGetCreateCaseFlyout = jest.fn();
 export const mockGetAllCasesSelectorModal = jest.fn();

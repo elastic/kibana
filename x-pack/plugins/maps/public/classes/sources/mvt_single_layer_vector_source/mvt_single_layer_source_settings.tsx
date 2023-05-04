@@ -11,8 +11,8 @@ import React, { Fragment, Component, ChangeEvent } from 'react';
 import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { ValidatedDualRange, Value } from '@kbn/kibana-react-plugin/public';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 

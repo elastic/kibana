@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
+import { dirname, extname, join, relative, resolve, basename } from 'path';
 
 export class File {
-  private path: string;
+  public readonly path: string;
   private relativePath: string;
   private ext: string;
 
@@ -47,12 +47,6 @@ export class File {
 
   public isSass() {
     return this.ext === '.sass' || this.ext === '.scss';
-  }
-
-  public isFixture() {
-    return (
-      this.relativePath.split(sep).includes('__fixtures__') || this.path.endsWith('.test-d.ts')
-    );
   }
 
   public getRelativeParentDirs() {

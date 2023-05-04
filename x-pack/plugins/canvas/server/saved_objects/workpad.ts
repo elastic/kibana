@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
-import { removeAttributesId } from './migrations/remove_attributes_id';
+import { workpadMigrationsFactory } from './migrations';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './migrations';
 
-export const workpadType: SavedObjectsType = {
+export const workpadTypeFactory = (
+  deps: CanvasSavedObjectTypeMigrationsDeps
+): SavedObjectsType => ({
   name: CANVAS_TYPE,
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -29,9 +34,7 @@ export const workpadType: SavedObjectsType = {
       '@created': { type: 'date' },
     },
   },
-  migrations: {
-    '7.0.0': removeAttributesId,
-  },
+  migrations: () => workpadMigrationsFactory(deps),
   management: {
     importableAndExportable: true,
     icon: 'canvasApp',
@@ -46,4 +49,4 @@ export const workpadType: SavedObjectsType = {
       };
     },
   },
-};
+});

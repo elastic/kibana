@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
 import { SpacesPlugin } from './plugin';
@@ -27,13 +27,7 @@ export type {
   SpacesClientWrapper,
 } from './spaces_client';
 
-export type {
-  Space,
-  GetAllSpacesOptions,
-  GetAllSpacesPurpose,
-  GetSpaceResult,
-  LegacyUrlAliasTarget,
-} from '../common';
+export type { Space, GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,

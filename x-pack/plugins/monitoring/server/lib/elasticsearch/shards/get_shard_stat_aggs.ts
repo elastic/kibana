@@ -10,14 +10,14 @@
  * @param {Boolean} includeNodes - whether to add the aggs for node shards
  */
 
-import { LegacyServer } from '../../../types';
+import { MonitoringConfig } from '../../../config';
 
 export function getShardAggs(
-  config: ReturnType<LegacyServer['config']>,
+  config: MonitoringConfig,
   includeNodes: boolean,
   includeIndices: boolean
 ) {
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const maxBucketSize = config.ui.max_bucket_size;
   const aggSize = 10;
   const indicesAgg = {
     terms: {

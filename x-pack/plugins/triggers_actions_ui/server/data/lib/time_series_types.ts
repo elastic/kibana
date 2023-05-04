@@ -11,13 +11,13 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { parseDuration } from '../../../../alerting/server';
-import { MAX_INTERVALS } from '../index';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
-  getTooManyIntervalsErrorMessage,
+  MAX_INTERVALS,
   getDateStartAfterDateEndErrorMessage,
-} from './date_range_info';
+  getTooManyIntervalsErrorMessage,
+} from '../../../common/data';
 
 export type { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
 
@@ -44,6 +44,13 @@ export const TimeSeriesQuerySchema = schema.object(
     validate: validateBody,
   }
 );
+
+export const TimeSeriesConditionSchema = schema.object({
+  resultLimit: schema.number(),
+  conditionScript: schema.string({ minLength: 1 }),
+});
+
+export type TimeSeriesCondition = TypeOf<typeof TimeSeriesConditionSchema>;
 
 // using direct type not allowed, circular reference, so body is typed to unknown
 function validateBody(anyParams: unknown): string | undefined {

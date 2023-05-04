@@ -10,7 +10,7 @@ import type { Query, Filter } from '@kbn/es-query';
 import type { RefreshInterval, TimeRange } from './timefilter/types';
 
 export type { RefreshInterval, TimeRange, TimeRangeBounds } from './timefilter/types';
-export type { Query } from '@kbn/es-query';
+export type { Query, AggregateQuery } from '@kbn/es-query';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;

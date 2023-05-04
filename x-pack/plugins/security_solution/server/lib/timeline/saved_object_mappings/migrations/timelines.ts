@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectMigrationMap,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
 import { createMigratedDoc, createReference } from './utils';
 

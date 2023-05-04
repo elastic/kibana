@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PipelineRequestFlyoutProvider as PipelineRequestFlyout } from './pipeline_request_flyout_provider';
+export { PipelineRequestFlyout } from './pipeline_request_flyout';

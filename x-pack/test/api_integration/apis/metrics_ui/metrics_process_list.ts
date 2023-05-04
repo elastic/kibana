@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import {
   ProcessListAPIRequestRT,
   ProcessListAPIResponseRT,
-} from '../../../../plugins/infra/common/http_api/host_details/process_list';
-import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
+} from '@kbn/infra-plugin/common/http_api/host_details/process_list';
+import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

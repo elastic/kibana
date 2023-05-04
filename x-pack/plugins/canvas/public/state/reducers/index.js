@@ -19,12 +19,18 @@ import { assetsReducer } from './assets';
 import { historyReducer } from './history';
 import { embeddableReducer } from './embeddable';
 import { sidebarReducer } from './sidebar';
+import { flyoutsReducer } from './flyouts';
 
 export function getRootReducer(initialState) {
   return combineReducers({
     assets: assetsReducer,
     app: appReducer,
-    transient: reduceReducers(transientReducer, resolvedArgsReducer, sidebarReducer),
+    transient: reduceReducers(
+      transientReducer,
+      resolvedArgsReducer,
+      sidebarReducer,
+      flyoutsReducer
+    ),
     persistent: reduceReducers(
       historyReducer,
       combineReducers({

@@ -7,8 +7,7 @@
 
 import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 import {
@@ -17,26 +16,30 @@ import {
   DATA_ROWINDEX_ATTRIBUTE,
   isTab,
   onKeyDownFocusHandler,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
+import { isInTableScope, isTimelineScope } from '../../../helpers';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { BrowserFields, getAllFieldsByName } from '../../containers/source';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import type { BrowserFields } from '../../containers/source';
+import { getAllFieldsByName } from '../../containers/source';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
   timelineTabType: TimelineTabs | 'flyout';
+  isReadOnly?: boolean;
 }
 
 const TableWrapper = styled.div`
@@ -58,6 +61,7 @@ const TableWrapper = styled.div`
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   flex: 1;
   overflow: auto;
+  overflow-x: hidden;
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
@@ -86,30 +90,22 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     font: ${({ theme }) => theme.eui.euiFont};
   } */
 
+  .inlineActions {
+    opacity: 0;
+  }
+
   .eventFieldsTable__tableRow {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+    .inlineActions-popoverOpen {
+      opacity: 1;
     }
 
     &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
+      .inlineActions {
         opacity: 1;
       }
-    }
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      // TODO: Using this logic from discover
-      /* @include euiBreakpoint('m', 'l', 'xl') {
-        opacity: 0;
-      } */
-      opacity: 0;
     }
   }
 
@@ -130,6 +126,32 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   }
 `;
 
+// Match structure in discover
+const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
+
+// Encapsulating the pagination logic for the table.
+const useFieldBrowserPagination = () => {
+  const [pagination, setPagination] = useState<{ pageIndex: number }>({
+    pageIndex: 0,
+  });
+
+  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
+    setPagination({ pageIndex: index });
+  }, []);
+  const paginationTableProp = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+    }),
+    [pagination]
+  );
+
+  return {
+    onTableChange,
+    paginationTableProp,
+  };
+};
+
 /**
  * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
  * attributes to every `<tr>`.
@@ -137,10 +159,21 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId }) => {
+  ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getScope = useMemo(() => {
+      if (isTimelineScope(scopeId)) {
+        return timelineSelectors.getTimelineByIdSelector();
+      } else if (isInTableScope(scopeId)) {
+        return dataTableSelectors.getTableByIdSelector();
+      }
+    }, [scopeId]);
+    const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
+    const columnHeaders = useDeepEqualSelector((state) => {
+      const { columns } = (getScope && getScope(state, scopeId)) ?? defaults;
+      return getColumnHeaders(columns, browserFields);
+    });
+
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
@@ -152,11 +185,6 @@ export const EventFieldsBrowser = React.memo<Props>(
         })),
       [data, fieldsByName]
     );
-
-    const columnHeaders = useDeepEqualSelector((state) => {
-      const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-      return getColumnHeaders(columns, browserFields);
-    });
 
     const getLinkValue = useCallback(
       (field: string) => {
@@ -171,28 +199,6 @@ export const EventFieldsBrowser = React.memo<Props>(
       [data, columnHeaders]
     );
 
-    const toggleColumn = useCallback(
-      (column: ColumnHeaderOptions) => {
-        if (columnHeaders.some((c) => c.id === column.id)) {
-          dispatch(
-            timelineActions.removeColumn({
-              columnId: column.id,
-              id: timelineId,
-            })
-          );
-        } else {
-          dispatch(
-            timelineActions.upsertColumn({
-              column,
-              id: timelineId,
-              index: 1,
-            })
-          );
-        }
-      },
-      [columnHeaders, dispatch, timelineId]
-    );
-
     const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
       const rowIndex = ariaRowindex != null ? { 'data-rowindex': ariaRowindex } : {};
       return {
@@ -202,35 +208,18 @@ export const EventFieldsBrowser = React.memo<Props>(
       };
     }, []);
 
-    const onUpdateColumns = useCallback(
-      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
-      [dispatch, timelineId]
-    );
-
     const columns = useMemo(
       () =>
         getColumns({
           browserFields,
-          columnHeaders,
           eventId,
-          onUpdateColumns,
-          contextId: `event-fields-browser-for-${timelineId}-${timelineTabType}`,
-          timelineId,
-          toggleColumn,
+          contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
+          scopeId,
           getLinkValue,
           isDraggable,
+          isReadOnly,
         }),
-      [
-        browserFields,
-        columnHeaders,
-        eventId,
-        onUpdateColumns,
-        timelineId,
-        timelineTabType,
-        toggleColumn,
-        getLinkValue,
-        isDraggable,
-      ]
+      [browserFields, eventId, scopeId, timelineTabType, getLinkValue, isDraggable, isReadOnly]
     );
 
     const focusSearchInput = useCallback(() => {
@@ -271,13 +260,18 @@ export const EventFieldsBrowser = React.memo<Props>(
       focusSearchInput();
     }, [focusSearchInput]);
 
+    // Pagination
+    const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
+
     return (
       <TableWrapper onKeyDown={onKeyDown} ref={containerElement}>
         <StyledEuiInMemoryTable
           className={EVENT_FIELDS_TABLE_CLASS_NAME}
           items={items}
+          itemId="field"
           columns={columns}
-          pagination={false}
+          onTableChange={onTableChange}
+          pagination={paginationTableProp}
           rowProps={onSetRowProps}
           search={search}
           sorting={false}

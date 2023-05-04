@@ -20,7 +20,7 @@ export const getRequestsViewDescription = (): InspectorViewDescription => ({
   }),
   order: 20,
   help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
-    defaultMessage: 'View the requests that collected the data',
+    defaultMessage: 'View the search requests used to collect the data',
   }),
   shouldShow(adapters: Adapters) {
     return Boolean(adapters.requests);

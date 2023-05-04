@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
-import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { render } from '../../../../utils/test_helper';
-import { UXSection } from './';
+import { render, data as dataMock } from '../../../../utils/test_helper';
+import { UXSection } from '.';
 import { response } from './mock_data/ux.mock';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  LEGEND_GOOD_LABEL,
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_POOR_LABEL,
+} from '../../../shared/core_web_vitals/translations';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -26,6 +26,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('UXSection', () => {
+  const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
+
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
       hasDataMap: {
@@ -36,36 +38,12 @@ describe('UXSection', () => {
         },
       },
     } as HasDataContextValue);
-    jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: {
-        uiSettings: { get: jest.fn() },
-        http: { basePath: { prepend: jest.fn() } },
-      } as unknown as CoreStart,
-      appMountParameters: {} as AppMountParameters,
-      config: {
-        unsafe: {
-          alertingExperience: { enabled: true },
-          cases: { enabled: true },
-          overviewNext: { enabled: false },
-        },
-      },
-      plugins: {
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {
-                getTime: jest.fn().mockImplementation(() => ({
-                  from: '2020-10-08T06:00:00.000Z',
-                  to: '2020-10-08T07:00:00.000Z',
-                })),
-              },
-            },
-          },
-        },
-      } as unknown as ObservabilityPublicPluginsStart,
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      ObservabilityPageTemplate: KibanaPageTemplate,
-    }));
+
+    // @ts-expect-error `dataMock` is not properly propagating the mock types
+    dataMock.query.timefilter.timefilter.getTime.mockReturnValue({
+      from: '2020-10-08T06:00:00.000Z',
+      to: '2020-10-08T07:00:00.000Z',
+    });
   });
   it('renders with core web vitals', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -73,12 +51,12 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getAllByText } = render(
-      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+    const { getByText, getByTestId, getAllByTestId } = render(
+      <UXSection bucketSize={bucketSize} />
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
-    expect(getByText('View in app')).toBeInTheDocument();
+    expect(getByText('Show dashboard')).toBeInTheDocument();
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
     expect(getByText('Largest contentful paint')).toBeInTheDocument();
     expect(getByText('1.94 s')).toBeInTheDocument();
@@ -86,20 +64,20 @@ describe('UXSection', () => {
     expect(getByText('0.010')).toBeInTheDocument();
 
     // LCP Rank Values
-    expect(getByText('Good (65%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (19%)')).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-65`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-19`)).toBeInTheDocument();
 
     // LCP and FID both have same poor value
-    expect(getAllByText('Poor (16%)')).toHaveLength(2);
+    expect(getAllByTestId(`${LEGEND_POOR_LABEL}-16`)).toHaveLength(2);
 
     // FID Rank Values
-    expect(getByText('Good (73%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (11%)')).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-73`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-11`)).toBeInTheDocument();
 
     // CLS Rank Values
-    expect(getByText('Good (86%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (8%)')).toBeInTheDocument();
-    expect(getByText('Poor (6%)')).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-86`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-8`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_POOR_LABEL}-6`)).toBeInTheDocument();
   });
   it('shows loading state', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
@@ -108,12 +86,12 @@ describe('UXSection', () => {
       refetch: jest.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
-      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+      <UXSection bucketSize={bucketSize} />
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('--')).toHaveLength(3);
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
   it('shows empty state', () => {
@@ -123,12 +101,12 @@ describe('UXSection', () => {
       refetch: jest.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
-      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+      <UXSection bucketSize={bucketSize} />
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getAllByText('No data is available.')).toHaveLength(3);
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
 });

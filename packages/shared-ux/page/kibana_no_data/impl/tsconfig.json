@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-prompt-no-data-views",
+    "@kbn/shared-ux-page-no-data-config",
+    "@kbn/shared-ux-page-kibana-no-data-types",
+    "@kbn/shared-ux-page-kibana-no-data-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-card-no-data",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

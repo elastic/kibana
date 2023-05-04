@@ -12,17 +12,18 @@ import type {
   AddExceptionListItemProps,
   ApiCallByIdProps,
   ApiCallByListIdProps,
+  DuplicateExceptionListProps,
   UpdateExceptionListItemProps,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { coreMock } from '@kbn/core/public/mocks';
+import { HttpStart } from '@kbn/core/public';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
-import { HttpStart } from '../../../../../../src/core/public';
 
 jest.mock('@kbn/securitysolution-list-api');
 
@@ -297,7 +298,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -313,7 +313,6 @@ describe('useApi', () => {
         });
 
         const expected: ApiCallByListIdProps = {
-          filterOptions: [],
           http: mockKibanaHttpService,
           listIds: ['list_id'],
           namespaceTypes: ['single'],
@@ -351,7 +350,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -389,7 +387,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -463,6 +460,63 @@ describe('useApi', () => {
         };
 
         expect(spyOnUpdateExceptionListItem).toHaveBeenCalledWith(expected);
+      });
+    });
+  });
+
+  describe('duplicateExceptionList', () => {
+    test('it invokes "onSuccess" when duplication does not throw', async () => {
+      const onSuccessMock = jest.fn();
+      const spyOnDuplicateExceptionList = jest
+        .spyOn(api, 'duplicateExceptionList')
+        .mockResolvedValue(getExceptionListSchemaMock());
+
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+          useApi(mockKibanaHttpService)
+        );
+        await waitForNextUpdate();
+
+        await result.current.duplicateExceptionList({
+          includeExpiredExceptions: false,
+          listId: 'my_list',
+          namespaceType: 'single',
+          onError: jest.fn(),
+          onSuccess: onSuccessMock,
+        });
+
+        const expected: DuplicateExceptionListProps = {
+          http: mockKibanaHttpService,
+          includeExpiredExceptions: false,
+          listId: 'my_list',
+          namespaceType: 'single',
+          signal: new AbortController().signal,
+        };
+
+        expect(spyOnDuplicateExceptionList).toHaveBeenCalledWith(expected);
+        expect(onSuccessMock).toHaveBeenCalled();
+      });
+    });
+
+    test('invokes "onError" callback if "duplicateExceptionList" fails', async () => {
+      const mockError = new Error('failed to duplicate item');
+      jest.spyOn(api, 'duplicateExceptionList').mockRejectedValue(mockError);
+
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+          useApi(mockKibanaHttpService)
+        );
+        await waitForNextUpdate();
+
+        await result.current.duplicateExceptionList({
+          includeExpiredExceptions: false,
+          listId: 'my_list',
+          namespaceType: 'single',
+          onError: onErrorMock,
+          onSuccess: jest.fn(),
+        });
+
+        expect(onErrorMock).toHaveBeenCalledWith(mockError);
       });
     });
   });

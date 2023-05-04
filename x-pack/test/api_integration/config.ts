@@ -10,11 +10,10 @@ import { services } from './services';
 
 export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
-    testFiles: [require.resolve('./apis')],
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
     security: xPackFunctionalTestsConfig.get('security'),
@@ -28,18 +27,10 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--telemetry.optIn=true',
         '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
-        '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
-        '--xpack.data_enhanced.search.sessions.notTouchedTimeout=15s', // shorten notTouchedTimeout for quicker testing
-        '--xpack.data_enhanced.search.sessions.trackingInterval=5s', // shorten trackingInterval for quicker testing
-        '--xpack.data_enhanced.search.sessions.cleanupInterval=5s', // shorten cleanupInterval for quicker testing
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
-        '--xpack.uptime.unsafe.service.enabled=true',
-        '--xpack.uptime.unsafe.service.password=test',
-        '--xpack.uptime.unsafe.service.manifestUrl=http://test.com',
-        '--xpack.uptime.unsafe.service.username=localKibanaIntegrationTestsUser',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
+        '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       ],
     },
     esTestCluster: {

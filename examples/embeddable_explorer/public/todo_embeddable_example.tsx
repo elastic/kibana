@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
@@ -23,9 +23,9 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { TodoInput } from '../../../examples/embeddable_examples/public/todo';
-import { TodoEmbeddableFactory } from '../../../examples/embeddable_examples/public';
-import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
+import { TodoInput } from '@kbn/embeddable-examples-plugin/public/todo';
+import { TodoEmbeddableFactory } from '@kbn/embeddable-examples-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 interface Props {
   todoEmbeddableFactory: TodoEmbeddableFactory;

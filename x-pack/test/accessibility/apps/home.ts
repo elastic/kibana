@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('Kibana Home', () => {
+  describe('Kibana Home Accessibility', () => {
     before(async () => {
       await common.navigateToApp('home');
     });

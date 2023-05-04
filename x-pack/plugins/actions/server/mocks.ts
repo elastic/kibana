@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { actionsClientMock } from './actions_client.mock';
-import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
-import { Services } from './types';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { actionsClientMock } from './actions_client.mock';
+import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
+import { Services } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
-import { Logger } from '../../../../src/core/server';
+import { ConnectorTokenClient } from './lib/connector_token_client';
+import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -24,7 +25,11 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    registerSubActionConnectorType: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
+    getSubActionConnectorClass: jest.fn(),
+    getCaseConnectorClass: jest.fn(),
+    getActionsHealth: jest.fn(),
   };
   return mock;
 };
@@ -33,7 +38,9 @@ const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
+    getAllTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
+    getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),

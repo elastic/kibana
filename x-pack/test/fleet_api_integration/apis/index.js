@@ -8,55 +8,43 @@
 import { setupTestUsers } from './test_users';
 
 export default function ({ loadTestFile, getService }) {
+  // total runtime ~ 4m
   describe('Fleet Endpoints', function () {
     before(async () => {
       await setupTestUsers(getService('security'));
     });
 
-    // EPM
-    loadTestFile(require.resolve('./epm'));
-
     // Fleet setup
-    loadTestFile(require.resolve('./fleet_setup'));
-
-    // Agents
-    loadTestFile(require.resolve('./agents/delete'));
-    loadTestFile(require.resolve('./agents/list'));
-    loadTestFile(require.resolve('./agents/unenroll'));
-    loadTestFile(require.resolve('./agents/actions'));
-    loadTestFile(require.resolve('./agents/upgrade'));
-    loadTestFile(require.resolve('./agents/reassign'));
-    loadTestFile(require.resolve('./agents/status'));
+    loadTestFile(require.resolve('./fleet_setup')); // ~ 6s
 
     // Enrollment API keys
-    loadTestFile(require.resolve('./enrollment_api_keys/crud'));
-
-    // Package policies
-    loadTestFile(require.resolve('./package_policy/create'));
-    loadTestFile(require.resolve('./package_policy/update'));
-    loadTestFile(require.resolve('./package_policy/get'));
-    loadTestFile(require.resolve('./package_policy/delete'));
-    loadTestFile(require.resolve('./package_policy/upgrade'));
-
-    // Agent policies
-    loadTestFile(require.resolve('./agent_policy/index'));
+    loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
 
     // Data Streams
-    loadTestFile(require.resolve('./data_streams/index'));
+    loadTestFile(require.resolve('./data_streams')); // ~ 20s
 
     // Settings
-    loadTestFile(require.resolve('./settings/index'));
-
-    // Preconfiguration
-    loadTestFile(require.resolve('./preconfiguration/index'));
+    loadTestFile(require.resolve('./settings')); // ~ 7s
 
     // Service tokens
-    loadTestFile(require.resolve('./service_tokens'));
+    loadTestFile(require.resolve('./service_tokens')); // ~ 2s
 
     // Outputs
-    loadTestFile(require.resolve('./outputs'));
+    loadTestFile(require.resolve('./outputs')); // ~ 1m 30s
+
+    // Download sources
+    loadTestFile(require.resolve('./download_sources')); // ~ 15s
 
     // Telemetry
-    loadTestFile(require.resolve('./fleet_telemetry'));
+    loadTestFile(require.resolve('./fleet_telemetry')); // ~ 30s
+
+    // Integrations
+    loadTestFile(require.resolve('./integrations')); // ~ 8s
+
+    // Fleet server hosts
+    loadTestFile(require.resolve('./fleet_server_hosts/crud')); // ~ 9s
+
+    // Fleet proxies
+    loadTestFile(require.resolve('./fleet_proxies/crud')); // ~ 20s
   });
 }

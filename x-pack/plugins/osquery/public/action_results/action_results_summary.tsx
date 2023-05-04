@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -20,6 +18,7 @@ interface ActionResultsSummaryProps {
   actionId: string;
   expirationDate?: string;
   agentIds?: string[];
+  error?: string;
 }
 
 const renderErrorMessage = (error: string) => (
@@ -32,11 +31,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
   expirationDate,
   agentIds,
+  error,
 }) => {
-  // @ts-expect-error update types
-  const [pageIndex, setPageIndex] = useState(0);
-  // @ts-expect-error update types
-  const [pageSize, setPageSize] = useState(50);
+  const [pageIndex] = useState(0);
+  const [pageSize] = useState(50);
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
@@ -56,23 +54,42 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     isLive,
     skip: !hasActionResultsPrivileges,
   });
-  if (expired) {
-    // @ts-expect-error update types
-    edges.forEach((edge) => {
-      if (!edge.fields.completed_at) {
-        edge.fields['error.keyword'] = edge.fields.error = [
-          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
-            defaultMessage: 'The action request timed out.',
-          }),
-        ];
-      }
-    });
-  }
+
+  useEffect(() => {
+    if (error) {
+      edges.forEach((edge) => {
+        if (edge.fields) {
+          edge.fields['error.skipped'] = edge.fields.error = [
+            i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedErrorText', {
+              defaultMessage:
+                "This query hasn't been called due to parameter used and its value not found in the alert.",
+            }),
+          ];
+        }
+      });
+    } else if (expired) {
+      edges.forEach((edge) => {
+        if (!edge.fields?.completed_at && edge.fields) {
+          edge.fields['error.keyword'] = edge.fields.error = [
+            i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
+              defaultMessage: 'The action request timed out.',
+            }),
+          ];
+        }
+      });
+    }
+  }, [edges, error, expired]);
 
   const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
   const renderRowsColumn = useCallback((rowsCount) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
     (_, item) => {
+      if (item.fields['error.skipped']) {
+        return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
+          defaultMessage: 'skipped',
+        });
+      }
+
       if (!item.fields.completed_at) {
         return expired
           ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
@@ -144,11 +161,11 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   useEffect(() => {
     setIsLive(() => {
-      if (!agentIds?.length || expired) return false;
+      if (!agentIds?.length || expired || error) return false;
 
       return !!(aggregations.totalResponded !== agentIds?.length);
     });
-  }, [agentIds?.length, aggregations.totalResponded, expired]);
+  }, [agentIds?.length, aggregations.totalResponded, error, expired]);
 
   return edges.length ? (
     <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />

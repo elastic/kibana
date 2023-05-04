@@ -10,13 +10,9 @@ import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
-import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import {
-  FeatureCatalogueEntry,
-  FeatureCatalogueCategory,
-} from '../../../../../../src/plugins/home/public';
-// @ts-expect-error untyped component
+import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks, useKibana } from '@kbn/kibana-react-plugin/public';
+import { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { Synopsis } from '../synopsis';
 import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 
@@ -84,7 +80,7 @@ ManageData.propTypes = {
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.oneOf(Object.values(FeatureCatalogueCategory)).isRequired,
+      category: PropTypes.string.isRequired,
       order: PropTypes.number as PropTypes.Validator<number | undefined>,
     }).isRequired
   ).isRequired,

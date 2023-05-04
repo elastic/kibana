@@ -51,7 +51,6 @@ export const DurationEventStartEnd = React.memo<{
       ? uniq(eventDuration).map((duration) => (
           <EuiFlexItem grow={false} key={duration}>
             <DefaultDraggable
-              data-test-subj="event-duration"
               field={EVENT_DURATION_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
               isDraggable={isDraggable}
@@ -75,7 +74,6 @@ export const DurationEventStartEnd = React.memo<{
       ? uniq(eventStart).map((start) => (
           <EuiFlexItem grow={false} key={start}>
             <DefaultDraggable
-              data-test-subj="event-start"
               field={EVENT_START_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_START_FIELD_NAME}-${start}`}
               isDraggable={isDraggable}
@@ -94,7 +92,6 @@ export const DurationEventStartEnd = React.memo<{
       ? uniq(eventEnd).map((end) => (
           <EuiFlexItem grow={false} key={end}>
             <DefaultDraggable
-              data-test-subj="event-end"
               field={EVENT_END_FIELD_NAME}
               id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_END_FIELD_NAME}-${end}`}
               isDraggable={isDraggable}

@@ -9,8 +9,9 @@ import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { GeoJsonProperties, Geometry } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { FeaturesTooltip } from './features_tooltip';
 import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
@@ -39,6 +40,7 @@ interface Props {
   mbMap: MbMap;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
+  executionContext: KibanaExecutionContext;
 }
 
 interface State {
@@ -88,32 +90,17 @@ export class TooltipPopover extends Component<Props, State> {
 
   _loadFeatureProperties = async ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties?: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => {
     const tooltipLayer = this.props.findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
 
-    let targetFeature;
-    if (typeof featureId !== 'undefined') {
-      targetFeature = tooltipLayer.getFeatureById(featureId);
-    }
-
-    let properties: GeoJsonProperties | undefined;
-    if (mbProperties) {
-      properties = mbProperties;
-    } else if (targetFeature?.properties) {
-      properties = targetFeature?.properties;
-    } else {
-      properties = {};
-    }
-    return await tooltipLayer.getPropertiesForTooltip(properties);
+    return await tooltipLayer.getPropertiesForTooltip(properties, this.props.executionContext);
   };
 
   _getLayerName = async (layerId: string) => {
@@ -172,6 +159,7 @@ export class TooltipPopover extends Component<Props, State> {
           pointerEvents: 'none',
           transform: `translate(${this.state.x - 13 - offset}px, ${this.state.y - 13}px)`,
         }}
+        repositionOnScroll
       >
         {this._renderTooltipContent()}
       </EuiPopover>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpFetchQuery } from 'src/core/public';
+import type { HttpFetchQuery } from '@kbn/core/public';
 
 export interface ListWithKuery extends HttpFetchQuery {
   page?: number;
@@ -20,4 +20,8 @@ export interface ListResult<T> {
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface BulkGetResult<T> {
+  items: T[];
 }

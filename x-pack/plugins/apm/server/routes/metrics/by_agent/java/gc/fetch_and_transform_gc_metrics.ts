@@ -6,9 +6,10 @@
  */
 
 import { sum, round } from 'lodash';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
-import { Setup } from '../../../../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
 import { ChartBase } from '../../../types';
 
@@ -16,48 +17,66 @@ import {
   AGENT_NAME,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
+  LABEL_GC,
+  METRIC_OTEL_JVM_GC_DURATION,
   METRIC_JAVA_GC_TIME,
   SERVICE_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { getBucketSize } from '../../../../../lib/helpers/get_bucket_size';
+} from '../../../../../../common/es_fields/apm';
+import { getBucketSize } from '../../../../../../common/utils/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../../../../common/utils/environment_query';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../../../observability/server';
-import { ProcessorEvent } from '../../../../../../common/processor_event';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export const RATE = 'rate';
+export const TIME = 'time';
 
 export async function fetchAndTransformGcMetrics({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   chartBase,
-  fieldName,
+  rateOrTime,
   operationName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
   end: number;
   chartBase: ChartBase;
-  fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  rateOrTime: typeof RATE | typeof TIME;
   operationName: string;
+  isOpenTelemetry?: boolean;
 }) {
-  const { apmEventClient, config } = setup;
-
   const { bucketSize } = getBucketSize({ start, end });
+
+  const groupByField = isOpenTelemetry ? LABEL_GC : LABEL_NAME;
+
+  const targetField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_GC_DURATION
+    : rateOrTime === RATE
+    ? METRIC_JAVA_GC_COUNT
+    : METRIC_JAVA_GC_TIME;
+
+  const fieldAggregation = isOpenTelemetry
+    ? rateOrTime === RATE
+      ? { value_count: { field: targetField } }
+      : { sum: { field: targetField } }
+    : { max: { field: targetField } };
 
   // GC rate and time are reported by the agents as monotonically
   // increasing counters, which means that we have to calculate
@@ -68,6 +87,7 @@ export async function fetchAndTransformGcMetrics({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -77,7 +97,7 @@ export async function fetchAndTransformGcMetrics({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            { exists: { field: fieldName } },
+            { exists: { field: targetField } },
             { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
@@ -85,7 +105,7 @@ export async function fetchAndTransformGcMetrics({
       aggs: {
         per_pool: {
           terms: {
-            field: `${LABEL_NAME}`,
+            field: `${groupByField}`,
           },
           aggs: {
             timeseries: {
@@ -96,11 +116,7 @@ export async function fetchAndTransformGcMetrics({
               }),
               aggs: {
                 // get the max value
-                max: {
-                  max: {
-                    field: fieldName,
-                  },
-                },
+                max: fieldAggregation,
                 // get the derivative, which is the delta y
                 derivative: {
                   derivative: {
@@ -148,7 +164,7 @@ export async function fetchAndTransformGcMetrics({
 
       // convert to milliseconds if we're calculating time, but not for rate
       const y =
-        unconvertedY !== null && fieldName === METRIC_JAVA_GC_TIME
+        unconvertedY !== null && rateOrTime === TIME
           ? unconvertedY * 1000
           : unconvertedY;
 

@@ -14,13 +14,16 @@ import {
   EuiLoadingSpinner,
   EuiBottomBar,
   EuiSpacer,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { ApplicationStart } from 'kibana/public';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import type { ApplicationStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
   agentStatusSummary,
@@ -28,15 +31,12 @@ import {
   isLoading,
 } from '../../../store/policy_details/selectors';
 
-import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
-import { AppAction } from '../../../../../../common/store/actions';
-import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
-import { SecurityPageName } from '../../../../../../app/types';
-import { getEndpointListPath } from '../../../../../common/routing';
+import type { AppAction } from '../../../../../../common/store/actions';
+import { getEndpointListPath, getPoliciesPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
+import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../../../common/components/page_wrapper';
 import { PolicyDetailsForm } from '../../policy_details_form';
 import { ConfirmUpdate } from './policy_form_confirm_update';
@@ -45,11 +45,13 @@ export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const {
     services: {
+      theme,
       application: { navigateToApp },
     },
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const showEditableFormFields = useShowEditableFormFields();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -61,12 +63,23 @@ export const PolicyFormLayout = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
-  const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
+  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routingOnCancelNavigateTo ?? [APP_UI_ID, { path: hostListRouterPath }];
-  }, [hostListRouterPath, routingOnCancelNavigateTo]);
+    if (routingOnCancelNavigateTo) {
+      return routingOnCancelNavigateTo;
+    }
+
+    return [
+      APP_UI_ID,
+      {
+        path: isPolicyListEnabled
+          ? getPoliciesPath()
+          : getEndpointListPath({ name: 'endpointList' }),
+      },
+    ];
+  }, [isPolicyListEnabled, routingOnCancelNavigateTo]);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -86,7 +99,8 @@ export const PolicyFormLayout = React.memo(() => {
                 defaultMessage="Integration {name} has been updated."
                 values={{ name: policyName }}
               />
-            </span>
+            </span>,
+            { theme$: theme.theme$ }
           ),
         });
 
@@ -103,7 +117,7 @@ export const PolicyFormLayout = React.memo(() => {
         });
       }
     }
-  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
+  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState, theme.theme$]);
 
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
@@ -135,7 +149,6 @@ export const PolicyFormLayout = React.memo(() => {
     return (
       <SecuritySolutionPageWrapper noTimeline>
         {isPolicyLoading ? <EuiLoadingSpinner size="xl" /> : null}
-        <SpyRoute pageName={SecurityPageName.administration} />
       </SecuritySolutionPageWrapper>
     );
   }
@@ -144,7 +157,7 @@ export const PolicyFormLayout = React.memo(() => {
     <>
       {showConfirm && (
         <ConfirmUpdate
-          hostCount={policyAgentStatusSummary?.total ?? 0}
+          endpointCount={policyAgentStatusSummary?.total ?? 0}
           onCancel={handleSaveCancel}
           onConfirm={handleSaveConfirmation}
         />
@@ -154,31 +167,35 @@ export const PolicyFormLayout = React.memo(() => {
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="ghost"
-              onClick={handleCancelOnClick}
-              data-test-subj="policyDetailsCancelButton"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
+            <EuiThemeProvider colorMode="dark">
+              <EuiButtonEmpty
+                color="text"
+                onClick={handleCancelOnClick}
+                data-test-subj="policyDetailsCancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiThemeProvider>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={true}
-              iconType="save"
-              data-test-subj="policyDetailsSaveButton"
-              onClick={handleSaveOnClick}
-              isLoading={isPolicyLoading}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.save"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {showEditableFormFields && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                iconType="save"
+                data-test-subj="policyDetailsSaveButton"
+                onClick={handleSaveOnClick}
+                isLoading={isPolicyLoading}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.save"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiBottomBar>
     </>

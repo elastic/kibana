@@ -7,8 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import type { EsIndex } from '../types/es_index';
-import { isPopulatedObject } from '../shared_imports';
+import type { EsIngestPipeline } from '../types/es_ingest_pipeline';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will
@@ -16,8 +18,10 @@ import { isPopulatedObject } from '../shared_imports';
 import type { FieldHistogramsResponseSchema } from './field_histograms';
 import type { GetTransformsAuditMessagesResponseSchema } from './audit_messages';
 import type { DeleteTransformsResponseSchema } from './delete_transforms';
+import type { ResetTransformsResponseSchema } from './reset_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
+import type { ScheduleNowTransformsResponseSchema } from './schedule_now_transforms';
 import type {
   GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
@@ -56,8 +60,21 @@ export const isDeleteTransformsResponseSchema = (
   );
 };
 
+export const isResetTransformsResponseSchema = (
+  arg: unknown
+): arg is ResetTransformsResponseSchema => {
+  return (
+    isPopulatedObject(arg) &&
+    Object.values(arg).every((d) => isPopulatedObject(d, ['transformReset']))
+  );
+};
+
 export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
+};
+
+export const isEsIngestPipelines = (arg: unknown): arg is EsIngestPipeline[] => {
+  return Array.isArray(arg) && arg.every((d) => isPopulatedObject(d, ['name']));
 };
 
 export const isEsSearchResponse = (arg: unknown): arg is estypes.SearchResponse => {
@@ -87,7 +104,7 @@ export const isFieldHistogramsResponseSchema = (
 export const isGetTransformsAuditMessagesResponseSchema = (
   arg: unknown
 ): arg is GetTransformsAuditMessagesResponseSchema => {
-  return Array.isArray(arg);
+  return isPopulatedObject(arg, ['messages', 'total']);
 };
 
 export const isPostTransformsPreviewResponseSchema = (
@@ -126,5 +143,11 @@ export const isStartTransformsResponseSchema = (
 export const isStopTransformsResponseSchema = (
   arg: unknown
 ): arg is StopTransformsResponseSchema => {
+  return isGenericSuccessResponseSchema(arg);
+};
+
+export const isScheduleNowTransformsResponseSchema = (
+  arg: unknown
+): arg is ScheduleNowTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
 };

@@ -1,0 +1,29 @@
+{
+  "groups": ["security", "windows"],
+  "description": "Security: Windows - Looks for rare and unusual Windows service names which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare service names.",
+        "function": "rare",
+        "by_field_name": "winlog.event_data.ServiceName",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "winlog.event_data.ServiceName"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-windows-v3",
+    "security_app_display_name": "Unusual Windows Service",
+    "managed": true,
+    "job_revision": 4
+  }
+}

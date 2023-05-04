@@ -12,22 +12,6 @@ let mlNodeCount: number = 0;
 let lazyMlNodeCount: number = 0;
 let userHasPermissionToViewMlNodeCount: boolean = false;
 
-export async function checkMlNodesAvailable(redirectToJobsManagementPage: () => Promise<void>) {
-  try {
-    const { count, lazyNodeCount } = await getMlNodeCount();
-    if (count > 0 || lazyNodeCount > 0) {
-      Promise.resolve();
-    } else {
-      throw Error('Cannot load count of ML nodes');
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-    await redirectToJobsManagementPage();
-    Promise.reject();
-  }
-}
-
 export async function getMlNodeCount(): Promise<MlNodeCount> {
   try {
     const nodes = await ml.mlNodeCount();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'src/core/public';
+import { HttpHandler } from '@kbn/core/public';
 import { getJobId } from '../../../common/infra_ml';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 
@@ -19,7 +19,7 @@ export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
     await callStopDatafeeds({ spaceId, sourceId, jobTypes }, fetch);
   } catch (err) {
     // Proceed only if datafeed has been deleted or didn't exist in the first place
-    if (err?.res?.status !== 404) {
+    if (err?.response?.status !== 404) {
       throw err;
     }
   }

@@ -16,10 +16,13 @@ import React, {
   useRef,
   FunctionComponent,
 } from 'react';
+import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { BehaviorSubject } from 'rxjs';
+import { RuntimePrimitiveTypes } from '../../shared_imports';
+import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -27,12 +30,12 @@ import type {
   PainlessExecuteContext,
   Context,
   Params,
-  ClusterData,
-  From,
   EsDocument,
-  ScriptErrorCodes,
   FetchDocError,
+  FieldPreview,
+  PreviewState,
 } from './types';
+import type { PreviewController } from './preview_controller';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
@@ -43,12 +46,37 @@ const defaultParams: Params = {
   document: null,
   type: null,
   format: null,
+  parentName: null,
 };
 
-export const defaultValueFormatter = (value: unknown) =>
-  `<span>${typeof value === 'object' ? JSON.stringify(value) : value ?? '-'}</span>`;
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  return renderToString(<>{content}</>);
+};
 
-export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
+export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes => {
+  const valueType = typeof value;
+  if (valueType === 'string') return 'keyword';
+  if (valueType === 'number') return 'double';
+  if (valueType === 'boolean') return 'boolean';
+  return 'keyword';
+};
+
+const documentsSelector = (state: PreviewState) => {
+  const currentDocument = state.documents[state.currentIdx];
+  return {
+    currentDocument,
+    totalDocs: state.documents.length,
+    currentDocIndex: currentDocument?._index,
+    currentDocId: currentDocument?._id,
+    currentIdx: state.currentIdx,
+  };
+};
+
+export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
+  controller,
+  children,
+}) => {
   const previewCount = useRef(0);
 
   // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
@@ -71,59 +99,48 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       notifications,
       api: { getFieldPreview },
     },
-    fieldFormats,
+    fieldName$,
   } = useFieldEditorContext();
 
-  /** Response from the Painless _execute API */
-  const [previewResponse, setPreviewResponse] = useState<{
-    fields: Context['fields'];
-    error: Context['error'];
-  }>({ fields: [], error: null });
+  const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
+
+  const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
+
   /** Possible error while fetching sample documents */
   const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
-  /** The sample documents fetched from the cluster */
-  const [clusterData, setClusterData] = useState<ClusterData>({
-    documents: [],
-    currentIdx: 0,
-  });
-  /** Flag to show/hide the preview panel */
-  const [isPanelVisible, setIsPanelVisible] = useState(true);
-  /** Flag to indicate if we are loading document from cluster */
-  const [isFetchingDocument, setIsFetchingDocument] = useState(false);
-  /** Flag to indicate if we are calling the _execute API */
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  /** Flag to indicate if we are loading a single document by providing its ID */
-  const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
-  /** Define if we provide the document to preview from the cluster or from a custom JSON */
-  const [from, setFrom] = useState<From>('cluster');
-  /** Map of fields pinned to the top of the list */
-  const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
-  /** Keep track if the script painless syntax is being validated and if it is valid  */
+
   const [scriptEditorValidation, setScriptEditorValidation] = useState<{
     isValidating: boolean;
     isValid: boolean;
     message: string | null;
   }>({ isValidating: false, isValid: true, message: null });
 
-  const { documents, currentIdx } = clusterData;
-  const currentDocument: EsDocument | undefined = documents[currentIdx];
-  const currentDocIndex: string | undefined = currentDocument?._index;
-  const currentDocId: string | undefined = currentDocument?._id;
-  const totalDocs = documents.length;
-  const isCustomDocId = customDocIdToLoad !== null;
+  /** Flag to show/hide the preview panel */
+  const [isPanelVisible, setIsPanelVisible] = useState(true);
+  /** Flag to indicate if we are loading document from cluster */
+  const [isFetchingDocument, setIsFetchingDocument] = useState(false);
+  /** Flag to indicate if we are calling the _execute API */
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  /** Flag to indicate if we are loading a single document by providing its ID */
+  const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
+
+  const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
+    useStateSelector(controller.state$, documentsSelector);
+
   let isPreviewAvailable = true;
 
   // If no documents could be fetched from the cluster (and we are not trying to load
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
-  // (the _execute API expects one) and thus the validation should not expect any value.
-  if (!isFetchingDocument && !isCustomDocId && documents.length === 0) {
+  // (the _execute API expects one) and thus the validation should not expect a value.
+  if (!isFetchingDocument && !customDocIdToLoad && totalDocs === 0) {
     isPreviewAvailable = false;
   }
 
-  const { name, document, script, format, type } = params;
+  const { name, document, script, format, type, parentName } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -144,45 +161,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     );
   }, [type, script, currentDocId]);
 
-  const setPreviewError = useCallback((error: Context['error']) => {
-    setPreviewResponse((prev) => ({
-      ...prev,
-      error,
-    }));
-  }, []);
-
-  const clearPreviewError = useCallback((errorCode: ScriptErrorCodes) => {
-    setPreviewResponse((prev) => {
-      const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
-      return {
-        ...prev,
-        error,
-      };
-    });
-  }, []);
-
-  const valueFormatter = useCallback(
-    (value: unknown) => {
-      if (format?.id) {
-        const formatter = fieldFormats.getInstance(format.id, format.params);
-        if (formatter) {
-          return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
-        }
-      }
-
-      if (type) {
-        const fieldType = castEsToKbnFieldTypeName(type);
-        const defaultFormatterForType = fieldFormats.getDefaultInstance(fieldType);
-        if (defaultFormatterForType) {
-          return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
-        }
-      }
-
-      return defaultValueFormatter(value);
-    },
-    [format, type, fieldFormats]
-  );
-
   const fetchSampleDocuments = useCallback(
     async (limit: number = 50) => {
       if (typeof limit !== 'number') {
@@ -192,13 +170,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       lastExecutePainlessRequestParams.current.documentId = undefined;
       setIsFetchingDocument(true);
-      setPreviewResponse({ fields: [], error: null });
+      controller.setPreviewResponse({ fields: [], error: null });
 
       const [response, searchError] = await search
         .search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: {
+              fields: ['*'],
               size: limit,
             },
           },
@@ -228,13 +207,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       setFetchDocError(error);
 
       if (error === null) {
-        setClusterData({
-          documents: response ? response.rawResponse.hits.hits : [],
-          currentIdx: 0,
-        });
+        controller.setDocuments(response ? response.rawResponse.hits.hits : []);
       }
     },
-    [dataView, search]
+    [dataView, search, controller]
   );
 
   const loadDocument = useCallback(
@@ -249,9 +225,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: {
               size: 1,
+              fields: ['*'],
               query: {
                 ids: {
                   values: [id],
@@ -298,25 +275,77 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       setFetchDocError(error);
 
       if (error === null) {
-        setClusterData({
-          documents: loadedDocuments,
-          currentIdx: 0,
-        });
+        controller.setDocuments(loadedDocuments);
       } else {
         // Make sure we disable the "Updating..." indicator as we have an error
         // and we won't fetch the preview
         setIsLoadingPreview(false);
       }
     },
-    [dataView, search]
+    [dataView, search, controller]
+  );
+
+  const updateSingleFieldPreview = useCallback(
+    (fieldName: string, values: unknown[]) => {
+      const [value] = values;
+      const formattedValue = controller.valueFormatter({ value, type, format });
+
+      controller.setPreviewResponse({
+        fields: [{ key: fieldName, value, formattedValue }],
+        error: null,
+      });
+    },
+    [controller, type, format]
+  );
+
+  const updateCompositeFieldPreview = useCallback(
+    (compositeValues: Record<string, unknown[]>) => {
+      const updatedFieldsInScript: string[] = [];
+      // if we're displaying a composite subfield, filter results
+      const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
+
+      const fields = Object.entries(compositeValues)
+        .map<FieldPreview>(([key, values]) => {
+          // The Painless _execute API returns the composite field values under a map.
+          // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
+          const { 1: fieldName } = key.split('composite_field.');
+          updatedFieldsInScript.push(fieldName);
+
+          const [value] = values;
+          const formattedValue = controller.valueFormatter({ value, type, format });
+
+          return {
+            key: parentName
+              ? `${parentName ?? ''}.${fieldName}`
+              : `${fieldName$.getValue() ?? ''}.${fieldName}`,
+            value,
+            formattedValue,
+            type: valueTypeToSelectedType(value),
+          };
+        })
+        .filter(filterSubfield)
+        // ...and sort alphabetically
+        .sort((a, b) => a.key.localeCompare(b.key));
+
+      fieldPreview$.current.next(fields);
+      controller.setPreviewResponse({
+        fields,
+        error: null,
+      });
+    },
+    [parentName, name, fieldPreview$, fieldName$, controller, type, format]
   );
 
   const updatePreview = useCallback(async () => {
-    if (scriptEditorValidation.isValidating) {
+    // don't prevent rendering if we're working with a composite subfield (has parentName)
+    if (!parentName && scriptEditorValidation.isValidating) {
       return;
     }
 
-    if (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false) {
+    if (
+      !parentName &&
+      (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false)
+    ) {
       setIsLoadingPreview(false);
       return;
     }
@@ -329,17 +358,18 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     const currentApiCall = ++previewCount.current;
 
+    const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
+
     const response = await getFieldPreview({
-      index: currentDocIndex!,
-      document: document!,
-      context: `${type!}_field` as PainlessExecuteContext,
-      script: script!,
-      documentId: currentDocId,
+      index: currentDocIndex,
+      document: document?._source!,
+      context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
+      script: previewScript,
     });
 
     if (currentApiCall !== previewCount.current) {
       // Discard this response as there is another one inflight
-      // or we have called reset() and don't need the response anymore.
+      // or we have called reset() and no longer need the response.
       return;
     }
 
@@ -360,83 +390,67 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const { values, error } = response.data;
 
       if (error) {
-        setPreviewResponse({
-          fields: [{ key: name ?? '', value: '', formattedValue: defaultValueFormatter('') }],
+        controller.setPreviewResponse({
+          fields: [
+            {
+              key: name ?? '',
+              value: '',
+              formattedValue: defaultValueFormatter(''),
+            },
+          ],
           error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
         });
       } else {
-        const [value] = values;
-        const formattedValue = valueFormatter(value);
-
-        setPreviewResponse({
-          fields: [{ key: name!, value, formattedValue }],
-          error: null,
-        });
+        if (!Array.isArray(values)) {
+          updateCompositeFieldPreview(values);
+        } else {
+          updateSingleFieldPreview(name!, values);
+        }
       }
     }
 
+    setInitialPreviewComplete(true);
     setIsLoadingPreview(false);
   }, [
     name,
     type,
     script,
+    parentName,
+    dataView,
     document,
-    currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    valueFormatter,
     allParamsDefined,
     scriptEditorValidation,
     hasSomeParamsChanged,
+    updateSingleFieldPreview,
+    updateCompositeFieldPreview,
+    currentDocIndex,
+    controller,
   ]);
 
-  const goToNextDoc = useCallback(() => {
-    if (currentIdx >= totalDocs - 1) {
-      setClusterData((prev) => ({ ...prev, currentIdx: 0 }));
-    } else {
-      setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx + 1 }));
-    }
-  }, [currentIdx, totalDocs]);
-
-  const goToPrevDoc = useCallback(() => {
-    if (currentIdx === 0) {
-      setClusterData((prev) => ({ ...prev, currentIdx: totalDocs - 1 }));
-    } else {
-      setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx - 1 }));
-    }
-  }, [currentIdx, totalDocs]);
-
   const reset = useCallback(() => {
-    // By resetting the previewCount we will discard any inflight
+    // By resetting the previewCount we will discard previous inflight
     // API call response coming in after calling reset() was called
     previewCount.current = 0;
 
-    setClusterData({
-      documents: [],
-      currentIdx: 0,
-    });
-    setPreviewResponse({ fields: [], error: null });
-    setFrom('cluster');
+    controller.setDocuments([]);
+    controller.setPreviewResponse({ fields: [], error: null });
     setIsLoadingPreview(false);
     setIsFetchingDocument(false);
-  }, []);
+  }, [controller]);
 
   const ctx = useMemo<Context>(
     () => ({
-      fields: previewResponse.fields,
-      error: previewResponse.error,
+      controller,
+      fieldPreview$: fieldPreview$.current,
       isPreviewAvailable,
       isLoadingPreview,
+      initialPreviewComplete,
       params: {
         value: params,
         update: updateParams,
-      },
-      currentDocument: {
-        value: currentDocument,
-        id: isCustomDocId ? customDocIdToLoad! : currentDocId,
-        isLoading: isFetchingDocument,
-        isCustomId: isCustomDocId,
       },
       documents: {
         loadSingle: setCustomDocIdToLoad,
@@ -446,47 +460,30 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       navigation: {
         isFirstDoc: currentIdx === 0,
         isLastDoc: currentIdx >= totalDocs - 1,
-        next: goToNextDoc,
-        prev: goToPrevDoc,
       },
       panel: {
         isVisible: isPanelVisible,
         setIsVisible: setIsPanelVisible,
       },
-      from: {
-        value: from,
-        set: setFrom,
-      },
-      reset,
-      pinnedFields: {
-        value: pinnedFields,
-        set: setPinnedFields,
-      },
       validation: {
         setScriptEditorValidation,
       },
+      reset,
     }),
     [
-      previewResponse,
+      controller,
+      currentIdx,
+      fieldPreview$,
       fetchDocError,
       params,
       isPreviewAvailable,
       isLoadingPreview,
       updateParams,
-      currentDocument,
-      currentDocId,
-      isCustomDocId,
       fetchSampleDocuments,
-      isFetchingDocument,
-      customDocIdToLoad,
-      currentIdx,
       totalDocs,
-      goToNextDoc,
-      goToPrevDoc,
       isPanelVisible,
-      from,
       reset,
-      pinnedFields,
+      initialPreviewComplete,
     ]
   );
 
@@ -507,10 +504,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * "customDocIdToLoad" changes
    */
   useEffect(() => {
+    controller.setCustomId(customDocIdToLoad || undefined);
     if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
       setIsFetchingDocument(true);
     }
-  }, [customDocIdToLoad]);
+  }, [customDocIdToLoad, controller]);
 
   /**
    * Whenever we show the preview panel we will update the documents from the cluster
@@ -527,7 +525,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    */
   useEffect(() => {
     updateParams({
-      document: currentDocument?._source,
+      document: currentDocument,
       index: currentDocument?._index,
     });
   }, [currentDocument, updateParams]);
@@ -536,33 +534,70 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    * Whenever the name or the format changes we immediately update the preview
    */
   useEffect(() => {
-    setPreviewResponse((prev) => {
-      const {
-        fields: { 0: field },
-      } = prev;
+    const { previewResponse: prev } = controller.state$.getValue();
+    const { fields } = prev;
 
-      const nextValue =
-        script === null && Boolean(document)
-          ? get(document, name ?? '') // When there is no script we read the value from _source
-          : field?.value;
+    let updatedFields: PreviewState['previewResponse']['fields'] = fields.map((field) => {
+      let key = name ?? '';
 
-      const formattedValue = valueFormatter(nextValue);
+      if (type === 'composite') {
+        // restore initial key segement (the parent name), which was not returned
+        const { 1: fieldName } = field.key.split('.');
+        key = `${name ?? ''}.${fieldName}`;
+      }
 
       return {
-        ...prev,
-        fields: [{ ...field, key: name ?? '', value: nextValue, formattedValue }],
+        ...field,
+        key,
       };
     });
-  }, [name, script, document, valueFormatter]);
+
+    // If the user has entered a name but not yet any script we will display
+    // the field in the preview with just the name
+    if (updatedFields.length === 0 && name !== null) {
+      updatedFields = [{ key: name, value: undefined, formattedValue: undefined, type: undefined }];
+    }
+
+    controller.setPreviewResponse({
+      ...prev,
+      fields: updatedFields,
+    });
+  }, [name, type, parentName, controller]);
+
+  /**
+   * Whenever the format changes we immediately update the preview
+   */
+  useEffect(() => {
+    const { previewResponse: prev } = controller.state$.getValue();
+    const { fields } = prev;
+
+    controller.setPreviewResponse({
+      ...prev,
+      fields: fields.map((field) => {
+        const nextValue =
+          script === null && Boolean(document)
+            ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
+            : field?.value;
+
+        const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
+
+        return {
+          ...field,
+          value: nextValue,
+          formattedValue,
+        };
+      }),
+    });
+  }, [name, script, document, controller, type, format]);
 
   useEffect(() => {
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
       // script is empty) we clear the error and update the params cache.
       lastExecutePainlessRequestParams.current.script = undefined;
-      setPreviewError(null);
+      controller.setPreviewError(null);
     }
-  }, [script?.source, setPreviewError]);
+  }, [script?.source, controller]);
 
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)
@@ -589,19 +624,19 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
                   }),
               },
             };
-      setPreviewError(error);
+      controller.setPreviewError(error);
 
       // Make sure to update the lastExecutePainlessRequestParams cache so when the user updates
       // the script and fixes the syntax the "updatePreview()" will run
       lastExecutePainlessRequestParams.current.script = script?.source;
     } else {
       // Clear possible previous syntax error
-      clearPreviewError('PAINLESS_SYNTAX_ERROR');
+      controller.clearPreviewError('PAINLESS_SYNTAX_ERROR');
     }
-  }, [scriptEditorValidation, script?.source, setPreviewError, clearPreviewError]);
+  }, [scriptEditorValidation, script?.source, controller]);
 
   /**
-   * Whenever updatePreview() changes (meaning whenever any of the params changes)
+   * Whenever updatePreview() changes (meaning whenever a param changes)
    * we call it to update the preview response with the field(s) value or possible error.
    */
   useDebounce(updatePreview, 500, [updatePreview]);

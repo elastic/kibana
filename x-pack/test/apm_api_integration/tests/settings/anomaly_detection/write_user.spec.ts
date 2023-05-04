@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const legacyWriteUserClient = getService('legacySupertestAsApmWriteUser');
+  const ml = getService('ml');
 
   function getJobs() {
     return apmApiClient.writeUser({
@@ -30,17 +30,14 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   function deleteJobs(jobIds: string[]) {
-    return legacyWriteUserClient
-      .post(`/api/ml/jobs/delete_jobs`)
-      .send({ jobIds })
-      .set('kbn-xsrf', 'foo');
+    return Promise.allSettled(jobIds.map((jobId) => ml.deleteAnomalyDetectionJobES(jobId)));
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
     describe('when user has write access to ML', () => {
       after(async () => {
         const res = await getJobs();
-        const jobIds = res.body.jobs.map((job: any) => job.job_id);
+        const jobIds = res.body.jobs.map((job: any) => job.jobId);
         await deleteJobs(jobIds);
       });
 

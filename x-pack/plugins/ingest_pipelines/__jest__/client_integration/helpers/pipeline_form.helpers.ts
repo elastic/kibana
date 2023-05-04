@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 export const getFormActions = (testBed: TestBed) => {
   const { find, form, component } = testBed;
@@ -37,10 +37,23 @@ export const getFormActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const toggleMetaSwitch = () => {
+    act(() => {
+      form.toggleEuiSwitch('metaToggle');
+    });
+  };
+
+  const setMetaField = (value: object) => {
+    find('metaEditor').getDOMNode().setAttribute('data-currentvalue', JSON.stringify(value));
+    find('metaEditor').simulate('change');
+  };
+
   return {
     clickSubmitButton,
     clickShowRequestLink,
     toggleVersionSwitch,
+    toggleMetaSwitch,
+    setMetaField,
   };
 };
 
@@ -54,6 +67,8 @@ export type PipelineFormTestSubjects =
   | 'pipelineForm'
   | 'versionToggle'
   | 'versionField'
+  | 'metaToggle'
+  | 'metaEditor'
   | 'nameField.input'
   | 'descriptionField.input'
   | 'processorsEditor'
@@ -61,8 +76,8 @@ export type PipelineFormTestSubjects =
   | 'onFailureEditor'
   | 'testPipelineButton'
   | 'showRequestLink'
-  | 'requestFlyout'
-  | 'requestFlyout.title'
+  | 'apiRequestFlyout'
+  | 'apiRequestFlyout.apiRequestFlyoutTitle'
   | 'testPipelineFlyout'
   | 'testPipelineFlyout.title'
   | 'documentationLink';

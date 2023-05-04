@@ -11,8 +11,8 @@ import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import { Execution } from '../execution';
 import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
-import { MigrateFunction } from '../../../kibana_utils/common/persistable_state';
-import { SavedObjectReference } from 'src/core/types';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { SavedObjectReference } from '@kbn/core/types';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -88,36 +88,6 @@ describe('Executor', () => {
       const executor = new Executor();
       expect(executor.context).toEqual({});
     });
-
-    test('can extend context', () => {
-      const executor = new Executor();
-      executor.extendContext({
-        foo: 'bar',
-      });
-      expect(executor.context).toEqual({
-        foo: 'bar',
-      });
-    });
-
-    test('can extend context multiple times with multiple keys', () => {
-      const executor = new Executor();
-      const abortSignal = {};
-      const env = {};
-
-      executor.extendContext({
-        foo: 'bar',
-      });
-      executor.extendContext({
-        abortSignal,
-        env,
-      });
-
-      expect(executor.context).toEqual({
-        foo: 'bar',
-        abortSignal,
-        env,
-      });
-    });
   });
 
   describe('execution', () => {
@@ -140,9 +110,8 @@ describe('Executor', () => {
       });
 
       test('Execution inherits context from Executor', () => {
-        const executor = new Executor();
         const foo = {};
-        executor.extendContext({ foo });
+        const executor = new Executor(undefined, { context: { foo }, functions: {}, types: {} });
         const execution = executor.createExecution('foo bar="baz"');
 
         expect(execution.context).toHaveProperty('foo', foo);
@@ -172,13 +141,15 @@ describe('Executor', () => {
       inject: (state: ExpressionAstFunction['arguments']) => {
         return injectFn(state);
       },
-      migrations: {
-        '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
-          return migrateFn(state, version);
-        }) as unknown as MigrateFunction,
-        '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
-          return migrateFn(state, version);
-        }) as unknown as MigrateFunction,
+      migrations: () => {
+        return {
+          '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+            return migrateFn(state, version);
+          }) as unknown as MigrateFunction,
+          '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+            return migrateFn(state, version);
+          }) as unknown as MigrateFunction,
+        };
       },
       fn: jest.fn(),
     };
@@ -277,6 +248,40 @@ describe('Executor', () => {
     });
 
     describe('.migrateToLatest', () => {
+      const fnMigrateTo = {
+        name: 'fnMigrateTo',
+        help: 'test',
+        args: {
+          bar: {
+            types: ['string'],
+            help: 'test',
+          },
+        },
+        fn: jest.fn(),
+      };
+
+      const fnMigrateFrom = {
+        name: 'fnMigrateFrom',
+        help: 'test',
+        args: {
+          bar: {
+            types: ['string'],
+            help: 'test',
+          },
+        },
+        migrations: {
+          '8.1.0': ((state: ExpressionAstFunction, version: string) => {
+            const migrateToAst = parseExpression('fnMigrateTo');
+            const { arguments: args } = state;
+            const ast = { ...migrateToAst.chain[0], arguments: args };
+            return { type: 'expression', chain: [ast, ast] };
+          }) as unknown as MigrateFunction,
+        },
+        fn: jest.fn(),
+      };
+      executor.registerFunction(fnMigrateFrom);
+      executor.registerFunction(fnMigrateTo);
+
       test('calls migrate function for every expression function in expression', () => {
         executor.migrateToLatest({
           state: parseExpression(
@@ -285,6 +290,25 @@ describe('Executor', () => {
           version: '7.10.0',
         });
         expect(migrateFn).toBeCalledTimes(5);
+      });
+
+      test('migrates expression function to expression function or chain of expression functions', () => {
+        const plainExpression = 'foo bar={foo bar="baz" | foo bar={foo bar="baz"}}';
+        const plainExpressionAst = parseExpression(plainExpression);
+        const migratedExpressionAst = executor.migrateToLatest({
+          state: parseExpression(`${plainExpression} | fnMigrateFrom bar="baz" | fnMigrateTo`),
+          version: '8.0.0',
+        });
+
+        expect(migratedExpressionAst).toEqual({
+          type: 'expression',
+          chain: [
+            ...plainExpressionAst.chain,
+            { type: 'function', function: 'fnMigrateTo', arguments: { bar: ['baz'] } },
+            { type: 'function', function: 'fnMigrateTo', arguments: { bar: ['baz'] } },
+            { type: 'function', function: 'fnMigrateTo', arguments: {} },
+          ],
+        });
       });
     });
   });

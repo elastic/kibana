@@ -8,20 +8,24 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type ExpectedSectionTableEntries = Record<string, string>;
 export interface ExpectedSectionTable {
   section: string;
-  expectedEntries: ExpectedSectionTableEntries;
+  expectedEntries: string[] | ExpectedSectionTableEntries;
 }
 
 export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable[]>;
 
 export type MlDFAJobTable = ProvidedType<typeof MachineLearningDataFrameAnalyticsTableProvider>;
 
-export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: FtrProviderContext) {
+export function MachineLearningDataFrameAnalyticsTableProvider({
+  getPageObject,
+  getService,
+}: FtrProviderContext) {
+  const headerPage = getPageObject('header');
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -114,15 +118,21 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
-    public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+    public async waitForRefreshButtonLoaded(buttonTestSubj: string) {
+      await testSubjects.existOrFail(`~${buttonTestSubj}`, { timeout: 10 * 1000 });
+      await testSubjects.existOrFail(`${buttonTestSubj} loaded`, { timeout: 30 * 1000 });
     }
 
-    public async refreshAnalyticsTable() {
-      await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
-      await this.waitForRefreshButtonLoaded();
+    public async refreshAnalyticsTable(
+      tableEnvironment: 'mlDataFrameAnalytics' | 'stackMgmtJobList' = 'mlDataFrameAnalytics'
+    ) {
+      const testSubjStr =
+        tableEnvironment === 'mlDataFrameAnalytics'
+          ? 'mlDatePickerRefreshPageButton'
+          : 'mlAnalyticsRefreshListButton';
+      await this.waitForRefreshButtonLoaded(testSubjStr);
+      await testSubjects.click(`~${testSubjStr}`);
+      await this.waitForRefreshButtonLoaded(testSubjStr);
       await this.waitForAnalyticsToLoad();
     }
 
@@ -164,6 +174,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
           timeout: 5 * 1000,
         });
       });
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async openMapView(analyticsId: string) {
@@ -200,11 +211,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
 
     public async assertAnalyticsJobDisplayedInTable(
       analyticsId: string,
-      shouldBeDisplayed: boolean
+      shouldBeDisplayed: boolean,
+      refreshButtonTestSubj = 'mlDatePickerRefreshPageButton'
     ) {
-      await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
-      await this.waitForRefreshButtonLoaded();
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.click(`~${refreshButtonTestSubj}`);
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
       await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
 
       if (shouldBeDisplayed) {
@@ -439,30 +451,59 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       const sectionTable = await testSubjects.find(`${sectionSelector}-table`);
       const parsedSectionTableEntries = await this.parseDetailsSectionTable(sectionTable);
 
-      for (const [key, value] of Object.entries(expectedEntries)) {
-        expect(parsedSectionTableEntries)
-          .to.have.property(key)
-          .eql(
-            value,
-            `Expected ${sectionSubject} property '${key}' to exist with value '${value}'`
-          );
+      for (const [key] of Object.entries(expectedEntries)) {
+        expect(parsedSectionTableEntries).to.have.property(key);
       }
     }
 
-    public async assertJobDetailsTabContent(jobId: string, sections: ExpectedSectionTable[]) {
+    public async assertRowDetailsDescriptionListContent(
+      jobId: string,
+      sectionSubject: string,
+      expectedEntries: string[]
+    ) {
+      const sectionSelector = this.detailsSectionSelector(jobId, sectionSubject);
+      await this.assertDetailsSectionExists(jobId, sectionSubject);
+
+      const allVisibleText = await testSubjects.getVisibleTextAll(sectionSelector);
+      const allText = allVisibleText[0].split('\n');
+
+      expectedEntries.forEach((text) => {
+        expect(allText.includes(text)).to.eql(
+          true,
+          `Expected text '${text}' from '${sectionSubject}' to be in list`
+        );
+      });
+    }
+
+    public async assertAllJobDetailsTabSectionsExist(jobId: string) {
       const tabSubject = 'job-details';
-      await this.ensureDetailsTabOpen(jobId, tabSubject);
-
-      for (const { section, expectedEntries } of sections) {
-        await this.assertRowDetailsSectionContent(jobId, section, expectedEntries);
-      }
-    }
-
-    public async assertJobStatsTabContent(jobId: string) {
-      const tabSubject = 'job-stats';
       await this.ensureDetailsTabOpen(jobId, tabSubject);
       await this.assertDetailsSectionExists(jobId, 'stats');
       await this.assertDetailsSectionExists(jobId, 'analysisStats');
+      await this.assertDetailsSectionExists(jobId, 'counts');
+      await this.assertDetailsSectionExists(jobId, 'progress');
+      await this.assertDetailsSectionExists(jobId, 'state');
+    }
+
+    public async assertJobDetailsTabContent(jobId: string, sections: ExpectedSectionTable[]) {
+      await this.assertAllJobDetailsTabSectionsExist(jobId);
+
+      for (const { section, expectedEntries } of sections) {
+        if (section === 'analysisStats') {
+          await this.assertRowDetailsSectionContent(jobId, section, expectedEntries);
+        } else if (
+          section === 'state' ||
+          section === 'stats' ||
+          section === 'counts' ||
+          section === 'progress'
+        ) {
+          await this.assertRowDetailsDescriptionListContent(
+            jobId,
+            section,
+            expectedEntries as string[]
+          );
+        }
+      }
     }
 
     public async assertJsonTabContent(jobId: string) {
@@ -486,12 +527,10 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return await this.withDetailsOpen(jobId, async () => {
         await this.assertRowDetailsTabsExist('mlAnalyticsTableRowDetailsTab', [
           'job-details',
-          'job-stats',
           'json',
           'job-messages',
         ]);
         await this.assertJobDetailsTabContent(jobId, expectedRowDetails.jobDetails);
-        await this.assertJobStatsTabContent(jobId);
         await this.assertJsonTabContent(jobId);
         await this.assertJobMessagesTabContent(jobId);
       });

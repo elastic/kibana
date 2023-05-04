@@ -5,15 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { CSSProperties, lazy } from 'react';
+import React, { CSSProperties } from 'react';
 import { Observable } from 'rxjs';
-import { CoreTheme } from 'kibana/public';
+import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { EuiErrorBoundary } from '@elastic/eui';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '../../../../core/public';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
@@ -27,9 +31,6 @@ const strings = {
     }),
 };
 
-const LazyMetricComponent = lazy(() => import('../components/metric_component'));
-const MetricComponent = withSuspense(LazyMetricComponent);
-
 export const getMetricRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$) =>
   (): ExpressionRenderDefinition<MetricRendererConfig> => ({
@@ -42,20 +43,23 @@ export const getMetricRenderer =
       config: MetricRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const { MetricComponent } = await import('../components/metric_component');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <MetricComponent
-            label={config.label}
-            labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
-            metric={config.metric}
-            metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
-            metricFormat={config.metricFormat}
-          />
-        </KibanaThemeProvider>,
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <MetricComponent
+              label={config.label}
+              labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
+              metric={config.metric}
+              metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
+              metricFormat={config.metricFormat}
+            />
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
         domNode,
         () => handlers.done()
       );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import semverLte from 'semver/functions/lte';
-import { ImmutableArray } from '../../types';
+import type { ImmutableArray } from '../../types';
 
 const minSupportedVersion = '7.14.0';
 const minCapabilitiesVersion = '7.15.0';
@@ -26,8 +26,20 @@ export const isVersionSupported = ({
   currentVersion: string;
   minVersionRequired?: string;
 }) => {
-  const parsedCurrentVersion = parseSemver(currentVersion);
-  return semverLte(minVersionRequired, parsedCurrentVersion);
+  // `parseSemver()` will throw if the version provided is not a valid semver value.
+  // If that happens, then just return false from this function
+  try {
+    const parsedCurrentVersion = parseSemver(currentVersion);
+    return semverLte(minVersionRequired, parsedCurrentVersion);
+  } catch (e) {
+    // If running in the browser, log to console
+    if (window && window.console) {
+      window.console.warn(
+        `SecuritySolution: isVersionSupported(): Unable to determine if current version [${currentVersion}] meets minimum version [${minVersionRequired}]. Error: ${e.message}`
+      );
+    }
+    return false;
+  }
 };
 
 export const isOsSupported = ({

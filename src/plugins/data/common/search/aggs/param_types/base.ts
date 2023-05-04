@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import { ExpressionAstExpression } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ISearchOptions, ISearchSource } from '../../../../public';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
 

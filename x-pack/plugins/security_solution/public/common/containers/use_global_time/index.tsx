@@ -6,44 +6,61 @@
  */
 
 import { pick } from 'lodash/fp';
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { SetQuery, DeleteQuery } from './types';
+import type { SetQuery, DeleteQuery } from './types';
 
-export const useGlobalTime = (clearAllQuery: boolean = true) => {
+export const useGlobalTime = () => {
   const dispatch = useDispatch();
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
   const [isInitializing, setIsInitializing] = useState(true);
 
+  const queryId = useRef<string[]>([]);
+
   const setQuery = useCallback(
-    ({ id, inspect, loading, refetch }: SetQuery) =>
-      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) => {
+      queryId.current = [...queryId.current, id];
+      dispatch(
+        inputsActions.setQuery({
+          inputId: InputsModelId.global,
+          id,
+          inspect,
+          loading,
+          refetch,
+          searchSessionId,
+        })
+      );
+    },
     [dispatch]
   );
 
   const deleteQuery = useCallback(
-    ({ id }: DeleteQuery) => dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
+    ({ id }: DeleteQuery) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
 
   useEffect(() => {
-    if (isInitializing) {
-      setIsInitializing(false);
-    }
+    setIsInitializing(false);
+  }, []);
+
+  // This effect must not have any mutable dependencies. Otherwise, the cleanup function gets called before the component unmounts.
+  useEffect(() => {
     return () => {
-      if (clearAllQuery) {
-        dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+      if (queryId.current.length > 0) {
+        queryId.current.forEach((id) => deleteQuery({ id }));
       }
     };
-  }, [clearAllQuery, dispatch, isInitializing]);
+  }, [deleteQuery]);
 
-  const memoizedReturn = useMemo(
+  return useMemo(
     () => ({
       isInitializing,
       from,
@@ -53,8 +70,6 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
     }),
     [deleteQuery, from, isInitializing, setQuery, to]
   );
-
-  return memoizedReturn;
 };
 
 export type GlobalTimeArgs = Omit<ReturnType<typeof useGlobalTime>, 'deleteQuery'> &

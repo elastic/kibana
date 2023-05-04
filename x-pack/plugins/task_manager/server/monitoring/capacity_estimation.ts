@@ -8,11 +8,11 @@
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
 import { JsonObject } from '@kbn/utility-types';
+import { Logger } from '@kbn/core/server';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
-import { Logger } from '../../../../../src/core/server';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -184,13 +184,14 @@ export function estimateCapacity(
     averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
-  const status = getHealthStatus(logger, {
+  const { status, reason } = getHealthStatus(logger, {
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
   });
   return {
     status,
+    reason,
     timestamp: new Date().toISOString(),
     value: {
       observed: mapValues(
@@ -199,7 +200,7 @@ export function estimateCapacity(
           max_throughput_per_minute_per_kibana: capacityPerMinutePerKibana,
           max_throughput_per_minute: assumedCapacityAvailablePerMinute,
           minutes_to_drain_overdue:
-            overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
+            overdue ?? 0 / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
           avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
           avg_recurring_required_throughput_per_minute_per_kibana:
             assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
@@ -231,27 +232,28 @@ interface GetHealthStatusParams {
   capacityPerMinutePerKibana: number;
 }
 
-function getHealthStatus(logger: Logger, params: GetHealthStatusParams): HealthStatus {
+function getHealthStatus(
+  logger: Logger,
+  params: GetHealthStatusParams
+): { status: HealthStatus; reason?: string } {
   const {
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
   } = params;
   if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
-    return HealthStatus.OK;
+    return { status: HealthStatus.OK };
   }
 
   if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
-    logger.debug(
-      `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
-    );
-    return HealthStatus.Warning;
+    const reason = `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+    logger.warn(reason);
+    return { status: HealthStatus.Warning, reason };
   }
 
-  logger.debug(
-    `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
-  );
-  return HealthStatus.Error;
+  const reason = `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+  logger.warn(reason);
+  return { status: HealthStatus.Error, reason };
 }
 
 export function withCapacityEstimate(

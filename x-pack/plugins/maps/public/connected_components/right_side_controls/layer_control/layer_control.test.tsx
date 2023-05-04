@@ -11,6 +11,12 @@ jest.mock('./layer_toc', () => ({
   },
 }));
 
+jest.mock('../../../kibana_services', () => ({
+  isScreenshotMode: () => {
+    return false;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -22,9 +28,12 @@ const defaultProps = {
   showAddLayerWizard: async () => {},
   closeLayerTOC: () => {},
   openLayerTOC: () => {},
+  hideAllLayers: () => {},
+  showAllLayers: () => {},
   isLayerTOCOpen: true,
   layerList: [],
   isFlyoutOpen: false,
+  zoom: 0,
 };
 
 describe('LayerControl', () => {
@@ -65,6 +74,9 @@ describe('LayerControl', () => {
         isVisible: () => {
           return isVisible;
         },
+        showAtZoomLevel: () => {
+          return true;
+        },
       } as unknown as ILayer;
       test('Should render expand button with loading icon when layer is loading', () => {
         const component = shallow(
@@ -96,6 +108,12 @@ describe('LayerControl', () => {
         },
         isLayerLoading: () => {
           return false;
+        },
+        isVisible: () => {
+          return true;
+        },
+        showAtZoomLevel: () => {
+          return true;
         },
       } as unknown as ILayer;
       const component = shallow(

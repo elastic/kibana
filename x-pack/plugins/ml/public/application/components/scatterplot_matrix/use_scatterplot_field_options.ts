@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
 
@@ -47,5 +47,6 @@ export const useScatterplotFieldOptions = (
     return Array.isArray(excludes) && excludes.length > 0
       ? fields.filter((f) => !excludes.includes(f))
       : fields;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern, includes, excludes]);
 };

@@ -15,6 +15,8 @@ const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const pageObjects = getPageObjects([
     'common',
     'infraHome',
@@ -22,11 +24,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'timePicker',
     'infraSavedViews',
   ]);
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('Metrics Explorer', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Basic Functionality', () => {
@@ -40,6 +44,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
+      it('should render the correct page title', async () => {
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain(
+          'Metrics Explorer - Infrastructure - Observability - Elastic'
+        );
+      });
 
       it('should have three metrics by default', async () => {
         const metrics = await pageObjects.infraMetricsExplorer.getMetrics();
@@ -69,8 +80,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should display multple charts', async () => {
-        const charts = await pageObjects.infraMetricsExplorer.getCharts();
-        expect(charts.length).to.equal(6);
+        await retry.try(async () => {
+          const charts = await pageObjects.infraMetricsExplorer.getCharts();
+          expect(charts.length).to.equal(6);
+        });
       });
 
       it('should render as area chart by default', async () => {
@@ -88,35 +101,51 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Saved Views', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      before(async () => {
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.infraHome.goToMetricExplorer();
+      });
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      describe('save functionality', () => {
-        it('should have saved views component', async () => {
-          await pageObjects.common.navigateToApp('infraOps');
-          await pageObjects.infraHome.goToMetricExplorer();
-          await pageObjects.infraSavedViews.getSavedViewsButton();
-          await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
-        });
 
-        it('should open popover', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.closeSavedViewsPopover();
-        });
+      it('should render a button with the view name', async () => {
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
 
-        it('should create new saved view and load it', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.clickSaveNewViewButton();
-          await pageObjects.infraSavedViews.getCreateSavedViewModal();
-          await pageObjects.infraSavedViews.createNewSavedView('view1');
-          await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
-        });
+      it('should open/close the views popover menu on button click', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+        testSubjects.existOrFail('savedViews-popover');
+        await pageObjects.infraSavedViews.closeSavedViewsPopover();
+      });
 
-        it('should new views should be listed in the load views list', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.clickLoadViewButton();
-          await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
-          await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
-        });
+      it('should create a new saved view and load it', async () => {
+        await pageObjects.infraSavedViews.createView('view1');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
+      });
+
+      it('should laod a clicked view from the manage views section', async () => {
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
+        const views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        await views[0].click();
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
+
+      it('should update the current saved view and load it', async () => {
+        let views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(2);
+        await pageObjects.infraSavedViews.pressEsc();
+
+        await pageObjects.infraSavedViews.createView('view2');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
+        views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.pressEsc();
+
+        await pageObjects.infraSavedViews.updateView('view3');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
+        views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.pressEsc();
       });
     });
   });

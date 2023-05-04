@@ -7,36 +7,32 @@
  */
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+import { EuiIcon, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Filter } from '@kbn/es-query';
 import { TableHeader } from './components/table_header/table_header';
-import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SAMPLE_SIZE_SETTING,
-  SHOW_MULTIFIELDS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../common';
-import { getServices } from '../../kibana_services';
-import { SortOrder } from './components/table_header/helpers';
-import { DocTableRow, TableRow } from './components/table_row';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { SHOW_MULTIFIELDS } from '../../../common';
+import { TableRow } from './components/table_row';
+import { DocViewFilterFn, DocViewRenderProps } from '../../services/doc_views/doc_views_types';
+import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
    * Rows of classic table
    */
-  rows: DocTableRow[];
+  rows: DataTableRecord[];
   /**
    * Columns of classic table
    */
   columns: string[];
   /**
-   * Current IndexPattern
+   * Current DataView
    */
-  indexPattern: IndexPattern;
+  dataView: DataView;
   /**
    * Current sorting
    */
@@ -62,6 +58,14 @@ export interface DocTableProps {
    */
   isLoading: boolean;
   /**
+   * Filters applied by embeddalbe
+   */
+  filters?: Filter[];
+  /**
+   * Saved search id
+   */
+  savedSearchId?: string;
+  /**
    * Filter callback
    */
   onFilter: DocViewFilterFn;
@@ -81,13 +85,16 @@ export interface DocTableProps {
    * Remove column callback
    */
   onRemoveColumn?: (column: string) => void;
+  /**
+   * Doc viewer component
+   */
+  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export interface DocTableRenderProps {
   columnLength: number;
-  rows: DocTableRow[];
-  sampleSize: number;
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  rows: DataTableRecord[];
+  renderRows: (row: DataTableRecord[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
   onSkipBottomButtonClick: () => void;
 }
@@ -106,8 +113,10 @@ export const DocTableWrapper = forwardRef(
     {
       render,
       columns,
+      filters,
+      savedSearchId,
       rows,
-      indexPattern,
+      dataView,
       onSort,
       onAddColumn,
       onMoveColumn,
@@ -119,29 +128,12 @@ export const DocTableWrapper = forwardRef(
       sharedItemTitle,
       dataTestSubj,
       isLoading,
+      DocViewer,
     }: DocTableWrapperProps,
     ref
   ) => {
-    const [
-      defaultSortOrder,
-      hideTimeColumn,
-      isShortDots,
-      sampleSize,
-      showMultiFields,
-      filterManager,
-      addBasePath,
-    ] = useMemo(() => {
-      const services = getServices();
-      return [
-        services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-        services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-        services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
-        services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
-        services.uiSettings.get(SHOW_MULTIFIELDS, false),
-        services.filterManager,
-        services.addBasePath,
-      ];
-    }, []);
+    const { uiSettings } = useDiscoverServices();
+    const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS, false), [uiSettings]);
 
     const onSkipBottomButtonClick = useCallback(async () => {
       // delay scrolling to after the rows have been rendered
@@ -155,73 +147,60 @@ export const DocTableWrapper = forwardRef(
       bottomMarker!.blur();
     }, [rows]);
 
-    const fieldsToShow = useMemo(
+    const shouldShowFieldHandler = useMemo(
       () =>
-        getFieldsToShow(
-          indexPattern.fields.map((field: IndexPatternField) => field.name),
-          indexPattern,
+        getShouldShowFieldHandler(
+          dataView.fields.map((field: DataViewField) => field.name),
+          dataView,
           showMultiFields
         ),
-      [indexPattern, showMultiFields]
+      [dataView, showMultiFields]
     );
 
     const renderHeader = useCallback(
       () => (
         <TableHeader
           columns={columns}
-          defaultSortOrder={defaultSortOrder}
-          hideTimeColumn={hideTimeColumn}
-          indexPattern={indexPattern}
-          isShortDots={isShortDots}
+          dataView={dataView}
           onChangeSortOrder={onSort}
           onMoveColumn={onMoveColumn}
           onRemoveColumn={onRemoveColumn}
           sortOrder={sort as SortOrder[]}
         />
       ),
-      [
-        columns,
-        defaultSortOrder,
-        hideTimeColumn,
-        indexPattern,
-        isShortDots,
-        onMoveColumn,
-        onRemoveColumn,
-        onSort,
-        sort,
-      ]
+      [columns, dataView, onMoveColumn, onRemoveColumn, onSort, sort]
     );
 
     const renderRows = useCallback(
-      (rowsToRender: DocTableRow[]) => {
+      (rowsToRender: DataTableRecord[]) => {
         return rowsToRender.map((current) => (
           <TableRow
-            key={`${current._index}${current._id}${current._score}${current._version}${current._routing}`}
+            key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
+            filters={filters}
+            savedSearchId={savedSearchId}
             filter={onFilter}
-            indexPattern={indexPattern}
+            dataView={dataView}
             row={current}
             useNewFieldsApi={useNewFieldsApi}
-            hideTimeColumn={hideTimeColumn}
+            shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
-            filterManager={filterManager}
-            addBasePath={addBasePath}
-            fieldsToShow={fieldsToShow}
+            DocViewer={DocViewer}
           />
         ));
       },
       [
         columns,
+        filters,
+        savedSearchId,
         onFilter,
-        indexPattern,
+        dataView,
         useNewFieldsApi,
-        hideTimeColumn,
+        shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
-        filterManager,
-        addBasePath,
-        fieldsToShow,
+        DocViewer,
       ]
     );
 
@@ -239,7 +218,6 @@ export const DocTableWrapper = forwardRef(
           render({
             columnLength: columns.length,
             rows,
-            sampleSize,
             onSkipBottomButtonClick,
             renderHeader,
             renderRows,
@@ -247,12 +225,22 @@ export const DocTableWrapper = forwardRef(
         {!rows.length && (
           <div className="kbnDocTable__error">
             <EuiText size="xs" color="subdued">
-              <EuiIcon type="visualizeApp" size="m" color="subdued" />
-              <EuiSpacer size="m" />
-              <FormattedMessage
-                id="discover.docTable.noResultsTitle"
-                defaultMessage="No results found"
-              />
+              {isLoading ? (
+                <>
+                  <EuiLoadingSpinner />
+                  <EuiSpacer size="m" />
+                  <FormattedMessage id="discover.loadingResults" defaultMessage="Loading results" />
+                </>
+              ) : (
+                <>
+                  <EuiIcon type="discoverApp" size="m" color="subdued" />
+                  <EuiSpacer size="m" />
+                  <FormattedMessage
+                    id="discover.docTable.noResultsTitle"
+                    defaultMessage="No results found"
+                  />
+                </>
+              )}
             </EuiText>
           </div>
         )}

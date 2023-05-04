@@ -23,6 +23,7 @@ export const FrequencyInput: FC = () => {
   useEffect(() => {
     jobCreator.frequency = frequency === '' ? null : frequency;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frequency]);
 
   useEffect(() => {
@@ -30,10 +31,12 @@ export const FrequencyInput: FC = () => {
 
     const df = createDefaultFrequency();
     setDefaultFrequency(df);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.frequency);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   function createDefaultFrequency() {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { type Subject, ReplaySubject } from 'rxjs';
+import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Dataset } from './index_options';
 import { RuleDataClient } from '../rule_data_client/rule_data_client';
@@ -17,9 +18,22 @@ jest.mock('../rule_data_client/rule_data_client', () => ({
   RuleDataClient: jest.fn().mockImplementation(() => mockCreateRuleDataClient()),
 }));
 
+const frameworkAlertsService = {
+  enabled: () => false,
+  getContextInitializationPromise: async () => ({ result: false }),
+};
+
 describe('ruleDataPluginService', () => {
+  let pluginStop$: Subject<void>;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    pluginStop$ = new ReplaySubject(1);
+  });
+
+  afterEach(() => {
+    pluginStop$.next();
+    pluginStop$.complete();
   });
 
   describe('isRegistrationContextDisabled', () => {
@@ -34,6 +48,8 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        frameworkAlerts: frameworkAlertsService,
+        pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.logs')).toBe(true);
     });
@@ -49,6 +65,8 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        frameworkAlerts: frameworkAlertsService,
+        pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.apm')).toBe(false);
     });
@@ -66,6 +84,8 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        frameworkAlerts: frameworkAlertsService,
+        pluginStop$,
       });
 
       expect(ruleDataService.isWriteEnabled('observability.logs')).toBe(false);
@@ -84,6 +104,8 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        frameworkAlerts: frameworkAlertsService,
+        pluginStop$,
       });
       const indexOptions = {
         feature: AlertConsumers.LOGS,

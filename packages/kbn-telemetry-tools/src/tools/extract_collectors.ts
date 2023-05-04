@@ -6,31 +6,34 @@
  * Side Public License, v 1.
  */
 
-import * as ts from 'typescript';
+import globby from 'globby';
 import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
-import { globAsync } from './utils';
 import { TelemetryRC } from './config';
+import { createKibanaProgram, getAllSourceFiles } from './ts_program';
 
 export async function getProgramPaths({
   root,
   exclude,
 }: Pick<TelemetryRC, 'root' | 'exclude'>): Promise<string[]> {
-  const filePaths = await globAsync('**/*.ts', {
-    cwd: root,
-    ignore: [
-      '**/node_modules/**',
-      '**/*.test.*',
-      '**/*.mock.*',
-      '**/mocks.*',
-      '**/__fixture__/**',
-      '**/__tests__/**',
-      '**/public/**',
-      '**/dist/**',
-      '**/target/**',
-      '**/*.d.ts',
+  const filePaths = await globby(
+    [
+      '**/*.ts',
+      '!**/node_modules/**',
+      '!**/*.test.*',
+      '!**/*.mock.*',
+      '!**/mocks.*',
+      '!**/__fixture__/**',
+      '!**/__tests__/**',
+      '!**/public/**',
+      '!**/dist/**',
+      '!**/target/**',
+      '!**/*.d.ts',
     ],
-  });
+    {
+      cwd: root,
+    }
+  );
 
   if (filePaths.length === 0) {
     throw Error(`No files found in ${root}`);
@@ -48,15 +51,8 @@ export async function getProgramPaths({
 }
 
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  const program = ts.createProgram(fullPaths, tsConfig);
-  program.getTypeChecker();
-  const sourceFiles = fullPaths.map((fullPath) => {
-    const sourceFile = program.getSourceFile(fullPath);
-    if (!sourceFile) {
-      throw Error(`Unable to get sourceFile ${fullPath}.`);
-    }
-    return sourceFile;
-  });
+  const program = createKibanaProgram(fullPaths, tsConfig);
+  const sourceFiles = getAllSourceFiles(fullPaths, program);
 
   for (const sourceFile of sourceFiles) {
     yield* parseUsageCollection(sourceFile, program);

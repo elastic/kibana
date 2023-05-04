@@ -8,7 +8,8 @@
 import React, { Fragment } from 'react';
 import { EuiPageBody, EuiSpacer } from '@elastic/eui';
 
-import { Header, HeaderProps } from './header';
+import type { HeaderProps } from './header';
+import { Header } from './header';
 import { Page, ContentWrapper } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
@@ -16,12 +17,14 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   restrictHeaderWidth?: number;
   'data-test-subj'?: string;
   children?: React.ReactNode;
+  headerChildren?: React.ReactNode;
 }
 
 export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   restrictWidth,
   restrictHeaderWidth,
   children,
+  headerChildren,
   'data-test-subj': dataTestSubj,
   ...rest
 }) => (
@@ -30,14 +33,16 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
       maxWidth={restrictHeaderWidth}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
       {...rest}
-    />
+    >
+      {headerChildren}
+    </Header>
     <Page
       restrictWidth={restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
     >
       <EuiPageBody>
         <ContentWrapper>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           {children}
         </ContentWrapper>
       </EuiPageBody>

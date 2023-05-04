@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ManagementAppMountParams } from '../../../management/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18Texts } from '../constants/texts';
 
 export type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];

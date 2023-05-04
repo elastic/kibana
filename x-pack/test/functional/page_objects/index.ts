@@ -20,11 +20,11 @@ import { ObservabilityPageProvider } from './observability_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { GisPageObject } from './gis_page';
+import { GeoFileUploadPageObject } from './geo_file_upload';
 import { StatusPageObject } from './status_page';
 import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
 import { RollupPageObject } from './rollup_page';
 import { UptimePageObject } from './uptime_page';
-import { SyntheticsIntegrationPageProvider } from './synthetics_integration_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
@@ -44,6 +44,7 @@ import { NavigationalSearchPageObject } from './navigational_search';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { BannersPageObject } from './banners_page';
+import { InfraHostsViewProvider } from './infra_hosts_view';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -63,11 +64,12 @@ export const pageObjects = {
   infraMetricsExplorer: InfraMetricsExplorerProvider,
   infraLogs: InfraLogsPageProvider,
   infraSavedViews: InfraSavedViewsProvider,
+  infraHostsView: InfraHostsViewProvider,
   maps: GisPageObject,
+  geoFileUpload: GeoFileUploadPageObject,
   statusPage: StatusPageObject,
   upgradeAssistant: UpgradeAssistantPageObject,
   uptime: UptimePageObject,
-  syntheticsIntegration: SyntheticsIntegrationPageProvider,
   rollup: RollupPageObject,
   apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,

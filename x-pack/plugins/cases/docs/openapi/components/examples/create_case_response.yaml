@@ -1,0 +1,37 @@
+summary: The create case API returns a JSON object that contains details about the case.
+value: 
+  comments: []
+  totalAlerts: 0
+  id: 66b9aa00-94fa-11ea-9f74-e7e108796192
+  version: WzUzMiwxXQ==
+  totalComment: 1
+  title: Case title 1
+  tags:
+    - tag 1
+  assignees: []
+  description: A case description.
+  settings:
+    syncAlerts: false
+  owner: cases
+  duration: null
+  severity: low
+  closed_at: null
+  closed_by: null
+  created_at: '2022-03-24T00:37:03.906Z'
+  created_by:
+    username: elastic
+    full_name: null
+    email: null
+  status: open
+  updated_at: null
+  updated_by: null
+  connector:
+    id: 131d4448-abe0-4789-939d-8ef60680b498
+    name: My connector
+    type: .jira
+    fields:
+      issueType: '10006'
+      parent: null
+      priority: High
+  external_service: null
+  

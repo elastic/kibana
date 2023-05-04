@@ -6,18 +6,23 @@
  */
 
 import React, { FC } from 'react';
-import { NavigationMenu } from '../../components/navigation_menu';
-// @ts-ignore
-import { JobsListView } from './components/jobs_list_view/index';
-import { usePageUrlState } from '../../util/url_state';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { JobsListView } from './components/jobs_list_view';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
+import { MlPageHeader } from '../../components/page_header';
+import { HeaderMenuPortal } from '../../components/header_menu_portal';
+import { JobsActionMenu } from '../components/jobs_action_menu';
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+  pageUrlState: ListingPageUrlState;
+}
 
 interface JobsPageProps {
-  blockRefresh?: boolean;
-  isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   lastRefresh?: number;
 }
@@ -29,8 +34,8 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
-export const JobsPage: FC<JobsPageProps> = (props) => {
-  const [pageState, setPageState] = usePageUrlState(
+export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
+  const [pageState, setPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
   );
@@ -39,10 +44,20 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
   } = useMlKibana();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
-    <div data-test-subj="mlPageJobManagement">
-      <NavigationMenu tabId="anomaly_detection" />
-      <JobsListView {...props} jobsViewState={pageState} onJobsViewStateUpdate={setPageState} />
+    <>
+      <MlPageHeader>
+        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly Detection Jobs" />
+      </MlPageHeader>
+      <HeaderMenuPortal>
+        <JobsActionMenu />
+      </HeaderMenuPortal>
+      <JobsListView
+        isMlEnabledInSpace={isMlEnabledInSpace}
+        lastRefresh={lastRefresh}
+        jobsViewState={pageState}
+        onJobsViewStateUpdate={setPageState}
+      />
       <HelpMenu docLink={helpLink} />
-    </div>
+    </>
   );
 };

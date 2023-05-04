@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { BannersConfigType } from './config';
 import { BannersRequestHandlerContext } from './types';
 import { registerRoutes } from './routes';

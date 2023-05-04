@@ -15,7 +15,9 @@ import {
   EuiColorPicker,
   EuiColorPickerProps,
   EuiColorPickerSwatch,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
@@ -37,6 +39,8 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
     : value;
   const [color, setColor] = useState(initialColorValue || '');
 
+  const { euiTheme } = useEuiTheme();
+
   const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
     setColor(text);
     onChange({ [name]: hex ? `rgba(${rgba.join(',')})` : '' });
@@ -56,8 +60,18 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
         defaultMessage: 'Color picker, not accessible',
       });
 
+  const tsvbColorPickerStyles = css`
+    display: flex;
+    align-items: center;
+    position: relative;
+  `;
+
+  const tsvbColorPickerClearStyles = css`
+    margin-left: ${euiTheme.size.xs};
+  `;
+
   return (
-    <div className="tvbColorPicker" data-test-subj="tvbColorPicker">
+    <div css={tsvbColorPickerStyles} data-test-subj="tvbColorPicker">
       <EuiColorPicker
         onChange={handleColorChange}
         color={color}
@@ -66,7 +80,11 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
         button={<EuiColorPickerSwatch color={color} aria-label={label} />}
       />
       {!disableTrash && (
-        <div className="tvbColorPicker__clear" onClick={handleClear}>
+        <div
+          css={tsvbColorPickerClearStyles}
+          onClick={handleClear}
+          data-test-subj="tvbColorPickerClear"
+        >
           <EuiIconTip
             size="s"
             type="cross"

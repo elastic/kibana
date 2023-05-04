@@ -9,27 +9,39 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class AccountSettingsPageObject extends FtrService {
+  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly userMenu = this.ctx.getService('userMenu');
 
-  async verifyAccountSettings(expectedEmail: string, expectedUserName: string) {
+  async verifyAccountSettings(expectedUserName: string) {
     await this.userMenu.clickProvileLink();
 
     const usernameField = await this.testSubjects.find('username');
     const userName = await usernameField.getVisibleText();
     expect(userName).to.be(expectedUserName);
 
-    const emailIdField = await this.testSubjects.find('email');
-    const emailField = await emailIdField.getVisibleText();
-    expect(emailField).to.be(expectedEmail);
     await this.userMenu.closeMenu();
   }
 
   async changePassword(currentPassword: string, newPassword: string) {
-    await this.testSubjects.setValue('currentPassword', currentPassword);
-    await this.testSubjects.setValue('newPassword', newPassword);
-    await this.testSubjects.setValue('confirmNewPassword', newPassword);
-    await this.testSubjects.click('changePasswordButton');
-    await this.testSubjects.existOrFail('passwordUpdateSuccess');
+    await this.testSubjects.click('openChangePasswordForm');
+
+    const currentPasswordInput = await this.find.byName('current_password');
+    await currentPasswordInput.clearValue();
+    await currentPasswordInput.type(currentPassword);
+
+    const passwordInput = await this.find.byName('password');
+    await passwordInput.clearValue();
+    await passwordInput.type(newPassword);
+
+    const confirmPasswordInput = await this.find.byName('confirm_password');
+    await confirmPasswordInput.clearValue();
+    await confirmPasswordInput.type(newPassword);
+
+    await this.testSubjects.click('changePasswordFormSubmitButton');
+
+    const toast = await this.testSubjects.find('euiToastHeader');
+    const title = await toast.getVisibleText();
+    expect(title).to.contain('Password successfully changed');
   }
 }

@@ -18,7 +18,7 @@ import {
   EuiOverlayMask,
   EuiHealth,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   AutoFollowPatternDeleteProvider,

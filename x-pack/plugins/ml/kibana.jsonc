@@ -1,0 +1,66 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ml-plugin",
+  "owner": "@elastic/ml-ui",
+  "description": "This plugin provides access to the machine learning features provided by Elastic.",
+  "plugin": {
+    "id": "ml",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "ml"
+    ],
+    "requiredPlugins": [
+      "aiops",
+      "charts",
+      "cloud",
+      "data",
+      "dataViews",
+      "dataVisualizer",
+      "discover",
+      "embeddable",
+      "features",
+      "fieldFormats",
+      "lens",
+      "licensing",
+      "share",
+      "taskManager",
+      "triggersActionsUi",
+      "uiActions",
+      "unifiedSearch",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ],
+    "optionalPlugins": [
+      "alerting",
+      "dashboard",
+      "home",
+      "licenseManagement",
+      "management",
+      "maps",
+      "security",
+      "spaces",
+      "usageCollection",
+      "cases"
+    ],
+    "requiredBundles": [
+      "cases",
+      "charts",
+      "dashboard",
+      "esUiShared",
+      "fieldFormats",
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "maps",
+      "savedSearch",
+      "usageCollection",
+      "unifiedFieldList",
+      "unifiedSearch"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

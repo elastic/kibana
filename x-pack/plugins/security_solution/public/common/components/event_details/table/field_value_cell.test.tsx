@@ -8,10 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { BrowserField } from '../../../containers/source';
+import type { BrowserField } from '../../../containers/source';
 import { FieldValueCell } from './field_value_cell';
 import { TestProviders } from '../../../mock';
-import { EventFieldsData } from '../types';
+import type { EventFieldsData } from '../types';
 
 const contextId = 'test';
 
@@ -53,9 +53,7 @@ describe('FieldValueCell', () => {
     });
 
     test('it formats multiple values such that each value is displayed on a single line', () => {
-      expect(screen.getByTestId(`event-field-${hostIpData.field}`)).toHaveClass(
-        'euiFlexGroup--directionColumn'
-      );
+      expect(screen.getByTestId(`event-field-${hostIpData.field}`).className).toContain('column');
     });
   });
 
@@ -185,8 +183,8 @@ describe('FieldValueCell', () => {
     });
 
     test('it aligns items at the start of the group to prevent content from stretching (by default)', () => {
-      expect(screen.getByTestId(`event-field-${hostIpData.field}`)).toHaveClass(
-        'euiFlexGroup--alignItemsFlexStart'
+      expect(screen.getByTestId(`event-field-${hostIpData.field}`).className).toContain(
+        'flexStart'
       );
     });
 

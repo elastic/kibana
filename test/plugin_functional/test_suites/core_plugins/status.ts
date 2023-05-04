@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ServiceStatusLevels } from '../../../../src/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {

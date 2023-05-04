@@ -7,25 +7,25 @@
 
 import {
   Axis,
-  Settings,
-  Position,
   Chart,
+  ChartSizeArray,
   PointerUpdateListener,
+  Position,
+  Settings,
   TickFormatter,
   TooltipValue,
-  ChartSizeArray,
 } from '@elastic/charts';
-import React from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
+import React from 'react';
 import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
+import { getTimelineChartTheme } from '../../../../../../../utils/get_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
 } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { ChartHeader } from './chart_header';
-import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 const CHART_SIZE: ChartSizeArray = ['100%', 160];
 

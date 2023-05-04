@@ -16,12 +16,19 @@ export interface Context<T extends FormData = FormData, I extends FormData = T> 
   getFormData: FormHook<T, I>['getFormData'];
 }
 
+/**
+ * Context required for the "useFormData()" hook in order to access the form data
+ * observable and the getFormData() handler which serializes the form data
+ */
 const FormDataContext = createContext<Context<any> | undefined>(undefined);
 
 interface Props extends Context {
   children: React.ReactNode;
 }
 
+/**
+ * This provider wraps the whole form and is consumed by the <Form /> component
+ */
 export const FormDataContextProvider = ({ children, getFormData$, getFormData }: Props) => {
   const value = useMemo<Context>(
     () => ({

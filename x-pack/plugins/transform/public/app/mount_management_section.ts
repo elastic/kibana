@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public/';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';
@@ -25,11 +25,31 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const { element, setBreadcrumbs, history } = params;
-  const { http, notifications, getStartServices } = coreSetup;
+  const { http, getStartServices } = coreSetup;
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
-  const { application, chrome, docLinks, i18n, overlays, theme, savedObjects, uiSettings } = core;
-  const { data, share, spaces, triggersActionsUi } = plugins;
+  const {
+    application,
+    chrome,
+    docLinks,
+    i18n,
+    overlays,
+    theme,
+    savedObjects,
+    uiSettings,
+    notifications,
+  } = core;
+  const {
+    data,
+    dataViews,
+    share,
+    spaces,
+    triggersActionsUi,
+    unifiedSearch,
+    charts,
+    fieldFormats,
+    savedObjectsManagement,
+  } = plugins;
   const { docTitle } = chrome;
 
   // Initialize services
@@ -42,6 +62,7 @@ export async function mountManagementSection(
     application,
     chrome,
     data,
+    dataViews,
     docLinks,
     http,
     i18n,
@@ -57,6 +78,10 @@ export async function mountManagementSection(
     spaces,
     ml: await getMlSharedImports(),
     triggersActionsUi,
+    unifiedSearch,
+    charts,
+    fieldFormats,
+    savedObjectsManagement,
   };
 
   const unmountAppCallback = renderApp(element, appDependencies);

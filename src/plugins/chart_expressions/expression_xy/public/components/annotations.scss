@@ -1,0 +1,61 @@
+.xyAnnotationNumberIcon {
+  border-radius: $euiSize;
+  min-width: $euiSize;
+  height: $euiSize;
+  background-color: currentColor;
+}
+
+.xyAnnotationNumberIcon__text {
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: -.5px;
+  line-height: 11px;
+}
+
+.xyAnnotationIcon_rotate90 {
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+
+.xyAnnotationTooltip {
+  border-radius: 0 !important;
+}
+
+.xyAnnotationTooltip__rows {
+  // max-height: 60vh;
+  overflow-y: hidden;
+}
+
+.xyAnnotationTooltipDetail {
+  padding: $euiSizeXS (
+    $euiSizeXS * 2
+  );
+}
+
+.xyAnnotationTooltip__row {
+  font-weight: $euiFontWeightRegular;
+  padding: $euiSizeS $euiSizeM $euiSizeS $euiSizeS;
+  border-radius: 0 !important;
+}
+
+.xyAnnotationTooltip__extraFields {
+  color: $euiColorDarkShade;
+  margin-top: $euiSizeS;
+}
+
+.xyAnnotationTooltip__extraFieldsKey {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.xyAnnotationTooltip__extraFieldsValue {
+  text-align: right;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.xyAnnotationTooltip__skippedCount {
+  position: relative;
+  text-align: right;
+  font-weight: $euiFontWeightRegular;
+}

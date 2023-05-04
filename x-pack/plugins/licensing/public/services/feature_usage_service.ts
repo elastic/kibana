@@ -6,7 +6,7 @@
  */
 
 import { isDate } from 'lodash';
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { LicenseType } from '../../common/types';
 
 /** @public */

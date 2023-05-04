@@ -29,16 +29,17 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
       try {
         const { id, ...rest } = request.body.job;
         // Create job.
         await clusterClient.asCurrentUser.rollup.putJob({
           id,
+          // @ts-expect-error type mismatch on RollupPutJobRequest.body
           body: rest,
         });
         // Then request the newly created job.
-        const { body: results } = await clusterClient.asCurrentUser.rollup.getJobs({ id });
+        const results = await clusterClient.asCurrentUser.rollup.getJobs({ id });
         return response.ok({ body: results.jobs[0] });
       } catch (err) {
         return handleEsError({ error: err, response });

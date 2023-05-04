@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
-import type { ApplicationStart } from 'src/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import { ILM_POLICY_NAME } from '../../../common/constants';
 import { LocatorPublic, SerializableRecord } from '../../shared_imports';
@@ -31,14 +31,11 @@ export const IlmPolicyLink: FunctionComponent<Props> = ({ locator, navigateToUrl
       data-test-subj="ilmPolicyLink"
       size="xs"
       onClick={() => {
-        locator
-          .getUrl({
-            page: 'policy_edit',
-            policyName: ILM_POLICY_NAME,
-          })
-          .then((url) => {
-            navigateToUrl(url);
-          });
+        const url = locator.getRedirectUrl({
+          page: 'policy_edit',
+          policyName: ILM_POLICY_NAME,
+        });
+        navigateToUrl(url);
       }}
     >
       {i18nTexts.buttonLabel}

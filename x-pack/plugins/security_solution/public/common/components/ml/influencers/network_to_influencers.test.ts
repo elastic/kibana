@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfluencerInput } from '../types';
+import type { InfluencerInput } from '../types';
 import { networkToInfluencers } from './network_to_influencers';
 
 describe('network_to_influencers', () => {

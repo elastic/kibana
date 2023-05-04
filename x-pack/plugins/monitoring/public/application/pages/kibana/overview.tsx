@@ -10,28 +10,31 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaTemplate } from './kibana_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-// @ts-ignore
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';
 
 const KibanaOverview = ({ data }: { data: any }) => {
   const { zoomInfo, onBrush } = useCharts();
 
   if (!data) return null;
+
+  const showRules =
+    data.metrics.kibana_cluster_rule_overdue_count &&
+    data.metrics.kibana_cluster_rule_overdue_count.length &&
+    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.ecs;
 
   return (
     <EuiPage>
@@ -57,6 +60,42 @@ const KibanaOverview = ({ data }: { data: any }) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {showRules && (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_rule_overdue_count}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_rule_overdue_duration}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_action_overdue_count}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_action_overdue_duration}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
@@ -66,7 +105,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
 export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const [data, setData] = useState<any>();
   const clusterUuid = globalState.cluster_uuid;
   const cluster = find(clusters, {

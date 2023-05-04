@@ -6,10 +6,9 @@
  */
 
 import { resolve } from 'path';
-import fs from 'fs';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { KIBANA_ROOT } from '@kbn/test';
-import { FtrConfigProviderContext } from '@kbn/test';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -17,12 +16,8 @@ import { pageObjects } from './page_objects';
 // that returns an object with the projects config values
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
-
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(resolve(__dirname, 'plugins', file)).isDirectory()
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
   );
 
   return {
@@ -30,7 +25,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
       resolve(__dirname, './test_suites/global_search'),
-      resolve(__dirname, './test_suites/timelines'),
     ],
 
     services,
@@ -48,7 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
+        ...findTestPluginPaths(resolve(__dirname, 'plugins')),
       ],
     },
     uiSettings: xpackFunctionalConfig.get('uiSettings'),
@@ -60,9 +54,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       resolverTest: {
         pathname: '/app/resolverTest',
-      },
-      timelineTest: {
-        pathname: '/app/timelinesTest',
       },
     },
 

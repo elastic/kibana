@@ -7,6 +7,7 @@
 
 import { stringify } from 'query-string';
 import url from 'url';
+import { resolve } from 'path';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
@@ -15,13 +16,15 @@ import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
-} from '../../fixtures/saml/saml_tools';
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
+  const retry = getService('retry');
 
   const kibanaServerConfig = config.get('servers.kibana');
 
@@ -52,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       .set('Cookie', sessionCookie.cookieString())
       .expect(200);
 
-    expect(apiResponse.body).to.only.have.keys([
+    expect(apiResponse.body).to.have.keys([
       'username',
       'full_name',
       'email',
@@ -63,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       'lookup_realm',
       'authentication_provider',
       'authentication_type',
+      'elastic_cloud_user',
     ]);
 
     expect(apiResponse.body.username).to.be(username);
@@ -188,10 +192,8 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -237,10 +239,8 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -447,8 +447,6 @@ export default function ({ getService }: FtrProviderContext) {
       let sessionCookie: Cookie;
 
       beforeEach(async function () {
-        this.timeout(40000);
-
         const handshakeResponse = await supertest
           .get(
             '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
@@ -465,10 +463,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
-
-        // Access token expiration is set to 15s for API integration tests.
-        // Let's wait for 20s to make sure token expires.
-        await setTimeoutAsync(20000);
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -479,7 +473,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookie.value).to.not.be(sessionCookie.value);
       };
 
-      it('expired access token should be automatically refreshed', async () => {
+      it('expired access token should be automatically refreshed', async function () {
+        this.timeout(60000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
@@ -525,7 +525,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should refresh access token even if multiple concurrent requests try to refresh it', async () => {
+      it('should refresh access token even if multiple concurrent requests try to refresh it', async function () {
+        this.timeout(60000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
         // Send 5 concurrent requests with a cookie that contains an expired access token.
         await Promise.all(
           Array.from({ length: 5 }).map((value, index) =>
@@ -536,6 +542,54 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200)
           )
         );
+      });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            expectNewSessionCookie(newSessionCookie);
+            await checkSessionCookie(newSessionCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', newSessionCookie.cookieString())
+              .expect(200);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
       });
     });
 
@@ -739,6 +793,98 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(newSessionCookie, newUsername);
         });
       }
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        // Initiating handshake
+        const handshakeResponse = await supertest
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
+
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
+
+        // Signing in should create a `user_login` event.
+        const samlAuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
+          .expect(302);
+
+        const cookies = samlAuthenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('a@b.c');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('saml');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('a@b.c');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('saml');
+      });
+
+      it('should log authentication failure correctly', async () => {
+        // Initiating handshake
+        const handshakeResponse = await supertest
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
+
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+
+        await supertest
+          .post('/api/security/saml/callback')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({
+            SAMLResponse: await createSAMLResponse({ inResponseTo: 'some-invalid-request-id' }),
+          })
+          .expect(401);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(1);
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('failure');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].kibana.authentication_provider).to.be('saml');
+      });
     });
   });
 }

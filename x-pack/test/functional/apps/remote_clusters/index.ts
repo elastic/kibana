@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // https://www.elastic.co/guide/en/kibana/7.9/working-remote-clusters.html
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Remote Clusters app', function () {
-    this.tags(['ciGroup4', 'skipCloud']);
+    this.tags('skipCloud');
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./home_page'));
   });

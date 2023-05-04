@@ -7,20 +7,24 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ApmApiError } from '../../../common/apm_api_supertest';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const apmReadUser = getService('legacySupertestAsApmReadUser');
-
+  const apmApiClient = getService('apmApiClient');
   function getJobs() {
-    return apmReadUser.get(`/internal/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return apmApiClient.writeUser({
+      endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
+    });
   }
 
   function createJobs(environments: string[]) {
-    return apmReadUser
-      .post(`/internal/apm/settings/anomaly-detection/jobs`)
-      .send({ environments })
-      .set('kbn-xsrf', 'foo');
+    return apmApiClient.readUser({
+      endpoint: `POST /internal/apm/settings/anomaly-detection/jobs`,
+      params: {
+        body: { environments },
+      },
+    });
   }
 
   registry.when('ML jobs', { config: 'trial', archives: [] }, () => {
@@ -36,10 +40,13 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
       describe('when calling create endpoint', () => {
         it('returns an error because the user does not have access', async () => {
-          const { body } = await createJobs(['production', 'staging']);
-
-          expect(body.statusCode).to.be(403);
-          expect(body.error).to.be('Forbidden');
+          try {
+            await createJobs(['production', 'staging']);
+            expect(true).to.be(false);
+          } catch (e) {
+            const err = e as ApmApiError;
+            expect(err.res.status).to.be(403);
+          }
         });
       });
     });

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup } from '../../../../src/core/server';
+import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -17,32 +17,47 @@ import {
   DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  DEFAULT_TRANSFORMS,
-  DEFAULT_TRANSFORMS_SETTING,
+  ENABLE_GROUPED_NAVIGATION,
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
+  ENABLE_CCS_READ_WARNING_SETTING,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
 } from '../common/constants';
-import { transformConfigSchema } from '../common/transforms/types';
-import { ExperimentalFeatures } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { LogLevelSetting } from '../common/detection_engine/rule_monitoring';
+
+type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
+
+/**
+ * This helper is used to preserve settings order in the UI
+ *
+ * @param settings - UI settings config
+ * @returns Settings config with the order field added
+ */
+const orderSettings = (settings: SettingsConfig): SettingsConfig => {
+  return Object.fromEntries(
+    Object.entries(settings).map(([id, setting], index) => [id, { ...setting, order: index }])
+  );
+};
 
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  uiSettings.register({
+  const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {
@@ -91,9 +106,7 @@ export const initUiSettings = (
       }),
       sensitive: true,
 
-      value: experimentalFeatures.uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN,
+      value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
@@ -136,6 +149,23 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.number(),
     },
+    [ENABLE_GROUPED_NAVIGATION]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
+        defaultMessage: 'New streamlined navigation',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
+        {
+          defaultMessage:
+            '<p>Improve your experience with the new navigation organized and optimized around the most important workflows.</p>',
+        }
+      ),
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.boolean(),
+    },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
         defaultMessage: 'News feed',
@@ -157,19 +187,17 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.rulesTableRefreshDescription',
         {
           defaultMessage:
-            '<p>Enables auto refresh on the all rules and monitoring tables, in milliseconds</p>',
+            '<p>Enables auto refresh on the rules and monitoring tables, in milliseconds</p>',
         }
       ),
       type: 'json',
       value: `{
   "on": ${DEFAULT_RULE_REFRESH_INTERVAL_ON},
-  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE},
-  "idleTimeout": ${DEFAULT_RULE_REFRESH_IDLE_VALUE}
+  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE}
 }`,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
-        idleTimeout: schema.number({ min: 300000 }),
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
@@ -210,25 +238,133 @@ export const initUiSettings = (
         })
       ),
     },
-    // TODO: Remove this check once the experimental flag is removed
-    ...(experimentalFeatures.metricsEntitiesEnabled
+    [ENABLE_CCS_READ_WARNING_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
+        defaultMessage: 'CCS Rule Privileges Warning',
+      }),
+      value: true,
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
+        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
+      }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.boolean(),
+    },
+    [SHOW_RELATED_INTEGRATIONS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
+        defaultMessage: 'Related integrations',
+      }),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.showRelatedIntegrationsDescription',
+        {
+          defaultMessage: '<p>Shows related integrations on the rules and monitoring tables</p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
-          [DEFAULT_TRANSFORMS]: {
-            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
-              defaultMessage: 'Default transforms to use',
-            }),
-            value: DEFAULT_TRANSFORMS_SETTING,
-            type: 'json',
-            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
-              // TODO: Add a hyperlink to documentation about this feature
-              defaultMessage: 'Experimental: Enable an application cache through transforms',
-            }),
-            sensitive: true,
+          [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
+              {
+                defaultMessage: 'Extended rule execution logging',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
+              {
+                defaultMessage:
+                  '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            value: true,
             category: [APP_ID],
             requiresPageReload: false,
-            schema: transformConfigSchema,
+          },
+          [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
+              {
+                defaultMessage: 'Extended rule execution logging: min level',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription',
+              {
+                defaultMessage:
+                  '<p>Sets minimum log level starting from which rules will write extended logs to .kibana-event-log-* indices. This affects only events of type Message, other events are being written to .kibana-event-log-* regardless of this setting and their log level.</p>',
+              }
+            ),
+            type: 'select',
+            schema: schema.oneOf([
+              schema.literal(LogLevelSetting.off),
+              schema.literal(LogLevelSetting.error),
+              schema.literal(LogLevelSetting.warn),
+              schema.literal(LogLevelSetting.info),
+              schema.literal(LogLevelSetting.debug),
+              schema.literal(LogLevelSetting.trace),
+            ]),
+            value: LogLevelSetting.error,
+            options: [
+              LogLevelSetting.off,
+              LogLevelSetting.error,
+              LogLevelSetting.warn,
+              LogLevelSetting.info,
+              LogLevelSetting.debug,
+              LogLevelSetting.trace,
+            ],
+            optionLabels: {
+              [LogLevelSetting.off]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelOff',
+                {
+                  defaultMessage: 'Off',
+                }
+              ),
+              [LogLevelSetting.error]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError',
+                {
+                  defaultMessage: 'Error',
+                }
+              ),
+              [LogLevelSetting.warn]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn',
+                {
+                  defaultMessage: 'Warn',
+                }
+              ),
+              [LogLevelSetting.info]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelInfo',
+                {
+                  defaultMessage: 'Info',
+                }
+              ),
+              [LogLevelSetting.debug]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug',
+                {
+                  defaultMessage: 'Debug',
+                }
+              ),
+              [LogLevelSetting.trace]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelTrace',
+                {
+                  defaultMessage: 'Trace',
+                }
+              ),
+            },
+            category: [APP_ID],
+            requiresPageReload: false,
           },
         }
       : {}),
-  });
+  };
+
+  uiSettings.register(orderSettings(securityUiSettings));
 };

@@ -6,7 +6,7 @@
  */
 
 import { buildAlertsHistogramQuery } from './query.alerts_histogram.dsl';
-import { mockOptions, expectedDsl } from './__mocks__/';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildAlertsHistogramQuery', () => {
   test('build query from options correctly', () => {

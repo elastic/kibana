@@ -9,21 +9,15 @@ import { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
 import { DataRequestContext } from '../../../../actions';
-import { InnerJoin } from '../../../joins/inner_join';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { JoinState } from '../types';
+import { isTermJoinSource, type ITermJoinSource } from '../../../sources/join_sources';
 
 interface SourceResult {
   refreshed: boolean;
   featureCollection: FeatureCollection;
 }
 
-export interface JoinState {
-  dataHasChanged: boolean;
-  join: InnerJoin;
-  propertiesMap?: PropertiesMap;
-}
-
-export function performInnerJoins(
+export async function performInnerJoins(
   sourceResult: SourceResult,
   joinStates: JoinState[],
   updateSourceData: DataRequestContext['updateSourceData'],
@@ -84,13 +78,22 @@ export function performInnerJoins(
     updateSourceData({ ...sourceResult.featureCollection });
   }
 
-  const joinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
-    return (
-      !joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined
-    );
+  //
+  // term joins are easy to misconfigure.
+  // Users often are unaware of left values and right values and whether they allign for joining
+  // Provide messaging that helps users debug term joins with no matches
+  //
+  const termJoinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
+    if (!isTermJoinSource(joinStatus.joinState.join.getRightJoinSource())) {
+      return false;
+    }
+
+    const hasTerms =
+      joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
+    return !joinStatus.joinedWithAtLeastOneFeature && hasTerms;
   });
 
-  if (joinStatusesWithoutAnyMatches.length) {
+  if (termJoinStatusesWithoutAnyMatches.length) {
     function prettyPrintArray(array: unknown[]) {
       return array.length <= 5
         ? array.join(',')
@@ -101,8 +104,10 @@ export function performInnerJoins(
             });
     }
 
-    const joinStatus = joinStatusesWithoutAnyMatches[0];
-    const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
+    const joinStatus = termJoinStatusesWithoutAnyMatches[0];
+    const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
+    const termJoinSource = joinStatus.joinState.join.getRightJoinSource() as ITermJoinSource;
+    const rightFieldName = await termJoinSource.getTermField().getLabel();
     const reason =
       joinStatus.keys.length === 0
         ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
@@ -114,10 +119,7 @@ export function performInnerJoins(
             values: {
               leftFieldName,
               leftFieldValues: prettyPrintArray(joinStatus.keys),
-              rightFieldName: joinStatus.joinState.join
-                .getRightJoinSource()
-                .getTermField()
-                .getName(),
+              rightFieldName,
               rightFieldValues: prettyPrintArray(
                 Array.from(joinStatus.joinState.propertiesMap!.keys())
               ),

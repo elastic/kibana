@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { coreMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { FeaturesPlugin } from './plugin';
 
 describe('Features Plugin', () => {
@@ -66,6 +66,8 @@ describe('Features Plugin', () => {
         "dev_tools",
         "advancedSettings",
         "indexPatterns",
+        "filesManagement",
+        "filesSharedImage",
         "savedObjectsManagement",
       ]
     `);

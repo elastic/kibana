@@ -8,8 +8,9 @@
 
 import { CLIEngine } from 'eslint';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 
 /**
@@ -34,15 +35,13 @@ export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boole
     CLIEngine.outputFixes(report);
   }
 
-  const failTypes = [];
-  if (report.errorCount > 0) failTypes.push('errors');
-  if (report.warningCount > 0) failTypes.push('warning');
-
-  if (!failTypes.length) {
-    log.success('[eslint] %d files linted successfully', files.length);
-    return;
+  if (report.errorCount || report.warningCount) {
+    log[report.errorCount ? 'error' : 'warning'](cli.getFormatter()(report.results));
   }
 
-  log.error(cli.getFormatter()(report.results));
-  throw createFailError(`[eslint] ${failTypes.join(' & ')}`);
+  if (report.errorCount) {
+    throw createFailError(`[eslint] errors`);
+  }
+
+  log.success('[eslint] %d files linted successfully', files.length);
 }

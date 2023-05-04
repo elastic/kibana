@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RequestHandlerWrapper } from 'kibana/server';
+import { RequestHandlerWrapper } from '@kbn/core/server';
 
 export const handleDisabledApiKeysError: RequestHandlerWrapper = (handler) => {
   return async (context, request, response) => {

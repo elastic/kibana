@@ -7,25 +7,22 @@
  */
 
 import React from 'react';
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
-import { setServices } from '../../kibana_services';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
-import { DocTableRow } from './components/table_row';
 import { discoverServiceMock } from '../../__mocks__/services';
-
-const mountComponent = (props: DocTableWrapperProps) => {
-  return mountWithIntl(<DocTableWrapper {...props} />);
-};
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { EsHitRecord } from '../../types';
+import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 describe('Doc table component', () => {
-  let defaultProps: DocTableWrapperProps;
-
-  const initDefaults = (rows?: DocTableRow[]) => {
-    defaultProps = {
+  const mountComponent = (customProps?: Partial<DocTableWrapperProps>) => {
+    const props = {
       columns: ['_source'],
-      indexPattern: indexPatternMock,
-      rows: rows || [
+      dataView: dataViewMock,
+      rows: [
         {
           _index: 'mock_index',
           _id: '1',
@@ -36,8 +33,8 @@ describe('Doc table component', () => {
             },
           ],
           _source: { message: 'mock_message', bytes: 20 },
-        },
-      ],
+        } as EsHitRecord,
+      ].map((row) => buildDataTableRecord(row, dataViewMock)),
       sort: [['order_date', 'desc']],
       isLoading: false,
       searchDescription: '',
@@ -51,24 +48,35 @@ describe('Doc table component', () => {
       render: () => {
         return <div data-test-subj="docTable">mock</div>;
       },
+      DocViewer,
+      ...(customProps || {}),
     };
 
-    setServices(discoverServiceMock);
+    return mountWithIntl(
+      <KibanaContextProvider services={discoverServiceMock}>
+        <DocTableWrapper {...props} />
+      </KibanaContextProvider>
+    );
   };
 
   it('should render infinite table correctly', () => {
-    initDefaults();
-    const component = mountComponent(defaultProps);
-    expect(findTestSubject(component, defaultProps.dataTestSubj).exists()).toBeTruthy();
+    const component = mountComponent();
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'docTable').exists()).toBeTruthy();
     expect(component.find('.kbnDocTable__error').exists()).toBeFalsy();
   });
 
   it('should render error fallback if rows array is empty', () => {
-    initDefaults([]);
-    const component = mountComponent(defaultProps);
-    expect(findTestSubject(component, defaultProps.dataTestSubj).exists()).toBeTruthy();
+    const component = mountComponent({ rows: [], isLoading: false });
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'docTable').exists()).toBeFalsy();
-    expect(component.find('.kbnDocTable__error').exists()).toBeTruthy();
+    expect(component.find('.kbnDocTable__error').find(EuiIcon).exists()).toBeTruthy();
+  });
+
+  it('should render loading indicator', () => {
+    const component = mountComponent({ rows: [], isLoading: true });
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
+    expect(findTestSubject(component, 'docTable').exists()).toBeFalsy();
+    expect(component.find('.kbnDocTable__error').find(EuiLoadingSpinner).exists()).toBeTruthy();
   });
 });

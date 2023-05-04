@@ -1,9 +1,6 @@
 // stylelint-disable selector-no-qualifying-type
 // SASSTODO: Looks like this could use a rewrite. Needs selectors
 .time-range-selector {
-  .time-range-section-container {
-    display: flex;
-  }
   .time-range-section-title {
     font-weight: bold;
     margin-bottom: $euiSizeS;
@@ -46,7 +43,6 @@
       }
       .body {
         display: block;
-        height: 315px;
       }
     }
     & > li.has-body.active {

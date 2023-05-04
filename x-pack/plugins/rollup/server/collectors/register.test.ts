@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerRollupUsageCollector } from './register';
 
 describe('registerRollupUsageCollector', () => {
   const mockIndex = 'mock_index';
+  const getIndexForType = () => Promise.resolve(mockIndex);
 
   it('makes a usage collector and registers it`', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerRollupUsageCollector(mockCollectorSet, mockIndex);
+    registerRollupUsageCollector(mockCollectorSet, getIndexForType);
     expect(mockCollectorSet.makeUsageCollector).toBeCalledTimes(1);
     expect(mockCollectorSet.registerCollector).toBeCalledTimes(1);
   });
 
   it('makeUsageCollector configs fit the shape', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerRollupUsageCollector(mockCollectorSet, mockIndex);
+    registerRollupUsageCollector(mockCollectorSet, getIndexForType);
     expect(mockCollectorSet.makeUsageCollector).toHaveBeenCalledWith({
       type: 'rollups',
       isReady: expect.any(Function),
@@ -81,7 +82,7 @@ describe('registerRollupUsageCollector', () => {
 
   it('makeUsageCollector config.isReady returns true', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
-    registerRollupUsageCollector(mockCollectorSet, mockIndex);
+    registerRollupUsageCollector(mockCollectorSet, getIndexForType);
     const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
     expect(usageCollectorConfig.isReady()).toBe(true);
   });

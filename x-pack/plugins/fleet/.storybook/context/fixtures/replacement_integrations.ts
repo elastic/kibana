@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomIntegration } from '../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 export const integrations: CustomIntegration[] = [
   {

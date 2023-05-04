@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
-import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
-import { TimeBuckets } from '../../../../util/time_buckets';
-import { getSeverityType } from '../../../../../../common/util/anomaly_utils';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
+
+import { getSeverityType, ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
+
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { ANOMALY_SEVERITY } from '../../../../../../common/constants/anomalies';
-import { getScoresByRecord } from './searches';
-import { ChartLoader } from '../chart_loader';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+
+import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
+import { TimeBuckets } from '../../../../util/time_buckets';
+
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
+import { ChartLoader } from '../chart_loader';
+
+import { getScoresByRecord } from './searches';
 
 export interface Results {
   progress: number;
@@ -33,7 +37,7 @@ export interface ModelItem {
 export interface Anomaly {
   time: number;
   value: number;
-  severity: ANOMALY_SEVERITY;
+  severity: ML_ANOMALY_SEVERITY;
 }
 
 const emptyModelItem = {
@@ -155,8 +159,8 @@ export class ResultsLoader {
     if (agg === null) {
       return { [dtrIndex]: [emptyModelItem] };
     }
-    const resp = await mlResultsService
-      .getModelPlotOutput(
+    const resp = await lastValueFrom(
+      mlResultsService.getModelPlotOutput(
         this._jobCreator.jobId,
         dtrIndex,
         [],
@@ -165,7 +169,7 @@ export class ResultsLoader {
         this._chartInterval.getInterval().asMilliseconds(),
         agg.mlModelPlotAgg
       )
-      .toPromise();
+    );
 
     return this._createModel(resp, dtrIndex);
   }

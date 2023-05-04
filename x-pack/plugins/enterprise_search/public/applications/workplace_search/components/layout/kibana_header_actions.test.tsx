@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
 
-import { WorkplaceSearchHeaderActions } from './';
+import { WorkplaceSearchHeaderActions } from '.';
 
 describe('WorkplaceSearchHeaderActions', () => {
   const ENT_SEARCH_URL = 'http://localhost:3002';

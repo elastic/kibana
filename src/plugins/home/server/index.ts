@@ -22,7 +22,7 @@ export type {
   SampleObject,
   ScopedTutorialContextFactory,
 } from './services';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { HomeServerPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
 

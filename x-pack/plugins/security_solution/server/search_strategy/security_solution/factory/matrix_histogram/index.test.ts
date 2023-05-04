@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   MatrixHistogramRequestOptions,
   MatrixHistogramType,
 } from '../../../../../common/search_strategy/security_solution';

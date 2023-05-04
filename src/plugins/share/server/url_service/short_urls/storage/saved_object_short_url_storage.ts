@@ -7,8 +7,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 import { ShortUrlRecord } from '..';
+import { UrlServiceError } from '../..';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlData } from '../../../../common/url_service/short_urls/types';
 import { ShortUrlStorage } from '../types';
@@ -161,7 +162,7 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
     });
 
     if (result.saved_objects.length !== 1) {
-      throw new Error('not found');
+      throw new UrlServiceError('not found', 'NOT_FOUND');
     }
 
     const savedObject = result.saved_objects[0] as ShortUrlSavedObject;

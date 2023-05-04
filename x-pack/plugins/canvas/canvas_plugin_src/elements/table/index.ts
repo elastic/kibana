@@ -13,7 +13,8 @@ export const table: ElementFactory = () => ({
   type: 'chart',
   help: 'A scrollable grid for displaying data in a tabular format',
   icon: 'visTable',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | table
 | render`,

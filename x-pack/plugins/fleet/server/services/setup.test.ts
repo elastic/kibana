@@ -5,29 +5,73 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
-import { appContextService } from './app_context';
-import { setupFleet } from './setup';
+import { ensurePreconfiguredPackagesAndPolicies } from '.';
 
-const mockedMethodThrowsError = () =>
-  jest.fn().mockImplementation(() => {
+import { appContextService } from './app_context';
+import { getInstallations } from './epm/packages';
+import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import { setupFleet, ensureFleetFileUploadIndices } from './setup';
+
+import { ensureFileUploadWriteIndices } from './epm/elasticsearch/template/install';
+
+jest.mock('./preconfiguration');
+jest.mock('./preconfiguration/outputs');
+jest.mock('./preconfiguration/fleet_proxies');
+jest.mock('./settings');
+jest.mock('./output');
+jest.mock('./download_source');
+jest.mock('./epm/packages');
+jest.mock('./managed_package_policies');
+jest.mock('./setup/upgrade_package_install_version');
+jest.mock('./epm/elasticsearch/template/install', () => {
+  return {
+    ...jest.requireActual('./epm/elasticsearch/template/install'),
+    ensureFileUploadWriteIndices: jest.fn(),
+  };
+});
+
+const mockedMethodThrowsError = (mockFn: jest.Mock) =>
+  mockFn.mockImplementation(() => {
     throw new Error('SO method mocked to throw');
   });
 
 class CustomTestError extends Error {}
-const mockedMethodThrowsCustom = () =>
-  jest.fn().mockImplementation(() => {
+const mockedMethodThrowsCustom = (mockFn: jest.Mock) =>
+  mockFn.mockImplementation(() => {
     throw new CustomTestError('method mocked to throw');
   });
 
 describe('setupFleet', () => {
   let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let esClient: ElasticsearchClientMock;
 
   beforeEach(async () => {
     context = xpackMocks.createRequestHandlerContext();
     // prevents `Logger not set.` and other appContext errors
     appContextService.start(createAppContextStartContractMock());
+    soClient = context.core.savedObjects.client;
+    esClient = context.core.elasticsearch.client.asInternalUser;
+
+    (getInstallations as jest.Mock).mockResolvedValueOnce({
+      saved_objects: [],
+    });
+
+    (ensurePreconfiguredPackagesAndPolicies as jest.Mock).mockResolvedValue({
+      nonFatalErrors: [],
+    });
+
+    (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
+
+    soClient.find.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
+
+    (ensureFileUploadWriteIndices as jest.Mock).mockResolvedValue({});
   });
 
   afterEach(async () => {
@@ -37,12 +81,7 @@ describe('setupFleet', () => {
 
   describe('should reject with any error thrown underneath', () => {
     it('SO client throws plain Error', async () => {
-      const soClient = context.core.savedObjects.client;
-      soClient.create = mockedMethodThrowsError();
-      soClient.find = mockedMethodThrowsError();
-      soClient.get = mockedMethodThrowsError();
-      soClient.update = mockedMethodThrowsError();
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      mockedMethodThrowsError(upgradeManagedPackagePolicies as jest.Mock);
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
@@ -50,16 +89,61 @@ describe('setupFleet', () => {
     });
 
     it('SO client throws other error', async () => {
-      const soClient = context.core.savedObjects.client;
-      soClient.create = mockedMethodThrowsCustom();
-      soClient.find = mockedMethodThrowsCustom();
-      soClient.get = mockedMethodThrowsCustom();
-      soClient.update = mockedMethodThrowsCustom();
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      mockedMethodThrowsCustom(upgradeManagedPackagePolicies as jest.Mock);
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });
+  });
+
+  it('should not return non fatal errors when upgrade result has no errors', async () => {
+    (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([
+      {
+        errors: [],
+        packagePolicyId: '1',
+      },
+    ]);
+
+    const result = await setupFleet(soClient, esClient);
+
+    expect(result).toEqual({
+      isInitialized: true,
+      nonFatalErrors: [],
+    });
+  });
+
+  it('should return non fatal errors when upgrade result has errors', async () => {
+    (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([
+      {
+        errors: [{ key: 'key', message: 'message' }],
+        packagePolicyId: '1',
+      },
+    ]);
+
+    const result = await setupFleet(soClient, esClient);
+
+    expect(result).toEqual({
+      isInitialized: true,
+      nonFatalErrors: [
+        {
+          errors: [
+            {
+              key: 'key',
+              message: 'message',
+            },
+          ],
+          packagePolicyId: '1',
+        },
+      ],
+    });
+  });
+
+  it('should create agent file upload write indices', async () => {
+    await ensureFleetFileUploadIndices(soClient, esClient);
+
+    expect((ensureFileUploadWriteIndices as jest.Mock).mock.calls[0][0].integrationNames).toEqual([
+      'elastic_agent',
+    ]);
   });
 });

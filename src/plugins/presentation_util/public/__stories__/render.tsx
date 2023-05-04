@@ -8,12 +8,18 @@
 
 import { action } from '@storybook/addon-actions';
 import React, { useRef, useEffect } from 'react';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 
 export const defaultHandlers: IInterpreterRenderHandlers = {
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncCursorEnabled: () => true,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
+  getExecutionContext: () => undefined,
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),

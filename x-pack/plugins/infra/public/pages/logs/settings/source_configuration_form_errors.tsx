@@ -14,7 +14,11 @@ import { FormValidationError } from './validation_errors';
 export const LogSourceConfigurationFormErrors: React.FC<{ errors: FormValidationError[] }> = ({
   errors,
 }) => (
-  <EuiCallOut color="danger" iconType="alert" title={logSourceConfigurationFormErrorsCalloutTitle}>
+  <EuiCallOut
+    color="danger"
+    iconType="warning"
+    title={logSourceConfigurationFormErrorsCalloutTitle}
+  >
     <ul>
       {errors.map((error, errorIndex) => (
         <li key={errorIndex}>
@@ -35,6 +39,16 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
       <FormattedMessage
         id="xpack.infra.logSourceConfiguration.emptyFieldErrorMessage"
         defaultMessage="The field '{fieldName}' must not be empty."
+        values={{
+          fieldName: error.fieldName,
+        }}
+      />
+    );
+  } else if (error.type === 'includes_spaces') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.includesSpacesErrorMessage"
+        defaultMessage="The field '{fieldName}' must not include spaces."
         values={{
           fieldName: error.fieldName,
         }}

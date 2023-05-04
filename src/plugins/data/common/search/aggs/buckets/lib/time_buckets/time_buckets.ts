@@ -9,7 +9,7 @@ import { Assign } from 'utility-types';
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { parseInterval, splitStringInterval } from '../../../utils';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';

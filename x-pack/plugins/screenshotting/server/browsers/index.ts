@@ -7,7 +7,7 @@
 
 export { download } from './download';
 export { install } from './install';
-export type { ConditionalHeaders, PerformanceMetrics } from './chromium';
+export type { Context, PerformanceMetrics } from './chromium';
 export {
   getChromiumDisconnectedError,
   ChromiumArchivePaths,

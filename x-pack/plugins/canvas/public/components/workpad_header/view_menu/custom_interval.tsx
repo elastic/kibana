@@ -9,8 +9,8 @@ import React, { useState, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ButtonSize } from '@elastic/eui/src/components/button/button';
-import { FlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
+import { EuiButtonSize } from '@elastic/eui/src/components/button/button';
+import { EuiFlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
 import { getTimeInterval } from '../../../lib/time_interval';
 
 const strings = {
@@ -35,8 +35,8 @@ const strings = {
 };
 
 interface Props {
-  gutterSize: FlexGroupGutterSize;
-  buttonSize: ButtonSize;
+  gutterSize: EuiFlexGroupGutterSize;
+  buttonSize: EuiButtonSize;
   onSubmit: (interval: number) => void;
   defaultValue: any;
 }

@@ -42,6 +42,9 @@ Object {
   ],
   "meta": Object {
     "source": "*",
+    "statistics": Object {
+      "totalCount": 1977,
+    },
     "type": "esdsl",
   },
   "rows": Array [
@@ -86,6 +89,9 @@ Object {
   ],
   "meta": Object {
     "source": "*",
+    "statistics": Object {
+      "totalCount": 1977,
+    },
     "type": "esdsl",
   },
   "rows": Array [
@@ -172,6 +178,9 @@ Object {
   ],
   "meta": Object {
     "source": "*",
+    "statistics": Object {
+      "totalCount": 1977,
+    },
     "type": "esdsl",
   },
   "rows": Array [

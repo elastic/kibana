@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../ml/common/types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { isSecurityJob } from './is_security_job';
 
 describe('isSecurityJob', () => {

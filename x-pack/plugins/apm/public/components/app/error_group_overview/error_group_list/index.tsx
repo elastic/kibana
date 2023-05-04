@@ -12,19 +12,23 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
-import { asInteger } from '../../../../../common/utils/formatters';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { asInteger } from '../../../../../common/utils/formatters';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
-import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { APMQueryParams } from '../../../shared/Links/url_helpers';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -51,23 +55,31 @@ const Culprit = euiStyled.div`
 type ErrorGroupItem =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'][0];
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 interface Props {
   mainStatistics: ErrorGroupItem[];
   serviceName: string;
+  detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
+  initialSortField: string;
+  initialSortDirection: 'asc' | 'desc';
   comparisonEnabled?: boolean;
+  isLoading: boolean;
 }
 
 function ErrorGroupList({
   mainStatistics,
   serviceName,
+  detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
+  initialSortField,
+  initialSortDirection,
+  isLoading,
 }: Props) {
-  const { urlParams } = useLegacyUrlParams();
-
+  const { query } = useApmParams('/services/{serviceName}/errors');
+  const { offset } = query;
   const columns = useMemo(() => {
     return [
       {
@@ -98,7 +110,11 @@ function ErrorGroupList({
         width: `${unit * 6}px`,
         render: (_, { groupId }) => {
           return (
-            <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
+            <GroupIdLink
+              serviceName={serviceName}
+              errorGroupId={groupId}
+              data-test-subj="errorGroupId"
+            >
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -115,12 +131,10 @@ function ErrorGroupList({
             <ErrorLink
               title={type}
               serviceName={serviceName}
-              query={
-                {
-                  ...urlParams,
-                  kuery: `error.exception.type:"${type}"`,
-                } as APMQueryParams
-              }
+              query={{
+                ...query,
+                kuery: `error.exception.type:"${type}"`,
+              }}
             >
               {type}
             </ErrorLink>
@@ -203,9 +217,14 @@ function ErrorGroupList({
             detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
+          const { currentPeriodColor, previousPeriodColor } =
+            getTimeSeriesColor(ChartType.ERROR_OCCURRENCES);
+
           return (
             <SparkPlot
-              color="euiColorVis7"
+              type="bar"
+              color={currentPeriodColor}
+              isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -217,26 +236,43 @@ function ErrorGroupList({
                 }
               )}
               comparisonSeries={
-                comparisonEnabled ? previousPeriodTimeseries : undefined
+                comparisonEnabled && isTimeComparison(offset)
+                  ? previousPeriodTimeseries
+                  : undefined
               }
+              comparisonSeriesColor={previousPeriodColor}
             />
           );
         },
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, urlParams, detailedStatistics, comparisonEnabled]);
+  }, [
+    serviceName,
+    query,
+    detailedStatistics,
+    comparisonEnabled,
+    detailedStatisticsLoading,
+    offset,
+  ]);
 
   return (
     <ManagedTable
-      noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-        defaultMessage: 'No errors found',
-      })}
+      noItemsMessage={
+        isLoading
+          ? i18n.translate('xpack.apm.errorsTable.loading', {
+              defaultMessage: 'Loading...',
+            })
+          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+              defaultMessage: 'No errors found',
+            })
+      }
       items={mainStatistics}
       columns={columns}
-      initialPageSize={25}
-      initialSortField="occurrences"
-      initialSortDirection="desc"
+      initialSortField={initialSortField}
+      initialSortDirection={initialSortDirection}
       sortItems={false}
+      initialPageSize={25}
+      isLoading={isLoading}
     />
   );
 }

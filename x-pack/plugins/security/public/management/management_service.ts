@@ -7,12 +7,12 @@
 
 import type { Subscription } from 'rxjs';
 
-import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
+import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import type {
   ManagementApp,
   ManagementSection,
   ManagementSetup,
-} from 'src/plugins/management/public';
+} from '@kbn/management-plugin/public';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';

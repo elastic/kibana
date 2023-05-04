@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/detect_beats';
+import fixture from './fixtures/detect_beats.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

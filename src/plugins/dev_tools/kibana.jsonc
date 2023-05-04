@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dev-tools-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "devTools",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "urlForwarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

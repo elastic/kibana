@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import {
-  ColorMode,
-  Labels,
-  CustomPaletteState,
-  Style as ChartStyle,
-} from '../../../../charts/common';
-import { Style } from '../../../../expressions/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { LayoutDirection } from '@elastic/charts';
+import { TrendlineResult } from './expression_functions';
 
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metrics: ExpressionValueVisDimension[];
-  bucket?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  max?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
 }
 
-export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
 export interface MetricVisParam {
-  percentageMode: boolean;
-  percentageFormatPattern?: string;
-  metricColorMode: ColorMode;
+  subtitle?: string;
+  secondaryPrefix?: string;
+  color?: string;
+  icon?: string;
   palette?: CustomPaletteState;
-  labels: Labels;
-  style: MetricStyle;
+  progressDirection: LayoutDirection;
+  maxCols: number;
+  minTiles?: number;
+  trends?: TrendlineResult['trends'];
 }
 
 export interface VisParams {
@@ -46,4 +46,6 @@ export interface MetricOptions {
   color?: string;
   bgColor?: string;
   lightText: boolean;
+  colIndex: number;
+  rowIndex: number;
 }

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Immutable } from '../../../../../../../common/endpoint/types';
-import { PolicyDetailsState } from '../../../types';
+import type { Immutable } from '../../../../../../../common/endpoint/types';
+import type { PolicyDetailsState } from '../../../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../../../common/constants';
-import { createUninitialisedResourceState } from '../../../../../state';
 
 /**
  * Return a fresh copy of initial state, since we mutate state in the reducer.
@@ -26,21 +25,15 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     online: 0,
     total: 0,
     other: 0,
+    all: 0,
+    active: 0,
   },
   artifacts: {
     location: {
-      page_index: MANAGEMENT_DEFAULT_PAGE,
-      page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+      page: MANAGEMENT_DEFAULT_PAGE,
+      pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
       show: undefined,
       filter: '',
     },
-    assignableList: createUninitialisedResourceState(),
-    trustedAppsToUpdate: createUninitialisedResourceState(),
-    assignableListEntriesExist: createUninitialisedResourceState(),
-    doesAnyTrustedAppExists: createUninitialisedResourceState(),
-    hasTrustedApps: createUninitialisedResourceState(),
-    assignedList: createUninitialisedResourceState(),
-    policies: createUninitialisedResourceState(),
-    removeList: createUninitialisedResourceState(),
   },
 });

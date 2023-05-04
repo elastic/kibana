@@ -46,13 +46,62 @@ export class ValidateIntervalError extends UIError {
   }
 }
 
-export class AggNotSupportedInMode extends UIError {
-  constructor(metricType: string, timeRangeMode: string) {
+export class AggNotSupportedError extends UIError {
+  constructor(metricType: string) {
     super(
       i18n.translate('visTypeTimeseries.wrongAggregationErrorMessage', {
-        defaultMessage: 'The aggregation {metricType} is not supported in {timeRangeMode} mode',
-        values: { metricType, timeRangeMode },
+        defaultMessage:
+          'The {metricType} aggregation is not supported for existing panel configuration.',
+        values: { metricType },
       })
     );
+  }
+}
+
+export class TimeFieldNotSpecifiedError extends UIError {
+  constructor() {
+    super(
+      i18n.translate('visTypeTimeseries.errors.timeFieldNotSpecifiedError', {
+        defaultMessage: 'Time field is required to visualize the data',
+      })
+    );
+  }
+}
+
+export const filterCannotBeAppliedErrorMessage = i18n.translate(
+  'visTypeTimeseries.filterCannotBeAppliedError',
+  {
+    defaultMessage: 'The "filter" cannot be applied with this configuration',
+  }
+);
+
+export class FilterCannotBeAppliedError extends UIError {
+  constructor() {
+    super(filterCannotBeAppliedErrorMessage);
+  }
+}
+
+export class PivotNotSelectedForTableError extends UIError {
+  constructor() {
+    super(
+      i18n.translate('visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage', {
+        defaultMessage:
+          'No results available. You must choose a group by field for this visualization.',
+      })
+    );
+  }
+}
+
+export const getDataViewNotFoundError = (dataViewId: string) =>
+  i18n.translate('visTypeTimeseries.errors.dataViewNotFoundError', {
+    defaultMessage: `Could not find the data view: {dataViewId}`,
+    values: {
+      dataViewId,
+    },
+  });
+
+export class DataViewNotFoundError extends UIError {
+  constructor(dataViewId: string) {
+    super(getDataViewNotFoundError(dataViewId));
   }
 }

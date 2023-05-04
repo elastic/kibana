@@ -7,13 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { formatMetric } from '../../../lib/format_number';
-// @ts-ignore
 import { SummaryStatus } from '../../summary_status';
 
-// @ts-ignore
-export function Status({ stats }) {
+interface Props {
+  stats: {
+    totalInstances: number;
+    appSearchEngines: number;
+    workplaceSearchOrgSources: number;
+    workplaceSearchPrivateSources: number;
+  };
+}
+
+export function Status({ stats }: Props) {
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.entSearch.overview.instances', {

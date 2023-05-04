@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerAlertsUsageCollector } from './alerts_usage_collector';
+export { registerAlertingUsageCollector } from './alerting_usage_collector';

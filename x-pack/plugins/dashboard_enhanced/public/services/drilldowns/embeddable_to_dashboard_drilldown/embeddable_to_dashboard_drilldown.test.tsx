@@ -5,27 +5,16 @@
  * 2.0.
  */
 
+import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
-import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
-import {
-  Filter,
-  FilterStateStore,
-  Query,
-  RangeFilter,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
-import {
-  ApplyGlobalFilterActionContext,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
-import {
-  DashboardAppLocatorDefinition,
-  DashboardAppLocatorParams,
-} from '../../../../../../../src/plugins/dashboard/public/locator';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
 import { StartDependencies } from '../../../plugin';
-import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
-import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
+import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
+import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public/dashboard_app/locator/locator';
 
 describe('.isConfigValid()', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);
@@ -36,6 +25,7 @@ describe('.isConfigValid()', () => {
         dashboardId: '',
         useCurrentDateRange: false,
         useCurrentFilters: false,
+        openInNewTab: false,
       })
     ).toBe(false);
   });
@@ -46,6 +36,7 @@ describe('.isConfigValid()', () => {
         dashboardId: 'id',
         useCurrentDateRange: false,
         useCurrentFilters: false,
+        openInNewTab: false,
       })
     ).toBe(true);
   });
@@ -120,6 +111,7 @@ describe('.execute() & getHref', () => {
       dashboardId: 'id',
       useCurrentFilters: false,
       useCurrentDateRange: false,
+      openInNewTab: false,
       ...config,
     };
 
@@ -318,7 +310,7 @@ describe('.execute() & getHref', () => {
 function getFilter(isPinned: boolean, queryKey: string): Filter {
   return {
     $state: {
-      store: isPinned ? esFilters.FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+      store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
     },
     meta: {
       index: 'logstash-*',

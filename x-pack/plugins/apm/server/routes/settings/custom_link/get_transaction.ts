@@ -7,20 +7,18 @@
 
 import * as t from 'io-ts';
 import { compact } from 'lodash';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransaction({
-  setup,
+  apmEventClient,
   filters = {},
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   filters?: t.TypeOf<typeof filterOptionsRt>;
 }) {
-  const { apmEventClient } = setup;
-
   const esFilters = compact(
     Object.entries(filters)
       // loops through the filters splitting the value by comma and removing white spaces
@@ -36,8 +34,9 @@ export async function getTransaction({
     apm: {
       events: [ProcessorEvent.transaction as const],
     },
-    size: 1,
     body: {
+      track_total_hits: false,
+      size: 1,
       query: {
         bool: {
           filter: esFilters,

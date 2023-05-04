@@ -7,6 +7,7 @@
 
 import {
   continuousModeDelayValidator,
+  jsonStringValidator,
   parseDuration,
   retentionPolicyMaxAgeValidator,
   transformFrequencyValidator,
@@ -135,5 +136,30 @@ describe('transformFrequencyValidator', () => {
     expect(transformFrequencyValidator('0h')).toBe(false);
     expect(transformFrequencyValidator('1h')).toBe(true);
     expect(transformFrequencyValidator('2h')).toBe(false);
+  });
+});
+
+describe('jsonStringValidator', () => {
+  it('should return false for non-string input', () => {
+    expect(jsonStringValidator(false)).toBe(false);
+    expect(jsonStringValidator(undefined)).toBe(false);
+    expect(jsonStringValidator(null)).toBe(false);
+    expect(jsonStringValidator(0)).toBe(false);
+    expect(jsonStringValidator({})).toBe(false);
+  });
+
+  it('should return whether string is parsable as valid json', () => {
+    expect(
+      jsonStringValidator(`{
+        "must": [],
+        "must_not": [],
+        "should": []
+      }`)
+    ).toBe(true);
+    expect(
+      jsonStringValidator(`{
+        "must":,
+      }`)
+    ).toBe(false);
   });
 });

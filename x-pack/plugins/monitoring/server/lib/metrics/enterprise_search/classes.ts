@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { Metric } from '../classes';
+import { Metric, MetricOptions } from '../classes';
+
+type EnterpriseSearchMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'metricAgg' | 'label' | 'description' | 'format' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'title' | 'derivative'>>;
 
 export class EnterpriseSearchMetric extends Metric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: EnterpriseSearchMetricOptions) {
     super({
       ...opts,
       app: 'enterprise_search',

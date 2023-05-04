@@ -6,7 +6,7 @@
  */
 
 import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
-import { mockOptions, expectedDsl } from './__mocks__/';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildDnsHistogramQuery', () => {
   test('build query from options correctly', () => {

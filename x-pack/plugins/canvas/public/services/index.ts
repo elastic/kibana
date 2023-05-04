@@ -7,11 +7,13 @@
 
 export * from './legacy';
 
-import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasCustomElementService } from './custom_element';
+import { CanvasDataViewsService } from './data_views';
 import { CanvasEmbeddablesService } from './embeddables';
 import { CanvasExpressionsService } from './expressions';
+import { CanvasFiltersService } from './filters';
 import { CanvasLabsService } from './labs';
 import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
@@ -22,8 +24,10 @@ import { CanvasWorkpadService } from './workpad';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
+  dataViews: CanvasDataViewsService;
   embeddables: CanvasEmbeddablesService;
   expressions: CanvasExpressionsService;
+  filters: CanvasFiltersService;
   labs: CanvasLabsService;
   navLink: CanvasNavLinkService;
   notify: CanvasNotifyService;
@@ -37,10 +41,12 @@ export const pluginServices = new PluginServices<CanvasPluginServices>();
 
 export const useCustomElementService = () =>
   (() => pluginServices.getHooks().customElement.useService())();
+export const useDataViewsService = () => (() => pluginServices.getHooks().dataViews.useService())();
 export const useEmbeddablesService = () =>
   (() => pluginServices.getHooks().embeddables.useService())();
 export const useExpressionsService = () =>
   (() => pluginServices.getHooks().expressions.useService())();
+export const useFiltersService = () => (() => pluginServices.getHooks().filters.useService())();
 export const useLabsService = () => (() => pluginServices.getHooks().labs.useService())();
 export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
 export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();

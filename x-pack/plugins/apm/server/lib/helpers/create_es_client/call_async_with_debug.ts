@@ -8,11 +8,11 @@
 /* eslint-disable no-console */
 
 import chalk from 'chalk';
-import { KibanaRequest } from '../../../../../../../src/core/server';
-import { RequestStatus } from '../../../../../../../src/plugins/inspector';
-import { WrappedElasticsearchClientError } from '../../../../../observability/server';
+import { KibanaRequest } from '@kbn/core/server';
+import { RequestStatus } from '@kbn/inspector-plugin/common';
+import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import { getInspectResponse } from '@kbn/observability-plugin/server';
 import { inspectableEsQueriesMap } from '../../../routes/apm_routes/register_apm_server_routes';
-import { getInspectResponse } from '../../../../../observability/server';
 
 function formatObj(obj: Record<string, any>) {
   return JSON.stringify(obj, null, 2);
@@ -23,7 +23,6 @@ export async function callAsyncWithDebug<T>({
   getDebugMessage,
   debug,
   request,
-  requestType,
   requestParams,
   operationName,
   isCalledWithInternalUser,
@@ -31,12 +30,11 @@ export async function callAsyncWithDebug<T>({
   cb: () => Promise<T>;
   getDebugMessage: () => { body: string; title: string };
   debug: boolean;
-  request: KibanaRequest;
-  requestType: string;
+  request?: KibanaRequest;
   requestParams: Record<string, any>;
   operationName: string;
   isCalledWithInternalUser: boolean; // only allow inspection of queries that were retrieved with credentials of the end user
-}) {
+}): Promise<T> {
   if (!debug) {
     return cb();
   }
@@ -70,19 +68,21 @@ export async function callAsyncWithDebug<T>({
     console.log(body);
     console.log(`\n`);
 
-    const inspectableEsQueries = inspectableEsQueriesMap.get(request);
-    if (!isCalledWithInternalUser && inspectableEsQueries) {
-      inspectableEsQueries.push(
-        getInspectResponse({
-          esError,
-          esRequestParams: requestParams,
-          esRequestStatus,
-          esResponse: res,
-          kibanaRequest: request,
-          operationName,
-          startTime,
-        })
-      );
+    if (request) {
+      const inspectableEsQueries = inspectableEsQueriesMap.get(request);
+      if (!isCalledWithInternalUser && inspectableEsQueries) {
+        inspectableEsQueries.push(
+          getInspectResponse({
+            esError,
+            esRequestParams: requestParams,
+            esRequestStatus,
+            esResponse: res,
+            kibanaRequest: request,
+            operationName,
+            startTime,
+          })
+        );
+      }
     }
   }
 

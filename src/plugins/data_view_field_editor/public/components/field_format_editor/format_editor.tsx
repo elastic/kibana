@@ -7,22 +7,23 @@
  */
 
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
-import React, { PureComponent, LazyExoticComponent } from 'react';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
+import React, { LazyExoticComponent, PureComponent } from 'react';
+import { FormatEditorServiceStart } from '../../service';
+import { FieldFormatEditor, FieldFormatEditorFactory } from './editors';
 
 export interface FormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
-  fieldFormatParams: { [key: string]: unknown };
-  fieldFormatEditors: any;
-  onChange: (change: { [key: string]: any }) => void;
+  fieldFormatParams: FieldFormatParams;
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }
 
-interface FormatEditorState {
+export interface FormatEditorState {
   EditorComponent: LazyExoticComponent<FieldFormatEditor> | null;
   fieldFormatId?: string;
 }
@@ -39,13 +40,15 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
   constructor(props: FormatEditorProps) {
     super(props);
     this.state = {
-      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId)),
+      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId) ?? null),
     };
   }
 
   static getDerivedStateFromProps(nextProps: FormatEditorProps) {
     return {
-      EditorComponent: unwrapEditor(nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId)),
+      EditorComponent: unwrapEditor(
+        nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) ?? null
+      ),
     };
   }
 

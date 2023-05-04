@@ -18,7 +18,7 @@ export async function extract(archivePath: string, targetPath: string) {
       unpacker = unzip;
       break;
     default:
-      throw new ExtractError(`Unable to unpack filetype: ${fileType}`);
+      throw new ExtractError(new Error(`Unable to unpack filetype: ${fileType}`));
   }
 
   await unpacker(archivePath, targetPath);

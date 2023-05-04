@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
+import * as rt from 'io-ts';
 import {
   logEntryAfterCursorRT,
   logEntryBeforeCursorRT,
   logEntryCursorRT,
   logEntryRT,
 } from '../../log_entry';
+import { logViewColumnConfigurationRT, logViewReferenceRT } from '../../log_views';
 import { jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 
@@ -21,14 +21,14 @@ export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
 
 const logEntriesBaseSearchRequestParamsRT = rt.intersection([
   rt.type({
-    sourceId: rt.string,
+    logView: logViewReferenceRT,
     startTimestamp: rt.number,
     endTimestamp: rt.number,
     size: rt.number,
   }),
   rt.partial({
     query: jsonObjectRT,
-    columns: rt.array(logSourceColumnConfigurationRT),
+    columns: rt.array(logViewColumnConfigurationRT),
     highlightPhrase: rt.string,
   }),
 ]);

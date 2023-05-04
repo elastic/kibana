@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { MonitoringClusterStackProductUsage } from '../types';
 import { fetchESUsage } from './fetch_es_usage';
 import { MonitoringConfig } from '../../../config';
-// @ts-ignore
-import { getIndexPatterns } from '../../../lib/cluster/get_index_patterns';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,

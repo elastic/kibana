@@ -1,6 +1,7 @@
 [
   {
     "cluster_uuid": "__standalone_cluster__",
+    "version": "",
     "license": {},
     "elasticsearch": {
       "cluster_stats": {

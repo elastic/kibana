@@ -126,6 +126,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
 >
   <div
     className="kibanaCodeEditor"
+    onKeyDown={[Function]}
   >
     <EuiToolTip
       content={
@@ -162,81 +163,155 @@ exports[`<CodeEditor /> is rendered 1`] = `
       display="block"
       position="top"
     >
-      <span
-        className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
+      <EuiToolTipAnchor
+        display="block"
+        id="generated-id"
+        isVisible={false}
+        onBlur={[Function]}
+        onFocus={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        <div
-          aria-label="Code Editor"
-          className="kibanaCodeEditor__keyboardHint"
-          data-test-subj="codeEditorHint"
-          id="1234"
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          role="button"
-          tabIndex={0}
-        />
-      </span>
+        <span
+          css="unknown styles"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <Insertion
+            cache={
+              Object {
+                "insert": [Function],
+                "inserted": Object {
+                  "uuw4g3-euiToolTipAnchor-block": true,
+                },
+                "key": "css",
+                "nonce": undefined,
+                "registered": Object {},
+                "sheet": StyleSheet {
+                  "_alreadyInsertedOrderInsensitiveRule": true,
+                  "_insertTag": [Function],
+                  "before": null,
+                  "container": <head>
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block{display:block;}
+                    </style>
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
+                    </style>
+                    <style
+                      data-styled="active"
+                      data-styled-version="5.1.0"
+                    />
+                  </head>,
+                  "ctr": 2,
+                  "insertionPoint": undefined,
+                  "isSpeedy": false,
+                  "key": "css",
+                  "nonce": undefined,
+                  "prepend": undefined,
+                  "tags": Array [
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block{display:block;}
+                    </style>,
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
+                    </style>,
+                  ],
+                },
+              }
+            }
+            isStringTag={true}
+            serialized={
+              Object {
+                "map": undefined,
+                "name": "uuw4g3-euiToolTipAnchor-block",
+                "next": undefined,
+                "styles": "*[disabled]{pointer-events:none;};label:euiToolTipAnchor;;;display:block;label:block;;;",
+                "toString": [Function],
+              }
+            }
+          />
+          <span
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <div
+              aria-label="Code Editor"
+              className="kibanaCodeEditor__keyboardHint"
+              data-test-subj="codeEditorHint"
+              id="1234"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
+          </span>
+        </span>
+      </EuiToolTipAnchor>
     </EuiToolTip>
-    <mockMonacoEditor
-      editorDidMount={[Function]}
-      editorWillMount={[Function]}
-      height={250}
-      language="loglang"
-      onChange={[Function]}
-      options={
-        Object {
-          "fontFamily": "Roboto Mono",
-          "fontSize": 12,
-          "lineHeight": 21,
-          "matchBrackets": "never",
-          "minimap": Object {
-            "enabled": false,
-          },
-          "renderLineHighlight": "none",
-          "scrollBeyondLastLine": false,
-          "scrollbar": Object {
-            "alwaysConsumeMouseWheel": false,
-            "useShadows": false,
-          },
-          "wordBasedSuggestions": false,
-          "wordWrap": "on",
-          "wrappingIndent": "indent",
+    <Component>
+      <mockMonacoEditor
+        editorDidMount={[Function]}
+        editorWillMount={[Function]}
+        height={250}
+        language="loglang"
+        onChange={[Function]}
+        options={
+          Object {
+            "fontFamily": "Roboto Mono",
+            "fontSize": 12,
+            "lineHeight": 21,
+            "matchBrackets": "never",
+            "minimap": Object {
+              "enabled": false,
+            },
+            "padding": Object {},
+            "renderLineHighlight": "none",
+            "scrollBeyondLastLine": false,
+            "scrollbar": Object {
+              "alwaysConsumeMouseWheel": false,
+              "useShadows": false,
+            },
+            "wordBasedSuggestions": false,
+            "wordWrap": "on",
+            "wrappingIndent": "indent",
+          }
         }
-      }
-      theme="euiColors"
-      value="
+        theme="euiColors"
+        value="
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 "
-    >
-      <div>
-        <div />
-        <textarea
-          data-test-subj="monacoEditorTextarea"
-          onKeyDown={[Function]}
-        />
-      </div>
-    </mockMonacoEditor>
-    <ResizeDetector
-      handleHeight={true}
-      handleWidth={true}
-      nodeType="div"
-      onResize={[Function]}
-      querySelector={null}
-      refreshMode="debounce"
-      refreshRate={1000}
-      skipOnMount={false}
-      targetDomEl={null}
-    >
-      <ChildWrapper>
-        <div />
-      </ChildWrapper>
-    </ResizeDetector>
+      >
+        <div>
+          <div />
+          <textarea
+            data-test-subj="monacoEditorTextarea"
+            onKeyDown={[Function]}
+          />
+        </div>
+      </mockMonacoEditor>
+    </Component>
   </div>
 </CodeEditor>
 `;

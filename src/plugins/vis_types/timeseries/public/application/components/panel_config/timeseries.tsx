@@ -26,9 +26,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-// @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { AnnotationsEditor } from '../annotations_editor';
 import { createSelectHandler } from '../lib/create_select_handler';
@@ -166,6 +164,7 @@ export class TimeseriesPanelConfig extends Component<
           fields={this.props.fields}
           model={this.props.model}
           onChange={this.props.onChange}
+          defaultIndexPattern={this.props.defaultIndexPattern}
         />
       );
     } else {

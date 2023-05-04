@@ -38,7 +38,7 @@ export type MyPluginConfigType = TypeOf<typeof config.schema>;
 *my_plugin/server/index.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 export class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<MyPluginConfigType>();
@@ -57,7 +57,7 @@ allow-list property.
 [source,typescript]
 ----
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from 'kibana/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   secret: schema.string({ defaultValue: 'Only on server' }),
@@ -115,7 +115,7 @@ configuration root.
 [source,typescript]
 ----
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from 'kibana/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   newProperty: schema.string({ defaultValue: 'Some string' }),

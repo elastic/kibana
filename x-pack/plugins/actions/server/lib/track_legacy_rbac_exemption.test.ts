@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { trackLegacyRBACExemption } from './track_legacy_rbac_exemption';
 
 describe('trackLegacyRBACExemption', () => {
@@ -28,5 +28,17 @@ describe('trackLegacyRBACExemption', () => {
       err = e;
     }
     expect(err).toBeUndefined();
+  });
+
+  it('should call `usageCounter.incrementCounter` and increment by the passed in value', () => {
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    trackLegacyRBACExemption('test', mockUsageCounter, 15);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: `source_test`,
+      counterType: 'legacyRBACExemption',
+      incrementBy: 15,
+    });
   });
 });

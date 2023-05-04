@@ -11,8 +11,8 @@ import { EuiCallOut, EuiText } from '@elastic/eui';
 import React from 'react';
 // @ts-expect-error untyped local
 import { DatasourceComponent } from '../datasource_component';
-import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { Datasource } from '../../../../public/expression_types/datasource';
+import { templateFromReactComponent } from '../../../lib/template_from_react_component';
+import { Datasource } from '../../../expression_types/datasource';
 
 const TestDatasource = ({ args }: any) => (
   <EuiCallOut title="My Test Data Source" iconType="iInCircle">

@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { APP_ID } from '../../../plugins/maps/common/constants';
+import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import { FtrService } from '../ftr_provider_context';
 
 function escapeLayerName(layerName: string) {
@@ -44,6 +44,26 @@ export class GisPageObject extends FtrService {
     this.basePath = basePath;
   }
 
+  async expectEmsToBeAvailable() {
+    this.log.debug(`expectEmsToBeAvailable`);
+    await this.openNewMap();
+    await this.clickAddLayer();
+    await this.testSubjects.click('emsBoundaries');
+    try {
+      const emsFileElement = await this.testSubjects.find('emsFileSelect', 120000); // large timeout for EMS request
+      if (!emsFileElement) {
+        throw new Error('Unable to find EMS file select');
+      }
+      const isDisabled = await this.comboBox.isDisabled(emsFileElement);
+      if (isDisabled) {
+        throw new Error('EMS file select is disabled');
+      }
+    } catch (e) {
+      this.log.debug(`EMS is not available, error: ${e.message}`);
+      throw new Error('Test requires access to Elastic Maps Service (EMS). EMS is not available');
+    }
+  }
+
   async setAbsoluteRange(start: string, end: string) {
     await this.timePicker.setAbsoluteRange(start, end);
     await this.waitForLayersToLoad();
@@ -64,7 +84,7 @@ export class GisPageObject extends FtrService {
     this.log.debug(`enterFullScreen`);
     await this.testSubjects.click('mapsFullScreenMode');
     await this.retry.try(async () => {
-      await this.testSubjects.exists('exitFullScreenModeLogo');
+      await this.testSubjects.exists('exitFullScreenModeButton');
     });
     await this.waitForLayersToLoad();
   }
@@ -72,9 +92,9 @@ export class GisPageObject extends FtrService {
   // TODO combine with dashboard full screen into a service
   async existFullScreen() {
     this.log.debug(`existFullScreen`);
-    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeLogo');
+    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeButton');
     if (isFullScreen) {
-      await this.testSubjects.click('exitFullScreenModeLogo');
+      await this.testSubjects.click('exitFullScreenModeButton');
     }
   }
 
@@ -171,7 +191,7 @@ export class GisPageObject extends FtrService {
       }
       await this.testSubjects.click('savedObjectTitle');
     }
-    await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -193,6 +213,14 @@ export class GisPageObject extends FtrService {
 
   async expectMissingAddLayerButton() {
     await this.testSubjects.missingOrFail('addLayerButton');
+  }
+
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
   }
 
   async expectExistAddLayerButton() {
@@ -288,10 +316,33 @@ export class GisPageObject extends FtrService {
     };
   }
 
+  // This method is also used by upgrade testing which is not part of PR testing
+  // Please keep in mind when udpating, removing or adding to this method
+  // upgrade needs to be tested too
+  async clearLegendTooltip() {
+    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+    if (isTooltipOpen) {
+      await this.testSubjects.click(`layerTocTooltip`);
+      // Wait for tooltip to go away
+      await this.common.sleep(1000);
+    }
+  }
+
+  // This method is also used by upgrade testing which is not part of PR testing
+  // Please keep in mind when udpating, removing or adding to this method
+  // upgrade needs to be tested too
   async toggleLayerVisibility(layerName: string) {
-    this.log.debug(`Toggle layer visibility, layer: ${layerName}`);
+    this.log.debug('Inside toggleLayerVisibility');
+    await this.clearLegendTooltip();
     await this.openLayerTocActionsPanel(layerName);
     await this.testSubjects.click('layerVisibilityToggleButton');
+    await this.waitForLayersToLoad();
+    await this.clearLegendTooltip();
+  }
+
+  // In 8.4, EMS basemap layers no longer use EMS tile service name, instead using "Basemap"
+  async toggleEmsBasemapLayerVisibility() {
+    await this.toggleLayerVisibility('Basemap');
   }
 
   async openLegend() {
@@ -393,14 +444,6 @@ export class GisPageObject extends FtrService {
     );
   }
 
-  async hasFilePickerLoadedFile(fileName: string) {
-    this.log.debug(`Has file picker loaded file ${fileName}`);
-    const filePickerText = await this.find.byCssSelector('.euiFilePicker__promptText');
-    const filePickerTextContent = await filePickerText.getVisibleText();
-
-    return fileName === filePickerTextContent;
-  }
-
   /*
    * Layer panel utility functions
    */
@@ -461,62 +504,6 @@ export class GisPageObject extends FtrService {
     }
   }
 
-  async importFileButtonEnabled() {
-    this.log.debug(`Check "Import file" button enabled`);
-    const importFileButton = await this.testSubjects.find('importFileButton');
-    const isDisabled = await importFileButton.getAttribute('disabled');
-    return !isDisabled;
-  }
-
-  async importLayerReadyForAdd() {
-    this.log.debug(`Wait until import complete`);
-    await this.testSubjects.find('indexRespCopyButton', 5000);
-    let layerAddReady = false;
-    await this.retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
-      layerAddReady = await this.importFileButtonEnabled();
-      return layerAddReady;
-    });
-    return layerAddReady;
-  }
-
-  async clickImportFileButton() {
-    this.log.debug(`Click "Import file" button`);
-    await this.testSubjects.click('importFileButton');
-  }
-
-  async setIndexName(indexName: string) {
-    this.log.debug(`Set index name to: ${indexName}`);
-    await this.testSubjects.setValue('fileUploadIndexNameInput', indexName);
-  }
-
-  async setIndexType(indexType: string) {
-    this.log.debug(`Set index type to: ${indexType}`);
-    await this.testSubjects.selectValue('fileImportIndexSelect', indexType);
-  }
-
-  async indexTypeOptionExists(indexType: string) {
-    this.log.debug(`Check index type "${indexType}" available`);
-    return await this.find.existsByCssSelector(
-      `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
-    );
-  }
-
-  async clickCopyButton(dataTestSubj: string): Promise<string> {
-    this.log.debug(`Click ${dataTestSubj} copy button`);
-
-    await this.testSubjects.click(dataTestSubj);
-
-    return await this.browser.getClipboardValue();
-  }
-
-  async getIndexResults() {
-    return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
-  }
-
-  async getIndexPatternResults() {
-    return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
-  }
-
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
@@ -566,37 +553,21 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
-  async selectEMSBoundariesSource() {
-    this.log.debug(`Select Elastic Maps Service boundaries source`);
-    await this.testSubjects.click('emsBoundaries');
+  async selectLayerGroupCard() {
+    this.log.debug(`Click layer group card`);
+    await this.testSubjects.click('layerGroup');
   }
 
-  async selectGeoJsonUploadSource() {
-    this.log.debug(`Select upload geojson source`);
-    await this.testSubjects.click('uploadGeoJson');
-  }
-
-  async uploadJsonFileForIndexing(path: string) {
-    await this.common.setFileInputPath(path);
-    this.log.debug(`File selected`);
-
-    await this.header.waitUntilLoadingHasFinished();
-    await this.waitForLayersToLoad();
-  }
-
-  async selectVectorLayer(vectorLayerName: string) {
-    this.log.debug(`Select EMS vector layer ${vectorLayerName}`);
-    if (!vectorLayerName) {
-      throw new Error(`You did not provide the EMS layer to select`);
-    }
-    await this.comboBox.set('emsVectorComboBox', vectorLayerName);
-    await this.waitForLayersToLoad();
+  async selectFileUploadCard() {
+    this.log.debug(`Select upload file card`);
+    await this.testSubjects.click('uploadFile');
   }
 
   async removeLayer(layerName: string) {
     this.log.debug(`Remove layer ${layerName}`);
     await this.openLayerPanel(layerName);
     await this.testSubjects.click(`mapRemoveLayerButton`);
+    await this.common.clickConfirmOnModal();
     await this.waitForLayerDeleted(layerName);
   }
 
@@ -616,11 +587,11 @@ export class GisPageObject extends FtrService {
   }
 
   async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   async clickExitFullScreenTextButton() {
@@ -628,7 +599,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openInspectorMapView() {
-    await this.inspector.openInspectorView('~inspectorViewChooserMap');
+    await this.inspector.openInspectorView('Map details');
   }
 
   // Method should only be used when multiple requests are expected
@@ -672,6 +643,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
+    await this.inspector.openInspectorRequestsView();
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);
@@ -739,7 +711,7 @@ export class GisPageObject extends FtrService {
   }
 
   async getCategorySuggestions() {
-    return await this.comboBox.getOptionsList(`colorStopInput1`);
+    return await this.comboBox.getOptionsList(`colorStopInput0`);
   }
 
   async enableAutoFitToBounds() {

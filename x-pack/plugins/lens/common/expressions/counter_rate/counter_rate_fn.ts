@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildResultColumns,
-  getBucketIdentifier,
-} from '../../../../../../src/plugins/expressions/common';
+import { buildResultColumns, getBucketIdentifier } from '@kbn/expressions-plugin/common';
 import type { CounterRateExpressionFunction } from './types';
 
 export const counterRateFn: CounterRateExpressionFunction['fn'] = (

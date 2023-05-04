@@ -13,10 +13,27 @@ export interface ResultTerm {
   insertValue?: string;
   name?: string;
   value?: string;
+  score?: number;
+}
+
+export interface DataAutoCompleteRulesOneOf {
+  __condition?: {
+    lines_regex: string;
+  };
+  __template: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface AutoCompleteContext {
   autoCompleteSet?: null | ResultTerm[];
+  /**
+   * Stores a state for async results, e.g. fields suggestions based on the mappings definition.
+   */
+  asyncResultsState?: {
+    isLoading: boolean;
+    lastFetched: number | null;
+    results: Promise<ResultTerm[]>;
+  };
   endpoint?: null | {
     paramsAutocomplete: {
       getTopLevelComponents: (method?: string | null) => unknown;
@@ -24,6 +41,7 @@ export interface AutoCompleteContext {
     bodyAutocompleteRootComponents: unknown;
     id?: string;
     documentation?: string;
+    data_autocomplete_rules?: Record<string, unknown> | null;
   };
   urlPath?: null | unknown;
   urlParamsTokenPath?: Array<Record<string, string>> | null;

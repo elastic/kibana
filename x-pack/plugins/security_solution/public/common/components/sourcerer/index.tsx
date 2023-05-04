@@ -14,12 +14,15 @@ import {
   EuiSpacer,
   EuiSuperSelect,
 } from '@elastic/eui';
-import React, { ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import * as i18n from './translations';
-import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
+import type { sourcererModel } from '../../store/sourcerer';
+import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import type { SourcererUrlState } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButton, StyledFormRow } from './helpers';
@@ -28,6 +31,9 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
+import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { useUpdateUrlParam } from '../../utils/global_query_string';
+import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -37,6 +43,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
+  const isDefaultSourcerer = scopeId === SourcererScopeName.default;
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
@@ -49,6 +57,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       missingPatterns: sourcererMissingPatterns,
     },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
+  const { pollForSignalIndex } = useSignalHelpers();
+
+  useEffect(() => {
+    if (pollForSignalIndex != null && (isTimelineSourcerer || isDetectionsSourcerer)) {
+      pollForSignalIndex();
+    }
+  }, [isDetectionsSourcerer, isTimelineSourcerer, pollForSignalIndex]);
 
   const { activePatterns, indicesExist, loading } = useSourcererDataView(scopeId);
   const [missingPatterns, setMissingPatterns] = useState<string[]>(
@@ -135,8 +151,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           shouldValidateSelectedPatterns,
         })
       );
+
+      if (isDefaultSourcerer) {
+        updateUrlParam({
+          [SourcererScopeName.default]: {
+            id: newSelectedDataView,
+            selectedPatterns: newSelectedPatterns,
+          },
+        });
+      }
     },
-    [dispatch, scopeId]
+    [dispatch, scopeId, isDefaultSourcerer, updateUrlParam]
   );
 
   const onChangeDataView = useCallback(

@@ -11,18 +11,18 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { assertNever } from '@kbn/std';
 import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
-import { LicensingPluginStart } from '../../../licensing/server';
-import { ILicense, LicenseType } from '../../../licensing/common/types';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
-import { AlertTypeDisabledError } from './errors/alert_type_disabled';
+import { RuleTypeDisabledError } from './errors/rule_type_disabled';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -147,10 +147,35 @@ export class LicenseState {
     }
   }
 
+  public ensureLicenseForMaintenanceWindow() {
+    if (!this.license || !this.license?.isAvailable) {
+      throw Boom.forbidden(
+        i18n.translate(
+          'xpack.alerting.serverSideErrors.maintenanceWindow.unavailableLicenseErrorMessage',
+          {
+            defaultMessage:
+              'Maintenance window is disabled because license information is not available at this time.',
+          }
+        )
+      );
+    }
+    if (!this.license.hasAtLeast('platinum')) {
+      throw Boom.forbidden(
+        i18n.translate(
+          'xpack.alerting.serverSideErrors.maintenanceWindow.invalidLicenseErrorMessage',
+          {
+            defaultMessage:
+              'Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options.',
+          }
+        )
+      );
+    }
+  }
+
   public ensureLicenseForRuleType<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
@@ -179,7 +204,7 @@ export class LicenseState {
     }
     switch (check.reason) {
       case 'unavailable':
-        throw new AlertTypeDisabledError(
+        throw new RuleTypeDisabledError(
           i18n.translate('xpack.alerting.serverSideErrors.unavailableLicenseErrorMessage', {
             defaultMessage:
               'Rule type {ruleTypeId} is disabled because license information is not available at this time.',
@@ -190,7 +215,7 @@ export class LicenseState {
           'license_unavailable'
         );
       case 'expired':
-        throw new AlertTypeDisabledError(
+        throw new RuleTypeDisabledError(
           i18n.translate('xpack.alerting.serverSideErrors.expirerdLicenseErrorMessage', {
             defaultMessage:
               'Rule type {ruleTypeId} is disabled because your {licenseType} license has expired.',
@@ -199,7 +224,7 @@ export class LicenseState {
           'license_expired'
         );
       case 'invalid':
-        throw new AlertTypeDisabledError(
+        throw new RuleTypeDisabledError(
           i18n.translate('xpack.alerting.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
               'Rule {ruleTypeId} is disabled because it requires a {licenseType} license. Go to License Management to view upgrade options.',

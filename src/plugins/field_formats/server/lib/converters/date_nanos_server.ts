@@ -16,11 +16,11 @@ import {
 import { TextContextTypeConvert } from '../../../common/types';
 
 class DateNanosFormatServer extends DateNanosFormat {
-  textConvert: TextContextTypeConvert = (val: string | number) => {
+  textConvert: TextContextTypeConvert = (val: string | number, options) => {
     // don't give away our ref to converter so
     // we can hot-swap when config changes
     const pattern = this.param('pattern');
-    const timezone = this.param('timezone');
+    const timezone = options?.timezone || this.param('timezone');
     const fractPattern = analysePatternForFract(pattern);
     const fallbackPattern = this.param('patternFallback');
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
+import { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
 import { RawAction } from '../types';
 
 export function getImportWarnings(
@@ -29,7 +29,7 @@ export function getImportWarnings(
     {
       type: 'action_required',
       message,
-      actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
+      actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       buttonLabel: GO_TO_CONNECTORS_BUTTON_LABLE,
     } as SavedObjectsImportWarning,
   ];

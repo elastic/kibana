@@ -6,7 +6,7 @@ When you log in, {kib} creates a session that is used to authenticate subsequent
 
 When your session expires, or you log out, {kib} will invalidate your cookie and remove session information from the index. {kib} also periodically invalidates and removes any expired sessions that weren't explicitly invalidated.
 
-To manage user sessions programmatically, {kib} exposes <<session-management-api, session management APIs>>.
+To manage user sessions programmatically, {kib} exposes <<session-management-api, session management APIs>>. For details, check out <<security-session-and-cookie-settings, Session and cookie security settings>>.
 
 [[session-idle-timeout]]
 ==== Session idle timeout
@@ -47,5 +47,23 @@ You can configure the interval at which {kib} tries to remove expired and invali
 [source,yaml]
 --------------------------------------------------------------------------------
 xpack.security.session.cleanupInterval: "1d"
+--------------------------------------------------------------------------------
+--
+
+[[session-max-sessions]]
+==== Maximum number of concurrent sessions
+By default, there is no limit to the maximum number of concurrent sessions each user can have in {kib}.
+To add a limit, use the `xpack.security.session.сoncurrentSessions.maxSessions` configuration option.
+If set, the value of this option should be an integer between `1` and `1000`.
+When the limit is exceeded, the oldest session is automatically invalidated.
+
+NOTE: Due to the rate at which session information is refreshed, there might be a few seconds where the concurrent session limit is not enforced.
+This is something to consider for use cases where it is common to create multiple sessions simultaneously.
+
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.concurrentSessions:
+  maxSessions: 3
 --------------------------------------------------------------------------------
 --

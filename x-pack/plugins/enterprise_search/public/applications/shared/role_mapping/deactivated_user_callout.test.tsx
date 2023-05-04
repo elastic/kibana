@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { DeactivatedUserCallout } from './';
+import { DeactivatedUserCallout } from '.';
 
 describe('DeactivatedUserCallout', () => {
   it('renders with new', () => {
@@ -22,7 +22,7 @@ describe('DeactivatedUserCallout', () => {
         >
           <EuiIcon
             color="warning"
-            type="alert"
+            type="warning"
           />
            
           <strong>
@@ -53,7 +53,7 @@ describe('DeactivatedUserCallout', () => {
         >
           <EuiIcon
             color="warning"
-            type="alert"
+            type="warning"
           />
            
           <strong>

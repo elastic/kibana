@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ML Integrations renders without errors 1`] = `
+<div
+  class="euiPopover emotion-euiPopover"
+>
+  <div
+    class="euiPopover__anchor css-16vtueo-render"
+  >
+    <button
+      aria-label="You can enable anomaly detection job or if job is already there you can manage the job or alert."
+      class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-s-base-disabled"
+      data-test-subj="uptimeEnableAnomalyBtn"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          aria-label="Loading"
+          class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+          role="progressbar"
+          style="border-color:#07C currentcolor currentcolor currentcolor"
+        />
+        <span
+          class="eui-textTruncate"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`ML Integrations shallow renders without errors 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <MLIntegrationComponent />
+  </ContextProvider>
+</ContextProvider>
+`;

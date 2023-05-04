@@ -15,9 +15,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import * as React from 'react';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogTextSeparator } from './log_text_separator';
 import { extendDatemath } from '../../../utils/datemath';
 
@@ -181,7 +181,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
 
   if (rangeEdge === 'now' && position === 'end') {
     return (
-      <EuiButton onClick={onStreamStart} size="s">
+      <EuiButton data-test-subj="infraProgressCtaStreamLiveButton" onClick={onStreamStart} size="s">
         <FormattedMessage id="xpack.infra.logs.streamLive" defaultMessage="Stream live" />
       </EuiButton>
     );
@@ -198,6 +198,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
 
   return (
     <EuiButton
+      data-test-subj="infraProgressCtaButton"
       onClick={() => {
         if (typeof onExtendRange === 'function') {
           onExtendRange(extendedRange.value);

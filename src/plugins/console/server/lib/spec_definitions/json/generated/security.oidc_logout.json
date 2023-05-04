@@ -1,0 +1,11 @@
+{
+  "security.oidc_logout": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/oidc/logout"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-oidc-logout.html"
+  }
+}

@@ -7,8 +7,8 @@
 
 import * as i18n from './translations';
 import { ToasterError } from '../../toasters';
-import { SetupMlResponse } from '../../ml_popover/types';
-import { isMlStartJobError } from './errors';
+import type { SetupMlResponse } from '../../ml_popover/types';
+import { isMlStartJobError, isUnknownError } from './errors';
 
 export const tryParseResponse = (response: string): string => {
   try {
@@ -22,18 +22,21 @@ export const throwIfErrorAttachedToSetup = (
   setupResponse: SetupMlResponse,
   jobIdErrorFilter: string[] = []
 ): void => {
-  const jobErrors = setupResponse.jobs.reduce<string[]>(
-    (accum, job) =>
-      job.error != null && jobIdErrorFilter.includes(job.id)
-        ? [
-            ...accum,
-            job.error.msg,
-            tryParseResponse(job.error.response),
-            `${i18n.STATUS_CODE} ${job.error.statusCode}`,
-          ]
-        : accum,
-    []
-  );
+  const jobErrors = setupResponse.jobs.reduce<string[]>((accum, job) => {
+    if (job.error != null && jobIdErrorFilter.includes(job.id)) {
+      if (isMlStartJobError(job)) {
+        return [
+          ...accum,
+          job.error.msg,
+          tryParseResponse(job.error.response),
+          `${i18n.STATUS_CODE} ${job.error.statusCode}`,
+        ];
+      } else if (isUnknownError(job)) {
+        return [job.error.error.reason];
+      }
+    }
+    return accum;
+  }, []);
 
   const dataFeedErrors = setupResponse.datafeeds.reduce<string[]>(
     (accum, dataFeed) =>
@@ -67,6 +70,8 @@ export const throwIfErrorAttached = (
         tryParseResponse(dataFeed.error.response),
         `${i18n.STATUS_CODE} ${dataFeed.error.statusCode}`,
       ];
+    } else if (isUnknownError(dataFeed)) {
+      return [dataFeed.error.error.reason];
     } else {
       return accum;
     }

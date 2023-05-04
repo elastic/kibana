@@ -15,12 +15,9 @@ image::user/monitoring/images/metricbeat.png[Example monitoring architecture]
 To learn about monitoring in general, see
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
-//NOTE: The tagged regions are re-used in the Stack Overview.
-
 . Disable the default collection of {kib} monitoring metrics. +
 +
 --
-// tag::disable-kibana-collection[]
 Add the following setting in the {kib} configuration file (`kibana.yml`):
 
 [source,yaml]
@@ -29,7 +26,6 @@ monitoring.kibana.collection.enabled: false
 ----------------------------------
 
 Leave the `monitoring.enabled` set to its default value (`true`).
-// end::disable-kibana-collection[]
 For more information, see
 <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 --

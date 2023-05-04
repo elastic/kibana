@@ -5,26 +5,26 @@ exports[`Storyshots components/Tags/TagList empty list 1`] = `null`;
 exports[`Storyshots components/Tags/TagList with badge tags 1`] = `
 Array [
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#cc3b54",
-        "color": "#fff",
+        "color": "#FFF",
       }
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag1
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#5bc149",
@@ -33,17 +33,17 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag2
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#fbc545",
@@ -52,10 +52,10 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag3
       </span>
@@ -67,7 +67,7 @@ Array [
 exports[`Storyshots components/Tags/TagList with health tags 1`] = `
 Array [
   <div
-    className="euiHealth euiHealth--textSizeS"
+    className="euiHealth emotion-euiHealth-s"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -78,7 +78,9 @@ Array [
         <span
           color="#cc3b54"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -88,7 +90,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiHealth euiHealth--textSizeS"
+    className="euiHealth emotion-euiHealth-s"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -99,7 +101,9 @@ Array [
         <span
           color="#9b3067"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -109,7 +113,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiHealth euiHealth--textSizeS"
+    className="euiHealth emotion-euiHealth-s"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -120,7 +124,9 @@ Array [
         <span
           color="#d41e93"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -135,26 +141,26 @@ Array [
 exports[`Storyshots components/Tags/TagList with lots of tags 1`] = `
 Array [
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#cc3b54",
-        "color": "#fff",
+        "color": "#FFF",
       }
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag1
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#5bc149",
@@ -163,17 +169,17 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag2
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#fbc545",
@@ -182,74 +188,74 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag3
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#9b3067",
-        "color": "#fff",
+        "color": "#FFF",
       }
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag4
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#1819bd",
-        "color": "#fff",
+        "color": "#FFF",
       }
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag5
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#d41e93",
-        "color": "#fff",
+        "color": "#FFF",
       }
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag6
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#3486d2",
@@ -258,17 +264,17 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag7
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#b870d8",
@@ -277,17 +283,17 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag8
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#f4a4a7",
@@ -296,29 +302,29 @@ Array [
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag9
       </span>
     </span>
   </span>,
   <span
-    className="euiBadge euiBadge--iconLeft"
+    className="euiBadge emotion-euiBadge"
     style={
       Object {
         "backgroundColor": "#072d6d",
-        "color": "#fff",
+        "color": "#FFF",
       }
     }
   >
     <span
-      className="euiBadge__content"
+      className="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        className="euiBadge__text"
+        className="euiBadge__text emotion-euiBadge__text"
       >
         tag10
       </span>

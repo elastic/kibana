@@ -9,17 +9,22 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
-import { Start as InspectorStart } from '../../inspector/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   PublicAppInfo,
-} from '../../../core/public';
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -37,11 +42,10 @@ import {
   EmbeddablePanel,
   SavedObjectEmbeddableInput,
   EmbeddableContainerContext,
+  PANEL_BADGE_TRIGGER,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
-import { Storage } from '../../kibana_utils/public';
-import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
@@ -52,6 +56,8 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { setTheme } from './services';
+import { CustomTimeRangeBadge } from './lib/panel/panel_header/panel_actions/customize_panel/custom_time_range_badge';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -60,6 +66,8 @@ export interface EmbeddableSetupDependencies {
 export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface EmbeddableSetup {
@@ -103,6 +111,7 @@ export type EmbeddablePanelHOC = React.FC<{
   embeddable: IEmbeddable;
   hideHeader?: boolean;
   containerContext?: EmbeddableContainerContext;
+  index?: number;
 }>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -119,6 +128,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
+    setTheme(core.theme);
     bootstrap(uiActions);
 
     return {
@@ -137,7 +147,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(
     core: CoreStart,
-    { uiActions, inspector }: EmbeddableStartDependencies
+    {
+      uiActions,
+      inspector,
+      savedObjectsManagement,
+      savedObjectsTaggingOss,
+    }: EmbeddableStartDependencies
   ): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
@@ -147,6 +162,20 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     });
+
+    const { overlays, theme, uiSettings } = core;
+
+    const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
+    const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+
+    const timeRangeBadge = new CustomTimeRangeBadge(
+      overlays,
+      theme,
+      commonlyUsedRanges,
+      dateFormat
+    );
+
+    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
@@ -165,25 +194,36 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         embeddable,
         hideHeader,
         containerContext,
+        index,
       }: {
         embeddable: IEmbeddable;
         hideHeader?: boolean;
         containerContext?: EmbeddableContainerContext;
+        index?: number;
       }) =>
         (
           <EmbeddablePanel
             hideHeader={hideHeader}
             embeddable={embeddable}
+            index={index}
             stateTransfer={this.stateTransferService}
             getActions={uiActions.getTriggerCompatibleActions}
             getEmbeddableFactory={this.getEmbeddableFactory}
             getAllEmbeddableFactories={this.getEmbeddableFactories}
-            overlays={core.overlays}
+            dateFormat={dateFormat}
+            commonlyUsedRanges={commonlyUsedRanges}
+            overlays={overlays}
             notifications={core.notifications}
             application={core.application}
             inspector={inspector}
-            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+            SavedObjectFinder={getSavedObjectFinder(
+              core.uiSettings,
+              core.http,
+              savedObjectsManagement,
+              savedObjectsTaggingOss?.getTaggingApi()
+            )}
             containerContext={containerContext}
+            theme={theme}
           />
         );
 
@@ -204,14 +244,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getAttributeService: (type: string, options) =>
-        new AttributeService(
-          type,
-          showSaveModal,
-          core.i18n.Context,
-          core.notifications.toasts,
-          options,
-          this.getEmbeddableFactory
-        ),
+        new AttributeService(type, core.notifications.toasts, options, this.getEmbeddableFactory),
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
@@ -244,7 +277,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.enhancements.set(enhancement.id, {
       id: enhancement.id,
-      telemetry: enhancement.telemetry || (() => ({})),
+      telemetry: enhancement.telemetry || ((state, stats) => stats),
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||

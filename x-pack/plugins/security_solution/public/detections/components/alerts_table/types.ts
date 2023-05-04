@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Ecs } from '../../../../common/ecs';
-import { NoteResult } from '../../../../common/types/timeline/note';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { inputsModel } from '../../../common/store';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { inputsModel } from '../../../common/store';
 
 export interface SetEventsLoadingProps {
   eventIds: string[];
@@ -55,6 +56,7 @@ export interface SendAlertToTimelineActionProps {
   ecsData: Ecs | Ecs[];
   updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;
+  getExceptionFilter: GetExceptionFilter;
 }
 
 export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
@@ -65,9 +67,11 @@ export interface CreateTimelineProps {
   to: string;
   notes: NoteResult[] | null;
   ruleNote?: string;
+  ruleAuthor?: string | string[];
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
+export type GetExceptionFilter = (ecsData: Ecs) => Promise<Filter | undefined>;
 
 export interface ThresholdAggregationData {
   thresholdFrom: string;

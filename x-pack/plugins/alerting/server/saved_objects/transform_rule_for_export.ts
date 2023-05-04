@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { RawRule } from '../types';
 
@@ -26,6 +26,7 @@ function transformRuleForExport(
       enabled: false,
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyCreatedByUser: null,
       scheduledTaskId: null,
       executionStatus: getRuleExecutionStatusPending(exportDate),
     },

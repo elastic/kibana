@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTableRow,
@@ -21,8 +21,9 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import useToggle from 'react-use/lib/useToggle';
 import { AutoSizer } from '../../../../../../../components/auto_sizer';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
@@ -32,16 +33,17 @@ interface Props {
 }
 
 export const ProcessRow = ({ cells, item }: Props) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, toggle] = useToggle(false);
 
   return (
     <>
       <EuiTableRow>
         <EuiTableRowCell isExpander textOnly={false}>
           <EuiButtonEmpty
+            data-test-subj="infraProcessRowButton"
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             aria-expanded={isExpanded}
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={toggle}
           />
         </EuiTableRowCell>
         {cells}
@@ -71,7 +73,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                     </EuiFlexItem>
                     {item.apmTrace && (
                       <EuiFlexItem grow={false}>
-                        <EuiButton>
+                        <EuiButton data-test-subj="infraProcessRowViewTraceInApmButton">
                           {i18n.translate(
                             'xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM',
                             {
@@ -149,6 +151,6 @@ const ExpandedRowCell = euiStyled(EuiTableRowCell).attrs({
   colSpan: 6,
 })<{ commandHeight: number }>`
   height: ${(props) => props.commandHeight + 240}px;
-  padding: 0 ${(props) => props.theme.eui.paddingSizes.m};
+  padding: 0 ${(props) => props.theme.eui.euiSizeM};
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;

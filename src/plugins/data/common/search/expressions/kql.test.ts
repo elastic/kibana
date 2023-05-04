@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from 'src/plugins/expressions/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueSearchContext } from './kibana_context_type';
 import { functionWrapper } from './utils';
 import { kqlFunction } from './kql';

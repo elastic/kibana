@@ -8,16 +8,18 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { DraggableId } from 'react-beautiful-dnd';
-import { useDispatch } from 'react-redux';
-
 import { isEmpty } from 'lodash';
+
+import { useDispatch } from 'react-redux';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { TimelineId } from '../../../store/timeline';
+import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { DataProvider, TimelineId } from '../../../../common/types';
+import { DataProvider } from '../../../../common/types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 import { HoverActionComponentProps } from './types';
-import { addProviderToTimeline } from '../../../store/t_grid/actions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 
@@ -44,11 +46,23 @@ const useGetHandleStartDragToTimeline = ({
   return handleStartDragToTimeline;
 };
 
+export interface SuccessMessageProps {
+  children: React.ReactChild;
+}
+export const AddSuccessMessage = (props: SuccessMessageProps) => {
+  return (
+    <span className="eui-textBreakWord" data-test-subj="add-to-timeline-toast-success">
+      {props.children}
+    </span>
+  );
+};
+
 export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   draggableId?: DraggableId;
   dataProvider?: DataProvider[] | DataProvider;
+  timelineType?: string;
 }
 
 const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
@@ -63,10 +77,12 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     onClick,
     showTooltip = false,
     value,
+    timelineType = 'default',
   }) => {
     const dispatch = useDispatch();
     const { addSuccess } = useAppToasts();
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
+
     const handleStartDragToTimeline = useCallback(() => {
       if (draggableId != null) {
         startDragToTimeline();
@@ -80,7 +96,16 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
                 dataProvider: provider,
               })
             );
-            addSuccess(i18n.ADDED_TO_TIMELINE_MESSAGE(provider.name));
+            addSuccess({
+              title: toMountPoint(
+                <AddSuccessMessage>
+                  {i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
+                    provider.name,
+                    timelineType === 'default'
+                  )}
+                </AddSuccessMessage>
+              ),
+            });
           }
         });
       }
@@ -88,7 +113,15 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       if (onClick != null) {
         onClick();
       }
-    }, [addSuccess, onClick, dataProvider, dispatch, draggableId, startDragToTimeline]);
+    }, [
+      addSuccess,
+      dataProvider,
+      dispatch,
+      draggableId,
+      onClick,
+      startDragToTimeline,
+      timelineType,
+    ]);
 
     useEffect(() => {
       if (!ownFocus) {

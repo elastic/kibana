@@ -6,6 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
+import { flow, map, flatten, uniq } from 'lodash/fp';
 
 import {
   SnapshotDetails,
@@ -19,6 +20,19 @@ import {
 import { deserializeTime, serializeTime } from './time_serialization';
 
 import { csvToArray } from './utils';
+
+export const convertFeaturesToIndicesArray = (
+  features: SnapshotDetailsEs['feature_states']
+): string[] => {
+  return flow(
+    // Map each feature into Indices[]
+    map('indices'),
+    // Flatten the array
+    flatten,
+    // And finally dedupe the indices
+    uniq
+  )(features);
+};
 
 export function deserializeSnapshotDetails(
   snapshotDetailsEs: SnapshotDetailsEs,
@@ -46,21 +60,27 @@ export function deserializeSnapshotDetails(
     duration_in_millis: durationInMillis,
     failures = [],
     shards,
+    feature_states: featureStates = [],
     metadata: { policy: policyName } = { policy: undefined },
   } = snapshotDetailsEs;
 
+  const systemIndices = convertFeaturesToIndicesArray(featureStates);
+  const snapshotIndicesWithoutSystemIndices = indices
+    .filter((index) => !systemIndices.includes(index))
+    .sort();
+
   // If an index has multiple failures, we'll want to see them grouped together.
-  const indexToFailuresMap = failures.reduce((map, failure) => {
+  const indexToFailuresMap = failures.reduce((aggregation, failure) => {
     const { index, ...rest } = failure;
-    if (!map[index]) {
-      map[index] = {
+    if (!aggregation[index]) {
+      aggregation[index] = {
         index,
         failures: [],
       };
     }
 
-    map[index].failures.push(rest);
-    return map;
+    aggregation[index].failures.push(rest);
+    return aggregation;
   }, {});
 
   // Sort all failures by their shard.
@@ -80,9 +100,10 @@ export function deserializeSnapshotDetails(
     uuid,
     versionId,
     version,
-    indices: [...indices].sort(),
+    indices: snapshotIndicesWithoutSystemIndices,
     dataStreams: [...dataStreams].sort(),
     includeGlobalState,
+    featureStates: featureStates.map((feature) => feature.feature_name),
     state,
     startTime,
     startTimeInMillis,
@@ -109,6 +130,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
     indices,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
+    feature_states: featureStates,
     partial,
     metadata,
   } = snapshotConfigEs;
@@ -117,6 +139,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
     indices,
     ignoreUnavailable,
     includeGlobalState,
+    featureStates,
     partial,
     metadata,
   };
@@ -130,7 +153,8 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
 }
 
 export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): SnapshotConfigEs {
-  const { indices, ignoreUnavailable, includeGlobalState, partial, metadata } = snapshotConfig;
+  const { indices, ignoreUnavailable, includeGlobalState, featureStates, partial, metadata } =
+    snapshotConfig;
 
   const maybeIndicesArray = csvToArray(indices);
 
@@ -138,6 +162,7 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
     indices: maybeIndicesArray,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
+    feature_states: featureStates,
     partial,
     metadata,
   };

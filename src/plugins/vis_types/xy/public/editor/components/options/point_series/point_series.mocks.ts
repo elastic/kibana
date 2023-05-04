@@ -346,7 +346,6 @@ export const getVis = (bucketType: string) => {
       titleInWizard: '',
       options: {
         showTimePicker: true,
-        showQueryBar: true,
         showFilterBar: true,
         showIndexSelection: true,
         hierarchicalData: false,
@@ -440,6 +439,7 @@ export const getVis = (bucketType: string) => {
         },
       },
       editorConfig: {
+        enableDataViewChange: true,
         collections: {
           legendPositions: [
             {
@@ -626,12 +626,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -642,12 +642,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 3,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -658,12 +658,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {
@@ -710,12 +710,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -726,12 +726,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 3,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -742,12 +742,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {
@@ -765,12 +765,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -781,12 +781,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 3,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -797,12 +797,12 @@ export const getVis = (bucketType: string) => {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {

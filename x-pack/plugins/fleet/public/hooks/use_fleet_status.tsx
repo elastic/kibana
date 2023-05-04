@@ -12,27 +12,42 @@ import type { GetFleetStatusResponse } from '../types';
 import { useConfig } from './use_config';
 import { sendGetFleetStatus } from './use_request';
 
-interface FleetStatusState {
+export interface FleetStatusProviderProps {
   enabled: boolean;
   isLoading: boolean;
   isReady: boolean;
   error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
+  missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
 }
 
-interface FleetStatus extends FleetStatusState {
+interface FleetStatus extends FleetStatusProviderProps {
   refresh: () => Promise<void>;
+
+  // This flag allows us to opt into displaying the Fleet Server enrollment instructions even if
+  // a healthy Fleet Server has been detected, so we can delay removing the enrollment UI until
+  // some user action like clicking a "continue" button
+  forceDisplayInstructions: boolean;
+  setForceDisplayInstructions: React.Dispatch<boolean>;
 }
 
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
-export const FleetStatusProvider: React.FC = ({ children }) => {
+export const FleetStatusProvider: React.FC<{
+  defaultFleetStatus?: FleetStatusProviderProps;
+}> = ({ defaultFleetStatus, children }) => {
   const config = useConfig();
-  const [state, setState] = useState<FleetStatusState>({
-    enabled: config.agents.enabled,
-    isLoading: false,
-    isReady: false,
-  });
+  const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
+
+  const [state, setState] = useState<FleetStatusProviderProps>(
+    defaultFleetStatus ?? {
+      enabled: config.agents.enabled,
+      isLoading: false,
+      isReady: false,
+    }
+  );
+
+  // TODO: Refactor to use react-query
   const sendGetStatus = useCallback(
     async function sendGetStatus() {
       try {
@@ -47,6 +62,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
           isLoading: false,
           isReady: res.data?.isReady ?? false,
           missingRequirements: res.data?.missing_requirements,
+          missingOptionalFeatures: res.data?.missing_optional_features,
         }));
       } catch (error) {
         setState((s) => ({ ...s, isLoading: false, error }));
@@ -56,13 +72,17 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
   );
 
   useEffect(() => {
-    sendGetStatus();
-  }, [sendGetStatus]);
+    if (!defaultFleetStatus) {
+      sendGetStatus();
+    }
+  }, [sendGetStatus, defaultFleetStatus]);
 
   const refresh = useCallback(() => sendGetStatus(), [sendGetStatus]);
 
   return (
-    <FleetStatusContext.Provider value={{ ...state, refresh }}>
+    <FleetStatusContext.Provider
+      value={{ ...state, refresh, forceDisplayInstructions, setForceDisplayInstructions }}
+    >
       {children}
     </FleetStatusContext.Provider>
   );

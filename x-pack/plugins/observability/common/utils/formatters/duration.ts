@@ -109,7 +109,7 @@ function getUnitLabelAndConvertedValue(unitKey: DurationTimeUnit, value: number)
 /**
  * Converts a microseconds value into the unit defined.
  */
-function convertTo({
+export function convertTo({
   unit,
   microseconds,
   defaultValue = NOT_AVAILABLE_LABEL,
@@ -215,3 +215,21 @@ export function asMillisecondDuration(value: Maybe<number>) {
     microseconds: value,
   }).formatted;
 }
+
+export type TimeUnitChar = 's' | 'm' | 'h' | 'd';
+
+export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
+  const sForPlural = time !== 0 && time > 1 ? 's' : ''; // Negative values are not taken into account
+  switch (unit) {
+    case 's':
+      return `${time} sec${sForPlural}`;
+    case 'm':
+      return `${time} min${sForPlural}`;
+    case 'h':
+      return `${time} hr${sForPlural}`;
+    case 'd':
+      return `${time} day${sForPlural}`;
+    default:
+      return `${time} ${unit}`;
+  }
+};

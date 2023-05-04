@@ -5,39 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateSearchSource } from './update_search_source';
-import { IndexPattern } from '../../../../../data/public';
-import { SavedSearch } from '../../../services/saved_searches';
-import { AppState } from '../services/discover_state';
-import type { SortOrder } from '../../../services/saved_searches';
-import { SavedObjectSaveOpts } from '../../../../../saved_objects/public';
 import { DiscoverServices } from '../../../build_services';
-import { saveSavedSearch } from '../../../services/saved_searches';
-
 /**
  * Helper function to update and persist the given savedSearch
  */
 export async function persistSavedSearch(
   savedSearch: SavedSearch,
   {
-    indexPattern,
+    dataView,
     onError,
     onSuccess,
     services,
     saveOptions,
     state,
   }: {
-    indexPattern: IndexPattern;
+    dataView: DataView;
     onError: (error: Error, savedSearch: SavedSearch) => void;
     onSuccess: (id: string) => void;
     saveOptions: SavedObjectSaveOpts;
     services: DiscoverServices;
-    state: AppState;
+    state: DiscoverAppState;
   }
 ) {
   updateSearchSource(savedSearch.searchSource, true, {
-    indexPattern,
+    dataView,
     services,
     sort: state.sort as SortOrder[],
     useNewFieldsApi: false,
@@ -51,17 +48,54 @@ export async function persistSavedSearch(
   if (typeof state.hideChart !== 'undefined') {
     savedSearch.hideChart = state.hideChart;
   }
+  if (typeof state.rowHeight !== 'undefined') {
+    savedSearch.rowHeight = state.rowHeight;
+  }
 
   if (state.viewMode) {
     savedSearch.viewMode = state.viewMode;
+  }
+
+  if (typeof state.breakdownField !== 'undefined') {
+    savedSearch.breakdownField = state.breakdownField;
+  } else if (savedSearch.breakdownField) {
+    savedSearch.breakdownField = '';
   }
 
   if (state.hideAggregatedPreview) {
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
   }
 
+  // add a flag here to identify text based language queries
+  // these should be filtered out from the visualize editor
+  const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
+  if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
+    savedSearch.isTextBasedQuery = isTextBasedQuery;
+  }
+
+  savedSearch.usesAdHocDataView = !dataView.isPersisted();
+
+  const { from, to } = services.timefilter.getTime();
+  const refreshInterval = services.timefilter.getRefreshInterval();
+  savedSearch.timeRange =
+    savedSearch.timeRestore || savedSearch.timeRange
+      ? {
+          from,
+          to,
+        }
+      : undefined;
+  savedSearch.refreshInterval =
+    savedSearch.timeRestore || savedSearch.refreshInterval
+      ? { value: refreshInterval.value, pause: refreshInterval.pause }
+      : undefined;
+
   try {
-    const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
+    const id = await saveSavedSearch(
+      savedSearch,
+      saveOptions,
+      services.core.savedObjects.client,
+      services.savedObjectsTagging
+    );
     if (id) {
       onSuccess(id);
     }

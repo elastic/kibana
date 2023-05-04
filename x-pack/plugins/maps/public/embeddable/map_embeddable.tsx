@@ -9,47 +9,66 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
+import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter as filterOperator,
+  map,
+  skip,
+  startWith,
+} from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
+  genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  TimeRange,
-  Query,
-} from '../../../../../src/plugins/data/public';
+  omitGenericEmbeddableInput,
+  FilterableEmbeddable,
+  shouldFetch$,
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  disableScrollZoom,
   setReadOnly,
+  updateLayerById,
+  setGotoWithCenter,
+  setEmbeddableSearchContext,
+  setExecutionContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
+  setOnMapMove,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
-  areLayersLoaded,
+  isMapLoading,
   getGeoFieldNames,
+  getEmbeddableSearchContext,
+  getLayerList,
+  getGoto,
   getMapCenter,
   getMapBuffer,
   getMapExtent,
   getMapReady,
+  getMapSettings,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -60,15 +79,18 @@ import {
   getFullPath,
   MAP_SAVED_OBJECT_TYPE,
   RawValue,
+  RENDER_TIMEOUT,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
-  getUiActions,
+  getCharts,
   getCoreI18n,
+  getExecutionContextService,
   getHttp,
-  getChartsPaletteServiceGetColor,
-  getSpacesApi,
   getSearchService,
+  getSpacesApi,
+  getTheme,
+  getUiActions,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -77,6 +99,8 @@ import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
+import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
+import { getGeoFieldsLabel } from './get_geo_fields_label';
 
 import {
   MapByValueInput,
@@ -86,6 +110,24 @@ import {
   MapEmbeddableOutput,
 } from './types';
 
+async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
+  const chartsService = getCharts();
+  const paletteRegistry: PaletteRegistry | null = chartsService
+    ? await chartsService.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
+}
+
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
     return false;
@@ -94,9 +136,13 @@ function getIsRestore(searchSessionId?: string) {
   return searchSessionOptions ? searchSessionOptions.isRestore : false;
 }
 
+export function getControlledBy(id: string) {
+  return `mapEmbeddablePanel${id}`;
+}
+
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
@@ -104,22 +150,16 @@ export class MapEmbeddable
   private _isActive: boolean;
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
-  private _subscription: Subscription;
-  private _prevFilterByMapExtent: boolean;
+  private _subscriptions: Subscription[] = [];
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
-  private _prevTimeRange?: TimeRange;
-  private _prevQuery?: Query;
-  private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
-  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
-  private _onInitialRenderComplete?: () => void = undefined;
-  private _hasInitialRenderCompleteFired = false;
   private _isSharable = true;
+  private readonly _onRenderComplete$;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -135,10 +175,30 @@ export class MapEmbeddable
     this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
-    this._controlledBy = `mapEmbeddablePanel${this.id}`;
-    this._prevFilterByMapExtent =
-      this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
+    this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
+    this._controlledBy = getControlledBy(this.id);
+
+    this._onRenderComplete$ = this.getOutput$().pipe(
+      // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial value.
+      startWith(this.getOutput()),
+      distinctUntilChanged((a, b) => a.loading === b.loading),
+      skip(1),
+      debounceTime(RENDER_TIMEOUT),
+      filterOperator((output) => !output.loading),
+      map(() => {
+        // Observable notifies subscriber when rendering is complete
+        // Return void to not expose internal implemenation details of observabale
+        return;
+      })
+    );
+  }
+
+  public getOnRenderComplete$() {
+    return this._onRenderComplete$;
+  }
+
+  public reportsEmbeddableLoad() {
+    return true;
   }
 
   private async _initializeSaveMap() {
@@ -156,6 +216,8 @@ export class MapEmbeddable
       return;
     }
 
+    this._savedMap.getStore().dispatch(setExecutionContext(this.getExecutionContext()));
+
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
 
@@ -165,37 +227,83 @@ export class MapEmbeddable
     }
   }
 
+  private getExecutionContext() {
+    const parentContext = getExecutionContextService().get();
+    const mapContext: KibanaExecutionContext = {
+      type: APP_ID,
+      name: APP_ID,
+      id: this.id,
+      url: this.output.editPath,
+    };
+
+    return parentContext
+      ? {
+          ...parentContext,
+          child: mapContext,
+        }
+      : mapContext;
+  }
+
   private _initializeStore() {
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();
+
     store.dispatch(setReadOnly(true));
-    store.dispatch(disableScrollZoom());
     store.dispatch(
       setMapSettings({
+        keydownScrollZoom: true,
         showTimesliderToggleButton: false,
       })
     );
 
-    this._dispatchSetQuery({
-      forceRefresh: false,
-    });
+    // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
+    store.dispatch(setOnMapMove(this._propogateMapMovement));
 
-    this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
+    this._dispatchSetQuery({ forceRefresh: false });
+    this._subscriptions.push(
+      shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
+        return {
+          ...this.getInput(),
+          filters: this._getInputFilters(),
+          searchSessionId: this._getSearchSessionId(),
+        };
+      }).subscribe(() => {
+        this._dispatchSetQuery({
+          forceRefresh: false,
+        });
+      })
+    );
+
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
+    this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
   }
 
   private async _initializeOutput() {
-    const savedMapTitle = this._savedMap.getAttributes()?.title
-      ? this._savedMap.getAttributes().title
-      : '';
+    const { title: savedMapTitle, description: savedMapDescription } =
+      this._savedMap.getAttributes();
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
-      ...this.getOutput(),
       defaultTitle: savedMapTitle,
+      defaultDescription: savedMapDescription,
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
@@ -210,20 +318,44 @@ export class MapEmbeddable
   }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsRefType(input, {
+    return getMapAttributeService().getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   }
 
-  public async getInputAsValueType(): Promise<MapByValueInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsValueType(input);
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    if (!genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput)) return false;
+
+    // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
+    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastExplicitInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentExplicitInput, 'mapBuffer'));
+    return fastIsEqual(lastMapInput, currentMapInput);
   }
 
-  public getDescription() {
-    return this._isInitialized ? this._savedMap.getAttributes().description : '';
+  public async getInputAsValueType(): Promise<MapByValueInput> {
+    return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
+  }
+
+  public getLayerList() {
+    return getLayerList(this._savedMap.getStore().getState());
+  }
+
+  public async getFilters() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext ? embeddableSearchContext.filters : [];
+  }
+
+  public async getQuery() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext?.query;
   }
 
   public supportedTriggers(): string[] {
@@ -238,10 +370,6 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
 
-  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
-    this._onInitialRenderComplete = onInitialRenderComplete;
-  }
-
   /*
    * Set to false to exclude sharing attributes 'data-*'.
    */
@@ -254,29 +382,6 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    if (
-      this.input.filterByMapExtent !== undefined &&
-      this._prevFilterByMapExtent !== this.input.filterByMapExtent
-    ) {
-      this._prevFilterByMapExtent = this.input.filterByMapExtent;
-      if (this.input.filterByMapExtent) {
-        this.setMapExtentFilter();
-      } else {
-        this.clearMapExtentFilter();
-      }
-    }
-
-    if (
-      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
-      !_.isEqual(this.input.query, this._prevQuery) ||
-      !esFilters.compareFilters(this._getFilters(), this._prevFilters) ||
-      this._getSearchSessionId() !== this._prevSearchSessionId
-    ) {
-      this._dispatchSetQuery({
-        forceRefresh: false,
-      });
-    }
-
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
@@ -293,7 +398,52 @@ export class MapEmbeddable
     }
   }
 
-  _getFilters() {
+  _getIsMovementSynchronized = () => {
+    return this.input.isMovementSynchronized === undefined
+      ? true
+      : this.input.isMovementSynchronized;
+  };
+
+  _getIsFilterByMapExtent = () => {
+    return this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
+  };
+
+  _gotoSynchronizedLocation() {
+    const syncedLocation = mapEmbeddablesSingleton.getLocation();
+    if (syncedLocation) {
+      // set map to synchronized view
+      this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
+      return;
+    }
+
+    if (!getMapReady(this._savedMap.getStore().getState())) {
+      // Initialize synchronized view to map's goto
+      // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
+      const goto = getGoto(this._savedMap.getStore().getState());
+      if (goto && goto.center) {
+        mapEmbeddablesSingleton.setLocation(
+          this.input.id,
+          goto.center.lat,
+          goto.center.lon,
+          goto.center.zoom
+        );
+        return;
+      }
+    }
+
+    // Initialize synchronized view to map's view
+    const center = getMapCenter(this._savedMap.getStore().getState());
+    const zoom = getMapZoom(this._savedMap.getStore().getState());
+    mapEmbeddablesSingleton.setLocation(this.input.id, center.lat, center.lon, zoom);
+  }
+
+  _propogateMapMovement = (lat: number, lon: number, zoom: number) => {
+    if (this._getIsMovementSynchronized()) {
+      mapEmbeddablesSingleton.setLocation(this.input.id, lat, lon, zoom);
+    }
+  };
+
+  _getInputFilters() {
     return this.input.filters
       ? this.input.filters.filter(
           (filter) => !filter.meta.disabled && filter.meta.controlledBy !== this._controlledBy
@@ -312,16 +462,14 @@ export class MapEmbeddable
   }
 
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
-    const filters = this._getFilters();
-    this._prevTimeRange = this.input.timeRange;
-    this._prevQuery = this.input.query;
-    this._prevFilters = filters;
-    this._prevSearchSessionId = this._getSearchSessionId();
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters,
+        filters: this._getInputFilters(),
         query: this.input.query,
         timeFilters: this.input.timeRange,
+        timeslice: this.input.timeslice
+          ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
+          : undefined,
         forceRefresh,
         searchSessionId: this._getSearchSessionId(),
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())
@@ -355,13 +503,54 @@ export class MapEmbeddable
       return;
     }
 
+    mapEmbeddablesSingleton.register(this.input.id, {
+      getTitle: () => {
+        const output = this.getOutput();
+        if (output.title) {
+          return output.title;
+        }
+
+        if (output.defaultTitle) {
+          return output.defaultTitle;
+        }
+
+        return this.input.id;
+      },
+      onLocationChange: this._mapSyncHandler,
+      getIsMovementSynchronized: this._getIsMovementSynchronized,
+      setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
+        this.updateInput({ isMovementSynchronized });
+        if (isMovementSynchronized) {
+          this._gotoSynchronizedLocation();
+        } else if (!isMovementSynchronized && this._savedMap.getAutoFitToBounds()) {
+          // restore autoFitToBounds when isMovementSynchronized disabled
+          this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: true }));
+        }
+      },
+      getIsFilterByMapExtent: this._getIsFilterByMapExtent,
+      setIsFilterByMapExtent: (isFilterByMapExtent: boolean) => {
+        this.updateInput({ filterByMapExtent: isFilterByMapExtent });
+        if (isFilterByMapExtent) {
+          this._setMapExtentFilter();
+        } else {
+          this._clearMapExtentFilter();
+        }
+      },
+      getGeoFieldNames: () => {
+        return getGeoFieldNames(this._savedMap.getStore().getState());
+      },
+    });
+    if (this._getIsMovementSynchronized()) {
+      this._gotoSynchronizedLocation();
+    }
+
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const content =
       sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
         <div className="mapEmbeddedError">
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             iconColor="danger"
             data-test-subj="embeddable-maps-failure"
             body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
@@ -373,7 +562,9 @@ export class MapEmbeddable
       ) : (
         <MapContainer
           onSingleValueTrigger={this.onSingleValueTrigger}
-          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          addFilters={
+            this.input.hideFilterActions || this.input.disableTriggers ? null : this.addFilters
+          }
           getFilterActions={this.getFilterActions}
           getActionContext={this.getActionContext}
           renderTooltipContent={this._renderTooltipContent}
@@ -387,7 +578,9 @@ export class MapEmbeddable
     const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>{content}</I18nContext>
+        <I18nContext>
+          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
+        </I18nContext>
       </Provider>,
       this._domNode
     );
@@ -397,10 +590,13 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
     this._getIndexPatterns().then((indexPatterns) => {
       this.updateOutput({
-        ...this.getOutput(),
         indexPatterns,
       });
     });
+  }
+
+  updateLayerById(layerDescriptor: LayerDescriptor) {
+    this._savedMap.getStore().dispatch<any>(updateLayerById(layerDescriptor));
   }
 
   private async _getIndexPatterns() {
@@ -468,14 +664,21 @@ export class MapEmbeddable
     } as ActionExecutionContext;
   };
 
-  setMapExtentFilter() {
-    const state = this._savedMap.getStore().getState();
-    const mapExtent = getMapExtent(state);
-    const geoFieldNames = getGeoFieldNames(state);
-    const center = getMapCenter(state);
-    const zoom = getMapZoom(state);
+  // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled
+  // When moving map with filterByMapExtent:false, previous map extent filter(s) does not get removed
+  // Cuased by syncDashboardContainerInput applyContainerChangesToState.
+  //   1) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
+  //      removing previous map extent filter and adding new map extent filter
+  //   2) applyContainerChangesToState then re-adds stale input.filters (which contains previous map extent filter)
+  // Add debounce to fix timing issue.
+  //   1) applyContainerChangesToState now runs first and does its thing
+  //   2) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
+  //      removing previous map extent filter and adding new map extent filter
+  _setMapExtentFilter = _.debounce(() => {
+    const mapExtent = getMapExtent(this._savedMap.getStore().getState());
+    const geoFieldNames = mapEmbeddablesSingleton.getGeoFieldNames();
 
-    if (center === undefined || mapExtent === undefined || geoFieldNames.length === 0) {
+    if (mapExtent === undefined || geoFieldNames.length === 0) {
       return;
     }
 
@@ -484,12 +687,8 @@ export class MapEmbeddable
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
-      defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
-      values: {
-        lat: center.lat,
-        lon: center.lon,
-        zoom,
-      },
+      defaultMessage: '{geoFieldsLabel} within map bounds',
+      values: { geoFieldsLabel: getGeoFieldsLabel(geoFieldNames) },
     });
 
     const executeContext = {
@@ -502,9 +701,9 @@ export class MapEmbeddable
       throw new Error('Unable to apply map extent filter, could not locate action');
     }
     action.execute(executeContext);
-  }
+  }, 100);
 
-  clearMapExtentFilter() {
+  _clearMapExtentFilter() {
     this._prevMapExtent = undefined;
     const executeContext = {
       ...this.getActionContext(),
@@ -520,6 +719,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    mapEmbeddablesSingleton.unregister(this.input.id);
     this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
@@ -529,9 +729,9 @@ export class MapEmbeddable
       unmountComponentAtNode(this._domNode);
     }
 
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
+    this._subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
   }
 
   reload() {
@@ -540,23 +740,23 @@ export class MapEmbeddable
     });
   }
 
+  _mapSyncHandler = (lat: number, lon: number, zoom: number) => {
+    // auto fit to bounds is not compatable with map synchronization
+    // auto fit to bounds may cause map location to never stablize and bound back and forth between bounds on different maps
+    if (getMapSettings(this._savedMap.getStore().getState()).autoFitToDataBounds) {
+      this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: false }));
+    }
+    this._savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
+  };
+
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
     }
 
-    if (
-      this._onInitialRenderComplete &&
-      !this._hasInitialRenderCompleteFired &&
-      areLayersLoaded(this._savedMap.getStore().getState())
-    ) {
-      this._hasInitialRenderCompleteFired = true;
-      this._onInitialRenderComplete();
-    }
-
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
-    if (this.input.filterByMapExtent && !_.isEqual(this._prevMapExtent, mapExtent)) {
-      this.setMapExtentFilter();
+    if (this._getIsFilterByMapExtent() && !_.isEqual(this._prevMapExtent, mapExtent)) {
+      this._setMapExtentFilter();
     }
 
     const center = getMapCenter(this._savedMap.getStore().getState());
@@ -594,10 +794,25 @@ export class MapEmbeddable
     }
 
     const hiddenLayerIds = getHiddenLayerIds(this._savedMap.getStore().getState());
-
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
+      });
+    }
+
+    const isLoading = isMapLoading(this._savedMap.getStore().getState());
+    if (this.getOutput().loading !== isLoading) {
+      /**
+       * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+       * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
+       * For more details please contact the maps team.
+       */
+      this.updateOutput({
+        loading: isLoading,
+        rendered: !isLoading,
+        // do not surface layer errors as output.error
+        // output.error blocks entire embeddable display and prevents map from displaying
+        // layer errors are better surfaced in legend while still keeping the map usable
       });
     }
   }

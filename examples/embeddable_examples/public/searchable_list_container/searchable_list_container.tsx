@@ -13,7 +13,7 @@ import {
   ContainerInput,
   EmbeddableStart,
   EmbeddableInput,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { SearchableListContainerComponent } from './searchable_list_container_component';
 
 export const SEARCHABLE_LIST_CONTAINER = 'SEARCHABLE_LIST_CONTAINER';

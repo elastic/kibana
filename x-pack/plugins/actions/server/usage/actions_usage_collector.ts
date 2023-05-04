@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ActionsUsage, byServiceProviderTypeSchema, byTypeSchema } from './types';
 import { ActionsConfig } from '../config';
 
@@ -23,6 +23,8 @@ export function createActionsUsageCollector(
       return true;
     },
     schema: {
+      has_errors: { type: 'boolean' },
+      error_messages: { type: 'array', items: { type: 'text' } },
       alert_history_connector_enabled: {
         type: 'boolean',
         _meta: { description: 'Indicates if preconfigured alert history connector is enabled.' },
@@ -45,19 +47,29 @@ export function createActionsUsageCollector(
       count_actions_executions_failed_by_type_per_day: byTypeSchema,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
+      count_connector_types_by_action_run_outcome_per_day: {
+        DYNAMIC_KEY: {
+          success: { type: 'long' },
+          failure: { type: 'long' },
+          unknown: { type: 'long' },
+        },
+      },
     },
     fetch: async () => {
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
         const { runs, ...state } = get(doc, 'state') as ActionsUsage & { runs: number };
-
         return {
           ...state,
           alert_history_connector_enabled: config.preconfiguredAlertHistoryEsIndex,
         };
       } catch (err) {
+        const errMessage = err && err.message ? err.message : err.toString();
+
         return {
+          has_errors: true,
+          error_messages: [errMessage],
           alert_history_connector_enabled: false,
           count_total: 0,
           count_by_type: {},
@@ -72,6 +84,7 @@ export function createActionsUsageCollector(
           count_actions_executions_failed_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
+          count_connector_types_by_action_run_outcome_per_day: {},
         };
       }
     },

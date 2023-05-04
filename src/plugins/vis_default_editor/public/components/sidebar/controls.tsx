@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { discardChanges, EditorAction } from './state';
 
 interface DefaultEditorControlsProps {
@@ -83,7 +83,7 @@ function DefaultEditorControls({
                   defaultMessage: 'Errors in the highlighted fields need to be resolved.',
                 })}
               >
-                <EuiButton color="danger" iconType="alert" size="s" disabled>
+                <EuiButton color="danger" iconType="warning" size="s" disabled>
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.updateChartButtonLabel"
                     defaultMessage="Update"
@@ -97,7 +97,7 @@ function DefaultEditorControls({
                     content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
                       defaultMessage: 'CTRL + Enter is a shortcut for Update.',
                     })}
-                    type="keyboardShortcut"
+                    type="keyboard"
                     color="subdued"
                   />
                 </EuiFlexItem>

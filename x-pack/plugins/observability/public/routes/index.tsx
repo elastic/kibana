@@ -7,14 +7,20 @@
 
 import * as t from 'io-ts';
 import React from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { DatePickerContextProvider } from '../context/date_picker_context';
+import { useKibana } from '../utils/kibana_react';
+import { AlertsPage } from '../pages/alerts/alerts';
+import { AlertDetails } from '../pages/alert_details/alert_details';
+import { CasesPage } from '../pages/cases/cases';
+import { OverviewPage } from '../pages/overview/overview';
+import { RulesPage } from '../pages/rules/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
+import { SlosPage } from '../pages/slos/slos';
+import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
+import { SloDetailsPage } from '../pages/slo_details/slo_details';
+import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { casesPath } from '../../common';
-import { CasesPage } from '../pages/cases';
-import { AlertsPage } from '../pages/alerts/containers/alerts_page';
-import { HomePage } from '../pages/home';
-import { LandingPage } from '../pages/landing';
-import { OverviewPage } from '../pages/overview';
-import { jsonRt } from './json_rt';
-import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -27,33 +33,49 @@ export interface Params {
   path?: t.HasProps;
 }
 
+// Note: React Router DOM <Redirect> component was not working here
+// so I've recreated this simple version for this purpose.
+function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: string }) {
+  const {
+    http: { basePath },
+  } = useKibana().services;
+  const history = useHistory();
+  const { search, hash } = useLocation();
+
+  if (redirectToApp) {
+    window.location.replace(
+      `${window.location.origin}${basePath.prepend(`/app/${redirectToApp}${to}${search}${hash}`)}`
+    );
+  } else if (to) {
+    history.replace(to);
+  }
+  return null;
+}
+
 export const routes = {
   '/': {
     handler: () => {
-      return <HomePage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
     exact: true,
   },
   '/landing': {
     handler: () => {
-      return <LandingPage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
     exact: true,
   },
   '/overview': {
-    handler: ({ query }: any) => {
-      return <OverviewPage routeParams={{ query }} />;
+    handler: () => {
+      return (
+        <DatePickerContextProvider>
+          <OverviewPage />
+        </DatePickerContextProvider>
+      );
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
+    params: {},
     exact: true,
   },
   [casesPath]: {
@@ -72,18 +94,67 @@ export const routes = {
     },
     exact: true,
   },
-  '/exploratory-view/': {
+  '/exploratory-view': {
     handler: () => {
-      return <ObservabilityExploratoryView />;
+      return <SimpleRedirect to="/" redirectToApp="exploratory-view" />;
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules': {
+    handler: () => {
+      return <RulesPage />;
     },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/:alertId': {
+    handler: () => {
+      return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos': {
+    handler: () => {
+      return <SlosPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/create': {
+    handler: () => {
+      return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/welcome': {
+    handler: () => {
+      return <SlosWelcomePage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/edit/:sloId': {
+    handler: () => {
+      return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/:sloId': {
+    handler: () => {
+      return <SloDetailsPage />;
+    },
+    params: {},
     exact: true,
   },
 };

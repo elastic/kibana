@@ -11,14 +11,12 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  AddFromLibraryButton,
-  QuickButtonGroup,
-  SolutionToolbar,
-} from '../../../../../../src/plugins/presentation_util/public';
+
+import { AddFromLibraryButton, IconButtonGroup, Toolbar } from '@kbn/shared-ux-button-toolbar';
+
 import { getElementStrings } from '../../../i18n';
 import { CommitFn, ElementSpec } from '../../../types';
-import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
 import { FullscreenControl } from './fullscreen_control';
@@ -30,6 +28,10 @@ import { LabsControl } from './labs_control';
 import { EditorMenu } from './editor_menu';
 
 const strings = {
+  getQuickCreateButtonGroupLegend: () =>
+    i18n.translate('xpack.canvas.workpadHeader.quickCreateButtonGroupLegend', {
+      defaultMessage: 'Shortcuts to popular element types',
+    }),
   getFullScreenButtonAriaLabel: () =>
     i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
       defaultMessage: 'View fullscreen',
@@ -141,43 +143,44 @@ export const WorkpadHeader: FC<Props> = ({
   const quickButtons = [
     {
       iconType: 'visText',
-      createType: elementStrings.markdown.displayName,
+      label: elementStrings.markdown.displayName,
       onClick: createElement('markdown'),
     },
     {
       iconType: 'node',
-      createType: elementStrings.shape.displayName,
+      label: elementStrings.shape.displayName,
       onClick: createElement('shape'),
     },
     {
       iconType: 'image',
-      createType: elementStrings.image.displayName,
+      label: elementStrings.image.displayName,
       onClick: createElement('image'),
     },
   ];
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        className="canvasLayout__stageHeaderInner"
-      >
+      <EuiFlexGroup gutterSize="m" alignItems="center" className="canvasLayout__stageHeaderInner">
         {isWriteable && (
           <EuiFlexItem grow={false}>
-            <SolutionToolbar>
+            <Toolbar>
               {{
-                primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
-                quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                addFromLibraryButton: (
+                primaryButton: <ElementMenu addElement={addElement} elements={elements} />,
+                iconButtonGroup: (
+                  <IconButtonGroup
+                    buttons={quickButtons}
+                    legend={strings.getQuickCreateButtonGroupLegend()}
+                  />
+                ),
+                extraButtons: [
                   <AddFromLibraryButton
                     onClick={showEmbedPanel}
                     data-test-subj="canvas-add-from-library-button"
-                  />
-                ),
-                extraButtons: [<EditorMenu addElement={addElement} />],
+                  />,
+                  <EditorMenu addElement={addElement} />,
+                ],
               }}
-            </SolutionToolbar>
+            </Toolbar>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>

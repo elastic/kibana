@@ -13,6 +13,7 @@ import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 const metricAggFilter: string[] = [
   '!top_hits',
+  '!top_metrics',
   '!percentiles',
   '!percentile_ranks',
   '!median',
@@ -30,7 +31,7 @@ const metricAggFilter: string[] = [
   '!filtered_metric',
   '!single_percentile',
 ];
-const bucketAggFilter: string[] = [];
+const bucketAggFilter: string[] = ['!filter', '!sampler', '!diversified_sampler', '!multi_terms'];
 
 export const siblingPipelineType = i18n.translate(
   'data.search.aggs.metrics.siblingPipelineAggregationsSubtypeTitle',

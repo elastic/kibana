@@ -24,6 +24,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   describe('lens in canvas', function () {
     before(async () => {
       await esArchiver.load(archives.es);
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(archives.kbn);
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-lens' });
       // open canvas home
@@ -36,14 +37,14 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     after(async () => {
       await esArchiver.unload(archives.es);
-      await kibanaServer.importExport.unload(archives.kbn);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('by-reference', () => {
       it('renders lens visualization using savedLens expression', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
+        await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
 
       it('adds existing lens embeddable from the visualize library', async () => {
@@ -87,7 +88,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       it('edits lens by-value embeddable', async () => {
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.toggleContextMenu();
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.lens.saveAndReturn();
         await retry.try(async () => {

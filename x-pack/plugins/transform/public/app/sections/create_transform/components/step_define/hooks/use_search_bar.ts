@@ -8,12 +8,12 @@
 import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
-import { Query } from '../../../../../../../../../../src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
+import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
-import { getPivotQuery } from '../../../../../common';
+import { getTransformConfigQuery } from '../../../../../common';
 
 import {
-  ErrorMessage,
   StepDefineExposedState,
   QUERY_LANGUAGE_KUERY,
   QUERY_LANGUAGE_LUCENE,
@@ -24,7 +24,7 @@ import { StepDefineFormProps } from '../step_define_form';
 
 export const useSearchBar = (
   defaults: StepDefineExposedState,
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  dataView: StepDefineFormProps['searchItems']['dataView']
 ) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -43,7 +43,9 @@ export const useSearchBar = (
 
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
 
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
@@ -53,7 +55,7 @@ export const useSearchBar = (
       switch (query.language) {
         case QUERY_LANGUAGE_KUERY:
           setSearchQuery(
-            toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern)
+            toElasticsearchQuery(fromKueryExpression(query.query as string), dataView)
           );
           return;
         case QUERY_LANGUAGE_LUCENE:
@@ -61,25 +63,25 @@ export const useSearchBar = (
           return;
       }
     } catch (e) {
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
-  const pivotQuery = getPivotQuery(searchQuery);
+  const transformConfigQuery = getTransformConfigQuery(searchQuery);
 
   return {
     actions: {
       searchChangeHandler,
       searchSubmitHandler,
-      setErrorMessage,
+      setQueryErrorMessage,
       setSearchInput,
       setSearchLanguage,
       setSearchQuery,
       setSearchString,
     },
     state: {
-      errorMessage,
-      pivotQuery,
+      queryErrorMessage,
+      transformConfigQuery,
       searchInput,
       searchLanguage,
       searchQuery,

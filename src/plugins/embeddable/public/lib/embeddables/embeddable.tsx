@@ -6,24 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import fastIsEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
-import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
+import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
-  return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
+  if (input.hidePanelTitles) return '';
+  return input.title ?? output.defaultTitle;
+}
+function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
+  if (input.hidePanelTitles) return '';
+  return input.description ?? output.defaultDescription;
 }
 
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
+  TNode = any
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;
 
@@ -32,6 +40,8 @@ export abstract class Embeddable<
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public readonly deferEmbeddableLoad: boolean = false;
+  public catchError?(error: EmbeddableError, domNode: HTMLElement | Element): TNode | (() => void);
+
   public abstract readonly type: string;
   public readonly id: string;
   public fatalError?: Error;
@@ -39,8 +49,10 @@ export abstract class Embeddable<
   protected output: TEmbeddableOutput;
   protected input: TEmbeddableInput;
 
-  private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
-  private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
+  private readonly inputSubject = new Rx.ReplaySubject<TEmbeddableInput>(1);
+  private readonly outputSubject = new Rx.ReplaySubject<TEmbeddableOutput>(1);
+  private readonly input$ = this.inputSubject.asObservable();
+  private readonly output$ = this.outputSubject.asObservable();
 
   protected renderComplete = new RenderCompleteDispatcher();
 
@@ -52,8 +64,16 @@ export abstract class Embeddable<
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
+
     this.output = {
       title: getPanelTitle(input, output),
+      description: getPanelDescription(input, output),
+      ...(this.reportsEmbeddableLoad()
+        ? {}
+        : {
+            loading: false,
+            rendered: true,
+          }),
       ...output,
     };
     this.input = {
@@ -62,8 +82,8 @@ export abstract class Embeddable<
     };
     this.parent = parent;
 
-    this.input$ = new Rx.BehaviorSubject<TEmbeddableInput>(this.input);
-    this.output$ = new Rx.BehaviorSubject<TEmbeddableOutput>(this.output);
+    this.inputSubject.next(this.input);
+    this.outputSubject.next(this.output);
 
     if (parent) {
       this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
@@ -80,12 +100,20 @@ export abstract class Embeddable<
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
-      .subscribe(
-        (title) => {
-          this.renderComplete.setTitle(title);
-        },
-        () => {}
-      );
+      .subscribe((title) => this.renderComplete.setTitle(title));
+  }
+
+  public reportsEmbeddableLoad() {
+    return false;
+  }
+
+  public refreshInputFromParent() {
+    if (!this.parent) return;
+    // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
+    if (!this.parent.getInput().panels[this.id]) return;
+
+    const newInput = this.parent.getInputForChild<TEmbeddableInput>(this.id);
+    this.onResetInput(newInput);
   }
 
   public getIsContainer(): this is IContainer {
@@ -120,15 +148,42 @@ export abstract class Embeddable<
   }
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
-    return this.input$.asObservable();
+    return this.input$;
   }
 
   public getOutput$(): Readonly<Rx.Observable<TEmbeddableOutput>> {
-    return this.output$.asObservable();
+    return this.output$;
   }
 
   public getOutput(): Readonly<TEmbeddableOutput> {
     return this.output;
+  }
+
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<TEmbeddableInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    return (
+      genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput) &&
+      fastIsEqual(
+        omitGenericEmbeddableInput(lastExplicitInput),
+        omitGenericEmbeddableInput(currentExplicitInput)
+      )
+    );
+  }
+
+  public getExplicitInput() {
+    const root = this.getRoot();
+    if (root.getIsContainer()) {
+      return (
+        (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
+      );
+    }
+    return this.getInput();
+  }
+
+  public getPersistableInput() {
+    return this.getExplicitInput();
   }
 
   public getInput(): Readonly<TEmbeddableInput> {
@@ -136,7 +191,11 @@ export abstract class Embeddable<
   }
 
   public getTitle(): string {
-    return this.output.title || '';
+    return this.output.title ?? '';
+  }
+
+  public getDescription(): string {
+    return this.output.description ?? '';
   }
 
   /**
@@ -163,14 +222,13 @@ export abstract class Embeddable<
     }
   }
 
-  public render(el: HTMLElement): void {
+  public render(el: HTMLElement): TNode | void {
     this.renderComplete.setEl(el);
     this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
-    return;
   }
 
   /**
@@ -189,8 +247,8 @@ export abstract class Embeddable<
   public destroy(): void {
     this.destroyed = true;
 
-    this.input$.complete();
-    this.output$.complete();
+    this.inputSubject.complete();
+    this.outputSubject.complete();
 
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
@@ -208,20 +266,20 @@ export abstract class Embeddable<
     }
   }
 
-  protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
+  public updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
     const newOutput = {
       ...this.output,
       ...outputChanges,
     };
-    if (!isEqual(this.output, newOutput)) {
+    if (!fastIsEqual(this.output, newOutput)) {
       this.output = newOutput;
-      this.output$.next(this.output);
+      this.outputSubject.next(this.output);
     }
   }
 
   protected onFatalError(e: Error) {
     this.fatalError = e;
-    this.output$.error(e);
+    this.outputSubject.error(e);
     // if the container is waiting for this embeddable to complete loading,
     // a fatal error counts as complete.
     if (this.deferEmbeddableLoad && this.parent?.isContainer) {
@@ -230,12 +288,13 @@ export abstract class Embeddable<
   }
 
   private onResetInput(newInput: TEmbeddableInput) {
-    if (!isEqual(this.input, newInput)) {
+    if (!fastIsEqual(this.input, newInput)) {
       const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
-      this.input$.next(newInput);
+      this.inputSubject.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
+        description: getPanelDescription(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
       if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
         this.reload();

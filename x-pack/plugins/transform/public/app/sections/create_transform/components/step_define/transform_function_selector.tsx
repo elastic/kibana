@@ -23,7 +23,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     {
       name: TRANSFORM_FUNCTION.PIVOT,
       helpText: i18n.translate('xpack.transform.stepDefineForm.pivotHelperText', {
-        defaultMessage: 'Aggregate and group your data',
+        defaultMessage: 'Aggregate and group your data.',
       }),
       icon: 'aggregate',
       title: i18n.translate('xpack.transform.stepDefineForm.pivotLabel', {
@@ -33,7 +33,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     {
       name: TRANSFORM_FUNCTION.LATEST,
       helpText: i18n.translate('xpack.transform.stepDefineForm.latestHelperText', {
-        defaultMessage: 'Keep track of your most recent data',
+        defaultMessage: 'Keep track of your most recent data.',
       }),
       icon: 'clock',
       title: i18n.translate('xpack.transform.stepDefineForm.latestLabel', {

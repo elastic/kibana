@@ -46,6 +46,10 @@ export function getVectorStyleLabel(styleName: VECTOR_STYLES) {
       return i18n.translate('xpack.maps.styles.vector.labelLabel', {
         defaultMessage: 'Label',
       });
+    case VECTOR_STYLES.LABEL_ZOOM_RANGE:
+      return i18n.translate('xpack.maps.styles.vector.labelZoomRangeLabel', {
+        defaultMessage: 'Label visibility',
+      });
     case VECTOR_STYLES.LABEL_COLOR:
       return i18n.translate('xpack.maps.styles.vector.labelColorLabel', {
         defaultMessage: 'Label color',
@@ -61,6 +65,10 @@ export function getVectorStyleLabel(styleName: VECTOR_STYLES) {
     case VECTOR_STYLES.LABEL_BORDER_SIZE:
       return i18n.translate('xpack.maps.styles.vector.labelBorderWidthLabel', {
         defaultMessage: 'Label border width',
+      });
+    case VECTOR_STYLES.LABEL_POSITION:
+      return i18n.translate('xpack.maps.styles.vector.labelPositionLabel', {
+        defaultMessage: 'Label position',
       });
     default:
       return styleName;

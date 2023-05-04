@@ -8,11 +8,8 @@
 import { upperFirst } from 'lodash';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createBeatsQuery } from './create_beats_query';
-// @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
 
 export function handleResponse(response: ElasticsearchResponse, beatUuid: string) {

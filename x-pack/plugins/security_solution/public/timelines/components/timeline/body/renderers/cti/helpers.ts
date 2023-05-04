@@ -8,10 +8,9 @@
 import { get, isEmpty } from 'lodash';
 import styled from 'styled-components';
 
+import type { EcsSecurityExtension as Ecs, ThreatIndicatorEcs } from '@kbn/securitysolution-ecs';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/constants';
-import { Ecs } from '../../../../../../../common/ecs';
-import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
 
 const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
   const threatData = get(data, ENRICHMENT_DESTINATION_PATH);
@@ -31,5 +30,5 @@ export const hasThreatMatchValue = (data: Ecs): boolean =>
   );
 
 export const HorizontalSpacer = styled.div`
-  margin: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin: 0 ${({ theme }) => theme.eui.euiSizeXS};
 `;

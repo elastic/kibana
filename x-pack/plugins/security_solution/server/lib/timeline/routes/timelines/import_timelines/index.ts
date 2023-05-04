@@ -6,15 +6,15 @@
  */
 
 import { extname } from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../../../common/constants';
 
-import { SetupPlugins } from '../../../../../plugin';
-import { ConfigType } from '../../../../../config';
+import type { SetupPlugins } from '../../../../../plugin';
+import type { ConfigType } from '../../../../../config';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
@@ -46,7 +46,7 @@ export const importTimelinesRoute = (
     async (context, request, response) => {
       try {
         const siemResponse = buildSiemResponse(response);
-        const savedObjectsClient = context.core.savedObjects.client;
+        const savedObjectsClient = (await context.core).savedObjects.client;
         if (!savedObjectsClient) {
           return siemResponse.error({ statusCode: 404 });
         }

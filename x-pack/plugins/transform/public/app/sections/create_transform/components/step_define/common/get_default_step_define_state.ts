@@ -21,6 +21,7 @@ export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineE
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
+    isDatePickerApplyEnabled: false,
     searchLanguage: QUERY_LANGUAGE_KUERY,
     searchString: undefined,
     searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,

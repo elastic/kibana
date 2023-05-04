@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spacesMock } from '../../../spaces/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 import { checkAccess } from './check_access';
 
@@ -47,7 +47,10 @@ describe('checkAccess', () => {
   const mockSpaces = spacesMock.createStart();
   const mockDependencies = {
     request: { auth: { isAuthenticated: true } },
-    config: { host: 'http://localhost:3002' },
+    config: {
+      canDeployEntSearch: true,
+      host: 'http://localhost:3002',
+    },
     security: mockSecurity,
     spaces: mockSpaces,
   } as any;
@@ -109,6 +112,15 @@ describe('checkAccess', () => {
           expectedError = e;
         }
         expect(expectedError).toEqual('Error');
+      });
+    });
+
+    describe('when spaces plugin is not available', () => {
+      it('should not throw', async () => {
+        await expect(checkAccess({ ...mockDependencies, spaces: undefined })).resolves.toEqual({
+          hasAppSearchAccess: false,
+          hasWorkplaceSearchAccess: false,
+        });
       });
     });
   });
@@ -191,6 +203,17 @@ describe('checkAccess', () => {
 
         it('falls back to no access if no http response', async () => {
           (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({}));
+          expect(await checkAccess(mockDependencies)).toEqual({
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: false,
+          });
+        });
+
+        it('falls back to no access if response error', async () => {
+          (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
+            responseStatus: 500,
+            responseStatusText: 'failed',
+          }));
           expect(await checkAccess(mockDependencies)).toEqual({
             hasAppSearchAccess: false,
             hasWorkplaceSearchAccess: false,

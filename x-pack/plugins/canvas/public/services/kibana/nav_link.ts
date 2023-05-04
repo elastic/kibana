@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { SESSIONSTORAGE_LASTPATH } from '../../../common/lib/constants';
 import { getSessionStorage } from '../../lib/storage';
@@ -20,7 +20,7 @@ export type CanvasNavLinkServiceFactory = KibanaPluginServiceFactory<
 export const navLinkServiceFactory: CanvasNavLinkServiceFactory = ({ coreStart, appUpdater }) => ({
   updatePath: (path: string) => {
     appUpdater?.next(() => ({
-      defaultPath: `#${path}`,
+      defaultPath: `${path}`,
     }));
 
     getSessionStorage().set(`${SESSIONSTORAGE_LASTPATH}:${coreStart.http.basePath.get()}`, path);

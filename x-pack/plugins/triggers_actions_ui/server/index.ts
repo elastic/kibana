@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
-import { configSchema, ConfigSchema } from '../config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, ConfigSchema } from './config';
 import { TriggersActionsPlugin } from './plugin';
 
 export type { PluginStartContract } from './plugin';
@@ -14,14 +14,17 @@ export {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
-  MAX_INTERVALS,
+  validateAggType,
+  validateGroupBy,
   MAX_GROUPS,
   DEFAULT_GROUPS,
+  TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from './data';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableGeoTrackingThresholdAlert: true,
+    enableExperimental: true,
   },
   schema: configSchema,
 };

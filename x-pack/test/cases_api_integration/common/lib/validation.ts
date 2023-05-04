@@ -6,22 +6,79 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  AttachmentTotals,
+  Case,
+  CasesByAlertId,
+  RelatedCaseInfo,
+} from '@kbn/cases-plugin/common/api';
+import { xorWith, isEqual } from 'lodash';
 
-import { CaseResponse, CasesByAlertId } from '../../../../plugins/cases/common/api';
+type AttachmentTotalsKeys = keyof AttachmentTotals;
+
+export interface TestCaseWithTotals {
+  caseInfo: Case;
+  totals?: Partial<AttachmentTotals>;
+}
 
 /**
  * Ensure that the result of the alerts API request matches with the cases created for the test.
  */
 export function validateCasesFromAlertIDResponse(
   casesFromAPIResponse: CasesByAlertId,
-  createdCasesForTest: CaseResponse[]
+  createdCasesForTest: TestCaseWithTotals[]
 ) {
-  const idToTitle = new Map<string, string>(
-    createdCasesForTest.map((caseInfo) => [caseInfo.id, caseInfo.title])
+  const idToResponse = new Map<string, RelatedCaseInfo>(
+    casesFromAPIResponse.map((response) => [response.id, response])
   );
 
-  for (const apiResCase of casesFromAPIResponse) {
-    // check that the title in the api response matches the title in the map from the created cases
-    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id));
+  expect(idToResponse.size).to.be(createdCasesForTest.length);
+
+  // only iterate over the test cases not the api response values
+  for (const expectedTestInfo of createdCasesForTest) {
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.title).to.be(
+      expectedTestInfo.caseInfo.title
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.description).to.be(
+      expectedTestInfo.caseInfo.description
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.status).to.be(
+      expectedTestInfo.caseInfo.status
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.createdAt).to.be(
+      expectedTestInfo.caseInfo.created_at
+    );
+
+    // only check the totals that are defined in the test case
+    for (const totalKey of Object.keys(expectedTestInfo.totals ?? {}) as AttachmentTotalsKeys[]) {
+      expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.totals[totalKey]).to.be(
+        expectedTestInfo.totals?.[totalKey]
+      );
+    }
   }
 }
+/**
+ * Compares two arrays to determine if they are sort of equal. This function returns true if the arrays contain the same
+ * elements but the ordering does not matter.
+ */
+export function arraysToEqual<T>(array1?: T[], array2?: T[]) {
+  if (!array1 || !array2 || array1.length !== array2.length) {
+    return false;
+  }
+
+  return xorWith(array1, array2, isEqual).length === 0;
+}
+
+/**
+ * Regular expression to test if a string matches the RFC7234 specification (without warn-date) for warning headers. This pattern assumes that the warn code
+ * is always 299. Further, this pattern assumes that the warn agent represents a version of Kibana.
+ *
+ * Example: 299 Kibana-8.2.0 "Deprecated endpoint"
+ */
+const WARNING_HEADER_REGEX =
+  /299 Kibana-\d+.\d+.\d+(?:-(?:alpha|beta|rc)\\d+)?(?:-SNAPSHOT)? \".+\"/g;
+
+export const assertWarningHeader = (warningHeader: string) => {
+  const res = warningHeader.match(WARNING_HEADER_REGEX);
+  expect(res).not.to.be(null);
+};

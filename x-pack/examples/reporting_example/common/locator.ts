@@ -6,8 +6,8 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition } from '../../../../src/plugins/share/public';
-import { PLUGIN_ID } from '../common';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import { PLUGIN_ID } from '.';
 import type { MyForwardableState } from '../public/types';
 
 export const REPORTING_EXAMPLE_LOCATOR_ID = 'REPORTING_EXAMPLE_LOCATOR_ID';

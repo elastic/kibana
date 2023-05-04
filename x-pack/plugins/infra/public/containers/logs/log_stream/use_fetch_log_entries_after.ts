@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
-import { JsonObject } from '@kbn/utility-types';
-import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
-import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { LogEntryAfterCursor } from '../../../../common/log_entry';
+import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
@@ -34,21 +34,21 @@ export const useLogEntriesAfterRequest = ({
   endTimestamp,
   highlightPhrase,
   query,
-  sourceId,
+  logViewReference,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
 }) => {
   const { search: fetchLogEntriesAfter, requests$: logEntriesAfterSearchRequests$ } = useDataSearch(
     {
       getRequest: useCallback(
         (cursor: LogEntryAfterCursor['after'], params: { size: number; extendTo?: number }) => {
-          return !!sourceId
+          return !!logViewReference
             ? {
                 request: {
                   params: logEntriesSearchRequestParamsRT.encode({
@@ -58,7 +58,7 @@ export const useLogEntriesAfterRequest = ({
                     highlightPhrase,
                     query: query as JsonObject,
                     size: params.size,
-                    sourceId,
+                    logView: logViewReference,
                     startTimestamp,
                   }),
                 },
@@ -66,7 +66,7 @@ export const useLogEntriesAfterRequest = ({
               }
             : null;
         },
-        [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
+        [columnOverrides, endTimestamp, highlightPhrase, query, logViewReference, startTimestamp]
       ),
       parseResponses: parseLogEntriesAfterSearchResponses,
     }
@@ -107,14 +107,14 @@ export const useFetchLogEntriesAfter = ({
   endTimestamp,
   highlightPhrase,
   query,
-  sourceId,
+  logViewReference,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
 }) => {
   const { fetchLogEntriesAfter, logEntriesAfterSearchRequests$ } = useLogEntriesAfterRequest({
@@ -122,7 +122,7 @@ export const useFetchLogEntriesAfter = ({
     endTimestamp,
     highlightPhrase,
     query,
-    sourceId,
+    logViewReference,
     startTimestamp,
   });
 

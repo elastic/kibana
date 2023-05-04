@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmWriteUser');
+  const apmApiClient = getService('apmApiClient');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
@@ -40,18 +41,41 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     expectResponse: (result: any) => void;
     onExpectationFail?: () => Promise<any>;
   }
+
+  function createAgent(
+    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration'>['params']['body']
+  ) {
+    return apmApiClient.writeUser({
+      endpoint: 'PUT /api/apm/settings/agent-configuration',
+      params: {
+        body,
+      },
+    });
+  }
+
+  function deleteAgent(
+    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration'>['params']['body']
+  ) {
+    return apmApiClient.writeUser({
+      endpoint: 'DELETE /api/apm/settings/agent-configuration',
+      params: {
+        body,
+      },
+    });
+  }
+
   const endpoints: Endpoint[] = [
     {
       // this doubles as a smoke test for the _inspect query parameter
       req: {
-        url: `/internal/apm/services/foo/errors/groups/main_statistics?start=${start}&end=${end}&_inspect=true&environment=ENVIRONMENT_ALL&transactionType=bar&kuery=`,
+        url: `/internal/apm/services/foo/errors/groups/main_statistics?start=${start}&end=${end}&_inspect=true&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/internal/apm/services/foo/errors/bar?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/bar/samples?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -79,7 +103,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1&documentType=transactionMetric&rollupInterval=1m`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -98,28 +122,28 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/internal/apm/traces/foo?start=${start}&end=${end}`,
+        url: `/internal/apm/traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=&documentType=transactionMetric&rollupInterval=1m&bucketSizeInSeconds=60`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=&documentType=transactionMetric&rollupInterval=1m&bucketSizeInSeconds=60`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -200,28 +224,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       .catch((error: any) => ({ error, response: undefined }));
   }
 
-  async function executeAsAdmin({ method = 'get', url, body }: Endpoint['req'], spaceId?: string) {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-    const fullPath = `${basePath}${url}`;
-    let request = supertest[method](fullPath);
-
-    // json body
-    if (body) {
-      request = request.send(body);
-    }
-
-    const response = await request.set('kbn-xsrf', 'foo');
-
-    const { status } = response;
-    if (status !== 200) {
-      throw new Error(`Endpoint: ${method} ${fullPath}
-      Status code: ${status}
-      Response: ${response.body.message}`);
-    }
-
-    return response;
-  }
-
   async function executeRequests({
     username,
     password,
@@ -268,23 +270,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     };
     before(async () => {
       log.info(`Creating agent configuration`);
-      await executeAsAdmin({
-        method: 'put',
-        url: '/api/apm/settings/agent-configuration',
-        body: config,
-      });
+      await createAgent(config);
       log.info(`Agent configuration created`);
     });
 
     after(async () => {
       log.info('deleting agent configuration');
-      await executeAsAdmin({
-        method: 'delete',
-        url: `/api/apm/settings/agent-configuration`,
-        body: {
-          service: config.service,
-        },
-      });
+      await deleteAgent({ service: config.service });
+      log.info('Agent configuration deleted');
     });
 
     it(`APIs can't be accessed by logstash_read user`, async () => {

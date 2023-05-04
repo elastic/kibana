@@ -16,13 +16,14 @@ import type { LocatorPublic, ILocatorClient, LocatorData } from '../locators';
  * request and the current Kibana version. On the client, the Short URL Service
  * needs no dependencies.
  */
-export interface IShortUrlClientFactory<D> {
-  get(dependencies: D): IShortUrlClient;
+export interface IShortUrlClientFactory<D, Client extends IShortUrlClient = IShortUrlClient> {
+  get(dependencies: D): Client;
 }
 
-export type IShortUrlClientFactoryProvider<D> = (params: {
-  locators: ILocatorClient;
-}) => IShortUrlClientFactory<D>;
+export type IShortUrlClientFactoryProvider<
+  D,
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient
+> = (params: { locators: ILocatorClient }) => IShortUrlClientFactory<D, ShortUrlClient>;
 
 /**
  * CRUD-like API for short URLs.
@@ -78,12 +79,6 @@ export interface ShortUrlCreateParams<P extends SerializableRecord> {
    * URL. This part will be visible to the user, it can have user-friendly text.
    */
   slug?: string;
-
-  /**
-   * Whether to generate a slug automatically. If `true`, the slug will be
-   * a human-readable text consisting of three worlds: "<adjective>-<adjective>-<noun>".
-   */
-  humanReadableSlug?: boolean;
 }
 
 /**

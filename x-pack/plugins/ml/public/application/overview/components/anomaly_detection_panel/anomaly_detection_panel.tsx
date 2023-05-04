@@ -5,36 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiImage,
-  EuiLoadingSpinner,
-  EuiPanel,
-} from '@elastic/eui';
+import React, { FC, Fragment, useEffect, useState } from 'react';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { zipObject } from 'lodash';
-import {
-  useMlKibana,
-  useMlLocator,
-  useNavigateToPath,
-  useTimefilter,
-} from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJob, MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import adImage from './ml_anomaly_detection.png';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 import { JobStatsBarStats } from '../../../components/stats_bar';
+import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -51,39 +37,23 @@ export interface Group {
 }
 
 interface Props {
+  anomalyTimelineService: AnomalyTimelineService;
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
+export const AnomalyDetectionPanel: FC<Props> = ({
+  anomalyTimelineService,
+  jobCreationDisabled,
+  setLazyJobCount,
+}) => {
   const {
-    services: {
-      uiSettings,
-      mlServices: { mlApiServices },
-    },
+    services: { charts: chartsService },
   } = useMlKibana();
-  const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
 
   const { displayErrorToast } = useToastNotificationService();
 
-  const timefilter = useTimefilter();
-
-  const anomalyTimelineService = useMemo(
-    () =>
-      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApiServices)),
-    [timefilter, uiSettings, mlApiServices]
-  );
-
   const refresh = useRefresh();
-
-  const redirectToCreateJobSelectIndexPage = async () => {
-    if (!mlLocator) return;
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
-    });
-    await navigateToPath(path, true);
-  };
 
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
@@ -156,6 +126,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
 
   useEffect(() => {
     loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh?.timeRange]);
 
   const errorDisplay = (
@@ -165,7 +136,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
           defaultMessage: 'An error occurred getting the anomaly detection jobs list.',
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <pre>{errorMessage}</pre>
       </EuiCallOut>
@@ -181,44 +152,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
     groupsCount === 0;
 
   if (noAdJobs) {
-    return (
-      <EuiEmptyPrompt
-        layout="horizontal"
-        hasBorder={true}
-        hasShadow={false}
-        icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
-        color="plain"
-        title={
-          <h2>
-            {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
-              defaultMessage: 'Create your first anomaly detection job',
-            })}
-          </h2>
-        }
-        body={
-          <>
-            <p>
-              {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
-                defaultMessage: `Anomaly detection enables you to find unusual behavior in time series data. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
-              })}
-            </p>
-          </>
-        }
-        actions={
-          <EuiButton
-            color="primary"
-            onClick={redirectToCreateJobSelectIndexPage}
-            fill
-            isDisabled={jobCreationDisabled}
-            data-test-subj="mlOverviewCreateADJobButton"
-          >
-            {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
-              defaultMessage: 'Create job',
-            })}
-          </EuiButton>
-        }
-      />
-    );
+    return <AnomalyDetectionEmptyState />;
   }
 
   return (
@@ -227,7 +161,11 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
 
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
-        <AnomalyDetectionTable items={groups} statsBarData={statsBarData!} />
+        <AnomalyDetectionTable
+          items={groups}
+          statsBarData={statsBarData!}
+          chartsService={chartsService}
+        />
       ) : null}
     </EuiPanel>
   );

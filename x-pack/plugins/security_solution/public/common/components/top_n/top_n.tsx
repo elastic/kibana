@@ -10,39 +10,34 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { InputsModelId } from '../../store/inputs/constants';
-import { TimelineEventsType } from '../../../../common/types/timeline';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import {
-  isDetectionsAlertsTable,
-  getSourcererScopeName,
-  removeIgnoredAlertFilters,
-  TopNOption,
-} from './helpers';
+import type { TopNOption } from './helpers';
+import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
-import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
   min-width: 600px;
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
-  z-index: 999999;
   position: absolute;
   right: 4px;
   top: 4px;
 `;
 
 const ViewSelect = styled(EuiSuperSelect)`
-  z-index: 999999;
-  width: 155px;
+  width: 170px;
 `;
 
 const TopNContent = styled.div`
   margin-top: 4px;
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 
   .euiPanel {
     border: none;
@@ -60,7 +55,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   showLegend?: boolean;
-  timelineId?: string;
+  scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -80,7 +75,7 @@ const TopNComponent: React.FC<Props> = ({
   showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
-  timelineId,
+  scopeId,
   to,
   toggleTopN,
 }) => {
@@ -89,7 +84,9 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const { selectedPatterns } = useSourcererDataView(getSourcererScopeName({ timelineId, view }));
+  const { selectedPatterns, runtimeMappings } = useSourcererDataView(
+    getSourcererScopeName({ scopeId, view })
+  );
 
   useEffect(() => {
     setView(defaultView);
@@ -99,24 +96,24 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
-        disabled={!isDetectionsAlertsTable(timelineId)}
+        disabled={options.length === 1}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, timelineId, view]
+    [onViewSelected, options, view]
   );
 
   // alert workflow statuses (e.g. open | closed) and other alert-specific
   // filters must be ignored when viewing raw alerts
   const applicableFilters = useMemo(
-    () => removeIgnoredAlertFilters({ filters, timelineId, view }),
-    [filters, timelineId, view]
+    () => removeIgnoredAlertFilters({ filters, tableId: scopeId, view }),
+    [filters, scopeId, view]
   );
 
   return (
-    <TopNContainer>
+    <TopNContainer data-test-subj="topN-container">
       <CloseButton
         aria-label={i18n.CLOSE}
         data-test-subj="close"
@@ -134,16 +131,19 @@ const TopNComponent: React.FC<Props> = ({
             headerChildren={headerChildren}
             indexPattern={indexPattern}
             indexNames={selectedPatterns}
+            runtimeMappings={runtimeMappings}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
+            queryType="topN"
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
             toggleTopN={toggleTopN}
-            timelineId={timelineId}
+            scopeId={scopeId}
             to={to}
+            hideQueryToggle
           />
         ) : (
           <SignalsByCategory
@@ -155,7 +155,8 @@ const TopNComponent: React.FC<Props> = ({
             query={query}
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            timelineId={timelineId}
+            runtimeMappings={runtimeMappings}
+            hideQueryToggle
           />
         )}
       </TopNContent>

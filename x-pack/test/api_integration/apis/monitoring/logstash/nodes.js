@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import nodesFixture from './fixtures/nodes';
+import nodesFixture from './fixtures/nodes.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

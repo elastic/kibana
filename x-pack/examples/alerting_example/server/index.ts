@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/server';
+import { PluginInitializer } from '@kbn/core/server';
 import { AlertingExamplePlugin } from './plugin';
 
 export const plugin: PluginInitializer<void, void> = () => new AlertingExamplePlugin();

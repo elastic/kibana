@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type DocumentCreationMode = 'text' | 'file' | 'api';
+export type DocumentCreationMode = 'api' | 'json' | 'elasticsearchIndex';
 
 export enum DocumentCreationStep {
   ShowCreationModes,

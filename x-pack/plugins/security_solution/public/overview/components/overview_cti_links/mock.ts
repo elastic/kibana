@@ -11,7 +11,8 @@ export const mockTheme = getMockTheme({
   eui: {
     euiSizeL: '10px',
     euiBreakpoints: { s: '10px' },
-    paddingSizes: { s: '10px', m: '10px', l: '10px' },
+    euiSizeS: '10px',
+    euiSizeM: '10px',
   },
 });
 
@@ -20,21 +21,6 @@ export const mockTiDataSources = {
   tiDataSources: [
     { dataset: 'ti_abusech', name: 'AbuseCH', count: 5, path: '/dashboard_path_abuseurl' },
   ],
-};
-
-export const mockEventCountsByDataset = {
-  abuseurl: 1,
-  abusemalware: 1,
-  alienvaultotx: 0,
-  anomali: 2,
-  anomalithreatstream: 0,
-  malwarebazaar: 2,
-  misp: 4,
-};
-
-export const mockCtiEventCountsResponse = {
-  eventCountsByDataset: mockEventCountsByDataset,
-  totalCount: 10,
 };
 
 export const mockCtiLinksResponse = {
@@ -49,20 +35,6 @@ export const mockCtiLinksResponse = {
   ],
 };
 
-export const mockEmptyCtiLinksResponse = {
-  isPluginDisabled: false,
-  buttonHref: '/button',
-  listItems: [
-    { title: 'abuseurl', count: 0, path: '/dashboard_path_abuseurl' },
-    { title: 'abusemalware', count: 0, path: '/dashboard_path_abusemalware' },
-    { title: 'alienvaultotx', count: 0, path: '/dashboard_path_alienvaultotx' },
-    { title: 'anomali', count: 0, path: '/dashboard_path_anomali' },
-    { title: 'anomalithreatstream', count: 0, path: '/dashboard_path_anomalithreatstream' },
-    { title: 'malwarebazaar', count: 0, path: '/dashboard_path_malwarebazaar' },
-    { title: 'misp', count: 0, path: '/dashboard_path_misp' },
-  ],
-};
-
 export const mockProps = {
   to: '2020-01-20T20:49:57.080Z',
   from: '2020-01-21T20:49:57.080Z',
@@ -72,17 +44,4 @@ export const mockProps = {
   allTiDataSources: [
     { dataset: 'ti_abusech', name: 'AbuseCH', count: 5, path: '/dashboard_path_abuseurl' },
   ],
-};
-
-export const mockCtiWithEventsProps = {
-  ...mockProps,
-  ...mockCtiEventCountsResponse,
-};
-
-export const mockThreatIntelPanelViewProps = {
-  buttonHref: '/button_href',
-  isPluginDisabled: false,
-  listItems: mockCtiLinksResponse.listItems,
-  splitPanel: undefined,
-  totalEventCount: 1337,
 };

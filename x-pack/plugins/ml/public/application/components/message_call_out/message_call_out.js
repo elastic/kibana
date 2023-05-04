@@ -22,7 +22,7 @@ function getCallOutAttributes(message, status) {
     case MESSAGE_LEVEL.ERROR:
       return { title: message, iconType: 'cross', color: 'danger' };
     case MESSAGE_LEVEL.WARNING:
-      return { title: message, iconType: 'alert', color: 'warning' };
+      return { title: message, iconType: 'warning', color: 'warning' };
     case MESSAGE_LEVEL.SUCCESS:
       return { title: message, iconType: 'check', color: 'success' };
     case MESSAGE_LEVEL.INFO:

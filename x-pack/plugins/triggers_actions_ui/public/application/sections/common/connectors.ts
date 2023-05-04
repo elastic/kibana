@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { ActionConnector, ActionTypeIndex, AlertAction } from '../../../types';
+import { ActionConnector, ActionTypeIndex, RuleAction } from '../../../types';
 
 export const getValidConnectors = (
   connectors: ActionConnector[],
-  actionItem: AlertAction,
-  actionTypesIndex: ActionTypeIndex
+  actionItem: RuleAction,
+  actionTypesIndex: ActionTypeIndex,
+  allowGroupConnector: string[] = []
 ): ActionConnector[] => {
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
   return connectors.filter(
     (connector) =>
-      connector.actionTypeId === actionItem.actionTypeId &&
+      (allowGroupConnector.includes(connector.actionTypeId) ||
+        connector.actionTypeId === actionItem.actionTypeId) &&
       // include only enabled by config connectors or preconfigured
       (actionType?.enabledInConfig || connector.isPreconfigured)
   );

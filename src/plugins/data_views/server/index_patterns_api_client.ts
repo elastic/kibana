@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import {
-  GetFieldsOptions,
-  IIndexPatternsApiClient,
-  GetFieldsOptionsTimePattern,
-} from '../common/types';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
-import { hasUserIndexPattern } from './has_user_index_pattern';
+import { hasUserDataView } from './has_user_data_view';
 
-export class IndexPatternsApiServer implements IIndexPatternsApiClient {
+export class IndexPatternsApiServer implements IDataViewsApiClient {
   esClient: ElasticsearchClient;
   constructor(
     elasticsearchClient: ElasticsearchClient,
@@ -30,7 +26,8 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     type,
     rollupIndex,
     allowNoIndex,
-    filter,
+    indexFilter,
+    fields,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     return await indexPatterns
@@ -39,7 +36,8 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
         metaFields,
         type,
         rollupIndex,
-        filter,
+        indexFilter,
+        fields,
       })
       .catch((err) => {
         if (
@@ -52,13 +50,12 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
         }
       });
   }
-  async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
-    const indexPatterns = new IndexPatternsFetcher(this.esClient);
-    return await indexPatterns.getFieldsForTimePattern(options);
-  }
 
-  async hasUserIndexPattern() {
-    return hasUserIndexPattern({
+  /**
+   * Is there a user created data view?
+   */
+  async hasUserDataView() {
+    return hasUserDataView({
       esClient: this.esClient,
       soClient: this.savedObjectsClient,
     });

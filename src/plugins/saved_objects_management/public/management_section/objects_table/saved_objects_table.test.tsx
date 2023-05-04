@@ -7,6 +7,8 @@
  */
 
 import {
+  bulkDeleteObjectsMock,
+  bulkGetObjectsMock,
   extractExportDetailsMock,
   fetchExportByTypeAndSearchMock,
   fetchExportObjectsMock,
@@ -17,17 +19,18 @@ import {
 } from './saved_objects_table.test.mocks';
 
 import React from 'react';
+import { pick } from 'lodash';
 import { Query } from '@elastic/eui';
 import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import {
   httpServiceMock,
   overlayServiceMock,
   notificationServiceMock,
-  savedObjectsServiceMock,
   applicationServiceMock,
-} from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+} from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
@@ -38,6 +41,7 @@ import {
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 const convertType = (type: string): SavedObjectManagementTypeInfo => ({
   name: type,
@@ -84,7 +88,6 @@ describe('SavedObjectsTable', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
-  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
@@ -103,7 +106,6 @@ describe('SavedObjectsTable', () => {
     http = httpServiceMock.createStartContract();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
-    savedObjects = savedObjectsServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
 
     const applications = applicationServiceMock.createStartContract();
@@ -119,6 +121,7 @@ describe('SavedObjectsTable', () => {
     };
 
     http.post.mockResolvedValue([]);
+    http.delete.mockResolvedValue({ id: 'test' });
 
     getSavedObjectCountsMock.mockReturnValue({
       'index-pattern': 0,
@@ -131,8 +134,7 @@ describe('SavedObjectsTable', () => {
       allowedTypes,
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
-      savedObjectsClient: savedObjects.client,
-      indexPatterns: dataPluginMock.createStartContract().indexPatterns,
+      dataViews: dataViewPluginMocks.createStartContract(),
       http,
       overlays,
       notifications,
@@ -141,11 +143,12 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
 
     findObjectsMock.mockImplementation(() => ({
       total: 4,
-      savedObjects: [
+      saved_objects: [
         {
           id: '1',
           type: 'index-pattern',
@@ -235,15 +238,9 @@ describe('SavedObjectsTable', () => {
         _id: obj.id,
         _source: {},
       }));
+      bulkGetObjectsMock.mockResolvedValue(mockSavedObjects);
 
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        bulkGet: jest.fn().mockImplementation(() => ({
-          savedObjects: mockSavedObjects,
-        })),
-      };
-
-      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -271,13 +268,7 @@ describe('SavedObjectsTable', () => {
         _id: obj.id,
         _source: {},
       }));
-
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        bulkGet: jest.fn().mockImplementation(() => ({
-          savedObjects: mockSavedObjects,
-        })),
-      };
+      bulkGetObjectsMock.mockResolvedValue(mockSavedObjects);
 
       extractExportDetailsMock.mockImplementation(() => ({
         exportedCount: 2,
@@ -287,7 +278,7 @@ describe('SavedObjectsTable', () => {
         excludedObjects: [],
       }));
 
-      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -318,13 +309,7 @@ describe('SavedObjectsTable', () => {
         _id: obj.id,
         _source: {},
       }));
-
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        bulkGet: jest.fn().mockImplementation(() => ({
-          savedObjects: mockSavedObjects,
-        })),
-      };
+      bulkGetObjectsMock.mockResolvedValue(mockSavedObjects);
 
       extractExportDetailsMock.mockImplementation(() => ({
         exportedCount: 2,
@@ -334,7 +319,7 @@ describe('SavedObjectsTable', () => {
         excludedObjects: [{ id: '7', type: 'visualisation' }],
       }));
 
-      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -552,6 +537,7 @@ describe('SavedObjectsTable', () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern', meta: {} },
         { id: '3', type: 'dashboard', meta: {} },
+        { id: '4', type: 'dashboard', meta: { hiddenType: false } },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
@@ -559,16 +545,13 @@ describe('SavedObjectsTable', () => {
         type: obj.type,
         source: {},
       }));
+      bulkGetObjectsMock.mockResolvedValue(mockSavedObjects);
+      bulkDeleteObjectsMock.mockResolvedValueOnce([
+        { id: '1', type: 'index-pattern', success: true },
+        { id: '3', type: 'dashboard', success: true },
+      ]);
 
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        bulkGet: jest.fn().mockImplementation(() => ({
-          savedObjects: mockSavedObjects,
-        })),
-        delete: jest.fn(),
-      };
-
-      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -580,24 +563,21 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().delete();
 
-      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-        mockSavedObjects[0].type,
-        mockSavedObjects[0].id,
-        { force: true }
-      );
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-        mockSavedObjects[1].type,
-        mockSavedObjects[1].id,
-        { force: true }
+      expect(defaultProps.dataViews.clearCache).toHaveBeenCalled();
+      expect(bulkDeleteObjectsMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.arrayContaining([
+          expect.objectContaining(pick(mockSavedObjects[0], 'id', 'type')),
+          expect.objectContaining(pick(mockSavedObjects[1], 'id', 'type')),
+        ])
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });
 
-    it('should not delete hidden selected objects', async () => {
+    it('should show a notification when deletion failed', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern', meta: {} },
-        { id: '3', type: 'hidden-type', meta: { hiddenType: true } },
+        { id: '3', type: 'hidden-type', meta: {} },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
@@ -605,16 +585,18 @@ describe('SavedObjectsTable', () => {
         type: obj.type,
         source: {},
       }));
+      bulkGetObjectsMock.mockResolvedValue(mockSavedObjects);
+      bulkDeleteObjectsMock.mockResolvedValueOnce([
+        { id: '1', type: 'index-pattern', success: true },
+        {
+          id: '3',
+          type: 'hidden-type',
+          success: false,
+          error: { message: 'Something went wrong.' },
+        },
+      ]);
 
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        bulkGet: jest.fn().mockImplementation(() => ({
-          savedObjects: mockSavedObjects,
-        })),
-        delete: jest.fn(),
-      };
-
-      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -626,11 +608,12 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().delete();
 
-      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', '1', {
-        force: true,
-      });
+      expect(defaultProps.dataViews.clearCache).toHaveBeenCalled();
+      expect(notifications.toasts.addInfo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: expect.stringContaining('1 object.'),
+        })
+      );
     });
   });
 });

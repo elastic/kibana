@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { StartTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/start_transforms';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { StartTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/start_transforms';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -48,15 +48,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should start the transform by transformId', async () => {
         const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body[transformId].success).to.eql(true);
         expect(typeof body[transformId].error).to.eql('undefined');
@@ -66,15 +66,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return 200 with success:false for unauthorized user', async () => {
         const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('object');
@@ -87,15 +87,15 @@ export default ({ getService }: FtrProviderContext) => {
     describe('single transform start with invalid transformId', function () {
       it('should return 200 with error in response if invalid transformId', async () => {
         const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body.invalid_transform_id.success).to.eql(false);
         expect(body.invalid_transform_id).to.have.property('error');
@@ -123,15 +123,15 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should start multiple transforms by transformIds', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
@@ -142,15 +142,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should start multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send([{ id: reqBody[0].id }, { id: invalidTransformId }, { id: reqBody[1].id }])
-          .expect(200);
+          .send([{ id: reqBody[0].id }, { id: invalidTransformId }, { id: reqBody[1].id }]);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);

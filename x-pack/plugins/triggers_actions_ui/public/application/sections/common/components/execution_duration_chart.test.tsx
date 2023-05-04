@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ExecutionDurationChart, padOrTruncateDurations } from './execution_duration_chart';
 
@@ -14,7 +14,13 @@ describe('execution duration chart', () => {
   it('renders empty state when no execution duration values are available', async () => {
     const executionDuration = mockExecutionDuration();
 
-    const wrapper = mountWithIntl(<ExecutionDurationChart executionDuration={executionDuration} />);
+    const wrapper = mountWithIntl(
+      <ExecutionDurationChart
+        executionDuration={executionDuration}
+        numberOfExecutions={60}
+        onChangeDuration={() => {}}
+      />
+    );
 
     await act(async () => {
       await nextTick();
@@ -32,7 +38,13 @@ describe('execution duration chart', () => {
       valuesWithTimestamp: { '17 Nov 2021 @ 19:19:17': 1, '17 Nov 2021 @ 20:19:17': 2 },
     });
 
-    const wrapper = mountWithIntl(<ExecutionDurationChart executionDuration={executionDuration} />);
+    const wrapper = mountWithIntl(
+      <ExecutionDurationChart
+        executionDuration={executionDuration}
+        numberOfExecutions={60}
+        onChangeDuration={() => {}}
+      />
+    );
 
     await act(async () => {
       await nextTick();

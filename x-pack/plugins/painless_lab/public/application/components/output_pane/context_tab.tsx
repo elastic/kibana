@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PainlessContext } from '@kbn/monaco';
 
-import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { painlessContextOptions } from '../../constants';
 import { useAppContext } from '../../context';
 
@@ -69,6 +69,7 @@ export const ContextTab: FunctionComponent = () => {
           itemLayoutAlign="top"
           hasDividers
           fullWidth
+          data-test-subj="painlessContextDropDown"
         />
       </EuiFormRow>
 

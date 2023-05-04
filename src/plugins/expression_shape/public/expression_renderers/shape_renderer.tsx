@@ -8,15 +8,18 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { CoreTheme } from 'kibana/public';
+import { EuiErrorBoundary } from '@elastic/eui';
+import { CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '../../../../core/public';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ShapeRendererConfig } from '../../common/types';
-import { LazyShapeComponent } from '../components/shape';
 
 const strings = {
   getDisplayName: () =>
@@ -28,8 +31,6 @@ const strings = {
       defaultMessage: 'Render a basic shape',
     }),
 };
-
-const ShapeComponent = withSuspense(LazyShapeComponent);
 
 export const getShapeRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$) =>
@@ -43,16 +44,19 @@ export const getShapeRenderer =
       config: ShapeRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const { ShapeComponent } = await import('../components/shape');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <I18nProvider>
-            <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
-          </I18nProvider>
-        </KibanaThemeProvider>,
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <I18nProvider>
+              <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
+            </I18nProvider>
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
         domNode
       );
     },

@@ -8,6 +8,7 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -17,7 +18,7 @@ export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
   onToggleDataset: (dataset: string) => void;
 }> = memo(({ selectedDatasets, onToggleDataset }) => {
-  const { data } = useStartServices();
+  const { unifiedSearch, data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
@@ -29,12 +30,21 @@ export const DatasetFilter: React.FunctionComponent<{
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const values = await data.autocomplete.getValueSuggestions({
-          indexPattern: {
-            title: AGENT_LOG_INDEX_PATTERN,
-            fields: [DATASET_FIELD],
-          },
-          field: DATASET_FIELD,
+        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
+          pattern: AGENT_LOG_INDEX_PATTERN,
+        });
+        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+          acc[curr.name] = curr;
+          return acc;
+        }, {});
+        const newDataView = await data.dataViews.create({
+          title: AGENT_LOG_INDEX_PATTERN,
+          fields: fieldsMap,
+        });
+
+        const values = await unifiedSearch.autocomplete.getValueSuggestions({
+          indexPattern: newDataView,
+          field: DATASET_FIELD as DataViewField,
           query: '',
         });
         if (values.length > 0) setDatasetValues(values.sort());
@@ -44,12 +54,13 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [data.autocomplete]);
+  }, [data.dataViews, unifiedSearch.autocomplete]);
 
   return (
     <EuiPopover
       button={
         <EuiFilterButton
+          data-test-subj="agentList.datasetFilterBtn"
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}

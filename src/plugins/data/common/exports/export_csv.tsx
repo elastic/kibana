@@ -8,8 +8,8 @@
 
 // Inspired by the inspector CSV exporter
 
-import { Datatable } from 'src/plugins/expressions';
-import { FormatFactory } from '../../../field_formats/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { createEscapeValue } from './escape_value';
 
 export const LINE_FEED_CHARACTER = '\r\n';
@@ -27,7 +27,11 @@ export function datatableToCSV(
   { columns, rows }: Datatable,
   { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions
 ) {
-  const escapeValues = createEscapeValue(quoteValues, escapeFormulaValues);
+  const escapeValues = createEscapeValue({
+    separator: csvSeparator,
+    quoteValues,
+    escapeFormulaValues,
+  });
   // Build the header row by its names
   const header = columns.map((col) => escapeValues(col.name));
 

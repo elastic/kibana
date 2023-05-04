@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../../framework';
+import type { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
 import {
   convertStringToBase64,
   getExistingPrepackagedTimelines,
   getAllTimeline,
+  getDraftTimeline,
   resolveTimelineOrNull,
+  updatePartialSavedTimeline,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
-import {
+import { TimelineType } from '../../../../../common/types/timeline';
+import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObject,
+  SavedTimeline,
 } from '../../../../../common/types/timeline';
 import {
   mockResolvedSavedObject,
@@ -27,7 +31,8 @@ import {
   mockResolveTimelineResponse,
 } from '../../__mocks__/resolve_timeline';
 import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../../src/plugins/data_views/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
@@ -87,8 +92,8 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if countsOnly is true', async () => {
-      const contsOnly = true;
-      await getExistingPrepackagedTimelines(mockRequest, contsOnly);
+      const countsOnly = true;
+      await getExistingPrepackagedTimelines(mockRequest, countsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
@@ -99,8 +104,8 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if countsOnly is false', async () => {
-      const contsOnly = false;
-      await getExistingPrepackagedTimelines(mockRequest, contsOnly);
+      const countsOnly = false;
+      await getExistingPrepackagedTimelines(mockRequest, countsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
@@ -109,12 +114,12 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if pageInfo is given', async () => {
-      const contsOnly = false;
+      const countsOnly = false;
       const pageInfo = {
         pageSize: 10,
         pageIndex: 1,
       };
-      await getExistingPrepackagedTimelines(mockRequest, contsOnly, pageInfo);
+      await getExistingPrepackagedTimelines(mockRequest, countsOnly, pageInfo);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
@@ -222,11 +227,10 @@ describe('saved_object', () => {
     test('should send correct options for counts of favorite timeline', async () => {
       expect(mockFindSavedObject.mock.calls[5][0]).toEqual({
         filter:
-          'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
+          'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.favorite.keySearch: dXNlcm5hbWU=',
         page: 1,
         perPage: 1,
-        search: ' dXNlcm5hbWU=',
-        searchFields: ['title', 'description', 'favorite.keySearch'],
+        searchFields: ['title', 'description'],
         type: 'siem-ui-timeline',
       });
     });
@@ -359,6 +363,103 @@ describe('saved_object', () => {
       const { attributes } = convertSavedObjectToSavedTimelineMock.mock.calls[0][0];
       expect(attributes.dataViewId).toEqual('also-boo');
       expect(attributes.savedQueryId).toEqual('boo');
+    });
+  });
+
+  describe('updatePartialSavedTimeline', () => {
+    let mockSOClientGet: jest.Mock;
+    let mockSOClientUpdate: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    const patchTimelineRequest: SavedTimeline = {
+      savedQueryId: null,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockSOClientUpdate = jest.fn(() => ({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {},
+      }));
+
+      mockSOClientGet = jest.fn(async () => ({
+        ...mockResolvedSavedObject.saved_object,
+        references: [
+          {
+            id: 'boo',
+            name: SAVED_QUERY_ID_REF_NAME,
+            type: SAVED_QUERY_TYPE,
+          },
+        ],
+      }));
+
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                get: mockSOClientGet,
+                update: mockSOClientUpdate,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    it('does not remove savedQueryId when it is null in the patch request', async () => {
+      const resp = (await updatePartialSavedTimeline(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c',
+        patchTimelineRequest
+      )) as SavedObjectsUpdateResponse<SavedTimeline>;
+
+      expect(resp.attributes.savedQueryId).toBeNull();
+    });
+  });
+
+  describe('get draft timelines', () => {
+    let mockFindSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    beforeEach(() => {
+      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                find: mockFindSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    afterEach(() => {
+      mockFindSavedObject.mockClear();
+      (getNotesByTimelineId as jest.Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+    });
+
+    test('should get draft filtered by current user', async () => {
+      await getDraftTimeline(mockRequest, TimelineType.default);
+      expect(mockFindSavedObject).toBeCalledWith({
+        filter:
+          'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: username and siem-ui-timeline.attributes.createdBy: username',
+        sortField: 'created',
+        sortOrder: 'desc',
+        perPage: 1,
+        type: 'siem-ui-timeline',
+      });
     });
   });
 });

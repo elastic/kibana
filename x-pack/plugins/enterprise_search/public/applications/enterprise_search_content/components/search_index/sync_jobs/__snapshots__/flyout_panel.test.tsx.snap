@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FlyoutPanel renders 1`] = `
+<EuiPanel
+  color="subdued"
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      Title
+    </h4>
+  </EuiTitle>
+  <EuiSpacer />
+</EuiPanel>
+`;

@@ -15,15 +15,15 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '../../../src/plugins/field_formats/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import * as example1 from './examples/1_using_existing_format';
 import * as example2 from './examples/2_creating_custom_formatter';
 // @ts-ignore

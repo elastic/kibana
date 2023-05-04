@@ -9,7 +9,7 @@ import { pageHelpers, mockHttpRequest } from './helpers';
 
 import { act } from 'react-dom/test-utils';
 import { first } from 'lodash';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 
@@ -35,7 +35,7 @@ describe('Create Rollup Job, step 6: Review', () => {
   let component;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     startMock = coreMock.createStart();
     setHttp(startMock.http);
   });

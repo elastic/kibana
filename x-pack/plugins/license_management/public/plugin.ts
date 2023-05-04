@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { firstValueFrom } from 'rxjs';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
+import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
 import { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
+import { LicenseManagementLocator, LicenseManagementLocatorDefinition } from './locator';
 
 interface PluginsDependenciesSetup {
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
+  share: SharePluginSetup;
 }
 
 interface PluginsDependenciesStart {
@@ -27,6 +30,7 @@ interface PluginsDependenciesStart {
 
 export interface LicenseManagementUIPluginSetup {
   enabled: boolean;
+  locator: undefined | LicenseManagementLocator;
 }
 export type LicenseManagementUIPluginStart = void;
 
@@ -34,6 +38,7 @@ export class LicenseManagementUIPlugin
   implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any>
 {
   private breadcrumbService = new BreadcrumbService();
+  private locator?: LicenseManagementLocator;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -47,11 +52,18 @@ export class LicenseManagementUIPlugin
       // No need to go any further
       return {
         enabled: false,
+        locator: this.locator,
       };
     }
 
     const { getStartServices } = coreSetup;
-    const { management, licensing } = plugins;
+    const { management, licensing, share } = plugins;
+
+    this.locator = share.url.locators.create(
+      new LicenseManagementLocatorDefinition({
+        managementAppLocator: management.locator,
+      })
+    );
 
     management.sections.section.stack.registerApp({
       id: PLUGIN.id,
@@ -59,7 +71,7 @@ export class LicenseManagementUIPlugin
       order: 0,
       mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart, { telemetry }] = await getStartServices();
-        const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
+        const initialLicense = await firstValueFrom(plugins.licensing.license$);
 
         // Setup documentation links
         const {
@@ -105,6 +117,7 @@ export class LicenseManagementUIPlugin
 
     return {
       enabled: true,
+      locator: this.locator,
     };
   }
 

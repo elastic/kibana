@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObject, SavedObjectAttributes } from 'src/core/public';
+import { SavedObject } from '@kbn/core/types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
@@ -28,6 +28,8 @@ export enum ReindexStep {
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
+  originalIndexDeleted = 70,
+  existingAliasesUpdated = 80,
 }
 
 export enum ReindexStatus {
@@ -41,8 +43,21 @@ export enum ReindexStatus {
   fetchFailed,
 }
 
+export interface ReindexStatusResponse {
+  meta: {
+    indexName: string;
+    reindexName: string;
+    // Array of aliases pointing to the index being reindexed
+    aliases: string[];
+  };
+  warnings?: ReindexWarning[];
+  reindexOp?: ReindexOperation;
+  hasRequiredPrivileges?: boolean;
+}
+
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-export interface QueueSettings extends SavedObjectAttributes {
+
+export interface QueueSettings {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
    *
@@ -66,7 +81,7 @@ export interface QueueSettings extends SavedObjectAttributes {
   startedAt?: number;
 }
 
-export interface ReindexOptions extends SavedObjectAttributes {
+export interface ReindexOptions {
   /**
    * Whether to treat the index as if it were closed. This instructs the
    * reindex strategy to first open the index, perform reindexing and
@@ -81,7 +96,7 @@ export interface ReindexOptions extends SavedObjectAttributes {
   queueSettings?: QueueSettings;
 }
 
-export interface ReindexOperation extends SavedObjectAttributes {
+export interface ReindexOperation {
   indexName: string;
   newIndexName: string;
   status: ReindexStatus;
@@ -106,7 +121,8 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 7.0 -> 8.0 warnings
-export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting' | 'replaceIndexWithAlias';
+
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
   /**
@@ -183,12 +199,18 @@ export interface IndexSettingAction {
   type: 'indexSetting';
   deprecatedSettings: string[];
 }
+
+export interface ClusterSettingAction {
+  type: 'clusterSetting';
+  deprecatedSettings: string[];
+}
+
 export interface EnrichedDeprecationInfo
   extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
   type: keyof estypes.MigrationDeprecationsResponse;
   isCritical: boolean;
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction;
   resolveDuringUpgrade: boolean;
 }
 
@@ -219,7 +241,7 @@ export interface ResolveIndexResponseFromES {
 
 export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
 
-export interface MlOperation extends SavedObjectAttributes {
+export interface MlOperation {
   nodeId: string;
   snapshotId: string;
   jobId: string;
@@ -254,4 +276,10 @@ export interface SystemIndicesMigrationStatus {
 export interface SystemIndicesMigrationStarted {
   features: SystemIndicesMigrationFeature[];
   accepted: boolean;
+}
+
+export interface FeatureSet {
+  migrateSystemIndices: boolean;
+  mlSnapshots: boolean;
+  reindexCorrectiveActions: boolean;
 }

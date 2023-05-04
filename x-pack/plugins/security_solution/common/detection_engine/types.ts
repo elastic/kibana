@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { AlertAction } from '../../../alerting/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
-export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
+export type RuleAlertAction = Omit<RuleAction, 'actionTypeId' | 'alertsFilter'> & {
   action_type_id: string;
+  alerts_filter?: RuleAction['alertsFilter'];
 };
 
 /**
@@ -53,4 +54,8 @@ export interface EqlSearchResponse<T> {
     sequences?: Array<EqlSequence<T>>;
     events?: Array<BaseHit<T>>;
   };
+}
+
+export interface HTTPError extends Error {
+  body?: unknown;
 }

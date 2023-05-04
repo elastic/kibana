@@ -1,0 +1,29 @@
+// tag::classic-indices[]
+[options="header"]
+|====
+|Type |Privilege |Purpose
+
+|Index
+|`monitor` on `apm-*`
+|Monitor access to `apm-*` for storage explorer
+|====
+// end::classic-indices[]
+
+// tag::data-streams[]
+[options="header"]
+|====
+|Type |Privilege |Purpose
+
+|Index
+|`monitor` on `logs-apm*`
+|Monitor access to `logs-apm*` for storage explorer
+
+|Index
+|`monitor` on `metrics-apm*`
+|Monitor access to `metrics-apm*` for storage explorer
+
+|Index
+|`monitor` on `traces-apm*`
+|Monitor access to `traces-apm*` for storage explorer
+|====
+// end::data-streams[]

@@ -31,6 +31,12 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 export function EnterpriseSearchPanel(props) {
   const { setupMode } = props;
   const setupModeData = get(setupMode.data, 'enterprise_search');
+  const nodesCount = props.stats.totalInstances || 0;
+
+  // Do not show if we are not in setup mode
+  if (!nodesCount && !setupMode.enabled) {
+    return null;
+  }
 
   return (
     <ClusterItemContainer
@@ -126,7 +132,7 @@ export function EnterpriseSearchPanel(props) {
                       id="xpack.monitoring.cluster.overview.entSearchPanel.nodesTotalLinkLabel"
                       defaultMessage="Nodes: {nodesTotal}"
                       values={{
-                        nodesTotal: formatNumber(props.stats.totalInstances, 'int_commas'),
+                        nodesTotal: formatNumber(nodesCount, 'int_commas'),
                       }}
                     />
                   </h3>

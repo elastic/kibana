@@ -7,8 +7,8 @@
  */
 
 import { uniqBy } from 'lodash';
+import { defer as createDefer, Defer } from '@kbn/kibana-utils-plugin/public';
 import { Action } from '../actions';
-import { defer as createDefer, Defer } from '../../../kibana_utils/public';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 import { Trigger } from '../triggers';
 

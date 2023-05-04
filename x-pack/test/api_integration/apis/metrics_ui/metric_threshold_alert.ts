@@ -6,26 +6,29 @@
  */
 
 import expect from '@kbn/expect';
-import { convertToKibanaClient } from '@kbn/test';
-import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  evaluateRule,
-  EvaluatedRuleParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import moment from 'moment';
 import {
   Aggregators,
+  Comparator,
   CountMetricExpressionParams,
+  CustomMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-import { Comparator } from '../../../../plugins/infra/server/lib/alerting/common/types';
+} from '@kbn/infra-plugin/common/alerting/metrics';
+import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
+import {
+  EvaluatedRuleParams,
+  evaluateRule,
+} from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 const { gauge, rate } = DATES['alert-test-data'];
-
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const log = getService('log');
+  const logger = createFakeLogger(log);
 
   const baseParams: EvaluatedRuleParams = {
     groupBy: void 0,
@@ -38,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         comparator: Comparator.GT_OR_EQ,
         aggType: Aggregators.SUM,
         metric: 'value',
-      },
+      } as NonCountMetricExpressionParams,
     ],
   };
 
@@ -89,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [10000],
-                comparator: Comparator.LT_OR_EQ,
+                comparator: Comparator.GT_OR_EQ,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -99,30 +102,113 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, config, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
                 timeSize: 5,
                 timeUnit: 'm',
                 threshold: [10000],
-                comparator: '<=',
+                comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
-                timestamp: '2021-10-19T00:48:59.997Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should alert with custom metric that is a document ratio', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.CUSTOM,
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '(A / B) * 100',
+                label: 'apache2 error ratio',
+              } as CustomMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'custom',
+                metric: 'apache2 error ratio',
+                label: 'apache2 error ratio',
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '(A / B) * 100',
+                currentValue: 36.195262024407754,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
         });
       });
       describe('with group by', () => {
-        it('should alert on document count', async () => {
+        it('should trigger on document count', async () => {
           const params = {
             ...baseParams,
             groupBy: ['event.category'],
@@ -130,8 +216,8 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 timeSize: 5,
                 timeUnit: 'm',
-                threshold: [10000],
-                comparator: Comparator.LT_OR_EQ,
+                threshold: [20000],
+                comparator: Comparator.GT_OR_EQ,
                 aggType: Aggregators.COUNT,
               } as CountMetricExpressionParams,
             ],
@@ -141,26 +227,518 @@ export default function ({ getService }: FtrProviderContext) {
             metricAlias: 'filebeat-*',
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, config, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               web: {
                 timeSize: 5,
                 timeUnit: 'm',
-                threshold: [10000],
-                comparator: '<=',
+                threshold: [20000],
+                comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
-                timestamp: '2021-10-19T00:48:59.997Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: 'web' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
+        });
+        it('shouldFire on document count and isNoData for missing group ', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['event.category'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame,
+            [{ key: 'middleware', bucketKey: { groupBy0: 'middleware' } }]
+          );
+          expect(results).to.eql([
+            {
+              web: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 20895,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: 'web' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+              middleware: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: null,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'middleware' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should trigger with contaier list in context on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['kubernetes.pod.uid'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+
+          expect(results).to.eql([
+            {
+              'pod-01': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: {
+                  groupBy0: 'pod-01',
+                },
+                context: {
+                  cloud: undefined,
+                  container: [{ id: 'container-01' }, { id: 'container-02' }],
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+              'pod-02': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: {
+                  groupBy0: 'pod-02',
+                },
+                context: {
+                  cloud: undefined,
+                  container: [{ id: 'container-03' }, { id: 'container-04' }],
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should trigger with single container in context on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['container.id'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [2],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+
+          expect(results).to.eql([
+            {
+              'container-05': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [2],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: {
+                  groupBy0: 'container-05',
+                },
+                context: {
+                  cloud: undefined,
+                  container: {
+                    id: 'container-05',
+                  },
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+      });
+    });
+    describe('without ANY data', () => {
+      describe('without groupBy', () => {
+        it('should trigger NO_DATA for document count queries', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: Comparator.LT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const timeFrame = { end: gauge.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: '<=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: null,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should trigger NO_DATA for basic metric', async () => {
+          const params = { ...baseParams };
+          const timeFrame = { end: gauge.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+      });
+      describe('with groupBy', () => {
+        describe('without pre-existing groups', () => {
+          it('should trigger NO_DATA for document count queries', async () => {
+            const params = {
+              ...baseParams,
+              groupBy: ['event.category'],
+              criteria: [
+                {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: Comparator.LT_OR_EQ,
+                  aggType: Aggregators.COUNT,
+                } as CountMetricExpressionParams,
+              ],
+            };
+            const timeFrame = { end: gauge.max };
+            const results = await evaluateRule(
+              esClient,
+              params,
+              configuration,
+              10000,
+              true,
+              logger,
+              void 0,
+              timeFrame
+            );
+            expect(results).to.eql([
+              {
+                '*': {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                  bucketKey: { groupBy0: '*' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
+                },
+              },
+            ]);
+          });
+        });
+        describe('with pre-existing groups', () => {
+          it('should trigger NO_DATA for document count queries', async () => {
+            const params = {
+              ...baseParams,
+              groupBy: ['event.category'],
+              criteria: [
+                {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: Comparator.LT_OR_EQ,
+                  aggType: Aggregators.COUNT,
+                } as CountMetricExpressionParams,
+              ],
+            };
+            const timeFrame = { end: gauge.max };
+            const results = await evaluateRule(
+              esClient,
+              params,
+              configuration,
+              10000,
+              true,
+              logger,
+              void 0,
+              timeFrame,
+              [
+                { key: 'web', bucketKey: { groupBy0: 'web' } },
+                { key: 'prod', bucketKey: { groupBy0: 'prod' } },
+              ]
+            );
+            expect(results).to.eql([
+              {
+                '*': {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                  bucketKey: { groupBy0: '*' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
+                },
+                web: {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                  bucketKey: { groupBy0: 'web' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
+                },
+                prod: {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                  bucketKey: { groupBy0: 'prod' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
+                },
+              },
+            ]);
+          });
         });
       });
     });
@@ -183,8 +761,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -194,12 +780,71 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 4,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                currentValue: 5,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should alert on ZERO document count outside the time frame', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: Comparator.LT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const timeFrame = { end: gauge.max + 600_000 };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: '<=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 0,
+                timestamp: '2021-01-01T01:10:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -207,8 +852,16 @@ export default function ({ getService }: FtrProviderContext) {
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -218,12 +871,20 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'sum',
                 metric: 'value',
-                currentValue: 1,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                currentValue: 151,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -245,8 +906,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -256,12 +925,20 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 2,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                currentValue: 3,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
               prod: {
                 timeSize: 5,
@@ -271,11 +948,19 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 2,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: 'prod' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -286,23 +971,41 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
+                aggType: 'sum',
+                bucketKey: {
+                  groupBy0: 'dev',
+                },
+                comparator: '>=',
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+                currentValue: 150,
+                isNoData: false,
+                metric: 'value',
+                shouldFire: true,
+                shouldWarn: false,
+                threshold: [1],
                 timeSize: 5,
                 timeUnit: 'm',
-                threshold: [1],
-                comparator: '>=',
-                aggType: 'sum',
-                metric: 'value',
-                currentValue: 0,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
               },
               prod: {
                 timeSize: 5,
@@ -312,11 +1015,19 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: 1,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: 'prod' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -328,13 +1039,16 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.midpoint };
-          const kbnClient = convertToKibanaClient(esClient);
           const results = await evaluateRule(
-            kbnClient,
+            esClient,
             params,
             configuration,
-            ['dev', 'prod'],
-            timeFrame
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame,
+            [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
           expect(results).to.eql([
             {
@@ -346,12 +1060,72 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: null,
-                timestamp: '2021-01-01T00:25:00.000Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [true],
-                isError: false,
+                timestamp: '2021-01-01T00:30:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
+            },
+          ]);
+        });
+
+        it('should NOT report any alerts when missing group recovers', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [100],
+                comparator: Comparator.GT,
+                aggType: Aggregators.SUM,
+                metric: 'value',
+              } as NonCountMetricExpressionParams,
+            ],
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: moment(gauge.midpoint).add(10, 'm').valueOf() };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            moment(gauge.midpoint).subtract(1, 'm').valueOf(),
+            timeFrame,
+            [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
+          );
+          expect(results).to.eql([{}]);
+        });
+
+        it('should report no data when both groups stop reporting', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: moment(gauge.max).add(6, 'm').valueOf() };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            gauge.max,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
@@ -359,22 +1133,103 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'sum',
                 metric: 'value',
-                currentValue: 0,
-                timestamp: '2021-01-01T00:25:00.000Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                currentValue: null,
+                timestamp: '2021-01-01T01:06:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'prod' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+              dev: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T01:06:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
         });
       });
     });
-
     describe('with rate data', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      it('should alert on rate with long threshold', async () => {
+        const params = {
+          ...baseParams,
+          criteria: [
+            {
+              timeSize: 1,
+              timeUnit: 'm',
+              threshold: [107374182400],
+              comparator: Comparator.LT_OR_EQ,
+              aggType: Aggregators.RATE,
+              metric: 'value',
+            } as NonCountMetricExpressionParams,
+          ],
+        };
+        const timeFrame = { end: rate.max };
+        const results = await evaluateRule(
+          esClient,
+          params,
+          configuration,
+          10000,
+          true,
+          logger,
+          void 0,
+          timeFrame
+        );
+        expect(results).to.eql([
+          {
+            '*': {
+              timeSize: 1,
+              timeUnit: 'm',
+              threshold: [107374182400],
+              comparator: '<=',
+              aggType: 'rate',
+              metric: 'value',
+              currentValue: 0.6666666666666666,
+              timestamp: '2021-01-02T00:05:00.000Z',
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: '*' },
+              context: {
+                cloud: undefined,
+                container: undefined,
+                host: undefined,
+                labels: undefined,
+                orchestrator: undefined,
+                tags: undefined,
+              },
+            },
+          },
+        ]);
+      });
       describe('without groupBy', () => {
         it('should alert on rate', async () => {
           const params = {
@@ -391,8 +1246,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -403,11 +1266,19 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'rate',
                 metric: 'value',
                 currentValue: 0.6666666666666666,
-                timestamp: '2021-01-02T00:04:00.000Z',
-                shouldFire: [false, false, false, false, true],
-                shouldWarn: [false],
-                isNoData: [true, false, false, false, false],
-                isError: false,
+                timestamp: '2021-01-02T00:05:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -432,8 +1303,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -446,11 +1325,19 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'rate',
                 metric: 'value',
                 currentValue: 0.6666666666666666,
-                timestamp: '2021-01-02T00:04:00.000Z',
-                shouldFire: [false, false, false, false, false],
-                shouldWarn: [false, false, false, false, true],
-                isNoData: [true, false, false, false, false],
-                isError: false,
+                timestamp: '2021-01-02T00:05:00.000Z',
+                shouldFire: false,
+                shouldWarn: true,
+                isNoData: false,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { Context } from '../../public/components/field_editor_context';
 import {
@@ -34,7 +34,7 @@ export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => 
 
   // Setup testbed
   await act(async () => {
-    testBed = await registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
+    testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
       memoryRouter: {
         wrapComponent: false,
       },

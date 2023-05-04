@@ -47,13 +47,14 @@ export function exactly(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { value, column } = args;
+      const { value, column, filterGroup } = args;
 
       const filter: ExpressionValueFilter = {
         type: 'filter',
         filterType: 'exactly',
         value,
         column,
+        filterGroup,
         and: [],
       };
 

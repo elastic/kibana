@@ -1,0 +1,11 @@
+{
+  "indices.modify_data_stream": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_data_stream/_modify"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html"
+  }
+}

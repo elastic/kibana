@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { sendRequest, XJson } from '../../es_ui_shared/public';
+import { sendRequest, XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
 
-export { KibanaThemeProvider, toMountPoint } from '../../kibana_react/public';
+export { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';

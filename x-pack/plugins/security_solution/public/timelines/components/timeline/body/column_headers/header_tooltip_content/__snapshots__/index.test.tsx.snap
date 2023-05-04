@@ -40,11 +40,12 @@ exports[`HeaderToolTipContent it renders the expected table content 1`] = `
         data-test-subj="type-icon"
         type="clock"
       />
-      <span
-        data-test-subj="type-value"
+      <EuiBadge
+        data-test-subj="type-value-date"
+        key="date"
       >
         date
-      </span>
+      </EuiBadge>
     </ToolTipTableValue>
   </P>
   <P>

@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { get } from 'lodash';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -23,15 +23,14 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
-  EuiComboBoxOptionOption,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FieldSelect } from '../aggs/field_select';
-// @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { YesNo } from '../yes_no';
 
@@ -42,7 +41,6 @@ import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,
@@ -57,7 +55,7 @@ export class TablePanelConfig extends Component<
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.bar_color_rules || !model.bar_color_rules.length) {
-      this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
+      this.props.onChange({ bar_color_rules: [{ id: uuidv1() }] });
     }
   }
 
@@ -65,21 +63,38 @@ export class TablePanelConfig extends Component<
     this.setState({ selectedTab });
   }
 
-  handlePivotChange = (selectedOption: Array<EuiComboBoxOptionOption<string>>) => {
+  handlePivotChange = (selectedOptions: Array<string | null>) => {
     const { fields, model } = this.props;
-    const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[getIndexPatternKey(model.index_pattern)].find((f) => f.name === pivotId);
-    const pivotType = get(field, 'type', model.pivot_type);
 
-    this.props.onChange({
-      pivot_id: pivotId,
-      pivot_type: pivotType,
-    });
+    const getPivotType = (fieldName?: string | null): KBN_FIELD_TYPES | null => {
+      const field = fields[getIndexPatternKey(model.index_pattern)].find(
+        (f) => f.name === fieldName
+      );
+      return get(field, 'type', null);
+    };
+
+    this.props.onChange(
+      selectedOptions.length === 1
+        ? {
+            pivot_id: selectedOptions[0] || undefined,
+            pivot_type: getPivotType(selectedOptions[0]) || undefined,
+          }
+        : {
+            pivot_id: selectedOptions,
+            pivot_type: selectedOptions.map((item) => getPivotType(item)),
+          }
+    );
   };
 
   handleTextChange =
     (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
       this.props.onChange({ [name]: e.target.value });
+
+  handleNumberChange =
+    (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      this.props.onChange({
+        [name]: !e.target.value ? undefined : Number(e.target.value),
+      });
 
   render() {
     const { selectedTab } = this.state;
@@ -87,7 +102,6 @@ export class TablePanelConfig extends Component<
       drilldown_url: '',
       filter: { query: '', language: getDefaultQueryLanguage() },
       pivot_label: '',
-      pivot_rows: 10,
       pivot_type: '',
     };
     const model = { ...defaults, ...this.props.model };
@@ -129,6 +143,8 @@ export class TablePanelConfig extends Component<
                     onChange={this.handlePivotChange}
                     uiRestrictions={this.context.uiRestrictions}
                     type={BUCKET_TYPES.TERMS}
+                    allowMultiSelect={true}
+                    fullWidth={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -160,15 +176,10 @@ export class TablePanelConfig extends Component<
                       />
                     }
                   >
-                    {/*
-                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                      Should it be number or string?
-                    */}
-                    <input
-                      className="tvbAgg__input"
-                      type="number"
-                      onChange={this.handleTextChange('pivot_rows')}
-                      value={model.pivot_rows ?? ''}
+                    <EuiFieldNumber
+                      onChange={this.handleNumberChange('pivot_rows')}
+                      value={model.pivot_rows !== undefined ? Number(model.pivot_rows) : ''}
+                      placeholder="10"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

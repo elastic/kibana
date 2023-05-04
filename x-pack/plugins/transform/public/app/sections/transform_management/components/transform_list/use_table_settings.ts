@@ -34,7 +34,7 @@ interface AnalyticsBasicTableSettings<T> {
   pageIndex: number;
   pageSize: number;
   totalItemCount: number;
-  hidePerPageOptions: boolean;
+  showPerPageOptions: boolean;
   sortField: keyof T;
   sortDirection: Direction;
 }
@@ -53,7 +53,7 @@ export function useTableSettings<TypeOfItem>(
     pageIndex: 0,
     pageSize: PAGE_SIZE,
     totalItemCount: 0,
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
     sortField: sortByField,
     sortDirection: 'asc',
   });
@@ -89,6 +89,5 @@ export function useTableSettings<TypeOfItem>(
       direction: sortDirection,
     },
   };
-
   return { onTableChange, pagination, sorting };
 }

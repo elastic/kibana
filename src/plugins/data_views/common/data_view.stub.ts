@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { SavedObject } from '@kbn/core/types';
 import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
 import { createStubDataView } from './data_views/data_view.stub';
 export {
   createStubDataView,
   createStubDataView as createStubIndexPattern,
 } from './data_views/data_view.stub';
-import { SavedObject } from '../../../core/types';
 import { DataViewAttributes } from './types';
 
 export const stubDataView = createStubDataView({
@@ -34,8 +34,6 @@ export const stubDataViewWithoutTimeField = createStubDataView({
   },
 });
 
-export const stubIndexPatternWithoutTimeField = stubDataViewWithoutTimeField;
-
 export const stubLogstashDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
@@ -44,8 +42,6 @@ export const stubLogstashDataView = createStubDataView({
     fields: stubLogstashFieldSpecMap,
   },
 });
-
-export const stubLogstashIndexPattern = stubLogstashDataView;
 
 export function stubbedSavedObjectDataView(
   id: string | null = null
@@ -57,6 +53,7 @@ export function stubbedSavedObjectDataView(
       timeFieldName: 'time',
       fields: JSON.stringify(stubLogstashFieldSpecMap),
       title: 'title',
+      name: 'Name',
     },
     version: '2',
     references: [],

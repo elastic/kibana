@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 
+import { validateField } from '../../common/fields_utils';
+import { TimeFieldNotSpecifiedError } from '../../common/errors';
 import { Framework } from '../plugin';
 import type { TimeseriesVisData, FetchedIndexPattern, Series } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
@@ -20,7 +22,7 @@ import { getSeriesData } from './vis_data/get_series_data';
 import { getTableData } from './vis_data/get_table_data';
 import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
 import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
-import { getIntervalAndTimefield } from './vis_data/get_interval_and_timefield';
+import { getInterval } from './vis_data/get_interval';
 import { UI_SETTINGS } from '../../common/constants';
 
 export async function getVisData(
@@ -28,7 +30,7 @@ export async function getVisData(
   request: VisTypeTimeseriesVisDataRequest,
   framework: Framework
 ): Promise<TimeseriesVisData> {
-  const uiSettings = requestContext.core.uiSettings.client;
+  const uiSettings = (await requestContext.core).uiSettings.client;
   const esShardTimeout = await framework.getEsShardTimeout();
   const fieldFormatService = await framework.getFieldFormatsService(uiSettings);
   const indexPatternsService = await framework.getIndexPatternsService(requestContext);
@@ -60,16 +62,40 @@ export async function getVisData(
         const maxBuckets = await uiSettings.get<number>(UI_SETTINGS.MAX_BUCKETS_SETTING);
         const { min, max } = request.body.timerange;
 
-        return getIntervalAndTimefield(
-          panel,
-          index,
-          {
-            min,
-            max,
-            maxBuckets,
-          },
-          series
-        );
+        let timeField =
+          (series?.override_index_pattern ? series.series_time_field : panel.time_field) ||
+          index.indexPattern?.timeFieldName;
+
+        /** This code is historically in TSVB and for backward compatibility
+         *  we cannot remove it while we support String Indexes.
+         *  Case: only for String Indexes mode + if user doesn't provide timeField
+         *  we should use @timestamp as default timeField **/
+        if (!panel.use_kibana_indexes && !timeField) {
+          timeField = '@timestamp';
+        }
+
+        if (panel.use_kibana_indexes) {
+          if (timeField) {
+            validateField(timeField, index);
+          } else {
+            throw new TimeFieldNotSpecifiedError();
+          }
+        }
+
+        return {
+          timeField,
+          ...getInterval(
+            timeField!,
+            panel,
+            index,
+            {
+              min,
+              max,
+              maxBuckets,
+            },
+            series
+          ),
+        };
       },
     };
 

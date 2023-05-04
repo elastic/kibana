@@ -9,35 +9,32 @@ import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  RuleTypeParamsExpressionProps,
   ForLastExpression,
-} from '../../../../../../triggers_actions_ui/public';
+  RuleTypeParamsExpressionProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { PersistedLogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
+  isOptimizableGroupedThreshold,
   isRatioRule,
-  PartialRuleParams,
   PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
   PartialRatioRuleParams,
+  PartialRuleParams,
   ThresholdType,
   timeUnitRT,
-  isOptimizableGroupedThreshold,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
-import {
-  LogIndexField,
-  LogSourceProvider,
-  useLogSourceContext,
-} from '../../../../containers/logs/log_source';
-import { useSourceId } from '../../../../containers/source_id';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { LogViewProvider, useLogViewContext } from '../../../../hooks/use_log_view';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
 import { Threshold } from './threshold';
 import { TypeSwitcher } from './type_switcher';
+import { LogViewSwitcher } from './log_view_switcher';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -57,7 +54,7 @@ const DEFAULT_BASE_EXPRESSION = {
 const DEFAULT_FIELD = 'log.level';
 
 const createDefaultCriterion = (
-  availableFields: LogIndexField[],
+  availableFields: ResolvedLogViewField[],
   value: ExpressionCriteria['value']
 ) =>
   availableFields.some((availableField) => availableField.name === DEFAULT_FIELD)
@@ -65,9 +62,11 @@ const createDefaultCriterion = (
     : { field: undefined, comparator: undefined, value: undefined };
 
 const createDefaultCountRuleParams = (
-  availableFields: LogIndexField[]
+  availableFields: ResolvedLogViewField[],
+  logView: PersistedLogViewReference
 ): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
+  logView,
   count: {
     value: 75,
     comparator: Comparator.GT,
@@ -76,9 +75,11 @@ const createDefaultCountRuleParams = (
 });
 
 const createDefaultRatioRuleParams = (
-  availableFields: LogIndexField[]
+  availableFields: ResolvedLogViewField[],
+  logView: PersistedLogViewReference
 ): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
+  logView,
   count: {
     value: 2,
     comparator: Comparator.GT,
@@ -93,8 +94,9 @@ export const ExpressionEditor: React.FC<
   RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
-  const [sourceId] = useSourceId();
-  const { http } = useKibana().services;
+  const {
+    services: { logViews },
+  } = useKibanaContextForPlugin(); // injected during alert registration
 
   return (
     <>
@@ -103,50 +105,40 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogSourceProvider
-          sourceId={sourceId}
-          fetch={http!.fetch}
-          indexPatternsService={props.data.indexPatterns}
-        >
+        <LogViewProvider logViews={logViews.client}>
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
-        </LogSourceProvider>
+        </LogViewProvider>
       )}
     </>
   );
 };
 
 export const SourceStatusWrapper: React.FC = ({ children }) => {
-  const {
-    initialize,
-    loadSource,
-    isLoadingSourceConfiguration,
-    hasFailedLoadingSource,
-    isUninitialized,
-  } = useLogSourceContext();
-
-  useMount(() => {
-    initialize();
-  });
+  const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
 
   return (
     <>
-      {isLoadingSourceConfiguration || isUninitialized ? (
+      {isLoading || isUninitialized ? (
         <div>
           <EuiSpacer size="m" />
           <EuiLoadingSpinner size="l" />
           <EuiSpacer size="m" />
         </div>
-      ) : hasFailedLoadingSource ? (
+      ) : hasFailedLoading ? (
         <EuiCallOut
           title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
             defaultMessage: 'Sorry, there was a problem loading field information',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
-          <EuiButton onClick={loadSource} iconType="refresh">
+          <EuiButton
+            data-test-subj="infraSourceStatusWrapperTryAgainButton"
+            onClick={load}
+            iconType="refresh"
+          >
             {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
               defaultMessage: 'Try again',
             })}
@@ -164,7 +156,11 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
 ) => {
   const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
+  const { logViewReference, resolvedLogView } = useLogViewContext();
+
+  if (logViewReference.type !== 'log-view-reference') {
+    throw new Error('The Log Threshold rule type only supports persisted Log Views');
+  }
 
   const {
     criteria: criteriaErrors,
@@ -174,24 +170,24 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
-    if (resolvedSourceConfiguration?.fields) {
-      return resolvedSourceConfiguration.fields.filter((field) => {
+    if (resolvedLogView?.fields) {
+      return resolvedLogView.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
       return [];
     }
-  }, [resolvedSourceConfiguration]);
+  }, [resolvedLogView]);
 
   const groupByFields = useMemo(() => {
-    if (resolvedSourceConfiguration?.fields) {
-      return resolvedSourceConfiguration.fields.filter((field) => {
+    if (resolvedLogView?.fields) {
+      return resolvedLogView.fields.filter((field) => {
         return field.type === 'string' && field.aggregatable;
       });
     } else {
       return [];
     }
-  }, [resolvedSourceConfiguration]);
+  }, [resolvedLogView]);
 
   const updateThreshold = useCallback(
     (thresholdParams) => {
@@ -232,19 +228,21 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   );
 
   const defaultCountAlertParams = useMemo(
-    () => createDefaultCountRuleParams(supportedFields),
-    [supportedFields]
+    () => createDefaultCountRuleParams(supportedFields, logViewReference),
+    [supportedFields, logViewReference]
   );
 
   const updateType = useCallback(
     (type: ThresholdType) => {
       const defaults =
-        type === 'count' ? defaultCountAlertParams : createDefaultRatioRuleParams(supportedFields);
+        type === 'count'
+          ? defaultCountAlertParams
+          : createDefaultRatioRuleParams(supportedFields, logViewReference);
       // Reset properties that don't make sense switching from one context to the other
       setRuleParams('count', defaults.count);
       setRuleParams('criteria', defaults.criteria);
     },
-    [defaultCountAlertParams, setRuleParams, supportedFields]
+    [defaultCountAlertParams, setRuleParams, supportedFields, logViewReference]
   );
 
   useMount(() => {
@@ -276,13 +274,15 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       defaultCriterion={defaultCountAlertParams.criteria[0]}
       errors={criteriaErrors}
       ruleParams={ruleParams}
-      sourceId={sourceId}
+      logViewReference={logViewReference}
       updateCriteria={updateCriteria}
     />
   ) : null;
 
   return (
     <>
+      {resolvedLogView && <LogViewSwitcher logView={resolvedLogView} />}
+
       <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
 
       {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
-import { JobParamsPDF, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
@@ -43,7 +39,20 @@ const getMockResponseFactory = () =>
     unauthorized: (obj: unknown) => obj,
   } as unknown as KibanaResponseFactory);
 
-const mockLogger = createMockLevelLogger();
+const mockLogger = loggingSystemMock.createLogger();
+const mockJobParams: JobParamsPDFDeprecated = {
+  browserTimezone: 'UTC',
+  objectType: 'cool_object_type',
+  title: 'cool_title',
+  version: 'unknown',
+  layout: { id: 'preserve_layout' },
+  relativeUrls: [],
+};
+
+const mockCounters = {
+  usageCounter: jest.fn(),
+  errorCounter: jest.fn(),
+};
 
 describe('Handle request to generate', () => {
   let reportingCore: ReportingCore;
@@ -51,15 +60,6 @@ describe('Handle request to generate', () => {
   let mockRequest: ReturnType<typeof getMockRequest>;
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
   let requestHandler: RequestHandler;
-
-  const mockJobParams: JobParamsPDF = {
-    browserTimezone: 'UTC',
-    objectType: 'cool_object_type',
-    title: 'cool_title',
-    version: 'unknown',
-    layout: { id: 'preserve_layout' },
-    relativeUrls: [],
-  };
 
   beforeEach(async () => {
     reportingCore = await createMockReportingCore(createMockConfigSchema({}));
@@ -80,7 +80,7 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = {} as ReportingSetup;
+    mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,
@@ -105,18 +105,21 @@ describe('Handle request to generate', () => {
           "attempts": 0,
           "completed_at": undefined,
           "created_by": "testymcgee",
+          "execution_time_ms": undefined,
           "jobtype": "printable_pdf",
           "kibana_id": undefined,
           "kibana_name": undefined,
           "max_attempts": undefined,
           "meta": Object {
-            "isDeprecated": undefined,
+            "isDeprecated": true,
             "layout": "preserve_layout",
             "objectType": "cool_object_type",
           },
+          "metrics": undefined,
           "migration_version": "7.14.0",
           "output": null,
           "process_expiration": undefined,
+          "queue_time_ms": undefined,
           "started_at": undefined,
           "status": "pending",
           "timeout": undefined,
@@ -127,6 +130,7 @@ describe('Handle request to generate', () => {
         Object {
           "browserTimezone": "UTC",
           "headers": "hello mock cypher text",
+          "isDeprecated": true,
           "layout": Object {
             "id": "preserve_layout",
           },
@@ -149,7 +153,7 @@ describe('Handle request to generate', () => {
   });
 
   test('disallows invalid export type', async () => {
-    expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
+    expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams, mockCounters))
       .toMatchInlineSnapshot(`
       Object {
         "body": "Invalid export-type of neanderthals",
@@ -165,18 +169,44 @@ describe('Handle request to generate', () => {
       },
     }));
 
-    expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
-      .toMatchInlineSnapshot(`
+    expect(
+      await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams, mockCounters)
+    ).toMatchInlineSnapshot(`
       Object {
         "body": "seeing this means the license isn't supported",
       }
     `);
   });
 
+  test('disallows invalid browser timezone', async () => {
+    (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+      csv_searchsource: {
+        enableLinks: false,
+        message: `seeing this means the license isn't supported`,
+      },
+    }));
+
+    expect(
+      await requestHandler.handleGenerateRequest(
+        'csv_searchsource',
+        {
+          ...mockJobParams,
+          browserTimezone: 'America/Amsterdam',
+        },
+        mockCounters
+      )
+    ).toMatchInlineSnapshot(`
+        Object {
+          "body": "seeing this means the license isn't supported",
+        }
+    `);
+  });
+
   test('generates the download path', async () => {
     const response = (await requestHandler.handleGenerateRequest(
       'csv_searchsource',
-      mockJobParams
+      mockJobParams,
+      mockCounters
     )) as unknown as { body: { job: ReportApiJSON } };
     const { id, created_at: _created_at, ...snapObj } = response.body.job;
     expect(snapObj).toMatchInlineSnapshot(`
@@ -184,6 +214,7 @@ describe('Handle request to generate', () => {
         "attempts": 0,
         "completed_at": undefined,
         "created_by": "testymcgee",
+        "execution_time_ms": undefined,
         "index": ".reporting-foo-index-234",
         "jobtype": "csv_searchsource",
         "kibana_id": undefined,
@@ -194,6 +225,7 @@ describe('Handle request to generate', () => {
           "layout": "preserve_layout",
           "objectType": "cool_object_type",
         },
+        "metrics": undefined,
         "migration_version": "7.14.0",
         "output": Object {},
         "payload": Object {
@@ -207,6 +239,7 @@ describe('Handle request to generate', () => {
           "title": "cool_title",
           "version": "7.14.0",
         },
+        "queue_time_ms": undefined,
         "started_at": undefined,
         "status": "pending",
         "timeout": undefined,

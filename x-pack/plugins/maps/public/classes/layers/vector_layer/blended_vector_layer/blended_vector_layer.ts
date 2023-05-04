@@ -13,8 +13,8 @@ import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style
 import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
-  COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
+  GRID_RESOLUTION,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,
@@ -30,6 +30,7 @@ import { ISource } from '../../../sources/source';
 import { DataRequestContext } from '../../../../actions';
 import { DataRequestAbortError } from '../../../util/data_request';
 import {
+  CustomIcon,
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
@@ -57,6 +58,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     indexPatternId: documentSource.getIndexPatternId(),
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
+    resolution: GRID_RESOLUTION.COARSE,
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
@@ -64,7 +66,6 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
-      label: COUNT_PROP_LABEL,
     },
     ...documentStyle.getDynamicPropertiesArray().map((dynamicProperty) => {
       return {
@@ -74,7 +75,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     }),
   ];
   clusterSourceDescriptor.id = documentSource.getId();
-  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
+  return new ESGeoGridSource(clusterSourceDescriptor);
 }
 
 function getClusterStyleDescriptor(
@@ -169,6 +170,7 @@ export interface BlendedVectorLayerArguments {
   chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
+  customIcons: CustomIcon[];
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
@@ -205,6 +207,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       clusterStyleDescriptor,
       this._clusterSource,
       this,
+      options.customIcons,
       options.chartsPaletteServiceGetColor
     );
 
@@ -217,15 +220,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       }
     }
     this._isClustered = isClustered;
-  }
-
-  destroy() {
-    if (this._documentSource) {
-      this._documentSource.destroy();
-    }
-    if (this._clusterSource) {
-      this._clusterSource.destroy();
-    }
   }
 
   async getDisplayName(source?: ISource) {
@@ -254,8 +248,12 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return false;
   }
 
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = await super.cloneDescriptor();
+  async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
+    const clones = await super.cloneDescriptor();
+    if (clones.length === 0) {
+      return [];
+    }
+    const clonedDescriptor = clones[0];
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
     const displayName = await super.getDisplayName();
@@ -264,12 +262,12 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     // sourceDescriptor must be document source descriptor
     clonedDescriptor.sourceDescriptor = this._documentSource.cloneDescriptor();
 
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
-  getSource(): IVectorSource {
+  getSource = () => {
     return this._isClustered ? this._clusterSource : this._documentSource;
-  }
+  };
 
   getSourceForEditing() {
     // Layer is based on this._documentSource
@@ -293,7 +291,8 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
-      this.getCurrentStyle()
+      this.getCurrentStyle(),
+      syncContext.isFeatureEditorOpenForLayer
     );
     const source = this.getSource();
 

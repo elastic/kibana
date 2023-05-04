@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { FIELD_FORMAT_IDS, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { useMlKibana } from './kibana_context';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 /**
  * Set of reasonable defaults for formatters for the ML app.
  */
-const defaultParam = {
+const defaultParam: Record<string, FieldFormatParams> = {
   [FIELD_FORMAT_IDS.DURATION]: {
     inputFormat: 'milliseconds',
     outputFormat: 'humanizePrecise',
   },
-} as Record<FIELD_FORMAT_IDS, object | undefined>;
+};
 
 export function useFieldFormatter(fieldType: FIELD_FORMAT_IDS) {
   const {

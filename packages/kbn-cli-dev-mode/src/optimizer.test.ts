@@ -11,8 +11,8 @@ import { PassThrough } from 'stream';
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { OptimizerUpdate } from '@kbn/optimizer';
-import { observeLines, createReplaceSerializer } from '@kbn/dev-utils';
-import { firstValueFrom } from '@kbn/std';
+import { observeLines } from '@kbn/stdio-dev-helpers';
+import { createReplaceSerializer } from '@kbn/jest-serializers';
 
 import { Optimizer, Options } from './optimizer';
 
@@ -43,7 +43,6 @@ const defaultOptions: Options = {
   enabled: true,
   cache: true,
   dist: true,
-  oss: true,
   pluginPaths: ['/some/dir'],
   pluginScanDirs: ['/some-scan-path'],
   quiet: true,
@@ -85,7 +84,6 @@ it('uses options to create valid OptimizerConfig', () => {
     cache: false,
     dist: false,
     runExamples: false,
-    oss: false,
     pluginPaths: [],
     pluginScanDirs: [],
     repoRoot: '/foo/bar',
@@ -100,7 +98,6 @@ it('uses options to create valid OptimizerConfig', () => {
           "dist": true,
           "examples": true,
           "includeCoreBundle": true,
-          "oss": true,
           "pluginPaths": Array [
             "/some/dir",
           ],
@@ -117,7 +114,6 @@ it('uses options to create valid OptimizerConfig', () => {
           "dist": false,
           "examples": false,
           "includeCoreBundle": true,
-          "oss": false,
           "pluginPaths": Array [],
           "pluginScanDirs": Array [],
           "repoRoot": "/foo/bar",
@@ -130,7 +126,7 @@ it('uses options to create valid OptimizerConfig', () => {
 
 it('is ready when optimizer phase is success or issue and logs in familiar format', async () => {
   const writeLogTo = new PassThrough();
-  const linesPromise = firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
+  const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
 
   const { update$, optimizer } = setup({
     ...defaultOptions,

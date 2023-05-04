@@ -6,6 +6,8 @@
         "names": [
           ".siem-signals-*",
           ".alerts-security*",
+          ".preview.alerts-security*",
+          ".internal.preview.alerts-security*",
           ".lists*",
           ".items*",
           "apm-*-transaction*",
@@ -20,11 +22,7 @@
         "privileges": ["manage", "write", "read"]
       },
       {
-        "names": [
-          "metrics-endpoint.metadata_current_*",
-          ".fleet-agents*",
-          ".fleet-actions*"
-        ],
+        "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
         "privileges": ["read"]
       }
     ]

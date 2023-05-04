@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../src/core/types/elasticsearch';
-import { Setup } from '../helpers/setup_request';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { MlClient } from '../helpers/get_ml_client';
 
 interface SharedFields {
   job_id: string;
@@ -46,7 +43,7 @@ interface MlRecord extends SharedFields {
 type AnomalyDocument = MlRecord | MlModelPlot;
 
 export async function anomalySearch<TParams extends ESSearchRequest>(
-  mlAnomalySearch: Required<Setup>['ml']['mlSystem']['mlAnomalySearch'],
+  mlAnomalySearch: Required<MlClient>['mlSystem']['mlAnomalySearch'],
   params: TParams
 ): Promise<ESSearchResponse<AnomalyDocument, TParams>> {
   const response = await mlAnomalySearch(params, []);

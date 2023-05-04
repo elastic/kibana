@@ -39,14 +39,18 @@ export const LinkCard: FC<Props> = ({
   onClick,
   href,
   isDisabled,
-  'data-test-subj': dateTestSubj,
+  'data-test-subj': dataTestSubj,
 }) => {
   const linkHrefAndOnClickProps = {
     ...(href ? { href } : {}),
     ...(onClick ? { onClick } : {}),
   };
   return (
-    <EuiPanel style={{ cursor: isDisabled ? 'not-allowed' : undefined }}>
+    <EuiPanel
+      style={{ cursor: isDisabled ? 'not-allowed' : undefined }}
+      hasShadow={false}
+      hasBorder
+    >
       <EuiLink
         style={{
           display: 'block',
@@ -54,7 +58,7 @@ export const LinkCard: FC<Props> = ({
           background: 'transparent',
           outline: 'none',
         }}
-        data-test-subj={dateTestSubj}
+        data-test-subj={dataTestSubj}
         color="subdued"
         {...linkHrefAndOnClickProps}
       >

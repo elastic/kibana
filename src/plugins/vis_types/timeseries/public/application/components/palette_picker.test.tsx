@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { PalettePicker, PalettePickerProps } from './palette_picker';
-import { chartPluginMock } from '../../../../../charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { PALETTES } from '../../../common/enums';
 

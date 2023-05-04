@@ -23,6 +23,13 @@ function findIllegalCharacters(indexPattern: string): string[] {
   return illegalCharacters;
 }
 
+/**
+ * Validate index pattern strings
+ * @public
+ * @param indexPattern string to validate
+ * @returns errors object
+ */
+
 export function validateDataView(indexPattern: string) {
   const errors: { [ILLEGAL_CHARACTERS_KEY]?: string[]; [CONTAINS_SPACES_KEY]?: boolean } = {};
 

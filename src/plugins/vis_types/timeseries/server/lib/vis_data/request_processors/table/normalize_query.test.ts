@@ -85,6 +85,7 @@ describe('normalizeQuery', () => {
 
     expect(modifiedDoc.aggs.pivot.aggs[seriesId].meta).toEqual({
       seriesId,
+      normalized: true,
       timeField: 'order_date',
       intervalString: '10s',
       bucketSize: 10,

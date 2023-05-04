@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationLogic } from '..';
 import { CLOSE_BUTTON_LABEL } from '../../../../shared/constants';
 import { FLYOUT_ARIA_LABEL_ID, DOCUMENT_CREATION_ERRORS } from '../constants';
-import { DocumentCreationLogic } from '../index';
 import { DocumentCreationStep } from '../types';
 
 import {
@@ -60,7 +60,7 @@ export const FlyoutBody: React.FC = () => {
   const { summary } = useValues(DocumentCreationLogic);
   const hasInvalidDocuments = summary.invalidDocuments.total > 0;
   const invalidDocumentsBanner = (
-    <EuiCallOut color="danger" iconType="alert" title={DOCUMENT_CREATION_ERRORS.TITLE} />
+    <EuiCallOut color="danger" iconType="warning" title={DOCUMENT_CREATION_ERRORS.TITLE} />
   );
 
   return (

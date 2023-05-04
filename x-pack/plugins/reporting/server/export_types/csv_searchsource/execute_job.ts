@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { CsvGenerator } from '@kbn/generate-csv';
+import { TaskPayloadCSV } from './types';
 import { getFieldFormats } from '../../services';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
-import { CsvGenerator } from './generate_csv/generate_csv';
-import { TaskPayloadCSV } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   reporting,
   parentLogger
 ) => {
   const config = reporting.getConfig();
+  const encryptionKey = config.get('encryptionKey');
+  const csvConfig = config.get('csv');
 
   return async function runTask(jobId, job, cancellationToken, stream) {
-    const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job', jobId]);
-
-    const encryptionKey = config.get('encryptionKey');
+    const logger = parentLogger.get(`execute-job:${jobId}`);
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
+    const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await reporting.getUiSettingsClient(fakeRequest, logger);
     const dataPluginStart = await reporting.getDataService();
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
@@ -45,7 +44,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
 
     const csv = new CsvGenerator(
       job,
-      config,
+      csvConfig,
       clients,
       dependencies,
       cancellationToken,

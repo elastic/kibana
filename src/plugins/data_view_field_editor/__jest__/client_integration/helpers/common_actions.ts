@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 /**
  * We often need to wait for both the documents & the preview to be fetched.
@@ -53,6 +53,7 @@ export const getCommonActions = (testBed: TestBed) => {
 
     await act(async () => {
       testBed.form.toggleEuiSwitch(testSubj);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     testBed.component.update();
@@ -62,6 +63,7 @@ export const getCommonActions = (testBed: TestBed) => {
   const updateName = async (value: string) => {
     await act(async () => {
       testBed.form.setInputValue('nameField.input', value);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     testBed.component.update();
@@ -70,6 +72,7 @@ export const getCommonActions = (testBed: TestBed) => {
   const updateScript = async (value: string) => {
     await act(async () => {
       testBed.form.setInputValue('scriptField', value);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     testBed.component.update();
@@ -83,6 +86,7 @@ export const getCommonActions = (testBed: TestBed) => {
           label: label ?? value,
         },
       ]);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     testBed.component.update();

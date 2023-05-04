@@ -28,7 +28,7 @@ describe('error_to_toaster', () => {
           toast: {
             color: 'danger',
             errors: ['some error 1', 'some error 2'],
-            iconType: 'alert',
+            iconType: 'error',
             id: 'some-made-up-id',
             title: 'some title',
           },
@@ -45,7 +45,7 @@ describe('error_to_toaster', () => {
           toast: {
             color: 'danger',
             errors: ['some error 1'],
-            iconType: 'alert',
+            iconType: 'error',
             id: 'some-made-up-id',
             title: 'some title',
           },
@@ -64,7 +64,7 @@ describe('error_to_toaster', () => {
           toast: {
             color: 'danger',
             errors: ['something bad happened'],
-            iconType: 'alert',
+            iconType: 'error',
             id: 'some-made-up-id',
             title: 'some title',
           },
@@ -82,7 +82,7 @@ describe('error_to_toaster', () => {
           toast: {
             color: 'danger',
             errors: ['Internal Server Error'],
-            iconType: 'alert',
+            iconType: 'error',
             id: 'some-made-up-id',
             title: 'some title',
           },
@@ -99,7 +99,7 @@ describe('error_to_toaster', () => {
           toast: {
             color: 'danger',
             errors: ['some error 1'],
-            iconType: 'alert',
+            iconType: 'error',
             id: 'some-made-up-id',
             title: 'some title',
           },
@@ -116,7 +116,7 @@ describe('error_to_toaster', () => {
           toast: {
             color: 'danger',
             errors: ['Network Error'],
-            iconType: 'alert',
+            iconType: 'error',
             id: 'some-made-up-id',
             title: 'some title',
           },

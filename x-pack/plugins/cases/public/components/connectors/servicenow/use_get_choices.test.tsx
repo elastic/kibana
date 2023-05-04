@@ -8,9 +8,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/api';
 import { choices } from '../mock';
-import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
+import type { UseGetChoices, UseGetChoicesProps } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
 import * as api from './api';
 
 jest.mock('./api');
@@ -29,6 +30,7 @@ const connector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },

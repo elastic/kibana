@@ -12,23 +12,23 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
-import { CoreStart } from 'kibana/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { StartDependencies } from './plugin';
-import { AllSeries } from '../../../plugins/observability/public';
 
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  defaultIndexPattern: IndexPattern | null;
+  defaultIndexPattern: DataView | null;
 }) => {
-  const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
+  const ExploratoryViewComponent = props.plugins.exploratoryView.ExploratoryViewEmbeddable;
 
   const seriesList: AllSeries = [
     {
@@ -48,7 +48,7 @@ export const App = (props: {
     },
   ];
 
-  const hrefLink = props.plugins.observability.createExploratoryViewUrl(
+  const hrefLink = props.plugins.exploratoryView.createExploratoryViewUrl(
     { reportType: 'kpi-over-time', allSeries: seriesList },
     props.core.http.basePath.get()
   );
@@ -80,6 +80,7 @@ export const App = (props: {
               attributes={seriesList}
               reportType="kpi-over-time"
               title={'Monitor response duration'}
+              withActions={['save', 'explore']}
             />
           </EuiPageContentBody>
         </EuiPageContent>

@@ -14,9 +14,17 @@ import type { DatafeedValidationResponse } from '../../../common/types/job_valid
 export async function validateDatafeedPreviewWithMessages(
   mlClient: MlClient,
   authHeader: AuthorizationHeader,
-  job: CombinedJob
+  job: CombinedJob,
+  start: number | undefined,
+  end: number | undefined
 ): Promise<JobValidationMessage[]> {
-  const { valid, documentsFound } = await validateDatafeedPreview(mlClient, authHeader, job);
+  const { valid, documentsFound } = await validateDatafeedPreview(
+    mlClient,
+    authHeader,
+    job,
+    start,
+    end
+  );
   if (valid) {
     return documentsFound ? [] : [{ id: 'datafeed_preview_no_documents' }];
   }
@@ -26,18 +34,23 @@ export async function validateDatafeedPreviewWithMessages(
 export async function validateDatafeedPreview(
   mlClient: MlClient,
   authHeader: AuthorizationHeader,
-  job: CombinedJob
+  job: CombinedJob,
+  start: number | undefined,
+  end: number | undefined
 ): Promise<DatafeedValidationResponse> {
   const { datafeed_config: datafeed, ...tempJob } = job;
   try {
-    const { body } = (await mlClient.previewDatafeed(
+    const body = (await mlClient.previewDatafeed(
       {
         body: {
           job_config: tempJob,
           datafeed_config: datafeed,
         },
+        // @ts-expect-error es client types are wrong
+        start,
+        end,
       },
-      authHeader
+      { ...authHeader, maxRetries: 0 }
       // previewDatafeed response type is incorrect
     )) as unknown as { body: unknown[] };
 

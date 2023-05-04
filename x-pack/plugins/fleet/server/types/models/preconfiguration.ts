@@ -8,17 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
-import {
-  PRECONFIGURATION_LATEST_KEYWORD,
-  DEFAULT_AGENT_POLICY,
-  DEFAULT_FLEET_SERVER_AGENT_POLICY,
-  DEFAULT_PACKAGES,
-} from '../../constants';
-import type { PreconfiguredOutput } from '../../../common';
-import { outputType } from '../../../common';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
+import type { PreconfiguredOutput } from '../../../common/types';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
+import { NewOutputSchema } from './output';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -45,7 +40,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
     }),
   }),
   {
-    defaultValue: DEFAULT_PACKAGES,
+    defaultValue: [],
   }
 );
 
@@ -79,21 +74,44 @@ function validatePreconfiguredOutputs(outputs: PreconfiguredOutput[]) {
 }
 
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  schema.object({
+  NewOutputSchema.extends({
     id: schema.string(),
-    is_default: schema.boolean({ defaultValue: false }),
-    is_default_monitoring: schema.boolean({ defaultValue: false }),
-    name: schema.string(),
-    type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
-    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
-    ca_sha256: schema.maybe(schema.string()),
-    ca_trusted_fingerprint: schema.maybe(schema.string()),
     config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    config_yaml: schema.never(),
   }),
   {
     defaultValue: [],
     validate: validatePreconfiguredOutputs,
   }
+);
+
+export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+    proxy_id: schema.nullable(schema.string()),
+  }),
+  { defaultValue: [] }
+);
+
+export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    url: schema.string(),
+    proxy_headers: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.boolean(), schema.number()])
+      )
+    ),
+    certificate_authorities: schema.maybe(schema.string()),
+    certificate: schema.maybe(schema.string()),
+    certificate_key: schema.maybe(schema.string()),
+  }),
+  { defaultValue: [] }
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
@@ -103,6 +121,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     is_default: schema.maybe(schema.boolean()),
     is_default_fleet_server: schema.maybe(schema.boolean()),
+    has_fleet_server: schema.maybe(schema.boolean()),
     data_output_id: schema.maybe(schema.string()),
     monitoring_output_id: schema.maybe(schema.string()),
     package_policies: schema.arrayOf(
@@ -110,7 +129,16 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
         id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         name: schema.string(),
         package: schema.object({
-          name: schema.string(),
+          name: schema.string({
+            validate: (value) => {
+              if (value === 'synthetics') {
+                return i18n.translate('xpack.fleet.config.disableSynthetics', {
+                  defaultMessage:
+                    'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                });
+              }
+            },
+          }),
         }),
         description: schema.maybe(schema.string()),
         namespace: schema.maybe(NamespaceSchema),
@@ -141,6 +169,6 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ),
   }),
   {
-    defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
+    defaultValue: [],
   }
 );

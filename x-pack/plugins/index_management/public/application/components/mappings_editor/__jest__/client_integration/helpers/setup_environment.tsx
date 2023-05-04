@@ -8,13 +8,9 @@
 import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
-/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
-import '../../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
-import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import {
-  docLinksServiceMock,
-  uiSettingsServiceMock,
-} from '../../../../../../../../../../src/core/public/mocks';
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
@@ -52,18 +48,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual(
-    '../../../../../../../../../../src/plugins/kibana_react/public'
-  );
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   const CodeEditorMock = (props: any) => (
     <input
       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-value={props.value}
+      data-currentvalue={props.value}
       value={props.value}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.target.value);
+        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
       }}
     />
   );

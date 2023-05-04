@@ -4,6 +4,10 @@ exports[`Initializing the store should initialize all datasources with state fro
 Object {
   "lens": Object {
     "activeDatasourceId": "testDatasource",
+    "dataViews": Object {
+      "indexPatternRefs": Array [],
+      "indexPatterns": Object {},
+    },
     "datasourceStates": Object {
       "testDatasource": Object {
         "isLoading": false,
@@ -37,6 +41,9 @@ Object {
             },
             "filters": Array [
               Object {
+                "meta": Object {
+                  "index": "index-pattern-0",
+                },
                 "query": Object {
                   "match_phrase": Object {
                     "src": "test",
@@ -91,7 +98,9 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
-      "state": Object {},
+      "state": Object {
+        "newState": "newState",
+      },
     },
   },
 }

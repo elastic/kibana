@@ -13,7 +13,7 @@ import {
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
-} from '../../../../usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 interface UsageCounterEvent {
   domainId: string;
@@ -86,27 +86,29 @@ export function registerUsageCountersUsageCollector(usageCollection: UsageCollec
       },
     },
     fetch: async ({ soClient }: CollectorFetchContext) => {
-      const { saved_objects: rawUsageCounters } =
-        await soClient.find<UsageCountersSavedObjectAttributes>({
-          type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-          fields: ['count', 'counterName', 'counterType', 'domainId'],
-          filter: `NOT ${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
-          perPage: 10000,
-        });
+      const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
+        type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+        fields: ['count', 'counterName', 'counterType', 'domainId'],
+        filter: `NOT ${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
+        perPage: 1000,
+      });
 
-      return {
-        dailyEvents: rawUsageCounters.reduce((acc, rawUsageCounter) => {
+      const dailyEvents: UsageCounterEvent[] = [];
+
+      for await (const { saved_objects: rawUsageCounters } of finder.find()) {
+        rawUsageCounters.forEach((rawUsageCounter) => {
           try {
             const event = transformRawCounter(rawUsageCounter);
             if (event) {
-              acc.push(event);
+              dailyEvents.push(event);
             }
           } catch (_) {
             // swallow error; allows sending successfully transformed objects.
           }
-          return acc;
-        }, [] as UsageCounterEvent[]),
-      };
+        });
+      }
+
+      return { dailyEvents };
     },
     isReady: () => true,
   });

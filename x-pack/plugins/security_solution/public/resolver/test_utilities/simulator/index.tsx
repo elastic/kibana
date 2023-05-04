@@ -6,22 +6,25 @@
  */
 
 import React from 'react';
-import { Store, createStore, applyMiddleware } from 'redux';
-import { mount, ReactWrapper } from 'enzyme';
-import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import type { Store } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import type { History as HistoryPackageHistoryInterface } from 'history';
+import { createMemoryHistory } from 'history';
+import { coreMock } from '@kbn/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import {
+import type {
   ResolverState,
   DataAccessLayer,
   SpyMiddleware,
   SideEffectSimulator,
   TimeFilters,
 } from '../../types';
-import { ResolverAction } from '../../store/actions';
+import type { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 import { uiSetting } from '../../mocks/ui_setting';
 

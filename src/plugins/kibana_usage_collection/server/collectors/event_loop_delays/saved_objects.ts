@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectAttributes,
-  SavedObjectsServiceSetup,
-  ISavedObjectsRepository,
-} from 'kibana/server';
+import type { SavedObjectsServiceSetup, ISavedObjectsRepository } from '@kbn/core/server';
 import moment from 'moment';
-import type { IntervalHistogram } from 'kibana/server';
+import type { IntervalHistogram } from '@kbn/core/server';
 export const SAVED_OBJECTS_DAILY_TYPE = 'event_loop_delays_daily';
 
-export interface EventLoopDelaysDaily extends SavedObjectAttributes, IntervalHistogram {
+export interface EventLoopDelaysDaily extends IntervalHistogram {
   processId: number;
   instanceUuid: string;
 }

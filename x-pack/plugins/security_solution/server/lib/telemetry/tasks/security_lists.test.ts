@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
 import {
@@ -42,5 +42,6 @@ describe('security list telemetry task test', () => {
     expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
       ENDPOINT_EVENT_FILTERS_LIST_ID
     );
+    expect(mockTelemetryReceiver.fetchValueListMetaData).toHaveBeenCalled();
   });
 });

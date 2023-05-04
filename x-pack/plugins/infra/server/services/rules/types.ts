@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../alerting/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import {
   createLifecycleExecutor,
+  createGetSummarizedAlertsFn,
   IRuleDataClient,
   RuleRegistryPluginSetupContract,
-} from '../../../../rule_registry/server';
+} from '@kbn/rule-registry-plugin/server';
 
 type LifecycleRuleExecutorCreator = ReturnType<typeof createLifecycleExecutor>;
-
+type GetSummarizedAlertsFn = ReturnType<typeof createGetSummarizedAlertsFn>;
 export interface RulesServiceSetupDeps {
   alerting: AlertingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -25,6 +26,7 @@ export interface RulesServiceStartDeps {}
 export interface RulesServiceSetup {
   createLifecycleRuleExecutor: LifecycleRuleExecutorCreator;
   ruleDataClient: IRuleDataClient;
+  createGetSummarizedAlerts: GetSummarizedAlertsFn;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

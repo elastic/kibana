@@ -11,8 +11,8 @@ import { mockCreateClusterDataCheck } from './get_state.test.mock';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { SecurityLicenseFeatures } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';

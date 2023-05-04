@@ -11,7 +11,7 @@ import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
 import { dirname } from 'path';
 import { finished, Readable } from 'stream';
 import { promisify } from 'util';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 
 /**
  * Download a url and calculate it's checksum

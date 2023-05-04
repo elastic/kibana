@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import mappings from './mappings.json';
+import { taskMappings } from './mappings';
 import { getMigrations } from './migrations';
-import { TaskManagerConfig } from '../config.js';
+import { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
 
@@ -22,7 +22,7 @@ export function setupSavedObjects(
     namespaceType: 'agnostic',
     hidden: true,
     convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id; ctx._source.remove("kibana")`,
-    mappings: mappings.task as SavedObjectsTypeMappingDefinition,
+    mappings: taskMappings,
     migrations: getMigrations(),
     indexPattern: TASK_MANAGER_INDEX,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {

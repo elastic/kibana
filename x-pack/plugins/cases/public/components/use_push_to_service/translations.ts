@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const PUSH_THIRD = (thirdParty: string) => {
+export const PUSH_INCIDENT = (thirdParty: string) => {
   if (thirdParty === 'none') {
     return i18n.translate('xpack.cases.caseView.pushThirdPartyIncident', {
       defaultMessage: 'Push as external incident',
@@ -22,7 +22,7 @@ export const PUSH_THIRD = (thirdParty: string) => {
   });
 };
 
-export const UPDATE_THIRD = (thirdParty: string) => {
+export const UPDATE_INCIDENT = (thirdParty: string) => {
   if (thirdParty === 'none') {
     return i18n.translate('xpack.cases.caseView.updateThirdPartyIncident', {
       defaultMessage: 'Update external incident',
@@ -76,3 +76,10 @@ export const PUSH_DISABLE_BY_LICENSE_TITLE = i18n.translate(
 export const LINK_CLOUD_DEPLOYMENT = i18n.translate('xpack.cases.caseView.cloudDeploymentLink', {
   defaultMessage: 'cloud deployment',
 });
+
+export const LINK_ACTIONS_CONFIGURATION = i18n.translate(
+  'xpack.cases.caseView.actionsConfigurationLink',
+  {
+    defaultMessage: 'Alerting and action settings in Kibana',
+  }
+);

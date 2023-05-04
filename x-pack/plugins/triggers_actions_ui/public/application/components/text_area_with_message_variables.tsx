@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
-import { ActionVariable } from '../../../../alerting/common';
 import { templateActionVariable } from '../lib';
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
   paramsProperty: string;
   index: number;
   inputTargetValue?: string;
+  isDisabled?: boolean;
   editAction: (property: string, value: any, index: number) => void;
   label: string;
   errors?: string[];
@@ -27,6 +28,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   paramsProperty,
   index,
   inputTargetValue,
+  isDisabled = false,
   editAction,
   label,
   errors,
@@ -52,6 +54,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
     <EuiFormRow
       fullWidth
       error={errors}
+      isDisabled={isDisabled}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
@@ -63,6 +66,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
       }
     >
       <EuiTextArea
+        disabled={isDisabled}
         fullWidth
         isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
         name={paramsProperty}

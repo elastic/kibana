@@ -7,8 +7,8 @@
  */
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { MetricsTracker } from '../types';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 const APP_TRACKER_NAME = 'console';
 

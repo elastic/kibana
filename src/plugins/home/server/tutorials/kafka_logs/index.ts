@@ -55,10 +55,10 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/kafka_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/kafka_logs/screenshot.webp',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['observability', 'stream_processing'],
   };
 }

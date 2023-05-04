@@ -7,7 +7,7 @@
 
 import { mockUseParams } from '../../../__mocks__/react_router';
 
-import { encodePathParams, generateEncodedPath, useDecodedParams } from './';
+import { encodePathParams, generateEncodedPath, useDecodedParams } from '.';
 
 describe('encodePathParams', () => {
   it('encodeURIComponent()s all object values', () => {

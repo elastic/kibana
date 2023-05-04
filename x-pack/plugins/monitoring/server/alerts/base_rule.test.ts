@@ -51,6 +51,11 @@ describe('BaseRule', () => {
               params: {
                 message: '{{context.internalShortMessage}}',
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1d',
+              },
             },
           ],
           alertTypeId: '',
@@ -65,8 +70,6 @@ describe('BaseRule', () => {
             interval: '1m',
           },
           tags: [],
-          throttle: '1d',
-          notifyWhen: null,
         },
       });
     });

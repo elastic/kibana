@@ -98,7 +98,7 @@ describe('watch_history_item', () => {
             lastChecked: null,
             lastMetCondition: null,
             lastFired: undefined,
-            state: 'OK',
+            state: 'Active',
           },
         };
         expect(watchHistoryItem.downstreamJson).toEqual(expected);

@@ -16,20 +16,16 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../types';
-import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
+import { useGetDataStreams, usePagination, useBreadcrumbs } from '../../../hooks';
 import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('data_streams');
-
-  const {
-    data: { fieldFormats },
-  } = useStartServices();
 
   const { pagination, pageSizeOptions } = usePagination();
 
@@ -99,14 +95,13 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Last activity',
         }),
         render: (date: DataStream['last_activity_ms']) => {
-          try {
-            const formatter = fieldFormats.getInstance('date', {
-              pattern: 'MMM D, YYYY @ HH:mm:ss',
-            });
-            return formatter.convert(date);
-          } catch (e) {
-            return <FormattedDate value={date} year="numeric" month="short" day="2-digit" />;
-          }
+          return (
+            <>
+              <FormattedDate value={date} year="numeric" month="short" day="numeric" />
+              <> @ </>
+              <FormattedTime value={date} hour="numeric" minute="numeric" second="numeric" />
+            </>
+          );
         },
       },
       {
@@ -115,13 +110,8 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.dataStreamList.sizeColumnTitle', {
           defaultMessage: 'Size',
         }),
-        render: (size: DataStream['size_in_bytes']) => {
-          try {
-            const formatter = fieldFormats.getInstance('bytes');
-            return formatter.convert(size);
-          } catch (e) {
-            return `${size}b`;
-          }
+        render: (_, datastream: DataStream) => {
+          return <>{datastream.size_in_bytes_formatted}</>;
         },
       },
       {
@@ -136,7 +126,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       },
     ];
     return cols;
-  }, [fieldFormats]);
+  }, []);
 
   const emptyPrompt = useMemo(
     () => (

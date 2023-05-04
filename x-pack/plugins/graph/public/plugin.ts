@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { SpacesApi } from '../../spaces/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -17,21 +17,20 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { checkLicense } from '../common/check_license';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
 import { ConfigSchema } from '../config';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -41,9 +40,12 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjects: SavedObjectsStart;
+  inspector: InspectorPublicPluginStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export class GraphPlugin
@@ -67,7 +69,7 @@ export class GraphPlugin
         icon: 'graphApp',
         path: '/app/graph',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         solutionId: 'kibana',
         order: 600,
       });
@@ -97,6 +99,7 @@ export class GraphPlugin
           coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
+          unifiedSearch: pluginsStart.unifiedSearch,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
@@ -111,6 +114,8 @@ export class GraphPlugin
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
+          inspect: pluginsStart.inspector,
+          savedObjectsManagement: pluginsStart.savedObjectsManagement,
         });
       },
     });

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { PointSeriesOptions } from './point_series';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -16,7 +16,6 @@ import { ChartType } from '../../../../../common';
 import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
 jest.mock('../../../../services', () => ({
-  getTrackUiMetric: jest.fn(() => null),
   getPalettesService: jest.fn(() => {
     return {
       getPalettes: jest.fn(),

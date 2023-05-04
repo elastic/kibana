@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-export function splitGrok(grokPattern: string, filter: boolean = false) {
-  const grokList = grokPattern.split(/(%{\w*?:\w*?})/);
+const ALIAS_PATTERN = /^%{\w*?}$/;
+const MATCH_FIELDS = /(%{\w*?:\w*?})/;
+const MATCH_AND_CAPTURE_FIELDS = /%{(\w*?):(\w*?)}/;
+
+function isAliasPattern(pattern: string) {
+  //  check to see if the pattern is a single alias pattern,
+  // e.g. %{COMBINEDAPACHELOG}
+  return (pattern.match(ALIAS_PATTERN) ?? []).length === 1;
+}
+
+function splitGrok(grokPattern: string, filter: boolean = false) {
+  const grokList = grokPattern.split(MATCH_FIELDS);
   return filter === true ? grokList.filter((d) => d[0] === '%' && d[1] === '{') : grokList;
 }
 
-export function splitGrok2(grokPattern: string, filter: boolean = false) {
-  const grokList = grokPattern
-    .split(/(%{\w*?:\w*?})|(\.\*\?)|(\.\*)/)
-    .filter((d) => d !== undefined);
-  return filter === true ? grokList.filter((d) => d[0] === '%' && d[1] === '{') : grokList;
-}
-
-export function getGrokField(field: string) {
+function getGrokField(field: string) {
   if (field[0] !== '%' && field[1] !== '{') {
     return { valid: false, type: '', name: '' };
   }
 
-  const match = field.match(/%{(\w*?):(\w*?)}/);
+  const match = field.match(MATCH_AND_CAPTURE_FIELDS);
   if (match === null) {
     return { valid: false, type: '', name: '' };
   }
@@ -32,21 +35,21 @@ export function getGrokField(field: string) {
 }
 
 export function getFieldsFromGrokPattern(grokPattern: string) {
-  if (grokPattern === '%{COMBINEDAPACHELOG}') {
+  if (isAliasPattern(grokPattern)) {
     return [];
   }
 
   return splitGrok(grokPattern, true).map((d) => {
     const { valid, name, type } = getGrokField(d);
     if (valid === false) {
-      return d;
+      return { name: d, type };
     }
     return { name, type };
   });
 }
 
 export function replaceFieldInGrokPattern(grokPattern: string, fieldName: string, index: number) {
-  if (grokPattern === '%{COMBINEDAPACHELOG}') {
+  if (isAliasPattern(grokPattern)) {
     return grokPattern;
   }
 

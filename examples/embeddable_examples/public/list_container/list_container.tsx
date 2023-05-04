@@ -8,11 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Container,
-  ContainerInput,
-  EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+import { Container, ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ListContainerComponent } from './list_container_component';
 
 export const LIST_CONTAINER = 'LIST_CONTAINER';

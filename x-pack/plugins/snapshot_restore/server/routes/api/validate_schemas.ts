@@ -15,6 +15,7 @@ const snapshotConfigSchema = schema.object({
   indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   ignoreUnavailable: schema.maybe(schema.boolean()),
   includeGlobalState: schema.maybe(schema.boolean()),
+  featureStates: schema.maybe(schema.arrayOf(schema.string())),
   partial: schema.maybe(schema.boolean()),
   metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
@@ -61,14 +62,8 @@ export const policySchema = schema.object({
   isManagedPolicy: schema.boolean(),
 });
 
-const fsRepositorySettings = schema.object({
-  location: schema.string(),
-  compress: schema.maybe(schema.boolean()),
-  chunkSize: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-  maxRestoreBytesPerSec: schema.maybe(schema.string()),
-  maxSnapshotBytesPerSec: schema.maybe(schema.string()),
-  readonly: schema.maybe(schema.boolean()),
-});
+// Only validate required settings, everything else is optional
+const fsRepositorySettings = schema.object({ location: schema.string() }, { unknowns: 'allow' });
 
 const fsRepositorySchema = schema.object({
   name: schema.string(),
@@ -86,20 +81,8 @@ const readOnlyRepository = schema.object({
   settings: readOnlyRepositorySettings,
 });
 
-const s3RepositorySettings = schema.object({
-  bucket: schema.string(),
-  client: schema.maybe(schema.string()),
-  basePath: schema.maybe(schema.string()),
-  compress: schema.maybe(schema.boolean()),
-  chunkSize: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-  serverSideEncryption: schema.maybe(schema.boolean()),
-  bufferSize: schema.maybe(schema.string()),
-  cannedAcl: schema.maybe(schema.string()),
-  storageClass: schema.maybe(schema.string()),
-  maxRestoreBytesPerSec: schema.maybe(schema.string()),
-  maxSnapshotBytesPerSec: schema.maybe(schema.string()),
-  readonly: schema.maybe(schema.boolean()),
-});
+// Only validate required settings, everything else is optional
+const s3RepositorySettings = schema.object({ bucket: schema.string() }, { unknowns: 'allow' });
 
 const s3Repository = schema.object({
   name: schema.string(),
@@ -107,17 +90,11 @@ const s3Repository = schema.object({
   settings: s3RepositorySettings,
 });
 
+// Only validate required settings, everything else is optional
 const hdsRepositorySettings = schema.object(
   {
     uri: schema.string(),
     path: schema.string(),
-    loadDefaults: schema.maybe(schema.boolean()),
-    compress: schema.maybe(schema.boolean()),
-    chunkSize: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-    maxRestoreBytesPerSec: schema.maybe(schema.string()),
-    maxSnapshotBytesPerSec: schema.maybe(schema.string()),
-    readonly: schema.maybe(schema.boolean()),
-    ['security.principal']: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' }
 );
@@ -128,17 +105,7 @@ const hdsfRepository = schema.object({
   settings: hdsRepositorySettings,
 });
 
-const azureRepositorySettings = schema.object({
-  client: schema.maybe(schema.string()),
-  container: schema.maybe(schema.string()),
-  basePath: schema.maybe(schema.string()),
-  locationMode: schema.maybe(schema.string()),
-  compress: schema.maybe(schema.boolean()),
-  chunkSize: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-  maxRestoreBytesPerSec: schema.maybe(schema.string()),
-  maxSnapshotBytesPerSec: schema.maybe(schema.string()),
-  readonly: schema.maybe(schema.boolean()),
-});
+const azureRepositorySettings = schema.object({}, { unknowns: 'allow' });
 
 const azureRepository = schema.object({
   name: schema.string(),
@@ -146,16 +113,8 @@ const azureRepository = schema.object({
   settings: azureRepositorySettings,
 });
 
-const gcsRepositorySettings = schema.object({
-  bucket: schema.string(),
-  client: schema.maybe(schema.string()),
-  basePath: schema.maybe(schema.string()),
-  compress: schema.maybe(schema.boolean()),
-  chunkSize: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-  maxRestoreBytesPerSec: schema.maybe(schema.string()),
-  maxSnapshotBytesPerSec: schema.maybe(schema.string()),
-  readonly: schema.maybe(schema.boolean()),
-});
+// Only validate required settings, everything else is optional
+const gcsRepositorySettings = schema.object({ bucket: schema.string() }, { unknowns: 'allow' });
 
 const gcsRepository = schema.object({
   name: schema.string(),
@@ -197,6 +156,7 @@ export const restoreSettingsSchema = schema.object({
   renamePattern: schema.maybe(schema.string()),
   renameReplacement: schema.maybe(schema.string()),
   includeGlobalState: schema.maybe(schema.boolean()),
+  featureStates: schema.maybe(schema.arrayOf(schema.string())),
   partial: schema.maybe(schema.boolean()),
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),

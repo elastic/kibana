@@ -6,25 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../../visualizations/public';
-import { buildExpression } from '../../../expressions/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { buildExpression } from '@kbn/expressions-plugin/public';
 
 import { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
-import { sampleAreaVis } from '../../xy/public/sample_vis.test.mocks';
+import { sampleAreaVis } from '@kbn/vis-type-xy-plugin/public/sample_vis.test.mocks';
 
-jest.mock('../../../expressions/public', () => ({
-  ...(jest.requireActual('../../../expressions/public') as any),
+jest.mock('@kbn/expressions-plugin/public', () => ({
+  ...(jest.requireActual('@kbn/expressions-plugin/public') as any),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',
       chain: [],
     }),
   })),
-}));
-
-jest.mock('./to_ast_esaggs', () => ({
-  getEsaggsFn: jest.fn(),
 }));
 
 describe('vislib vis toExpressionAst function', () => {
@@ -42,7 +38,7 @@ describe('vislib vis toExpressionAst function', () => {
 
   it('should match basic snapshot', () => {
     toExpressionAst(vis, params);
-    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
+    const [builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
 
     expect(builtExpression).toMatchSnapshot();
   });

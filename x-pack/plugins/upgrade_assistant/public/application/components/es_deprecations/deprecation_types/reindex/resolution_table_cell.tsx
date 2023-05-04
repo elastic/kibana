@@ -78,6 +78,7 @@ const i18nTexts = {
 
 export const ReindexResolutionCell: React.FunctionComponent = () => {
   const { reindexState } = useReindexContext();
+  const hasExistingAliases = reindexState.meta.aliases.length > 0;
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
@@ -104,7 +105,8 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
               {i18nTexts.reindexInProgressText}{' '}
               {getReindexProgressLabel(
                 reindexState.reindexTaskPercComplete,
-                reindexState.lastCompletedStep
+                reindexState.lastCompletedStep,
+                hasExistingAliases
               )}
             </EuiText>
           </EuiFlexItem>
@@ -125,7 +127,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
@@ -136,7 +138,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexFetchFailedText}</EuiText>
@@ -147,7 +149,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexPausedText}</EuiText>

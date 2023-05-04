@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   IEmbeddable,
   Container as EmbeddableContainer,
-} from '../../../../../../../src/plugins/embeddable/public';
-import { isEnhancedEmbeddable } from '../../../../../embeddable_enhanced/public';
-import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '../../../../../ui_actions_enhanced/public';
+} from '@kbn/embeddable-plugin/public';
+import { isEnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
+import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.

@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  IAggConfig,
-  AggParam,
-  IndexPatternField,
-  OptionedValueProp,
-} from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
+import { IAggConfig, AggParam, OptionedValueProp } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 import { EditorVisState } from './sidebar/state/reducers';
@@ -27,7 +23,7 @@ export interface AggParamCommonProps<T, P = AggParam> {
   disabled?: boolean;
   editorConfig: EditorConfig;
   formIsTouched: boolean;
-  indexedFields?: ComboBoxGroupedOptions<IndexPatternField>;
+  indexedFields?: ComboBoxGroupedOptions<DataViewField>;
   showValidation: boolean;
   state: EditorVisState;
   value?: T;

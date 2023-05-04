@@ -55,7 +55,7 @@ export const TEST_CASES = Object.freeze({
     type: 'resolvetype',
     id: 'conflict',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'conflict' as const, // only in space 1, where the alias exists
+    expectedOutcome: 'conflict' as const, // only in the default space and space 1, where the alias exists
     expectedId: 'conflict',
     expectedAliasTargetId: 'conflict-newid',
   }),
@@ -71,7 +71,7 @@ export const TEST_CASES = Object.freeze({
 });
 
 export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('get');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody =
     (testCase: ResolveTestCase): ExpectResponseBody =>
     async (response: Record<string, any>) => {

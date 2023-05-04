@@ -8,5 +8,4 @@
 
 export const NEWSFEED_FALLBACK_LANGUAGE = 'en';
 export const NEWSFEED_DEFAULT_SERVICE_BASE_URL = 'https://feeds.elastic.co';
-export const NEWSFEED_DEV_SERVICE_BASE_URL = 'https://feeds-staging.elastic.co';
 export const NEWSFEED_DEFAULT_SERVICE_PATH = '/kibana/v{VERSION}.json';

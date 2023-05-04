@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
-  describe('Stack Management -Advanced Settings', () => {
+  describe('Stack Management -Advanced Settings Accessibility', () => {
     // click on Management > Advanced settings
     it('click on advanced settings ', async () => {
       await PageObjects.common.navigateToUrl('management', 'kibana/settings', {

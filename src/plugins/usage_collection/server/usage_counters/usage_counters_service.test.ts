@@ -8,7 +8,7 @@
 
 /* eslint-disable dot-notation */
 import { UsageCountersService } from './usage_counters_service';
-import { loggingSystemMock, coreMock } from '../../../../core/server/mocks';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import * as rxOp from 'rxjs/operators';
 import moment from 'moment';
 
@@ -100,7 +100,7 @@ describe('UsageCountersService', () => {
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
     const { createUsageCounter } = usageCountersService.setup(coreSetup);
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
@@ -175,7 +175,7 @@ describe('UsageCountersService', () => {
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
     const { createUsageCounter } = usageCountersService.setup(coreSetup);
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
     usageCountersService.start(coreStart);
@@ -214,7 +214,7 @@ describe('UsageCountersService', () => {
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
 
     const { createUsageCounter } = usageCountersService.setup(coreSetup);
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
     usageCountersService.start(coreStart);

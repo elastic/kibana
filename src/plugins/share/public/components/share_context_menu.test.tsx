@@ -8,23 +8,19 @@
 
 import { ShareMenuItem } from '../types';
 
-jest.mock('../lib/url_shortener', () => ({}));
-
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ShareContextMenu } from './share_context_menu';
+import { ShareContextMenu, ShareContextMenuProps } from './share_context_menu';
 
-const defaultProps = {
+const defaultProps: ShareContextMenuProps = {
   allowEmbed: true,
   allowShortUrl: false,
   shareMenuItems: [],
   sharingData: null,
-  isDirty: false,
   onClose: () => {},
-  basePath: '',
-  post: () => Promise.resolve({} as any),
   objectType: 'dashboard',
+  urlService: {} as any,
 };
 
 test('should render context menu panel when there are more than one panel', () => {
@@ -34,6 +30,11 @@ test('should render context menu panel when there are more than one panel', () =
 
 test('should only render permalink panel when there are no other panels', () => {
   const component = shallow(<ShareContextMenu {...defaultProps} allowEmbed={false} />);
+  expect(component).toMatchSnapshot();
+});
+
+test('should disable the share URL when set', () => {
+  const component = shallow(<ShareContextMenu {...defaultProps} disabledShareUrl />);
   expect(component).toMatchSnapshot();
 });
 
@@ -68,6 +69,17 @@ describe('shareContextMenuExtensions', () => {
       <ShareContextMenu
         {...defaultProps}
         allowEmbed={false}
+        shareMenuItems={shareContextMenuItems}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should render a custom panel title when provided', () => {
+    const component = shallow(
+      <ShareContextMenu
+        {...defaultProps}
+        objectTypeTitle="Custom object"
         shareMenuItems={shareContextMenuItems}
       />
     );

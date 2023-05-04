@@ -7,8 +7,8 @@
 
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { VisTypeDefinition } from '../../../../../../src/plugins/visualizations/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
 import { MapTypes, TileMapVisParams, TILE_MAP_VIS_TYPE } from './types';
 import { LazyWrapper } from '../../lazy_wrapper';

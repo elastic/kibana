@@ -10,8 +10,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { SuricataSignature } from './suricata_signature';
@@ -24,7 +23,6 @@ const Details = styled.div`
 Details.displayName = 'Details';
 
 export const SuricataDetails = React.memo<{
-  browserFields: BrowserFields;
   data: Ecs;
   isDraggable?: boolean;
   timelineId: string;

@@ -6,14 +6,15 @@
  */
 
 import moment from 'moment';
-import { Logger } from 'src/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
-import { TelemetryEventsSender } from './sender';
+} from '@kbn/task-manager-plugin/server';
+import type { ITelemetryReceiver } from './receiver';
+import type { ITelemetryEventsSender } from './sender';
+import { tlog } from './helpers';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;
@@ -28,8 +29,8 @@ export interface SecurityTelemetryTaskConfig {
 export type SecurityTelemetryTaskRunner = (
   taskId: string,
   logger: Logger,
-  receiver: TelemetryReceiver,
-  sender: TelemetryEventsSender,
+  receiver: ITelemetryReceiver,
+  sender: ITelemetryEventsSender,
   taskExecutionPeriod: TaskExecutionPeriod
 ) => Promise<number>;
 
@@ -46,14 +47,14 @@ export type LastExecutionTimestampCalculator = (
 export class SecurityTelemetryTask {
   private readonly config: SecurityTelemetryTaskConfig;
   private readonly logger: Logger;
-  private readonly sender: TelemetryEventsSender;
-  private readonly receiver: TelemetryReceiver;
+  private readonly sender: ITelemetryEventsSender;
+  private readonly receiver: ITelemetryReceiver;
 
   constructor(
     config: SecurityTelemetryTaskConfig,
     logger: Logger,
-    sender: TelemetryEventsSender,
-    receiver: TelemetryReceiver
+    sender: ITelemetryEventsSender,
+    receiver: ITelemetryReceiver
   ) {
     this.config = config;
     this.logger = logger;
@@ -112,7 +113,7 @@ export class SecurityTelemetryTask {
 
   public start = async (taskManager: TaskManagerStartContract) => {
     const taskId = this.getTaskId();
-    this.logger.debug(`[task ${taskId}]: attempting to schedule`);
+    tlog(this.logger, `[task ${taskId}]: attempting to schedule`);
     try {
       await taskManager.ensureScheduled({
         id: taskId,
@@ -130,19 +131,25 @@ export class SecurityTelemetryTask {
   };
 
   public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
-    this.logger.debug(`[task ${taskId}]: attempting to run`);
+    tlog(this.logger, `[task ${taskId}]: attempting to run`);
     if (taskId !== this.getTaskId()) {
-      this.logger.debug(`[task ${taskId}]: outdated task`);
+      tlog(this.logger, `[task ${taskId}]: outdated task`);
       return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
-      this.logger.debug(`[task ${taskId}]: telemetry is not opted-in`);
+      tlog(this.logger, `[task ${taskId}]: telemetry is not opted-in`);
       return 0;
     }
 
-    this.logger.debug(`[task ${taskId}]: running task`);
+    const isTelemetryServicesReachable = await this.sender.isTelemetryServicesReachable();
+    if (!isTelemetryServicesReachable) {
+      tlog(this.logger, `[task ${taskId}]: cannot reach telemetry services`);
+      return 0;
+    }
+
+    tlog(this.logger, `[task ${taskId}]: running task`);
     return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
   };
 }

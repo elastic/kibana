@@ -6,16 +6,21 @@ Learn how to perform common APM app tasks.
 
 
 * <<agent-configuration>>
+* <<apm-spaces>>
 * <<apm-alerts>>
 * <<custom-links>>
 * <<filters>>
 * <<correlations>>
 * <<machine-learning-integration>>
+* <<apm-lambda>>
 * <<advanced-queries>>
+* <<storage-explorer>>
 * <<transactions-annotations>>
 
 
 include::agent-configuration.asciidoc[]
+
+include::apm-spaces.asciidoc[]
 
 include::apm-alerts.asciidoc[]
 
@@ -27,6 +32,10 @@ include::correlations.asciidoc[]
 
 include::machine-learning.asciidoc[]
 
+include::lambda.asciidoc[]
+
 include::advanced-queries.asciidoc[]
+
+include::storage-explorer.asciidoc[]
 
 include::deployment-annotations.asciidoc[]

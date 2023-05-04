@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { SessionInfo } from '../../../common/types';
 
@@ -16,7 +16,7 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
   router.get(
     { path: '/internal/security/session', validate: false },
     async (_context, request, response) => {
-      const sessionValue = await getSession().get(request);
+      const { value: sessionValue } = await getSession().get(request);
       if (sessionValue) {
         const expirationTime =
           sessionValue.idleTimeoutExpiration && sessionValue.lifespanExpiration

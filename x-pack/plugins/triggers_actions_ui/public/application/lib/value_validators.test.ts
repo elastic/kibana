@@ -10,9 +10,9 @@ import {
   throwIfIsntContained,
   isValidUrl,
   getConnectorWithInvalidatedFields,
-  getAlertWithInvalidatedFields,
+  getRuleWithInvalidatedFields,
 } from './value_validators';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {
@@ -38,32 +38,32 @@ describe('throwIfAbsent', () => {
 describe('throwIfIsntContained', () => {
   test('throws if value is absent', () => {
     expect(() => {
-      throwIfIsntContained<string>(new Set([uuid.v4()]), 'OMG no value', (val) => val)([uuid.v4()]);
+      throwIfIsntContained<string>(new Set([uuidv4()]), 'OMG no value', (val) => val)([uuidv4()]);
     }).toThrowErrorMatchingInlineSnapshot(`"OMG no value"`);
   });
 
   test('throws if value is absent using custom message', () => {
-    const id = uuid.v4();
+    const id = uuidv4();
     expect(() => {
       throwIfIsntContained<string>(
         new Set([id]),
         (value: string) => `OMG no ${value}`,
         (val) => val
-      )([uuid.v4()]);
+      )([uuidv4()]);
     }).toThrow(`OMG no ${id}`);
   });
 
   test('returns values if value is present', () => {
-    const id = uuid.v4();
-    const values = [uuid.v4(), uuid.v4(), id, uuid.v4()];
+    const id = uuidv4();
+    const values = [uuidv4(), uuidv4(), id, uuidv4()];
     expect(
       throwIfIsntContained<string>(new Set([id]), 'OMG no value', (val) => val)(values)
     ).toEqual(values);
   });
 
   test('returns values if multiple values is present', () => {
-    const [firstId, secondId] = [uuid.v4(), uuid.v4()];
-    const values = [uuid.v4(), uuid.v4(), secondId, uuid.v4(), firstId];
+    const [firstId, secondId] = [uuidv4(), uuidv4()];
+    const values = [uuidv4(), uuidv4(), secondId, uuidv4(), firstId];
     expect(
       throwIfIsntContained<string>(
         new Set([firstId, secondId]),
@@ -74,7 +74,7 @@ describe('throwIfIsntContained', () => {
   });
 
   test('allows a custom value extractor', () => {
-    const [firstId, secondId] = [uuid.v4(), uuid.v4()];
+    const [firstId, secondId] = [uuidv4(), uuidv4()];
     const values = [
       { id: firstId, some: 'prop' },
       { id: secondId, someOther: 'prop' },
@@ -112,6 +112,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       name: 'slack',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL is required.'] };
     const configErrors = {};
@@ -128,6 +129,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       name: 'jira',
       config: {} as any,
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const secretsErrors = {};
     const configErrors = { apiUrl: ['apiUrl is required'] };
@@ -146,6 +148,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       name: 'slack',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL must start with https://.'] };
     const configErrors = {};
@@ -155,9 +158,9 @@ describe('getConnectorWithInvalidatedFields', () => {
   });
 });
 
-describe('getAlertWithInvalidatedFields', () => {
-  test('sets to null all fields that are required but undefined in alert', () => {
-    const alert: Rule = {
+describe('getRuleWithInvalidatedFields', () => {
+  test('sets to null all fields that are required but undefined in rule', () => {
+    const rule: Rule = {
       params: {},
       consumer: 'test',
       schedule: {
@@ -171,17 +174,39 @@ describe('getAlertWithInvalidatedFields', () => {
     } as any;
     const baseAlertErrors = {
       name: ['Name is required.'],
-      alertTypeId: ['Rule type is required.'],
+      ruleTypeId: ['Rule type is required.'],
     };
     const actionsErrors: IErrorObject[] = [];
     const paramsErrors = {};
-    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect(alert.name).toBeNull();
-    expect(alert.alertTypeId).toBeNull();
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.name).toBeNull();
+    expect(rule.ruleTypeId).toBeNull();
   });
 
-  test('does not set to null any fields that are required and defined but invalid in alert', () => {
-    const alert: Rule = {
+  test('handles undefined fields with dot notation', () => {
+    const rule: Rule = {
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: undefined,
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = {
+      'schedule.interval': ['Interval is required.'],
+    };
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = {};
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.schedule.interval).toBeNull();
+  });
+
+  test('does not set to null any fields that are required and defined but invalid in rule', () => {
+    const rule: Rule = {
       name: 'test',
       id: '123',
       params: {},
@@ -198,14 +223,36 @@ describe('getAlertWithInvalidatedFields', () => {
     const baseAlertErrors = { consumer: ['Consumer is invalid.'] };
     const actionsErrors: IErrorObject[] = [];
     const paramsErrors = {};
-    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect(alert.consumer).toEqual('@@@@');
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.consumer).toEqual('@@@@');
   });
 
-  test('set to null all fields that are required but undefined in alert params', () => {
-    const alert: Rule = {
+  test('handles defined but invalid fields with dot notation', () => {
+    const rule: Rule = {
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: '1s',
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = {
+      'schedule.interval': ['Interval is too short.'],
+    };
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = {};
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.schedule.interval).toEqual('1s');
+  });
+
+  test('set to null all fields that are required but undefined in rule params', () => {
+    const rule: Rule = {
       name: 'test',
-      alertTypeId: '.threshold',
+      ruleTypeId: '.threshold',
       id: '123',
       params: {},
       consumer: 'test',
@@ -228,19 +275,20 @@ describe('getAlertWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
     const paramsErrors = { index: ['Index is required.'], timeField: ['Time field is required.'] };
-    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect(alert.params.index).toBeNull();
-    expect(alert.params.timeField).toBeNull();
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.params.index).toBeNull();
+    expect(rule.params.timeField).toBeNull();
   });
 
-  test('does not set to null any fields that are required and defined but invalid in alert params', () => {
-    const alert: Rule = {
+  test('does not set to null any fields that are required and defined but invalid in rule params', () => {
+    const rule: Rule = {
       name: 'test',
-      alertTypeId: '.threshold',
+      ruleTypeId: '.threshold',
       id: '123',
       params: {
         aggField: 'foo',
@@ -266,6 +314,7 @@ describe('getAlertWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -273,15 +322,15 @@ describe('getAlertWithInvalidatedFields', () => {
       aggField: ['Aggregation field is invalid.'],
       termSize: ['Term size is invalid.'],
     };
-    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect(alert.params.aggField).toEqual('foo');
-    expect(alert.params.termSize).toEqual('big');
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.params.aggField).toEqual('foo');
+    expect(rule.params.termSize).toEqual('big');
   });
 
-  test('set to null all fields that are required but undefined in alert actions', () => {
-    const alert: Rule = {
+  test('set to null all fields that are required but undefined in rule actions', () => {
+    const rule: Rule = {
       name: 'test',
-      alertTypeId: '.threshold',
+      ruleTypeId: '.threshold',
       id: '123',
       params: {},
       consumer: 'test',
@@ -298,6 +347,7 @@ describe('getAlertWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '123-456',
         },
       ],
       tags: [],
@@ -315,18 +365,19 @@ describe('getAlertWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [{ 'incident.field.name': ['Name is required.'] }];
     const paramsErrors = {};
-    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect((alert.actions[0].params as any).incident.field.name).toBeNull();
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect((rule.actions[0].params as any).incident.field.name).toBeNull();
   });
 
-  test('validates multiple alert actions with the same connector id', () => {
-    const alert: Rule = {
+  test('validates multiple rule actions with the same connector id', () => {
+    const rule: Rule = {
       name: 'test',
-      alertTypeId: '.threshold',
+      ruleTypeId: '.threshold',
       id: '123',
       params: {},
       consumer: 'test',
@@ -343,6 +394,7 @@ describe('getAlertWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '111-111',
         },
         {
           actionTypeId: 'test',
@@ -355,6 +407,7 @@ describe('getAlertWithInvalidatedFields', () => {
               },
             },
           },
+          uuid: '222-222',
         },
       ],
       tags: [],
@@ -372,6 +425,7 @@ describe('getAlertWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [
@@ -379,8 +433,8 @@ describe('getAlertWithInvalidatedFields', () => {
       { 'incident.field.name': ['Name is invalid.'] },
     ];
     const paramsErrors = {};
-    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
-    expect((alert.actions[0].params as any).incident.field.name).toBeNull();
-    expect((alert.actions[1].params as any).incident.field.name).toEqual('myIncident');
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect((rule.actions[0].params as any).incident.field.name).toBeNull();
+    expect((rule.actions[1].params as any).incident.field.name).toEqual('myIncident');
   });
 });

@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import normalizePosixPath from 'normalize-path';
-// @ts-ignore
-import { transformDependencies } from '@kbn/pm';
 import { findUsedDependencies } from './find_used_dependencies';
 import { read, write, Task } from '../../lib';
 
@@ -16,11 +13,27 @@ export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
 
   async run(config, log, build) {
+    const plugins = config.getDistPluginsFromRepo();
+    const distPkgIds = new Set(config.getDistPackagesFromRepo().map((p) => p.id));
     const pkg = config.getKibanaPkg();
-    const transformedDeps = transformDependencies(pkg.dependencies as { [key: string]: string });
-    const foundPkgDeps = await findUsedDependencies(
-      transformedDeps,
-      normalizePosixPath(build.resolvePath('.'))
+
+    /**
+     * Replaces `link:` dependencies with `file:` dependencies. When installing
+     * dependencies, these `file:` dependencies will be copied into `node_modules`
+     * instead of being symlinked.
+     *
+     * This will allow us to copy packages into the build and run `yarn`, which
+     * will then _copy_ the `file:` dependencies into `node_modules` instead of
+     * symlinking like we do in development.
+     *
+     * Additionally it also taken care of replacing `link:bazel-bin/` with
+     * `file:` so we can also support the copy of the Bazel packages dist already into
+     * build/packages to be copied into the node_modules
+     */
+    const transformedDeps = Object.fromEntries(
+      Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })
+        .filter(([id]) => !id.startsWith('@kbn/') || distPkgIds.has(id))
+        .map(([name, version]) => [name, version.replace(/^link:/, 'file:')])
     );
 
     const newPkg = {
@@ -38,10 +51,17 @@ export const CreatePackageJson: Task = {
       },
       repository: pkg.repository,
       engines: {
-        node: pkg.engines.node,
+        node: pkg.engines?.node,
       },
       resolutions: pkg.resolutions,
-      dependencies: foundPkgDeps,
+      dependencies: {
+        // include dependencies which are explicitly used
+        ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
+        // also include all plugin packages
+        ...Object.fromEntries(
+          plugins.map((p) => [p.manifest.id, `file:${p.normalizedRepoRelativeDir}`])
+        ),
+      },
     };
 
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));

@@ -7,7 +7,7 @@
  */
 
 import { cloneDeep, assign } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
 
 /**

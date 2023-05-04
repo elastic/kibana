@@ -11,15 +11,15 @@ import { Coordinate } from '../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceDetailedStatisticsParams {
   environment: string;
   kuery: string;
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
@@ -27,20 +27,26 @@ interface ServiceInstanceDetailedStatisticsParams {
   start: number;
   end: number;
   serviceNodeIds: string[];
+  offset?: string;
+}
+
+interface ServiceInstancesDetailedStat {
+  serviceNodeName: string;
+  errorRate?: Coordinate[];
+  latency?: Coordinate[];
+  throughput?: Coordinate[];
+  cpuUsage?: Coordinate[];
+  memoryUsage?: Coordinate[];
+}
+
+export interface ServiceInstancesDetailedStatisticsResponse {
+  currentPeriod: Record<string, ServiceInstancesDetailedStat>;
+  previousPeriod: Record<string, ServiceInstancesDetailedStat>;
 }
 
 async function getServiceInstancesDetailedStatistics(
   params: ServiceInstanceDetailedStatisticsParams
-): Promise<
-  Array<{
-    serviceNodeName: string;
-    errorRate?: Coordinate[];
-    latency?: Coordinate[];
-    throughput?: Coordinate[];
-    cpuUsage?: Coordinate[];
-    memoryUsage?: Coordinate[];
-  }>
-> {
+): Promise<ServiceInstancesDetailedStat[]> {
   return withApmSpan('get_service_instances_detailed_statistics', async () => {
     const [transactionStats, systemMetricStats = []] = await Promise.all([
       getServiceInstancesTransactionStatistics({
@@ -66,31 +72,29 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   environment,
   kuery,
   latencyAggregationType,
-  setup,
+  apmEventClient,
   serviceName,
   transactionType,
   searchAggregatedTransactions,
   numBuckets,
   serviceNodeIds,
-  comparisonStart,
-  comparisonEnd,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
   numBuckets: number;
   serviceNodeIds: string[];
-  comparisonStart?: number;
-  comparisonEnd?: number;
   start: number;
   end: number;
-}) {
+  offset?: string;
+}): Promise<ServiceInstancesDetailedStatisticsResponse> {
   return withApmSpan(
     'get_service_instances_detailed_statistics_periods',
     async () => {
@@ -98,7 +102,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         environment,
         kuery,
         latencyAggregationType,
-        setup,
+        apmEventClient,
         serviceName,
         transactionType,
         searchAggregatedTransactions,
@@ -112,14 +116,14 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         end,
       });
 
-      const previousPeriodPromise =
-        comparisonStart && comparisonEnd
-          ? getServiceInstancesDetailedStatistics({
-              ...commonParams,
-              start: comparisonStart,
-              end: comparisonEnd,
-            })
-          : [];
+      const previousPeriodPromise = offset
+        ? getServiceInstancesDetailedStatistics({
+            ...commonParams,
+            start,
+            end,
+            offset,
+          })
+        : [];
       const [currentPeriod, previousPeriod] = await Promise.all([
         currentPeriodPromise,
         previousPeriodPromise,

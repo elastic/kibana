@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import type { Role } from '../../../common/model';
 import { RolesAPIClient } from './roles_api_client';
@@ -27,6 +27,7 @@ describe('RolesAPIClient', () => {
       elasticsearch: {
         cluster: [],
         indices: [{ names: [], privileges: [] }],
+        remote_indices: [{ clusters: [], names: [], privileges: [] }],
         run_as: [],
       },
       kibana: [],
@@ -38,6 +39,7 @@ describe('RolesAPIClient', () => {
       elasticsearch: {
         cluster: [],
         indices: [],
+        remote_indices: [],
         run_as: [],
       },
       kibana: [],
@@ -107,6 +109,9 @@ describe('RolesAPIClient', () => {
       elasticsearch: {
         cluster: [],
         indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
+        remote_indices: [
+          { clusters: ['cluster'], names: ['.kibana*'], privileges: ['all'], query: 'something' },
+        ],
         run_as: [],
       },
       kibana: [],
@@ -118,6 +123,9 @@ describe('RolesAPIClient', () => {
       elasticsearch: {
         cluster: [],
         indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
+        remote_indices: [
+          { clusters: ['cluster'], names: ['.kibana*'], privileges: ['all'], query: 'something' },
+        ],
         run_as: [],
       },
       kibana: [],

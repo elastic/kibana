@@ -8,10 +8,14 @@
 import {
   DEFAULT_ICON,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
+  MAX_ZOOM,
+  MIN_ZOOM,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
+
 import {
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
@@ -31,11 +35,18 @@ export const DEFAULT_ICON_SIZE = 6;
 export const DEFAULT_COLOR_RAMP = NUMERICAL_COLOR_PALETTES[0].value;
 export const DEFAULT_COLOR_PALETTE = CATEGORICAL_COLOR_PALETTES[0].value;
 
-export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
+export const LABEL_STYLES = [
+  VECTOR_STYLES.LABEL_SIZE,
+  VECTOR_STYLES.LABEL_COLOR,
+  VECTOR_STYLES.LABEL_BORDER_COLOR,
+  VECTOR_STYLES.LABEL_BORDER_SIZE,
+];
+export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH, ...LABEL_STYLES];
 export const POLYGON_STYLES = [
   VECTOR_STYLES.FILL_COLOR,
   VECTOR_STYLES.LINE_COLOR,
   VECTOR_STYLES.LINE_WIDTH,
+  ...LABEL_STYLES,
 ];
 
 export function getDefaultStaticProperties(
@@ -108,6 +119,13 @@ export function getDefaultStaticProperties(
         size: DEFAULT_LABEL_SIZE,
       },
     },
+    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
+      options: {
+        useLayerZoomRange: true,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+      },
+    },
     [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
       type: STYLE_TYPE.STATIC,
       options: {
@@ -122,6 +140,11 @@ export function getDefaultStaticProperties(
     [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
       options: {
         size: LABEL_BORDER_SIZES.SMALL,
+      },
+    },
+    [VECTOR_STYLES.LABEL_POSITION]: {
+      options: {
+        position: LABEL_POSITIONS.CENTER,
       },
     },
   };
@@ -203,6 +226,13 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
         field: undefined,
       },
     },
+    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
+      options: {
+        useLayerZoomRange: true,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+      },
+    },
     [VECTOR_STYLES.LABEL_COLOR]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
@@ -247,6 +277,11 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
     [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
       options: {
         size: LABEL_BORDER_SIZES.SMALL,
+      },
+    },
+    [VECTOR_STYLES.LABEL_POSITION]: {
+      options: {
+        position: LABEL_POSITIONS.CENTER,
       },
     },
   };

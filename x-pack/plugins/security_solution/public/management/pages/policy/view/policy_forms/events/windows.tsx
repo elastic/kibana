@@ -8,13 +8,23 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { setIn } from '../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { EventFormOption, EventsForm } from '../../components/events_form';
+import type { EventFormOption } from '../../components/events_form';
+import { EventsForm } from '../../components/events_form';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
+      {
+        defaultMessage: 'Credential Access',
+      }
+    ),
+    protectionField: 'credential_access',
+  },
   {
     name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',

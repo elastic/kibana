@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { useEnvironmentsContext } from '../environments_context/use_environments_context';
 import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
@@ -43,31 +44,44 @@ export function ServiceAnomalyTimeseriesContextProvider({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { preferredEnvironment } = useEnvironmentsContext();
 
   const { status, data } = useFetcher(
     (callApmApi) => {
       if (!transactionType || !canGetAnomalies) {
         return;
       }
-
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/anomaly_charts',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              environment: preferredEnvironment,
+            },
           },
-          query: {
-            start,
-            end,
-            transactionType,
-          },
-        },
-      });
+        }
+      );
     },
-    [serviceName, canGetAnomalies, transactionType, start, end]
+    [
+      serviceName,
+      canGetAnomalies,
+      transactionType,
+      start,
+      end,
+      preferredEnvironment,
+    ]
   );
 
   return (

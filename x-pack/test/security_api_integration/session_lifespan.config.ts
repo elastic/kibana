@@ -15,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
+  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
   return {
     testFiles: [resolve(__dirname, './tests/session_lifespan')],
@@ -51,6 +51,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             saml_disable: { order: 3, realm: 'saml1', session: { lifespan: 0 } },
           },
         })}`,
+        // Exclude Uptime tasks to not interfere (additional ES load) with the session cleanup task.
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['UPTIME:*'])}`,
       ],
     },
 

@@ -7,22 +7,26 @@
 
 import { from } from 'rxjs';
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
-import { getLayerList } from '../../../selectors/map_selectors';
+import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStore } from '../../../reducers/store';
 
 export function waitUntilTimeLayersLoad$(store: MapStore) {
-  // @ts-expect-error
   const reduxState$ = from(store);
   return reduxState$.pipe(
     debounceTime(300),
     // using switchMap since switchMap will discard promise from previous state iterations in progress
     switchMap(async (state) => {
-      const promises = getLayerList(state).map(async (layer) => {
-        return {
-          isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
-          layer,
-        };
-      });
+      const zoom = getMapZoom(state);
+      const promises = getLayerList(state)
+        .filter((layer) => {
+          return layer.isVisible() && layer.showAtZoomLevel(zoom);
+        })
+        .map(async (layer) => {
+          return {
+            isFilteredByGlobalTime: await layer.isFilteredByGlobalTime(),
+            layer,
+          };
+        });
       const layersWithMeta = await Promise.all(promises);
       return layersWithMeta;
     }),

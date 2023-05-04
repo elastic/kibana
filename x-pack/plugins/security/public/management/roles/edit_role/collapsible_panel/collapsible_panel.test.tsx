@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { CollapsiblePanel } from './collapsible_panel';
 
@@ -45,7 +45,7 @@ test('it hides children when the "hide" link is clicked', () => {
   expect(wrapper.find(CollapsiblePanel)).toHaveLength(1);
   expect(wrapper.find('.child')).toHaveLength(2);
 
-  wrapper.find(EuiLink).simulate('click');
+  wrapper.find(EuiLink).find('button').simulate('click');
 
   expect(wrapper.find('.child')).toHaveLength(0);
 });

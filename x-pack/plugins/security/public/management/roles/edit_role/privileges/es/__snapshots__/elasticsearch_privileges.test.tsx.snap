@@ -52,6 +52,7 @@ exports[`it renders without crashing 1`] = `
             "monitor",
           ]
         }
+        editable={true}
         onChange={[Function]}
         role={
           Object {
@@ -99,29 +100,21 @@ exports[`it renders without crashing 1`] = `
       </h3>
     }
   >
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
+    <EuiComboBox
+      aria-label="Run as privileges"
+      async={false}
+      compressed={false}
       fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={true}
-      labelType="label"
-    >
-      <EuiComboBox
-        async={false}
-        compressed={false}
-        fullWidth={false}
-        isClearable={true}
-        isDisabled={false}
-        onChange={[Function]}
-        onCreateOption={[Function]}
-        options={Array []}
-        placeholder="Add a user…"
-        selectedOptions={Array []}
-        singleSelection={false}
-        sortMatchesBy="none"
-      />
-    </EuiFormRow>
+      isClearable={true}
+      isDisabled={false}
+      onChange={[Function]}
+      onCreateOption={[Function]}
+      options={Array []}
+      placeholder="Add a user…"
+      selectedOptions={Array []}
+      singleSelection={false}
+      sortMatchesBy="none"
+    />
   </EuiDescribedFormGroup>
   <EuiSpacer />
   <EuiTitle
@@ -170,7 +163,9 @@ exports[`it renders without crashing 1`] = `
         "index",
       ]
     }
+    editable={true}
     indexPatterns={Array []}
+    indexType="indices"
     indicesAPIClient={
       Object {
         "getFields": [MockFunction],
@@ -179,7 +174,6 @@ exports[`it renders without crashing 1`] = `
     license={
       Object {
         "features$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
@@ -206,16 +200,5 @@ exports[`it renders without crashing 1`] = `
       }
     }
   />
-  <EuiHorizontalRule />
-  <EuiButton
-    iconType="plusInCircle"
-    onClick={[Function]}
-  >
-    <FormattedMessage
-      defaultMessage="Add index privilege"
-      id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-      values={Object {}}
-    />
-  </EuiButton>
 </CollapsiblePanel>
 `;

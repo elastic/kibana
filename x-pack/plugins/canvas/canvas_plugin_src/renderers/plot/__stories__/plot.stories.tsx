@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { plot } from '../';
+import { plot } from '..';
 import { Render } from '../../__stories__/render';
 
 const plotOptions = {

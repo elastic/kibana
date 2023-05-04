@@ -8,19 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { PainlessLang } from '@kbn/monaco';
 
-import {
-  fieldValidators,
-  FieldConfig,
-  RuntimeType,
-  ValidationFunc,
-  ValidationCancelablePromise,
-} from '../../shared_imports';
-import type { Context } from '../preview';
+import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
+import type { PreviewState } from '../preview/types';
 
 const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
 const i18nTexts = {
@@ -32,45 +23,9 @@ const i18nTexts = {
   ),
 };
 
-// Validate the painless **syntax** (no need to make an HTTP request)
-const painlessSyntaxValidator = () => {
-  let isValidatingSub: Subscription;
-
-  return (() => {
-    const promise: ValidationCancelablePromise<'ERR_PAINLESS_SYNTAX'> = new Promise((resolve) => {
-      isValidatingSub = PainlessLang.validation$()
-        .pipe(
-          first(({ isValidating }) => {
-            return isValidating === false;
-          })
-        )
-        .subscribe(({ errors }) => {
-          const editorHasSyntaxErrors = errors.length > 0;
-
-          if (editorHasSyntaxErrors) {
-            return resolve({
-              message: i18nTexts.invalidScriptErrorMessage,
-              code: 'ERR_PAINLESS_SYNTAX',
-            });
-          }
-
-          resolve(undefined);
-        });
-    });
-
-    promise.cancel = () => {
-      if (isValidatingSub) {
-        isValidatingSub.unsubscribe();
-      }
-    };
-
-    return promise;
-  }) as ValidationFunc;
-};
-
 // Validate the painless **script**
 const painlessScriptValidator: ValidationFunc = async ({ customData: { provider } }) => {
-  const previewError = (await provider()) as Context['error'];
+  const previewError = (await provider()) as PreviewState['previewResponse']['error'];
 
   if (previewError && previewError.code === 'PAINLESS_SCRIPT_ERROR') {
     return {
@@ -132,10 +87,6 @@ export const schema = {
           ),
         },
         {
-          validator: painlessSyntaxValidator(),
-          isAsync: true,
-        },
-        {
           validator: painlessScriptValidator,
           isAsync: true,
         },
@@ -187,6 +138,9 @@ export const schema = {
         }),
       },
     ],
+  },
+  fields: {
+    defaultValue: {},
   },
   __meta__: {
     isCustomLabelVisible: {

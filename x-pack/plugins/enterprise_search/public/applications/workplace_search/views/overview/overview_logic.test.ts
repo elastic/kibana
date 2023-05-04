@@ -42,18 +42,27 @@ describe('OverviewLogic', () => {
     });
 
     it('will set `dataLoading` to false', () => {
-      expect(OverviewLogic.values.dataLoading).toEqual(false);
+      expect(OverviewLogic.values).toEqual({
+        ...mockOverviewValues,
+        ...data,
+        dataLoading: false,
+      });
     });
 
     it('will set server values', () => {
-      expect(OverviewLogic.values.hasUsers).toEqual(true);
-      expect(OverviewLogic.values.hasOrgSources).toEqual(true);
-      expect(OverviewLogic.values.isOldAccount).toEqual(true);
-      expect(OverviewLogic.values.sourcesCount).toEqual(1);
-      expect(OverviewLogic.values.pendingInvitationsCount).toEqual(1);
-      expect(OverviewLogic.values.accountsCount).toEqual(1);
-      expect(OverviewLogic.values.privateSourcesCount).toEqual(1);
-      expect(OverviewLogic.values.activityFeed).toEqual(feed);
+      expect(OverviewLogic.values).toEqual({
+        ...mockOverviewValues,
+        ...data,
+        dataLoading: false,
+        hasUsers: true,
+        hasOrgSources: true,
+        isOldAccount: true,
+        sourcesCount: 1,
+        pendingInvitationsCount: 1,
+        accountsCount: 1,
+        privateSourcesCount: 1,
+        activityFeed: feed,
+      });
     });
   });
 

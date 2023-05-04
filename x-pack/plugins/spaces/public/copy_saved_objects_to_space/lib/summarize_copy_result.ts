@@ -8,9 +8,9 @@
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
-import type { FailedImport, ProcessedImportResponse } from '../lib';
+import type { FailedImport, ProcessedImportResponse } from '.';
 import type { CopyToSpaceSavedObjectTarget } from '../types';
 
 export interface SummarizedSavedObjectResult {

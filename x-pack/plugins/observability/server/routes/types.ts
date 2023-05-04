@@ -4,30 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import type {
-  EndpointOf,
-  ReturnOf,
-  ServerRoute,
-  ServerRouteRepository,
-} from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, KibanaRequest, Logger } from 'kibana/server';
-import { RuleDataPluginService } from '../../../rule_registry/server';
+import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
+import { RegisterRoutesDependencies } from './register_routes';
 
 export type { ObservabilityServerRouteRepository };
 
 export interface ObservabilityRouteHandlerResources {
-  core: {
-    start: () => Promise<CoreStart>;
-    setup: CoreSetup;
-  };
-  ruleDataService: RuleDataPluginService;
-  request: KibanaRequest;
   context: ObservabilityRequestHandlerContext;
+  dependencies: RegisterRoutesDependencies;
   logger: Logger;
+  request: KibanaRequest;
 }
 
 export interface ObservabilityRouteCreateOptions {
@@ -36,20 +26,7 @@ export interface ObservabilityRouteCreateOptions {
   };
 }
 
-export type AbstractObservabilityServerRouteRepository = ServerRouteRepository<
-  ObservabilityRouteHandlerResources,
-  ObservabilityRouteCreateOptions,
-  Record<
-    string,
-    ServerRoute<
-      string,
-      t.Mixed | undefined,
-      ObservabilityRouteHandlerResources,
-      any,
-      ObservabilityRouteCreateOptions
-    >
-  >
->;
+export type AbstractObservabilityServerRouteRepository = ServerRouteRepository;
 
 export type ObservabilityAPIReturnType<
   TEndpoint extends EndpointOf<ObservabilityServerRouteRepository>

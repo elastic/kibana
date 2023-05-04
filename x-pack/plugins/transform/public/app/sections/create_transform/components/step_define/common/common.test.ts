@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { getPivotDropdownOptions } from '../common';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { getPivotDropdownOptions } from '.';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterAggForm } from './filter_agg/components';
-import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import { PercentilesAggForm } from './percentiles_agg/percentiles_form_component';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
-    // The field name includes the characters []> as well as a leading and ending space charcter
+    // The field name includes the characters []> as well as a leading and ending space character
     // which cannot be used for aggregation names. The test results verifies that the characters
     // should still be present in field and dropDownName values, but should be stripped for aggName values.
-    const indexPattern = {
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
+    const dataView = {
+      id: 'the-data-view-id',
+      title: 'the-data-view-title',
       fields: [
         {
           name: ' the-f[i]e>ld ',
@@ -27,11 +28,11 @@ describe('Transform: Define Pivot Common', () => {
           searchable: true,
         },
       ],
-    } as IndexPattern;
+    } as DataView;
 
-    const options = getPivotDropdownOptions(indexPattern);
-
+    const options = getPivotDropdownOptions(dataView);
     expect(options).toMatchObject({
+      fields: [{ name: ' the-f[i]e>ld ', type: 'number' }],
       aggOptions: [
         {
           label: ' the-f[i]e>ld ',
@@ -44,8 +45,10 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
             { label: 'filter( the-f[i]e>ld )' },
+            { label: 'terms( the-f[i]e>ld )' },
             { label: 'top_metrics( the-f[i]e>ld )' },
           ],
+          field: { id: ' the-f[i]e>ld ', type: 'number' },
         },
       ],
       aggOptionsData: {
@@ -78,7 +81,8 @@ describe('Transform: Define Pivot Common', () => {
           field: ' the-f[i]e>ld ',
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'filter( the-f[i]e>ld )': {
           agg: 'filter',
@@ -99,8 +103,29 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field.value_count',
           dropDownName: 'value_count( the-f[i]e>ld )',
         },
+        'terms( the-f[i]e>ld )': {
+          agg: 'terms',
+          field: ' the-f[i]e>ld ',
+          aggName: 'the-field.terms',
+          dropDownName: 'terms( the-f[i]e>ld )',
+          isSubAggsSupported: false,
+          isMultiField: false,
+          aggConfig: { size: 10 },
+        },
+        'top_metrics( the-f[i]e>ld )': {
+          agg: 'top_metrics',
+          field: ' the-f[i]e>ld ',
+          aggName: 'top_metrics',
+          dropDownName: 'top_metrics( the-f[i]e>ld )',
+          isSubAggsSupported: false,
+          isMultiField: true,
+          aggConfig: {},
+        },
       },
-      groupByOptions: [{ label: 'histogram( the-f[i]e>ld )' }],
+      groupByOptions: [
+        { label: 'histogram( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+        { label: 'terms( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+      ],
       groupByOptionsData: {
         'histogram( the-f[i]e>ld )': {
           agg: 'histogram',
@@ -108,6 +133,12 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field',
           dropDownName: 'histogram( the-f[i]e>ld )',
           interval: '10',
+        },
+        'terms( the-f[i]e>ld )': {
+          agg: 'terms',
+          aggName: 'the-field',
+          dropDownName: 'terms( the-f[i]e>ld )',
+          field: ' the-f[i]e>ld ',
         },
       },
     });
@@ -120,8 +151,12 @@ describe('Transform: Define Pivot Common', () => {
         },
       } as RuntimeField,
     };
-    const optionsWithRuntimeFields = getPivotDropdownOptions(indexPattern, runtimeMappings);
+    const optionsWithRuntimeFields = getPivotDropdownOptions(dataView, runtimeMappings);
     expect(optionsWithRuntimeFields).toMatchObject({
+      fields: [
+        { name: ' the-f[i]e>ld ', type: 'number' },
+        { name: 'rt_bytes_bigger', type: 'number' },
+      ],
       aggOptions: [
         {
           label: ' the-f[i]e>ld ',
@@ -134,8 +169,10 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
             { label: 'filter( the-f[i]e>ld )' },
+            { label: 'terms( the-f[i]e>ld )' },
             { label: 'top_metrics( the-f[i]e>ld )' },
           ],
+          field: { id: ' the-f[i]e>ld ', type: 'number' },
         },
         {
           label: 'rt_bytes_bigger',
@@ -148,8 +185,10 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum(rt_bytes_bigger)' },
             { label: 'value_count(rt_bytes_bigger)' },
             { label: 'filter(rt_bytes_bigger)' },
+            { label: 'terms(rt_bytes_bigger)' },
             { label: 'top_metrics(rt_bytes_bigger)' },
           ],
+          field: { id: 'rt_bytes_bigger', type: 'number' },
         },
       ],
       aggOptionsData: {
@@ -182,7 +221,8 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
           field: ' the-f[i]e>ld ',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'sum( the-f[i]e>ld )': {
           agg: 'sum',
@@ -203,6 +243,24 @@ describe('Transform: Define Pivot Common', () => {
           field: ' the-f[i]e>ld ',
           isSubAggsSupported: true,
           AggFormComponent: FilterAggForm,
+        },
+        'terms( the-f[i]e>ld )': {
+          agg: 'terms',
+          aggName: 'the-field.terms',
+          dropDownName: 'terms( the-f[i]e>ld )',
+          field: ' the-f[i]e>ld ',
+          isSubAggsSupported: false,
+          isMultiField: false,
+          aggConfig: { size: 10 },
+        },
+        'top_metrics( the-f[i]e>ld )': {
+          agg: 'top_metrics',
+          aggName: 'top_metrics',
+          dropDownName: 'top_metrics( the-f[i]e>ld )',
+          field: ' the-f[i]e>ld ',
+          isSubAggsSupported: false,
+          isMultiField: true,
+          aggConfig: {},
         },
         'avg(rt_bytes_bigger)': {
           agg: 'avg',
@@ -233,7 +291,8 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'rt_bytes_bigger.percentiles',
           dropDownName: 'percentiles(rt_bytes_bigger)',
           field: 'rt_bytes_bigger',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'sum(rt_bytes_bigger)': {
           agg: 'sum',
@@ -255,10 +314,30 @@ describe('Transform: Define Pivot Common', () => {
           isSubAggsSupported: true,
           AggFormComponent: FilterAggForm,
         },
+        'terms(rt_bytes_bigger)': {
+          agg: 'terms',
+          field: 'rt_bytes_bigger',
+          aggName: 'rt_bytes_bigger.terms',
+          dropDownName: 'terms(rt_bytes_bigger)',
+          isSubAggsSupported: false,
+          isMultiField: false,
+          aggConfig: { size: 10 },
+        },
+        'top_metrics(rt_bytes_bigger)': {
+          agg: 'top_metrics',
+          field: 'rt_bytes_bigger',
+          aggName: 'top_metrics',
+          dropDownName: 'top_metrics(rt_bytes_bigger)',
+          isSubAggsSupported: false,
+          isMultiField: true,
+          aggConfig: {},
+        },
       },
       groupByOptions: [
-        { label: 'histogram( the-f[i]e>ld )' },
-        { label: 'histogram(rt_bytes_bigger)' },
+        { label: 'histogram( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+        { label: 'terms( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+        { label: 'histogram(rt_bytes_bigger)', field: { id: 'rt_bytes_bigger', type: 'number' } },
+        { label: 'terms(rt_bytes_bigger)', field: { id: 'rt_bytes_bigger', type: 'number' } },
       ],
       groupByOptionsData: {
         'histogram( the-f[i]e>ld )': {
@@ -268,12 +347,24 @@ describe('Transform: Define Pivot Common', () => {
           field: ' the-f[i]e>ld ',
           interval: '10',
         },
+        'terms( the-f[i]e>ld )': {
+          agg: 'terms',
+          field: ' the-f[i]e>ld ',
+          aggName: 'the-field',
+          dropDownName: 'terms( the-f[i]e>ld )',
+        },
         'histogram(rt_bytes_bigger)': {
           agg: 'histogram',
           aggName: 'rt_bytes_bigger',
           dropDownName: 'histogram(rt_bytes_bigger)',
           field: 'rt_bytes_bigger',
           interval: '10',
+        },
+        'terms(rt_bytes_bigger)': {
+          agg: 'terms',
+          field: 'rt_bytes_bigger',
+          aggName: 'rt_bytes_bigger',
+          dropDownName: 'terms(rt_bytes_bigger)',
         },
       },
     });

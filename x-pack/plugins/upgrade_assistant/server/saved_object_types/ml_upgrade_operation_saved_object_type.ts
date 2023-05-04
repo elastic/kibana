@@ -5,44 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 import { ML_UPGRADE_OP_TYPE } from '../../common/types';
 
 export const mlSavedObjectType: SavedObjectsType = {
   name: ML_UPGRADE_OP_TYPE,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
   mappings: {
+    dynamic: false,
     properties: {
-      nodeId: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      },
       snapshotId: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      },
-      jobId: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      },
-      status: {
         type: 'text',
         fields: {
           keyword: {

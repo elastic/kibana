@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobFieldType } from './index';
+import type { SupportedFieldType } from '.';
 
 export interface Percentile {
   percent: number;
@@ -15,8 +15,10 @@ export interface Percentile {
 
 export interface FieldRequestConfig {
   fieldName: string;
-  type: JobFieldType;
+  type: SupportedFieldType;
   cardinality: number;
+  existsInDocs: boolean;
+  supportedAggs?: Set<string>;
 }
 
 export interface DocumentCountBuckets {
@@ -28,7 +30,18 @@ export interface DocumentCounts {
   interval?: number;
 }
 
+export interface LatLongExample {
+  lat: number;
+  lon: number;
+}
+
+export interface GeoPointExample {
+  coordinates: number[];
+  type?: string;
+}
+
 export interface FieldVisStats {
+  totalDocuments?: number;
   error?: Error;
   cardinality?: number;
   count?: number;
@@ -52,10 +65,8 @@ export interface FieldVisStats {
   max?: number;
   median?: number;
   min?: number;
-  topValues?: Array<{ key: number | string; doc_count: number }>;
-  topValuesSampleSize?: number;
-  topValuesSamplerShardSize?: number;
-  examples?: Array<string | object>;
+  topValues?: Array<{ key: number | string; doc_count: number; percent: number }>;
+  examples?: Array<string | GeoPointExample | object>;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
 }

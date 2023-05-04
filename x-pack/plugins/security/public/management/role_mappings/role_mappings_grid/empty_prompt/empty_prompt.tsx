@@ -8,24 +8,35 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
+import type { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ScopedHistory } from 'src/core/public';
 
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
 interface EmptyPromptProps {
   history: ScopedHistory;
+  readOnly?: boolean;
 }
 
-export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({ history }) => (
+export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
+  history,
+  readOnly = false,
+}) => (
   <EuiEmptyPrompt
     iconType="managementApp"
     title={
       <h1>
-        <FormattedMessage
-          id="xpack.security.management.roleMappings.emptyPromptTitle"
-          defaultMessage="Create your first role mapping"
-        />
+        {readOnly ? (
+          <FormattedMessage
+            id="xpack.security.management.roleMappings.readOnlyEmptyPromptTitle"
+            defaultMessage="There are no role mappings to view"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.security.management.roleMappings.emptyPromptTitle"
+            defaultMessage="Create your first role mapping"
+          />
+        )}
       </h1>
     }
     body={
@@ -38,7 +49,7 @@ export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({ history
         </p>
       </Fragment>
     }
-    actions={<CreateRoleMappingButton history={history} />}
+    actions={readOnly ? null : <CreateRoleMappingButton history={history} />}
     data-test-subj="roleMappingsEmptyPrompt"
   />
 );

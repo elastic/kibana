@@ -5,38 +5,59 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
+import { IntervalSchedule, RuleNotifyWhen } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { resolvable } from '../../test_utils';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateLegacyActions } from '../lib';
 
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
+
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
+const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -55,6 +76,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -74,12 +98,11 @@ describe('update()', () => {
       enabled: true,
       tags: ['foo'],
       alertTypeId: 'myType',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       consumer: 'myApp',
+      revision: 0,
       scheduledTaskId: 'task-123',
       params: {},
-      throttle: null,
-      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -88,6 +111,11 @@ describe('update()', () => {
           actionRef: '1',
           params: {
             foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.CHANGE,
+            throttle: null,
           },
         },
       ],
@@ -122,6 +150,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -138,9 +167,18 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
-      minimumScheduleInterval: '5s',
+      validate: {
+        params: { validate: (params) => params },
+      },
+    });
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
     });
   });
 
@@ -161,6 +199,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -176,6 +215,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -183,7 +223,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -214,6 +254,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -236,23 +277,16 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
           bar: true,
+          risk_score: 40,
+          severity: 'low',
         },
         throttle: null,
         notifyWhen: 'onActiveAlert',
@@ -316,8 +350,9 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -327,7 +362,8 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -340,6 +376,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "100",
           },
           Object {
             "actionRef": "action_1",
@@ -348,6 +385,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "101",
           },
           Object {
             "actionRef": "action_2",
@@ -356,13 +394,19 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "myType",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
+        "mapped_params": Object {
+          "risk_score": 40,
+          "severity": "20-low",
+        },
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
@@ -370,9 +414,12 @@ describe('update()', () => {
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
+          "risk_score": 40,
+          "severity": "low",
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -428,6 +475,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -443,6 +491,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -458,6 +507,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -469,7 +519,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -500,6 +550,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -520,7 +571,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -566,6 +617,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '103',
           },
           {
             group: 'default',
@@ -574,6 +626,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '104',
           },
           {
             group: 'custom',
@@ -582,18 +635,21 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '105',
           },
         ],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
         meta: { versionApiKeyLastmodified: 'v7.10.0' },
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
-        schedule: { interval: '10s' },
+        revision: 1,
+        schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
@@ -643,8 +699,9 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -687,11 +744,16 @@ describe('update()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -699,7 +761,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
@@ -715,6 +777,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -735,7 +798,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: ruleParams,
@@ -758,18 +821,26 @@ describe('update()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '106',
+          },
         ],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
         meta: { versionApiKeyLastmodified: 'v7.10.0' },
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
-        schedule: { interval: '10s' },
+        revision: 1,
+        schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
@@ -814,8 +885,9 @@ describe('update()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "9",
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -833,7 +905,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -851,6 +923,7 @@ describe('update()', () => {
           },
         ],
         apiKey: Buffer.from('123:abc').toString('base64'),
+        revision: 1,
         scheduledTaskId: 'task-123',
       },
       updated_at: new Date().toISOString(),
@@ -862,35 +935,17 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
           bar: true,
         },
         throttle: '5m',
-        notifyWhen: null,
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -922,14 +977,23 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -942,10 +1006,12 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "107",
           },
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
@@ -957,8 +1023,9 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -998,7 +1065,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: false,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1015,6 +1082,7 @@ describe('update()', () => {
             },
           },
         ],
+        revision: 1,
         scheduledTaskId: 'task-123',
         apiKey: null,
       },
@@ -1027,19 +1095,10 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1079,14 +1138,15 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -1099,10 +1159,12 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "108",
           },
         ],
         "alertTypeId": "myType",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": false,
@@ -1114,8 +1176,9 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1151,7 +1214,7 @@ describe('update()', () => {
         await rulesClient.update({
           id: '1',
           data: {
-            schedule: { interval: '10s' },
+            schedule: { interval: '1m' },
             name: 'abc',
             tags: ['foo'],
             params: {
@@ -1203,14 +1266,16 @@ describe('update()', () => {
           param1: schema.string(),
         }),
       },
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1241,7 +1306,7 @@ describe('update()', () => {
       attributes: {
         enabled: false,
         name: ' my alert name ',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1253,6 +1318,11 @@ describe('update()', () => {
             actionTypeId: 'test',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1285,7 +1355,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1296,6 +1366,11 @@ describe('update()', () => {
             actionTypeId: 'test',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1309,18 +1384,16 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail')); // add ApiKey to invalidate
+    bulkMarkApiKeysForInvalidationMock.mockImplementationOnce(() => new Error('Fail'));
     await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
           bar: true,
         },
-        throttle: null,
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1328,12 +1401,21 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
       },
     });
-    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -1355,6 +1437,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1370,6 +1453,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1377,7 +1461,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1389,6 +1473,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1397,6 +1486,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1404,6 +1498,11 @@ describe('update()', () => {
             actionTypeId: 'test2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1432,14 +1531,12 @@ describe('update()', () => {
     await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
           bar: true,
         },
-        throttle: '5m',
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1447,6 +1544,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
@@ -1454,12 +1556,22 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
             id: '2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
             },
           },
         ],
@@ -1481,14 +1593,12 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1496,14 +1606,24 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('234');
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MjM0OmFiYw=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   describe('updating an alert schedule', () => {
@@ -1517,13 +1637,21 @@ describe('update()', () => {
       ruleTypeRegistry.get.mockReturnValueOnce({
         id: '123',
         name: 'Test',
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'group2', name: 'Action Group 2' },
+        ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,
@@ -1566,6 +1694,11 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
           scheduledTaskId: taskId,
@@ -1579,26 +1712,24 @@ describe('update()', () => {
         ],
       });
 
-      taskManager.runNow.mockReturnValueOnce(Promise.resolve({ id: alertId }));
+      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId }));
     }
 
-    test('updating the alert schedule should rerun the task immediately', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+    test('updating the alert schedule should call taskManager.bulkUpdateSchedules', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
-      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
+      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '1m' });
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1606,31 +1737,34 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalledWith(taskId);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], { interval: '1m' });
     });
 
-    test('updating the alert without changing the schedule should not rerun the task', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+    test('updating the alert without changing the schedule should not call taskManager.bulkUpdateSchedules', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1638,72 +1772,214 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
       });
 
-      expect(taskManager.runNow).not.toHaveBeenCalled();
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+    test('throws error when mixing and matching global and per-action frequency values', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
-
-      const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
-
-      taskManager.runNow.mockReset();
-      taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
-
-      await rulesClient.update({
-        id: alertId,
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          notifyWhen: null,
-          actions: [
-            {
-              group: 'default',
-              id: '1',
-              params: {
-                foo: true,
-              },
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
             },
-          ],
-        },
-      });
+            throttle: null,
+            notifyWhen: 'onActionGroupChange',
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'group2',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
 
-      expect(taskManager.runNow).toHaveBeenCalled();
-      resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: null,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
     });
 
-    test('logs when the rerun of an alerts underlying task fails', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+    test('throws error when neither global frequency nor action frequency are defined', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
-      taskManager.runNow.mockReset();
-      taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            notifyWhen: undefined,
+            throttle: undefined,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    test('throws error when when some actions are missing frequency params', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
+
+      await expect(
+        rulesClient.update({
+          id: alertId,
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            notifyWhen: undefined,
+            throttle: undefined,
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+                frequency: {
+                  summary: false,
+                  notifyWhen: 'onActionGroupChange',
+                  throttle: null,
+                },
+              },
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    test('logs when update of schedule of an alerts underlying task fails', async () => {
+      const alertId = uuidv4();
+      const taskId = uuidv4();
+
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
+
+      taskManager.bulkUpdateSchedules.mockReset();
+      taskManager.bulkUpdateSchedules.mockRejectedValue(new Error('Failed to run alert'));
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
@@ -1711,15 +1987,20 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalled();
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalled();
 
       expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-        `Alert update failed to run its underlying task. TaskManager runNow failed with Error: Failed to run alert`
+        `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: Failed to run alert`
       );
     });
   });
@@ -1742,6 +2023,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1757,6 +2039,7 @@ describe('update()', () => {
         isMissingSecrets: true,
         name: 'another connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
 
@@ -1764,7 +2047,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1797,178 +2080,308 @@ describe('update()', () => {
           ],
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid connectors: another connector"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Invalid connectors: another connector"`
+    );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
-
-  describe('authorization', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+  test('should update a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
+    // Reset from default behaviour
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
         id: '1',
-        type: 'alert',
-        attributes: {
-          alertTypeId: 'myType',
-          consumer: 'myApp',
-          enabled: true,
-          schedule: { interval: '10s' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-          scheduledTaskId: 'task-123',
-          createdAt: new Date().toISOString(),
+        actionTypeId: '.slack',
+        config: {},
+        isMissingSecrets: true,
+        name: 'slack connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    actionsClient.isPreconfigured.mockReset();
+    actionsClient.isPreconfigured.mockReturnValueOnce(false);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
         },
-        updated_at: new Date().toISOString(),
-        references: [],
-      });
-    });
-
-    test('ensures user is authorised to update this type of alert under the consumer', async () => {
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          notifyWhen: null,
-          actions: [],
-        },
-      });
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'rule',
-        consumer: 'myApp',
-        operation: 'update',
-        ruleTypeId: 'myType',
-      });
-    });
-
-    test('throws when user is not authorised to update this type of alert', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to update a "myType" alert for "myApp"`)
-      );
-
-      await expect(
-        rulesClient.update({
-          id: '1',
-          data: {
-            schedule: { interval: '10s' },
-            name: 'abc',
-            tags: ['foo'],
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
             params: {
-              bar: true,
+              foo: true,
             },
-            throttle: null,
-            notifyWhen: null,
-            actions: [],
           },
-        })
-      ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to update a "myType" alert for "myApp"]`
-      );
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        entity: 'rule',
-        consumer: 'myApp',
-        operation: 'update',
-        ruleTypeId: 'myType',
-      });
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
     });
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      allowMissingConnectorSecrets: true,
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      'alert',
+      {
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+            uuid: '144',
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
+        consumer: 'myApp',
+        enabled: true,
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true },
+        revision: 1,
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(1);
   });
 
-  describe('auditLogger', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+  test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
         id: '1',
-        type: 'alert',
-        attributes: {
-          enabled: true,
-          schedule: { interval: '10s' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-          scheduledTaskId: 'task-123',
-          createdAt: new Date().toISOString(),
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
         },
-        updated_at: new Date().toISOString(),
-        references: [],
-      });
-    });
-
-    test('logs audit event when updating a rule', async () => {
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '10s' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          actions: [],
-          notifyWhen: null,
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
         },
-      });
-
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'rule_update',
-            outcome: 'unknown',
-          }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
-        })
-      );
-    });
-
-    test('logs audit event when not authorised to update a rule', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
-
-      await expect(
-        rulesClient.update({
-          id: '1',
-          data: {
-            schedule: { interval: '10s' },
-            name: 'abc',
-            tags: ['foo'],
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
-              bar: true,
-            },
-            throttle: null,
-            actions: [],
-            notifyWhen: null,
-          },
-        })
-      ).rejects.toThrow();
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            outcome: 'failure',
-            action: 'rule_update',
-          }),
-          kibana: {
-            saved_object: {
-              id: '1',
-              type: 'alert',
+              foo: true,
             },
           },
-          error: {
-            code: 'Error',
-            message: 'Unauthorized',
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
           },
-        })
-      );
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
     });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      `Rule schedule interval (1s) for "myType" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+    );
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });
 
-  test('throws error when updating with an interval less than the minimum configured one', async () => {
+  test('throws error when updating with an interval less than the minimum configured one when enforce = true', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
     await expect(
       rulesClient.update({
         id: '1',
@@ -2007,9 +2420,603 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: the interval is less than the minimum interval of 5s"`
+      `"Error updating rule: the interval is less than the allowed minimum interval of 1m"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  describe('authorization', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+        references: [],
+      });
+    });
+
+    test('ensures user is authorised to update this type of alert under the consumer', async () => {
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: null,
+          actions: [],
+        },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
+    });
+
+    test('throws when user is not authorised to update this type of alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to update a "myType" alert for "myApp"`)
+      );
+
+      await expect(
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: null,
+            actions: [],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to update a "myType" alert for "myApp"]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'myApp',
+        operation: 'update',
+        ruleTypeId: 'myType',
+      });
+    });
+  });
+
+  describe('auditLogger', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+        references: [],
+      });
+    });
+
+    test('logs audit event when updating a rule', async () => {
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          actions: [],
+          notifyWhen: null,
+        },
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_update',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to update a rule', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            actions: [],
+            notifyWhen: null,
+          },
+        })
+      ).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            outcome: 'failure',
+            action: 'rule_update',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
+  });
+
+  test('updates an action with uuid and adds uuid to an action without it', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '123-456',
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '111-111',
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+          risk_score: 40,
+          severity: 'low',
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '123-456',
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+          },
+        ],
+      },
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+            group: 'default',
+            params: { foo: true },
+            uuid: '123-456',
+          },
+          {
+            actionRef: '',
+            actionTypeId: '',
+            frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+            group: 'default',
+            params: { foo: true },
+            uuid: '151',
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
+        consumer: 'myApp',
+        enabled: true,
+        mapped_params: { risk_score: 40, severity: '20-low' },
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: null,
+        params: { bar: true, risk_score: 40, severity: 'low' },
+        revision: 1,
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          notifyWhen: 'onActiveAlert',
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [],
+      });
+    });
+
+    test('should call migrateLegacyActions', async () => {
+      const existingDecryptedSiemAlert = {
+        ...existingDecryptedAlert,
+        attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        existingDecryptedSiemAlert
+      );
+
+      actionsClient.getBulk.mockReset();
+      actionsClient.isPreconfigured.mockReset();
+
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+        },
+      });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+        attributes: existingDecryptedSiemAlert.attributes,
+      });
+    });
+  });
+
+  it('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyCreatedByUser: true,
+        revision: 1,
+        scheduledTaskId: 'task-123',
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": true,
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).not.toHaveBeenCalled();
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+            "uuid": "152",
+          },
+        ],
+        "alertTypeId": "myType",
+        "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": true,
+        "apiKeyOwner": "elastic",
+        "consumer": "myApp",
+        "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
+        "name": "abc",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
+        "updatedBy": "elastic",
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
+  });
+
+  test('throws when unsecuredSavedObjectsClient update fails and does not invalidate newly created API key if the user is authenticated using an api key', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
+    await expect(
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: [],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

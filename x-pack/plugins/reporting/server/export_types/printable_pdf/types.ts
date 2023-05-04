@@ -6,6 +6,6 @@
  */
 
 export type {
-  JobParamsPDF,
+  JobParamsPDFDeprecated,
   TaskPayloadPDF,
 } from '../../../common/types/export_types/printable_pdf';

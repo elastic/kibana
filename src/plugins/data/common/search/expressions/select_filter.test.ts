@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common';
+import { createMockContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from './utils';
 import { selectFilterFunction } from './select_filter';
 import { KibanaContext } from './kibana_context_type';
@@ -25,6 +25,12 @@ describe('interpreter/functions#selectFilter', () => {
       {
         meta: {
           group: 'g2',
+        },
+        query: {},
+      },
+      {
+        meta: {
+          group: 'g3',
         },
         query: {},
       },
@@ -70,6 +76,12 @@ describe('interpreter/functions#selectFilter', () => {
           },
           Object {
             "meta": Object {
+              "group": "g3",
+            },
+            "query": Object {},
+          },
+          Object {
+            "meta": Object {
               "controlledBy": "i1",
               "group": "g1",
             },
@@ -94,14 +106,20 @@ describe('interpreter/functions#selectFilter', () => {
     `);
   });
 
-  it('selects filters belonging to certain group', () => {
-    const actual = fn(kibanaContext, { group: 'g1' }, createMockContext());
+  it('selects filters belonging to certain groups', () => {
+    const actual = fn(kibanaContext, { group: ['g1', 'g3'] }, createMockContext());
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "filters": Array [
           Object {
             "meta": Object {
               "group": "g1",
+            },
+            "query": Object {},
+          },
+          Object {
+            "meta": Object {
+              "group": "g3",
             },
             "query": Object {},
           },

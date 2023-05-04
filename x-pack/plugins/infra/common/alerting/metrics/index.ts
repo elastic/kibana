@@ -17,3 +17,5 @@ export const isTooManyBucketsPreviewException = (
   value: any
 ): value is TooManyBucketsPreviewExceptionMetadata =>
   Boolean(value && value.TOO_MANY_BUCKETS_PREVIEW_EXCEPTION);
+
+export const LINK_TO_METRICS_EXPLORER = '/app/metrics/explorer';

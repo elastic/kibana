@@ -1,20 +1,20 @@
 - name: "add server.name: package-testing"
-  become: yes
-  command: 
+  become: true
+  command:
     cmd: /usr/share/kibana/bin/kibana-keystore add server.name --stdin
     stdin: package-testing
   register: kibana_keystore_add
 
 - debug:
-    msg: "{{ kibana_keystore_add.stdout }}"
+    msg: "{{ kibana_keystore_add }}"
 
 - name: register kibana-keystore list
-  become: yes
+  become: true
   command: /usr/share/kibana/bin/kibana-keystore list 
   register: kibana_keystore_list
 
 - debug: 
-    msg: "{{ kibana_keystore_list.stdout }}"
+    msg: "{{ kibana_keystore_list }}"
 
 - name: assert kibana-keystore list contains server.name
   assert:

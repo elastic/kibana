@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { HttpStart } from 'kibana/public';
-import type { AutocompleteStart } from 'src/plugins/data/public';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { HttpStart } from '@kbn/core/public';
 import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,
@@ -24,6 +24,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
+import { EntryFieldError } from './reducer';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -58,10 +59,12 @@ interface BuilderExceptionListItemProps {
   ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
+  setWarningsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
+  allowCustomOptions?: boolean;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -80,9 +83,11 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onDeleteExceptionItem,
     onChangeExceptionItem,
     setErrorsExist,
+    setWarningsExist,
     onlyShowListOperators = false,
     isDisabled = false,
     operatorsList,
+    allowCustomOptions = false,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -112,14 +117,12 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
       },
       [exceptionItem, onDeleteExceptionItem, exceptionItemIndex]
     );
-
-    const entries = useMemo(
-      (): FormattedBuilderEntry[] =>
-        indexPattern != null && exceptionItem.entries.length > 0
-          ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
-          : [],
-      [exceptionItem.entries, indexPattern]
-    );
+    const entries = useMemo((): FormattedBuilderEntry[] => {
+      const hasIndexPatternAndEntries = indexPattern != null && exceptionItem.entries.length > 0;
+      return hasIndexPatternAndEntries
+        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries, allowCustomOptions)
+        : [];
+    }, [exceptionItem.entries, indexPattern, allowCustomOptions]);
 
     return (
       <EuiFlexItem>
@@ -136,7 +139,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                 const key = (item as typeof item & { id?: string }).id ?? `${index}`;
                 return (
                   <EuiFlexItem key={key} grow={1}>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
+                    <EuiFlexGroup gutterSize="xs" direction="row">
                       {item.nested === 'child' && <MyBeautifulLine grow={false} />}
                       <MyOverflowContainer grow={1}>
                         <BuilderEntryItem
@@ -150,12 +153,14 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           onChange={handleEntryChange}
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}
+                          setWarningsExist={setWarningsExist}
                           osTypes={osTypes}
                           isDisabled={isDisabled}
                           showLabel={
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }
                           operatorsList={operatorsList}
+                          allowCustomOptions={allowCustomOptions}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

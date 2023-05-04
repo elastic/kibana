@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 const createRecentlyAccessed = (length) => {
   const recentlyAccessed = [];
@@ -27,7 +27,7 @@ const createRecentlyAccessed = (length) => {
 
 test('render', () => {
   const component = shallow(<RecentlyAccessed recentlyAccessed={createRecentlyAccessed(2)} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('more popover', () => {

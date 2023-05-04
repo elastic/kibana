@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '../../../core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
 import { baseFormattersPublic } from './lib';
 import { FormatFactory } from '../common/types';

@@ -8,7 +8,7 @@
 import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { createFeature } from '../../../../__fixtures__/kibana_features';
 import { SecuredFeature } from '../../../../model';
@@ -25,7 +25,7 @@ describe('FeatureTableCell', () => {
       <FeatureTableCell feature={new SecuredFeature(feature.toRaw())} />
     );
 
-    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature "`);
+    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature"`);
     expect(wrapper.find(EuiIconTip)).toHaveLength(0);
   });
 
@@ -40,7 +40,7 @@ describe('FeatureTableCell', () => {
       <FeatureTableCell feature={new SecuredFeature(feature.toRaw())} />
     );
 
-    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature "`);
+    expect(wrapper.text()).toMatchInlineSnapshot(`"Test FeatureInfo"`);
 
     expect(wrapper.find(EuiIconTip).props().content).toMatchInlineSnapshot(`
       <EuiText>

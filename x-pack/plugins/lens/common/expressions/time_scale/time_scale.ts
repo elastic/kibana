@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common';
 import type { TimeScaleExpressionFunction } from './types';
+import type { timeScaleFn } from './time_scale_fn';
 
 export const getTimeScale = (
-  getTimezone: (context: ExecutionContext) => string | Promise<string>
+  ...timeScaleFnParameters: Parameters<typeof timeScaleFn>
 ): TimeScaleExpressionFunction => ({
   name: 'lens_time_scale',
   type: 'datatable',
@@ -18,7 +18,6 @@ export const getTimeScale = (
     dateColumnId: {
       types: ['string'],
       help: '',
-      required: true,
     },
     inputColumnId: {
       types: ['string'],
@@ -40,11 +39,15 @@ export const getTimeScale = (
       help: '',
       required: true,
     },
+    reducedTimeRange: {
+      types: ['string'],
+      help: '',
+    },
   },
   inputTypes: ['datatable'],
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
     const { timeScaleFn } = await import('./time_scale_fn');
-    return timeScaleFn(getTimezone)(...args);
+    return timeScaleFn(...timeScaleFnParameters)(...args);
   },
 });

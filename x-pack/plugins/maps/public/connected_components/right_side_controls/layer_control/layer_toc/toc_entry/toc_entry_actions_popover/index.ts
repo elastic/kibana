@@ -16,6 +16,7 @@ import {
   setDrawMode,
   showThisLayerOnly,
   toggleLayerVisible,
+  ungroupLayer,
   updateEditLayer,
 } from '../../../../../../actions';
 import { getLayerListRaw } from '../../../../../../selectors/map_selectors';
@@ -54,6 +55,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     showThisLayerOnly: (layerId: string) => {
       dispatch(showThisLayerOnly(layerId));
+    },
+    ungroupLayer: (layerId: string) => {
+      dispatch(ungroupLayer(layerId));
     },
   };
 }

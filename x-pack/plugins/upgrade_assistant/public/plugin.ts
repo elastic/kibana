@@ -7,7 +7,7 @@
 
 import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
 import { apiService } from './application/lib/api';
 import { breadcrumbService } from './application/lib/breadcrumbs';
@@ -24,7 +24,7 @@ export class UpgradeAssistantUIPlugin
     { management, cloud, share, usageCollection }: SetupDependencies
   ) {
     const {
-      readonly,
+      featureSet,
       ui: { enabled: isUpgradeAssistantUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
@@ -60,8 +60,8 @@ export class UpgradeAssistantUIPlugin
           docTitle.change(pluginName);
 
           const appDependencies: AppDependencies = {
+            featureSet,
             kibanaVersionInfo,
-            isReadOnlyMode: readonly,
             plugins: {
               cloud,
               share,

@@ -4,6 +4,7 @@
       "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"
     ],
     "status": "green",
+    "some_status_is_stale": true,
     "requests_total": 174,
     "concurrent_connections": 174,
     "response_time_max": 2203,
@@ -38,7 +39,7 @@
         "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
         "status": "green"
       },
-      "availability": false
+      "statusIsStale": true
     }
   ]
 }

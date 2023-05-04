@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { kbnTestConfig } from './kbn_test_config';
-export { kibanaTestUser, kibanaServerTestUser, adminTestUser } from './users';
+export {
+  kibanaTestUser,
+  kibanaServerTestUser,
+  adminTestUser,
+  systemIndicesSuperuser,
+} from './users';

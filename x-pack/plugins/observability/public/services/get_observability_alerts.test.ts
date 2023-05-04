@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { getObservabilityAlerts } from './get_observability_alerts';
 
 const basePath = { prepend: (path: string) => path };
@@ -21,75 +21,67 @@ describe('getObservabilityAlerts', () => {
     global.console = originalConsole;
   });
   it('Returns empty array when api throws exception', async () => {
-    const core = {
-      http: {
-        get: async () => {
-          throw new Error('Boom');
-        },
-        basePath,
+    const http = {
+      get: async () => {
+        throw new Error('Boom');
       },
-    } as unknown as CoreStart;
+      basePath,
+    } as unknown as HttpSetup;
 
-    expect(getObservabilityAlerts({ core })).rejects.toThrow('Boom');
+    expect(getObservabilityAlerts({ http })).rejects.toThrow('Boom');
   });
 
   it('Returns empty array when api return undefined', async () => {
-    const core = {
-      http: {
-        get: async () => {
-          return {
-            data: undefined,
-          };
-        },
-        basePath,
+    const http = {
+      get: async () => {
+        return {
+          data: undefined,
+        };
       },
-    } as unknown as CoreStart;
+      basePath,
+    } as unknown as HttpSetup;
 
-    const alerts = await getObservabilityAlerts({ core });
+    const alerts = await getObservabilityAlerts({ http });
     expect(alerts).toEqual([]);
   });
 
   it('Returns empty array when alerts are not allowed based on consumer type', async () => {
-    const core = {
-      http: {
-        get: async () => {
-          return {
-            data: [
-              { id: 1, consumer: 'siem' },
-              { id: 2, consumer: 'kibana' },
-              { id: 3, consumer: 'index' },
-              { id: 4, consumer: 'foo' },
-              { id: 5, consumer: 'bar' },
-            ],
-          };
-        },
-        basePath,
+    const http = {
+      get: async () => {
+        return {
+          data: [
+            { id: 1, consumer: 'siem' },
+            { id: 2, consumer: 'kibana' },
+            { id: 3, consumer: 'index' },
+            { id: 4, consumer: 'foo' },
+            { id: 5, consumer: 'bar' },
+          ],
+        };
       },
-    } as unknown as CoreStart;
-    const alerts = await getObservabilityAlerts({ core });
+      basePath,
+    } as unknown as HttpSetup;
+    const alerts = await getObservabilityAlerts({ http });
     expect(alerts).toEqual([]);
   });
 
   it('Shows alerts from Observability and Alerts', async () => {
-    const core = {
-      http: {
-        get: async () => {
-          return {
-            data: [
-              { id: 1, consumer: 'siem' },
-              { id: 2, consumer: 'apm' },
-              { id: 3, consumer: 'uptime' },
-              { id: 4, consumer: 'logs' },
-              { id: 5, consumer: 'infrastructure' },
-              { id: 6, consumer: 'alerts' },
-            ],
-          };
-        },
-        basePath,
+    const http = {
+      get: async () => {
+        return {
+          data: [
+            { id: 1, consumer: 'siem' },
+            { id: 2, consumer: 'apm' },
+            { id: 3, consumer: 'uptime' },
+            { id: 4, consumer: 'logs' },
+            { id: 5, consumer: 'infrastructure' },
+            { id: 6, consumer: 'alerts' },
+          ],
+        };
       },
-    } as unknown as CoreStart;
+      basePath,
+    } as unknown as HttpSetup;
 
-    const alerts = await getObservabilityAlerts({ core });
+    const alerts = await getObservabilityAlerts({ http });
     expect(alerts).toEqual([
       {
         id: 2,

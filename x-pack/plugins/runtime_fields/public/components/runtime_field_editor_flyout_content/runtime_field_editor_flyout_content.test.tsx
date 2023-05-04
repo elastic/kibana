@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 import '../../__jest__/setup_environment';
 import { registerTestBed, TestBed } from '../../test_utils';
@@ -33,6 +33,14 @@ const noop = () => {};
 const defaultProps = { onSave: noop, onCancel: noop, docLinks };
 
 describe('Runtime field editor flyout', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   test('should have a flyout title', () => {
     const { exists, find } = setup(defaultProps);
 
@@ -67,6 +75,7 @@ describe('Runtime field editor flyout', () => {
 
     await act(async () => {
       find('saveFieldButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     expect(onSave).toHaveBeenCalled();
@@ -93,6 +102,7 @@ describe('Runtime field editor flyout', () => {
 
       await act(async () => {
         find('saveFieldButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
 
@@ -115,6 +125,7 @@ describe('Runtime field editor flyout', () => {
 
       await act(async () => {
         find('saveFieldButton').simulate('click');
+        jest.advanceTimersByTime(0);
       });
 
       expect(onSave).toHaveBeenCalled();
@@ -133,9 +144,11 @@ describe('Runtime field editor flyout', () => {
             value: 'other_type',
           },
         ]);
+        jest.advanceTimersByTime(0);
       });
       await act(async () => {
         find('saveFieldButton').simulate('click');
+        jest.advanceTimersByTime(0);
       });
       fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
       expect(fieldReturned).toEqual({

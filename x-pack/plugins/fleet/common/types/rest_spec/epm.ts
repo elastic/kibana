@@ -12,11 +12,14 @@ import type {
   PackageInfo,
   PackageUsageStats,
   InstallType,
+  InstallSource,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
   query: {
+    // deprecated in 8.6
     experimental?: boolean;
+    prerelease?: boolean;
     include_policy_templates?: boolean;
   };
 }
@@ -30,7 +33,10 @@ export interface GetCategoriesResponse {
 export interface GetPackagesRequest {
   query: {
     category?: string;
+    // deprecated in 8.6
     experimental?: boolean;
+    prerelease?: boolean;
+    excludeInstallStatus?: boolean;
   };
 }
 
@@ -108,6 +114,9 @@ export interface InstallPackageRequest {
 
 export interface InstallPackageResponse {
   items: AssetReference[];
+  _meta: {
+    install_source: InstallSource;
+  };
   // deprecated in 8.0
   response?: AssetReference[];
 }
@@ -123,6 +132,7 @@ export interface InstallResult {
   status?: 'installed' | 'already_installed';
   error?: Error;
   installType: InstallType;
+  installSource: InstallSource;
 }
 
 export interface BulkInstallPackageInfo {
@@ -160,4 +170,7 @@ export interface DeletePackageResponse {
   // deprecated in 8.0
   response?: AssetReference[];
   items: AssetReference[];
+}
+export interface GetVerificationKeyIdResponse {
+  id: string | null;
 }

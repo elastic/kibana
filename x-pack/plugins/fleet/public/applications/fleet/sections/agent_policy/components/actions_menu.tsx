@@ -10,8 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
-import { useCapabilities } from '../../../hooks';
+import { useAuthz } from '../../../hooks';
 import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
+import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
@@ -30,10 +31,18 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const hasWriteCapabilities = useCapabilities().write;
+    const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
+    );
+
+    const isFleetServerPolicy = useMemo(
+      () =>
+        agentPolicy.package_policies?.some(
+          (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
+        ),
+      [agentPolicy]
     );
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -76,7 +85,6 @@ export const AgentPolicyActionMenu = memo<{
             ? [viewPolicyItem]
             : [
                 <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
                   icon="plusInCircle"
                   onClick={() => {
                     setIsContextMenuOpen(false);
@@ -84,14 +92,21 @@ export const AgentPolicyActionMenu = memo<{
                   }}
                   key="enrollAgents"
                 >
-                  <FormattedMessage
-                    id="xpack.fleet.agentPolicyActionMenu.enrollAgentActionText"
-                    defaultMessage="Add agent"
-                  />
+                  {isFleetServerPolicy ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyActionMenu.addFleetServerActionText"
+                      defaultMessage="Add Fleet Server"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyActionMenu.enrollAgentActionText"
+                      defaultMessage="Add agent"
+                    />
+                  )}
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
+                  disabled={!canWriteIntegrationPolicies}
                   icon="copy"
                   onClick={() => {
                     setIsContextMenuOpen(false);

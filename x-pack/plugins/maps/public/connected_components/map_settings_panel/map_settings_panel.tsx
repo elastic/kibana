@@ -16,13 +16,13 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MapSettings } from '../../reducers/map';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { DisplayPanel } from './display_panel';
-import { MapCenter } from '../../../common/descriptor_types';
+import { CustomIconsPanel } from './custom_icons_panel';
+import { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
+import { panelStrings } from '../panel_strings';
 
 export interface Props {
   cancelChanges: () => void;
@@ -30,7 +30,10 @@ export interface Props {
   hasMapSettingsChanges: boolean;
   keepChanges: () => void;
   settings: MapSettings;
+  customIcons: CustomIcon[];
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
+  updateCustomIcons: (customIcons: CustomIcon[]) => void;
+  deleteCustomIcon: (symbolId: string) => void;
   zoom: number;
 }
 
@@ -40,33 +43,30 @@ export function MapSettingsPanel({
   hasMapSettingsChanges,
   keepChanges,
   settings,
+  customIcons,
   updateMapSetting,
+  updateCustomIcons,
+  deleteCustomIcon,
   zoom,
 }: Props) {
-  // TODO move common text like Cancel and Close to common i18n translation
-  const closeBtnLabel = hasMapSettingsChanges
-    ? i18n.translate('xpack.maps.mapSettingsPanel.cancelLabel', {
-        defaultMessage: 'Cancel',
-      })
-    : i18n.translate('xpack.maps.mapSettingsPanel.closeLabel', {
-        defaultMessage: 'Close',
-      });
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
         <EuiTitle size="s">
           <h2>
-            <FormattedMessage
-              id="xpack.maps.mapSettingsPanel.title"
-              defaultMessage="Map settings"
-            />
+            <FormattedMessage id="xpack.maps.mapSettingsPanel.title" defaultMessage="Settings" />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
+          <CustomIconsPanel
+            customIcons={customIcons}
+            updateCustomIcons={updateCustomIcons}
+            deleteCustomIcon={deleteCustomIcon}
+          />
+          <EuiSpacer size="s" />
           <DisplayPanel settings={settings} updateMapSetting={updateMapSetting} />
           <EuiSpacer size="s" />
           <NavigationPanel
@@ -88,7 +88,7 @@ export function MapSettingsPanel({
               flush="left"
               data-test-subj="layerPanelCancelButton"
             >
-              {closeBtnLabel}
+              {hasMapSettingsChanges ? panelStrings.discardChanges : panelStrings.close}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -102,10 +102,7 @@ export function MapSettingsPanel({
               fill
               data-test-subj="mapSettingSubmitButton"
             >
-              <FormattedMessage
-                id="xpack.maps.mapSettingsPanel.keepChangesButtonLabel"
-                defaultMessage="Keep changes"
-              />
+              {panelStrings.keepChanges}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

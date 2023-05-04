@@ -12,27 +12,30 @@ import './result.scss';
 
 import { EuiPanel, EuiIcon } from '@elastic/eui';
 
+import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { Schema } from '../../../shared/schema/types';
+import { AdvancedSchema, Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
+import { formatResultWithoutMeta } from '../../utils/results';
 
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
-import { FieldValue, Result as ResultType, ResultAction } from './types';
+import { FieldValue, ResultAction } from './types';
 
 interface Props {
-  result: ResultType;
+  result: SearchResult;
   isMetaEngine: boolean;
   showScore?: boolean;
   resultPosition?: number;
   shouldLinkToDetailPage?: boolean;
-  schemaForTypeHighlights?: Schema;
+  schemaForTypeHighlights?: Schema | AdvancedSchema;
   actions?: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
+  showClick?: boolean;
 }
 
 const RESULT_CUTOFF = 5;
@@ -46,6 +49,7 @@ export const Result: React.FC<Props> = ({
   actions = [],
   dragHandleProps,
   resultPosition,
+  showClick = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -53,13 +57,24 @@ export const Result: React.FC<Props> = ({
   const META = '_meta';
   const resultMeta = result[META];
   const resultFields = useMemo(
-    () => Object.entries(result).filter(([key]) => key !== META && key !== ID),
+    () => Object.entries(formatResultWithoutMeta(result)).filter(([key]) => key !== ID),
     [result]
   );
   const numResults = resultFields.length;
-
+  const isAdvancedSchema = (schema: Schema | AdvancedSchema): schema is AdvancedSchema => {
+    return (
+      schema &&
+      Object.values(schema).reduce((isAdvanced, schemaField) => {
+        return isAdvanced && typeof schemaField !== 'string';
+      }, true)
+    );
+  };
   const typeForField = (fieldName: string) => {
-    if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
+    if (schemaForTypeHighlights) {
+      return isAdvancedSchema(schemaForTypeHighlights)
+        ? schemaForTypeHighlights[fieldName].type
+        : schemaForTypeHighlights[fieldName];
+    }
   };
 
   const documentLink = shouldLinkToDetailPage
@@ -103,6 +118,7 @@ export const Result: React.FC<Props> = ({
           documentLink={documentLink}
           actions={actions}
           resultPosition={resultPosition}
+          showClick={showClick}
         />
         {resultFields
           .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)

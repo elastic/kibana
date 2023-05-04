@@ -12,13 +12,14 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
-import { isRumAgentName } from '../../agent_name';
+import { isRumOrMobileAgent } from '../../agent_name';
 import { floatRt } from '../runtime_types/float_rt';
 import { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
 import { getDurationRt } from '../runtime_types/duration_rt';
 import { getBytesRt } from '../runtime_types/bytes_rt';
+import { getStorageSizeRt } from '../runtime_types/storage_size_rt';
 
 function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
   switch (setting.type) {
@@ -62,6 +63,19 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
       };
     }
 
+    case 'storageSize': {
+      const units = setting.units ?? ['B', 'KB', 'MB', 'GB', 'TB'];
+      const min = setting.min ?? '0b';
+      const max = setting.max;
+
+      return {
+        validation: getStorageSizeRt({ min, max }),
+        units,
+        min,
+        ...setting,
+      };
+    }
+
     case 'duration': {
       const units = setting.units ?? ['ms', 's', 'm'];
       const min = setting.min ?? '1ms';
@@ -91,7 +105,7 @@ export function filterByAgent(agentName?: AgentName) {
 
       // only options that apply to every agent (ignoring RUM) should be returned
       if (setting.excludeAgents) {
-        return setting.excludeAgents.every(isRumAgentName);
+        return setting.excludeAgents.every(isRumOrMobileAgent);
       }
 
       return true;

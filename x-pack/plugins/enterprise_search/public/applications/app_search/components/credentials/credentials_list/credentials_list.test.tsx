@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiCopy } from '@elastic/eui';
 
 import { HiddenText } from '../../../../shared/hidden_text';
 import { ApiTokenTypes } from '../constants';
@@ -19,7 +19,7 @@ import { ApiToken } from '../types';
 
 import { Key } from './key';
 
-import { CredentialsList } from './';
+import { CredentialsList } from '.';
 
 describe('CredentialsList', () => {
   const apiToken: ApiToken = {
@@ -93,10 +93,8 @@ describe('CredentialsList', () => {
         apiTokens: [],
       });
 
-      const wrapper = shallow(<CredentialsList />)
-        .find(EuiBasicTable)
-        .dive();
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+      const wrapper = shallow(<CredentialsList />);
+      expect(wrapper.render().find('.euiEmptyPrompt')).toHaveLength(1);
     });
   });
 
@@ -131,7 +129,7 @@ describe('CredentialsList', () => {
         pageIndex: 5,
         pageSize: 55,
         totalItemCount: 1004,
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       });
     });
   });

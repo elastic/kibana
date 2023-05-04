@@ -10,8 +10,8 @@ import type {
   SavedObjectMigrationMap,
   SavedObjectsServiceSetup,
   SavedObjectsType,
-} from 'kibana/server';
-import type { LocatorData } from 'src/plugins/share/common/url_service';
+} from '@kbn/core/server';
+import type { LocatorData } from '../../../common/url_service';
 import type { ServerUrlService } from '..';
 
 export const registerUrlServiceSavedObjectType = (
@@ -37,6 +37,7 @@ export const registerUrlServiceSavedObjectType = (
       },
     },
     mappings: {
+      dynamic: false,
       properties: {
         slug: {
           type: 'text',
@@ -46,31 +47,11 @@ export const registerUrlServiceSavedObjectType = (
             },
           },
         },
-        accessCount: {
-          type: 'long',
-        },
         accessDate: {
           type: 'date',
         },
         createDate: {
           type: 'date',
-        },
-        // Legacy field - contains already pre-formatted final URL.
-        // This is here to support old saved objects that have this field.
-        // TODO: Remove this field and execute a migration to the new format.
-        url: {
-          type: 'text',
-          fields: {
-            keyword: {
-              type: 'keyword',
-              ignore_above: 2048,
-            },
-          },
-        },
-        // Information needed to load and execute a locator.
-        locatorJSON: {
-          type: 'text',
-          index: false,
         },
       },
     },

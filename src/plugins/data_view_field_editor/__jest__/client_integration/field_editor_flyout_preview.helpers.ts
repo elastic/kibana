@@ -7,7 +7,7 @@
  */
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { Context } from '../../public/components/field_editor_context';
@@ -164,7 +164,7 @@ export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => 
 
   // Setup testbed
   await act(async () => {
-    testBed = await registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
+    testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
       memoryRouter: {
         wrapComponent: false,
       },

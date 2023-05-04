@@ -10,8 +10,8 @@ import {
   Tree,
   EndpointDocGenerator,
   Event,
-} from '../../../plugins/security_solution/common/endpoint/generate_data';
-import { firstNonNullValue } from '../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';
@@ -106,10 +106,15 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
          * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
          * is why we're using _data_stream here.
          */
-        await client.transport.request({
-          method: 'DELETE',
-          path: `_data_stream/${index}`,
-        });
+        await client.transport.request(
+          {
+            method: 'DELETE',
+            path: `_data_stream/${index}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
       }
     },
   };

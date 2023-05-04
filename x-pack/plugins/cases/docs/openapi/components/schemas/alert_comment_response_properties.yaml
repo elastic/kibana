@@ -1,0 +1,54 @@
+title: Add case comment response properties for alerts
+type: object
+required:
+  - type
+properties:
+  alertId:
+    type: string
+    example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+  created_at:
+    type: string
+    format: date-time
+    example: 2022-03-24T02:31:03.210Z
+  created_by:
+    type: object
+    properties:
+      $ref: 'user_properties.yaml'
+  id:
+    type: string
+    example: 73362370-ab1a-11ec-985f-97e55adae8b9
+  index:
+    type: string
+    example: .internal.alerts-security.alerts-default-000001
+  owner:
+    $ref: 'owners.yaml'
+  pushed_at:
+    type: string
+    format: date-time
+    example: null
+    nullable: true
+  pushed_by:
+    type: object
+    properties:
+      $ref: 'user_properties.yaml'
+    nullable: true
+  rule:
+    type: object
+    properties:
+      $ref: 'rule_properties.yaml'
+  type:
+    type: string
+    example: alert
+    enum:
+      - alert
+  updated_at:
+    type: string
+    format: date-time
+    example: null
+  updated_by:
+    type: object
+    properties:
+      $ref: 'user_properties.yaml'
+  version:
+    type: string
+    example: WzMwNDgsMV0=

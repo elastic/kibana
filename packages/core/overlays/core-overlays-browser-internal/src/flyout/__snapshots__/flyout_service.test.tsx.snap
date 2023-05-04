@@ -1,0 +1,195 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FlyoutService FlyoutRef#close() can be called multiple times on the same FlyoutRef 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
+Array [
+  Array [
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction],
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
+      <EuiFlyout
+        onClose={[Function]}
+      >
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </CoreContextProvider>,
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\" aria-label=\\"Close this dialog\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div>"`;
+
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
+Array [
+  Array [
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiFlyout
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiFlyout>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiFlyout
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
+      <EuiFlyout
+        onClose={[Function]}
+      >
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </CoreContextProvider>,
+    <div />,
+  ],
+  Array [
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "children": <CoreThemeProvider
+                    globalStyles={false}
+                    theme$={
+                      Observable {
+                        "_subscribe": [Function],
+                      }
+                    }
+                  >
+                    <EuiFlyout
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiFlyout>
+                  </CoreThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <CoreThemeProvider
+                  globalStyles={false}
+                  theme$={
+                    Observable {
+                      "_subscribe": [Function],
+                    }
+                  }
+                >
+                  <EuiFlyout
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>
+                </CoreThemeProvider>,
+              },
+            ],
+          },
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
+      <EuiFlyout
+        onClose={[Function]}
+      >
+        <MountWrapper
+          className="kbnOverlayMountWrapper"
+          mount={[Function]}
+        />
+      </EuiFlyout>
+    </CoreContextProvider>,
+    <div />,
+  ],
+]
+`;
+
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\" aria-label=\\"Close this dialog\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div>"`;

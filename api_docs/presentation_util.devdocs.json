@@ -1,0 +1,4056 @@
+{
+  "id": "presentationUtil",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PluginServiceProvider",
+        "type": "Class",
+        "tags": [],
+        "label": "PluginServiceProvider",
+        "description": [
+          "\nAn object which uses a given factory to start, stop or provide a service.\n\nThe `Service` generic determines the shape of the API being produced.\nThe `StartParameters` generic determines what parameters are expected to\nstart the service."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PluginServiceProvider",
+            "text": "PluginServiceProvider"
+          },
+          "<Service, StartParameters, Services, RequiredServices>"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.Provider",
+            "type": "Function",
+            "tags": [],
+            "label": "Provider",
+            "description": [],
+            "signature": [
+              "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceProvider.Provider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ children }",
+                "description": [],
+                "signature": [
+                  "{ children?: React.ReactNode; }"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceProvider.Unnamed.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "factory",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.PluginServiceFactory",
+                    "text": "PluginServiceFactory"
+                  },
+                  "<Service, StartParameters, ",
+                  "PluginServiceRequiredServices",
+                  "<RequiredServices, Services>>"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceProvider.Unnamed.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "requiredServices",
+                "description": [],
+                "signature": [
+                  "RequiredServices | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.getService",
+            "type": "Function",
+            "tags": [],
+            "label": "getService",
+            "description": [
+              "\nGetter that will enforce proper setup throughout the class."
+            ],
+            "signature": [
+              "() => Service"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nStart the service.\n"
+            ],
+            "signature": [
+              "(params: StartParameters, requiredServices: ",
+              "PluginServiceRequiredServices",
+              "<RequiredServices, Services>) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceProvider.start.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Parameters used to start the service."
+                ],
+                "signature": [
+                  "StartParameters"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceProvider.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "requiredServices",
+                "description": [],
+                "signature": [
+                  "PluginServiceRequiredServices",
+                  "<RequiredServices, Services>"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.getServiceReactHook",
+            "type": "Function",
+            "tags": [],
+            "label": "getServiceReactHook",
+            "description": [
+              "\nReturns a function for providing a Context hook for the service."
+            ],
+            "signature": [
+              "() => () => Service"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nStop the service."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceProvider.requiredServices",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "requiredServices",
+            "description": [],
+            "signature": [
+              "never[] | NonNullable<RequiredServices>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PluginServiceRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "PluginServiceRegistry",
+        "description": [
+          "\nA `PluginServiceRegistry` maintains a set of service providers which can be collectively\nstarted, stopped or retreived.\n\nThe `Services` generic determines the shape of all service APIs being produced.\nThe `StartParameters` generic determines what parameters are expected to\nstart the service."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PluginServiceRegistry",
+            "text": "PluginServiceRegistry"
+          },
+          "<Services, StartParameters>"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceRegistry.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceRegistry.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "providers",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.PluginServiceProviders",
+                    "text": "PluginServiceProviders"
+                  },
+                  "<Services, StartParameters>"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceRegistry.isStarted",
+            "type": "Function",
+            "tags": [],
+            "label": "isStarted",
+            "description": [
+              "\nReturns true if the registry has been started, false otherwise."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceRegistry.getServiceProviders",
+            "type": "Function",
+            "tags": [],
+            "label": "getServiceProviders",
+            "description": [
+              "\nReturns a map of `PluginServiceProvider` objects."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.PluginServiceProviders",
+                "text": "PluginServiceProviders"
+              },
+              "<Services, StartParameters>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceRegistry.getContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getContextProvider",
+            "description": [
+              "\nReturns a React Context Provider for use in consuming applications."
+            ],
+            "signature": [
+              "() => React.FC<{}>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceRegistry.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nStart the registry.\n"
+            ],
+            "signature": [
+              "(params: StartParameters) => this"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServiceRegistry.start.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Parameters used to start the registry."
+                ],
+                "signature": [
+                  "StartParameters"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceRegistry.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nStop the registry."
+            ],
+            "signature": [
+              "() => this"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/registry.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PluginServices",
+        "type": "Class",
+        "tags": [],
+        "label": "PluginServices",
+        "description": [
+          "\n`PluginServices` is a top-level class for specifying and accessing services within a plugin.\n\nA `PluginServices` object can be provided with a `PluginServiceRegistry` at any time, which will\nthen be used to provide services to any component that accesses it.\n\nThe `Services` generic determines the shape of all service APIs being produced."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PluginServices",
+            "text": "PluginServices"
+          },
+          "<Services>"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServices.setRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "setRegistry",
+            "description": [
+              "\nSupply a `PluginServiceRegistry` for the class to use to provide services and context.\n"
+            ],
+            "signature": [
+              "(registry: ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.PluginServiceRegistry",
+                "text": "PluginServiceRegistry"
+              },
+              "<Services, any> | null) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PluginServices.setRegistry.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "registry",
+                "description": [
+                  "A setup and started `PluginServiceRegistry`."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.PluginServiceRegistry",
+                    "text": "PluginServiceRegistry"
+                  },
+                  "<Services, any> | null"
+                ],
+                "path": "src/plugins/presentation_util/public/services/create/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServices.hasRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "hasRegistry",
+            "description": [
+              "\nReturns true if a registry has been provided, false otherwise."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServices.getContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getContextProvider",
+            "description": [
+              "\nReturn the React Context Provider that will supply services."
+            ],
+            "signature": [
+              "() => React.FC<{}>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServices.getHooks",
+            "type": "Function",
+            "tags": [],
+            "label": "getHooks",
+            "description": [
+              "\nReturn a map of React Hooks that can be used in React components."
+            ],
+            "signature": [
+              "() => ServiceHooks<Services>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServices.getServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getServices",
+            "description": [],
+            "signature": [
+              "() => Services"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.cleanFiltersForSerialize",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanFiltersForSerialize",
+        "description": [],
+        "signature": [
+          "(filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/clean_redux_embeddable_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.cleanFiltersForSerialize.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/clean_redux_embeddable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.FloatingActions",
+        "type": "Function",
+        "tags": [],
+        "label": "FloatingActions",
+        "description": [],
+        "signature": [
+          "({ children, viewMode, isEnabled, embeddable, className, disabledActions, }: React.PropsWithChildren<",
+          "FloatingActionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.FloatingActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  viewMode,\n  isEnabled,\n  embeddable,\n  className = '',\n  disabledActions,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "FloatingActionsProps",
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.getContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "getContextProvider",
+        "description": [],
+        "signature": [
+          "() => React.FC<{}>"
+        ],
+        "path": "src/plugins/presentation_util/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyDashboardPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyDashboardPicker",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "DashboardPickerProps",
+          "> & { readonly _result: (props: ",
+          "DashboardPickerProps",
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazyDashboardPicker.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyDataViewPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyDataViewPicker",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<{ dataViews: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewListItem",
+            "text": "DataViewListItem"
+          },
+          "[]; selectedDataViewId?: string | undefined; trigger: ",
+          "DataViewTriggerProps",
+          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
+          "EuiSelectableProps",
+          "<{}>> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, }: { dataViews: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewListItem",
+            "text": "DataViewListItem"
+          },
+          "[]; selectedDataViewId?: string | undefined; trigger: ",
+          "DataViewTriggerProps",
+          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
+          "EuiSelectableProps",
+          "<{}>> | undefined; }) => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazyDataViewPicker.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyExpressionInput",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyExpressionInput",
+        "description": [
+          "\nA lazily-loaded ExpressionInput component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ExpressionInputProps",
+            "text": "ExpressionInputProps"
+          },
+          "> & { readonly _result: (props: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ExpressionInputProps",
+            "text": "ExpressionInputProps"
+          },
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazyExpressionInput.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyFieldPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyFieldPicker",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "FieldPickerProps",
+          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, }: ",
+          "FieldPickerProps",
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazyFieldPicker.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyLabsBeakerButton",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyLabsBeakerButton",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "EuiButtonProps",
+          " & Pick<",
+          "Props",
+          ", \"solutions\">> & { readonly _result: ({ solutions, ...props }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazyLabsBeakerButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazyLabsFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyLabsFlyout",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: (props: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazyLabsFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.lazyLoadReduxToolsPackage",
+        "type": "Function",
+        "tags": [],
+        "label": "lazyLoadReduxToolsPackage",
+        "description": [],
+        "signature": [
+          "() => Promise<",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxToolsPackage",
+            "text": "ReduxToolsPackage"
+          },
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazySavedObjectSaveModalDashboard",
+        "type": "Function",
+        "tags": [],
+        "label": "LazySavedObjectSaveModalDashboard",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          "> & { readonly _result: (props: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          ") => JSX.Element; }"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazySavedObjectSaveModalDashboard.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.registerExpressionsLanguage",
+        "type": "Function",
+        "tags": [],
+        "label": "registerExpressionsLanguage",
+        "description": [
+          "\nRegister a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows\nthe Monaco Editor to understand the functions and their arguments.\n\nThis function is async in order to move the logic to an async chunk.\n"
+        ],
+        "signature": [
+          "(expressionFunctions: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunction",
+            "text": "ExpressionFunction"
+          },
+          "[]) => Promise<void>"
+        ],
+        "path": "src/plugins/presentation_util/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.registerExpressionsLanguage.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "expressionFunctions",
+            "description": [
+              "A set of Expression Functions to use in the ExpressionInput."
+            ],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/presentation_util/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.useLabs",
+        "type": "Function",
+        "tags": [],
+        "label": "useLabs",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PresentationLabsService",
+            "text": "PresentationLabsService"
+          }
+        ],
+        "path": "src/plugins/presentation_util/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.withSuspense",
+        "type": "Function",
+        "tags": [],
+        "label": "withSuspense",
+        "description": [
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+        ],
+        "signature": [
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+        ],
+        "path": "src/plugins/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.withSuspense.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "A component deferred by `React.lazy`"
+            ],
+            "signature": [
+              "React.ComponentType<P>"
+            ],
+            "path": "src/plugins/presentation_util/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.withSuspense.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fallback",
+            "description": [
+              "A fallback component to render while things load; default is `EuiLoadingSpinner`"
+            ],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+            ],
+            "path": "src/plugins/presentation_util/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ExpressionInputProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExpressionInputProps",
+        "description": [
+          "\nReact Props for the ExpressionInput component."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ExpressionInputProps",
+            "text": "ExpressionInputProps"
+          },
+          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
+        ],
+        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.expressionFunctions",
+            "type": "Array",
+            "tags": [],
+            "label": "expressionFunctions",
+            "description": [
+              "A collection of ExpressionFunctions to use in the autocomplete"
+            ],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.expression",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [
+              "Value of expression"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "Function invoked when expression value is changed"
+            ],
+            "signature": [
+              "(value?: string | undefined) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ExpressionInputProps.onChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/components/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.isCompact",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isCompact",
+            "description": [
+              "In full screen mode or not"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.height",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "height",
+            "description": [
+              "\nThe CodeEditor requires a set height, either on itself, or set to 100% with the parent\ncontainer controlling the height.  This prop is required so consumers understand this\nlimitation and are intentional in using the component."
+            ],
+            "signature": [
+              "Property",
+              ".Height<string | number> | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.editorRef",
+            "type": "Object",
+            "tags": [],
+            "label": "editorRef",
+            "description": [
+              "\nAn optional ref in order to access the Monaco editor instance from consuming components,\n(e.g. to determine if the editor is focused, etc)."
+            ],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ExpressionInputEditorRef",
+                "text": "ExpressionInputEditorRef"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ExpressionInputProps.onEditorDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditorDidMount",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.OnExpressionInputEditorDidMount",
+                "text": "OnExpressionInputEditorDidMount"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.KibanaPluginServiceParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaPluginServiceParams",
+        "description": [
+          "\nParameters necessary to create a Kibana-based service, (e.g. during Plugin\nstartup or setup).\n\nThe `Start` generic refers to the specific Plugin `TPluginsStart`."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.KibanaPluginServiceParams",
+            "text": "KibanaPluginServiceParams"
+          },
+          "<Start>"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.KibanaPluginServiceParams.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              }
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.KibanaPluginServiceParams.startPlugins",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "startPlugins",
+            "description": [],
+            "signature": [
+              "Start"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.KibanaPluginServiceParams.appUpdater",
+            "type": "Object",
+            "tags": [],
+            "label": "appUpdater",
+            "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppUpdater",
+                "text": "AppUpdater"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.KibanaPluginServiceParams.initContext",
+            "type": "Object",
+            "tags": [],
+            "label": "initContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsBrowserPluginApi",
+                "section": "def-common.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<object> | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PresentationCapabilitiesService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentationCapabilitiesService",
+        "description": [],
+        "path": "src/plugins/presentation_util/public/services/capabilities/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canAccessDashboards",
+            "type": "Function",
+            "tags": [],
+            "label": "canAccessDashboards",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/capabilities/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canCreateNewDashboards",
+            "type": "Function",
+            "tags": [],
+            "label": "canCreateNewDashboards",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/capabilities/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canSaveVisualizations",
+            "type": "Function",
+            "tags": [],
+            "label": "canSaveVisualizations",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/capabilities/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationCapabilitiesService.canSetAdvancedSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "canSetAdvancedSettings",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/capabilities/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PresentationDashboardsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentationDashboardsService",
+        "description": [],
+        "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationDashboardsService.findDashboards",
+            "type": "Function",
+            "tags": [],
+            "label": "findDashboards",
+            "description": [],
+            "signature": [
+              "(query: string, fields: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<",
+              "PartialDashboardAttributes",
+              ">[]>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationDashboardsService.findDashboards.$1",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationDashboardsService.findDashboards.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationDashboardsService.findDashboardsByTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "findDashboardsByTitle",
+            "description": [],
+            "signature": [
+              "(title: string) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<",
+              "PartialDashboardAttributes",
+              ">[]>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationDashboardsService.findDashboardsByTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/presentation_util/public/services/dashboards/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PresentationLabsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentationLabsService",
+        "description": [],
+        "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.isProjectEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isProjectEnabled",
+            "description": [],
+            "signature": [
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\") => boolean"
+            ],
+            "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationLabsService.isProjectEnabled.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                ],
+                "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.getProjectIDs",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectIDs",
+            "description": [],
+            "signature": [
+              "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+            ],
+            "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.getProject",
+            "type": "Function",
+            "tags": [],
+            "label": "getProject",
+            "description": [],
+            "signature": [
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\") => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              }
+            ],
+            "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationLabsService.getProject.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                ],
+                "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.getProjects",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjects",
+            "description": [],
+            "signature": [
+              "(solutions?: (\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              },
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationLabsService.getProjects.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.setProjectStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "setProjectStatus",
+            "description": [],
+            "signature": [
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationLabsService.setProjectStatus.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+                ],
+                "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationLabsService.setProjectStatus.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "env",
+                "description": [],
+                "signature": [
+                  "\"kibana\" | \"browser\" | \"session\""
+                ],
+                "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.PresentationLabsService.setProjectStatus.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/services/labs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxEmbeddableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxEmbeddableState",
+        "description": [
+          "\nThe Embeddable Redux store should contain Input, Output and State. Input is serialized and used to create the embeddable,\nOutput is used as a communication layer for state that the Embeddable creates, and State is used to store ephemeral state which needs\nto be communicated between an embeddable and its inner React components."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
+          },
+          "<InputType, OutputType, StateType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.explicitInput",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "explicitInput",
+            "description": [],
+            "signature": [
+              "InputType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              "OutputType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.componentState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentState",
+            "description": [],
+            "signature": [
+              "StateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxEmbeddableTools",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxEmbeddableTools",
+        "description": [
+          "\nThe return type from createReduxEmbeddableTools. Contains tools to get state, select state for react components,\nset state, and react to state changes."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableTools",
+            "text": "ReduxEmbeddableTools"
+          },
+          "<ReduxEmbeddableStateType, ReducerType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.cleanup",
+            "type": "Function",
+            "tags": [],
+            "label": "cleanup",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "EnhancedStore",
+              "<ReduxEmbeddableStateType, ",
+              "AnyAction",
+              ", Middlewares<ReduxEmbeddableStateType>>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [],
+            "signature": [
+              "<Selected extends unknown>(selector: (state: ReduxEmbeddableStateType) => Selected, equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined) => Selected"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.select.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "presentationUtil",
+                    "id": "def-public.ReduxEmbeddableTools.select.$1.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
+                    "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.select.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "equalityFn",
+                "description": [],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [],
+            "signature": [
+              "() => ReduxEmbeddableStateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.dispatch",
+            "type": "Object",
+            "tags": [],
+            "label": "dispatch",
+            "description": [],
+            "signature": [
+              "{ [ReducerKey in keyof ReducerType]: (payload: Parameters<ReducerType[ReducerKey]>[1][\"payload\"]) => void; }"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.onStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onStateChange",
+            "description": [],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.onStateChange.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "node_modules/redux/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": []
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxTools",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxTools",
+        "description": [
+          "\nThe return type from createReduxTools. Contains tools to get state, select state for react components,\nset state, and react to state changes."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxTools",
+            "text": "ReduxTools"
+          },
+          "<ReduxStateType, ReducerType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "EnhancedStore",
+              "<ReduxStateType, ",
+              "AnyAction",
+              ", Middlewares<ReduxStateType>>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [],
+            "signature": [
+              "<Selected extends unknown>(selector: (state: ReduxStateType) => Selected, equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined) => Selected"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxTools.select.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "presentationUtil",
+                    "id": "def-public.ReduxTools.select.$1.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
+                    "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxTools.select.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "equalityFn",
+                "description": [],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [],
+            "signature": [
+              "() => ReduxStateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.onStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onStateChange",
+            "description": [],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxTools.onStateChange.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "node_modules/redux/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.dispatch",
+            "type": "Object",
+            "tags": [],
+            "label": "dispatch",
+            "description": [],
+            "signature": [
+              "{ [ReducerKey in keyof ReducerType]: (payload: Parameters<ReducerType[ReducerKey]>[1][\"payload\"]) => void; }"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxToolsPackage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxToolsPackage",
+        "description": [
+          "\nThe package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools."
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxToolsPackage.createReduxTools",
+            "type": "Function",
+            "tags": [],
+            "label": "createReduxTools",
+            "description": [],
+            "signature": [
+              "<ReduxStateType extends unknown, ReducerType extends ",
+              "ReduxToolsReducers",
+              "<ReduxStateType> = ",
+              "ReduxToolsReducers",
+              "<ReduxStateType>>({ reducers, additionalMiddleware, initialState, }: { additionalMiddleware?: ",
+              "Middleware",
+              "<",
+              "AnyAction",
+              ", any, ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">>[] | undefined; initialState: ReduxStateType; reducers: ReducerType; }) => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxTools",
+                "text": "ReduxTools"
+              },
+              "<ReduxStateType, ReducerType>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxToolsPackage.createReduxTools.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ additionalMiddleware?: ",
+                  "Middleware",
+                  "<",
+                  "AnyAction",
+                  ", any, ",
+                  "Dispatch",
+                  "<",
+                  "AnyAction",
+                  ">>[] | undefined; initialState: ReduxStateType; reducers: ReducerType; }"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/create_redux_tools.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxToolsPackage.createReduxEmbeddableTools",
+            "type": "Function",
+            "tags": [],
+            "label": "createReduxEmbeddableTools",
+            "description": [],
+            "signature": [
+              "<ReduxEmbeddableStateType extends ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableState",
+                "text": "ReduxEmbeddableState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", unknown> = ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableState",
+                "text": "ReduxEmbeddableState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", unknown>, ReducerType extends ",
+              "ReduxToolsReducers",
+              "<ReduxEmbeddableStateType> = ",
+              "ReduxToolsReducers",
+              "<ReduxEmbeddableStateType>>({ reducers, embeddable, syncSettings, additionalMiddleware, initialComponentState, }: { embeddable: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.Embeddable",
+                "text": "Embeddable"
+              },
+              "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; additionalMiddleware?: ",
+              "Middleware",
+              "<",
+              "AnyAction",
+              ", any, ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">>[] | undefined; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+              "ReduxEmbeddableSyncSettings",
+              "<",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableState",
+                "text": "ReduxEmbeddableState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", unknown>> | undefined; reducers: ReducerType; }) => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxEmbeddableTools",
+                "text": "ReduxEmbeddableTools"
+              },
+              "<ReduxEmbeddableStateType, ReducerType>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxToolsPackage.createReduxEmbeddableTools.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ embeddable: ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.Embeddable",
+                    "text": "Embeddable"
+                  },
+                  "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; additionalMiddleware?: ",
+                  "Middleware",
+                  "<",
+                  "AnyAction",
+                  ", any, ",
+                  "Dispatch",
+                  "<",
+                  "AnyAction",
+                  ">>[] | undefined; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+                  "ReduxEmbeddableSyncSettings",
+                  "<",
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddableState",
+                    "text": "ReduxEmbeddableState"
+                  },
+                  "<",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.EmbeddableInput",
+                    "text": "EmbeddableInput"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddableOutput",
+                    "text": "EmbeddableOutput"
+                  },
+                  ", unknown>> | undefined; reducers: ReducerType; }"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/create_redux_embeddable_tools.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.SaveModalDashboardProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SaveModalDashboardProps",
+        "description": [],
+        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.documentInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "documentInfo",
+            "description": [],
+            "signature": [
+              "SaveModalDocumentInfo"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.canSaveByReference",
+            "type": "boolean",
+            "tags": [],
+            "label": "canSaveByReference",
+            "description": [],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.objectType",
+            "type": "string",
+            "tags": [],
+            "label": "objectType",
+            "description": [],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.OnSaveProps",
+                "text": "OnSaveProps"
+              },
+              " & { dashboardId: string | null; addToLibrary: boolean; }) => void"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.SaveModalDashboardProps.onSave.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.OnSaveProps",
+                    "text": "OnSaveProps"
+                  },
+                  " & { dashboardId: string | null; addToLibrary: boolean; }"
+                ],
+                "path": "src/plugins/presentation_util/public/components/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.tagOptions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tagOptions",
+            "description": [],
+            "signature": [
+              "React.ReactNode | ((state: ",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SaveModalState",
+                "text": "SaveModalState"
+              },
+              ") => React.ReactNode)"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ExpressionInputEditorRef",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionInputEditorRef",
+        "description": [
+          "\nA type for any React Ref that can be used to store a reference to the Monaco editor within the\nExpressionInput."
+        ],
+        "signature": [
+          "React.MutableRefObject<",
+          "editor",
+          ".IStandaloneCodeEditor | null>"
+        ],
+        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.KibanaPluginServiceFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPluginServiceFactory",
+        "description": [
+          "\nA factory function for creating a Kibana-based service.\n\nThe `Service` generic determines the shape of the API being produced.\nThe `Setup` generic refers to the specific Plugin `TPluginsSetup`.\nThe `Start` generic refers to the specific Plugin `TPluginsStart`."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.KibanaPluginServiceParams",
+            "text": "KibanaPluginServiceParams"
+          },
+          "<Start>, requiredServices: RequiredServices) => Service"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.KibanaPluginServiceFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.KibanaPluginServiceParams",
+                "text": "KibanaPluginServiceParams"
+              },
+              "<Start>"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.KibanaPluginServiceFactory.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "requiredServices",
+            "description": [],
+            "signature": [
+              "RequiredServices"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.OnExpressionInputEditorDidMount",
+        "type": "Type",
+        "tags": [],
+        "label": "OnExpressionInputEditorDidMount",
+        "description": [],
+        "signature": [
+          "(editor: ",
+          "editor",
+          ".IStandaloneCodeEditor | null) => void"
+        ],
+        "path": "src/plugins/presentation_util/public/components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.OnExpressionInputEditorDidMount.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "editor",
+            "description": [],
+            "signature": [
+              "editor",
+              ".IStandaloneCodeEditor | null"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PluginServiceFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginServiceFactory",
+        "description": [
+          "\nA factory function for creating a service.\n\nThe `Service` generic determines the shape of the API being produced.\nThe `StartParameters` generic determines what parameters are expected to\ncreate the service."
+        ],
+        "signature": [
+          "(params: Parameters, requiredServices: RequiredServices) => Service"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceFactory.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Parameters"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PluginServiceFactory.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "requiredServices",
+            "description": [],
+            "signature": [
+              "RequiredServices"
+            ],
+            "path": "src/plugins/presentation_util/public/services/create/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PluginServiceProviders",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginServiceProviders",
+        "description": [
+          "\nA collection of `PluginServiceProvider` objects, keyed by the `Services` API generic.\n\nThe `Services` generic determines the shape of all service APIs being produced.\nThe `StartParameters` generic determines what parameters are expected to\nstart the service."
+        ],
+        "signature": [
+          "{ [K in keyof Services]: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PluginServiceProvider",
+            "text": "PluginServiceProvider"
+          },
+          "<Services[K], StartParameters, Services, (keyof Services)[]>; }"
+        ],
+        "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "presentationUtil",
+      "id": "def-public.PresentationUtilPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "PresentationUtilPluginSetup",
+      "description": [],
+      "path": "src/plugins/presentation_util/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "presentationUtil",
+      "id": "def-public.PresentationUtilPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "PresentationUtilPluginStart",
+      "description": [],
+      "path": "src/plugins/presentation_util/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.ContextProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "ContextProvider",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<{}>"
+          ],
+          "path": "src/plugins/presentation_util/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.ContextProvider.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.ContextProvider.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.labsService",
+          "type": "Object",
+          "tags": [],
+          "label": "labsService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "presentationUtil",
+              "scope": "public",
+              "docId": "kibPresentationUtilPluginApi",
+              "section": "def-public.PresentationLabsService",
+              "text": "PresentationLabsService"
+            }
+          ],
+          "path": "src/plugins/presentation_util/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.registerExpressionsLanguage",
+          "type": "Function",
+          "tags": [],
+          "label": "registerExpressionsLanguage",
+          "description": [],
+          "signature": [
+            "(expressionFunctions: ",
+            {
+              "pluginId": "expressions",
+              "scope": "common",
+              "docId": "kibExpressionsPluginApi",
+              "section": "def-common.ExpressionFunction",
+              "text": "ExpressionFunction"
+            },
+            "[]) => Promise<void>"
+          ],
+          "path": "src/plugins/presentation_util/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.registerExpressionsLanguage.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "expressionFunctions",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "expressions",
+                  "scope": "common",
+                  "docId": "kibExpressionsPluginApi",
+                  "section": "def-common.ExpressionFunction",
+                  "text": "ExpressionFunction"
+                },
+                "[]"
+              ],
+              "path": "src/plugins/presentation_util/public/index.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-server.SETTING_CATEGORY",
+        "type": "string",
+        "tags": [],
+        "label": "SETTING_CATEGORY",
+        "description": [],
+        "signature": [
+          "\"Presentation Labs\""
+        ],
+        "path": "src/plugins/presentation_util/server/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.encode",
+        "type": "Function",
+        "tags": [],
+        "label": "encode",
+        "description": [],
+        "signature": [
+          "(data: any, type: string) => Promise<string>"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.encode.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.encode.$2",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.getElasticLogo",
+        "type": "Function",
+        "tags": [],
+        "label": "getElasticLogo",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "src/plugins/presentation_util/common/lib/utils/elastic_logo",
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.getElasticOutline",
+        "type": "Function",
+        "tags": [],
+        "label": "getElasticOutline",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "src/plugins/presentation_util/common/lib/utils/elastic_outline",
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.getProjectIDs",
+        "type": "Function",
+        "tags": [],
+        "label": "getProjectIDs",
+        "description": [],
+        "signature": [
+          "() => readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.isProjectEnabledByStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "isProjectEnabledByStatus",
+        "description": [],
+        "signature": [
+          "(active: boolean, status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          },
+          ") => boolean"
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isProjectEnabledByStatus.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isProjectEnabledByStatus.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.EnvironmentStatus",
+                "text": "EnvironmentStatus"
+              }
+            ],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.isValidHttpUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidHttpUrl",
+        "description": [],
+        "signature": [
+          "(str: string) => boolean"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isValidHttpUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.isValidUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidUrl",
+        "description": [],
+        "signature": [
+          "(url: string) => boolean"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isValidUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.parseDataUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "parseDataUrl",
+        "description": [],
+        "signature": [
+          "(str: string, withData: boolean) => { mimetype: string; encoding: string; charset: string; data: string | null; isImage: boolean; extension: any; } | null"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.parseDataUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.parseDataUrl.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "withData",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.resolveFromArgs",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveFromArgs",
+        "description": [],
+        "signature": [
+          "(args: any, defaultDataurl?: string | null) => string"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.resolveFromArgs.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.resolveFromArgs.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultDataurl",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.resolveWithMissingImage",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveWithMissingImage",
+        "description": [],
+        "signature": [
+          "(img: string | null, alt?: string | null) => string | null"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.resolveWithMissingImage.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "img",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.resolveWithMissingImage.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alt",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.ProjectConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProjectConfig",
+        "description": [],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+            ],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.isActive",
+            "type": "boolean",
+            "tags": [],
+            "label": "isActive",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.isDisplayed",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDisplayed",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.environments",
+            "type": "Array",
+            "tags": [],
+            "label": "environments",
+            "description": [],
+            "signature": [
+              "(\"kibana\" | \"browser\" | \"session\")[]"
+            ],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.ProjectConfig.solutions",
+            "type": "Array",
+            "tags": [],
+            "label": "solutions",
+            "description": [],
+            "signature": [
+              "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
+            ],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.EnvironmentName",
+        "type": "Type",
+        "tags": [],
+        "label": "EnvironmentName",
+        "description": [],
+        "signature": [
+          "\"kibana\" | \"browser\" | \"session\""
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.EnvironmentStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "EnvironmentStatus",
+        "description": [],
+        "signature": [
+          "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.EXPRESSIONS_LANGUAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EXPRESSIONS_LANGUAGE_ID",
+        "description": [
+          "\nThe unique identifier for the Expressions Language for use in the ExpressionInput\nand CodeEditor components."
+        ],
+        "signature": [
+          "\"kibana-expressions\""
+        ],
+        "path": "src/plugins/presentation_util/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.LABS_PROJECT_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_PROJECT_PREFIX",
+        "description": [],
+        "signature": [
+          "\"labs:\""
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "path": "src/plugins/presentation_util/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "path": "src/plugins/presentation_util/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.Project",
+        "type": "Type",
+        "tags": [],
+        "label": "Project",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectConfig",
+            "text": "ProjectConfig"
+          },
+          " & { status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.ProjectStatus",
+            "text": "ProjectStatus"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.ProjectID",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectID",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\""
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.ProjectStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectStatus",
+        "description": [],
+        "signature": [
+          "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          }
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.SolutionName",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionName",
+        "description": [],
+        "signature": [
+          "\"canvas\" | \"presentation\" | \"dashboard\""
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.defaultTheme$",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultTheme$",
+        "description": [],
+        "signature": [
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/default_theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.environmentNames",
+        "type": "Object",
+        "tags": [],
+        "label": "environmentNames",
+        "description": [],
+        "signature": [
+          "readonly [\"kibana\", \"browser\", \"session\"]"
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.projectIDs",
+        "type": "Object",
+        "tags": [],
+        "label": "projectIDs",
+        "description": [],
+        "signature": [
+          "readonly [\"labs:dashboard:deferBelowFold\", \"labs:dashboard:dashboardControls\", \"labs:canvas:byValueEmbeddable\"]"
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.projects",
+        "type": "Object",
+        "tags": [],
+        "label": "projects",
+        "description": [
+          "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
+        ],
+        "path": "src/plugins/presentation_util/common/labs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DEFER_BELOW_FOLD",
+            "type": "Object",
+            "tags": [],
+            "label": "[DEFER_BELOW_FOLD]",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:deferBelowFold\""
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DEFER_BELOW_FOLD.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.DASHBOARD_CONTROLS",
+            "type": "Object",
+            "tags": [],
+            "label": "[DASHBOARD_CONTROLS]",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:dashboard:dashboardControls\""
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.DASHBOARD_CONTROLS.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"dashboard\"[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.projects.BY_VALUE_EMBEDDABLE",
+            "type": "Object",
+            "tags": [],
+            "label": "[BY_VALUE_EMBEDDABLE]",
+            "description": [],
+            "path": "src/plugins/presentation_util/common/labs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:canvas:byValueEmbeddable\""
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.isActive",
+                "type": "boolean",
+                "tags": [],
+                "label": "isActive",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.isDisplayed",
+                "type": "boolean",
+                "tags": [],
+                "label": "isDisplayed",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.environments",
+                "type": "Array",
+                "tags": [],
+                "label": "environments",
+                "description": [],
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.description",
+                "type": "Any",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-common.projects.BY_VALUE_EMBEDDABLE.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"canvas\"[]"
+                ],
+                "path": "src/plugins/presentation_util/common/labs.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

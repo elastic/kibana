@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
+// setup ts/pkg support in this webpack process
+require('@kbn/babel-register').install();
+
 const Path = require('path');
 
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
-const UiSharedDepsSrc = require('./src');
+const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
@@ -26,14 +29,14 @@ module.exports = {
   externals: {
     module: 'module',
   },
-  mode: 'production',
+  mode: process.env.NODE_ENV || 'development',
   entry: {
     'kbn-ui-shared-deps-src': './src/entry.js',
   },
   context: __dirname,
   devtool: 'cheap-source-map',
   output: {
-    path: UiSharedDepsSrc.distDir,
+    path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
     chunkFilename: 'kbn-ui-shared-deps-src.chunk.[id].js',
     sourceMapFilename: '[file].map',
@@ -57,15 +60,8 @@ module.exports = {
         ],
       },
       {
-        include: [require.resolve('./src/theme.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
-          },
-        ],
+        test: /\.peggy$/,
+        use: [require.resolve('@kbn/peggy-loader')],
       },
       {
         test: /\.css$/,
@@ -78,13 +74,23 @@ module.exports = {
           limit: 8192,
         },
       },
+      {
+        test: /\.(js|tsx?)$/,
+        exclude: /[\/\\]node_modules[\/\\](?!@kbn)([^\/\\]+)[\/\\]/,
+        loader: 'babel-loader',
+        options: {
+          babelrc: false,
+          envName: process.env.NODE_ENV || 'development',
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        },
+      },
     ],
   },
 
   resolve: {
-    extensions: ['.js', '.ts'],
-    symlinks: false,
+    extensions: ['.js', '.ts', '.tsx'],
     alias: {
+      '@elastic/eui$': '@elastic/eui/optimize/es',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
@@ -112,7 +118,7 @@ module.exports = {
 
     new webpack.DllReferencePlugin({
       context: REPO_ROOT,
-      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line
+      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
   ],
 };

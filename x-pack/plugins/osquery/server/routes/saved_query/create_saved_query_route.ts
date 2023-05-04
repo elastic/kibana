@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { isEmpty, pickBy } from 'lodash';
-import { IRouter } from '../../../../../../src/core/server';
+import { isEmpty, pickBy, some, isBoolean } from 'lodash';
+import type { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import {
-  createSavedQueryRequestSchema,
-  CreateSavedQueryRequestSchemaDecoded,
-} from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
+import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
+import { createSavedQueryRequestSchema } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray } from '../utils';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/api/osquery/saved_queries',
       validate: {
         body: buildRouteValidation<
           typeof createSavedQueryRequestSchema,
@@ -30,10 +28,21 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { id, description, platform, query, version, interval, ecs_mapping } = request.body;
+      const {
+        id,
+        description,
+        platform,
+        query,
+        version,
+        interval,
+        snapshot,
+        removed,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        ecs_mapping,
+      } = request.body;
 
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
@@ -42,7 +51,10 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
       });
 
-      if (conflictingEntries.saved_objects.length) {
+      if (
+        conflictingEntries.saved_objects.length &&
+        some(conflictingEntries.saved_objects, ['attributes.id', id])
+      ) {
         return response.conflict({ body: `Saved query with id "${id}" already exists.` });
       }
 
@@ -56,24 +68,28 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             platform,
             version,
             interval,
+            snapshot,
+            removed,
             ecs_mapping: convertECSMappingToArray(ecs_mapping),
             created_by: currentUser,
             created_at: new Date().toISOString(),
             updated_by: currentUser,
             updated_at: new Date().toISOString(),
           },
-          (value) => !isEmpty(value)
+          (value) => !isEmpty(value) || isBoolean(value)
         )
       );
 
       return response.ok({
-        body: pickBy(
-          {
-            ...savedQuerySO,
-            ecs_mapping,
-          },
-          (value) => !isEmpty(value)
-        ),
+        body: {
+          data: pickBy(
+            {
+              ...savedQuerySO,
+              ecs_mapping,
+            },
+            (value) => !isEmpty(value)
+          ),
+        },
       });
     }
   );

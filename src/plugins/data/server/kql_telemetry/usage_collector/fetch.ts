@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
@@ -18,19 +18,19 @@ export interface Usage {
   defaultQueryLanguage: string;
 }
 
-export function fetchProvider(index: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
-    const [{ body: response }, { body: config }] = await Promise.all([
+    const [response, config] = await Promise.all([
       esClient.get(
         {
-          index,
+          index: await getIndexForType('kql-telemetry'),
           id: 'kql-telemetry:kql-telemetry',
         },
         { ignore: [404] }
       ),
       esClient.search(
         {
-          index,
+          index: await getIndexForType('config'),
           body: { query: { term: { type: 'config' } } },
         },
         { ignore: [404] }

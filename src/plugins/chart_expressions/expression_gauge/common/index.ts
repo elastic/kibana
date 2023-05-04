@@ -10,17 +10,17 @@ export const PLUGIN_ID = 'expressionGauge';
 export const PLUGIN_NAME = 'expressionGauge';
 
 export type {
+  AllowedGaugeOverrides,
+  GaugeExpressionFunctionDefinition,
   GaugeExpressionProps,
   FormatFactory,
   GaugeRenderProps,
-  CustomPaletteParams,
-  ColorStop,
-  RequiredPaletteParamTypes,
   GaugeArguments,
   GaugeShape,
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeState,
+  Accessors,
 } from './types';
 
 export { gaugeFunction } from './expression_functions';

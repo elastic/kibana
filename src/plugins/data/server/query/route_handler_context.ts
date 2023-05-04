@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext, SavedObject } from 'kibana/server';
-import { isFilters } from '@kbn/es-query';
+import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
+import { isFilters, isOfQueryType } from '@kbn/es-query';
 import { isQuery, SavedQueryAttributes } from '../../common';
-import { extract, inject } from '../../common/query/persistable_state';
+import { extract, inject } from '../../common/query/filters/persistable_state';
 
 function injectReferences({
   id,
@@ -17,7 +17,7 @@ function injectReferences({
   references,
 }: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'references'>) {
   const { query } = attributes;
-  if (typeof query.query === 'string') {
+  if (isOfQueryType(query) && typeof query.query === 'string') {
     try {
       const parsed = JSON.parse(query.query);
       query.query = parsed instanceof Object ? parsed : query.query;
@@ -37,13 +37,22 @@ function extractReferences({
   timefilter,
 }: SavedQueryAttributes) {
   const { state: extractedFilters, references } = extract(filters);
+  const isOfQueryTypeQuery = isOfQueryType(query);
+  let queryString = '';
+  if (isOfQueryTypeQuery) {
+    if (typeof query.query === 'string') {
+      queryString = query.query;
+    } else {
+      queryString = JSON.stringify(query.query);
+    }
+  }
 
   const attributes: SavedQueryAttributes = {
     title: title.trim(),
     description: description.trim(),
     query: {
       ...query,
-      query: typeof query.query === 'string' ? query.query : JSON.stringify(query.query),
+      ...(queryString && { query: queryString }),
     },
     filters: extractedFilters,
     ...(timefilter && { timefilter }),
@@ -66,18 +75,16 @@ function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) 
   }
 }
 
-export function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
+export async function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
+  const soClient = (await context.core).savedObjects.client;
+
   const createSavedQuery = async (attrs: SavedQueryAttributes) => {
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
 
-    const savedObject = await context.core.savedObjects.client.create<SavedQueryAttributes>(
-      'query',
-      attributes,
-      {
-        references,
-      }
-    );
+    const savedObject = await soClient.create<SavedQueryAttributes>('query', attributes, {
+      references,
+    });
 
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
@@ -89,14 +96,9 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
 
-    const savedObject = await context.core.savedObjects.client.update<SavedQueryAttributes>(
-      'query',
-      id,
-      attributes,
-      {
-        references,
-      }
-    );
+    const savedObject = await soClient.update<SavedQueryAttributes>('query', id, attributes, {
+      references,
+    });
 
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
@@ -105,8 +107,10 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQuery = async (id: string) => {
-    const { saved_object: savedObject, outcome } =
-      await context.core.savedObjects.client.resolve<SavedQueryAttributes>('query', id);
+    const { saved_object: savedObject, outcome } = await soClient.resolve<SavedQueryAttributes>(
+      'query',
+      id
+    );
     if (outcome === 'conflict') {
       throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
     } else if (savedObject.error) {
@@ -116,28 +120,43 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQueriesCount = async () => {
-    const { total } = await context.core.savedObjects.client.find<SavedQueryAttributes>({
+    const { total } = await soClient.find<SavedQueryAttributes>({
       type: 'query',
     });
     return total;
   };
 
   const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}) => {
-    const { total, saved_objects: savedObjects } =
-      await context.core.savedObjects.client.find<SavedQueryAttributes>({
-        type: 'query',
-        page,
-        perPage,
-        search,
-      });
+    const { total, saved_objects: savedObjects } = await soClient.find<SavedQueryAttributes>({
+      type: 'query',
+      page,
+      perPage,
+      search,
+    });
 
     const savedQueries = savedObjects.map(injectReferences);
 
     return { total, savedQueries };
   };
 
-  const deleteSavedQuery = (id: string) => {
-    return context.core.savedObjects.client.delete('query', id);
+  const getAllSavedQueries = async () => {
+    const finder = soClient.createPointInTimeFinder<SavedQueryAttributes>({
+      type: 'query',
+      perPage: 100,
+    });
+
+    const savedObjects: Array<SavedObject<SavedQueryAttributes>> = [];
+    for await (const response of finder.find()) {
+      savedObjects.push(...(response.saved_objects ?? []));
+    }
+    await finder.close();
+
+    const savedQueries = savedObjects.map(injectReferences);
+    return { total: savedQueries.length, savedQueries };
+  };
+
+  const deleteSavedQuery = async (id: string) => {
+    return await soClient.delete('query', id);
   };
 
   return {
@@ -146,10 +165,11 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     get: getSavedQuery,
     count: getSavedQueriesCount,
     find: findSavedQueries,
+    getAll: getAllSavedQueries,
     delete: deleteSavedQuery,
   };
 }
 
-export interface SavedQueryRouteHandlerContext extends RequestHandlerContext {
-  savedQuery: ReturnType<typeof registerSavedQueryRouteHandlerContext>;
-}
+export type SavedQueryRouteHandlerContext = CustomRequestHandlerContext<{
+  savedQuery: Promise<ReturnType<typeof registerSavedQueryRouteHandlerContext>>;
+}>;

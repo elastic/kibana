@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../inspector/public';
+export * from '@kbn/inspector-plugin/public';

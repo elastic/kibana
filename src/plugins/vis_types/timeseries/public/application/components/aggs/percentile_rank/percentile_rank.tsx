@@ -16,6 +16,7 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { AggSelect } from '../agg_select';
 import { FieldSelect } from '../field_select';
 // @ts-ignore
@@ -26,8 +27,13 @@ import { createNumberHandler } from '../../lib/create_number_handler';
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
-import type { Metric, Panel, SanitizedFieldType, Series } from '../../../../../common/types';
+import type {
+  Metric,
+  Panel,
+  SanitizedFieldType,
+  Series,
+  IndexPatternValue,
+} from '../../../../../common/types';
 import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 
 import { DragHandleProps } from '../../../../types';
@@ -38,14 +44,14 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 interface PercentileRankAggProps {
   disableDelete: boolean;
   fields: Record<string, SanitizedFieldType[]>;
-  indexPattern: string;
+  indexPattern: IndexPatternValue;
   model: Metric;
   panel: Panel;
   siblings: Metric[];
   series: Series;
   dragHandleProps: DragHandleProps;
   onAdd(): void;
-  onChange(): void;
+  onChange(partialModel: Record<string, unknown>): void;
   onDelete(): void;
 }
 
@@ -111,7 +117,11 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
             restrict={RESTRICT_FIELDS}
             indexPattern={indexPattern}
             value={model.field ?? ''}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
           />
         </EuiFlexItem>
 

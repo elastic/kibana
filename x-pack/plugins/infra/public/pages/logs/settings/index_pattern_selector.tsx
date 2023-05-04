@@ -76,7 +76,7 @@ export const IndexPatternSelector: React.FC<{
       options={availableOptions}
       placeholder={indexPatternSelectorPlaceholder}
       selectedOptions={selectedOptions}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
       onChange={changeSelectedIndexPatterns}
     />
   );

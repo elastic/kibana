@@ -1,20 +1,35 @@
 [[get-connector-api]]
-=== Get connector API
+== Get connector API
 ++++
 <titleabbrev>Get connector</titleabbrev>
 ++++
 
 Retrieves a connector by ID.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
+[discrete]
 [[get-connector-api-request]]
-==== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connector/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
+[discrete]
+=== {api-prereq-title}
+
+You must have `read` privileges for the *{connectors-feature}* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[discrete]
 [[get-connector-api-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -22,18 +37,20 @@ Retrieves a connector by ID.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[discrete]
 [[get-connector-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
+[discrete]
 [[get-connector-api-example]]
-==== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+GET api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
 --------------------------------------------------
 // KIBANA
 
@@ -51,6 +68,7 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
+  "is_deprecated": false,
   "is_missing_secrets": false
 }
 --------------------------------------------------

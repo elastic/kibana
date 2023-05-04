@@ -4,30 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -53,7 +54,7 @@ export async function getServiceInstancesTransactionStatistics<
   environment,
   kuery,
   latencyAggregationType,
-  setup,
+  apmEventClient,
   transactionType,
   serviceName,
   size,
@@ -63,9 +64,10 @@ export async function getServiceInstancesTransactionStatistics<
   serviceNodeIds,
   numBuckets,
   isComparisonSearch,
+  offset,
 }: {
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
@@ -77,13 +79,18 @@ export async function getServiceInstancesTransactionStatistics<
   kuery: string;
   size?: number;
   numBuckets?: number;
+  offset?: string;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
-  const { apmEventClient } = setup;
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions(
     {
-      start,
-      end,
+      start: startWithOffset,
+      end: endWithOffset,
       numBuckets,
       searchAggregatedTransactions,
     }
@@ -108,7 +115,7 @@ export async function getServiceInstancesTransactionStatistics<
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-        ...rangeQuery(start, end),
+        ...rangeQuery(startWithOffset, endWithOffset),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
@@ -134,7 +141,7 @@ export async function getServiceInstancesTransactionStatistics<
                 field: '@timestamp',
                 fixed_interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: { min: start, max: end },
+                extended_bounds: { min: startWithOffset, max: endWithOffset },
               },
               aggs: subAggs,
             },
@@ -151,7 +158,7 @@ export async function getServiceInstancesTransactionStatistics<
           getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
-      body: { size: 0, query, aggs },
+      body: { size: 0, track_total_hits: false, query, aggs },
     }
   );
 
@@ -193,7 +200,11 @@ export async function getServiceInstancesTransactionStatistics<
               aggregation: latency,
               latencyAggregationType,
             }),
-            throughput: calculateThroughput({ start, end, value: count }),
+            throughput: calculateThroughputWithRange({
+              start: startWithOffset,
+              end: endWithOffset,
+              value: count,
+            }),
           };
         }
       }

@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 
-import {
-  EuiConfirmModal,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EUI_MODAL_CONFIRM_BUTTON,
-} from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu';
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
@@ -112,30 +104,27 @@ export class CalendarsListUI extends Component {
       destroyModal = (
         <EuiConfirmModal
           data-test-subj={'mlCalendarDeleteConfirmation'}
-          title={
-            <FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
-              defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
-              values={{
+          title={i18n.translate(
+            'xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle',
+            {
+              defaultMessage:
+                'Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?',
+              values: {
                 calendarsCount: selectedForDeletion.length,
                 calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
-              }}
-            />
-          }
+              },
+            }
+          )}
           onCancel={this.closeDestroyModal}
           onConfirm={this.deleteCalendars}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel',
+            { defaultMessage: 'Delete' }
+          )}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
@@ -143,35 +132,26 @@ export class CalendarsListUI extends Component {
     }
 
     return (
-      <Fragment>
-        <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarList" data-test-subj="mlPageCalendarManagement">
-          <EuiPageBody>
-            <EuiPageContent
-              className="mlCalendarList__content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <CalendarsListHeader
-                totalCount={calendars.length}
-                refreshCalendars={this.loadCalendars}
-              />
-              <CalendarsListTable
-                loading={loading}
-                calendarsList={this.addRequiredFieldsToList(calendars)}
-                onDeleteClick={this.showDestroyModal}
-                canCreateCalendar={canCreateCalendar}
-                canDeleteCalendar={canDeleteCalendar}
-                mlNodesAvailable={nodesAvailable}
-                setSelectedCalendarList={this.setSelectedCalendarList}
-                itemsSelected={selectedForDeletion.length > 0}
-              />
-            </EuiPageContent>
-            {destroyModal}
-          </EuiPageBody>
-        </EuiPage>
+      <>
+        <div data-test-subj="mlPageCalendarManagement">
+          <CalendarsListHeader
+            totalCount={calendars.length}
+            refreshCalendars={this.loadCalendars}
+          />
+          <CalendarsListTable
+            loading={loading}
+            calendarsList={this.addRequiredFieldsToList(calendars)}
+            onDeleteClick={this.showDestroyModal}
+            canCreateCalendar={canCreateCalendar}
+            canDeleteCalendar={canDeleteCalendar}
+            mlNodesAvailable={nodesAvailable}
+            setSelectedCalendarList={this.setSelectedCalendarList}
+            itemsSelected={selectedForDeletion.length > 0}
+          />
+          {destroyModal}
+        </div>
         <HelpMenu docLink={helpLink} />
-      </Fragment>
+      </>
     );
   }
 }

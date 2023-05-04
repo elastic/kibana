@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { euiDarkVars as euiVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars as euiVars } from '@kbn/ui-theme';
 
-import { stringHash } from './string_utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 const COLORS = [
   euiVars.euiColorVis0,

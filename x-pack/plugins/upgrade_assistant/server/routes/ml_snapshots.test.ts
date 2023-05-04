@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import {
+  createMockRouter,
+  MockRouter,
+  routeHandlerContextMock,
+  savedObjectsClient,
+} from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
@@ -25,13 +30,20 @@ describe('ML snapshots APIs', () => {
   let mockRouter: MockRouter;
   let routeDependencies: any;
 
-  beforeEach(() => {
+  function registerMockRouter({ mlSnapshots } = { mlSnapshots: true }) {
     mockRouter = createMockRouter();
     routeDependencies = {
+      config: {
+        featureSet: { mlSnapshots, migrateSystemIndices: true, reindexCorrectiveActions: true },
+      },
       router: mockRouter,
       lib: { handleEsError },
     };
     registerMlSnapshotRoutes(routeDependencies);
+  }
+
+  beforeEach(() => {
+    registerMockRouter();
   });
 
   afterEach(() => {
@@ -44,10 +56,8 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .upgradeJobSnapshot as jest.Mock
       ).mockResolvedValue({
-        body: {
-          node: NODE_ID,
-          completed: false,
-        },
+        node: NODE_ID,
+        completed: false,
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -78,10 +88,8 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .upgradeJobSnapshot as jest.Mock
       ).mockResolvedValue({
-        body: {
-          node: NODE_ID,
-          completed: true,
-        },
+        node: NODE_ID,
+        completed: true,
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -135,9 +143,7 @@ describe('ML snapshots APIs', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .deleteModelSnapshot as jest.Mock
-      ).mockResolvedValue({
-        body: { acknowledged: true },
-      });
+      ).mockResolvedValue({ acknowledged: true });
 
       const resp = await routeDependencies.router.getHandler({
         method: 'delete',
@@ -181,9 +187,7 @@ describe('ML snapshots APIs', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
       ).mockResolvedValue({
-        body: {
-          upgrade_mode: true,
-        },
+        upgrade_mode: true,
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -196,6 +200,26 @@ describe('ML snapshots APIs', () => {
         mlUpgradeModeEnabled: true,
       });
     });
+
+    it('returns false if featureSet.mlSnapshots is set to false even if upgrade_mode is true', async () => {
+      registerMockRouter({ mlSnapshots: false });
+
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
+      ).mockResolvedValue({
+        upgrade_mode: true,
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_upgrade_mode',
+      })(routeHandlerContextMock, createRequestMock({}), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        mlUpgradeModeEnabled: false,
+      });
+    });
   });
 
   describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
@@ -204,23 +228,21 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .getModelSnapshots as jest.Mock
       ).mockResolvedValue({
-        body: {
-          count: 1,
-          model_snapshots: [
-            {
-              job_id: JOB_ID,
-              min_version: '6.4.0',
-              timestamp: 1575402237000,
-              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
-              snapshot_id: SNAPSHOT_ID,
-              snapshot_doc_count: 1,
-              model_size_stats: {},
-              latest_record_time_stamp: 1576971072000,
-              latest_result_time_stamp: 1576965600000,
-              retain: false,
-            },
-          ],
-        },
+        count: 1,
+        model_snapshots: [
+          {
+            job_id: JOB_ID,
+            min_version: '6.4.0',
+            timestamp: 1575402237000,
+            description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+            snapshot_id: SNAPSHOT_ID,
+            snapshot_doc_count: 1,
+            model_size_stats: {},
+            latest_record_time_stamp: 1576971072000,
+            latest_result_time_stamp: 1576965600000,
+            retain: false,
+          },
+        ],
       });
 
       const resp = await routeDependencies.router.getHandler({
@@ -251,26 +273,24 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .getModelSnapshots as jest.Mock
       ).mockResolvedValue({
-        body: {
-          count: 1,
-          model_snapshots: [
-            {
-              job_id: JOB_ID,
-              min_version: '6.4.0',
-              timestamp: 1575402237000,
-              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
-              snapshot_id: SNAPSHOT_ID,
-              snapshot_doc_count: 1,
-              model_size_stats: {},
-              latest_record_time_stamp: 1576971072000,
-              latest_result_time_stamp: 1576965600000,
-              retain: false,
-            },
-          ],
-        },
+        count: 1,
+        model_snapshots: [
+          {
+            job_id: JOB_ID,
+            min_version: '6.4.0',
+            timestamp: 1575402237000,
+            description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+            snapshot_id: SNAPSHOT_ID,
+            snapshot_doc_count: 1,
+            model_size_stats: {},
+            latest_record_time_stamp: 1576971072000,
+            latest_result_time_stamp: 1576965600000,
+            retain: false,
+          },
+        ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -324,26 +344,24 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .getModelSnapshots as jest.Mock
       ).mockResolvedValue({
-        body: {
-          count: 1,
-          model_snapshots: [
-            {
-              job_id: JOB_ID,
-              min_version: '6.4.0',
-              timestamp: 1575402237000,
-              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
-              snapshot_id: SNAPSHOT_ID,
-              snapshot_doc_count: 1,
-              model_size_stats: {},
-              latest_record_time_stamp: 1576971072000,
-              latest_result_time_stamp: 1576965600000,
-              retain: false,
-            },
-          ],
-        },
+        count: 1,
+        model_snapshots: [
+          {
+            job_id: JOB_ID,
+            min_version: '6.4.0',
+            timestamp: 1575402237000,
+            description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+            snapshot_id: SNAPSHOT_ID,
+            snapshot_doc_count: 1,
+            model_size_stats: {},
+            latest_record_time_stamp: 1576971072000,
+            latest_result_time_stamp: 1576965600000,
+            retain: false,
+          },
+        ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -391,26 +409,24 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
           .getModelSnapshots as jest.Mock
       ).mockResolvedValue({
-        body: {
-          count: 1,
-          model_snapshots: [
-            {
-              job_id: JOB_ID,
-              min_version: '6.4.0',
-              timestamp: 1575402237000,
-              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
-              snapshot_id: SNAPSHOT_ID,
-              snapshot_doc_count: 1,
-              model_size_stats: {},
-              latest_record_time_stamp: 1576971072000,
-              latest_result_time_stamp: 1576965600000,
-              retain: false,
-            },
-          ],
-        },
+        count: 1,
+        model_snapshots: [
+          {
+            job_id: JOB_ID,
+            min_version: '6.4.0',
+            timestamp: 1575402237000,
+            description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+            snapshot_id: SNAPSHOT_ID,
+            snapshot_doc_count: 1,
+            model_size_stats: {},
+            latest_record_time_stamp: 1576971072000,
+            latest_result_time_stamp: 1576965600000,
+            retain: false,
+          },
+        ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -432,15 +448,13 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.migration
           .deprecations as jest.Mock
       ).mockResolvedValue({
-        body: {
-          cluster_settings: [],
-          ml_settings: [],
-          node_settings: [],
-          index_settings: {},
-        },
+        cluster_settings: [],
+        ml_settings: [],
+        node_settings: [],
+        index_settings: {},
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.delete as jest.Mock).mockResolvedValue({});
+      (savedObjectsClient.delete as jest.Mock).mockResolvedValue({});
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',

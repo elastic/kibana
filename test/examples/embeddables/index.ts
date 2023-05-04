@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({
@@ -18,7 +18,6 @@ export default function ({
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('embeddable explorer', function () {
-    this.tags('ciGroup2');
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('embeddableExplorer');
@@ -28,6 +27,5 @@ export default function ({
     loadTestFile(require.resolve('./todo_embeddable'));
     loadTestFile(require.resolve('./list_container'));
     loadTestFile(require.resolve('./adding_children'));
-    loadTestFile(require.resolve('./dashboard'));
   });
 }

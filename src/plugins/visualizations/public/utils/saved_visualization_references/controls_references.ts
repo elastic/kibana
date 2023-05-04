@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../../core/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { VisParams } from '../../../common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/common';
 
 const isControlsVis = (visType: string) => visType === 'input_control_vis';
 
@@ -26,7 +26,7 @@ export const extractControlsReferences = (
       control.indexPatternRefName = `${prefix}_${i}_index_pattern`;
       references.push({
         name: control.indexPatternRefName,
-        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: control.indexPattern,
       });
       delete control.indexPattern;

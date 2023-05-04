@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Plugin } from 'unified';
-import { RemarkTokenizer } from '@elastic/eui';
+import type { Plugin } from 'unified';
+import type { RemarkTokenizer } from '@elastic/eui';
+import { safeDecode } from '@kbn/rison';
 import { parse } from 'query-string';
-import { decodeRisonUrlState } from '../../../url_state/helpers';
+
 import { ID, PREFIX } from './constants';
 import * as i18n from './translations';
 
@@ -72,9 +73,14 @@ export const TimelineParser: Plugin = function () {
     try {
       const timelineSearch = timelineUrl.split('?');
       const parseTimelineUrlSearch = parse(timelineSearch[1]) as { timeline: string };
-      const { id: timelineId = '', graphEventId = '' } = decodeRisonUrlState(
-        parseTimelineUrlSearch.timeline ?? ''
-      ) ?? { id: null, graphEventId: '' };
+      const decodedTimeline = safeDecode(parseTimelineUrlSearch.timeline ?? '') as {
+        id?: string;
+        graphEventId?: string;
+      } | null;
+      const { id: timelineId = '', graphEventId = '' } = decodedTimeline ?? {
+        id: null,
+        graphEventId: '',
+      };
 
       if (!timelineId) {
         this.file.info(i18n.NO_TIMELINE_ID_FOUND, {

@@ -1,0 +1,568 @@
+{
+  "id": "@kbn/config-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.createTestEnv",
+        "type": "Function",
+        "tags": [],
+        "label": "createTestEnv",
+        "description": [],
+        "signature": [
+          "({ repoRoot, envOptions, packageInfo, }?: { repoRoot?: string | undefined; envOptions?: ",
+          "EnvOptions",
+          " | undefined; packageInfo?: ",
+          "RawPackageInfo",
+          " | undefined; }) => ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.Env",
+            "text": "Env"
+          }
+        ],
+        "path": "packages/kbn-config-mocks/src/env.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.createTestEnv.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  repoRoot = REPO_ROOT,\n  envOptions = getEnvOptions(),\n  packageInfo = createTestPackageInfo(),\n}",
+            "description": [],
+            "path": "packages/kbn-config-mocks/src/env.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-mocks",
+                "id": "def-common.createTestEnv.$1.repoRoot",
+                "type": "string",
+                "tags": [],
+                "label": "repoRoot",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-mocks",
+                "id": "def-common.createTestEnv.$1.envOptions",
+                "type": "Object",
+                "tags": [],
+                "label": "envOptions",
+                "description": [],
+                "signature": [
+                  "EnvOptions",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-mocks",
+                "id": "def-common.createTestEnv.$1.packageInfo",
+                "type": "Object",
+                "tags": [],
+                "label": "packageInfo",
+                "description": [],
+                "signature": [
+                  "RawPackageInfo",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.createTestPackageInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "createTestPackageInfo",
+        "description": [],
+        "signature": [
+          "({ dist }?: { dist?: boolean | undefined; }) => ",
+          "RawPackageInfo"
+        ],
+        "path": "packages/kbn-config-mocks/src/env.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.createTestPackageInfo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ dist = true }",
+            "description": [],
+            "path": "packages/kbn-config-mocks/src/env.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-mocks",
+                "id": "def-common.createTestPackageInfo.$1.dist",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dist",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.getEnvOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getEnvOptions",
+        "description": [],
+        "signature": [
+          "(options: DeepPartial<",
+          "EnvOptions",
+          ">) => ",
+          "EnvOptions"
+        ],
+        "path": "packages/kbn-config-mocks/src/env.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.getEnvOptions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "DeepPartial<",
+              "EnvOptions",
+              ">"
+            ],
+            "path": "packages/kbn-config-mocks/src/env.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.ConfigDeprecationContextMock",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigDeprecationContextMock",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigDeprecationContext",
+            "text": "ConfigDeprecationContext"
+          }
+        ],
+        "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.ConfigMock",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigMock",
+        "description": [],
+        "signature": [
+          "{ has: jest.MockInstance<boolean, [configPath: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          "]>; get: jest.MockInstance<any, [configPath: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          "]>; set: jest.MockInstance<void, [configPath: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          ", value: any]>; getFlattenedPaths: jest.MockInstance<string[], []>; toRaw: jest.MockInstance<Record<string, any>, []>; } & ",
+          "Config"
+        ],
+        "path": "packages/kbn-config-mocks/src/config.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.IConfigServiceMock",
+        "type": "Type",
+        "tags": [],
+        "label": "IConfigServiceMock",
+        "description": [],
+        "signature": [
+          "{ validate: jest.MockInstance<Promise<void>, [params?: ",
+          "ConfigValidateParameters",
+          " | undefined]>; getConfig$: jest.MockInstance<",
+          "Observable",
+          "<",
+          "Config",
+          ">, []>; setSchema: jest.MockInstance<void, [path: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          ", schema: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<unknown>]>; addDeprecationProvider: jest.MockInstance<void, [path: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          ", provider: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
+          "]>; getHandledDeprecatedConfigs: jest.MockInstance<[string, ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.DeprecatedConfigDetails",
+            "text": "DeprecatedConfigDetails"
+          },
+          "[]][], []>; atPath: jest.MockInstance<",
+          "Observable",
+          "<unknown>, [path: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          "]>; atPathSync: jest.MockInstance<unknown, [path: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          "]>; isEnabledAtPath: jest.MockInstance<Promise<boolean>, [path: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigPath",
+            "text": "ConfigPath"
+          },
+          "]>; getUnusedPaths: jest.MockInstance<Promise<string[]>, []>; getUsedPaths: jest.MockInstance<Promise<string[]>, []>; getDeprecatedConfigPath$: jest.MockInstance<",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ChangedDeprecatedPaths",
+            "text": "ChangedDeprecatedPaths"
+          },
+          ">, []>; } & ",
+          "IConfigService"
+        ],
+        "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.RawConfigServiceMock",
+        "type": "Type",
+        "tags": [],
+        "label": "RawConfigServiceMock",
+        "description": [],
+        "signature": [
+          "{ stop: jest.MockInstance<void, []>; getConfig$: jest.MockInstance<",
+          "Observable",
+          "<Record<string, any>>, []>; loadConfig: jest.MockInstance<void, []>; reloadConfig: jest.MockInstance<void, []>; } & ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.PublicMethodsOf",
+            "text": "PublicMethodsOf"
+          },
+          "<",
+          "RawConfigService",
+          ">"
+        ],
+        "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.configDeprecationsMock",
+        "type": "Object",
+        "tags": [],
+        "label": "configDeprecationsMock",
+        "description": [],
+        "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.configDeprecationsMock.createContext",
+            "type": "Function",
+            "tags": [],
+            "label": "createContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.ConfigDeprecationContext",
+                "text": "ConfigDeprecationContext"
+              }
+            ],
+            "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.configMock",
+        "type": "Object",
+        "tags": [],
+        "label": "configMock",
+        "description": [],
+        "path": "packages/kbn-config-mocks/src/config.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.configMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/config-mocks",
+                "scope": "common",
+                "docId": "kibKbnConfigMocksPluginApi",
+                "section": "def-common.ConfigMock",
+                "text": "ConfigMock"
+              }
+            ],
+            "path": "packages/kbn-config-mocks/src/config.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.configServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "configServiceMock",
+        "description": [],
+        "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.configServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ atPath, getConfig$, }?: { atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }) => ",
+              {
+                "pluginId": "@kbn/config-mocks",
+                "scope": "common",
+                "docId": "kibKbnConfigMocksPluginApi",
+                "section": "def-common.IConfigServiceMock",
+                "text": "IConfigServiceMock"
+              }
+            ],
+            "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-mocks",
+                "id": "def-common.configServiceMock.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }"
+                ],
+                "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-mocks",
+        "id": "def-common.rawConfigServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "rawConfigServiceMock",
+        "description": [],
+        "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-mocks",
+            "id": "def-common.rawConfigServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ rawConfig, rawConfig$, }?: { rawConfig?: Record<string, any> | undefined; rawConfig$?: ",
+              "Observable",
+              "<Record<string, any>> | undefined; }) => ",
+              {
+                "pluginId": "@kbn/config-mocks",
+                "scope": "common",
+                "docId": "kibKbnConfigMocksPluginApi",
+                "section": "def-common.RawConfigServiceMock",
+                "text": "RawConfigServiceMock"
+              }
+            ],
+            "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-mocks",
+                "id": "def-common.rawConfigServiceMock.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ rawConfig?: Record<string, any> | undefined; rawConfig$?: ",
+                  "Observable",
+                  "<Record<string, any>> | undefined; }"
+                ],
+                "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -9,55 +9,44 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 import {
-  ADD_BOX_PATH,
-  ADD_CONFLUENCE_PATH,
-  ADD_CONFLUENCE_SERVER_PATH,
-  ADD_DROPBOX_PATH,
-  ADD_GITHUB_ENTERPRISE_PATH,
-  ADD_GITHUB_PATH,
-  ADD_GMAIL_PATH,
-  ADD_GOOGLE_DRIVE_PATH,
-  ADD_JIRA_PATH,
-  ADD_JIRA_SERVER_PATH,
-  ADD_ONEDRIVE_PATH,
-  ADD_SALESFORCE_PATH,
-  ADD_SALESFORCE_SANDBOX_PATH,
-  ADD_SERVICENOW_PATH,
-  ADD_SHAREPOINT_PATH,
-  ADD_SLACK_PATH,
-  ADD_ZENDESK_PATH,
-  ADD_CUSTOM_PATH,
-  EDIT_BOX_PATH,
-  EDIT_CONFLUENCE_PATH,
-  EDIT_CONFLUENCE_SERVER_PATH,
-  EDIT_DROPBOX_PATH,
-  EDIT_GITHUB_ENTERPRISE_PATH,
-  EDIT_GITHUB_PATH,
-  EDIT_GMAIL_PATH,
-  EDIT_GOOGLE_DRIVE_PATH,
-  EDIT_JIRA_PATH,
-  EDIT_JIRA_SERVER_PATH,
-  EDIT_ONEDRIVE_PATH,
-  EDIT_SALESFORCE_PATH,
-  EDIT_SALESFORCE_SANDBOX_PATH,
-  EDIT_SERVICENOW_PATH,
-  EDIT_SHAREPOINT_PATH,
-  EDIT_SLACK_PATH,
-  EDIT_ZENDESK_PATH,
-  EDIT_CUSTOM_PATH,
-} from '../../routes';
+  SOURCE_CATEGORIES,
+  SOURCE_NAMES,
+  SOURCE_OBJ_TYPES,
+  GITHUB_LINK_TITLE,
+} from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
-export const staticSourceData = [
+export const staticGenericExternalSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.CUSTOM_CONNECTOR_PACKAGE,
+  categories: ['API', 'Custom'],
+  serviceType: 'external',
+  configuration: {
+    hasOauthRedirect: false,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchCustomConnectorPackage,
+    applicationPortalUrl: '',
+  },
+  objTypes: [],
+  features: {
+    basicOrgContext: [FeatureIds.SyncFrequency, FeatureIds.GlobalAccessPermissions],
+    platinumOrgContext: [],
+    platinumPrivateContext: [],
+  },
+  accountContextOnly: false,
+  isBeta: true,
+};
+
+export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
     serviceType: 'box',
-    addPath: ADD_BOX_PATH,
-    editPath: EDIT_BOX_PATH,
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchBox,
@@ -83,10 +72,8 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',
-    addPath: ADD_CONFLUENCE_PATH,
-    editPath: EDIT_CONFLUENCE_PATH,
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceCloud,
@@ -114,15 +101,48 @@ export const staticSourceData = [
     },
     accountContextOnly: false,
   },
+
+  {
+    name: SOURCE_NAMES.CONFLUENCE_CONNECTOR_PACKAGE,
+    serviceType: 'external',
+    baseServiceType: 'confluence_cloud',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
+    configuration: {
+      hasOauthRedirect: true,
+      needsBaseUrl: true,
+      documentationUrl: docLinks.workplaceSearchConfluenceCloudConnectorPackage,
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
+    },
+    objTypes: [
+      SOURCE_OBJ_TYPES.PAGES,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
+      SOURCE_OBJ_TYPES.BLOG_POSTS,
+      SOURCE_OBJ_TYPES.SPACES,
+    ],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
-    addPath: ADD_CONFLUENCE_SERVER_PATH,
-    editPath: EDIT_CONFLUENCE_SERVER_PATH,
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: true,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceServer,
     },
     objTypes: [
@@ -149,10 +169,12 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
-    addPath: ADD_DROPBOX_PATH,
-    editPath: EDIT_DROPBOX_PATH,
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchDropbox,
@@ -178,10 +200,12 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.GITHUB,
     serviceType: 'github',
-    addPath: ADD_GITHUB_PATH,
-    editPath: EDIT_GITHUB_PATH,
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsConfiguration: true,
@@ -214,10 +238,12 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
-    addPath: ADD_GITHUB_ENTERPRISE_PATH,
-    editPath: EDIT_GITHUB_ENTERPRISE_PATH,
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsConfiguration: true,
       needsBaseUrl: true,
@@ -256,10 +282,12 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
-    addPath: ADD_GMAIL_PATH,
-    editPath: EDIT_GMAIL_PATH,
+    categories: [
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.EMAIL,
+      SOURCE_CATEGORIES.GOOGLE,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchGmail,
@@ -274,10 +302,14 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
-    addPath: ADD_GOOGLE_DRIVE_PATH,
-    editPath: EDIT_GOOGLE_DRIVE_PATH,
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.GSUITE,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchGoogleDrive,
@@ -307,10 +339,13 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
-    addPath: ADD_JIRA_PATH,
-    editPath: EDIT_JIRA_PATH,
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchJiraCloud,
@@ -343,12 +378,15 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.JIRA_SERVER,
     serviceType: 'jira_server',
-    addPath: ADD_JIRA_SERVER_PATH,
-    editPath: EDIT_JIRA_SERVER_PATH,
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: true,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchJiraServer,
       applicationPortalUrl: '',
     },
@@ -376,12 +414,30 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
+    name: SOURCE_NAMES.NETWORK_DRVE,
+    categories: [SOURCE_CATEGORIES.STORAGE],
+    serviceType: 'custom',
+    baseServiceType: 'network_drive',
+    configuration: {
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchNetworkDrive,
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-network-drive-connector',
+    },
+    accountContextOnly: false,
+  },
+  {
     name: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
-    addPath: ADD_ONEDRIVE_PATH,
-    editPath: EDIT_ONEDRIVE_PATH,
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchOneDrive,
@@ -407,10 +463,12 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
-    addPath: ADD_SALESFORCE_PATH,
-    editPath: EDIT_SALESFORCE_PATH,
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSalesforce,
@@ -443,10 +501,12 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
-    addPath: ADD_SALESFORCE_SANDBOX_PATH,
-    editPath: EDIT_SALESFORCE_SANDBOX_PATH,
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSalesforce,
@@ -479,12 +539,11 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
-    addPath: ADD_SERVICENOW_PATH,
-    editPath: EDIT_SERVICENOW_PATH,
+    categories: [SOURCE_CATEGORIES.WORKFLOW],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
+      needsCredentials: true,
       documentationUrl: docLinks.workplaceSearchServiceNow,
       applicationPortalUrl: 'https://www.servicenow.com/my-account/sign-in.html',
     },
@@ -512,10 +571,14 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
-    addPath: ADD_SHAREPOINT_PATH,
-    editPath: EDIT_SHAREPOINT_PATH,
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSharePoint,
@@ -539,12 +602,70 @@ export const staticSourceData = [
     accountContextOnly: false,
   },
   {
+    name: SOURCE_NAMES.SHAREPOINT_CONNECTOR_PACKAGE,
+    serviceType: 'external',
+    baseServiceType: 'share_point',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
+    configuration: {
+      hasOauthRedirect: true,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
+      applicationPortalUrl: 'https://portal.azure.com/',
+    },
+    objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
+  {
+    name: SOURCE_NAMES.SHAREPOINT_SERVER,
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
+    serviceType: 'custom',
+    baseServiceType: 'share_point_server',
+    configuration: {
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchSharePointServer,
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
+    },
+    accountContextOnly: false,
+  },
+  {
     name: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
-    addPath: ADD_SLACK_PATH,
-    editPath: EDIT_SLACK_PATH,
+    categories: [
+      SOURCE_CATEGORIES.COLLABORATION,
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.INSTANT_MESSAGING,
+      SOURCE_CATEGORIES.CHAT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSlack,
@@ -563,10 +684,14 @@ export const staticSourceData = [
   {
     name: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
-    addPath: ADD_ZENDESK_PATH,
-    editPath: EDIT_ZENDESK_PATH,
+    categories: [
+      SOURCE_CATEGORIES.HELP,
+      SOURCE_CATEGORIES.CUSTOMER_SERVICE,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.TICKETING,
+      SOURCE_CATEGORIES.HELPDESK,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsSubdomain: true,
@@ -589,22 +714,40 @@ export const staticSourceData = [
     },
     accountContextOnly: false,
   },
-  {
-    name: SOURCE_NAMES.CUSTOM,
-    serviceType: 'custom',
-    addPath: ADD_CUSTOM_PATH,
-    editPath: EDIT_CUSTOM_PATH,
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: false,
-      needsBaseUrl: false,
-      helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
-        defaultMessage:
-          'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
-      }),
-      documentationUrl: docLinks.workplaceSearchCustomSources,
-      applicationPortalUrl: '',
-    },
-    accountContextOnly: false,
+  staticGenericExternalSourceData,
+];
+
+export const staticCustomSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.CUSTOM,
+  categories: ['API', 'Custom'],
+  serviceType: 'custom',
+  configuration: {
+    hasOauthRedirect: false,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchCustomSources,
+    applicationPortalUrl: '',
   },
-] as SourceDataItem[];
+  accountContextOnly: false,
+};
+
+export const getSourceData = (
+  serviceType: string,
+  baseServiceType?: string
+): SourceDataItem | undefined => {
+  if (serviceType === 'custom' && typeof baseServiceType === 'undefined') {
+    return staticCustomSourceData;
+  }
+  return staticSourceData.find(
+    (staticSource) =>
+      staticSource.serviceType === serviceType && staticSource.baseServiceType === baseServiceType
+  );
+};
+
+export const hasExternalConnectorOption = (serviceType: string): boolean =>
+  !!getSourceData('external', serviceType);
+
+export const hasCustomConnectorOption = (serviceType: string): boolean =>
+  !!getSourceData('custom', serviceType);
+
+export const hasMultipleConnectorOptions = (serviceType: string): boolean =>
+  hasExternalConnectorOption(serviceType) || hasCustomConnectorOption(serviceType);

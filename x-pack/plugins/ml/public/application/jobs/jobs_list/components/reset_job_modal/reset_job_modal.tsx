@@ -17,12 +17,16 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
+  EuiSwitch,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
+import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -37,6 +41,8 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
+  const [hasManagedJob, setHasManagedJob] = useState(false);
+  const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -47,13 +53,17 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
         unsetShowFunction();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showModal = useCallback((tempJobs: MlSummaryJob[]) => {
     setJobIds(tempJobs.map(({ id }) => id));
     setJobs(tempJobs);
+    setHasManagedJob(tempJobs.some((j) => isManagedJob(j)));
+
     setModalVisible(true);
     setResetting(false);
+    setDeleteUserAnnotations(false);
   }, []);
 
   const closeModal = useCallback(() => {
@@ -62,12 +72,12 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
   const resetJob = useCallback(async () => {
     setResetting(true);
-    await resetJobs(jobIds);
+    await resetJobs(jobIds, deleteUserAnnotations);
     closeModal();
     setTimeout(() => {
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
-  }, [jobIds, refreshJobs]);
+  }, [closeModal, deleteUserAnnotations, jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
@@ -90,6 +100,22 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
       <EuiModalBody>
         <>
           <OpenJobsWarningCallout jobs={jobs} />
+
+          {hasManagedJob === true ? (
+            <>
+              <ManagedJobsWarningCallout
+                jobsCount={jobIds.length}
+                action={i18n.translate(
+                  'xpack.ml.jobsList.startDatafeedsModal.resetManagedDatafeedsDescription',
+                  {
+                    defaultMessage: 'resetting',
+                  }
+                )}
+              />
+              <EuiSpacer />
+            </>
+          ) : null}
+
           <EuiText>
             <FormattedMessage
               id="xpack.ml.jobsList.resetJobModal.resetMultipleJobsDescription"
@@ -99,6 +125,14 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
               values={{
                 jobsCount: jobIds.length,
               }}
+            />
+            <EuiSpacer />
+            <EuiSwitch
+              label={i18n.translate('xpack.ml.jobsList.resetJobModal.deleteUserAnnotations', {
+                defaultMessage: 'Delete annotations.',
+              })}
+              checked={deleteUserAnnotations}
+              onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
             />
           </EuiText>
         </>

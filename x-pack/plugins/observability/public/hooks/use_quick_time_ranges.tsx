@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { useUiSetting } from '../../../../../src/plugins/kibana_react/public';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
-import { TimePickerQuickRange } from '../components/shared/exploratory_view/components/series_date_picker';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+
+export interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
 
 export function useQuickTimeRanges() {
   const timePickerQuickRanges = useUiSetting<TimePickerQuickRange[]>(

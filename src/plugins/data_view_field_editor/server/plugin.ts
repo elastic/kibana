@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PluginInitializerContext, CoreSetup, Plugin, Logger } from 'kibana/server';
+import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
 import { ApiRoutes } from './routes';
 
-export class IndexPatternPlugin implements Plugin<void, void, any, any> {
+export class IndexPatternPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
 

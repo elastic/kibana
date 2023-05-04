@@ -1,0 +1,31 @@
+{
+  "description": "Security: Linux - Looks for processes that are unusual to a particular Linux host. Such unusual processes may indicate unauthorized software, malware, or persistence mechanisms.",
+  "groups": ["linux", "security"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare processes for a host.",
+        "function": "rare",
+        "by_field_name": "process.name",
+        "partition_field_name": "host.name",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "process.name", "user.name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-linux-v3",
+    "security_app_display_name": "Unusual Process for a Linux Host",
+    "managed": true,
+    "job_revision": 4
+  }
+}

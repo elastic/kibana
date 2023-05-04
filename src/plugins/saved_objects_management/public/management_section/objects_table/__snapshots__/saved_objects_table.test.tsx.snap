@@ -47,6 +47,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
       },
     ]
   }
+  showPlainSpinner={false}
 />
 `;
 
@@ -104,9 +105,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -123,10 +124,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
           },
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -229,7 +229,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       goInspectObject={[Function]}
       isSearching={false}
-      itemId="id"
+      itemId={[Function]}
       items={
         Array [
           Object {
@@ -295,6 +295,12 @@ exports[`SavedObjectsTable should render normally 1`] = `
       selectionConfig={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sort={
+        Object {
+          "direction": "desc",
+          "field": "updated_at",
         }
       }
       totalItemCount={4}

@@ -9,24 +9,25 @@ import {
   CustomLink,
   CustomLinkES,
 } from '../../../../common/custom_link/custom_link_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { toESFormat } from './helper';
-import { APMIndexDocumentParams } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import {
+  APMIndexDocumentParams,
+  APMInternalESClient,
+} from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/get_apm_indices';
 
 export function createOrUpdateCustomLink({
   customLinkId,
   customLink,
-  setup,
+  internalESClient,
 }: {
   customLinkId?: string;
   customLink: Omit<CustomLink, '@timestamp'>;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
 }) {
-  const { internalClient, indices } = setup;
-
   const params: APMIndexDocumentParams<CustomLinkES> = {
     refresh: true,
-    index: indices.apmCustomLinkIndex,
+    index: APM_CUSTOM_LINK_INDEX,
     body: {
       '@timestamp': Date.now(),
       ...toESFormat(customLink),
@@ -38,5 +39,5 @@ export function createOrUpdateCustomLink({
     params.id = customLinkId;
   }
 
-  return internalClient.index('create_or_update_custom_link', params);
+  return internalESClient.index('create_or_update_custom_link', params);
 }

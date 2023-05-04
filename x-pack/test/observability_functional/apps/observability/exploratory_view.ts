@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const rangeFrom = '2021-01-17T16%3A46%3A15.338Z';
   const rangeTo = '2021-01-19T17%3A01%3A32.309Z';
 
-  // Failing: See https://github.com/elastic/kibana/issues/106934
-  describe.skip('ExploratoryView', () => {
+  describe('ExploratoryView', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
@@ -33,11 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
       );
-
-      await PageObjects.common.navigateToApp('ux', {
-        search: `?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
-      });
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -48,16 +42,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
       );
+      await esArchiver.unload(
+        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
+      );
+    });
+
+    it('should go to ux app', async function () {
+      await PageObjects.common.navigateToApp('ux', {
+        search: `?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
+      });
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('should able to open exploratory view from ux app', async () => {
       await testSubjects.exists('uxAnalyzeBtn');
       await testSubjects.click('uxAnalyzeBtn');
-      expect(await find.existsByCssSelector('.euiBasicTable')).to.eql(true);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('renders lens visualization', async () => {
-      expect(await testSubjects.exists('lnsVisualizationContainer')).to.eql(true);
+      expect(await testSubjects.exists('xyVisChart')).to.eql(true);
 
       expect(
         await find.existsByCssSelector('div[data-title="Prefilled from exploratory view app"]')
@@ -67,16 +73,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can do a breakdown per series', async () => {
+      await testSubjects.click('editSeries0');
+
       await testSubjects.click('seriesBreakdown');
 
       expect(await find.existsByCssSelector('[id="user_agent.name"]')).to.eql(true);
 
       await find.clickByCssSelector('[id="user_agent.name"]');
 
+      await testSubjects.click('seriesChangesApplyButton');
+
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await find.existsByCssSelector('[title="Chrome Mobile iOS"]')).to.eql(true);
-      expect(await find.existsByCssSelector('[title="Mobile Safari"]')).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[aria-label="Chrome Mobile iOS; Activate to hide series in graph"]'
+        )
+      ).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[aria-label="Mobile Safari; Activate to hide series in graph"]'
+        )
+      ).to.eql(true);
     });
   });
 }

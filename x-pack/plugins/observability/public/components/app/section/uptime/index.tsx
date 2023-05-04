@@ -15,6 +15,7 @@ import {
   TickFormatter,
   XYBrushEvent,
 } from '@elastic/charts';
+import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -22,17 +23,18 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { SectionContainer } from '../';
+import { useTimeZone } from '../../../../hooks/use_time_zone';
+import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { BucketSize } from '../../../../pages/overview';
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;
@@ -43,48 +45,63 @@ export function UptimeSection({ bucketSize }: Props) {
   const chartTheme = useChartTheme();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
+
+  const timeZone = useTimeZone();
 
   const { data, status } = useFetcher(
     () => {
-      if (bucketSize) {
-        return getDataHandler('synthetics')?.fetchData({
+      if (bucketSize && absoluteStart && absoluteEnd) {
+        return getDataHandler('uptime')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
+          timeZone,
           ...bucketSize,
         });
       }
     },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+    [
+      bucketSize,
+      relativeStart,
+      relativeEnd,
+      absoluteStart,
+      absoluteEnd,
+      forceUpdate,
+      lastUpdated,
+      timeZone,
+    ]
   );
 
-  if (!hasDataMap.synthetics?.hasData) {
+  if (!hasDataMap.uptime?.hasData) {
     return null;
   }
 
   const min = moment.utc(absoluteStart).valueOf();
   const max = moment.utc(absoluteEnd).valueOf();
 
-  const formatter = niceTimeFormatter([min, max]);
+  const formatter = bucketSize?.dateFormat
+    ? timeFormatter(bucketSize?.dateFormat)
+    : niceTimeFormatter([min, max]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
   const { appLink, stats, series } = data || {};
 
   const downColor = theme.eui.euiColorVis2;
-  const upColor = theme.eui.euiColorLightShade;
+  const upColor = theme.eui.euiColorMediumShade;
 
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.uptime.title', {
-        defaultMessage: 'Uptime',
+        defaultMessage: 'Monitors',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.uptime.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show monitors',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

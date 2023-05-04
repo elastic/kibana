@@ -24,8 +24,7 @@ import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
-  getMultiBucketImpactLabel,
-} from '../../../../common/util/anomaly_utils';
+} from '@kbn/ml-anomaly-utils';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -36,9 +35,11 @@ import {
   removeLabelOverlap,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
+  getMultiBucketImpactTooltipValue,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { mlFieldFormatService } from '../../services/field_format_service';
+import { TRANSPARENT_BACKGROUND } from './constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
@@ -50,6 +51,9 @@ export class ExplorerChartSingleMetric extends React.Component {
     severity: PropTypes.number.isRequired,
     tooltipService: PropTypes.object.isRequired,
     timeBuckets: PropTypes.object.isRequired,
+    onPointerUpdate: PropTypes.func.isRequired,
+    chartTheme: PropTypes.object.isRequired,
+    cursor: PropTypes.object,
   };
 
   componentDidMount() {
@@ -61,7 +65,15 @@ export class ExplorerChartSingleMetric extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
+    const {
+      tooManyBuckets,
+      tooltipService,
+      timeBuckets,
+      showSelectedInterval,
+      onPointerUpdate,
+      chartTheme,
+      cursor,
+    } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -181,9 +193,74 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       drawLineChartAxes();
       drawLineChartHighlightedSpan();
+      drawSyncedCursorLine(lineChartGroup);
       drawLineChartPaths(data);
       drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
       drawLineChartMarkers(data);
+    }
+
+    function drawSyncedCursorLine(lineChartGroup) {
+      lineChartGroup
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('height', chartHeight)
+        .attr('width', vizWidth)
+        .on('mouseout', function () {
+          onPointerUpdate({
+            chartId: 'ml-anomaly-chart-metric',
+            scale: 'time',
+            smHorizontalValue: null,
+            smVerticalValue: null,
+            type: 'Out',
+            unit: undefined,
+          });
+        })
+        .on('mousemove', function () {
+          const mouse = d3.mouse(this);
+
+          if (onPointerUpdate) {
+            onPointerUpdate({
+              chartId: 'ml-anomaly-chart-metric',
+              scale: 'time',
+              smHorizontalValue: null,
+              smVerticalValue: null,
+              type: 'Over',
+              unit: undefined,
+              x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
+            });
+          }
+        })
+        .style('fill', TRANSPARENT_BACKGROUND);
+
+      const cursorData =
+        cursor &&
+        cursor.type === 'Over' &&
+        cursor.x >= config.plotEarliest &&
+        cursor.x <= config.plotLatest
+          ? [cursor.x]
+          : [];
+
+      const cursorMouseLine = lineChartGroup
+        .append('g')
+        .attr('class', 'ml-anomaly-chart-cursor')
+        .selectAll('.ml-anomaly-chart-cursor-line')
+        .data(cursorData);
+
+      cursorMouseLine
+        .enter()
+        .append('path')
+        .attr('class', 'ml-anomaly-chart-cursor-line')
+        .attr('d', (ts) => {
+          const xPosition = lineChartXScale(ts);
+          return `M${xPosition},${chartHeight} ${xPosition},0`;
+        })
+        // Use elastic chart's cursor line style if possible
+        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
+
+      cursorMouseLine.exit().remove();
     }
 
     function drawLineChartAxes() {
@@ -384,6 +461,7 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
+
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.singleMetricChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',
@@ -401,7 +479,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             label: i18n.translate('xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel', {
               defaultMessage: 'multi-bucket impact',
             }),
-            value: getMultiBucketImpactLabel(marker.multiBucketImpact),
+            value: getMultiBucketImpactTooltipValue(marker),
             seriesIdentifier: {
               key: seriesKey,
             },

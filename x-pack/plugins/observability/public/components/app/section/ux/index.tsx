@@ -7,27 +7,54 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SectionContainer } from '../';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
+import { UX_APP } from '../../../../context/constants';
+import { ObservabilityPublicPluginsStart } from '../../../..';
+import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import CoreVitals from '../../../shared/core_web_vitals';
-import { BucketSize } from '../../../../pages/overview';
 
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 interface Props {
   bucketSize: BucketSize;
 }
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { services } = useKibana<ObservabilityPublicPluginsStart>();
+
+  const { ExploratoryViewEmbeddable } = services.exploratoryView;
+
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
+  const seriesList: AllSeries = [
+    {
+      name: PAGE_LOAD_DISTRIBUTION_TITLE,
+      time: {
+        from: relativeStart,
+        to: relativeEnd,
+      },
+      reportDefinitions: {
+        [SERVICE_NAME]: ['ALL_VALUES'],
+      },
+      breakdown: SERVICE_NAME,
+      dataType: UX_APP,
+      selectedMetricField: TRANSACTION_DURATION,
+      showPercentileAnnotations: false,
+    },
+  ];
+
   const { data, status } = useFetcher(
     () => {
-      if (serviceName && bucketSize) {
+      if (serviceName && bucketSize && absoluteStart && absoluteEnd) {
         return getDataHandler('ux')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
@@ -36,9 +63,18 @@ export function UXSection({ bucketSize }: Props) {
         });
       }
     },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate, serviceName]
+    [
+      bucketSize,
+      relativeStart,
+      relativeEnd,
+      absoluteStart,
+      absoluteEnd,
+      forceUpdate,
+      serviceName,
+      lastUpdated,
+    ]
   );
 
   if (!uxHasDataResponse?.hasData) {
@@ -57,11 +93,20 @@ export function UXSection({ bucketSize }: Props) {
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.ux.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show dashboard',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
+      <div style={{ height: 320 }}>
+        <ExploratoryViewEmbeddable
+          attributes={seriesList}
+          reportType="data-distribution"
+          title={PAGE_LOAD_DISTRIBUTION_TITLE}
+          withActions={false}
+        />
+      </div>
+
       <CoreVitals
         data={coreWebVitals}
         loading={isLoading}
@@ -71,3 +116,10 @@ export function UXSection({ bucketSize }: Props) {
     </SectionContainer>
   );
 }
+
+const PAGE_LOAD_DISTRIBUTION_TITLE = i18n.translate(
+  'xpack.observability.overview.ux.pageLoadDistribution.title',
+  {
+    defaultMessage: 'Page load distribution',
+  }
+);

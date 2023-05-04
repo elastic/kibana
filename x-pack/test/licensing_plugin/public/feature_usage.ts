@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { LicensingPluginStart, LicenseType } from '@kbn/licensing-plugin/public';
 import { FtrProviderContext } from '../services';
-import { LicensingPluginStart, LicenseType } from '../../../plugins/licensing/public';
-import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 interface FeatureUsage {
   last_used?: number;

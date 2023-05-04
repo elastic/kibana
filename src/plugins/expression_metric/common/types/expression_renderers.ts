@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Style } from '../../../expressions/common';
+import { Style } from '@kbn/expressions-plugin/common';
 
 export interface MetricRendererConfig {
   /** The text to display under the metric */

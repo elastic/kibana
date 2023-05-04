@@ -14,8 +14,8 @@ import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../.
 
 import { SourceSelection } from './source_selection';
 
-jest.mock('../../../../../../../../../../src/plugins/saved_objects/public', () => {
-  const SavedObjectFinderUi = ({
+jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
+  const SavedObjectFinder = ({
     onChoose,
   }: {
     onChoose: (id: string, type: string, fullName: string, savedObject: object) => void;
@@ -63,7 +63,7 @@ jest.mock('../../../../../../../../../../src/plugins/saved_objects/public', () =
   };
 
   return {
-    SavedObjectFinderUi,
+    SavedObjectFinder,
   };
 });
 
@@ -71,8 +71,9 @@ const mockNavigateToPath = jest.fn();
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
-      savedObjects: {},
       uiSettings: {},
+      http: {},
+      savedObjectsManagement: {},
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,
@@ -102,7 +103,6 @@ jest.mock('../../../../../util/index_utils', () => {
   };
 });
 
-const mockOnClose = jest.fn();
 const mockGetDataViewAndSavedSearch = getDataViewAndSavedSearch as jest.Mock;
 
 describe('Data Frame Analytics: <SourceSelection />', () => {
@@ -115,12 +115,11 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
     // assert
-    expect(screen.queryByText('New analytics job')).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
     expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
   });
@@ -129,7 +128,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
@@ -149,7 +148,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
@@ -172,7 +171,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 
@@ -197,7 +196,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <SourceSelection onClose={mockOnClose} />
+        <SourceSelection />
       </IntlProvider>
     );
 

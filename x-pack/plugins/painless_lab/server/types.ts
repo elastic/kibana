@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { IRouter } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { License } from './services';
 
 export interface RouteDependencies {

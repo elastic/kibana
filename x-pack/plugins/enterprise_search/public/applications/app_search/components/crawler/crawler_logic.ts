@@ -33,6 +33,14 @@ const ACTIVE_STATUSES = [
   CrawlerStatus.Canceling,
 ];
 
+export interface CrawlRequestOverrides {
+  domain_allowlist?: string[];
+  max_crawl_depth?: number;
+  seed_urls?: string[];
+  sitemap_urls?: string[];
+  sitemap_discovery_disabled?: boolean;
+}
+
 export interface CrawlerValues {
   events: CrawlEvent[];
   dataLoading: boolean;
@@ -48,7 +56,8 @@ interface CrawlerActions {
   fetchCrawlerData(): void;
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
-  startCrawl(): void;
+  onStartCrawlRequestComplete(): void;
+  startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
   stopCrawl(): void;
 }
 
@@ -60,7 +69,8 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     fetchCrawlerData: true,
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
-    startCrawl: () => null,
+    onStartCrawlRequestComplete: true,
+    startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
   },
   reducers: {
@@ -135,15 +145,19 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
       }
     },
-    startCrawl: async () => {
+    startCrawl: async ({ overrides = {} }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`);
+        await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`, {
+          body: JSON.stringify({ overrides }),
+        });
         actions.fetchCrawlerData();
       } catch (e) {
         flashAPIErrors(e);
+      } finally {
+        actions.onStartCrawlRequestComplete();
       }
     },
     stopCrawl: async () => {

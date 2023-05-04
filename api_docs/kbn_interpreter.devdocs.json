@@ -1,0 +1,990 @@
+{
+  "id": "@kbn/interpreter",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.Registry",
+        "type": "Class",
+        "tags": [],
+        "label": "Registry",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.Registry",
+            "text": "Registry"
+          },
+          "<ItemSpec, Item>"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/interpreter",
+                "id": "def-common.Registry.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "prop",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.wrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "wrapper",
+            "description": [],
+            "signature": [
+              "(obj: ItemSpec) => Item"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/interpreter",
+                "id": "def-common.Registry.wrapper.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "obj",
+                "description": [],
+                "signature": [
+                  "ItemSpec"
+                ],
+                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(fn: () => ItemSpec) => void"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/interpreter",
+                "id": "def-common.Registry.register.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "() => ItemSpec"
+                ],
+                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.toJS",
+            "type": "Function",
+            "tags": [],
+            "label": "toJS",
+            "description": [],
+            "signature": [
+              "() => { [key: string]: any; }"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.toArray",
+            "type": "Function",
+            "tags": [],
+            "label": "toArray",
+            "description": [],
+            "signature": [
+              "() => Item[]"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(name: string) => Item"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/interpreter",
+                "id": "def-common.Registry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.getProp",
+            "type": "Function",
+            "tags": [],
+            "label": "getProp",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Registry.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.addRegistries",
+        "type": "Function",
+        "tags": [],
+        "label": "addRegistries",
+        "description": [
+          "\nAdd a new set of registries to an existing set of registries.\n"
+        ],
+        "signature": [
+          "(registries: any, newRegistries: any) => any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/registries.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.addRegistries.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "registries",
+            "description": [
+              "- The existing set of registries"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.addRegistries.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "newRegistries",
+            "description": [
+              "- The new set of registries"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.castProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "castProvider",
+        "description": [],
+        "signature": [
+          "(types: any) => (node: any, toTypeNames: any) => any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/cast.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.castProvider.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/cast.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.Fn",
+        "type": "Function",
+        "tags": [],
+        "label": "Fn",
+        "description": [],
+        "signature": [
+          "(config: any) => void"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/fn.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.Fn.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/fn.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.fromExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "fromExpression",
+        "description": [],
+        "signature": [
+          "(expression: string, type: string) => ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.Ast",
+            "text": "Ast"
+          }
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.fromExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.fromExpression.$2",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.getByAlias",
+        "type": "Function",
+        "tags": [],
+        "label": "getByAlias",
+        "description": [
+          "\nThis is used for looking up function/argument definitions. It looks through\nthe given object/array for a case-insensitive match, which could be either the\n`name` itself, or something under the `aliases` property."
+        ],
+        "signature": [
+          "(specs: any, name: any) => any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.getByAlias.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "specs",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.getByAlias.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.getType",
+        "type": "Function",
+        "tags": [],
+        "label": "getType",
+        "description": [],
+        "signature": [
+          "(node: any) => string"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.getType.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.isAst",
+        "type": "Function",
+        "tags": [],
+        "label": "isAst",
+        "description": [],
+        "signature": [
+          "(value: any) => boolean"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.isAst.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.isAstWithMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "isAstWithMeta",
+        "description": [],
+        "signature": [
+          "(value: any) => boolean"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.isAstWithMeta.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.register",
+        "type": "Function",
+        "tags": [],
+        "label": "register",
+        "description": [
+          "\nRegister a set of interpreter specs (functions, types, renderers, etc)\n"
+        ],
+        "signature": [
+          "(registries: any, specs: any) => any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/registries.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.register.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "registries",
+            "description": [
+              "- The set of registries"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.register.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "specs",
+            "description": [
+              "- The specs to be regsitered (e.g. { types: [], browserFunctions: [] })"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.registryFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "registryFactory",
+        "description": [
+          "\nA convenience function for exposing registries and register in a plugin-friendly way\nas a global in the browser, and as server.plugins.interpreter.register | registries\non the server.\n"
+        ],
+        "signature": [
+          "(registries: any) => { registries(): any; register(specs: any): any; }"
+        ],
+        "path": "packages/kbn-interpreter/src/common/registries.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.registryFactory.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "registries",
+            "description": [
+              "- The registries to wrap."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-interpreter/src/common/registries.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.safeElementFromExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "safeElementFromExpression",
+        "description": [],
+        "signature": [
+          "(expression: string) => ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.Ast",
+            "text": "Ast"
+          }
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.safeElementFromExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.toExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "toExpression",
+        "description": [],
+        "signature": [
+          "(ast: ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstNode",
+            "text": "AstNode"
+          },
+          ", options: string | Options) => string"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.toExpression.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ast",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/interpreter",
+                "scope": "common",
+                "docId": "kibKbnInterpreterPluginApi",
+                "section": "def-common.AstNode",
+                "text": "AstNode"
+              }
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.toExpression.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "string | Options"
+            ],
+            "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.typedParse",
+        "type": "Function",
+        "tags": [],
+        "label": "typedParse",
+        "description": [],
+        "signature": [
+          "(input: string, options?: ",
+          "ParserOptions",
+          " | undefined) => any"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.typedParse.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/interpreter",
+            "id": "def-common.typedParse.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ParserOptions",
+              " | undefined"
+            ],
+            "path": "packages/kbn-ambient-common-types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.Ast",
+        "type": "Type",
+        "tags": [],
+        "label": "Ast",
+        "description": [],
+        "signature": [
+          "{ type: \"expression\"; chain: ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstFunction",
+            "text": "AstFunction"
+          },
+          "[]; }"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.AstArgument",
+        "type": "Type",
+        "tags": [],
+        "label": "AstArgument",
+        "description": [],
+        "signature": [
+          "string | number | boolean | ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.Ast",
+            "text": "Ast"
+          }
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.AstArgumentWithMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "AstArgumentWithMeta",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstWithMeta",
+            "text": "AstWithMeta"
+          },
+          " | WithMeta<string> | WithMeta<number> | WithMeta<false> | WithMeta<true>"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.AstFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "AstFunction",
+        "description": [],
+        "signature": [
+          "{ type: \"function\"; function: string; arguments: Record<string, ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstArgument",
+            "text": "AstArgument"
+          },
+          "[]>; }"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.AstFunctionWithMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "AstFunctionWithMeta",
+        "description": [],
+        "signature": [
+          "WithMeta<Replace<",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstFunction",
+            "text": "AstFunction"
+          },
+          ", { arguments: { [key: string]: ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstArgumentWithMeta",
+            "text": "AstArgumentWithMeta"
+          },
+          "[]; }; }>>"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.AstNode",
+        "type": "Type",
+        "tags": [],
+        "label": "AstNode",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstFunction",
+            "text": "AstFunction"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstArgument",
+            "text": "AstArgument"
+          }
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/interpreter",
+        "id": "def-common.AstWithMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "AstWithMeta",
+        "description": [],
+        "signature": [
+          "WithMeta<Replace<",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.Ast",
+            "text": "Ast"
+          },
+          ", { chain: ",
+          {
+            "pluginId": "@kbn/interpreter",
+            "scope": "common",
+            "docId": "kibKbnInterpreterPluginApi",
+            "section": "def-common.AstFunctionWithMeta",
+            "text": "AstFunctionWithMeta"
+          },
+          "[]; }>>"
+        ],
+        "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

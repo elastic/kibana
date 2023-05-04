@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { CommentType } from '../../../../common/api';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -16,7 +16,7 @@ import {
 } from '../../../../common/constants';
 import { createJiraConnector } from '../../../services/test_utils';
 import { payloadMigration } from './payload';
-import { UserActions } from './types';
+import type { UserActions } from './types';
 
 const create_7_14_0_userAction = (params: {
   action: string;

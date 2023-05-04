@@ -23,8 +23,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { loadingSpinner } from './loading_spinner';
 
-interface Props {
+/**
+ * OptInExampleFlyout props
+ */
+export interface Props {
+  /**
+   * Method that provides the sample payload to show in the flyout
+   */
   fetchExample: () => Promise<unknown[]>;
+  /**
+   * Hook called when the flyout is closed
+   */
   onClose: () => void;
 }
 
@@ -38,7 +47,7 @@ interface State {
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
 export class OptInExampleFlyout extends React.PureComponent<Props, State> {
-  _isMounted = false;
+  private _isMounted = false;
 
   public readonly state: State = {
     data: null,
@@ -71,7 +80,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     this._isMounted = false;
   }
 
-  renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
+  private renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
     if (isLoading) {
       return loadingSpinner;
     }
@@ -110,7 +119,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
         >
           <FormattedMessage
             id="telemetry.callout.errorLoadingClusterStatisticsDescription"
-            defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
+            defaultMessage="An unexpected error occurred while attempting to fetch the cluster statistics.
               This can occur because Elasticsearch failed, Kibana failed, or there is a network error.
               Check Kibana, then reload the page and try again."
           />
@@ -118,7 +127,11 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
       );
     }
 
-    return <EuiCodeBlock language="js">{JSON.stringify(data, null, 2)}</EuiCodeBlock>;
+    return (
+      <EuiCodeBlock language="json" isCopyable={true}>
+        {JSON.stringify(data, null, 2)}
+      </EuiCodeBlock>
+    );
   }
 
   render() {

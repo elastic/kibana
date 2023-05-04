@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   actions: schema.object({

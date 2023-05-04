@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { AnomalyResultType } from '../../common/types/anomalies';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
 
@@ -31,7 +31,10 @@ export interface MlUsageData {
   };
 }
 
-export function registerCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
+export function registerCollector(
+  usageCollection: UsageCollectionSetup,
+  getIndexForType: (type: string) => Promise<string>
+) {
   const collector = usageCollection.makeUsageCollector<MlUsageData>({
     type: 'ml',
     schema: {
@@ -86,39 +89,43 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         },
       },
     },
-    isReady: () => !!kibanaIndex,
+    isReady: () => true,
     fetch: async ({ esClient }) => {
-      const result = await esClient.search({
-        index: kibanaIndex,
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'alert' } },
-                {
-                  term: {
-                    'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
+      const alertIndex = await getIndexForType('alert');
+      const result = await esClient.search(
+        {
+          index: alertIndex,
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'alert' } },
+                  {
+                    term: {
+                      'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          aggs: {
-            count_by_result_type: {
-              terms: {
-                field: 'alert.params.resultType',
-                size: 3,
+            aggs: {
+              count_by_result_type: {
+                terms: {
+                  field: 'alert.params.resultType',
+                  size: 3,
+                },
               },
             },
           },
         },
-      });
+        { maxRetries: 0 }
+      );
 
-      const aggResponse = result.body.aggregations as {
+      const aggResponse = result.aggregations as {
         count_by_result_type: {
           buckets: Array<{
-            key: AnomalyResultType;
+            key: MlAnomalyResultType;
             doc_count: number;
           }>;
         };
@@ -132,26 +139,29 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         alert: {
           params: MlAnomalyDetectionJobsHealthRuleParams;
         };
-      }>({
-        index: kibanaIndex,
-        size: 10000,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'alert' } },
-                {
-                  term: {
-                    'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
+      }>(
+        {
+          index: alertIndex,
+          size: 10000,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'alert' } },
+                  {
+                    term: {
+                      'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
         },
-      });
+        { maxRetries: 0 }
+      );
 
-      const resultsByCheckType = jobsHealthRuleInstances.body.hits.hits.reduce(
+      const resultsByCheckType = jobsHealthRuleInstances.hits.hits.reduce(
         (acc, curr) => {
           const doc = curr._source;
           if (!doc) return acc;

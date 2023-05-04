@@ -6,7 +6,8 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 export function getUrlPrefix(spaceId?: string) {
   return spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : ``;
@@ -39,7 +40,7 @@ export function getTestScenariosForSpace(spaceId: string) {
 
 export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
   return es.search({
-    index: '.kibana',
+    index: ALL_SAVED_OBJECT_INDICES,
     body: {
       size: 0,
       runtime_mappings: {

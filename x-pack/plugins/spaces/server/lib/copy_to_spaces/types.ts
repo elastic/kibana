@@ -12,13 +12,14 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsImportSuccess,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 export interface CopyOptions {
   objects: Array<{ type: string; id: string }>;
   overwrite: boolean;
   includeReferences: boolean;
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 }
 
 export interface ResolveConflictsOptions {
@@ -28,6 +29,7 @@ export interface ResolveConflictsOptions {
     [spaceId: string]: Array<Omit<SavedObjectsImportRetry, 'replaceReferences'>>;
   };
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 }
 
 export interface CopyResponse {

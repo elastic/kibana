@@ -7,15 +7,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiBasicTableProps,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHideFor,
-} from '@elastic/eui';
+import type { EuiBasicTableProps } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 
-import { AndOr, AndOrBadge } from '../and_or_badge';
+import type { AndOr } from '../and_or_badge';
+import { AndOrBadge } from '../and_or_badge';
 
 const AndOrBadgeContainer = styled(EuiFlexItem)`
   padding-top: ${({ theme }) => theme.eui.euiSizeXL};

@@ -23,7 +23,7 @@ import { mountWithIntl } from '../../../../../test_helpers';
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
 
-import { PromotedDocuments } from './';
+import { PromotedDocuments } from '.';
 
 describe('PromotedDocuments', () => {
   const values = {

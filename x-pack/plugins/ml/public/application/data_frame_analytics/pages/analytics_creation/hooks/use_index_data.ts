@@ -9,13 +9,16 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
 
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
+import { CoreSetup } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
-import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -32,7 +35,7 @@ import {
   getProcessedFields,
   getCombinedRuntimeMappings,
 } from '../../../../components/data_grid';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
+
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
 
@@ -44,7 +47,10 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
 
 function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   return Object.keys(runtimeMappings).map((id) => {
-    const field = runtimeMappings[id];
+    let field = runtimeMappings[id];
+    if (Array.isArray(field)) {
+      field = field[0];
+    }
     const schema = getDataGridSchemaFromESFieldType(
       field.type as estypes.MappingRuntimeField['type']
     );
@@ -53,7 +59,7 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
 }
 
 function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) {
-  const { fields } = newJobCapsServiceAnalytics;
+  const { fields } = indexPattern;
 
   return fields
     .filter((field) => fieldsFilter.includes(field.name))
@@ -82,6 +88,8 @@ export const useIndexData = (
   // (for example, as part of filebeat/metricbeat/ECS based indices)
   // to the data grid component which would significantly slow down the page.
   const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+  const [timeRangeMs, setTimeRangeMs] = useState<TimeRangeMs | undefined>();
+
   useEffect(() => {
     async function fetchDataGridSampleDocuments() {
       setErrorMessage('');
@@ -108,9 +116,9 @@ export const useIndexData = (
 
         // Get all field names for each returned doc and flatten it
         // to a list of unique field names used across all docs.
-        const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+        const allDataViewFields = getFieldsFromKibanaIndexPattern(indexPattern);
         const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-          .filter((d) => allKibanaIndexPatternFields.includes(d))
+          .filter((d) => allDataViewFields.includes(d))
           .sort();
 
         setStatus(INDEX_STATUS.LOADED);
@@ -122,6 +130,7 @@ export const useIndexData = (
     }
 
     fetchDataGridSampleDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // To be used for data grid column selection
@@ -148,8 +157,7 @@ export const useIndexData = (
     pagination,
     resetPagination,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -159,6 +167,7 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   useEffect(() => {
@@ -166,6 +175,7 @@ export const useIndexData = (
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
+      const timeFieldName = indexPattern.getTimeField()?.name;
       const sort: EsSorting = sortingColumns.reduce((s, column) => {
         s[column.id] = { order: column.direction };
         return s;
@@ -187,19 +197,47 @@ export const useIndexData = (
           ...(isRuntimeMappings(combinedRuntimeMappings)
             ? { runtime_mappings: combinedRuntimeMappings }
             : {}),
+          ...(timeFieldName
+            ? {
+                aggs: {
+                  earliest: {
+                    min: {
+                      field: timeFieldName,
+                    },
+                  },
+                  latest: {
+                    max: {
+                      field: timeFieldName,
+                    },
+                  },
+                },
+              }
+            : {}),
         },
       };
 
       try {
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+
+        if (
+          resp.aggregations &&
+          isPopulatedObject(resp.aggregations.earliest, ['value']) &&
+          isPopulatedObject(resp.aggregations.latest, ['value'])
+        ) {
+          setTimeRangeMs({
+            from: resp.aggregations.earliest.value as number,
+            to: resp.aggregations.latest.value as number,
+          } as TimeRangeMs);
+        }
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-        setRowCountRelation(
-          typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total!.relation
-        );
+        setRowCountInfo({
+          rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+          rowCountRelation:
+            typeof resp.hits.total === 'number'
+              ? ('eq' as estypes.SearchTotalHitsRelation)
+              : resp.hits.total!.relation,
+        });
         setTableItems(docs);
         setStatus(INDEX_STATUS.LOADED);
       } catch (e) {
@@ -212,14 +250,17 @@ export const useIndexData = (
       fetchIndexData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     indexPattern.title,
     indexPatternFields,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
   const dataLoader = useMemo(
     () => new DataLoader(indexPattern, toastNotifications),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [indexPattern]
   );
 
@@ -247,9 +288,11 @@ export const useIndexData = (
       fetchColumnChartsData(query);
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 
@@ -259,5 +302,6 @@ export const useIndexData = (
     ...dataGrid,
     indexPatternFields,
     renderCellValue,
+    timeRangeMs,
   };
 };

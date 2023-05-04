@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
+import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/es_fields/apm';
+import { EventOutcome } from '@kbn/apm-plugin/common/event_outcome';
+import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import type { FailedTransactionsCorrelationsResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
-import { EVENT_OUTCOME } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a failed transactions correlation analysis.
@@ -29,11 +30,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('failed transactions without data', { config: 'trial', archives: [] }, () => {
     it('handles the empty state', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -44,12 +46,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const errorDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
             termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -60,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const fieldCandidatesResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
+        endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
         params: {
           query: getOptions(),
         },
@@ -72,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/p_values',
+        endpoint: 'POST /internal/apm/correlations/p_values/transactions',
         params: {
           body: {
             ...getOptions(),
@@ -104,11 +107,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('failed transactions with data', { config: 'trial', archives: ['8.0.0'] }, () => {
     it('runs queries and returns results', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -119,12 +123,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const errorDistributionResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
+        endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
         params: {
           body: {
             ...getOptions(),
             percentileThreshold: 95,
             termFilters: [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }],
+            chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
           },
         },
       });
@@ -135,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const fieldCandidatesResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
+        endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
         params: {
           query: getOptions(),
         },
@@ -157,7 +162,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       const failedTransactionsCorrelationsResponse = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/p_values',
+        endpoint: 'POST /internal/apm/correlations/p_values/transactions',
         params: {
           body: {
             ...getOptions(),
@@ -178,16 +183,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       }
 
-      const failedtransactionsFieldStats = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/field_stats',
-        params: {
-          body: {
-            ...getOptions(),
-            fieldsToSample: [...fieldsToSample],
-          },
-        },
-      });
-
       const finalRawResponse: FailedTransactionsCorrelationsResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
@@ -195,13 +190,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         errorHistogram: errorDistributionResponse.body?.overallHistogram,
         failedTransactionsCorrelations:
           failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
-        fieldStats: failedtransactionsFieldStats.body?.stats,
       };
 
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
       expect(finalRawResponse?.errorHistogram?.length).to.be(101);
       expect(finalRawResponse?.overallHistogram?.length).to.be(101);
-      expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
       expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
         30,
@@ -223,13 +216,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(typeof correlation?.normalizedScore).to.be('number');
       expect(typeof correlation?.failurePercentage).to.be('number');
       expect(typeof correlation?.successPercentage).to.be('number');
-
-      const fieldStats = finalRawResponse?.fieldStats?.[0];
-      expect(typeof fieldStats).to.be('object');
-      expect(Array.isArray(fieldStats?.topValues) && fieldStats?.topValues?.length).to.greaterThan(
-        0
-      );
-      expect(fieldStats?.topValuesSampleSize).to.greaterThan(0);
     });
   });
 }

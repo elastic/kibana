@@ -4,15 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import pMap from 'p-map';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import semverGte from 'semver/functions/gte';
+import type { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import {
-  isPackageLimited,
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../common';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
+  SO_SEARCH_LIMIT,
+} from '../../../../common/constants';
+import { isPackageLimited } from '../../../../common/services';
+import type {
+  PackageUsageStats,
+  PackagePolicySOAttributes,
+  Installable,
+} from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -21,14 +29,21 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { IngestManagerError } from '../../../errors';
-import { appContextService } from '../../';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
+import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom, isUnremovablePackage } from './index';
+import { auditLoggingService } from '../../audit_logging';
+
+import { createInstallableFrom } from '.';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -44,16 +59,53 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
+    excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category } = options;
-  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
+  const {
+    savedObjectsClient,
+    category,
+    excludeInstallStatus = false,
+    prerelease = false,
+  } = options;
+
+  const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const MAX_PKGS_TO_LOAD_TITLE = 10;
+
+  const packagesNotInRegistry = packageSavedObjects.saved_objects.filter(
+    (pkg) => !registryItems.some((item) => item.name === pkg.id)
+  );
+
+  const uploadedPackagesNotInRegistry = await pMap(
+    packagesNotInRegistry.entries(),
+    async ([i, pkg]) => {
+      // fetching info of uploaded packages to populate title, description
+      // limit to 10 for performance
+      if (i < MAX_PKGS_TO_LOAD_TITLE) {
+        const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
+          getPackageInfo({
+            savedObjectsClient,
+            pkgName: pkg.id,
+            pkgVersion: pkg.attributes.version,
+          })
+        );
+        return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
+      } else {
+        return createInstallableFrom(
+          { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
+          pkg
+        );
+      }
+    },
+    { concurrency: 10 }
+  );
+
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -61,16 +113,45 @@ export async function getPackages(
         packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
       )
     )
+    .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .sort(sortByName);
-  return packageList;
+
+  for (const pkg of packageList) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: pkg.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  if (!excludeInstallStatus) {
+    return packageList;
+  }
+
+  // Exclude the `installStatus` value if the `excludeInstallStatus` query parameter is set to true
+  // to better facilitate response caching
+  const packageListWithoutStatus = packageList.map((pkg) => {
+    const newPkg = {
+      ...pkg,
+      status: undefined,
+    };
+
+    return newPkg;
+  });
+
+  return packageListWithoutStatus;
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
+  prerelease?: boolean;
 }): Promise<string[]> {
-  const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
+  const { savedObjectsClient, prerelease } = options;
+  const allPackages = await getPackages({
+    savedObjectsClient,
+    prerelease,
+  });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
   );
@@ -83,55 +164,108 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  const packages = installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  for (const pkg of installedPackages) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: pkg.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return packages;
 }
 
 export async function getPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
-  return savedObjectsClient.find<Installation>({
+  const result = await savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
   });
+
+  for (const savedObject of result.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: savedObject.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return result;
 }
 
 export const getInstallations = getPackageSavedObjects;
 
-export async function getPackageInfo(options: {
+export async function getPackageInfo({
+  savedObjectsClient,
+  pkgName,
+  pkgVersion,
+  skipArchive = false,
+  ignoreUnverified = false,
+  prerelease,
+}: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
+  /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
+  skipArchive?: boolean;
+  ignoreUnverified?: boolean;
+  prerelease?: boolean;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackage(pkgName),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
   ]);
 
-  // If no package version is provided, use the installed version in the response
-  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
-
-  // If no installed version of the given package exists, default to the latest version of the package
-  if (!responsePkgVersion) {
-    responsePkgVersion = latestPackage.version;
+  if (!savedObject && !latestPackage) {
+    throw new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
   }
 
-  const getPackageRes = await getPackageFromSource({
-    pkgName,
-    pkgVersion: responsePkgVersion,
-    savedObjectsClient,
-    installedPkg: savedObject?.attributes,
-  });
-  const { paths, packageInfo } = getPackageRes;
+  // If no package version is provided, use the installed version in the response, fallback to package from registry
+  const resolvedPkgVersion =
+    pkgVersion !== ''
+      ? pkgVersion
+      : savedObject?.attributes.install_version ?? latestPackage!.version;
+
+  // If same version is available in registry and skipArchive is true, use the info from the registry (faster),
+  // otherwise build it from the archive
+  let paths: string[];
+  const registryInfo = await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined);
+  let packageInfo;
+  // We need to get input only packages from source to get all fields
+  // see https://github.com/elastic/package-registry/issues/864
+  if (registryInfo && skipArchive && registryInfo.type !== 'input') {
+    packageInfo = registryInfo;
+    // Fix the paths
+    paths =
+      packageInfo.assets?.map((path) =>
+        path.replace(`/package/${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`)
+      ) ?? [];
+  } else {
+    ({ paths, packageInfo } = await getPackageFromSource({
+      pkgName,
+      pkgVersion: resolvedPkgVersion,
+      savedObjectsClient,
+      installedPkg: savedObject?.attributes,
+      ignoreUnverified,
+    }));
+  }
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
-    latestVersion: latestPackage.version,
+    latestVersion:
+      latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
+        ? latestPackage.version
+        : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: !isUnremovablePackage(pkgName),
     notice: Registry.getNoticePath(paths || []),
+    licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
@@ -164,6 +298,14 @@ export const getPackageUsageStats = async ({
       filter,
     });
 
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
       agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
     }
@@ -182,15 +324,22 @@ interface PackageResponse {
 }
 type GetPackageResponse = PackageResponse | undefined;
 
-// gets package from install_source if it exists otherwise gets from registry
+// gets package from install_source
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
+  ignoreUnverified?: boolean;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
-  const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
+  const {
+    pkgName,
+    pkgVersion,
+    installedPkg,
+    savedObjectsClient,
+    ignoreUnverified = false,
+  } = options;
   let res: GetPackageResponse;
 
   // If the package is installed
@@ -218,24 +367,40 @@ export async function getPackageFromSource(options: {
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
       }
     }
-    // for packages not in cache or package storage and installed from registry, check registry
+    // install source is now archive in all cases
+    // See https://github.com/elastic/kibana/issues/115032
     if (!res && pkgInstallSource === 'registry') {
       try {
-        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
-        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
-        // TODO: add to cache and storage here?
+        res = await Registry.getPackage(pkgName, pkgVersion);
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion}`);
       } catch (error) {
+        if (error instanceof PackageFailedVerificationError) {
+          throw error;
+        }
         // treating this is a 404 as no status code returned
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
   } else {
-    // else package is not installed or installed and missing from cache and storage and installed from registry
-    res = await Registry.getRegistryPackage(pkgName, pkgVersion);
-    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
+    res = getArchivePackage({ name: pkgName, version: pkgVersion });
+
+    if (res) {
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
+    } else {
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
+        }
+      }
+    }
   }
   if (!res) {
-    throw new IngestManagerError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,
@@ -246,19 +411,66 @@ export async function getPackageFromSource(options: {
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
+  logger?: Logger;
 }) {
-  const { savedObjectsClient, pkgName } = options;
-  return savedObjectsClient
+  const { savedObjectsClient, pkgName, logger } = options;
+  const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch((e) => undefined);
+    .catch((e) => {
+      logger?.error(e);
+      return undefined;
+    });
+
+  if (!installation) {
+    return;
+  }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'find',
+    id: installation.id,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
+  return installation;
+}
+
+export async function getInstallationObjects(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const { savedObjectsClient, pkgNames } = options;
+  const res = await savedObjectsClient.bulkGet<Installation>(
+    pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
+  );
+
+  const installations = res.saved_objects.filter((so) => so?.attributes);
+
+  for (const installation of installations) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: installation.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return installations;
 }
 
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
+  logger?: Logger;
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
+}
+
+export async function getInstallationsByName(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const savedObjects = await getInstallationObjects(options);
+  return savedObjects.map((so) => so.attributes);
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {

@@ -9,7 +9,7 @@
 /**
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { vislibTypesConfig as visTypes } from './types';
 import { Data } from './data';

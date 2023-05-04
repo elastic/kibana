@@ -6,8 +6,8 @@
  */
 
 import { toExpression as toExpressionString } from '@kbn/interpreter';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { SavedLensInput } from '../../../functions/external/saved_lens';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { SavedLensInput } from '../../../functions/external/saved_lens';
 
 export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): string {
   const expressionParts = [] as string[];

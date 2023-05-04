@@ -17,8 +17,12 @@ function createBundle(id: string, deps: ReturnType<Bundle['readBundleDeps']>) {
     id,
     contextDir: Path.resolve('/kibana/plugins', id),
     outputDir: Path.resolve('/kibana/plugins', id, 'target/public'),
-    publicDirNames: ['public'],
     sourceRoot: Path.resolve('/kibana'),
+    remoteInfo: {
+      pkgId: id === 'core' ? `@kbn/core` : `@kbn/${id}-plugin`,
+      targets: ['public'],
+    },
+    ignoreMetrics: false,
   });
 
   jest.spyOn(bundle, 'readBundleDeps').mockReturnValue(deps);

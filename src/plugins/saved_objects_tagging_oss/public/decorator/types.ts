@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../saved_objects/public';
+import { SavedObject } from '@kbn/saved-objects-plugin/public';
 
 /**
  * @public

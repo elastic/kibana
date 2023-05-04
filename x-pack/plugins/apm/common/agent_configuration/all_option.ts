@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 export const ALL_OPTION_VALUE = 'ALL_OPTION_VALUE';
 
 // human-readable label for service and environment. The "All" option should be translated.
@@ -24,3 +23,8 @@ export function getOptionLabel(value: string | undefined) {
 export function omitAllOption(value?: string) {
   return value === ALL_OPTION_VALUE ? undefined : value;
 }
+
+export const ALL_OPTION = {
+  value: ALL_OPTION_VALUE,
+  label: getOptionLabel(ALL_OPTION_VALUE),
+};

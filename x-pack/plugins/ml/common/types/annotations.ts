@@ -6,10 +6,10 @@
  */
 
 // The Annotation interface is based on annotation documents stored in the
-// `.ml-annotations-6` index, accessed via the `.ml-annotations-[read|write]` aliases.
+// `.ml-annotations-*` index, accessed via the `.ml-annotations-[read|write]` aliases.
 
 // Annotation document mapping:
-// PUT .ml-annotations-6
+// PUT .ml-annotations-000001
 // {
 //   "mappings": {
 //     "annotation": {
@@ -54,22 +54,22 @@
 // POST /_aliases
 // {
 //     "actions" : [
-//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-read" } },
-//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-write" } }
+//         { "add" : { "index" : ".ml-annotations-000001", "alias" : ".ml-annotations-read" } },
+//         { "add" : { "index" : ".ml-annotations-000001", "alias" : ".ml-annotations-write" } }
 //     ]
 // }
 
-import { PartitionFieldsType } from './anomalies';
+import { MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
 import { ANNOTATION_TYPE } from '../constants/annotations';
 
 export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';
 export type AnnotationFieldValue = 'partition_field_value' | 'over_field_value' | 'by_field_value';
 
-export function getAnnotationFieldName(fieldType: PartitionFieldsType): AnnotationFieldName {
+export function getAnnotationFieldName(fieldType: MlPartitionFieldsType): AnnotationFieldName {
   return `${fieldType}_name` as AnnotationFieldName;
 }
 
-export function getAnnotationFieldValue(fieldType: PartitionFieldsType): AnnotationFieldValue {
+export function getAnnotationFieldValue(fieldType: MlPartitionFieldsType): AnnotationFieldValue {
   return `${fieldType}_value` as AnnotationFieldValue;
 }
 
@@ -128,4 +128,5 @@ export interface GetAnnotationsResponse {
 export interface AnnotationsTable {
   annotationsData: Annotations;
   error?: string;
+  totalCount?: number;
 }

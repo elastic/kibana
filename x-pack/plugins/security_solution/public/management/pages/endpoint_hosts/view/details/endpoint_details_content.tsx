@@ -17,17 +17,23 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EndpointAgentStatus } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { isPolicyOutOfDate } from '../../utils';
-import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
+import type { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
+import {
+  fullDetailsHostInfo,
+  getEndpointPendingActionsCallback,
+  nonExistingPolicies,
+  policyResponseStatus,
+  uiQueryParams,
+} from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import { EndpointPolicyLink } from '../components/endpoint_policy_link';
+import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
-import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
 const EndpointDetailsContentStyled = styled.div`
   dl dt {
@@ -63,6 +69,9 @@ export const EndpointDetailsContent = memo(
     const policyStatus = useEndpointSelector(
       policyResponseStatus
     ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
+    const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
+    const missingPolicies = useEndpointSelector(nonExistingPolicies);
+    const hostInfo = useEndpointSelector(fullDetailsHostInfo);
 
     const policyResponseRoutePath = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -99,7 +108,14 @@ export const EndpointDetailsContent = memo(
               />
             </ColumnTitle>
           ),
-          description: <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={details} />,
+          description: hostInfo ? (
+            <EndpointAgentStatus
+              pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
+              endpointHostInfo={hostInfo}
+            />
+          ) : (
+            <></>
+          ),
         },
         {
           title: (
@@ -131,6 +147,7 @@ export const EndpointDetailsContent = memo(
                 policyId={details.Endpoint.policy.applied.id}
                 data-test-subj="policyDetailsValue"
                 className={'policyLineText'}
+                missingPolicies={missingPolicies}
               >
                 {details.Endpoint.policy.applied.name}
               </EndpointPolicyLink>
@@ -211,7 +228,15 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo]);
+    }, [
+      details,
+      getHostPendingActions,
+      hostInfo,
+      missingPolicies,
+      policyInfo,
+      policyStatus,
+      policyStatusClickHandler,
+    ]);
 
     return (
       <EndpointDetailsContentStyled>

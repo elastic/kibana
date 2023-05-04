@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppNavLinkStatus } from '../../../../../../src/core/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
 import { getCasesDeepLinks } from './deep_links';
 
 describe('getCasesDeepLinks', () => {

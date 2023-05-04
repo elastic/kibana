@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { FLEET_SERVER_SERVERS_INDEX } from '../../../../fleet/common';
+import type { Client } from '@elastic/elasticsearch';
+import { FLEET_SERVER_SERVERS_INDEX } from '@kbn/fleet-plugin/common';
 import { wrapErrorAndRejectPromise } from './utils';
 
 /**
@@ -31,6 +31,7 @@ export const enableFleetServerIfNecessary = async (esClient: Client, version: st
   await esClient
     .index({
       index: FLEET_SERVER_SERVERS_INDEX,
+      refresh: 'wait_for',
       body: {
         agent: {
           id: '12988155-475c-430d-ac89-84dc84b67cd1',

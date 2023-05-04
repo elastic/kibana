@@ -4,48 +4,61 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
-import type { ConfigSchema } from '.';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
-  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import type {
-  DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+  DataPublicPluginSetup,
+} from '@kbn/data-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
-import type { FeaturesPluginSetup } from '../../features/public';
-import type { FleetStart } from '../../fleet/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { MapsStartApi } from '../../maps/public';
-import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+} from '@kbn/alerting-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import {
   FetchDataParams,
-  HasDataParams,
   METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -53,8 +66,9 @@ import {
 import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
-import type { SecurityPluginStart } from '../../security/public';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+import type { ConfigSchema } from '.';
+import { APMServiceDetailLocator } from './locator/service_detail_locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -63,16 +77,21 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
+  charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
@@ -82,13 +101,29 @@ export interface ApmPluginStartDeps {
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   fleet?: FleetStart;
+  fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
+  infra?: InfraClientStartExports;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  storage: IStorageWrapper;
+  lens: LensPublicStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
+
+const serviceGroupsTitle = i18n.translate(
+  'xpack.apm.navigation.serviceGroupsTitle',
+  {
+    defaultMessage: 'Service groups',
+  }
+);
+
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
@@ -100,6 +135,20 @@ const dependenciesTitle = i18n.translate(
   'xpack.apm.navigation.dependenciesTitle',
   {
     defaultMessage: 'Dependencies',
+  }
+);
+
+const apmSettingsTitle = i18n.translate(
+  'xpack.apm.navigation.apmSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+const apmStorageExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.apmStorageExplorerTitle',
+  {
+    defaultMessage: 'Storage Explorer',
   }
 );
 
@@ -119,7 +168,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     }
 
     // register observability nav if user has access to plugin
-    plugins.observability.navigation.registerSections(
+    plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) => {
           if (coreStart.application.capabilities.apm.show) {
@@ -129,12 +178,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 label: 'APM',
                 sortKey: 400,
                 entries: [
-                  { label: servicesTitle, app: 'apm', path: '/services' },
+                  {
+                    label: servicesTitle,
+                    app: 'apm',
+                    path: '/services',
+                    matchPath(currentPath: string) {
+                      return [
+                        '/service-groups',
+                        '/mobile-services',
+                        '/services',
+                        '/service-map',
+                      ].some((testPath) => currentPath.startsWith(testPath));
+                    },
+                  },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends',
+                    path: '/dependencies/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -144,28 +205,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_backend'
+                          'side_nav_dependency'
                         );
                       }
                     },
-                  },
-                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
-                ],
-              },
-
-              // UX navigation
-              {
-                label: 'User Experience',
-                sortKey: 600,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Dashboard',
-                    }),
-                    app: 'ux',
-                    path: '/',
-                    matchFullPath: true,
-                    ignoreTrailingSlash: true,
                   },
                 ],
               },
@@ -186,7 +229,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       );
 
       const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
+        './services/rest/create_call_apm_api'
       );
 
       // have to do this here as well in case app isn't mounted yet
@@ -236,32 +279,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    const getUxDataHelper = async () => {
-      const { fetchUxOverviewDate, hasRumData } = await import(
-        './components/app/RumDashboard/ux_overview_fetchers'
-      );
-      const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
-      );
-      // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
-
-      return { fetchUxOverviewDate, hasRumData };
-    };
-
-    const { observabilityRuleTypeRegistry } = plugins.observability;
-
-    plugins.observability.dashboard.register({
-      appName: 'ux',
-      hasData: async (params?: HasDataParams) => {
-        const dataHelper = await getUxDataHelper();
-        return await dataHelper.hasRumData(params!);
+    plugins.exploratoryView.register({
+      appName: 'apm',
+      hasData: async () => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUxDataHelper();
-        return await dataHelper.fetchUxOverviewDate(params);
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.fetchObservabilityOverviewPageData(params);
       },
     });
+
+    const { observabilityRuleTypeRegistry } = plugins.observability;
 
     core.application.register({
       id: 'apm',
@@ -272,10 +302,29 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
-        { id: 'services', title: servicesTitle, path: '/services' },
+        {
+          id: 'service-groups-list',
+          title: serviceGroupsTitle,
+          path: '/service-groups',
+        },
+        {
+          id: 'services',
+          title: servicesTitle,
+          path: '/services',
+        },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        {
+          id: 'dependencies',
+          title: dependenciesTitle,
+          path: '/dependencies/inventory',
+        },
+        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'storage-explorer',
+          title: apmStorageExplorerTitle,
+          path: '/storage-explorer',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -296,52 +345,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    registerApmAlerts(observabilityRuleTypeRegistry);
+    registerApmRuleTypes(observabilityRuleTypeRegistry);
 
-    core.application.register({
-      id: 'ux',
-      title: 'User Experience',
-      order: 8500,
-      euiIconType: 'logoObservability',
-      category: DEFAULT_APP_CATEGORIES.observability,
-      navLinkStatus: config.ui.enabled
-        ? AppNavLinkStatus.default
-        : AppNavLinkStatus.hidden,
-      keywords: [
-        'RUM',
-        'Real User Monitoring',
-        'DEM',
-        'Digital Experience Monitoring',
-        'EUM',
-        'End User Monitoring',
-        'UX',
-        'Javascript',
-        'APM',
-        'Mobile',
-        'digital',
-        'performance',
-        'web performance',
-        'web perf',
-      ],
-      async mount(appMountParameters: AppMountParameters<unknown>) {
-        // Load application bundle and Get start service
-        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/uxApp'),
-          core.getStartServices(),
-        ]);
+    const locator = plugins.share.url.locators.create(
+      new APMServiceDetailLocator(core.uiSettings)
+    );
 
-        return renderApp({
-          core: coreStart,
-          deps: pluginSetupDeps,
-          appMountParameters,
-          config,
-          corePlugins: corePlugins as ApmPluginStartDeps,
-          observabilityRuleTypeRegistry,
-        });
-      },
-    });
-
-    return {};
+    return {
+      locator,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;

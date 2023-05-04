@@ -3,214 +3,108 @@
 exports[`ConditionalToolTip renders correctly 1`] = `
 <div
   data-test-subj="conditionalTooltipContent-host-01"
-  style={
-    Object {
-      "minWidth": 200,
-    }
-  }
+  style="min-width: 200px;"
 >
   <div
-    style={
-      Object {
-        "borderBottom": "1px solid #98a2b3",
-        "marginBottom": "4px",
-        "paddingBottom": "4px",
-      }
-    }
+    style="border-bottom: 1px solid #98a2b3; padding-bottom: 4px; margin-bottom: 4px;"
   >
     host-01
   </div>
-  <EuiFlexGroup
-    gutterSize="s"
-    key="cpu"
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
     >
-      <EuiFlexItem
-        className="eui-textTruncate eui-displayBlock"
-        data-test-subj="conditionalTooltipContent-metric"
-        grow={1}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
-          data-test-subj="conditionalTooltipContent-metric"
-        >
-          CPU usage
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="conditionalTooltipContent-value"
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-          data-test-subj="conditionalTooltipContent-value"
-        >
-          10%
-        </div>
-      </EuiFlexItem>
+      CPU usage
     </div>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="s"
-    key="memory"
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      10%
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
     >
-      <EuiFlexItem
-        className="eui-textTruncate eui-displayBlock"
-        data-test-subj="conditionalTooltipContent-metric"
-        grow={1}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
-          data-test-subj="conditionalTooltipContent-metric"
-        >
-          Memory usage
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="conditionalTooltipContent-value"
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-          data-test-subj="conditionalTooltipContent-value"
-        >
-          80%
-        </div>
-      </EuiFlexItem>
+      Memory usage
     </div>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="s"
-    key="tx"
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      80%
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
     >
-      <EuiFlexItem
-        className="eui-textTruncate eui-displayBlock"
-        data-test-subj="conditionalTooltipContent-metric"
-        grow={1}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
-          data-test-subj="conditionalTooltipContent-metric"
-        >
-          Outbound traffic
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="conditionalTooltipContent-value"
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-          data-test-subj="conditionalTooltipContent-value"
-        >
-          8Mbit/s
-        </div>
-      </EuiFlexItem>
+      Outbound traffic
     </div>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="s"
-    key="rx"
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
     >
-      <EuiFlexItem
-        className="eui-textTruncate eui-displayBlock"
-        data-test-subj="conditionalTooltipContent-metric"
-        grow={1}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
-          data-test-subj="conditionalTooltipContent-metric"
-        >
-          Inbound traffic
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="conditionalTooltipContent-value"
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-          data-test-subj="conditionalTooltipContent-value"
-        >
-          8Mbit/s
-        </div>
-      </EuiFlexItem>
+      Inbound traffic
     </div>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="s"
-    key="cedd6ca0-5775-11eb-a86f-adb714b6c486"
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
     >
-      <EuiFlexItem
-        className="eui-textTruncate eui-displayBlock"
-        data-test-subj="conditionalTooltipContent-metric"
-        grow={1}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
-          data-test-subj="conditionalTooltipContent-metric"
-        >
-          My Custom Label
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="conditionalTooltipContent-value"
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-          data-test-subj="conditionalTooltipContent-value"
-        >
-          34.1%
-        </div>
-      </EuiFlexItem>
+      My Custom Label
     </div>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="s"
-    key="e12dd700-5775-11eb-a86f-adb714b6c486"
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      34.1%
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
     >
-      <EuiFlexItem
-        className="eui-textTruncate eui-displayBlock"
-        data-test-subj="conditionalTooltipContent-metric"
-        grow={1}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
-          data-test-subj="conditionalTooltipContent-metric"
-        >
-          Avg of host.network.out.packets
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        data-test-subj="conditionalTooltipContent-value"
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-          data-test-subj="conditionalTooltipContent-value"
-        >
-          4,392.2
-        </div>
-      </EuiFlexItem>
+      Avg of host.network.out.packets
     </div>
-  </EuiFlexGroup>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      4,392.2
+    </div>
+  </div>
 </div>
 `;

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricsAPIMetric, MetricsExplorerMetric } from '../../../../common/http_api';
+import { createCustomMetricsAggregations } from '../../../lib/create_custom_metrics_aggregations';
 
 export const convertMetricToMetricsAPIMetric = (
   metric: MetricsExplorerMetric,
@@ -62,5 +64,19 @@ export const convertMetricToMetricsAPIMetric = (
         },
       },
     };
+  }
+
+  if (metric.aggregation === 'custom' && metric.custom_metrics) {
+    const customMetricAggregations = createCustomMetricsAggregations(
+      id,
+      metric.custom_metrics,
+      metric.equation
+    );
+    if (!isEmpty(customMetricAggregations)) {
+      return {
+        id,
+        aggregations: customMetricAggregations,
+      };
+    }
   }
 };

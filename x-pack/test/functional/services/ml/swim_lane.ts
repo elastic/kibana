@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 import { DebugState } from '@elastic/charts';
 import { DebugStateAxis } from '@elastic/charts/dist/state/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'>>;
+
+export type MlAnomalySwimLane = ProvidedType<typeof SwimLaneProvider>;
 
 export function SwimLaneProvider({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
@@ -22,7 +25,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
   /**
    * Y axis labels width + padding
    */
-  const xOffset = 185;
+  const xOffset = 170;
 
   /**
    * Get coordinates relative to the left top corner of the canvas
@@ -71,7 +74,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
 
   return {
     async getDebugState(testSubj: string): Promise<HeatmapDebugState> {
-      const state = await elasticChart.getChartDebugData(testSubj);
+      const state = await elasticChart.getChartDebugData(testSubj, 0, 5000);
       if (!state) {
         throw new Error('Swim lane debug state is not available');
       }
@@ -96,7 +99,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         const actualValues = await this.getAxisLabels(testSubj, axis);
         expect(actualValues.length).to.eql(
           expectedCount,
-          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues}`
+          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues.length}`
         );
       });
     },
@@ -195,7 +198,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
     async assertActivePage(testSubj: string, expectedPage: number) {
       const pagination = await testSubjects.find(`${testSubj} > mlSwimLanePagination`);
       const activePage = await pagination.findByCssSelector(
-        '.euiPaginationButton-isActive .euiButtonEmpty__text'
+        '.euiPaginationButton[aria-current] .euiButtonEmpty__text'
       );
       const text = await activePage.getVisibleText();
       expect(text).to.eql(expectedPage);

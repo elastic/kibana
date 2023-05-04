@@ -8,8 +8,8 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { SearchResponse } from 'src/core/server';
-import { CollectorFetchContext } from '../../../../../usage_collection/server';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 interface SearchHit {
   _id: string;
@@ -33,9 +33,10 @@ export interface TelemetryResponse {
 
 type ESResponse = SearchResponse<SearchHit>;
 
-export function fetchProvider(index: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext) => {
-    const { body: response } = await esClient.search<ESResponse>(
+    const index = await getIndexForType('sample-data-telemetry');
+    const response = await esClient.search<ESResponse>(
       {
         index,
         body: {

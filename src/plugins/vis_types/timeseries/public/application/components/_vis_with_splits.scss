@@ -14,13 +14,13 @@
   // but it will also grow to fill the space if there are less than 4 in a row
   flex: 1 0 25%;
   // Ensure a minimum width is acheived on smaller width panels
-  min-width: $tvbSplitBlockVisMinSize;
+  min-width: $euiSize * 12;
   display: flex;
 
   > .tvbVis {
     // Apply the minimum height on the vis itself so it doesn't interfere with flex calculations
     // Gauges are not completely square, so the height is just slightly less than the width
-    min-height: $tvbSplitBlockVisMinSize / 1.25;
+    min-height: $euiSize * 12 / 1.25;
   }
 }
 

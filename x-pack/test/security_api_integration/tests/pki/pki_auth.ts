@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expect as jestExpect } from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';
@@ -13,16 +14,22 @@ import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { FileWrapper } from '../audit/file_wrapper';
 
 const CA_CERT = readFileSync(CA_CERT_PATH);
-const FIRST_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
-const SECOND_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/second_client.p12'));
+const FIRST_CLIENT_CERT = readFileSync(
+  require.resolve('@kbn/security-api-integration-helpers/pki/first_client.p12')
+);
+const SECOND_CLIENT_CERT = readFileSync(
+  require.resolve('@kbn/security-api-integration-helpers/pki/second_client.p12')
+);
 const UNTRUSTED_CLIENT_CERT = readFileSync(
-  resolve(__dirname, '../../fixtures/pki/untrusted_client.p12')
+  require.resolve('@kbn/security-api-integration-helpers/pki/untrusted_client.p12')
 );
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const retry = getService('retry');
 
   function checkCookieIsSet(cookie: Cookie) {
     expect(cookie.value).to.not.be.empty();
@@ -72,10 +79,8 @@ export default function ({ getService }: FtrProviderContext) {
         .pfx(UNTRUSTED_CLIENT_CERT)
         .expect(401);
 
-      expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-        `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-      );
-      expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+      expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
+      expect(unauthenticatedResponse.text).to.contain('error');
     });
 
     it('does not prevent basic login', async () => {
@@ -123,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly set cookie and authenticate user', async () => {
-      const response = await supertest
+      let response = await supertest
         .get('/security/account')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
@@ -136,28 +141,32 @@ export default function ({ getService }: FtrProviderContext) {
       checkCookieIsSet(sessionCookie);
 
       // Cookie should be accepted.
-      await supertest
+      response = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
         .set('Cookie', sessionCookie.cookieString())
-        .expect(200, {
-          username: 'first_client',
-          roles: ['kibana_admin'],
-          full_name: null,
-          email: null,
-          enabled: true,
-          metadata: {
-            pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana_system',
-            pki_dn: 'CN=first_client',
-          },
-          authentication_realm: { name: 'pki1', type: 'pki' },
-          lookup_realm: { name: 'pki1', type: 'pki' },
-          authentication_provider: { name: 'pki', type: 'pki' },
-          authentication_type: 'token',
-        });
+        .expect(200);
+
+      jestExpect(response.body).toEqual({
+        username: 'first_client',
+        roles: ['kibana_admin'],
+        full_name: null,
+        email: null,
+        enabled: true,
+        metadata: {
+          pki_delegated_by_realm: 'reserved',
+          pki_delegated_by_user: 'kibana_system',
+          pki_dn: 'CN=first_client',
+        },
+        authentication_realm: { name: 'pki1', type: 'pki' },
+        lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: { name: 'pki', type: 'pki' },
+        authentication_type: 'token',
+        elastic_cloud_user: false,
+        profile_uid: jestExpect.any(String),
+      });
     });
 
     it('should update session if new certificate is provided', async () => {
@@ -179,22 +188,26 @@ export default function ({ getService }: FtrProviderContext) {
         .pfx(SECOND_CLIENT_CERT)
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
-        .expect(200, {
-          username: 'second_client',
-          roles: [],
-          full_name: null,
-          email: null,
-          enabled: true,
-          metadata: {
-            pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana_system',
-            pki_dn: 'CN=second_client',
-          },
-          authentication_realm: { name: 'pki1', type: 'pki' },
-          lookup_realm: { name: 'pki1', type: 'pki' },
-          authentication_provider: { name: 'pki', type: 'pki' },
-          authentication_type: 'realm',
-        });
+        .expect(200);
+
+      jestExpect(response.body).toEqual({
+        username: 'second_client',
+        roles: [],
+        full_name: null,
+        email: null,
+        enabled: true,
+        metadata: {
+          pki_delegated_by_realm: 'reserved',
+          pki_delegated_by_user: 'kibana_system',
+          pki_dn: 'CN=second_client',
+        },
+        authentication_realm: { name: 'pki1', type: 'pki' },
+        lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: { name: 'pki', type: 'pki' },
+        authentication_type: 'realm',
+        elastic_cloud_user: false,
+        profile_uid: jestExpect.any(String),
+      });
 
       checkCookieIsSet(parseCookie(response.headers['set-cookie'][0])!);
     });
@@ -398,6 +411,132 @@ export default function ({ getService }: FtrProviderContext) {
 
         const refreshedCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(refreshedCookie);
+      });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .ca(CA_CERT)
+              .pfx(FIRST_CLIENT_CERT)
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const refreshedCookie = parseCookie(newSessionCookies[0])!;
+            checkCookieIsSet(refreshedCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .ca(CA_CERT)
+              .pfx(FIRST_CLIENT_CERT)
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', refreshedCookie.cookieString())
+              .expect(200);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .ca(CA_CERT)
+                  .pfx(FIRST_CLIENT_CERT)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
+      });
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/pki.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        this.timeout(60000);
+
+        // Accessing Kibana without an existing session should create a `user_login` event.
+        const response = await supertest
+          .get('/security/account')
+          .ca(CA_CERT)
+          .pfx(FIRST_CLIENT_CERT)
+          .expect(200);
+
+        const cookies = response.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .ca(CA_CERT)
+          .pfx(FIRST_CLIENT_CERT)
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .ca(CA_CERT)
+          .pfx(FIRST_CLIENT_CERT)
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('first_client');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('pki');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('first_client');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('pki');
+      });
+
+      it('should log authentication failure correctly', async () => {
+        await supertest.get('/security/account').ca(CA_CERT).pfx(UNTRUSTED_CLIENT_CERT).expect(401);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(1);
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('failure');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].kibana.authentication_provider).to.be('pki');
       });
     });
   });

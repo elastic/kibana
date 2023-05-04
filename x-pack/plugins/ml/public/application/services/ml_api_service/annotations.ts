@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
-import { http, http$ } from '../http_service';
-import { basePath } from './index';
+import { useMemo } from 'react';
+import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
+import type { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
+import { basePath } from '.';
 
-export const annotations = {
+export const annotationsApiProvider = (httpService: HttpService) => ({
   getAnnotations$(obj: {
     jobIds: string[];
     earliestMs: number;
@@ -19,7 +21,7 @@ export const annotations = {
     entities?: any[];
   }) {
     const body = JSON.stringify(obj);
-    return http$<GetAnnotationsResponse>({
+    return httpService.http$<GetAnnotationsResponse>({
       path: `${basePath()}/annotations`,
       method: 'POST',
       body,
@@ -35,7 +37,7 @@ export const annotations = {
     entities?: any[];
   }) {
     const body = JSON.stringify(obj);
-    return http<GetAnnotationsResponse>({
+    return httpService.http<GetAnnotationsResponse>({
       path: `${basePath()}/annotations`,
       method: 'POST',
       body,
@@ -44,16 +46,30 @@ export const annotations = {
 
   indexAnnotation(obj: Annotation) {
     const body = JSON.stringify(obj);
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/annotations/index`,
       method: 'PUT',
       body,
     });
   },
   deleteAnnotation(id: string) {
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/annotations/delete/${id}`,
       method: 'DELETE',
     });
   },
-};
+});
+
+export type AnnotationsApiService = ReturnType<typeof annotationsApiProvider>;
+
+/**
+ * Hooks for accessing {@link AnnotationsApiService} in React components.
+ */
+export function useAnnotationsApiService(): AnnotationsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => annotationsApiProvider(httpService), [httpService]);
+}

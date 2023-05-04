@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { countUsageOfPredefinedIds } from './count_usage_of_predefined_ids';
 
 beforeEach(() => {

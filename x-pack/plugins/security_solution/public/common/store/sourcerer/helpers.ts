@@ -6,9 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
-import { SelectedDataViewPayload } from './actions';
-import { sourcererModel } from '../model';
+import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
+import { SourcererScopeName } from './model';
+import type { SelectedDataViewPayload } from './actions';
+import type { sourcererModel } from '../model';
+import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
@@ -20,26 +22,19 @@ export const getScopePatternListSelection = (
     theDataView != null && theDataView.id !== null ? theDataView.patternList : [];
 
   if (!isDefaultDataView) {
-    return patternList.sort();
+    return sortWithExcludesAtEnd(patternList);
   }
   // when our SIEM data view is set, here are the defaults
   switch (sourcererScope) {
     case SourcererScopeName.default:
-      return patternList.filter((index) => index !== signalIndexName).sort();
+      return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
     case SourcererScopeName.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
-      return (signalIndexName != null ? [signalIndexName] : []).sort();
+      return signalIndexName != null ? [signalIndexName] : [];
     case SourcererScopeName.timeline:
-      return patternList.sort();
+      return sortWithExcludesAtEnd(patternList);
   }
 };
-
-export const ensurePatternFormat = (patternList: string[]): string[] =>
-  [
-    ...new Set(
-      patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
-    ),
-  ].sort();
 
 export const validateSelectedPatterns = (
   state: SourcererModel,
@@ -63,7 +58,12 @@ export const validateSelectedPatterns = (
   const selectedPatterns =
     // shouldValidateSelectedPatterns is false when upgrading from
     // legacy pre-8.0 timeline index patterns to data view.
-    shouldValidateSelectedPatterns && dataView != null && missingPatterns.length === 0
+    shouldValidateSelectedPatterns &&
+    dataView != null &&
+    missingPatterns.length === 0 &&
+    // don't validate when the data view has not been initialized (default is initialized already always)
+    dataView.id !== state.defaultDataView.id &&
+    dataView.patternList.length > 0
       ? dedupePatterns.filter(
           (pattern) =>
             (dataView != null && dataView.patternList.includes(pattern)) ||

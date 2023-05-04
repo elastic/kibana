@@ -13,30 +13,27 @@ import type {
   SavedObjectsCreateOptions,
   OverlayStart,
   SavedObjectsClientContract,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
+import type { VisSavedObject } from '../../types';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
  * exists, a warning message requests an overwrite confirmation.
  * @param source - serialized version of this object what will be indexed into elasticsearch.
- * @param savedObject - a simple object that contains properties title and displayName, and getEsType method
+ * @param savedObject - VisSavedObject
  * @param options - options to pass to the saved object create method
  * @param services - provides Kibana services savedObjectsClient and overlays
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
  * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
  * a confirmRejected = true parameter so that case can be handled differently than
  * a create or index error.
- * @resolved {SavedObject}
+ * @resolved {SimpleSavedObject}
  */
 export async function saveWithConfirmation(
   source: SavedObjectAttributes,
-  savedObject: {
-    getEsType(): string;
-    title: string;
-    displayName: string;
-  },
+  savedObject: Pick<VisSavedObject, 'title' | 'getEsType' | 'displayName'>,
   options: SavedObjectsCreateOptions,
   services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart }
 ) {

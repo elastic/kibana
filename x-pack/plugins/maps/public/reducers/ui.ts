@@ -19,6 +19,9 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
+  SET_AUTO_OPEN_WIZARD_ID,
+  PUSH_DELETED_FEATURE_ID,
+  CLEAR_DELETED_FEATURE_IDS,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -37,6 +40,8 @@ export type MapUiState = {
   isLayerTOCOpen: boolean;
   isTimesliderOpen: boolean;
   openTOCDetails: string[];
+  autoOpenLayerWizardId: string;
+  deletedFeatureIds: string[];
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -51,6 +56,8 @@ export const DEFAULT_MAP_UI_STATE = {
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
+  autoOpenLayerWizardId: '',
+  deletedFeatureIds: [],
 };
 
 // Reducer
@@ -81,6 +88,18 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
         openTOCDetails: state.openTOCDetails.filter((layerId) => {
           return layerId !== action.layerId;
         }),
+      };
+    case SET_AUTO_OPEN_WIZARD_ID:
+      return { ...state, autoOpenLayerWizardId: action.autoOpenLayerWizardId };
+    case PUSH_DELETED_FEATURE_ID:
+      return {
+        ...state,
+        deletedFeatureIds: [...state.deletedFeatureIds, action.featureId],
+      };
+    case CLEAR_DELETED_FEATURE_IDS:
+      return {
+        ...state,
+        deletedFeatureIds: [],
       };
     default:
       return state;

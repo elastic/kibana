@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -14,14 +15,16 @@ const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
+  const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'infraSavedViews']);
+  const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/106650
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('without metrics present', () => {
@@ -34,6 +37,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
+
+      it('renders the correct error page title', async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraOps',
+          '/detail/host/test',
+          '',
+          {
+            ensureCurrentUrl: false,
+          }
+        );
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain('Uh oh - Observability - Elastic');
+      });
     });
 
     describe('with metrics present', () => {
@@ -42,20 +61,53 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(
-        async () =>
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
-      );
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY);
+      });
+
+      it('renders the correct page title', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
+
+      it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const kubernetesTourText =
+          'Click here to see your infrastructure in different ways, including Kubernetes pods.';
+        const ensureKubernetesTourVisible =
+          await pageObjects.infraHome.ensureKubernetesTourIsVisible();
+
+        expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
+
+        // Persist after refresh
+        await browser.refresh();
+        await pageObjects.infraHome.waitForLoading();
+
+        expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
+
+        await pageObjects.infraHome.clickDismissKubernetesTourButton();
+
+        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+      });
 
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
-
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.getWaffleMapTooltips();
+        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
+      });
+      it('shows query suggestions', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.clickQueryBar();
+        await pageObjects.infraHome.inputQueryData();
+        await pageObjects.infraHome.ensureSuggestionsPanelVisible();
+        await pageObjects.infraHome.clearSearchTerm();
       });
 
       it('sort nodes by descending value', async () => {
@@ -96,8 +148,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('group nodes by custom field', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
-        expect(groups).to.eql(['ubuntu']);
+        await retry.try(async () => {
+          const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
+          expect(groups).to.eql(['ubuntu']);
+        });
       });
 
       it('filter nodes by search term', async () => {
@@ -169,34 +223,52 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Saved Views', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-      it('should have save and load controls', async () => {
+      before(async () => {
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraSavedViews.getSavedViewsButton();
+      });
+
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
+      it('should render a button with the view name', async () => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
       });
 
-      it('should open popover', async () => {
+      it('should open/close the views popover menu on button click', async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();
+        testSubjects.existOrFail('savedViews-popover');
         await pageObjects.infraSavedViews.closeSavedViewsPopover();
       });
 
-      it('should create new saved view and load it', async () => {
-        await pageObjects.infraSavedViews.clickSavedViewsButton();
-        await pageObjects.infraSavedViews.clickSaveNewViewButton();
-        await pageObjects.infraSavedViews.getCreateSavedViewModal();
-        await pageObjects.infraSavedViews.createNewSavedView('view1');
+      it('should create a new saved view and load it', async () => {
+        await pageObjects.infraSavedViews.createView('view1');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
       });
 
-      it('should new views should be listed in the load views list', async () => {
-        await pageObjects.infraSavedViews.clickSavedViewsButton();
-        await pageObjects.infraSavedViews.clickLoadViewButton();
-        await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
-        await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
+      it('should laod a clicked view from the manage views section', async () => {
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
+        const views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        await views[0].click();
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
+      });
+
+      it('should update the current saved view and load it', async () => {
+        let views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(2);
+        await pageObjects.infraSavedViews.pressEsc();
+
+        await pageObjects.infraSavedViews.createView('view2');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
+        views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.pressEsc();
+
+        await pageObjects.infraSavedViews.updateView('view3');
+        await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
+        views = await pageObjects.infraSavedViews.getManageViewsEntries();
+        expect(views.length).to.equal(3);
+        await pageObjects.infraSavedViews.pressEsc();
       });
     });
   });

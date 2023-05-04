@@ -14,7 +14,7 @@ import { NAV } from '../../../../constants';
 import {
   getContentSourcePath,
   SYNC_FREQUENCY_PATH,
-  OBJECTS_AND_ASSETS_PATH,
+  ASSETS_AND_OBJECTS_PATH,
 } from '../../../../routes';
 import { SourceLogic } from '../../source_logic';
 
@@ -35,9 +35,9 @@ export const useSynchronizationSubNav = () => {
       }),
     },
     {
-      id: 'sourceSynchronizationObjectsAndAssets',
-      name: NAV.SYNCHRONIZATION_OBJECTS_AND_ASSETS,
-      ...generateNavLink({ to: getContentSourcePath(OBJECTS_AND_ASSETS_PATH, id, true) }),
+      id: 'sourceSynchronizationAssetsAndObjects',
+      name: NAV.SYNCHRONIZATION_ASSETS_AND_OBJECTS,
+      ...generateNavLink({ to: getContentSourcePath(ASSETS_AND_OBJECTS_PATH, id, true) }),
     },
   ];
 

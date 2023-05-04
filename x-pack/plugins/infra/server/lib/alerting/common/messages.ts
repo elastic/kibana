@@ -6,12 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Comparator, AlertStates } from './types';
+import {
+  formatDurationFromTimeUnitChar,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
   'xpack.infra.metrics.alerting.threshold.documentCount',
   {
     defaultMessage: 'Document count',
+  }
+);
+
+export const CUSTOM_EQUATION_I18N = i18n.translate(
+  'xpack.infra.metrics.alerting.threshold.customEquation',
+  {
+    defaultMessage: 'Custom equation',
   }
 );
 
@@ -35,43 +47,6 @@ export const stateToAlertMessage = {
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
-
-const comparatorToI18n = (comparator: Comparator, threshold: number[], currentValue: number) => {
-  const gtText = i18n.translate('xpack.infra.metrics.alerting.threshold.gtComparator', {
-    defaultMessage: 'greater than',
-  });
-  const ltText = i18n.translate('xpack.infra.metrics.alerting.threshold.ltComparator', {
-    defaultMessage: 'less than',
-  });
-  const eqText = i18n.translate('xpack.infra.metrics.alerting.threshold.eqComparator', {
-    defaultMessage: 'equal to',
-  });
-
-  switch (comparator) {
-    case Comparator.BETWEEN:
-      return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenComparator', {
-        defaultMessage: 'between',
-      });
-    case Comparator.OUTSIDE_RANGE:
-      return i18n.translate('xpack.infra.metrics.alerting.threshold.outsideRangeComparator', {
-        defaultMessage: 'not between',
-      });
-    case Comparator.GT:
-      return gtText;
-    case Comparator.LT:
-      return ltText;
-    case Comparator.GT_OR_EQ:
-    case Comparator.LT_OR_EQ: {
-      if (currentValue === threshold[0]) {
-        return eqText;
-      } else if (currentValue < threshold[0]) {
-        return ltText;
-      } else {
-        return gtText;
-      }
-    }
-  }
-};
 
 const recoveredComparatorToI18n = (
   comparator: Comparator,
@@ -108,25 +83,31 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
   });
 };
 
+const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : ` for ${group}`);
+
 export const buildFiredAlertReason: (alertResult: {
   group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
+  timeSize: number;
+  timeUnit: TimeUnitChar;
+}) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
+      '{metric} is {currentValue} in the last {duration}{group}. Alert when {comparator} {threshold}.',
     values: {
-      group,
+      group: formatGroup(group),
       metric,
-      comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
+      comparator,
       threshold: thresholdToI18n(threshold),
       currentValue,
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),
     },
   });
 
+// Once recovered reason messages are re-enabled, checkout this issue https://github.com/elastic/kibana/issues/121272 regarding latest reason format
 export const buildRecoveredAlertReason: (alertResult: {
   group: string;
   metric: string;
@@ -157,11 +138,11 @@ export const buildNoDataAlertReason: (alertResult: {
   timeUnit: string;
 }) => string = ({ group, metric, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
-    defaultMessage: '{metric} has reported no data over the past {interval} for {group}',
+    defaultMessage: '{metric} reported no data in the last {interval}{group}',
     values: {
       metric,
       interval: `${timeSize}${timeUnit}`,
-      group,
+      group: formatGroup(group),
     },
   });
 
@@ -181,10 +162,10 @@ export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
     },
   });
 
-export const groupActionVariableDescription = i18n.translate(
-  'xpack.infra.metrics.alerting.groupActionVariableDescription',
+export const groupByKeysActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
   {
-    defaultMessage: 'Name of the group reporting data',
+    defaultMessage: 'The object containing groups that are reporting data',
   }
 );
 
@@ -195,11 +176,18 @@ export const alertStateActionVariableDescription = i18n.translate(
   }
 );
 
+export const alertDetailUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.alertDetailUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view within Elastic that shows further details and context surrounding this alert',
+  }
+);
+
 export const reasonActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.reasonActionVariableDescription',
   {
-    defaultMessage:
-      'A description of why the alert is in this state, including which metrics have crossed which thresholds',
+    defaultMessage: 'A concise description of the reason for the alert',
   }
 );
 
@@ -231,5 +219,71 @@ export const thresholdActionVariableDescription = i18n.translate(
   {
     defaultMessage:
       'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can assist with further investigation',
+  }
+);
+
+export const cloudActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.cloudActionVariableDescription',
+  {
+    defaultMessage: 'The cloud object defined by ECS if available in the source.',
+  }
+);
+
+export const hostActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.hostActionVariableDescription',
+  {
+    defaultMessage: 'The host object defined by ECS if available in the source.',
+  }
+);
+
+export const containerActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.containerActionVariableDescription',
+  {
+    defaultMessage: 'The container object defined by ECS if available in the source.',
+  }
+);
+
+export const orchestratorActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.orchestratorActionVariableDescription',
+  {
+    defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
+  }
+);
+
+export const labelsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.labelsActionVariableDescription',
+  {
+    defaultMessage: 'List of labels associated with the entity where this alert triggered.',
+  }
+);
+
+export const tagsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.tagsActionVariableDescription',
+  {
+    defaultMessage: 'List of tags associated with the entity where this alert triggered.',
+  }
+);
+
+export const originalAlertStateActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.originalAlertStateActionVariableDescription',
+  {
+    defaultMessage:
+      'The state of the alert before it recovered. This is only available in the recovery context',
+  }
+);
+
+export const originalAlertStateWasActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.originalAlertStateWasWARNINGActionVariableDescription',
+  {
+    defaultMessage:
+      'Boolean value of the state of the alert before it recovered. This can be used for template conditions. This is only available in the recovery context',
   }
 );

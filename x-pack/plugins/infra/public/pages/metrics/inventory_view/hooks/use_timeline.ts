@@ -10,8 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { first } from 'lodash';
 import { useEffect, useMemo, useCallback } from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIntervalInSeconds } from '../../../../../server/utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
@@ -20,7 +19,7 @@ import {
   SnapshotRequest,
   InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
-import {
+import type {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
@@ -89,7 +88,6 @@ export function useTimeline(
     interval: displayInterval ?? '',
     to: endTime,
     from: startTime,
-    ignoreLookback: true,
     forceInterval: true,
   };
 

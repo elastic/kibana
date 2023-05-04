@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
-import {
+import type {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
-  GetEndpointPackagePolicyRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
-import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
-import { wrapErrorIfNeeded } from '../../utils';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
+import type { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
 
 export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined,
@@ -25,11 +22,8 @@ export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined
 > {
   return async (context, request, response) => {
-    const doc = await getPolicyResponseByAgentId(
-      policyIndexPattern,
-      request.query.agentId,
-      context.core.elasticsearch.client
-    );
+    const client = (await context.core).elasticsearch.client;
+    const doc = await getPolicyResponseByAgentId(policyIndexPattern, request.query.agentId, client);
 
     if (doc) {
       return response.ok({ body: doc });
@@ -63,35 +57,5 @@ export const getAgentPolicySummaryHandler = function (
     return response.ok({
       body,
     });
-  };
-};
-
-export const getPolicyListHandler = function (
-  endpointAppContext: EndpointAppContext
-): RequestHandler<
-  undefined,
-  TypeOf<typeof GetEndpointPackagePolicyRequestSchema.query>,
-  undefined
-> {
-  return async (context, request, response) => {
-    const soClient = context.core.savedObjects.client;
-    const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
-    const endpointFilteredKuery = `${
-      request?.query?.kuery ? `(${request.query.kuery}) and ` : ''
-    }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
-    try {
-      const listResponse = await fleetServices.packagePolicy.list(soClient, {
-        ...request.query,
-        perPage: request.query.pageSize,
-        sortField: request.query.sort,
-        kuery: endpointFilteredKuery,
-      });
-
-      return response.ok({
-        body: listResponse,
-      });
-    } catch (error) {
-      throw wrapErrorIfNeeded(error);
-    }
   };
 };

@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Lens', () => {
+  describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens metric chart', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await a11y.testAppSnapshot();
     });
 
@@ -119,8 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('change chart type', async () => {
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.openChartSwitchPopover();
+      await PageObjects.lens.waitForSearchInputValue('line');
       await a11y.testAppSnapshot();
+      await testSubjects.click('lnsChartSwitchPopover_line');
     });
 
     it('change chart type via suggestions', async () => {
@@ -144,23 +146,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.switchToVisualization('area');
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'median',
-          field: 'bytes',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'median',
+        field: 'bytes',
+      });
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens XY chart with reference line layer', async () => {
+      await PageObjects.lens.createLayer('referenceLine');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens XY chart with annotations layer', async () => {
+      await PageObjects.lens.createLayer('annotations');
       await a11y.testAppSnapshot();
     });
 

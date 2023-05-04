@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getGeneralFilters } from '.';
 
 describe('getGeneralFilters', () => {
@@ -31,6 +32,21 @@ describe('getGeneralFilters', () => {
 
     expect(filters).toEqual(
       '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample)'
+    );
+  });
+
+  test('it properly formats filters when two types are passed in', () => {
+    const filters = getGeneralFilters(
+      {
+        created_by: 'moi',
+        name: 'Sample',
+        types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.RULE_DEFAULT],
+      },
+      ['exception-list', 'exception-list-agnostic']
+    );
+
+    expect(filters).toEqual(
+      '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (exception-list.attributes.type:detection OR exception-list.attributes.type:rule_default OR exception-list-agnostic.attributes.type:detection OR exception-list-agnostic.attributes.type:rule_default)'
     );
   });
 });

@@ -8,7 +8,6 @@
 
 import {
   FeatureCatalogueRegistry,
-  FeatureCatalogueCategory,
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
 } from './feature_catalogue_registry';
@@ -20,7 +19,7 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   icon: 'dashboardApp',
   path: `/app/kibana#dashboard`,
   showOnHomePage: true,
-  category: FeatureCatalogueCategory.DATA,
+  category: 'data',
 };
 
 const KIBANA_SOLUTION: FeatureCatalogueSolution = {

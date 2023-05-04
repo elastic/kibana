@@ -7,7 +7,7 @@
 
 import { validateTagMock } from './tags_client.test.mocks';
 
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { TagAttributes, TagSavedObject } from '../../../common/types';
 import { TagValidation } from '../../../common/validation';
 import { TagsClient } from './tags_client';
@@ -58,7 +58,20 @@ describe('TagsClient', () => {
       await tagsClient.create(attributes);
 
       expect(soClient.create).toHaveBeenCalledTimes(1);
-      expect(soClient.create).toHaveBeenCalledWith('tag', attributes);
+      expect(soClient.create).toHaveBeenCalledWith('tag', attributes, undefined);
+    });
+
+    it('calls `soClient.create` with options', async () => {
+      const attributes = createAttributes();
+
+      await tagsClient.create(attributes, { id: '1', overwrite: true, refresh: false });
+
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+      expect(soClient.create).toHaveBeenCalledWith('tag', attributes, {
+        id: '1',
+        overwrite: true,
+        refresh: false,
+      });
     });
 
     it('converts the object returned from the soClient to a `Tag`', async () => {
@@ -205,7 +218,8 @@ describe('TagsClient', () => {
         expect.objectContaining({
           type: 'tag',
           perPage: 1000,
-        })
+        }),
+        undefined // internalOptions
       );
     });
 

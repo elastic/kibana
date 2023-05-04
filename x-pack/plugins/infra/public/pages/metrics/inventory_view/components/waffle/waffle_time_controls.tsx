@@ -9,8 +9,8 @@ import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from 
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
-import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
@@ -26,14 +26,25 @@ export const WaffleTimeControls = withTheme(({ interval }: Props) => {
   const intervalAsString = convertIntervalToString(interval);
 
   const liveStreamingButton = isAutoReloading ? (
-    <EuiButton color="primary" iconSide="left" iconType="pause" onClick={stopAutoReload}>
+    <EuiButton
+      data-test-subj="infraWaffleTimeControlsStopRefreshingButton"
+      color="primary"
+      iconSide="left"
+      iconType="pause"
+      onClick={stopAutoReload}
+    >
       <FormattedMessage
         id="xpack.infra.waffleTime.stopRefreshingButtonLabel"
         defaultMessage="Stop refreshing"
       />
     </EuiButton>
   ) : (
-    <EuiButton iconSide="left" iconType="play" onClick={startAutoReload}>
+    <EuiButton
+      data-test-subj="infraWaffleTimeControlsAutoRefreshButton"
+      iconSide="left"
+      iconType="play"
+      onClick={startAutoReload}
+    >
       <FormattedMessage
         id="xpack.infra.waffleTime.autoRefreshButtonLabel"
         defaultMessage="Auto-refresh"
@@ -66,7 +77,7 @@ export const WaffleTimeControls = withTheme(({ interval }: Props) => {
             injectTimes={currentMoment ? [currentMoment] : []}
             isLoading={isAutoReloading}
             onChange={handleChangeDate}
-            popoverPlacement="top-end"
+            popoverPlacement="upRight"
             selected={currentMoment}
             shouldCloseOnSelect
             showTimeSelect

@@ -27,15 +27,11 @@
     dest: /etc/kibana/kibana.yml
   register: config
 
-- name: open port 5601/tcp
+- name: copy node.options
   become: yes
-  command:
-    cmd: firewall-cmd --zone=public --permanent --add-port=5601/tcp
-
-- name: reload firewall
-  become: yes
-  command:
-    cmd: firewall-cmd --reload
+  template:
+    src: templates/node.options
+    dest: /etc/kibana/node.options
 
 - name: start kibana
   become: yes

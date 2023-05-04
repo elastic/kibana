@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NotificationsSetup, FatalErrorsSetup } from 'src/core/public';
+import { NotificationsSetup, FatalErrorsSetup } from '@kbn/core/public';
 
 export let toasts: NotificationsSetup['toasts'];
 export let fatalError: FatalErrorsSetup;

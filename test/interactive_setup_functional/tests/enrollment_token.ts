@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 import { getElasticsearchCaCertificate } from '../../interactive_setup_api_integration/fixtures/tls_tools';
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Enrollment token)', function () {
-    this.tags(['skipCloud', 'ciGroup2']);
+    this.tags('skipCloud');
 
     const elasticsearchConfig = config.get('servers.elasticsearch');
     let verificationCode: string;

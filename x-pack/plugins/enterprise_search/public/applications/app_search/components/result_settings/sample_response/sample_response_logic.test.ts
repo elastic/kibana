@@ -8,7 +8,7 @@
 import { LogicMounter, mockHttpValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { flashAPIErrors } from '../../../../shared/flash_messages';
 
@@ -83,7 +83,7 @@ describe('SampleResponseLogic', () => {
 
   describe('listeners', () => {
     describe('getSearchResults', () => {
-      beforeAll(() => jest.useFakeTimers());
+      beforeAll(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterAll(() => jest.useRealTimers());
 
       it('makes a search API request and calls getSearchResultsSuccess with the first result of the response', async () => {

@@ -3,7 +3,7 @@
 exports[`UrlFormatEditor should render normally 1`] = `
 <div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -12,6 +12,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Type
@@ -28,7 +29,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiFormControlLayout__childrenWrapper"
         >
           <select
-            class="euiSelect"
+            class="euiSelect euiFormControlLayout--1icons"
             data-test-subj="urlEditorType"
             id="generated-id"
           >
@@ -66,7 +67,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -75,6 +76,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Open in a new tab
@@ -85,7 +87,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -127,7 +129,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -137,6 +139,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         aria-invalid="false"
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           URL template
@@ -167,21 +170,22 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
-          rel="noopener"
+          class="euiLink emotion-euiLink-primary"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
+          rel="noopener noreferrer"
           target="_blank"
         >
           <span>
             URL template help
           </span>
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -190,7 +194,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -200,6 +204,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         aria-invalid="false"
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Label template
@@ -230,21 +235,22 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
-          rel="noopener"
+          class="euiLink emotion-euiLink-primary"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
+          rel="noopener noreferrer"
           target="_blank"
         >
           <span>
             Label template help
           </span>
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -253,7 +259,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -262,6 +268,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Samples
@@ -280,23 +287,23 @@ exports[`UrlFormatEditor should render normally 1`] = `
             class="euiTableHeaderMobile"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               />
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               />
             </div>
           </div>
           <table
-            class="euiTable euiTable--compressed euiTable--responsive"
+            class="euiTable css-0 euiTable--compressed euiTable--responsive"
             id="__table_generated-id"
             tabindex="-1"
           >
             <caption
-              class="euiScreenReaderOnly euiTableCaption"
+              class="euiTableCaption emotion-euiScreenReaderOnly"
             />
             <thead>
               <tr>
@@ -336,7 +343,9 @@ exports[`UrlFormatEditor should render normally 1`] = `
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody
+              class="css-0"
+            >
               <tr
                 class="euiTableRow"
               >

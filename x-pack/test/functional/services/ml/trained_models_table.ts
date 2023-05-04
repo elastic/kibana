@@ -7,9 +7,12 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import { upperFirst } from 'lodash';
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
+import { MappedInputParams, MappedOutput, ModelType, TrainedModelsActions } from './trained_models';
 
 export interface TrainedModelRowData {
   id: string;
@@ -19,7 +22,11 @@ export interface TrainedModelRowData {
 
 export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvider>;
 
-export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
+export function TrainedModelsTableProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI,
+  trainedModelsActions: TrainedModelsActions
+) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -74,13 +81,15 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~mlDatePickerRefreshPageButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlDatePickerRefreshPageButton loaded', {
+        timeout: 30 * 1000,
+      });
     }
 
     public async refreshModelsTable() {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await testSubjects.click('~mlDatePickerRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await this.waitForModelsToLoad();
     }
@@ -175,6 +184,45 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       );
     }
 
+    public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
+      const actionExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsTableRowTestAction')
+      );
+      expect(actionExists).to.eql(
+        expectedValue,
+        `Expected test action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionExists ? 'visible' : 'hidden'})`
+      );
+    }
+
+    public async testModel(
+      modelType: ModelType,
+      modelId: string,
+      inputParams: MappedInputParams[typeof modelType],
+      expectedResult: MappedOutput[typeof modelType]
+    ) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowTestAction',
+        false
+      );
+      await this.assertTestFlyoutExists();
+
+      await trainedModelsActions.testModelOutput(modelType, inputParams, expectedResult);
+    }
+
+    public async deleteModel(modelId: string) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeleteAction'
+      );
+      await this.assertDeleteModalExists();
+      await this.confirmDeleteModel();
+      await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.assertModelDisplayedInTable(modelId, false);
+    }
+
     public async assertModelDeleteActionButtonEnabled(modelId: string, expectedValue: boolean) {
       await this.assertModelDeleteActionButtonExists(modelId, true);
       const isEnabled = await testSubjects.isEnabled(
@@ -192,6 +240,18 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
 
+    public async assertTestFlyoutExists() {
+      await testSubjects.existOrFail('mlTestModelsFlyout', { timeout: 60 * 1000 });
+    }
+
+    public async assertStartDeploymentModalExists(expectExist = true) {
+      if (expectExist) {
+        await testSubjects.existOrFail('mlModelsStartDeploymentModal', { timeout: 60 * 1000 });
+      } else {
+        await testSubjects.missingOrFail('mlModelsStartDeploymentModal', { timeout: 60 * 1000 });
+      }
+    }
+
     public async assertDeleteModalNotExists() {
       await testSubjects.missingOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
@@ -207,6 +267,138 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
     public async clickDeleteAction(modelId: string) {
       await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
       await this.assertDeleteModalExists();
+    }
+
+    async assertNumOfAllocations(expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(
+        'mlModelsStartDeploymentModalNumOfAllocations',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Expected number of allocations to equal ${expectedValue}, got ${actualValue}`
+      );
+    }
+
+    public async setNumOfAllocations(value: number) {
+      await testSubjects.setValue('mlModelsStartDeploymentModalNumOfAllocations', value.toString());
+      await this.assertNumOfAllocations(value);
+    }
+
+    public async setPriority(value: 'low' | 'normal') {
+      await mlCommonUI.selectButtonGroupValue(
+        'mlModelsStartDeploymentModalPriority',
+        value.toString()
+      );
+    }
+
+    public async setThreadsPerAllocation(value: number) {
+      await mlCommonUI.selectButtonGroupValue(
+        'mlModelsStartDeploymentModalThreadsPerAllocation',
+        value.toString()
+      );
+    }
+
+    public async startDeploymentWithParams(
+      modelId: string,
+      params: { priority: 'low' | 'normal'; numOfAllocations: number; threadsPerAllocation: number }
+    ) {
+      await this.openStartDeploymentModal(modelId);
+
+      await this.setPriority(params.priority);
+      await this.setNumOfAllocations(params.numOfAllocations);
+      await this.setThreadsPerAllocation(params.threadsPerAllocation);
+
+      await testSubjects.click('mlModelsStartDeploymentModalStartButton');
+      await this.assertStartDeploymentModalExists(false);
+
+      await mlCommonUI.waitForRefreshButtonEnabled();
+
+      await mlCommonUI.assertLastToastHeader(
+        `Deployment for "${modelId}" has been started successfully.`
+      );
+    }
+
+    public async stopDeployment(modelId: string) {
+      await this.clickStopDeploymentAction(modelId);
+      await mlCommonUI.waitForRefreshButtonEnabled();
+      await mlCommonUI.assertLastToastHeader(
+        `Deployment for "${modelId}" has been stopped successfully.`
+      );
+    }
+
+    public async openStartDeploymentModal(modelId: string) {
+      await testSubjects.clickWhenNotDisabled(
+        this.rowSelector(modelId, 'mlModelsTableRowStartDeploymentAction'),
+        { timeout: 5000 }
+      );
+      await this.assertStartDeploymentModalExists(true);
+    }
+
+    public async clickStopDeploymentAction(modelId: string) {
+      await testSubjects.clickWhenNotDisabled(
+        this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
+        { timeout: 5000 }
+      );
+    }
+
+    public async ensureRowIsExpanded(modelId: string) {
+      await this.filterWithSearchString(modelId);
+      await retry.tryForTime(10 * 1000, async () => {
+        if (!(await testSubjects.exists('mlTrainedModelRowDetails'))) {
+          await testSubjects.click(`${this.rowSelector(modelId)} > mlModelsTableRowDetailsToggle`);
+          await testSubjects.existOrFail('mlTrainedModelRowDetails', { timeout: 1000 });
+        }
+      });
+      await mlCommonUI.waitForRefreshButtonEnabled();
+    }
+
+    public async assertTabContent(
+      type: 'details' | 'stats' | 'inferenceConfig' | 'pipelines',
+      expectVisible = true
+    ) {
+      const tabTestSubj = `mlTrainedModel${upperFirst(type)}`;
+      const tabContentTestSubj = `mlTrainedModel${upperFirst(type)}Content`;
+
+      if (!expectVisible) {
+        await testSubjects.missingOrFail(tabTestSubj);
+        return;
+      }
+
+      await testSubjects.existOrFail(tabTestSubj);
+      await testSubjects.click(tabTestSubj);
+      await testSubjects.existOrFail(tabContentTestSubj);
+    }
+
+    public async assertDetailsTabContent(expectVisible = true) {
+      await this.assertTabContent('details', expectVisible);
+    }
+
+    public async assertInferenceConfigTabContent(expectVisible = true) {
+      await this.assertTabContent('inferenceConfig', expectVisible);
+    }
+
+    public async assertStatsTabContent(expectVisible = true) {
+      await this.assertTabContent('stats', expectVisible);
+    }
+
+    public async assertPipelinesTabContent(
+      expectVisible = true,
+      pipelinesExpectOptions?: Array<{ pipelineName: string; expectDefinition: boolean }>
+    ) {
+      await this.assertTabContent('pipelines', expectVisible);
+
+      if (Array.isArray(pipelinesExpectOptions)) {
+        for (const p of pipelinesExpectOptions) {
+          if (p.expectDefinition) {
+            await testSubjects.existOrFail(`mlTrainedModelPipelineEditButton_${p.pipelineName}`);
+            await testSubjects.existOrFail(`mlTrainedModelPipelineDefinition_${p.pipelineName}`);
+          } else {
+            await testSubjects.missingOrFail(`mlTrainedModelPipelineEditButton_${p.pipelineName}`);
+            await testSubjects.missingOrFail(`mlTrainedModelPipelineDefinition_${p.pipelineName}`);
+          }
+        }
+      }
     }
   })();
 }

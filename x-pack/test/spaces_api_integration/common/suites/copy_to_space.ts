@@ -6,13 +6,16 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
-import { EsArchiver } from '@kbn/es-archiver';
-import type { Client } from '@elastic/elasticsearch';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
+import {
+  SavedObjectsImportFailure,
+  SavedObjectsImportAmbiguousConflictError,
+} from '@kbn/core/server';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 type TestResponse = Record<string, any>;
 
@@ -71,6 +74,21 @@ const UUID_PATTERN = new RegExp(
   /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
 );
 
+const SPACE_DATA_TO_LOAD: Array<{ spaceName: string | null; dataUrl: string }> = [
+  {
+    spaceName: null,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json',
+  },
+  {
+    spaceName: SPACE_1.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
+  },
+  {
+    spaceName: SPACE_2.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
+  },
+];
+
 const getDestinationWithoutConflicts = () => 'space_2';
 const getDestinationWithConflicts = (originSpaceId?: string) =>
   !originSpaceId || originSpaceId === DEFAULT_SPACE_ID ? 'space_1' : DEFAULT_SPACE_ID;
@@ -78,11 +96,11 @@ const getDestinationWithConflicts = (originSpaceId?: string) =>
 interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: SpaceBucket[];
 }
-export function copyToSpaceTestSuiteFactory(
-  es: Client,
-  esArchiver: EsArchiver,
-  supertest: SuperTest<any>
-) {
+export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
+  const es = context.getService('es');
+
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
       'visualization',
@@ -164,6 +182,7 @@ export function copyToSpaceTestSuiteFactory(
                 icon: 'dashboardApp',
               },
               destinationId: dashboardDestinationId,
+              managed: false,
             },
           ],
         },
@@ -211,24 +230,28 @@ export function copyToSpaceTestSuiteFactory(
                 title: `Copy to Space index pattern 1 from ${spaceId} space`,
               },
               destinationId: indexPatternDestinationId,
+              managed: false,
             },
             {
               id: `cts_vis_1_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
               destinationId: vis1DestinationId,
+              managed: false,
             },
             {
               id: `cts_vis_2_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
               destinationId: vis2DestinationId,
+              managed: false,
             },
             {
               id: `cts_vis_3_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
               destinationId: vis3DestinationId,
+              managed: false,
             },
             {
               id: `cts_dashboard_${spaceId}`,
@@ -238,6 +261,7 @@ export function copyToSpaceTestSuiteFactory(
                 title: `This is the ${spaceId} test space CTS dashboard`,
               },
               destinationId: dashboardDestinationId,
+              managed: false,
             },
           ],
         },
@@ -339,18 +363,21 @@ export function copyToSpaceTestSuiteFactory(
               },
               overwrite: true,
               destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
+              managed: false,
             },
             {
               id: `cts_vis_1_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
               destinationId: vis1DestinationId,
+              managed: false,
             },
             {
               id: `cts_vis_2_${spaceId}`,
               type: 'visualization',
               meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
               destinationId: vis2DestinationId,
+              managed: false,
             },
             {
               id: `cts_vis_3_${spaceId}`,
@@ -358,6 +385,7 @@ export function copyToSpaceTestSuiteFactory(
               meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
               overwrite: true,
               destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
+              managed: false,
             },
             {
               id: `cts_dashboard_${spaceId}`,
@@ -368,6 +396,7 @@ export function copyToSpaceTestSuiteFactory(
               },
               overwrite: true,
               destinationId: `cts_dashboard_${destination}`, // this conflicted with another dashboard in the destination space because of a shared originId
+              managed: false,
             },
           ],
         },
@@ -401,12 +430,14 @@ export function copyToSpaceTestSuiteFactory(
           type: 'visualization',
           meta: { icon: 'visualizeApp', title: `CTS vis 1 from ${spaceId} space` },
           destinationId: vis1DestinationId,
+          managed: false,
         },
         {
           id: `cts_vis_2_${spaceId}`,
           type: 'visualization',
           meta: { icon: 'visualizeApp', title: `CTS vis 2 from ${spaceId} space` },
           destinationId: vis2DestinationId,
+          managed: false,
         },
       ];
       const expectedErrors = [
@@ -416,7 +447,6 @@ export function copyToSpaceTestSuiteFactory(
             destinationId: `cts_dashboard_${destination}`, // this conflicted with another dashboard in the destination space because of a shared originId
           },
           id: `cts_dashboard_${spaceId}`,
-          title: `This is the ${spaceId} test space CTS dashboard`,
           type: 'dashboard',
           meta: {
             title: `This is the ${spaceId} test space CTS dashboard`,
@@ -429,7 +459,6 @@ export function copyToSpaceTestSuiteFactory(
             destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
           },
           id: `cts_ip_1_${spaceId}`,
-          title: `Copy to Space index pattern 1 from ${spaceId} space`,
           type: 'index-pattern',
           meta: {
             title: `Copy to Space index pattern 1 from ${spaceId} space`,
@@ -442,7 +471,6 @@ export function copyToSpaceTestSuiteFactory(
             destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
           },
           id: `cts_vis_3_${spaceId}`,
-          title: `CTS vis 3 from ${spaceId} space`,
           type: 'visualization',
           meta: {
             title: `CTS vis 3 from ${spaceId} space`,
@@ -482,7 +510,9 @@ export function copyToSpaceTestSuiteFactory(
       const type = 'sharedtype';
       const noConflictId = `${spaceId}_only`;
       const exactMatchId = 'each_space';
-      const inexactMatchId = `conflict_1_${spaceId}`;
+      const inexactMatchIdA = `conflict_1a_${spaceId}`;
+      const inexactMatchIdB = `conflict_1b_${spaceId}`;
+      const inexactMatchIdC = `conflict_1c_default_and_space_1`;
       const ambiguousConflictId = `conflict_2_${spaceId}`;
 
       const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
@@ -505,7 +535,8 @@ export function copyToSpaceTestSuiteFactory(
         const destinationId = successResults![0].destinationId;
         expect(destinationId).to.match(UUID_PATTERN);
         const meta = { title, icon: 'beaker' };
-        expect(successResults).to.eql([{ type, id: sourceId, meta, destinationId }]);
+        const managed = false; // default added By `create`
+        expect(successResults).to.eql([{ type, id: sourceId, meta, destinationId, managed }]);
         expect(errors).to.be(undefined);
       };
 
@@ -560,22 +591,31 @@ export function copyToSpaceTestSuiteFactory(
           },
         },
         {
-          testTitle: 'copying with an inexact match conflict',
-          objects: [{ type, id: inexactMatchId }],
+          testTitle:
+            'copying with an inexact match conflict (a) - originId matches existing originId',
+          objects: [{ type, id: inexactMatchIdA }],
           statusCode,
           response: async (response: TestResponse) => {
             if (outcome === 'authorized') {
               const { success, successCount, successResults, errors } = getResult(response);
-              const title = 'A shared saved-object in one space';
+              const title =
+                'This is used to test an inexact match conflict for an originId -> originId match';
               const meta = { title, icon: 'beaker' };
-              const destinationId = 'conflict_1_space_2';
+              const destinationId = 'conflict_1a_space_2';
               if (createNewCopies) {
-                expectNewCopyResponse(response, inexactMatchId, title);
+                expectNewCopyResponse(response, inexactMatchIdA, title);
               } else if (overwrite) {
                 expect(success).to.eql(true);
                 expect(successCount).to.eql(1);
                 expect(successResults).to.eql([
-                  { type, id: inexactMatchId, meta, overwrite: true, destinationId },
+                  {
+                    type,
+                    id: inexactMatchIdA,
+                    meta,
+                    overwrite: true,
+                    destinationId,
+                    managed: false,
+                  },
                 ]);
                 expect(errors).to.be(undefined);
               } else {
@@ -586,8 +626,103 @@ export function copyToSpaceTestSuiteFactory(
                   {
                     error: { type: 'conflict', destinationId },
                     type,
-                    id: inexactMatchId,
-                    title,
+                    id: inexactMatchIdA,
+                    meta,
+                  },
+                ]);
+              }
+            } else if (outcome === 'noAccess') {
+              expectRouteForbiddenResponse(response);
+            } else {
+              // unauthorized read/write
+              expectSavedObjectForbiddenResponse(response);
+            }
+          },
+        },
+        {
+          testTitle: 'copying with an inexact match conflict (b) - originId matches existing id',
+          objects: [{ type, id: inexactMatchIdB }],
+          statusCode,
+          response: async (response: TestResponse) => {
+            if (outcome === 'authorized') {
+              const { success, successCount, successResults, errors } = getResult(response);
+              const title =
+                'This is used to test an inexact match conflict for an originId -> id match';
+              const meta = { title, icon: 'beaker' };
+              const destinationId = 'conflict_1b_space_2';
+              if (createNewCopies) {
+                expectNewCopyResponse(response, inexactMatchIdB, title);
+              } else if (overwrite) {
+                expect(success).to.eql(true);
+                expect(successCount).to.eql(1);
+                expect(successResults).to.eql([
+                  {
+                    type,
+                    id: inexactMatchIdB,
+                    meta,
+                    overwrite: true,
+                    destinationId,
+                    managed: false,
+                  },
+                ]);
+                expect(errors).to.be(undefined);
+              } else {
+                expect(success).to.eql(false);
+                expect(successCount).to.eql(0);
+                expect(successResults).to.be(undefined);
+                expect(errors).to.eql([
+                  {
+                    error: { type: 'conflict', destinationId },
+                    type,
+                    id: inexactMatchIdB,
+                    meta,
+                  },
+                ]);
+              }
+            } else if (outcome === 'noAccess') {
+              expectRouteForbiddenResponse(response);
+            } else {
+              // unauthorized read/write
+              expectSavedObjectForbiddenResponse(response);
+            }
+          },
+        },
+        {
+          testTitle: 'copying with an inexact match conflict (c) - id matches existing originId',
+          objects: [{ type, id: inexactMatchIdC }],
+          statusCode,
+          response: async (response: TestResponse) => {
+            if (outcome === 'authorized') {
+              const { success, successCount, successResults, errors } = getResult(response);
+              const title =
+                'This is used to test an inexact match conflict for an id -> originId match';
+              const meta = { title, icon: 'beaker' };
+              const destinationId = 'conflict_1c_space_2';
+              if (createNewCopies) {
+                expectNewCopyResponse(response, inexactMatchIdC, title);
+              } else if (overwrite) {
+                expect(success).to.eql(true);
+                expect(successCount).to.eql(1);
+                expect(successResults).to.eql([
+                  {
+                    type,
+                    id: inexactMatchIdC,
+                    meta,
+                    overwrite: true,
+                    destinationId,
+                    managed: false,
+                  },
+                ]);
+                expect(errors).to.be(undefined);
+              } else {
+                expect(success).to.eql(false);
+                expect(successCount).to.eql(0);
+                expect(successResults).to.be(undefined);
+                expect(errors).to.eql([
+                  {
+                    error: { type: 'conflict', destinationId },
+                    type,
+                    id: inexactMatchIdC,
                     meta,
                   },
                 ]);
@@ -611,18 +746,22 @@ export function copyToSpaceTestSuiteFactory(
               if (createNewCopies) {
                 expectNewCopyResponse(response, ambiguousConflictId, title);
               } else {
+                // The `updatedAt` values cannot be determined upfront and hence asserted since we update spaces list
+                // for certain objects in the test setup.
+                const importAmbiguousConflictError = (errors as SavedObjectsImportFailure[])?.[0]
+                  .error as SavedObjectsImportAmbiguousConflictError;
                 // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space
                 const destinations = [
-                  // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
+                  // response destinations should be sorted by ID in ascending order
                   {
                     id: 'conflict_2_all',
                     title: 'A shared saved-object in all spaces',
-                    updatedAt: '2017-09-21T18:59:16.270Z',
+                    updatedAt: importAmbiguousConflictError?.destinations[0].updatedAt,
                   },
                   {
                     id: 'conflict_2_space_2',
                     title: 'A shared saved-object in one space',
-                    updatedAt: '2017-09-21T18:59:16.270Z',
+                    updatedAt: importAmbiguousConflictError?.destinations[1].updatedAt,
                   },
                 ];
                 expect(success).to.eql(false);
@@ -633,7 +772,6 @@ export function copyToSpaceTestSuiteFactory(
                     error: { type: 'ambiguous_conflict', destinations },
                     type,
                     id: ambiguousConflictId,
-                    title,
                     meta: { title, icon: 'beaker' },
                   },
                 ]);
@@ -656,22 +794,23 @@ export function copyToSpaceTestSuiteFactory(
       { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
       describeFn(description, () => {
-        before(() => {
+        before(async () => {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
+
+          await testDataLoader.createFtrSpaces();
+        });
+
+        after(async () => {
+          await testDataLoader.deleteFtrSpaces();
         });
 
         describe('single-namespace types', () => {
-          beforeEach(() =>
-            esArchiver.load(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
-          afterEach(() =>
-            esArchiver.unload(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
+          beforeEach(async () => {
+            await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD);
+          });
+
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
 
@@ -680,7 +819,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -699,7 +838,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -718,7 +857,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -737,7 +876,7 @@ export function copyToSpaceTestSuiteFactory(
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -755,7 +894,7 @@ export function copyToSpaceTestSuiteFactory(
             const conflictDestination = getDestinationWithConflicts(spaceId);
             const noConflictDestination = getDestinationWithoutConflicts();
 
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -788,7 +927,7 @@ export function copyToSpaceTestSuiteFactory(
           });
 
           it(`should return ${tests.nonExistentSpace.statusCode} when copying to non-existent space`, async () => {
-            return supertest
+            return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
               .auth(user.username, user.password)
               .send({
@@ -812,21 +951,13 @@ export function copyToSpaceTestSuiteFactory(
           const spaces = ['space_2'];
           const includeReferences = false;
           describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-            before(() =>
-              esArchiver.load(
-                'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-              )
-            );
-            after(() =>
-              esArchiver.unload(
-                'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-              )
-            );
+            before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+            after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {
               it(`should return ${statusCode} when ${testTitle}`, async () => {
-                return supertest
+                return supertestWithoutAuth
                   .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
                   .auth(user.username, user.password)
                   .send({ objects, spaces, includeReferences, createNewCopies, overwrite })

@@ -6,32 +6,35 @@
  * Side Public License, v 1.
  */
 
-import React, { LazyExoticComponent, PureComponent } from 'react';
-import { memoize } from 'lodash';
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import type {
-  FieldFormatEditorFactory,
   FieldFormatEditor as InnerFieldFormatEditor,
-} from 'src/plugins/data_view_field_editor/public';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
+  FieldFormatEditorFactory,
+} from '@kbn/data-view-field-editor-plugin/public';
+import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { memoize } from 'lodash';
+import React, { LazyExoticComponent, PureComponent } from 'react';
 
 export interface FieldFormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
-  fieldFormatParams: { [key: string]: unknown };
-  fieldFormatEditors: any;
-  onChange: (change: { [key: string]: any }) => void;
+  fieldFormatParams: FieldFormatParams<{ type?: string }>;
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }
 
 interface FieldFormatEditorState {
-  EditorComponent: LazyExoticComponent<InnerFieldFormatEditor> | null;
+  EditorComponent: LazyExoticComponent<InnerFieldFormatEditor<FieldFormatParams>> | null;
 }
 
 // use memoize to get stable reference
 const unwrapEditor = memoize(
-  (editorFactory: FieldFormatEditorFactory | null): FieldFormatEditorState['EditorComponent'] => {
+  (
+    editorFactory: FieldFormatEditorFactory<FieldFormatParams> | undefined
+  ): FieldFormatEditorState['EditorComponent'] => {
     if (!editorFactory) return null;
     return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
   }

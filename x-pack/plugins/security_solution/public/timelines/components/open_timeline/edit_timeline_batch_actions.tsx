@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { TimelineType } from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
-import { DeleteTimelines, OpenTimelineResult } from './types';
+import type { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 
@@ -70,6 +71,33 @@ export const useEditTimelineBatchActions = ({
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
       const disabled = selectedItems == null || selectedItems.length === 0;
+      const items = [];
+      if (selectedItems) {
+        items.push(
+          <EuiContextMenuItem
+            data-test-subj="export-timeline-action"
+            disabled={disabled}
+            icon="exportAction"
+            key="ExportItemKey"
+            onClick={handleEnableExportTimelineDownloader}
+          >
+            {i18n.EXPORT_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (deleteTimelines) {
+        items.push(
+          <EuiContextMenuItem
+            data-test-subj="delete-timeline-action"
+            disabled={disabled}
+            icon="trash"
+            key="DeleteItemKey"
+            onClick={handleOnOpenDeleteTimelineModal}
+          >
+            {i18n.DELETE_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
       return (
         <>
           <EditTimelineActions
@@ -86,29 +114,7 @@ export const useEditTimelineBatchActions = ({
                 : selectedItems[0]?.title ?? ''
             }
           />
-
-          <EuiContextMenuPanel
-            items={[
-              <EuiContextMenuItem
-                data-test-subj="export-timeline-action"
-                disabled={disabled}
-                icon="exportAction"
-                key="ExportItemKey"
-                onClick={handleEnableExportTimelineDownloader}
-              >
-                {i18n.EXPORT_SELECTED}
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                data-test-subj="delete-timeline-action"
-                disabled={disabled}
-                icon="trash"
-                key="DeleteItemKey"
-                onClick={handleOnOpenDeleteTimelineModal}
-              >
-                {i18n.DELETE_SELECTED}
-              </EuiContextMenuItem>,
-            ]}
-          />
+          <EuiContextMenuPanel items={items} />
         </>
       );
     },

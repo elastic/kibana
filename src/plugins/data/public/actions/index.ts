@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { ApplyGlobalFilterActionContext } from './apply_filter_action';
-export { ACTION_GLOBAL_APPLY_FILTER, createFilterAction } from './apply_filter_action';
 export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
+export { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';
 export * from './select_range_action';
 export * from './value_click_action';
+export * from './multi_value_click_action';

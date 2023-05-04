@@ -55,10 +55,10 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/uwsgi_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/uwsgi_metrics/screenshot.webp',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['observability', 'web'],
   };
 }

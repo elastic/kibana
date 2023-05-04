@@ -11,13 +11,13 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
       className="euiAccordion canvasVarConfig__listView canvasSidebar__accordion"
     >
       <div
-        className="euiAccordion__triggerWrapper"
+        className="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
       >
         <button
           aria-controls="accordion-variables"
           aria-expanded={false}
           aria-labelledby="generated-id"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+          className="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
           disabled={false}
           onClick={[Function]}
           tabIndex={-1}
@@ -29,12 +29,15 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
             color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
         <button
           aria-controls="accordion-variables"
           aria-expanded={false}
-          className="euiAccordion__button"
+          className="euiAccordion__button emotion-euiAccordion__button"
+          disabled={false}
           id="generated-id"
           onClick={[Function]}
           type="button"
@@ -43,7 +46,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
             className="euiAccordion__buttonContent"
           >
             <span
-              className="euiToolTipAnchor"
+              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
@@ -57,16 +60,16 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           </span>
         </button>
         <div
-          className="euiAccordion__optionalAction"
+          className="euiAccordion__optionalAction emotion-euiAccordion__optionalAction"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Add a variable"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
@@ -79,18 +82,675 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                 color="inherit"
                 data-euiicon-type="plusInCircle"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
       </div>
       <div
         aria-labelledby="generated-id"
-        className="euiAccordion__childWrapper"
+        className="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
         id="accordion-variables"
         role="region"
         tabIndex={-1}
-      />
+      >
+        <div>
+          <div
+            className=" emotion-euiAccordion__children"
+          >
+            <div
+              className="canvasSidebar__accordionContent"
+            >
+              <div
+                className="euiBasicTable canvasVarConfig__list"
+              >
+                <div>
+                  <div
+                    className="euiTableHeaderMobile"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      />
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <div
+                          className="euiTableSortMobile"
+                        >
+                          <div
+                            className="euiPopover emotion-euiPopover"
+                          >
+                            <div
+                              className="euiPopover__anchor css-16vtueo-render"
+                            >
+                              <button
+                                className="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    data-euiicon-type="arrowDown"
+                                    size="s"
+                                  >
+                                    
+                                  </span>
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Sorting
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <table
+                    className="euiTable euiTable--compressed euiTable--responsive"
+                    id="__table_generated-id"
+                    tabIndex={-1}
+                  >
+                    <caption
+                      className="euiTableCaption emotion-euiScreenReaderOnly"
+                    />
+                    <thead>
+                      <tr>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_type_0"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": "50px",
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                              >
+                                Type
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_name_1"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                              >
+                                Name
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_value_2"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                              >
+                                Value
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <td
+                          className="euiTableHeaderCell"
+                          role="columnheader"
+                          style={
+                            Object {
+                              "width": "60px",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiTableCellContent euiTableCellContent--alignRight"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            />
+                          </span>
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        className="euiTableRow euiTableRow-hasActions"
+                      >
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": "50px",
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Type
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              className="euiToken emotion-euiToken-square-light-s-euiColorVis1"
+                              style={Object {}}
+                            >
+                              <span
+                                data-euiicon-type="tokenString"
+                                size="m"
+                              >
+                                
+                              </span>
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Name
+                          </div>
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              homeUrl
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Value
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                          >
+                            https://elastic.co
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              onMouseOut={[Function]}
+                              onMouseOver={[Function]}
+                            >
+                              <button
+                                aria-labelledby="generated-id"
+                                className="euiButtonIcon euiButtonIcon--xSmall euiTableCellContent__hoverItem emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="copyClipboard"
+                                  size="m"
+                                >
+                                  
+                                </span>
+                              </button>
+                              <span
+                                className="emotion-euiScreenReaderOnly"
+                                id="generated-id"
+                              >
+                                Copy snippet
+                              </span>
+                            </span>
+                            <div
+                              className="euiTableCellContent__hoverItem"
+                            >
+                              <div
+                                className="euiPopover emotion-euiPopover"
+                                id="0-actions"
+                              >
+                                <div
+                                  className="euiPopover__anchor css-16vtueo-render"
+                                >
+                                  <span
+                                    className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                    onMouseOut={[Function]}
+                                    onMouseOver={[Function]}
+                                  >
+                                    <button
+                                      aria-label="All actions"
+                                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+                                      data-test-subj="euiCollapsedItemActionsButton"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        data-euiicon-type="boxesHorizontal"
+                                        size="m"
+                                      >
+                                        
+                                      </span>
+                                    </button>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        className="euiTableRow euiTableRow-hasActions"
+                      >
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": "50px",
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Type
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              className="euiToken emotion-euiToken-square-light-s-euiColorVis0"
+                              style={Object {}}
+                            >
+                              <span
+                                data-euiicon-type="tokenNumber"
+                                size="m"
+                              >
+                                
+                              </span>
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Name
+                          </div>
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              bigNumber
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Value
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                          >
+                            1000
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              onMouseOut={[Function]}
+                              onMouseOver={[Function]}
+                            >
+                              <button
+                                aria-labelledby="generated-id"
+                                className="euiButtonIcon euiButtonIcon--xSmall euiTableCellContent__hoverItem emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="copyClipboard"
+                                  size="m"
+                                >
+                                  
+                                </span>
+                              </button>
+                              <span
+                                className="emotion-euiScreenReaderOnly"
+                                id="generated-id"
+                              >
+                                Copy snippet
+                              </span>
+                            </span>
+                            <div
+                              className="euiTableCellContent__hoverItem"
+                            >
+                              <div
+                                className="euiPopover emotion-euiPopover"
+                                id="1-actions"
+                              >
+                                <div
+                                  className="euiPopover__anchor css-16vtueo-render"
+                                >
+                                  <span
+                                    className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                    onMouseOut={[Function]}
+                                    onMouseOver={[Function]}
+                                  >
+                                    <button
+                                      aria-label="All actions"
+                                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+                                      data-test-subj="euiCollapsedItemActionsButton"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        data-euiicon-type="boxesHorizontal"
+                                        size="m"
+                                      >
+                                        
+                                      </span>
+                                    </button>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        className="euiTableRow euiTableRow-hasActions"
+                      >
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": "50px",
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Type
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              className="euiToken emotion-euiToken-square-light-s-euiColorVis7"
+                              style={Object {}}
+                            >
+                              <span
+                                data-euiicon-type="tokenBoolean"
+                                size="m"
+                              >
+                                
+                              </span>
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Name
+                          </div>
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              zenMode
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Value
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                          >
+                            true
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--middle"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                          >
+                            <span
+                              className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              onMouseOut={[Function]}
+                              onMouseOver={[Function]}
+                            >
+                              <button
+                                aria-labelledby="generated-id"
+                                className="euiButtonIcon euiButtonIcon--xSmall euiTableCellContent__hoverItem emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="copyClipboard"
+                                  size="m"
+                                >
+                                  
+                                </span>
+                              </button>
+                              <span
+                                className="emotion-euiScreenReaderOnly"
+                                id="generated-id"
+                              >
+                                Copy snippet
+                              </span>
+                            </span>
+                            <div
+                              className="euiTableCellContent__hoverItem"
+                            >
+                              <div
+                                className="euiPopover emotion-euiPopover"
+                                id="2-actions"
+                              >
+                                <div
+                                  className="euiPopover__anchor css-16vtueo-render"
+                                >
+                                  <span
+                                    className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                    onMouseOut={[Function]}
+                                    onMouseOver={[Function]}
+                                  >
+                                    <button
+                                      aria-label="All actions"
+                                      className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+                                      data-test-subj="euiCollapsedItemActionsButton"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        data-euiicon-type="boxesHorizontal"
+                                        size="m"
+                                      >
+                                        
+                                      </span>
+                                    </button>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div
       className="canvasVarConfig__editView canvasSidebar__accordion"

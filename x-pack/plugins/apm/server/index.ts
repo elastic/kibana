@@ -9,8 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   PluginConfigDescriptor,
   PluginInitializerContext,
-} from 'src/core/server';
-import { maxSuggestions } from '../../observability/common';
+} from '@kbn/core/server';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
@@ -20,16 +20,15 @@ const configSchema = schema.object({
   autoCreateApmDataView: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
-  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapFingerprintGlobalBucketSize: schema.number({
     defaultValue: 1000,
   }),
+  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
-    maxTraceItems: schema.number({ defaultValue: 1000 }),
+    maxTraceItems: schema.number({ defaultValue: 5000 }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [
@@ -41,7 +40,6 @@ const configSchema = schema.object({
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
-  profilingEnabled: schema.boolean({ defaultValue: false }),
   agent: schema.object({
     migrations: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
@@ -52,19 +50,28 @@ const configSchema = schema.object({
     span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
     error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
+  forceSyntheticSource: schema.boolean({ defaultValue: false }),
+  latestAgentVersionsUrl: schema.string({
+    defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
+  }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
   deprecations: ({
     rename,
+    unused,
     renameFromRoot,
     deprecateFromRoot,
     unusedFromRoot,
   }) => [
+    unused('indices.sourcemap', { level: 'warning' }),
+    unused('ui.transactionGroupBucketSize', {
+      level: 'warning',
+    }),
     rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
       level: 'warning',
     }),
@@ -99,7 +106,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.apm.maxServiceSelections',
+      'xpack.apm.maxServiceSelection',
       `uiSettings.overrides[${maxSuggestions}]`,
       { level: 'warning' }
     ),
@@ -107,7 +114,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
-    profilingEnabled: true,
+    latestAgentVersionsUrl: true,
   },
   schema: configSchema,
 };
@@ -118,7 +125,7 @@ export type ApmIndicesConfigName = keyof APMConfig['indices'];
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
+export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 export { APMPlugin } from './plugin';
 export type { APMPluginSetup } from './types';
 export type {
@@ -126,5 +133,3 @@ export type {
   APIEndpoint,
 } from './routes/apm_routes/get_global_apm_server_route_repository';
 export type { APMRouteHandlerResources } from './routes/typings';
-
-export type { ProcessorEvent } from '../common/processor_event';

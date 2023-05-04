@@ -1,7 +1,9 @@
+require('@kbn/babel-register').install();
+
 module.exports = {
   root: true,
   extends: [
-    '@elastic/eslint-config-kibana',
+    '@kbn/eslint-config',
     'plugin:@elastic/eui/recommended'
   ],
   rules: {

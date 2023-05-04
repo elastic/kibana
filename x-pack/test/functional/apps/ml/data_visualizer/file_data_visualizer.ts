@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
-
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -16,11 +14,11 @@ export default function ({ getService }: FtrProviderContext) {
   const testDataListPositive = [
     {
       suiteSuffix: 'with an artificial server log',
-      filePath: path.join(__dirname, 'files_to_import', 'artificial_server_log'),
+      filePath: require.resolve('./files_to_import/artificial_server_log'),
       indexName: 'user-import_1',
       createIndexPattern: false,
       fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER, ML_JOB_FIELD_TYPES.DATE],
-      fieldNameFilters: ['clientip'],
+      fieldNameFilters: ['source.address'],
       expected: {
         results: {
           title: 'artificial_server_log',
@@ -28,21 +26,21 @@ export default function ({ getService }: FtrProviderContext) {
         },
         metricFields: [
           {
-            fieldName: 'bytes',
+            fieldName: 'http.response.body.bytes',
             type: ML_JOB_FIELD_TYPES.NUMBER,
             docCountFormatted: '19 (100%)',
             statsMaxDecimalPlaces: 3,
             topValuesCount: 8,
           },
           {
-            fieldName: 'httpversion',
+            fieldName: 'http.version',
             type: ML_JOB_FIELD_TYPES.NUMBER,
             docCountFormatted: '19 (100%)',
             statsMaxDecimalPlaces: 3,
             topValuesCount: 1,
           },
           {
-            fieldName: 'response',
+            fieldName: 'http.response.status_code',
             type: ML_JOB_FIELD_TYPES.NUMBER,
             docCountFormatted: '19 (100%)',
             statsMaxDecimalPlaces: 3,
@@ -57,43 +55,25 @@ export default function ({ getService }: FtrProviderContext) {
             exampleCount: 10,
           },
           {
-            fieldName: 'agent',
+            fieldName: 'user_agent.original',
             type: ML_JOB_FIELD_TYPES.KEYWORD,
             exampleCount: 8,
             docCountFormatted: '19 (100%)',
           },
           {
-            fieldName: 'auth',
+            fieldName: 'http.request.method',
             type: ML_JOB_FIELD_TYPES.KEYWORD,
             exampleCount: 1,
             docCountFormatted: '19 (100%)',
           },
           {
-            fieldName: 'ident',
-            type: ML_JOB_FIELD_TYPES.KEYWORD,
-            exampleCount: 1,
-            docCountFormatted: '19 (100%)',
-          },
-          {
-            fieldName: 'verb',
-            type: ML_JOB_FIELD_TYPES.KEYWORD,
-            exampleCount: 1,
-            docCountFormatted: '19 (100%)',
-          },
-          {
-            fieldName: 'request',
+            fieldName: 'url.original',
             type: ML_JOB_FIELD_TYPES.KEYWORD,
             exampleCount: 2,
             docCountFormatted: '19 (100%)',
           },
           {
-            fieldName: 'referrer',
-            type: ML_JOB_FIELD_TYPES.KEYWORD,
-            exampleCount: 1,
-            docCountFormatted: '19 (100%)',
-          },
-          {
-            fieldName: 'clientip',
+            fieldName: 'source.address',
             type: ML_JOB_FIELD_TYPES.IP,
             exampleCount: 7,
             docCountFormatted: '19 (100%)',
@@ -107,8 +87,8 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         visibleMetricFieldsCount: 3,
         totalMetricFieldsCount: 3,
-        populatedFieldsCount: 12,
-        totalFieldsCount: 12,
+        populatedFieldsCount: 9,
+        totalFieldsCount: 9,
         fieldTypeFiltersResultCount: 4,
         fieldNameFiltersResultCount: 1,
         ingestedDocCount: 20,
@@ -116,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteSuffix: 'with a file containing geo field',
-      filePath: path.join(__dirname, 'files_to_import', 'geo_file.csv'),
+      filePath: require.resolve('./files_to_import/geo_file.csv'),
       indexName: 'user-import_2',
       createIndexPattern: false,
       fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
@@ -158,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteSuffix: 'with a file with a missing new line char at the end',
-      filePath: path.join(__dirname, 'files_to_import', 'missing_end_of_file_newline.csv'),
+      filePath: require.resolve('./files_to_import/missing_end_of_file_newline.csv'),
       indexName: 'user-import_3',
       createIndexPattern: false,
       fieldTypeFilters: [],
@@ -205,12 +185,12 @@ export default function ({ getService }: FtrProviderContext) {
   const testDataListNegative = [
     {
       suiteSuffix: 'with a non-log file',
-      filePath: path.join(__dirname, 'files_to_import', 'not_a_log_file'),
+      filePath: require.resolve('./files_to_import/not_a_log_file'),
     },
   ];
 
   describe('file based', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
 

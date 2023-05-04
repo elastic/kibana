@@ -52,7 +52,7 @@ export const EventSchema = schema.maybe(
         code: ecsString(),
         created: ecsDate(),
         dataset: ecsString(),
-        duration: ecsNumber(),
+        duration: ecsStringOrNumber(),
         end: ecsDate(),
         hash: ecsString(),
         id: ecsString(),
@@ -66,8 +66,8 @@ export const EventSchema = schema.maybe(
         reference: ecsString(),
         risk_score: ecsNumber(),
         risk_score_norm: ecsNumber(),
-        sequence: ecsNumber(),
-        severity: ecsNumber(),
+        sequence: ecsStringOrNumber(),
+        severity: ecsStringOrNumber(),
         start: ecsDate(),
         timezone: ecsString(),
         type: ecsStringMulti(),
@@ -104,8 +104,9 @@ export const EventSchema = schema.maybe(
         server_uuid: ecsString(),
         task: schema.maybe(
           schema.object({
+            id: ecsString(),
             scheduled: ecsDate(),
-            schedule_delay: ecsNumber(),
+            schedule_delay: ecsStringOrNumber(),
           })
         ),
         alerting: schema.maybe(
@@ -114,26 +115,71 @@ export const EventSchema = schema.maybe(
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+            outcome: ecsString(),
+            summary: schema.maybe(
+              schema.object({
+                new: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                ongoing: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                recovered: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+              })
+            ),
           })
         ),
         alert: schema.maybe(
           schema.object({
+            flapping: ecsBoolean(),
+            maintenance_window_ids: ecsStringMulti(),
+            uuid: ecsString(),
             rule: schema.maybe(
               schema.object({
+                consumer: ecsString(),
                 execution: schema.maybe(
                   schema.object({
                     uuid: ecsString(),
                     status: ecsString(),
-                    status_order: ecsNumber(),
+                    status_order: ecsStringOrNumber(),
                     metrics: schema.maybe(
                       schema.object({
-                        total_indexing_duration_ms: ecsNumber(),
-                        total_search_duration_ms: ecsNumber(),
-                        execution_gap_duration_s: ecsNumber(),
+                        number_of_triggered_actions: ecsStringOrNumber(),
+                        number_of_generated_actions: ecsStringOrNumber(),
+                        alert_counts: schema.maybe(
+                          schema.object({
+                            active: ecsStringOrNumber(),
+                            new: ecsStringOrNumber(),
+                            recovered: ecsStringOrNumber(),
+                          })
+                        ),
+                        number_of_searches: ecsStringOrNumber(),
+                        total_indexing_duration_ms: ecsStringOrNumber(),
+                        es_search_duration_ms: ecsStringOrNumber(),
+                        total_search_duration_ms: ecsStringOrNumber(),
+                        execution_gap_duration_s: ecsStringOrNumber(),
+                        rule_type_run_duration_ms: ecsStringOrNumber(),
+                        process_alerts_duration_ms: ecsStringOrNumber(),
+                        trigger_actions_duration_ms: ecsStringOrNumber(),
+                        process_rule_duration_ms: ecsStringOrNumber(),
+                        claim_to_start_duration_ms: ecsStringOrNumber(),
+                        prepare_rule_duration_ms: ecsStringOrNumber(),
+                        total_run_duration_ms: ecsStringOrNumber(),
+                        total_enrichment_duration_ms: ecsStringOrNumber(),
                       })
                     ),
                   })
                 ),
+                revision: ecsStringOrNumber(),
+                rule_type_id: ecsString(),
               })
             ),
           })
@@ -146,11 +192,24 @@ export const EventSchema = schema.maybe(
               id: ecsString(),
               type: ecsString(),
               type_id: ecsString(),
+              space_agnostic: ecsBoolean(),
             })
           )
         ),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
+        action: schema.maybe(
+          schema.object({
+            name: ecsString(),
+            id: ecsString(),
+            execution: schema.maybe(
+              schema.object({
+                source: ecsString(),
+                uuid: ecsString(),
+              })
+            ),
+          })
+        ),
       })
     ),
   })
@@ -168,8 +227,16 @@ function ecsNumber() {
   return schema.maybe(schema.number());
 }
 
+function ecsStringOrNumber() {
+  return schema.maybe(schema.oneOf([schema.string(), schema.number()]));
+}
+
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;

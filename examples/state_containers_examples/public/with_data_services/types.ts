@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StateDemoPublicPluginSetup {}

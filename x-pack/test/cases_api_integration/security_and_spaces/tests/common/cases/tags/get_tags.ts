@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common/lib/utils';
+import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common/lib/api';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   secOnly,
@@ -74,17 +74,17 @@ export default ({ getService }: FtrProviderContext): void => {
         for (const scenario of [
           {
             user: globalRead,
-            expectedTags: ['sec', 'obs'],
+            expectedTags: ['obs', 'sec'],
           },
           {
             user: superUser,
-            expectedTags: ['sec', 'obs'],
+            expectedTags: ['obs', 'sec'],
           },
           { user: secOnlyRead, expectedTags: ['sec'] },
           { user: obsOnlyRead, expectedTags: ['obs'] },
           {
             user: obsSecRead,
-            expectedTags: ['sec', 'obs'],
+            expectedTags: ['obs', 'sec'],
           },
         ]) {
           const tags = await getTags({

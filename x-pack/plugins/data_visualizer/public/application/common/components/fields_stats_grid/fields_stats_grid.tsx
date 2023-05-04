@@ -7,8 +7,8 @@
 
 import React, { useMemo, FC, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import type { DataVisualizerTableState } from '../../../../../common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
 import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
@@ -85,6 +85,7 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         gutterSize="xs"
         style={{ marginLeft: 4 }}
         data-test-subj="dataVisualizerFieldCountPanel"
+        responsive={true}
       >
         <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
         <MetricFieldsCount metricsStats={metricsStats} />
@@ -112,6 +113,7 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         pageState={dataVisualizerListState}
         updatePageState={setDataVisualizerListState}
         getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+        overallStatsRunning={false}
       />
     </div>
   );

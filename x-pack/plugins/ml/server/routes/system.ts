@@ -35,7 +35,7 @@ export function systemRoutes(
         body: schema.maybe(schema.any()),
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetMlInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
@@ -43,7 +43,7 @@ export function systemRoutes(
         const { asCurrentUser } = client;
         let upgradeInProgress = false;
         try {
-          const { body } = await mlClient.info();
+          const body = await mlClient.info();
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = body.upgrade_mode === true;
@@ -70,7 +70,7 @@ export function systemRoutes(
             },
           });
         } else {
-          const { body } = await asCurrentUser.security.hasPrivileges({ body: request.body });
+          const body = await asCurrentUser.security.hasPrivileges({ body: request.body });
           return response.ok({
             body: {
               ...body,
@@ -159,15 +159,17 @@ export function systemRoutes(
       path: '/api/ml/info',
       validate: false,
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetMlInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.info();
-        const cloudId = cloud && cloud.cloudId;
+        const body = await mlClient.info();
+        const cloudId = cloud?.cloudId;
+        const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
+
         return response.ok({
-          body: { ...body, cloudId },
+          body: { ...body, cloudId, isCloudTrial },
         });
       } catch (error) {
         return response.customError(wrapError(error));
@@ -195,7 +197,7 @@ export function systemRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { body } = await client.asCurrentUser.search(request.body);
+        const body = await client.asCurrentUser.search(request.body);
         return response.ok({
           body,
         });
@@ -218,7 +220,7 @@ export function systemRoutes(
         body: schema.object({ indices: schema.arrayOf(schema.string()) }),
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
@@ -229,12 +231,13 @@ export function systemRoutes(
           indices.map(async (index) =>
             client.asCurrentUser.indices.exists({
               index,
+              allow_no_indices: false,
             })
           )
         );
 
         const result = indices.reduce((acc, cur, i) => {
-          acc[cur] = { exists: results[i].body };
+          acc[cur] = { exists: results[i] };
           return acc;
         }, {} as Record<string, { exists: boolean }>);
 

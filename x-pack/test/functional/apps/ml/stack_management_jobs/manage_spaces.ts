@@ -76,7 +76,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     // AD
     await ml.navigation.navigateToAnomalyDetection();
-    await ml.jobTable.filterWithSearchString(adJobId, shouldBeDisplayed ? 1 : 0);
+
+    if (shouldBeDisplayed) {
+      await ml.jobTable.filterWithSearchString(adJobId, 1);
+    } else {
+      await ml.jobManagement.assertEmptyStateVisible();
+    }
 
     // DFA
     await ml.navigation.navigateToDataFrameAnalytics();
@@ -102,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   describe('manage spaces', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
@@ -132,6 +137,8 @@ export default function ({ getService }: FtrProviderContext) {
       }
       await ml.testResources.cleanMLSavedObjects();
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
 
     for (const testData of testDataList) {
@@ -172,7 +179,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToStackManagementJobsListPage();
 
           // AD
-          await ml.jobTable.filterWithSearchString(testData.adJobId);
+          await ml.stackManagementJobs.filterTableWithSearchString(
+            'anomaly-detector',
+            testData.adJobId
+          );
+
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, [
             testData.initialSpace,
           ]);
@@ -187,13 +198,16 @@ export default function ({ getService }: FtrProviderContext) {
         it('should edit job space assignment', async () => {
           // AD
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.stackManagementJobs.openADJobSpacesFlyout(testData.adJobId);
+          await ml.stackManagementJobs.openJobSpacesFlyout('anomaly-detector', testData.adJobId);
           await selectSpaces(testData);
           await ml.stackManagementJobs.saveAndCloseSpacesFlyout();
 
           // DFA
           await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-          await ml.stackManagementJobs.openDFAJobSpacesFlyout(testData.dfaJobId);
+          await ml.stackManagementJobs.openJobSpacesFlyout(
+            'data-frame-analytics',
+            testData.dfaJobId
+          );
           await selectSpaces(testData);
           await ml.stackManagementJobs.saveAndCloseSpacesFlyout();
         });
@@ -216,12 +230,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           // AD
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.jobTable.filterWithSearchString(testData.adJobId);
+          await ml.stackManagementJobs.filterTableWithSearchString(
+            'anomaly-detector',
+            testData.adJobId
+          );
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, expectedJobRowSpaces);
 
           // DFA
           await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.dfaJobId);
+          await ml.stackManagementJobs.filterTableWithSearchString(
+            'data-frame-analytics',
+            testData.dfaJobId
+          );
           await ml.stackManagementJobs.assertDFAJobRowSpaces(
             testData.dfaJobId,
             expectedJobRowSpaces

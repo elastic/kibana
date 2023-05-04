@@ -19,7 +19,13 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from './';
+import {
+  isValidNamespace,
+  doesPackageHaveIntegrations,
+  isInputOnlyPolicyTemplate,
+  getNormalizedInputs,
+  getNormalizedDataStreams,
+} from '.';
 
 type Errors = string[] | null;
 
@@ -55,6 +61,7 @@ export const validatePackagePolicy = (
     description: null,
     namespace: null,
     inputs: {},
+    vars: {},
   };
   const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 
@@ -89,10 +96,12 @@ export const validatePackagePolicy = (
     !packageInfo.policy_templates ||
     packageInfo.policy_templates.length === 0 ||
     !packageInfo.policy_templates.find(
-      (policyTemplate) => policyTemplate.inputs && policyTemplate.inputs.length > 0
+      (policyTemplate) =>
+        isInputOnlyPolicyTemplate(policyTemplate) ||
+        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
     )
   ) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
     return validationResults;
   }
 
@@ -100,7 +109,8 @@ export const validatePackagePolicy = (
   const inputVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, policyTemplate) => {
-    (policyTemplate.inputs || []).forEach((input) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
 
       if ((input.vars || []).length) {
@@ -110,14 +120,16 @@ export const validatePackagePolicy = (
     return varDefs;
   }, {});
 
-  const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
-    Record<string, RegistryStream>
-  >((streams, dataStream) => {
-    dataStream.streams?.forEach((stream) => {
-      streams[`${dataStream.dataset}-${stream.input}`] = stream;
-    });
-    return streams;
-  }, {});
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
+    (streams, dataStream) => {
+      dataStream.streams?.forEach((stream) => {
+        streams[`${dataStream.dataset}-${stream.input}`] = stream;
+      });
+      return streams;
+    },
+    {}
+  );
   const streamVarDefsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, [path, stream]) => {
@@ -143,7 +155,7 @@ export const validatePackagePolicy = (
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[inputKey][name],
+              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
               name,
               safeLoadYaml
             )
@@ -162,23 +174,17 @@ export const validatePackagePolicy = (
         const streamVarDefs =
           streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
 
-        // Validate stream-level config fields
-        if (stream.vars) {
-          streamValidationResults.vars = Object.entries(stream.vars).reduce(
-            (results, [name, configEntry]) => {
-              results[name] =
-                streamVarDefs && streamVarDefs[name] && input.enabled && stream.enabled
-                  ? validatePackagePolicyConfig(
-                      configEntry,
-                      streamVarDefs[name],
-                      name,
-                      safeLoadYaml
-                    )
-                  : null;
-              return results;
-            },
-            {} as ValidationEntry
-          );
+        if (streamVarDefs && Object.keys(streamVarDefs).length) {
+          streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
+            const configEntry = stream?.vars?.[name];
+
+            results[name] =
+              input.enabled && stream.enabled
+                ? validatePackagePolicyConfig(configEntry, streamVarDefs[name], name, safeLoadYaml)
+                : null;
+
+            return results;
+          }, {} as ValidationEntry);
         }
 
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
@@ -193,20 +199,22 @@ export const validatePackagePolicy = (
   });
 
   if (Object.entries(validationResults.inputs!).length === 0) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
   }
 
   return validationResults;
 };
 
 export const validatePackagePolicyConfig = (
-  configEntry: PackagePolicyConfigRecordEntry,
+  configEntry: PackagePolicyConfigRecordEntry | undefined,
   varDef: RegistryVarsEntry,
   varName: string,
   safeLoadYaml: (yaml: string) => any
 ): string[] | null => {
   const errors = [];
-  const { value } = configEntry;
+
+  const value = configEntry?.value;
+
   let parsedValue: any = value;
 
   if (typeof value === 'string') {
@@ -214,6 +222,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef === undefined) {
+    // TODO return validation error here once https://github.com/elastic/kibana/issues/125655 is fixed
     // eslint-disable-next-line no-console
     console.debug(`No variable definition for ${varName} found`);
 
@@ -221,7 +230,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.required) {
-    if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
+    if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
@@ -249,14 +258,15 @@ export const validatePackagePolicyConfig = (
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage', {
-          defaultMessage: 'Invalid format',
+          defaultMessage: 'Invalid format for {fieldName}: expected array',
+          values: {
+            fieldName: varDef.title || varDef.name,
+          },
         })
       );
+      return errors;
     }
-    if (
-      varDef.required &&
-      (!parsedValue || (Array.isArray(parsedValue) && parsedValue.length === 0))
-    ) {
+    if (varDef.required && Array.isArray(parsedValue) && parsedValue.length === 0) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
@@ -266,8 +276,8 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
-    if (varDef.type === 'text' && parsedValue && Array.isArray(parsedValue)) {
-      const invalidStrings = parsedValue.filter((cand) => /^[*&]/.test(cand));
+    if (varDef.type === 'text' && parsedValue) {
+      const invalidStrings = parsedValue.filter((cand: any) => /^[*&]/.test(cand));
       // only show one error if multiple strings in array are invalid
       if (invalidStrings.length > 0) {
         errors.push(
@@ -278,6 +288,20 @@ export const validatePackagePolicyConfig = (
         );
       }
     }
+
+    if (varDef.type === 'integer' && parsedValue) {
+      const invalidIntegers = parsedValue.filter((val: any) => !Number.isInteger(Number(val)));
+      // only show one error if multiple strings in array are invalid
+      if (invalidIntegers.length > 0) {
+        errors.push(
+          i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerMultiErrorMessage', {
+            defaultMessage: 'Invalid integer',
+          })
+        );
+      }
+    }
+
+    return errors.length ? errors : null;
   }
 
   if (varDef.type === 'text' && parsedValue && !Array.isArray(parsedValue)) {
@@ -301,6 +325,26 @@ export const validatePackagePolicyConfig = (
         defaultMessage: 'Boolean values must be either true or false',
       })
     );
+  }
+
+  if (varDef.type === 'integer' && parsedValue && !Array.isArray(parsedValue)) {
+    if (!Number.isInteger(Number(parsedValue))) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
+          defaultMessage: 'Invalid integer',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'select' && parsedValue !== undefined) {
+    if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
+          defaultMessage: 'Invalid value for select type',
+        })
+      );
+    }
   }
 
   return errors.length ? errors : null;

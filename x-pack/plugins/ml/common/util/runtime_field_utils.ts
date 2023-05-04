@@ -5,9 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from './object_utils';
-import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
-import type { RuntimeMappings } from '../types/fields';
+import { RUNTIME_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
@@ -15,15 +14,16 @@ export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField
   return (
     ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
       (isPopulatedObject(arg, ['type', 'script']) &&
-        Object.keys(arg).length === 2 &&
+        // Can be a string
         (typeof arg.script === 'string' ||
-          (isPopulatedObject(arg.script, ['source']) &&
-            Object.keys(arg.script).length === 1 &&
-            typeof arg.script.source === 'string')))) &&
+          // Can be InlineScript
+          (isPopulatedObject(arg.script, ['source']) && typeof arg.script.source === 'string') ||
+          // Can be StoredScriptId
+          (isPopulatedObject(arg.script, ['id']) && typeof arg.script.id === 'string')))) &&
     RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
 }
 
-export function isRuntimeMappings(arg: unknown): arg is RuntimeMappings {
+export function isRuntimeMappings(arg: unknown): arg is estypes.MappingRuntimeFields {
   return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }

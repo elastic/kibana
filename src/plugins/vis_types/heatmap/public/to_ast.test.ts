@@ -6,25 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from 'src/plugins/visualizations/public';
-import { sampleAreaVis } from './sample_vis.test.mocks';
-import { buildExpression } from '../../../expressions/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { sampleHeatmapVis } from './sample_vis.test.mocks';
+import { buildExpression } from '@kbn/expressions-plugin/public';
 
 import { toExpressionAst } from './to_ast';
 import { HeatmapVisParams } from './types';
 
-jest.mock('../../../expressions/public', () => ({
-  ...(jest.requireActual('../../../expressions/public') as any),
+jest.mock('@kbn/expressions-plugin/public', () => ({
+  ...(jest.requireActual('@kbn/expressions-plugin/public') as any),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',
       chain: [],
     }),
   })),
-}));
-
-jest.mock('./to_ast_esaggs', () => ({
-  getEsaggsFn: jest.fn(),
 }));
 
 describe('heatmap vis toExpressionAst function', () => {
@@ -37,12 +33,12 @@ describe('heatmap vis toExpressionAst function', () => {
   } as any;
 
   beforeEach(() => {
-    vis = sampleAreaVis as any;
+    vis = sampleHeatmapVis as any;
   });
 
   it('should match basic snapshot', () => {
     toExpressionAst(vis, params);
-    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
+    const [builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
 
     expect(builtExpression).toMatchSnapshot();
   });

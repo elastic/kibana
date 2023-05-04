@@ -7,13 +7,16 @@
 
 // handlers that handle agent actions request
 
-import type { RequestHandler } from 'kibana/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
+import type {
+  PostNewAgentActionRequestSchema,
+  PostCancelActionRequestSchema,
+} from '../../types/rest_spec';
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -24,16 +27,18 @@ export const postNewAgentActionHandlerBuilder = function (
 > {
   return async (context, request, response) => {
     try {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const core = await context.core;
+      const esClient = core.elasticsearch.client.asInternalUser;
+      const soClient = core.savedObjects.client;
 
-      const agent = await actionsService.getAgent(esClient, request.params.agentId);
+      const agent = await actionsService.getAgent(esClient, soClient, request.params.agentId);
 
       const newAgentAction = request.body.action;
 
       const savedAgentAction = await actionsService.createAgentAction(esClient, {
         created_at: new Date().toISOString(),
         ...newAgentAction,
-        agent_id: agent.id,
+        agents: [agent.id],
       });
 
       const body: PostNewAgentActionResponse = {
@@ -42,7 +47,27 @@ export const postNewAgentActionHandlerBuilder = function (
 
       return response.ok({ body });
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
+    }
+  };
+};
+
+export const postCancelActionHandlerBuilder = function (
+  actionsService: ActionsService
+): RequestHandler<TypeOf<typeof PostCancelActionRequestSchema.params>, undefined, undefined> {
+  return async (context, request, response) => {
+    try {
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
+      const action = await actionsService.cancelAgentAction(esClient, request.params.actionId);
+
+      const body: PostNewAgentActionResponse = {
+        item: action,
+      };
+
+      return response.ok({ body });
+    } catch (error) {
+      return defaultFleetErrorHandler({ error, response });
     }
   };
 };

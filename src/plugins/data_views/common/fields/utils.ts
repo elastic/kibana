@@ -8,11 +8,11 @@
 
 import { getFilterableKbnTypeNames } from '@kbn/field-types';
 import { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from '@kbn/es-query';
-import { IFieldType } from './types';
+import type { DataViewField } from '.';
 
 const filterableTypes = getFilterableKbnTypeNames();
 
-export function isFilterable(field: IFieldType): boolean {
+export function isFilterable(field: DataViewField): boolean {
   return (
     field.name === '_id' ||
     field.scripted ||
@@ -30,10 +30,8 @@ const DOT_PREFIX_RE = /(.).+?\./g;
 /**
  * Convert a dot.notated.string into a short
  * version (d.n.string)
- *
- * @return {any}
  */
-export function shortenDottedString(input: any) {
+export function shortenDottedString(input: string): string {
   return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
 }
 
@@ -54,6 +52,12 @@ export function isDataViewFieldSubtypeMulti(field: HasSubtype) {
   const subTypeNested = field?.subType as IFieldSubTypeMulti;
   return !!subTypeNested?.multi?.parent;
 }
+
+/**
+ * Returns subtype data for multi field
+ * @public
+ * @param field field to get subtype data from
+ */
 
 export function getDataViewFieldSubtypeMulti(field: HasSubtype) {
   return isDataViewFieldSubtypeMulti(field) ? (field.subType as IFieldSubTypeMulti) : undefined;

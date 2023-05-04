@@ -7,7 +7,7 @@
 
 import faker from 'faker';
 import { LogEntry } from '../../common/log_entry';
-import { LogSourceConfiguration } from '../containers/logs/log_source';
+import { LogViewColumnConfiguration } from '../../common/log_views';
 
 export const ENTRIES_EMPTY = {
   data: {
@@ -21,7 +21,7 @@ export function generateFakeEntries(
   count: number,
   startTimestamp: number,
   endTimestamp: number,
-  columns: LogSourceConfiguration['configuration']['logColumns']
+  columns: LogViewColumnConfiguration[]
 ): LogEntry[] {
   const entries: LogEntry[] = [];
   const timestampStep = Math.floor((endTimestamp - startTimestamp) / count);

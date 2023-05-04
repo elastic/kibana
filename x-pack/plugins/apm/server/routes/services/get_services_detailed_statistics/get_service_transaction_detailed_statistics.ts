@@ -5,85 +5,95 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+} from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
-import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { maybe } from '../../../../common/utils/maybe';
 
-export async function getServiceTransactionDetailedStatistics({
+interface ServiceTransactionDetailedStat {
+  serviceName: string;
+  latency: Array<{ x: number; y: number | null }>;
+  transactionErrorRate?: Array<{ x: number; y: number }>;
+  throughput?: Array<{ x: number; y: number }>;
+}
+
+export async function getServiceTransactionDetailedStats({
   serviceNames,
   environment,
   kuery,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
   offset,
   start,
   end,
+  randomSampler,
 }: {
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
   offset?: string;
   start: number;
   end: number;
+  randomSampler: RandomSampler;
 }) {
-  const { apmEventClient } = setup;
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
     offset,
   });
 
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions),
+        field: getDurationFieldForTransactions(documentType),
       },
     },
-    outcomes,
+    ...outcomes,
   };
 
   const response = await apmEventClient.search(
     'get_service_transaction_detail_stats',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+        sources: [
+          {
+            documentType,
+            rollupInterval,
+          },
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
             filter: [
               { terms: { [SERVICE_NAME]: serviceNames } },
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -91,33 +101,34 @@ export async function getServiceTransactionDetailedStatistics({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-            },
+          sample: {
+            random_sampler: randomSampler,
             aggs: {
-              transactionType: {
+              services: {
                 terms: {
-                  field: TRANSACTION_TYPE,
+                  field: SERVICE_NAME,
+                  size: serviceNames.length,
                 },
                 aggs: {
-                  ...metrics,
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSizeForAggregatedTransactions({
-                        start: startWithOffset,
-                        end: endWithOffset,
-                        numBuckets: 20,
-                        searchAggregatedTransactions,
-                      }).intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: startWithOffset,
-                        max: endWithOffset,
+                  transactionType: {
+                    terms: {
+                      field: TRANSACTION_TYPE,
+                    },
+                    aggs: {
+                      ...metrics,
+                      timeseries: {
+                        date_histogram: {
+                          field: '@timestamp',
+                          fixed_interval: `${bucketSizeInSeconds}s`,
+                          min_doc_count: 0,
+                          extended_bounds: {
+                            min: startWithOffset,
+                            max: endWithOffset,
+                          },
+                        },
+                        aggs: metrics,
                       },
                     },
-                    aggs: metrics,
                   },
                 },
               },
@@ -129,33 +140,30 @@ export async function getServiceTransactionDetailedStatistics({
   );
 
   return keyBy(
-    response.aggregations?.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-        ) ?? bucket.transactionType.buckets[0];
+    response.aggregations?.sample.services.buckets.map((bucket) => {
+      const topTransactionTypeBucket = maybe(
+        bucket.transactionType.buckets.find(({ key }) =>
+          isDefaultTransactionType(key as string)
+        ) ?? bucket.transactionType.buckets[0]
+      );
 
       return {
         serviceName: bucket.key as string,
-        latency: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+        latency:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: dateBucket.avg_duration.value,
-          })
-        ),
-        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
+          })) ?? [],
+        transactionErrorRate:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
+            x: dateBucket.key + offsetInMs,
+            y: calculateFailedTransactionRate(dateBucket),
+          })) ?? undefined,
+        throughput: topTransactionTypeBucket?.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateFailedTransactionRate(dateBucket.outcomes),
-          })
-        ),
-        throughput: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
-            x: dateBucket.key + offsetInMs,
-            y: calculateThroughput({
-              start,
-              end,
+            y: calculateThroughputWithInterval({
+              bucketSize: bucketSizeInSeconds,
               value: dateBucket.doc_count,
             }),
           })
@@ -164,4 +172,62 @@ export async function getServiceTransactionDetailedStatistics({
     }) ?? [],
     'serviceName'
   );
+}
+
+export interface ServiceTransactionDetailedStatPeriodsResponse {
+  currentPeriod: Record<string, ServiceTransactionDetailedStat>;
+  previousPeriod: Record<string, ServiceTransactionDetailedStat>;
+}
+
+export async function getServiceTransactionDetailedStatsPeriods({
+  serviceNames,
+  environment,
+  kuery,
+  apmEventClient,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
+  offset,
+  start,
+  end,
+  randomSampler,
+}: {
+  serviceNames: string[];
+  environment: string;
+  kuery: string;
+  apmEventClient: APMEventClient;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
+  offset?: string;
+  start: number;
+  end: number;
+  randomSampler: RandomSampler;
+}): Promise<ServiceTransactionDetailedStatPeriodsResponse> {
+  return withApmSpan('get_service_detailed_statistics', async () => {
+    const commonProps = {
+      serviceNames,
+      environment,
+      kuery,
+      apmEventClient,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
+      start,
+      end,
+      randomSampler,
+    };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceTransactionDetailedStats(commonProps),
+      offset
+        ? getServiceTransactionDetailedStats({
+            ...commonProps,
+            offset,
+          })
+        : Promise.resolve({}),
+    ]);
+
+    return { currentPeriod, previousPeriod };
+  });
 }

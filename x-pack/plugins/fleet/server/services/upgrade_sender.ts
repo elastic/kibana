@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import type { InstallType } from '../types';

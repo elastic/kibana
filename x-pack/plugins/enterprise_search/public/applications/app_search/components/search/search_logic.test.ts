@@ -12,7 +12,7 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SearchLogic } from './search_logic';
 
@@ -78,7 +78,7 @@ describe('SearchLogic', () => {
 
   describe('listeners', () => {
     describe('search', () => {
-      beforeAll(() => jest.useFakeTimers());
+      beforeAll(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterAll(() => jest.useRealTimers());
 
       it('should make a GET API call with a search query', async () => {

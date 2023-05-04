@@ -63,6 +63,23 @@ describe('formatted_date', () => {
 
       expect(wrapper.text()).toEqual('Feb-25-2019');
     });
+
+    test('it strips down milliseconds when stripMs is passed', () => {
+      const date = new Date('2022-01-27T10:30:00.000Z');
+
+      const wrapper = mount(<PreferenceFormattedDate value={date} stripMs={true} />);
+
+      expect(wrapper.text()).toEqual('Jan 27, 2022 @ 10:30:00');
+    });
+
+    test('it strips down milliseconds when stripMs is passed and user-defined format is used', () => {
+      const date = new Date('2022-01-27T10:30:00.000Z');
+      mockUseDateFormat.mockImplementation(() => 'HH:mm:ss.SSS');
+
+      const wrapper = mount(<PreferenceFormattedDate value={date} stripMs={true} />);
+
+      expect(wrapper.text()).toEqual('10:30:00');
+    });
   });
 
   describe('FormattedDate', () => {
@@ -165,6 +182,17 @@ describe('formatted_date', () => {
       );
 
       expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('strips down the time milliseconds when stripMs is passed', () => {
+      const date = new Date('2022-01-27T10:30:00.000Z');
+      const wrapper = mount(
+        <TestProviders>
+          <FormattedRelativePreferenceDate stripMs={true} value={date.toISOString()} />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toBe('Jan 27, 2022 @ 10:30:00');
     });
   });
 });

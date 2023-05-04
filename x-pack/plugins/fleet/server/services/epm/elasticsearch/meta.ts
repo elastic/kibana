@@ -7,15 +7,9 @@
 
 import { safeLoad, safeDump } from 'js-yaml';
 
-const MANAGED_BY_DEFAULT = 'fleet';
+import type { ESAssetMetadata } from '../../../../common/types';
 
-export interface ESAssetMetadata {
-  package?: {
-    name: string;
-  };
-  managed_by: string;
-  managed: boolean;
-}
+const MANAGED_BY_DEFAULT = 'fleet';
 
 /**
  * Build common metadata object for Elasticsearch assets installed by Fleet. Result should be
@@ -64,6 +58,6 @@ export function appendMetadataToIngestPipeline({
 
   return {
     ...pipeline,
-    contentForInstallation: parsedPipelineContent,
+    contentForInstallation: JSON.stringify(parsedPipelineContent),
   };
 }

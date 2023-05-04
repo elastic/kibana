@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectType } from 'tsd';
-import { ShallowPromise } from '../..';
+import { ShallowPromise } from '../../..';
 
 type P1 = ShallowPromise<string>;
 type P2 = ShallowPromise<ShallowPromise<string>>;

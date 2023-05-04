@@ -4,32 +4,48 @@
 <titleabbrev>Sync {ml} saved objects</titleabbrev>
 ++++
 
-Synchronizes {kib} saved objects for {ml} jobs.
+Synchronizes {kib} saved objects for {ml} jobs and trained models.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[open API specification]. For a preview, check out <<machine-learning-apis>>.
+====
 
 [[machine-learning-api-sync-request]]
-==== Request
+==== {api-request-title}
 
 `GET <kibana host>:<port>/api/ml/saved_objects/sync`
 
 `GET <kibana host>:<port>/s/<space_id>/api/ml/saved_objects/sync`
 
+[[machine-learning-api-sync-prereq]]
+==== {api-prereq-title}
+
+You must have `all` privileges for the *Machine Learning* feature in the *Analytics* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[[machine-learning-api-sync-desc]]
+==== {api-description-title}
+
+This API runs automatically when you start {kib} and periodically thereafter.
 
 [[machine-learning-api-sync-path-params]]
-==== Path parameters
+==== {api-path-parms-title}
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in
 the URL the default space is used.
 
 [[machine-learning-api-sync-query-params]]
-==== Query parameters
+==== {api-query-parms-title}
 
 `simulate`::
 (Optional, boolean) When `true`, simulates the synchronization by only returning
 the list actions that _would_ be performed.
 
 [[machine-learning-api-sync-response-body]]
-==== Response body
+==== {api-response-body-title}
 
 `datafeedsAdded`::
 (array) If a saved object for an {anomaly-job} is missing a {dfeed} identifier,
@@ -37,43 +53,43 @@ it is added. This list contains the {dfeed} identifiers and indicates whether
 the synchronization was successful.
 
 `datafeedsRemoved`::
-(array) If saved objects exist for {dfeeds} that no longer exist, they are
-deleted. This list contains the {dfeed} identifiers and indicates whether the
-synchronization was successful.
+(array) If a saved object for an anomaly detection job references a datafeed
+that no longer exists, it is deleted. This list contains the {dfeed} identifiers 
+and indicates whether the synchronization was successful.
 
 `savedObjectsCreated`::
-(array) If saved objects are missing for {ml} jobs, they are created. This
-list contains the job identifiers and indicates whether the synchronization was
-successful.
+(array) If saved objects are missing for {ml} jobs or trained models, they are
+created. This list contains the job and model identifiers and indicates whether
+the synchronization was successful.
 
 `savedObjectsDeleted`::
-(array) If saved objects exist for jobs that no longer exist, they are deleted. 
-This list contains the job identifiers and indicates whether the synchronization
-was successful.
+(array) If saved objects exist for {ml} jobs or trained models that no longer
+exist, they are deleted. This list contains the job and model identifiers and
+indicates whether the synchronization was successful.
 
 [[machine-learning-api-sync-codes]]
-==== Response code
+==== {api-response-codes-title}
 
 `200`::
   Indicates a successful call.
 
 [[machine-learning-api-sync-example]]
-==== Example
+==== {api-examples-title}
 
 Retrieve the list of {ml} saved objects that require synchronization:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/ml/saved_objects/sync?simulate=true
+GET api/ml/saved_objects/sync?simulate=true
 --------------------------------------------------
 // KIBANA
 
-If there are two jobs and a {dfeed} that need to be synchronized, for example,
-the API returns the following:
+If there are two jobs that need to be synchronized, for example, the API returns
+the following response:
 
 [source,sh]
 --------------------------------------------------
-{{"savedObjectsCreated":{"myjob1":{"success":true},"myjob2":{"success":true}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{"myfeed3":{"success":true}}}
+{"savedObjectsCreated":{"anomaly_detector":{"myjob1":{"success":true},"myjob2":{"success":true}}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{}}
 --------------------------------------------------
 
 To perform the synchronization, re-run the API and omit the `simulate` parameter.

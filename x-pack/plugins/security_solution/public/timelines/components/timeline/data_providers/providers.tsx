@@ -8,30 +8,31 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
+import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
+import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
-import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
+import type { DataProvider, DataProvidersAnd } from './data_provider';
+import { DataProviderType, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -109,9 +110,6 @@ const ParensContainer = styled(EuiFlexItem)`
   align-self: center;
 `;
 
-const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
-  dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
-
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -160,7 +158,6 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
-    const { timelines } = useKibana().services;
 
     const handleClosePopOverTrigger = useCallback(() => {
       setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -246,7 +243,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       setIsPopoverOpen(true);
     }, []);
 
-    const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
+    const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
       closePopover: handleClosePopOverTrigger,
       draggableId,
       fieldName: dataProvider.queryMatch.field,
@@ -261,6 +258,10 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         }
       },
       [onKeyDown]
+    );
+
+    const displayValue = String(
+      dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value
     );
 
     const DraggableContent = useCallback(
@@ -301,7 +302,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
-                val={getDataProviderValue(dataProvider)}
+                displayValue={displayValue}
+                val={dataProvider.queryMatch.value}
                 type={dataProvider.type}
                 wrapperRef={keyboardHandlerRef}
               />
@@ -322,6 +324,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [
         browserFields,
         dataProvider,
+        displayValue,
         group,
         handleDataProviderEdited,
         handleDeleteProvider,
@@ -357,14 +360,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         </Draggable>
       </div>
     );
-  },
-  (prevProps, nextProps) =>
-    prevProps.groupIndex === nextProps.groupIndex &&
-    prevProps.index === nextProps.index &&
-    prevProps.timelineId === nextProps.timelineId &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.group, nextProps.group) &&
-    deepEqual(prevProps.dataProvider, nextProps.dataProvider)
+  }
 );
 
 DataProvidersGroupItem.displayName = 'DataProvidersGroupItem';

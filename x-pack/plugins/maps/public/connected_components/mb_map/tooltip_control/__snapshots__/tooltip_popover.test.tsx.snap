@@ -15,12 +15,13 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
     />
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   id="mapTooltip"
   isOpen={true}
   ownFocus={true}
   panelPaddingSize="m"
+  repositionOnScroll={true}
   style={
     Object {
       "pointerEvents": "none",
@@ -74,12 +75,13 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
     />
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   id="mapTooltip"
   isOpen={true}
   ownFocus={true}
   panelPaddingSize="m"
+  repositionOnScroll={true}
   style={
     Object {
       "pointerEvents": "none",

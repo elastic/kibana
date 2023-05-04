@@ -11,19 +11,22 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { Filter, Query } from '../filters';
+import { Filter, Query, AggregateQuery } from '../filters';
+import { isOfQueryType } from './es_query_sql';
 import { BoolQuery, DataViewBase } from './types';
-import { KueryQueryOptions } from '../kuery';
+import type { KueryQueryOptions } from '../kuery';
+import type { EsQueryFiltersConfig } from './from_filters';
 
+type AnyQuery = Query | AggregateQuery;
 /**
  * Configurations to be used while constructing an ES query.
  * @public
  */
-export type EsQueryConfig = KueryQueryOptions & {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: SerializableRecord;
-  ignoreFilterIfFieldNotInIndex: boolean;
-};
+export type EsQueryConfig = KueryQueryOptions &
+  EsQueryFiltersConfig & {
+    allowLeadingWildcards?: boolean;
+    queryStringOptions?: SerializableRecord;
+  };
 
 function removeMatchAll<T>(filters: T[]) {
   return filters.filter(
@@ -42,8 +45,8 @@ function removeMatchAll<T>(filters: T[]) {
  * @public
  */
 export function buildEsQuery(
-  indexPattern: DataViewBase | undefined,
-  queries: Query | Query[],
+  indexPattern: DataViewBase | DataViewBase[] | undefined,
+  queries: AnyQuery | AnyQuery[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {
     allowLeadingWildcards: false,
@@ -54,25 +57,29 @@ export function buildEsQuery(
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query) => has(query, 'query'));
+  const validQueries = queries.filter(isOfQueryType).filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
-    indexPattern,
+    Array.isArray(indexPattern) ? indexPattern[0] : indexPattern,
     queriesByLanguage.kuery,
-    config.allowLeadingWildcards,
-    config.dateFormatTZ,
-    config.filtersInMustClause
+    { allowLeadingWildcards: config.allowLeadingWildcards },
+    {
+      dateFormatTZ: config.dateFormatTZ,
+      filtersInMustClause: config.filtersInMustClause,
+      nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+      caseInsensitive: config.caseInsensitive,
+    }
   );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,
     config.queryStringOptions,
     config.dateFormatTZ
   );
-  const filterQuery = buildQueryFromFilters(
-    filters,
-    indexPattern,
-    config.ignoreFilterIfFieldNotInIndex
-  );
+
+  const filterQuery = buildQueryFromFilters(filters, indexPattern, {
+    ignoreFilterIfFieldNotInIndex: config.ignoreFilterIfFieldNotInIndex,
+    nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+  });
 
   return {
     bool: {

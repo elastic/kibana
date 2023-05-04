@@ -9,7 +9,7 @@ import { Coordinate } from '../typings/timeseries';
 
 export enum NodeType {
   service = 'service',
-  backend = 'backend',
+  dependency = 'dependency',
 }
 
 interface NodeBase {
@@ -23,35 +23,37 @@ export interface ServiceNode extends NodeBase {
   environment: string;
 }
 
-export interface BackendNode extends NodeBase {
-  type: NodeType.backend;
-  backendName: string;
+export interface DependencyNode extends NodeBase {
+  type: NodeType.dependency;
+  dependencyName: string;
   spanType: string;
   spanSubtype: string;
 }
 
-export type Node = ServiceNode | BackendNode;
+export type Node = ServiceNode | DependencyNode;
+
+export interface ConnectionStats {
+  latency: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+  throughput: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+  errorRate: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+  totalTime: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+}
 
 export interface ConnectionStatsItem {
   location: Node;
-  stats: {
-    latency: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-    throughput: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-    errorRate: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-    totalTime: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-  };
+  stats: ConnectionStats;
 }
 
 export interface ConnectionStatsItemWithImpact extends ConnectionStatsItem {
@@ -67,5 +69,7 @@ export interface ConnectionStatsItemWithComparisonData {
 }
 
 export function getNodeName(node: Node) {
-  return node.type === NodeType.service ? node.serviceName : node.backendName;
+  return node.type === NodeType.service
+    ? node.serviceName
+    : node.dependencyName;
 }

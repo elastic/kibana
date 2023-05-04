@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useState, useEffect, useCallback, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,6 +22,10 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -30,10 +33,8 @@ import {
   CombinedJob,
   Datafeed,
 } from '../../../../../../../../../common/types/anomaly_detection_jobs';
-import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../../../../src/plugins/saved_objects/public';
 import {
   useMlKibana,
   useMlApiContext,
@@ -54,9 +55,10 @@ interface Props {
 export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const {
     services: {
-      savedObjects,
+      http,
       uiSettings,
       data: { dataViews },
+      savedObjectsManagement,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -76,6 +78,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   useEffect(function initialPageLoad() {
     setCurrentDataViewTitle(jobCreator.indexPatternTitle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -145,7 +148,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
               <EuiSpacer size="s" />
 
-              <SavedObjectFinderUi
+              <SavedObjectFinder
                 key="searchSavedObjectFinder"
                 onChoose={onDataViewSelected}
                 showFilter
@@ -165,11 +168,15 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                         defaultMessage: 'Data view',
                       }
                     ),
+                    defaultSearchField: 'name',
                   },
                 ]}
                 fixedPageSize={fixedPageSize}
-                uiSettings={uiSettings}
-                savedObjects={savedObjects}
+                services={{
+                  uiSettings,
+                  http,
+                  savedObjectsManagement,
+                }}
               />
             </>
           )}

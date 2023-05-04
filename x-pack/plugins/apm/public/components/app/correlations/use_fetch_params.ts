@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
 export const useFetchParams = () => {
@@ -24,7 +24,10 @@ export const useFetchParams = () => {
       transactionName,
       transactionType,
     },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

@@ -9,21 +9,24 @@ import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 
 import { RareFieldSelect } from './rare_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  newJobCapsService,
-  filterCategoryFields,
-} from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import { Field } from '../../../../../../../../../common/types/fields';
+import type { Field } from '../../../../../../../../../common/types/fields';
 import { RareJobCreator } from '../../../../../common/job_creator';
 
 export const RareFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
-    () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
+    () =>
+      [...newJobCapsService.categoryFields, ...runtimeCategoryFields].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const categoryFields = useFilteredCategoryFields(
@@ -41,10 +44,12 @@ export const RareFieldSelector: FC = () => {
       jobCreator.addInfluencer(rareField.name);
     }
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rareField]);
 
   useEffect(() => {
     setRareField(jobCreator.rareField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (
@@ -75,6 +80,7 @@ function useFilteredCategoryFields(
     } else {
       setFields(allCategoryFields);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return fields;

@@ -12,9 +12,9 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { UserAPIClient } from '..';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface ConfirmDisableUsersProps {
   usernames: string[];

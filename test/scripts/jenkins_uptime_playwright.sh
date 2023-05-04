@@ -2,11 +2,10 @@
 
 source test/scripts/jenkins_test_setup_xpack.sh
 
-echo " -> Running Uptime @elastic/synthetics tests"
+echo " -> Running synthetics @elastic/synthetics tests"
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Uptime @elastic/synthetics Tests" \
- node plugins/uptime/scripts/e2e.js
+node plugins/synthetics/scripts/e2e.js
 
 echo ""
 echo ""

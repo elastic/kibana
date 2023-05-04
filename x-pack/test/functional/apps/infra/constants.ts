@@ -24,6 +24,8 @@ export const DATES = {
       withoutData: '10/09/2018 10:00:00 PM',
       min: '2018-10-17T19:42:21.208Z',
       max: '2018-10-17T19:58:03.952Z',
+      processesDataStartDate: '2023-03-28T18:20:00.000Z',
+      processesDataEndDate: '2023-03-28T18:21:00.000Z',
     },
     stream: {
       startWithData: '2018-10-17T19:42:22.000Z',
@@ -40,3 +42,7 @@ export const ML_JOB_IDS = [
   'kibana-metrics-ui-default-default-k8s_network_in',
   'kibana-metrics-ui-default-default-k8s_memory_usage',
 ];
+
+export const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
+
+export const HOSTS_VIEW_PATH = 'metrics/hosts';

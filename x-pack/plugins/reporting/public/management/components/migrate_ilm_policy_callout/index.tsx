@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup } from '@kbn/core/public';
 
 import { useIlmPolicyStatus } from '../../../lib/ilm_policy_status_context';
 

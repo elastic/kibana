@@ -1,0 +1,103 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_D",
+    "index": "auditbeat-2022-big",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-big",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-big",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}

@@ -23,3 +23,8 @@ export const bulkGetObjectsMock = jest.fn();
 jest.doMock('../../lib/bulk_get_objects', () => ({
   bulkGetObjects: bulkGetObjectsMock,
 }));
+
+export const bulkDeleteObjectsMock = jest.fn();
+jest.doMock('../../lib/bulk_delete_objects', () => ({
+  bulkDeleteObjects: bulkDeleteObjectsMock,
+}));

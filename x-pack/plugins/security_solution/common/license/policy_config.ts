@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../licensing/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isAtLeast } from './license';
-import { PolicyConfig } from '../endpoint/types';
+import type { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
@@ -202,6 +202,47 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointCredentialDumpingPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all advanced features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may use credential hardening
+  if (
+    policy.windows.attack_surface_reduction.credential_hardening.enabled !==
+    defaults.windows.attack_surface_reduction.credential_hardening.enabled
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all advanced features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may use rollback
+  if (
+    policy.windows.advanced?.alerts?.rollback.self_healing.enabled !==
+    defaults.windows.advanced?.alerts?.rollback.self_healing.enabled
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Given an endpoint package policy, verifies that all enabled features that
  * require a certain license level have a valid license for them.
@@ -214,7 +255,9 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointMalwarePolicyValidForLicense(policy, license) &&
     isEndpointRansomwarePolicyValidForLicense(policy, license) &&
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
-    isEndpointBehaviorPolicyValidForLicense(policy, license)
+    isEndpointBehaviorPolicyValidForLicense(policy, license) &&
+    isEndpointAdvancedPolicyValidForLicense(policy, license) &&
+    isEndpointCredentialDumpingPolicyValidForLicense(policy, license)
   );
 };
 

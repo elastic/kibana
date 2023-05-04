@@ -85,14 +85,37 @@ export const isNotInListOperator: OperatorOption = {
   value: 'is_not_in_list',
 };
 
+export const matchesOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.matchesOperatorLabel', {
+    defaultMessage: 'matches',
+  }),
+  operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.WILDCARD,
+  value: 'matches',
+};
+
+export const doesNotMatchOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.doesNotMatchOperatorLabel', {
+    defaultMessage: 'does not match',
+  }),
+  operator: OperatorEnum.EXCLUDED,
+  type: OperatorTypeEnum.WILDCARD,
+  value: 'does_not_match',
+};
+
 export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
   isOneOfOperator,
   isNotOneOfOperator,
+  matchesOperator,
 ];
 
-export const EXCEPTION_OPERATORS: OperatorOption[] = [
+/*
+ * !IMPORTANT! - Please only add to this list if it is an operator
+ * supported by the detection engine.
+ */
+export const DETECTION_ENGINE_EXCEPTION_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
   isOneOfOperator,
@@ -101,6 +124,21 @@ export const EXCEPTION_OPERATORS: OperatorOption[] = [
   doesNotExistOperator,
   isInListOperator,
   isNotInListOperator,
+  matchesOperator,
+  doesNotMatchOperator,
+];
+
+export const ALL_OPERATORS: OperatorOption[] = [
+  isOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isNotOneOfOperator,
+  existsOperator,
+  doesNotExistOperator,
+  isInListOperator,
+  isNotInListOperator,
+  matchesOperator,
+  doesNotMatchOperator,
 ];
 
 export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
@@ -110,6 +148,8 @@ export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
   isNotOneOfOperator,
   existsOperator,
   doesNotExistOperator,
+  matchesOperator,
+  doesNotMatchOperator,
 ];
 
 export const EXCEPTION_OPERATORS_ONLY_LISTS: OperatorOption[] = [

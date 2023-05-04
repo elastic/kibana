@@ -1,13 +1,17 @@
+.homSolutions__content {
+  padding-block-start: 0;
+}
+
 .homSolutions__item {
   @include euiBreakpoint('l', 'xl') {
-    max-width: calc(33.33% - #{$euiSizeM * 2});
+    max-inline-size: calc(33.33% - #{$euiSizeM * 2});
   }
 }
 
 .homSolutionPanel {
   img {
     background-color: $euiColorPrimary;
-    max-height: $euiSize * 10;
+    max-block-size: $euiSize * 10;
     object-fit: cover;
   }
 

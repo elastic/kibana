@@ -1,0 +1,201 @@
+{
+  "id": "@kbn/core-http-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-http-browser-internal",
+        "id": "def-common.BasePath",
+        "type": "Class",
+        "tags": [],
+        "label": "BasePath",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
+            "section": "def-common.BasePath",
+            "text": "BasePath"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          }
+        ],
+        "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser-internal",
+            "id": "def-common.BasePath.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-internal",
+                "id": "def-common.BasePath.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "basePath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser-internal",
+                "id": "def-common.BasePath.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "serverBasePath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser-internal",
+                "id": "def-common.BasePath.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "publicBaseUrl",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-internal",
+            "id": "def-common.BasePath.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-internal",
+            "id": "def-common.BasePath.prepend",
+            "type": "Function",
+            "tags": [],
+            "label": "prepend",
+            "description": [],
+            "signature": [
+              "(path: string) => string"
+            ],
+            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-internal",
+                "id": "def-common.BasePath.prepend.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-internal",
+            "id": "def-common.BasePath.remove",
+            "type": "Function",
+            "tags": [],
+            "label": "remove",
+            "description": [],
+            "signature": [
+              "(path: string) => string"
+            ],
+            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-internal",
+                "id": "def-common.BasePath.remove.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

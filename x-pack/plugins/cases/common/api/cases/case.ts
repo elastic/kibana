@@ -8,49 +8,45 @@
 import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
-import { UserRT } from '../user';
-import { CommentResponseRt } from './comment';
+import { UserRt } from '../user';
+import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors';
-import { SubCaseResponseRt } from './sub_case';
+import { CaseConnectorRt } from '../connectors/connector';
+import { CaseAssigneesRt } from './assignee';
 
-const BucketsAggs = rt.array(
-  rt.type({
-    key: rt.string,
-  })
-);
-
-export const GetCaseIdsByAlertIdAggsRt = rt.type({
-  references: rt.type({
-    doc_count: rt.number,
-    caseIds: rt.type({
-      buckets: BucketsAggs,
-    }),
-  }),
+export const AttachmentTotalsRt = rt.type({
+  alerts: rt.number,
+  userComments: rt.number,
 });
 
-export const CasesByAlertIdRt = rt.array(
-  rt.type({
-    id: rt.string,
-    title: rt.string,
-  })
-);
+export const RelatedCaseInfoRt = rt.type({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  createdAt: rt.string,
+  totals: AttachmentTotalsRt,
+});
 
-export enum CaseType {
-  collection = 'collection',
-  individual = 'individual',
-}
-
-/**
- * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
- */
-export const caseTypeField = 'type';
-
-const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
+
+export enum CaseSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export const CaseSeverityRt = rt.union([
+  rt.literal(CaseSeverity.LOW),
+  rt.literal(CaseSeverity.MEDIUM),
+  rt.literal(CaseSeverity.HIGH),
+  rt.literal(CaseSeverity.CRITICAL),
+]);
 
 const CaseBasicRt = rt.type({
   /**
@@ -70,10 +66,6 @@ const CaseBasicRt = rt.type({
    */
   title: rt.string,
   /**
-   * The type of a case (individual or collection)
-   */
-  [caseTypeField]: CaseTypeRt,
-  /**
    * The external system that the case can be synced with
    */
   connector: CaseConnectorRt,
@@ -85,6 +77,14 @@ const CaseBasicRt = rt.type({
    * The plugin owner of the case
    */
   owner: rt.string,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
+  /**
+   * The users assigned to this case
+   */
+  assignees: CaseAssigneesRt,
 });
 
 /**
@@ -97,7 +97,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
   external_title: rt.string,
   external_url: rt.string,
   pushed_at: rt.string,
-  pushed_by: UserRT,
+  pushed_by: UserRt,
 });
 
 export const CaseExternalServiceBasicRt = rt.intersection([
@@ -112,71 +112,59 @@ export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, r
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
+    duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
-    closed_by: rt.union([UserRT, rt.null]),
+    closed_by: rt.union([UserRt, rt.null]),
     created_at: rt.string,
-    created_by: UserRT,
+    created_by: UserRt,
     external_service: CaseFullExternalServiceRt,
     updated_at: rt.union([rt.string, rt.null]),
-    updated_by: rt.union([UserRT, rt.null]),
+    updated_by: rt.union([UserRt, rt.null]),
   }),
 ]);
 
-const CasePostRequestNoTypeRt = rt.type({
-  /**
-   * Description of the case
-   */
-  description: rt.string,
-  /**
-   * Identifiers for the case.
-   */
-  tags: rt.array(rt.string),
-  /**
-   * Title of the case
-   */
-  title: rt.string,
-  /**
-   * The external configuration for the case
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Sync settings for alerts
-   */
-  settings: SettingsRt,
-  /**
-   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
-   * creating this case must also be granted access to that plugin's feature.
-   */
-  owner: rt.string,
-});
-
-/**
- * This type is used for validating a create case request. It requires that the type field be defined.
- */
-export const CasesClientPostRequestRt = rt.type({
-  ...CasePostRequestNoTypeRt.props,
-  [caseTypeField]: CaseTypeRt,
-});
-
-/**
- * This type is not used for validation when decoding a request because intersection does not have props defined which
- * required for the excess function. Instead we use this as the type used by the UI. This allows the type field to be
- * optional and the server will handle setting it to a default value before validating that the request
- * has all the necessary fields. CasesClientPostRequestRt is used for validation.
- */
 export const CasePostRequestRt = rt.intersection([
-  /**
-   * The case type: an individual case (one without children) or a collection case (one with children)
-   */
-  rt.partial({ [caseTypeField]: CaseTypeRt }),
-  CasePostRequestNoTypeRt,
+  rt.type({
+    /**
+     * Description of the case
+     */
+    description: rt.string,
+    /**
+     * Identifiers for the case.
+     */
+    tags: rt.array(rt.string),
+    /**
+     * Title of the case
+     */
+    title: rt.string,
+    /**
+     * The external configuration for the case
+     */
+    connector: CaseConnectorRt,
+    /**
+     * Sync settings for alerts
+     */
+    settings: SettingsRt,
+    /**
+     * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+     * creating this case must also be granted access to that plugin's feature.
+     */
+    owner: rt.string,
+  }),
+  rt.partial({
+    /**
+     * The users assigned to the case
+     */
+    assignees: CaseAssigneesRt,
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
+    severity: CaseSeverityRt,
+  }),
 ]);
 
 export const CasesFindRequestRt = rt.partial({
-  /**
-   * Type of a case (individual, or collection)
-   */
-  type: CaseTypeRt,
   /**
    * Tags to filter by
    */
@@ -185,6 +173,14 @@ export const CasesFindRequestRt = rt.partial({
    * The status of the case (open, closed, in-progress)
    */
   status: CaseStatusRt,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
+  /**
+   * The uids of the user profiles to filter by
+   */
+  assignees: rt.union([rt.array(rt.string), rt.string]),
   /**
    * The reporters to filter by
    */
@@ -196,7 +192,11 @@ export const CasesFindRequestRt = rt.partial({
   /**
    * The fields in the entity to return in the response
    */
-  fields: rt.array(rt.string),
+  fields: rt.union([rt.array(rt.string), rt.string]),
+  /**
+   * A KQL date. If used all cases created after (gte) the from date will be returned
+   */
+  from: rt.string,
   /**
    * The page of objects to return
    */
@@ -214,6 +214,10 @@ export const CasesFindRequestRt = rt.partial({
    */
   searchFields: rt.union([rt.array(rt.string), rt.string]),
   /**
+   * The root fields to perform the simple_query_string parsed query against
+   */
+  rootSearchFields: rt.array(rt.string),
+  /**
    * The field to use for sorting the found objects.
    *
    * This only supports, `create_at`, `closed_at`, and `status`
@@ -223,11 +227,17 @@ export const CasesFindRequestRt = rt.partial({
    * The order to sort by
    */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+
+  /**
+   * A KQL date. If used all cases created before (lte) the to date will be returned.
+   */
+  to: rt.string,
   /**
    * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
    * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
    * that the user has access to.
    */
+
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
@@ -239,7 +249,7 @@ export const CasesByAlertIDRequestRt = rt.partial({
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
-export const CaseResponseRt = rt.intersection([
+export const CaseRt = rt.intersection([
   CaseAttributesRt,
   rt.type({
     id: rt.string,
@@ -248,25 +258,24 @@ export const CaseResponseRt = rt.intersection([
     version: rt.string,
   }),
   rt.partial({
-    subCaseIds: rt.array(rt.string),
-    subCases: rt.array(SubCaseResponseRt),
-    comments: rt.array(CommentResponseRt),
+    comments: rt.array(CommentRt),
   }),
 ]);
 
 export const CaseResolveResponseRt = rt.intersection([
   rt.type({
-    case: CaseResponseRt,
+    case: CaseRt,
     outcome: rt.union([rt.literal('exactMatch'), rt.literal('aliasMatch'), rt.literal('conflict')]),
   }),
   rt.partial({
     alias_target_id: rt.string,
+    alias_purpose: rt.union([rt.literal('savedObjectConversion'), rt.literal('savedObjectImport')]),
   }),
 ]);
 
 export const CasesFindResponseRt = rt.intersection([
   rt.type({
-    cases: rt.array(CaseResponseRt),
+    cases: rt.array(CaseRt),
     page: rt.number,
     per_page: rt.number,
     total: rt.number,
@@ -283,7 +292,7 @@ export const CasePatchRequestRt = rt.intersection([
 ]);
 
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
-export const CasesResponseRt = rt.array(CaseResponseRt);
+export const CasesRt = rt.array(CaseRt);
 
 export const CasePushRequestParamsRt = rt.type({
   case_id: rt.string,
@@ -320,17 +329,33 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const CasesBulkGetRequestRt = rt.intersection([
+  rt.type({
+    ids: rt.array(rt.string),
+  }),
+  rt.partial({
+    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
+  }),
+]);
+
+export const CasesBulkGetResponseRt = rt.type({
+  cases: CasesRt,
+  errors: rt.array(
+    rt.type({
+      error: rt.string,
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      caseId: rt.string,
+    })
+  ),
+});
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
-/**
- * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
- * that the type field be defined. The CasePostRequest should be used in most places (the UI etc). This type is really
- * only necessary for validation.
- */
-export type CasesClientPostRequest = rt.TypeOf<typeof CasesClientPostRequestRt>;
+
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
-export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
+export type Case = rt.TypeOf<typeof CaseRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
-export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
+export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
@@ -344,5 +369,21 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
-export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
+export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
+
+export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
+export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
+export type CasesBulkGetRequestCertainFields<Field extends keyof Case = keyof Case> = Omit<
+  CasesBulkGetRequest,
+  'fields'
+> & {
+  fields?: Field[];
+};
+export type CasesBulkGetResponseCertainFields<Field extends keyof Case = keyof Case> = Omit<
+  CasesBulkGetResponse,
+  'cases'
+> & {
+  cases: Array<Pick<Case, Field | 'id' | 'version' | 'owner'>>;
+};

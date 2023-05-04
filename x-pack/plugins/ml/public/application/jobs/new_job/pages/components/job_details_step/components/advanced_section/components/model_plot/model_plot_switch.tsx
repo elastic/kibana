@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { MMLCallout } from '../mml_callout';
@@ -22,6 +22,7 @@ export const ModelPlotSwitch: FC = () => {
   useEffect(() => {
     jobCreator.modelPlot = modelPlotEnabled;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelPlotEnabled]);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export const ModelPlotSwitch: FC = () => {
       isCategorizationJobCreator(jobCreator) &&
       jobCreator.aggregations.some((agg) => aggs.includes(agg.id));
     setEnabled(isRareCategoryJob === false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function toggleModelPlot() {
@@ -56,7 +58,6 @@ export const ModelPlotSwitch: FC = () => {
         />
       </Description>
       <MMLCallout />
-      <EuiSpacer />
     </>
   );
 };

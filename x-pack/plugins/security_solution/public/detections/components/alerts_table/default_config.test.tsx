@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExistsFilter, Filter } from '@kbn/es-query';
+import type { ExistsFilter, Filter } from '@kbn/es-query';
 import {
   buildAlertsFilter,
   buildAlertStatusesFilter,

@@ -6,12 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { renameKeys } from './../lib/rename_keys';
+import {
+  LEGACY_BASE_ALERT_API_PATH,
+  DefaultRuleAggregationResult,
+  getDefaultRuleAggregation,
+  formatDefaultAggregationResult,
+} from '../../../common';
+import { renameKeys } from '../lib/rename_keys';
 import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
@@ -53,7 +58,7 @@ export const aggregateAlertRoute = (
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const rulesClient = context.alerting.getRulesClient();
+      const rulesClient = (await context.alerting).getRulesClient();
 
       trackLegacyRouteUsage('aggregate', usageCounter);
       trackLegacyTerminology(
@@ -77,9 +82,16 @@ export const aggregateAlertRoute = (
           : [query.search_fields];
       }
 
-      const aggregateResult = await rulesClient.aggregate({ options });
+      const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+        options,
+        aggs: getDefaultRuleAggregation(),
+      });
+      const { ruleExecutionStatus, ...rest } = formatDefaultAggregationResult(aggregateResult);
       return res.ok({
-        body: aggregateResult,
+        body: {
+          ...rest,
+          alertExecutionStatus: ruleExecutionStatus,
+        },
       });
     })
   );

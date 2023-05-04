@@ -1,22 +1,26 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/discover/tsconfig.json" },
-    { "path": "../../../src/plugins/share/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/url_forwarding/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/visualizations/tsconfig.json" },
-    { "path": "../../../src/plugins/ui_actions/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/share-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/unified-search-plugin",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

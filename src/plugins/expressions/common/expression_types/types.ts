@@ -32,6 +32,7 @@ export interface ExpressionTypeDefinition<
   SerializedType = undefined
 > {
   name: Name;
+  namespace?: string;
   validate?(type: unknown): void | Error;
   serialize?(type: Value): SerializedType;
   deserialize?(type: SerializedType): Value;

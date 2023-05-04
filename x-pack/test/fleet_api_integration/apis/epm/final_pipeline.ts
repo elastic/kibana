@@ -14,9 +14,10 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-const FINAL_PIPELINE_VERSION = 1;
+// TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
+const LOG_INTEGRATION_VERSION = '1.1.2';
 
-let pkgVersion: string;
+const FINAL_PIPELINE_VERSION = 1;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -42,25 +43,15 @@ export default function (providerContext: FtrProviderContext) {
 
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
-      const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?experimental=true`
-      );
-      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
-      if (!logPackage) {
-        throw new Error('No log package');
-      }
-
-      pkgVersion = logPackage.version;
-
       await supertest
-        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -101,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(2);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(3);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
@@ -109,8 +100,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain('.fleet_globals-1');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
-        '.fleet_component_template-1'
+        '.fleet_agent_id_verification-1'
       );
     });
 
@@ -197,12 +189,17 @@ export default function (providerContext: FtrProviderContext) {
     for (const scenario of scenarios) {
       it(`Should write the correct event.agent_id_status for ${scenario.name}`, async () => {
         // Create an API key
-        const apiKeyRes = await es.security.createApiKey({
-          body: {
-            name: `test api key`,
-            ...(scenario.apiKey || {}),
+        const apiKeyRes = await es.security.createApiKey(
+          {
+            body: {
+              name: `test api key`,
+              ...(scenario.apiKey || {}),
+            },
           },
-        });
+          {
+            headers: { 'es-security-runas-user': 'elastic' }, // run as elastic suer
+          }
+        );
 
         const res = await indexUsingApiKey(
           {

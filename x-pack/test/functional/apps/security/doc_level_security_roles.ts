@@ -15,17 +15,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
+  const security = getService('security');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('dls', function () {
     before('initialize tests', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
+      await security.testUser.setRoles(['cluster_security_manager', 'kibana_admin']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
     });
@@ -75,9 +78,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.contain('EAST');
     });
+
     after('logout', async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await security.user.delete('userEast');
+      await security.role.delete('myroleEast');
+      await security.testUser.restoreDefaults();
     });
   });
 }

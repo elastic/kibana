@@ -14,10 +14,6 @@ mkdir -p "$destination"
 mkdir -p elasticsearch && cd elasticsearch
 
 export ELASTICSEARCH_BRANCH="${ELASTICSEARCH_BRANCH:-$BUILDKITE_BRANCH}"
-# Until ES renames their master branch to main...
-if [[ "$ELASTICSEARCH_BRANCH" == "main" ]]; then
-  export ELASTICSEARCH_BRANCH="master"
-fi
 
 if [[ ! -d .git ]]; then
   git init
@@ -38,13 +34,13 @@ export JENKINS_URL=""
 export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
-export DOCKER_BUILDKIT=""
 
 # Reads the ES_BUILD_JAVA env var out of .ci/java-versions.properties and exports it
 export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
 
 export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
 export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
+export DOCKER_BUILDKIT=1
 
 # The Elasticsearch Dockerfile needs to be built with root privileges, but Docker on our servers is running using a non-root user
 # So, let's use docker-in-docker to temporarily create a privileged docker daemon to run `docker build` on
@@ -79,17 +75,39 @@ find distribution -type f \( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elas
 
 ls -alh "$destination"
 
-echo "--- Create docker image archives"
+echo "--- Create docker default image archives"
 docker images "docker.elastic.co/elasticsearch/elasticsearch"
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 echo 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
+
+echo "--- Create kibana-ci docker cloud image archives"
+# Ignore build failures.  This docker image downloads metricbeat and filebeat.
+# When we bump versions, these dependencies may not exist yet, but we don't want to
+# block the rest of the snapshot promotion process
+set +e
+./gradlew :distribution:docker:cloud-docker-export:assemble && {
+  ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
+  ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
+  KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+  KIBANA_ES_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION"
+  echo $ES_CLOUD_ID $ES_CLOUD_VERSION $KIBANA_ES_CLOUD_VERSION $KIBANA_ES_CLOUD_IMAGE
+  docker tag "$ES_CLOUD_ID" "$KIBANA_ES_CLOUD_IMAGE"
+
+  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+  trap 'docker logout docker.elastic.co' EXIT
+  docker image push "$KIBANA_ES_CLOUD_IMAGE"
+
+  export ELASTICSEARCH_CLOUD_IMAGE="$KIBANA_ES_CLOUD_IMAGE"
+  export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker images "$KIBANA_ES_CLOUD_IMAGE" --format "{{.Digest}}")"
+}
+set -e
 
 echo "--- Create checksums for snapshot files"
 cd "$destination"
 find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
 
 cd "$BUILDKITE_BUILD_CHECKOUT_PATH"
-node "$(dirname "${0}")/create_manifest.js" "$destination"
+ts-node "$(dirname "${0}")/create_manifest.ts" "$destination"
 
 ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST)"
 

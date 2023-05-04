@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+require('@kbn/babel-register').install();
+
 const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('stream');
 const { promisify } = require('util');
 
 const del = require('del');
-const { run } = require('@kbn/dev-utils');
+const { run } = require('@kbn/dev-cli-runner');
 const execa = require('execa');
 
 const asyncPipeline = promisify(pipeline);
@@ -51,16 +53,13 @@ run(
     if (flags.run) {
       log.info('Starting Webpack Dev Server...');
       execa.sync(
-        'yarn',
+        process.execPath,
         [
-          'webpack-dev-server',
+          require.resolve('webpack-dev-server/bin/webpack-dev-server'),
           '--config',
           webpackConfig,
           ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
-          '--hide-modules',
-          '--display-entrypoints',
-          'false',
-          '--content-base',
+          '--static',
           SHAREABLE_RUNTIME_SRC,
         ],
         options
@@ -87,12 +86,11 @@ run(
     clean();
     log.info('Building Canvas Shareable Workpad Runtime...');
     execa.sync(
-      'yarn',
+      process.execPath,
       [
-        'webpack',
+        require.resolve('webpack/bin/webpack'),
         '--config',
         webpackConfig,
-        '--hide-modules',
         ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
       ],
       {

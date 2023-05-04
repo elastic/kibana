@@ -8,10 +8,11 @@
 
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
-import { AbortError, defer, of } from '../../../kibana_utils/public';
+import { AbortError, defer, of } from '@kbn/kibana-utils-plugin/public';
 import { Subject } from 'rxjs';
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
@@ -50,7 +51,7 @@ const setup = () => {
 
 describe('createStreamingBatchedFunction()', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -194,6 +195,33 @@ describe('createStreamingBatchedFunction()', () => {
       expect(JSON.parse(body)).toEqual({
         batch: [{ baz: 'quix' }],
       });
+    });
+
+    test("doesn't send batch request if all items have been aborted", async () => {
+      const { fetchStreaming } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+        getIsCompressionDisabled: () => true,
+      });
+
+      const abortController = new AbortController();
+      abortController.abort();
+
+      expect.assertions(3);
+      const req1 = fn({ foo: 'bar' }, abortController.signal).catch((e) =>
+        expect(e).toBeInstanceOf(AbortError)
+      );
+      const req2 = fn({ baz: 'quix' }, abortController.signal).catch((e) =>
+        expect(e).toBeInstanceOf(AbortError)
+      );
+
+      jest.advanceTimersByTime(6);
+      expect(fetchStreaming).not.toBeCalled();
+
+      await Promise.all([req1, req2]);
     });
 
     test('sends POST request to correct endpoint with items in array batched sorted in call order', async () => {

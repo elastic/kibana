@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../src/core/types/elasticsearch';
-import { AlertServices } from '../../../../alerting/server';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
-export async function alertingEsClient<TParams extends ESSearchRequest>({
+export type APMEventESSearchRequestParams = ESSearchRequest & {
+  body: { size: number; track_total_hits: boolean | number };
+};
+
+export async function alertingEsClient<
+  TParams extends APMEventESSearchRequestParams
+>({
   scopedClusterClient,
   params,
 }: {
-  scopedClusterClient: AlertServices<
+  scopedClusterClient: RuleExecutorServices<
     never,
     never,
     never
@@ -27,5 +30,5 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
     ignore_unavailable: true,
   });
 
-  return response.body as unknown as ESSearchResponse<unknown, TParams>;
+  return response as unknown as ESSearchResponse<unknown, TParams>;
 }

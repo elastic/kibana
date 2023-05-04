@@ -28,7 +28,7 @@ export const beatsAggFilterPath = [
   'aggregations.max_bytes_sent_total.value',
 ];
 
-export const beatsUuidsAgg = (maxBucketSize: string) => ({
+export const beatsUuidsAgg = (maxBucketSize: number) => ({
   types: {
     terms: {
       field: 'beats_stats.beat.type',

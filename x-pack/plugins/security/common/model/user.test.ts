@@ -13,12 +13,22 @@ describe('#getUserDisplayName', () => {
     expect(
       getUserDisplayName({
         full_name: 'my full name',
+        email: 'foo@elastic.co',
         username: 'foo',
       } as User)
     ).toEqual('my full name');
   });
 
-  it(`uses the username when full name is not available`, () => {
+  it(`uses the email when full name is not available available`, () => {
+    expect(
+      getUserDisplayName({
+        email: 'foo@elastic.co',
+        username: 'foo',
+      } as User)
+    ).toEqual('foo@elastic.co');
+  });
+
+  it(`uses the username when full name and email are not available`, () => {
     expect(
       getUserDisplayName({
         username: 'foo',

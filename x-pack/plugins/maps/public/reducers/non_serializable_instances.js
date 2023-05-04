@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { RequestAdapter } from '../../../../../src/plugins/inspector/common/adapters/request';
-import { MapAdapter } from '../inspector/map_adapter';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
 const SET_EVENT_HANDLERS = 'SET_EVENT_HANDLERS';
 const SET_CHARTS_PALETTE_SERVICE_GET_COLOR = 'SET_CHARTS_PALETTE_SERVICE_GET_COLOR';
+const SET_ON_MAP_MOVE = 'SET_ON_MAP_MOVE';
 
 function createInspectorAdapters() {
   const inspectorAdapters = {
     requests: new RequestAdapter(),
+    vectorTiles: new VectorTileAdapter(),
   };
   if (getShowMapsInspectorAdapter()) {
     inspectorAdapters.map = new MapAdapter();
@@ -58,6 +60,12 @@ export function nonSerializableInstances(state, action = {}) {
         chartsPaletteServiceGetColor: action.chartsPaletteServiceGetColor,
       };
     }
+    case SET_ON_MAP_MOVE: {
+      return {
+        ...state,
+        onMapMove: action.onMapMove,
+      };
+    }
     default:
       return state;
   }
@@ -78,6 +86,10 @@ export const getEventHandlers = ({ nonSerializableInstances }) => {
 
 export function getChartsPaletteServiceGetColor({ nonSerializableInstances }) {
   return nonSerializableInstances.chartsPaletteServiceGetColor;
+}
+
+export function getOnMapMove({ nonSerializableInstances }) {
+  return nonSerializableInstances.onMapMove;
 }
 
 // Actions
@@ -121,5 +133,12 @@ export function setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor) {
   return {
     type: SET_CHARTS_PALETTE_SERVICE_GET_COLOR,
     chartsPaletteServiceGetColor,
+  };
+}
+
+export function setOnMapMove(onMapMove) {
+  return {
+    type: SET_ON_MAP_MOVE,
+    onMapMove,
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 // Cloud has its own system for managing SLM policies and we want to make
 // this clear when Snapshot and Restore is used in a Cloud deployment.
@@ -15,9 +15,7 @@ export const getManagedPolicyNames = async (
   clusterClient: ElasticsearchClient
 ): Promise<string[]> => {
   try {
-    const {
-      body: { persistent, transient, defaults },
-    } = await clusterClient.cluster.getSettings({
+    const { persistent, transient, defaults } = await clusterClient.cluster.getSettings({
       filter_path: '*.*managed_policies',
       flat_settings: true,
       include_defaults: true,

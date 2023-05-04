@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
@@ -32,7 +33,7 @@ export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => 
       button={
         <EuiButtonEmpty
           data-test-subj="eql-validation-errors-popover-button"
-          iconType="crossInACircleFilled"
+          iconType="error"
           size="s"
           color="danger"
           aria-label={ariaLabel}

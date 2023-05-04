@@ -1,0 +1,16 @@
+// Add truncation to heath status
+
+.rulesList__health {
+  width: 100%;
+
+  .euiFlexItem:last-of-type {
+    @include euiTextTruncate;
+    min-width: 0;
+    width: 85%;
+  }
+}
+
+.ruleDurationWarningIcon {
+  bottom: $euiSizeXS;
+  position: relative;
+}

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { retryIfConflicts, RetryForConflictsAttempts } from './retry_if_conflicts';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('retry_if_conflicts', () => {
   beforeEach(() => {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IRuleDataClient } from '../../../../../plugins/rule_registry/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { GetService } from '../../types';
 
 export const cleanupRegistryIndices = async (getService: GetService, client: IRuleDataClient) => {

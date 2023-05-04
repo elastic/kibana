@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
-import { useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_GOOD_LABEL,
@@ -74,7 +74,7 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }:
           >
             <StyledSpan darkMode={darkMode}>
               <PaletteLegend color={color}>
-                <EuiText size="xs">
+                <EuiText size="xs" data-test-subj={`${labels[ind]}-${ranks?.[ind]}`}>
                   <FormattedMessage
                     id="xpack.observability.ux.coreVitals.paletteLegend.rankPercentage"
                     defaultMessage="{labelsInd} ({ranksInd}%)"

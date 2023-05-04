@@ -8,8 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, IBasePath, ApplicationStart } from 'kibana/public';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
 const FooApp = ({
   appId,

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
-import { Plugin, PluginSetup, PluginStart } from './plugin';
-import { configSchema, ConfigSchema, ConfigType } from './config';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { PluginSetup, PluginStart } from './plugin';
+import { Plugin } from './plugin';
+import type { ConfigSchema, ConfigType } from './config';
+import { configSchema } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 
@@ -18,9 +20,10 @@ export const plugin = (context: PluginInitializerContext) => {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
+    prebuiltRulesPackageVersion: true,
   },
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled', { level: 'critical' }),
     renameFromRoot(
       'xpack.siem.maxRuleImportExportSize',
@@ -47,6 +50,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       `xpack.securitySolution.${SIGNALS_INDEX_KEY}`,
       { level: 'critical' }
     ),
+    unused('ruleExecutionLog.underlyingClient', { level: 'warning' }),
+    unused('prebuiltRulesFromFileSystem', { level: 'warning' }),
+    unused('prebuiltRulesFromSavedObjects', { level: 'warning' }),
   ],
 };
 

@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
 import { useDownloadRenderedWorkpad } from '../../../hooks';
 import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
@@ -179,7 +179,7 @@ export const ShareWebsiteFlyout: FC<Props> = ({
       <EuiSpacer size="xs" key="spacer" />,
     ];
     warningText = [
-      <EuiCallOut title={warning} color="warning" size="s" iconType="alert" key="callout" />,
+      <EuiCallOut title={warning} color="warning" size="s" iconType="warning" key="callout" />,
       <EuiSpacer key="spacer" />,
     ];
   }

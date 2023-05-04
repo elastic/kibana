@@ -9,10 +9,17 @@ import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
 
-import { ListWithKuerySchema } from './index';
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
+    noAgentCount: schema.maybe(schema.boolean()),
+    full: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const BulkGetAgentPoliciesRequestSchema = {
+  body: BulkRequestBodySchema.extends({
     full: schema.maybe(schema.boolean()),
   }),
 };
@@ -32,7 +39,9 @@ export const CreateAgentPolicyRequestSchema = {
 
 export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
-  body: NewAgentPolicySchema,
+  body: NewAgentPolicySchema.extends({
+    force: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const CopyAgentPolicyRequestSchema = {
@@ -57,5 +66,13 @@ export const GetFullAgentPolicyRequestSchema = {
     download: schema.maybe(schema.boolean()),
     standalone: schema.maybe(schema.boolean()),
     kubernetes: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const GetK8sManifestRequestSchema = {
+  query: schema.object({
+    download: schema.maybe(schema.boolean()),
+    fleetServer: schema.maybe(schema.string()),
+    enrolToken: schema.maybe(schema.string()),
   }),
 };

@@ -6,42 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flowRight } from 'lodash';
+import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
+import { flowRight } from 'lodash';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
-import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
-import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
-import { useLogSource } from '../../containers/logs/log_source';
-import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { LinkDescriptor } from '../../hooks/use_link_props';
-import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { useLogView } from '../../hooks/use_log_view';
+import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
+import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { replaceLogPositionInQueryString } from '../../observability_logs/log_stream_position_state/src/url_state_storage_service';
+import { replaceLogViewInQueryString } from '../../observability_logs/log_view_state';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
   nodeType: InventoryItemType;
-  sourceId?: string;
+  logViewId?: string;
 }>;
 
 export const RedirectToNodeLogs = ({
   match: {
-    params: { nodeId, nodeType, sourceId = 'default' },
+    params: { nodeId, nodeType, logViewId = 'default' },
   },
   location,
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
-  const { isLoading, loadSource } = useLogSource({
-    fetch: services.http.fetch,
-    sourceId,
-    indexPatternsService: services.data.indexPatterns,
+  const { isLoading, load } = useLogView({
+    initialLogViewReference: { type: 'log-view-reference', logViewId },
+    logViews: services.logViews.client,
   });
 
   useMount(() => {
-    loadSource();
+    load();
   });
 
   if (isLoading) {
@@ -61,11 +60,12 @@ export const RedirectToNodeLogs = ({
   const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+  const time = getTimeFromLocation(location);
 
   const searchString = flowRight(
-    replaceLogFilterInQueryString({ language: 'kuery', query: filter }),
-    replaceLogPositionInQueryString(getTimeFromLocation(location)),
-    replaceSourceIdInQueryString(sourceId)
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
+    replaceLogPositionInQueryString(time),
+    replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
   )('');
 
   return <Redirect to={`/stream?${searchString}`} />;

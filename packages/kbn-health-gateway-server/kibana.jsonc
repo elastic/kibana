@@ -1,0 +1,5 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/health-gateway-server",
+  "owner": "@elastic/kibana-core"
+}

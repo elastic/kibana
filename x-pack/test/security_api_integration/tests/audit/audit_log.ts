@@ -6,48 +6,18 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-class FileWrapper {
-  constructor(private readonly path: string) {}
-  async reset() {
-    // "touch" each file to ensure it exists and is empty before each test
-    await Fs.promises.writeFile(this.path, '');
-  }
-  async read() {
-    const content = await Fs.promises.readFile(this.path, { encoding: 'utf8' });
-    return content.trim().split('\n');
-  }
-  async readJSON() {
-    const content = await this.read();
-    try {
-      return content.map((l) => JSON.parse(l));
-    } catch (err) {
-      const contentString = content.join('\n');
-      throw new Error(
-        `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
-      );
-    }
-  }
-  // writing in a file is an async operation. we use this method to make sure logs have been written.
-  async isNotEmpty() {
-    const content = await this.read();
-    const line = content[0];
-    return line.length > 0;
-  }
-}
+import { FileWrapper } from './file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const { username, password } = getService('config').get('servers.kibana');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/119267
-  describe.skip('Audit Log', function () {
-    const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
-    const logFile = new FileWrapper(logFilePath);
+  describe('Audit Log', function () {
+    const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
+    const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
       await logFile.reset();
@@ -56,12 +26,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
-
       const content = await logFile.readJSON();
 
       const httpEvent = content.find((c) => c.event.action === 'http_request');
       expect(httpEvent).to.be.ok();
       expect(httpEvent.trace.id).to.be.ok();
+
       expect(httpEvent.user.name).to.be(username);
       expect(httpEvent.kibana.space_id).to.be('default');
       expect(httpEvent.http.request.method).to.be('get');
@@ -74,7 +44,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(createEvent.user.name).to.be(username);
       expect(createEvent.kibana.space_id).to.be('default');
 
-      const findEvent = content.find((c) => c.event.action === 'saved_object_find');
+      // There are two 'saved_object_find' events in the log. One is by the fleet app for
+      // "epm - packages", the other is by the user for a dashboard (this is the one we are
+      // concerned with).
+      const findEvent = content.find(
+        (c) => c.event.action === 'saved_object_find' && c.kibana.saved_object.type === 'dashboard'
+      );
       expect(findEvent).to.be.ok();
       expect(findEvent.trace.id).to.be.ok();
       expect(findEvent.user.name).to.be(username);
@@ -85,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
+        .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
           providerType: 'basic',
           providerName: 'basic',
@@ -93,7 +69,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
-
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');
@@ -101,12 +76,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.event.outcome).to.be('success');
       expect(loginEvent.trace.id).to.be.ok();
       expect(loginEvent.user.name).to.be(username);
+      expect(loginEvent.client.ip).to.be.ok();
+      expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
 
     it('logs audit events when failing to log in', async () => {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
+        .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
           providerType: 'basic',
           providerName: 'basic',
@@ -115,7 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(401);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
-
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');
@@ -123,6 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.event.outcome).to.be('failure');
       expect(loginEvent.trace.id).to.be.ok();
       expect(loginEvent.user).not.to.be.ok();
+      expect(loginEvent.client.ip).to.be.ok();
+      expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
   });
 }

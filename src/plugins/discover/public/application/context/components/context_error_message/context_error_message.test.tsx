@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
 import { FailureReason, LoadingStatus } from '../../services/context_query_state';

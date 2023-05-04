@@ -1,0 +1,321 @@
+{
+  "id": "@kbn/cases-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.getStatusConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "getStatusConfiguration",
+        "description": [],
+        "signature": [
+          "() => { open: { color: string; label: any; icon: \"folderOpen\"; }; \"in-progress\": { color: string; label: any; icon: \"folderExclamation\"; }; closed: { color: string; label: any; icon: \"folderCheck\"; }; }"
+        ],
+        "path": "packages/kbn-cases-components/src/status/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.Status",
+        "type": "Function",
+        "tags": [],
+        "label": "Status",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<Props>"
+        ],
+        "path": "packages/kbn-cases-components/src/status/status.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.Status.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.Tooltip",
+        "type": "Function",
+        "tags": [],
+        "label": "Tooltip",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseTooltipProps",
+            "text": "CaseTooltipProps"
+          },
+          "> & { readonly type: React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseTooltipProps",
+            "text": "CaseTooltipProps"
+          },
+          ">; }"
+        ],
+        "path": "packages/kbn-cases-components/src/tooltip/tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.Tooltip.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.CaseTooltipContentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CaseTooltipContentProps",
+        "description": [],
+        "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipContentProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipContentProps.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipContentProps.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cases-components",
+                "scope": "common",
+                "docId": "kibKbnCasesComponentsPluginApi",
+                "section": "def-common.CaseStatuses",
+                "text": "CaseStatuses"
+              }
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipContentProps.totalComments",
+            "type": "number",
+            "tags": [],
+            "label": "totalComments",
+            "description": [],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipContentProps.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipContentProps.createdBy",
+            "type": "Object",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "{ username?: string | undefined; fullName?: string | undefined; }"
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.CaseTooltipProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CaseTooltipProps",
+        "description": [],
+        "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipProps.content",
+            "type": "Object",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cases-components",
+                "scope": "common",
+                "docId": "kibKbnCasesComponentsPluginApi",
+                "section": "def-common.CaseTooltipContentProps",
+                "text": "CaseTooltipContentProps"
+              }
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.CaseTooltipProps.loading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-cases-components/src/tooltip/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.CaseStatuses",
+        "type": "Enum",
+        "tags": [],
+        "label": "CaseStatuses",
+        "description": [],
+        "path": "packages/kbn-cases-components/src/status/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

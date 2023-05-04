@@ -6,8 +6,8 @@
  */
 
 import * as selectors from './selectors';
-import { DataState, TimeRange } from '../../types';
-import { ResolverAction } from '../actions';
+import type { DataState } from '../../types';
+import type { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
 import { createStore } from 'redux';
 import {
@@ -16,10 +16,10 @@ import {
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
-import { endpointSourceSchema } from './../../mocks/tree_schema';
+import { endpointSourceSchema } from '../../mocks/tree_schema';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { maxDate } from '../../models/time_range';
 
@@ -425,7 +425,7 @@ describe('data state', () => {
         expect(selectors.timeRangeFilters(state())?.to).toBe(new Date(maxDate).toISOString());
       });
       describe('when resolver receives time range filters', () => {
-        const timeRangeFilters: TimeRange = {
+        const timeRangeFilters = {
           to: 'to',
           from: 'from',
         };

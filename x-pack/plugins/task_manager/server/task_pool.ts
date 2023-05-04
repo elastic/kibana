@@ -12,7 +12,7 @@
 import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { padStart } from 'lodash';
-import { Logger } from '../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 import { TaskManagerStat } from './task_events';
@@ -168,7 +168,7 @@ export class TaskPool {
         // we asssume the underlying task has been deleted while it was running
         // so we will log this as a debug, rather than a warn
         const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${
-          err.message
+          err.message || err.error.message
         }`;
         if (isTaskSavedObjectNotFoundError(err, taskRunner.id)) {
           this.logger.debug(errorLogLine);

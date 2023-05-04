@@ -6,14 +6,15 @@
  */
 
 import { get, omit } from 'lodash/fp';
-import { Action } from 'redux';
-import { Epic } from 'redux-observable';
-import { from, Observable, empty } from 'rxjs';
+import type { Action } from 'redux';
+import type { Epic } from 'redux-observable';
+import type { Observable } from 'rxjs';
+import { from, empty } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
 import { addError } from '../../../common/store/app/actions';
-import { inputsModel } from '../../../common/store/inputs';
-import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { inputsModel } from '../../../common/store/inputs';
+import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import {
   pinEvent,
   endTimelineSaving,
@@ -24,7 +25,7 @@ import {
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { ActionTimeline, TimelineById } from './types';
+import type { ActionTimeline, TimelineById } from './types';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];

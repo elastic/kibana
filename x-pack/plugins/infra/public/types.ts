@@ -5,53 +5,99 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as PluginClass } from 'kibana/public';
-import { IHttpFetchError } from 'src/core/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import type { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
+import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
+import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
-} from '../../../../src/plugins/usage_collection/public';
+} from '@kbn/usage-collection-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../plugins/triggers_actions_ui/public';
-import type { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import { MlPluginStart, MlPluginSetup } from '../../ml/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { UnwrapPromise } from '../common/utility_types';
+import type {
+  SourceProviderProps,
+  UseNodeMetricsTableOptions,
+} from './components/infrastructure_node_metrics_tables/shared';
+import { InventoryViewsServiceStart } from './services/inventory_views';
+import { LogViewsServiceStart } from './services/log_views';
+import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
+import { ITelemetryClient } from './services/telemetry';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
-export type InfraClientStartExports = void;
+
+export interface InfraClientStartExports {
+  inventoryViews: InventoryViewsServiceStart;
+  logViews: LogViewsServiceStart;
+  metricsExplorerViews: MetricsExplorerViewsServiceStart;
+  telemetry: ITelemetryClient;
+  ContainerMetricsTable: (
+    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
+  ) => JSX.Element;
+  HostMetricsTable: (
+    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
+  ) => JSX.Element;
+  PodMetricsTable: (
+    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
+  ) => JSX.Element;
+}
 
 export interface InfraClientSetupDeps {
-  dataEnhanced: DataEnhancedSetup;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
+  share: SharePluginSetup;
+  lens: LensPublicStart;
 }
 
 export interface InfraClientStartDeps {
+  cases: CasesUiStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
-  dataEnhanced: DataEnhancedStart;
-  observability: ObservabilityPublicStart;
-  spaces: SpacesPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  usageCollection: UsageCollectionStart;
-  ml: MlPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
   embeddable?: EmbeddableStart;
+  lens: LensPublicStart;
+  ml: MlPluginStart;
+  observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   osquery?: unknown; // OsqueryPluginStart;
+  share: SharePluginStart;
+  spaces: SpacesPluginStart;
+  storage: IStorageWrapper;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  usageCollection: UsageCollectionStart;
+  telemetry: ITelemetryClient;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
@@ -62,6 +108,8 @@ export type InfraClientPluginClass = PluginClass<
   InfraClientSetupDeps,
   InfraClientStartDeps
 >;
+export type InfraClientStartServicesAccessor = InfraClientCoreSetup['getStartServices'];
+export type InfraClientStartServices = UnwrapPromise<ReturnType<InfraClientStartServicesAccessor>>;
 
 export interface InfraHttpError extends IHttpFetchError {
   readonly body?: {
@@ -69,3 +117,17 @@ export interface InfraHttpError extends IHttpFetchError {
     message?: string;
   };
 }
+
+export interface ExecutionTimeRange {
+  gte: number;
+  lte: number;
+}
+
+type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
+type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
+  ? FirstArgument
+  : never;
+export type DragHandleProps = FirstArgumentOf<
+  Exclude<PropsOf<typeof EuiDraggable>['children'], React.ReactElement>
+>['dragHandleProps'];
+export type DropResult = FirstArgumentOf<FirstArgumentOf<typeof EuiDragDropContext>['onDragEnd']>;

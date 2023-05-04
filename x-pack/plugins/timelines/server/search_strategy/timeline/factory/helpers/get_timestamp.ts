@@ -10,8 +10,6 @@ import { EventHit } from '../../../../../common/search_strategy';
 export const getTimestamp = (hit: EventHit): string => {
   if (hit.fields && hit.fields['@timestamp']) {
     return `${hit.fields['@timestamp'][0] ?? ''}`;
-  } else if (hit._source && hit._source['@timestamp']) {
-    return hit._source['@timestamp'];
   }
   return '';
 };

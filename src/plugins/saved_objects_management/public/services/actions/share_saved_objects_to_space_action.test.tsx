@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { spacesPluginMock } from '../../../../../../x-pack/plugins/spaces/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SavedObjectsManagementRecord } from '../types';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 

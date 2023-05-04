@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { RouteDefinitionParams } from '../..';
 import type { CheckPrivileges } from '../../../authorization/types';
@@ -36,6 +36,7 @@ describe('Share Saved Object Permissions', () => {
   describe('GET /internal/security/_share_saved_object_permissions', () => {
     let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
+
     beforeEach(() => {
       const [shareRouteConfig, shareRouteHandler] = router.get.mock.calls.find(
         ([{ path }]) => path === '/internal/security/_share_saved_object_permissions'
@@ -48,6 +49,24 @@ describe('Share Saved Object Permissions', () => {
     it('correctly defines route.', () => {
       expect(routeConfig.options).toBeUndefined();
       expect(routeConfig.validate).toHaveProperty('query');
+    });
+
+    it('returns `not found` when security is diabled', async () => {
+      routeParamsMock.license.isEnabled = jest.fn().mockReturnValue(false);
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          type: 'foo-type',
+        },
+      });
+
+      await expect(
+        routeHandler(mockContext, request, kibanaResponseFactory)
+      ).resolves.toMatchObject({
+        status: 404,
+      });
+
+      expect(routeParamsMock.license.isEnabled).toHaveBeenCalled();
     });
 
     it('returns `true` when the user is authorized globally', async () => {

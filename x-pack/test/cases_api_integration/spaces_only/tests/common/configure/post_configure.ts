@@ -15,12 +15,12 @@ import {
   deleteConfiguration,
   createConfiguration,
   getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should create a configuration in space1', async () => {
       const configuration = await createConfiguration(
-        supertest,
+        supertestWithoutAuth,
         getConfigurationRequest(),
         200,
         authSpace1

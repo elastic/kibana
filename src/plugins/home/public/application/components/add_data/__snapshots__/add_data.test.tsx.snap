@@ -1,116 +1,140 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddData render 1`] = `
-<Fragment>
-  <section
-    aria-labelledby="homDataAdd__title"
-    className="homDataAdd"
+<_EuiPageSection
+  aria-labelledby="homDataAdd__title"
+  bottomBorder={true}
+  className="homDataAdd"
+  paddingSize="xl"
+>
+  <EuiFlexGroup
+    alignItems="flexEnd"
   >
-    <EuiFlexGroup
-      alignItems="flexEnd"
-    >
-      <EuiFlexItem>
-        <EuiTitle
-          size="s"
+    <EuiFlexItem>
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="homDataAdd__title"
         >
-          <h2
-            id="homDataAdd__title"
-          >
-            <FormattedMessage
-              defaultMessage="Get started by adding integrations"
-              id="home.addData.sectionTitle"
-              values={Object {}}
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
-              id="home.addData.text"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFlexGroup
-          gutterSize="m"
-          responsive={false}
-          wrap={true}
+          <FormattedMessage
+            defaultMessage="Get started by adding integrations"
+            id="home.addData.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, play with a sample data set."
+            id="home.addData.text"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup
+        gutterSize="m"
+      >
+        <EuiFlexItem
+          grow={false}
         >
-          <EuiFlexItem
-            grow={false}
-          >
-            <RedirectAppLinks
-              application={
-                Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "integrations": true,
-                    },
+          <RedirectAppLinks
+            application={
+              Object {
+                "capabilities": Object {
+                  "navLinks": Object {
+                    "integrations": true,
                   },
-                }
+                },
               }
-            >
-              <EuiButton
-                data-test-subj="homeAddData"
-                fill={true}
-                href="/app/integrations/browse"
-                iconType="plusInCircle"
-                onClick={[Function]}
-              >
-                <FormattedMessage
-                  defaultMessage="Add integrations"
-                  id="home.addData.addDataButtonLabel"
-                  values={Object {}}
-                />
-              </EuiButton>
-            </RedirectAppLinks>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
+            }
           >
-            <EuiButtonEmpty
-              data-test-subj="addSampleData"
-              href="#/tutorial_directory/sampleData"
-              iconType="documents"
+            <EuiButton
+              color="primary"
+              data-test-subj="homeAddData"
+              fill={true}
+              fullWidth={true}
+              href="/app/integrations/browse"
+              iconType="plusInCircle"
+              onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
-                defaultMessage="Try sample data"
-                id="home.addData.sampleDataButtonLabel"
+                defaultMessage="Add integrations"
+                id="home.addData.addDataButtonLabel"
                 values={Object {}}
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
+            </EuiButton>
+          </RedirectAppLinks>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="addSampleData"
+            href="#/tutorial_directory/sampleData"
+            iconType="documents"
           >
-            <EuiButtonEmpty
-              data-test-subj="uploadFile"
-              href="#/tutorial_directory/fileDataViz"
-              iconType="importAction"
-            >
-              <FormattedMessage
-                defaultMessage="Upload a file"
-                id="home.addData.uploadFileButtonLabel"
-                values={Object {}}
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiImage
-          alt="Illustration of Elastic data integrations"
-          className="homDataAdd__illustration"
-          src="/plugins/kibanaReact/assets/illustration_integrations_lightmode.svg"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </section>
-  <EuiHorizontalRule
-    margin="xxl"
-  />
-</Fragment>
+            <FormattedMessage
+              defaultMessage="Try sample data"
+              id="home.addData.sampleDataButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="uploadFile"
+            href="#/tutorial_directory/fileDataViz"
+            iconType="importAction"
+          >
+            <FormattedMessage
+              defaultMessage="Upload a file"
+              id="home.addData.uploadFileButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <MoveData
+        addBasePath={
+          [MockFunction] {
+            "calls": Array [
+              Array [
+                "/app/integrations/browse",
+              ],
+              Array [
+                "#/tutorial_directory/sampleData",
+              ],
+              Array [
+                "#/tutorial_directory/fileDataViz",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/app/integrations/browse",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/sampleData",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/fileDataViz",
+              },
+            ],
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</_EuiPageSection>
 `;

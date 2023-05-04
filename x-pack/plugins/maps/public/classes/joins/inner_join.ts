@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Query } from 'src/plugins/data/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
-import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
@@ -17,53 +17,44 @@ import {
 import {
   ESTermSourceDescriptor,
   JoinDescriptor,
+  JoinSourceDescriptor,
   TableSourceDescriptor,
-  TermJoinSourceDescriptor,
 } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
-import { ITermJoinSource } from '../sources/term_join_source';
-import { TableSource } from '../sources/table_source';
-import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
+import { IJoinSource } from '../sources/join_sources';
+import { ESTermSource, TableSource } from '../sources/join_sources';
 
-function createJoinTermSource(
-  descriptor: Partial<TermJoinSourceDescriptor> | undefined,
-  inspectorAdapters: Adapters | undefined
-): ITermJoinSource | undefined {
+export function createJoinSource(
+  descriptor: Partial<JoinSourceDescriptor> | undefined
+): IJoinSource | undefined {
   if (!descriptor) {
     return;
   }
 
   if (
     descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
-    'indexPatternId' in descriptor &&
-    'term' in descriptor
+    descriptor.indexPatternId !== undefined &&
+    descriptor.term !== undefined
   ) {
-    return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
+    return new ESTermSource(descriptor as ESTermSourceDescriptor);
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
-    return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);
+    return new TableSource(descriptor as TableSourceDescriptor);
   }
 }
 
 export class InnerJoin {
   private readonly _descriptor: JoinDescriptor;
-  private readonly _rightSource?: ITermJoinSource;
+  private readonly _rightSource?: IJoinSource;
   private readonly _leftField?: IField;
 
   constructor(joinDescriptor: JoinDescriptor, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
-    const inspectorAdapters = leftSource.getInspectorAdapters();
-    this._rightSource = createJoinTermSource(this._descriptor.right, inspectorAdapters);
+    this._rightSource = createJoinSource(this._descriptor.right);
     this._leftField = joinDescriptor.leftField
       ? leftSource.createField({ fieldName: joinDescriptor.leftField })
       : undefined;
-  }
-
-  destroy() {
-    if (this._rightSource) {
-      this._rightSource.destroy();
-    }
   }
 
   hasCompleteConfig() {
@@ -135,7 +126,7 @@ export class InnerJoin {
     return joinKey === undefined || joinKey === null ? null : joinKey.toString();
   }
 
-  getRightJoinSource(): ITermJoinSource {
+  getRightJoinSource(): IJoinSource {
     if (!this._rightSource) {
       throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
     }
@@ -146,8 +137,11 @@ export class InnerJoin {
     return this._descriptor;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
-    return await this.getRightJoinSource().getTooltipProperties(properties);
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ) {
+    return await this.getRightJoinSource().getTooltipProperties(properties, executionContext);
   }
 
   getIndexPatternIds() {

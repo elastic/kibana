@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
@@ -13,7 +13,7 @@ import { SpacesSavedObjectsService } from './saved_objects_service';
 
 describe('SpacesSavedObjectsService', () => {
   describe('#setup', () => {
-    it('registers the "space" saved object type with appropriate mappings and migrations', () => {
+    it('registers the "space" saved object type with appropriate mappings, migrations, and schemas', () => {
       const core = coreMock.createSetup();
       const spacesService = spacesServiceMock.createStartContract();
 
@@ -23,7 +23,11 @@ describe('SpacesSavedObjectsService', () => {
       expect(core.savedObjects.registerType).toHaveBeenCalledTimes(2);
       expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({ name: 'space' })
+        expect.objectContaining({
+          name: 'space',
+          mappings: expect.any(Object),
+          schemas: { '8.8.0': expect.any(Object) },
+        })
       );
       expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
         2,
@@ -31,19 +35,14 @@ describe('SpacesSavedObjectsService', () => {
       );
     });
 
-    it('registers the client wrapper', () => {
+    it('registers the spaces extension', () => {
       const core = coreMock.createSetup();
       const spacesService = spacesServiceMock.createStartContract();
 
       const service = new SpacesSavedObjectsService();
       service.setup({ core, getSpacesService: () => spacesService });
 
-      expect(core.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-      expect(core.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-        Number.MIN_SAFE_INTEGER,
-        'spaces',
-        expect.any(Function)
-      );
+      expect(core.savedObjects.setSpacesExtension).toHaveBeenCalledTimes(1);
     });
   });
 });

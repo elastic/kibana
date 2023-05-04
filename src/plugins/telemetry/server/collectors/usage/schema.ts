@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { LicenseUsage, StaticTelemetryUsage } from './telemetry_usage_collector';
 
 const licenseSchema: MakeSchemaFrom<LicenseUsage> = {

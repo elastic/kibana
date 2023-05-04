@@ -5,36 +5,16 @@
  * 2.0.
  */
 
+import { Response } from 'supertest';
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
+import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
+import {
+  AvailableTotal,
+  JobTypes,
+  LayoutCounts,
+  ReportingUsageType,
+} from '@kbn/reporting-plugin/server/usage/types';
 import { FtrProviderContext } from '../ftr_provider_context';
-
-interface PDFAppCounts {
-  app: {
-    [appName: string]: number;
-  };
-  layout: {
-    [layoutType: string]: number;
-  };
-}
-
-export interface ReportingUsageStats {
-  available: boolean;
-  enabled: boolean;
-  total: number;
-  last_7_days: {
-    total: number;
-    printable_pdf: PDFAppCounts;
-    [jobType: string]: any;
-  };
-  printable_pdf: PDFAppCounts;
-  status: any;
-  [jobType: string]: any;
-}
-
-export interface UsageStats {
-  reporting: ReportingUsageStats;
-}
 
 export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -42,16 +22,14 @@ export function createUsageServices({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    async waitForJobToFinish(downloadReportPath: string) {
+    async waitForJobToFinish(downloadReportPath: string, ignoreFailure = false) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
+      let response: Response & { statusCode?: number };
 
       const statusCode = await new Promise((resolve) => {
         const intervalId = setInterval(async () => {
-          const response = (await supertest
-            .get(downloadReportPath)
-            .responseType('blob')
-            .set('kbn-xsrf', 'xxx')) as any;
+          response = await supertest.get(downloadReportPath).responseType('blob');
           if (response.statusCode === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
           } else if (response.statusCode === 200) {
@@ -65,8 +43,11 @@ export function createUsageServices({ getService }: FtrProviderContext) {
           }
         }, 1500);
       });
-
-      expect(statusCode).to.be(200);
+      if (!ignoreFailure) {
+        const jobInfo = await supertest.get(downloadReportPath.replace(/download/, 'info'));
+        expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
+        expect(statusCode).to.be(200);
+      }
     },
 
     /**
@@ -108,40 +89,59 @@ export function createUsageServices({ getService }: FtrProviderContext) {
     async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {
       await Promise.all(
         jobPaths.map(async (path) => {
+          log.debug(`wait for job to finish: ${path}`);
           await this.waitForJobToFinish(path);
         })
       );
     },
 
-    expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.app[app]).to.be(count);
+    expectRecentPdfAppStats(stats: ReportingUsageType, app: string, count: number) {
+      const actual = stats.last7Days.printable_pdf.app![app as keyof AvailableTotal['app']];
+      log.info(`expecting recent ${app} stats to have ${count} printable pdfs (actual: ${actual})`);
+      expect(actual).to.be(count);
     },
 
-    expectAllTimePdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(stats.reporting.printable_pdf.app[app]).to.be(count);
+    expectAllTimePdfAppStats(stats: ReportingUsageType, app: string, count: number) {
+      const actual = stats.printable_pdf.app![app as keyof AvailableTotal['app']];
+      log.info(
+        `expecting all time pdf ${app} stats to have ${count} printable pdfs (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
     },
 
-    expectRecentPdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.layout[layout]).to.be(count);
+    expectRecentPdfLayoutStats(stats: ReportingUsageType, layout: string, count: number) {
+      const actual = stats.last7Days.printable_pdf.layout![layout as keyof LayoutCounts];
+      log.info(`expecting recent stats to report ${count} ${layout} layouts (actual: ${actual})`);
+      expect(actual).to.be(count);
     },
 
-    expectAllTimePdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.printable_pdf.layout[layout]).to.be(count);
+    expectAllTimePdfLayoutStats(stats: ReportingUsageType, layout: string, count: number) {
+      const actual = stats.printable_pdf.layout![layout as keyof LayoutCounts];
+      log.info(`expecting all time stats to report ${count} ${layout} layouts (actual: ${actual})`);
+      expect(actual).to.be(count);
     },
 
-    expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting.last_7_days[jobType].total).to.be(count);
+    expectRecentJobTypeTotalStats(stats: ReportingUsageType, jobType: string, count: number) {
+      const actual = stats.last7Days[jobType as keyof JobTypes].total;
+      log.info(
+        `expecting recent stats to report ${count} ${jobType} job types (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
     },
 
-    expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting[jobType].total).to.be(count);
+    expectAllTimeJobTypeTotalStats(stats: ReportingUsageType, jobType: string, count: number) {
+      const actual = stats[jobType as keyof JobTypes].total;
+      log.info(
+        `expecting all time stats to report ${count} ${jobType} job types (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
     },
 
-    getCompletedReportCount(stats: UsageStats) {
-      return stats.reporting.status.completed;
+    getCompletedReportCount(stats: ReportingUsageType) {
+      return stats.status.completed;
     },
 
-    expectCompletedReportCount(stats: UsageStats, count: number) {
+    expectCompletedReportCount(stats: ReportingUsageType, count: number) {
       expect(this.getCompletedReportCount(stats)).to.be(count);
     },
   };

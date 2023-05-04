@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from './types';
+import { FieldSpec } from '..';
 
-export const fields: IFieldType[] = [
+export const fields: FieldSpec[] = [
   {
     name: 'bytes',
     type: 'number',
@@ -306,6 +306,29 @@ export const fields: IFieldType[] = [
     readFromDocValues: false,
     subType: { nested: { path: 'nestedField.nestedChild' } },
   },
+  {
+    name: 'mapping issues',
+    type: 'conflict',
+    esTypes: ['text', 'unmapped'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    conflictDescriptions: {
+      text: [
+        '.siem-signals-default-000001',
+        '.siem-signals-default-000002',
+        '.siem-signals-default-000011',
+        '.siem-signals-default-000012',
+      ],
+      unmapped: [
+        '.siem-signals-default-000004',
+        '.siem-signals-default-000005',
+        '.siem-signals-default-000240',
+      ],
+    },
+  },
 ];
 
-export const getField = (name: string) => fields.find((field) => field.name === name) as IFieldType;
+export const getField = (name: string) => fields.find((field) => field.name === name) as FieldSpec;

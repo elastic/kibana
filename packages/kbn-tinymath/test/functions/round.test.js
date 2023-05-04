@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { round } = require('../../src/functions/round.js');
+const { round } = require('../../src/functions/round');
 
 describe('Round', () => {
   it('numbers', () => {

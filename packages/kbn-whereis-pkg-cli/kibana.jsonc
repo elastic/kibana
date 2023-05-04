@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/whereis-pkg-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

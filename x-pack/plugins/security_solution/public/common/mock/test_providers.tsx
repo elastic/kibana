@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import type { DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { createStore, State } from '../store';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { ConsoleManager } from '../../management/components/console';
+import type { State } from '../store';
+import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
-import { FieldHook } from '../../shared_imports';
+import type { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { CASES_FEATURE_ID } from '../../../common/constants';
@@ -34,6 +41,7 @@ interface Props {
   children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
+  cellActions?: Action[];
 }
 
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
@@ -50,17 +58,31 @@ export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
-}) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-        </ThemeProvider>
-      </ReduxStoreProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+  cellActions = [],
+}) => {
+  const queryClient = new QueryClient();
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <QueryClientProvider client={queryClient}>
+              <ExpandableFlyoutProvider>
+                <ConsoleManager>
+                  <CellActionsProvider
+                    getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                  >
+                    <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                  </CellActionsProvider>
+                </ConsoleManager>
+              </ExpandableFlyoutProvider>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 /**
  * A utility for wrapping children in the providers required to run most tests
@@ -70,6 +92,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
+  cellActions = [],
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
@@ -83,7 +106,9 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
               } as unknown as Capabilities
             }
           >
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve(cellActions)}>
+              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            </CellActionsProvider>
           </UserPrivilegesProvider>
         </ThemeProvider>
       </ReduxStoreProvider>

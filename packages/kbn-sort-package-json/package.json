@@ -1,0 +1,6 @@
+{
+  "name": "@kbn/sort-package-json",
+  "private": true,
+  "version": "1.0.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

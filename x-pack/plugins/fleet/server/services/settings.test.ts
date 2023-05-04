@@ -5,59 +5,37 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+import Boom from '@hapi/boom';
+
+import { GLOBAL_SETTINGS_ID, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
+
+import type { Settings } from '../types';
 
 import { appContextService } from './app_context';
-import { getCloudFleetServersHosts, settingsSetup } from './settings';
+import { getSettings, saveSettings, settingsSetup } from './settings';
+import { auditLoggingService } from './audit_logging';
+import { listFleetServerHosts } from './fleet_server_host';
 
 jest.mock('./app_context');
+jest.mock('./audit_logging');
+jest.mock('./fleet_server_host');
 
+const mockListFleetServerHosts = listFleetServerHosts as jest.MockedFunction<
+  typeof listFleetServerHosts
+>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
-
-describe('getCloudFleetServersHosts', () => {
-  afterEach(() => {
-    mockedAppContextService.getCloud.mockReset();
-  });
-  it('should return undefined if cloud is not setup', () => {
-    expect(getCloudFleetServersHosts()).toBeUndefined();
-  });
-
-  it('should return fleet server hosts if cloud is correctly setup with default port == 443', () => {
-    mockedAppContextService.getCloud.mockReturnValue({
-      cloudId:
-        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
-      isCloudEnabled: true,
-      deploymentId: 'deployment-id-1',
-      apm: {},
-    });
-
-    expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
-      Array [
-        "https://deployment-id-1.fleet.us-east-1.aws.found.io",
-      ]
-    `);
-  });
-
-  it('should return fleet server hosts if cloud is correctly setup with a default port', () => {
-    mockedAppContextService.getCloud.mockReturnValue({
-      cloudId:
-        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
-      isCloudEnabled: true,
-      deploymentId: 'deployment-id-1',
-      apm: {},
-    });
-
-    expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
-      Array [
-        "https://deployment-id-1.fleet.test.fr:9243",
-      ]
-    `);
-  });
-});
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
 
 describe('settingsSetup', () => {
   afterEach(() => {
     mockedAppContextService.getCloud.mockReset();
+    mockedAppContextService.getConfig.mockReset();
   });
   it('should create settings if there is no settings', async () => {
     const soClientMock = savedObjectsClientMock.create();
@@ -81,7 +59,7 @@ describe('settingsSetup', () => {
     expect(soClientMock.create).toBeCalled();
   });
 
-  it('should do nothing if there is settings and no default fleet server hosts', async () => {
+  it('should do nothing if there is settings', async () => {
     const soClientMock = savedObjectsClientMock.create();
 
     soClientMock.find.mockResolvedValue({
@@ -106,102 +84,145 @@ describe('settingsSetup', () => {
       type: 'so_type',
     });
 
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [
+        {
+          id: 'fleet-server-host',
+          name: 'Fleet Server Host',
+          is_default: true,
+          is_preconfigured: false,
+          host_urls: ['http://localhost:8220'],
+        },
+      ],
+      page: 1,
+      perPage: 10,
+      total: 1,
+    });
+
     await settingsSetup(soClientMock);
 
     expect(soClientMock.create).not.toBeCalled();
   });
+});
 
-  it('should update settings if there is settings without fleet server hosts and default fleet server hosts', async () => {
-    const soClientMock = savedObjectsClientMock.create();
-    mockedAppContextService.getCloud.mockReturnValue({
-      cloudId:
-        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
-      isCloudEnabled: true,
-      deploymentId: 'deployment-id-1',
-      apm: {},
-    });
+describe('getSettings', () => {
+  it('should call audit logger', async () => {
+    const soClient = savedObjectsClientMock.create();
 
-    soClientMock.find.mockResolvedValue({
-      total: 1,
-      page: 0,
-      per_page: 10,
+    soClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
-          id: 'defaultsettings',
+          id: GLOBAL_SETTINGS_ID,
           attributes: {},
-          type: 'so_type',
           references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
           score: 0,
         },
       ],
-    });
-
-    soClientMock.update.mockResolvedValue({
-      id: 'updated',
-      attributes: {},
-      references: [],
-      type: 'so_type',
-    });
-
-    soClientMock.create.mockResolvedValue({
-      id: 'created',
-      attributes: {},
-      references: [],
-      type: 'so_type',
-    });
-
-    await settingsSetup(soClientMock);
-
-    expect(soClientMock.create).not.toBeCalled();
-    expect(soClientMock.update).toBeCalledWith('ingest_manager_settings', 'defaultsettings', {
-      fleet_server_hosts: ['https://deployment-id-1.fleet.test.fr:9243'],
-    });
-  });
-
-  it('should not update settings if there is settings with fleet server hosts and default fleet server hosts', async () => {
-    const soClientMock = savedObjectsClientMock.create();
-    mockedAppContextService.getCloud.mockReturnValue({
-      cloudId:
-        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
-      isCloudEnabled: true,
-      deploymentId: 'deployment-id-1',
-      apm: {},
-    });
-
-    soClientMock.find.mockResolvedValue({
-      total: 1,
-      page: 0,
+      page: 1,
       per_page: 10,
-      saved_objects: [
+      total: 1,
+    });
+
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [
         {
-          id: 'defaultsettings',
-          attributes: {
-            fleet_server_hosts: ['http://fleetserver:1234'],
+          id: 'fleet-server-host',
+          name: 'Fleet Server Host',
+          is_default: true,
+          is_preconfigured: false,
+          host_urls: ['http://localhost:8220'],
+        },
+      ],
+      page: 1,
+      perPage: 10,
+      total: 1,
+    });
+
+    await getSettings(soClient);
+  });
+});
+
+describe('saveSettings', () => {
+  describe('when settings object exists', () => {
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      const newData: Partial<Omit<Settings, 'id'>> = {
+        fleet_server_hosts: ['http://localhost:8220'],
+      };
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: GLOBAL_SETTINGS_ID,
+            attributes: {},
+            references: [],
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            score: 0,
           },
-          type: 'so_type',
+        ],
+        page: 1,
+        per_page: 10,
+        total: 1,
+      });
+
+      soClient.update.mockResolvedValueOnce({
+        id: GLOBAL_SETTINGS_ID,
+        attributes: {},
+        references: [],
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      });
+
+      mockListFleetServerHosts.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'fleet-server-host',
+            name: 'Fleet Server Host',
+            is_default: true,
+            is_preconfigured: false,
+            host_urls: ['http://localhost:8220'],
+          },
+        ],
+        page: 1,
+        perPage: 10,
+        total: 1,
+      });
+
+      await saveSettings(soClient, newData);
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'create',
+        id: GLOBAL_SETTINGS_ID,
+        savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    describe('when settings object does not exist', () => {
+      it('should call audit logger', async () => {
+        const soClient = savedObjectsClientMock.create();
+
+        const newData: Partial<Omit<Settings, 'id'>> = {
+          fleet_server_hosts: ['http://localhost:8220'],
+        };
+
+        soClient.find.mockRejectedValueOnce(Boom.notFound('not found'));
+
+        soClient.create.mockResolvedValueOnce({
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {},
           references: [],
-          score: 0,
-        },
-      ],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        });
+
+        await saveSettings(soClient, newData);
+
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+          action: 'create',
+          id: GLOBAL_SETTINGS_ID,
+          savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        });
+      });
     });
-
-    soClientMock.update.mockResolvedValue({
-      id: 'updated',
-      attributes: {},
-      references: [],
-      type: 'so_type',
-    });
-
-    soClientMock.create.mockResolvedValue({
-      id: 'created',
-      attributes: {},
-      references: [],
-      type: 'so_type',
-    });
-
-    await settingsSetup(soClientMock);
-
-    expect(soClientMock.create).not.toBeCalled();
-    expect(soClientMock.update).not.toBeCalled();
   });
 });

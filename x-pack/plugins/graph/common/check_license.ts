@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ILicense } from '../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 // Can be used in switch statements to ensure we perform exhaustive checks, see
 // https://www.typescriptlang.org/docs/handbook/advanced-types.html#exhaustiveness-checking

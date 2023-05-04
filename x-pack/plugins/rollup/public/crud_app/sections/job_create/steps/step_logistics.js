@@ -25,8 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CronEditor } from '../../../../../../../../src/plugins/es_ui_shared/public';
-import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { CronEditor } from '@kbn/es-ui-shared-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 
 import { indices } from '../../../../shared_imports';
 import { documentationLinks } from '../../../services/documentation_links';

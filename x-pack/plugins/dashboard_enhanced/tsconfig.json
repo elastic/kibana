@@ -1,24 +1,30 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
   ],
-  "references": [
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/dashboard/tsconfig.json" },
-    { "path": "../../../src/plugins/share/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json"},
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../embeddable_enhanced/tsconfig.json" },
-    { "path": "../ui_actions_enhanced/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/share-plugin",
+    "@kbn/data-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-enhanced-plugin",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/unified-search-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/image-embeddable-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

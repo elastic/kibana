@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { caseFn } from '../../../canvas_plugin_src/functions/common/case';
+import type { caseFn } from '../../../canvas_plugin_src/functions/common/case';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

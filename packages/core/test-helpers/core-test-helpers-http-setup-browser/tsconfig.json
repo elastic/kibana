@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-fatal-errors-browser-mocks",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-http-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

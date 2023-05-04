@@ -41,6 +41,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
     if (showJsonFlyout === true) {
       setCategorizationAnalyzerString(JSON.stringify(jobCreator.categorizationAnalyzer, null, 2));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
   function toggleJsonFlyout() {

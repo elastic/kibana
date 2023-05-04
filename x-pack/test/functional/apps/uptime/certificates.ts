@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { getSha256 } from '../../../api_integration/apis/uptime/rest/helper/make_tls';
+import { UPTIME_HEARTBEAT_DATA } from './overview';
 
 const BLANK_INDEX_PATH = 'x-pack/test/functional/es_archives/uptime/blank';
 
@@ -18,17 +19,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // FLAKY https://github.com/elastic/kibana/issues/114261
-  describe.skip('certificates', function () {
+  describe('certificates', function () {
     describe('empty certificates', function () {
       before(async () => {
-        await esArchiver.load(BLANK_INDEX_PATH);
-        await makeCheck({ es });
+        await esArchiver.load(UPTIME_HEARTBEAT_DATA);
         await uptime.goToRoot(true);
       });
 
       after(async () => {
-        await esArchiver.unload(BLANK_INDEX_PATH);
+        await esArchiver.unload(UPTIME_HEARTBEAT_DATA);
       });
 
       it('go to certs page', async () => {

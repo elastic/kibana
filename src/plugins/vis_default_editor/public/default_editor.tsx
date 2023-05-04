@@ -13,10 +13,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
 
-import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { EditorRenderProps } from 'src/plugins/visualize/public';
-import { KibanaContextProvider } from '../../kibana_react/public';
-import { Storage } from '../../kibana_utils/public';
+import {
+  Vis,
+  VisualizeEmbeddableContract,
+  EditorRenderProps,
+} from '@kbn/visualizations-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
@@ -59,7 +62,6 @@ function DefaultEditor({
     if (!visRef.current) {
       return;
     }
-
     embeddableHandler.render(visRef.current).then(() => {
       setTimeout(async () => {
         eventEmitter.emit('embeddableRendered');

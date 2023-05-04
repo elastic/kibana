@@ -19,28 +19,32 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
   EuiAccordion,
+  EuiText,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, toExpression } from '@kbn/interpreter';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import {
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from '@kbn/expressions-plugin/public';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
   Visualization,
   FramePublicAPI,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
+  DatasourceLayers,
+  UserMessagesGetter,
+  FrameDatasourceAPI,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import {
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public';
-import { prependDatasourceExpression } from './expression_helpers';
-import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import { getDatasourceExpressionsByLayers } from './expression_helpers';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
+import { getMissingIndexPattern } from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -53,18 +57,49 @@ import {
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
-  selectActiveData,
   selectDatasourceStates,
+  selectChangesApplied,
+  applyChanges,
+  selectStagedActiveData,
+  selectFrameDatasourceAPI,
 } from '../../state_management';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
+
+const configurationsValid = (
+  currentDataSource: Datasource | null,
+  currentDatasourceState: unknown,
+  currentVisualization: Visualization,
+  currentVisualizationState: unknown,
+  frame: FrameDatasourceAPI
+): boolean => {
+  try {
+    return (
+      filterAndSortUserMessages(
+        [
+          ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
+            frame,
+            setState: () => {},
+          }) ?? []),
+          ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
+        ],
+        undefined,
+        { severity: 'error' }
+      ).length === 0
+    );
+  } catch (e) {
+    return false;
+  }
+};
 
 export interface SuggestionPanelProps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
+  getUserMessages: UserMessagesGetter;
 }
 
 const PreviewRenderer = ({
@@ -83,7 +118,7 @@ const PreviewRenderer = ({
       <EuiIconTip
         size="xl"
         color="danger"
-        type="alert"
+        type="warning"
         aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
           defaultMessage: 'Preview rendering failed',
         })}
@@ -96,7 +131,6 @@ const PreviewRenderer = ({
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
@@ -106,6 +140,7 @@ const PreviewRenderer = ({
         <ExpressionRendererComponent
           className="lnsSuggestionPanel__expressionRenderer"
           padding="s"
+          renderMode="preview"
           expression={expression}
           debounce={2000}
           renderError={() => {
@@ -139,10 +174,9 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
-          hasBorder
+          hasBorder={true}
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
           })}
           paddingSize="none"
@@ -150,6 +184,8 @@ const SuggestionPreview = ({
           onClick={onSelect}
           aria-current={!!selected}
           aria-label={preview.title}
+          element="div"
+          role="listitem"
         >
           {preview.expression || preview.error ? (
             <PreviewRenderer
@@ -182,14 +218,20 @@ export function SuggestionPanel({
   visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
+  getUserMessages,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
-  const activeData = useLensSelector(selectActiveData);
+  const activeData = useLensSelector(selectStagedActiveData);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+
+  const frameDatasourceAPI = useLensSelector((state) =>
+    selectFrameDatasourceAPI(state, datasourceMap)
+  );
+  const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
@@ -202,7 +244,8 @@ export function SuggestionPanel({
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+    frame.dataViews.indexPatterns
   );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(() => {
     const newSuggestions = missingIndexPatterns.length
@@ -216,6 +259,7 @@ export function SuggestionPanel({
             : undefined,
           visualizationState: currentVisualization.state,
           activeData,
+          dataViews: frame.dataViews,
         })
           .filter(
             ({
@@ -223,17 +267,17 @@ export function SuggestionPanel({
               visualizationId,
               visualizationState: suggestionVisualizationState,
               datasourceState: suggestionDatasourceState,
-              datasourceId: suggetionDatasourceId,
+              datasourceId: suggestionDatasourceId,
             }) => {
               return (
                 !hide &&
-                validateDatasourceAndVisualization(
-                  suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                configurationsValid(
+                  suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frame
-                ) == null
+                  frameDatasourceAPI
+                )
               );
             }
           )
@@ -249,16 +293,11 @@ export function SuggestionPanel({
             ),
           }));
 
-    const validationErrors = validateDatasourceAndVisualization(
-      activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-      activeDatasourceId && currentDatasourceStates[activeDatasourceId]?.state,
-      currentVisualization.activeId ? visualizationMap[currentVisualization.activeId] : null,
-      currentVisualization.state,
-      frame
-    );
+    const hasErrors =
+      getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length > 0;
 
     const newStateExpression =
-      currentVisualization.state && currentVisualization.activeId && !validationErrors
+      currentVisualization.state && currentVisualization.activeId && !hasErrors
         ? preparePreviewExpression(
             { visualizationState: currentVisualization.state },
             visualizationMap[currentVisualization.activeId],
@@ -271,7 +310,7 @@ export function SuggestionPanel({
     return {
       suggestions: newSuggestions,
       currentStateExpression: newStateExpression,
-      currentStateError: validationErrors,
+      currentStateError: hasErrors,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -281,6 +320,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
@@ -324,11 +364,84 @@ export function SuggestionPanel({
 
   function rollbackToCurrentVisualization() {
     if (lastSelectedSuggestion !== -1) {
-      trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatchLens(rollbackSuggestion());
+      dispatchLens(applyChanges());
     }
   }
+
+  const renderApplyChangesPrompt = () => (
+    <EuiPanel hasShadow={false} className="lnsSuggestionPanel__applyChangesPrompt" paddingSize="m">
+      <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
+        <p>
+          <FormattedMessage
+            id="xpack.lens.suggestions.applyChangesPrompt"
+            defaultMessage="Latest changes must be applied to view suggestions."
+          />
+        </p>
+      </EuiText>
+
+      <EuiButtonEmpty
+        iconType="checkInCircleFilled"
+        size="s"
+        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        onClick={() => dispatchLens(applyChanges())}
+        data-test-subj="lnsApplyChanges__suggestions"
+      >
+        <FormattedMessage
+          id="xpack.lens.suggestions.applyChangesLabel"
+          defaultMessage="Apply changes"
+        />
+      </EuiButtonEmpty>
+    </EuiPanel>
+  );
+
+  const renderSuggestionsUI = () => (
+    <>
+      {currentVisualization.activeId && !hideSuggestions && (
+        <SuggestionPreview
+          preview={{
+            error: currentStateError,
+            expression: currentStateExpression,
+            icon:
+              visualizationMap[currentVisualization.activeId].getDescription(
+                currentVisualization.state
+              ).icon || 'empty',
+            title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+              defaultMessage: 'Current visualization',
+            }),
+          }}
+          ExpressionRenderer={AutoRefreshExpressionRenderer}
+          onSelect={rollbackToCurrentVisualization}
+          selected={lastSelectedSuggestion === -1}
+          showTitleAsLabel
+        />
+      )}
+      {!hideSuggestions &&
+        suggestions.map((suggestion, index) => {
+          return (
+            <SuggestionPreview
+              preview={{
+                expression: suggestion.previewExpression,
+                icon: suggestion.previewIcon,
+                title: suggestion.title,
+              }}
+              ExpressionRenderer={AutoRefreshExpressionRenderer}
+              key={index}
+              onSelect={() => {
+                if (lastSelectedSuggestion === index) {
+                  rollbackToCurrentVisualization();
+                } else {
+                  setLastSelectedSuggestion(index);
+                  switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                }
+              }}
+              selected={index === lastSelectedSuggestion}
+            />
+          );
+        })}
+    </>
+  );
 
   return (
     <div className="lnsSuggestionPanel">
@@ -359,7 +472,6 @@ export function SuggestionPanel({
                 size="xs"
                 iconType="refresh"
                 onClick={() => {
-                  trackUiEvent('suggestion_confirmed');
                   dispatchLens(submitSuggestion());
                 }}
               >
@@ -371,50 +483,13 @@ export function SuggestionPanel({
           )
         }
       >
-        <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
-          {currentVisualization.activeId && !hideSuggestions && (
-            <SuggestionPreview
-              preview={{
-                error: currentStateError != null,
-                expression: currentStateExpression,
-                icon:
-                  visualizationMap[currentVisualization.activeId].getDescription(
-                    currentVisualization.state
-                  ).icon || 'empty',
-                title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-                  defaultMessage: 'Current visualization',
-                }),
-              }}
-              ExpressionRenderer={AutoRefreshExpressionRenderer}
-              onSelect={rollbackToCurrentVisualization}
-              selected={lastSelectedSuggestion === -1}
-              showTitleAsLabel
-            />
-          )}
-          {!hideSuggestions &&
-            suggestions.map((suggestion, index) => {
-              return (
-                <SuggestionPreview
-                  preview={{
-                    expression: suggestion.previewExpression,
-                    icon: suggestion.previewIcon,
-                    title: suggestion.title,
-                  }}
-                  ExpressionRenderer={AutoRefreshExpressionRenderer}
-                  key={index}
-                  onSelect={() => {
-                    trackUiEvent('suggestion_clicked');
-                    if (lastSelectedSuggestion === index) {
-                      rollbackToCurrentVisualization();
-                    } else {
-                      setLastSelectedSuggestion(index);
-                      switchToSuggestion(dispatchLens, suggestion);
-                    }
-                  }}
-                  selected={index === lastSelectedSuggestion}
-                />
-              );
-            })}
+        <div
+          className="lnsSuggestionPanel__suggestions"
+          data-test-subj="lnsSuggestionsPanel"
+          role="list"
+          tabIndex={0}
+        >
+          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
         </div>
       </EuiAccordion>
     </div>
@@ -432,41 +507,57 @@ function getPreviewExpression(
   visualizableState: VisualizableState,
   visualization: Visualization,
   datasources: Record<string, Datasource>,
+  datasourceStates: DatasourceStates,
   frame: FramePublicAPI
 ) {
   if (!visualization.toPreviewExpression) {
     return null;
   }
 
-  const suggestionFrameApi: FramePublicAPI = { datasourceLayers: { ...frame.datasourceLayers } };
+  const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
+    datasourceLayers: { ...frame.datasourceLayers },
+  };
+  try {
+    // use current frame api and patch apis for changed datasource layers
+    if (
+      visualizableState.keptLayerIds &&
+      visualizableState.datasourceId &&
+      visualizableState.datasourceState
+    ) {
+      const datasource = datasources[visualizableState.datasourceId];
+      const datasourceState = visualizableState.datasourceState;
+      const updatedLayerApis: DatasourceLayers = pick(
+        frame.datasourceLayers,
+        visualizableState.keptLayerIds
+      );
+      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
+      changedLayers.forEach((layerId) => {
+        if (updatedLayerApis[layerId]) {
+          updatedLayerApis[layerId] = datasource.getPublicAPI({
+            layerId,
+            state: datasourceState,
+            indexPatterns: frame.dataViews.indexPatterns,
+          });
+        }
+      });
+    }
 
-  // use current frame api and patch apis for changed datasource layers
-  if (
-    visualizableState.keptLayerIds &&
-    visualizableState.datasourceId &&
-    visualizableState.datasourceState
-  ) {
-    const datasource = datasources[visualizableState.datasourceId];
-    const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
-      frame.datasourceLayers,
-      visualizableState.keptLayerIds
+    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+      datasources,
+      datasourceStates,
+      frame.dataViews.indexPatterns,
+      frame.dateRange
     );
-    const changedLayers = datasource.getLayers(visualizableState.datasourceState);
-    changedLayers.forEach((layerId) => {
-      if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI({
-          layerId,
-          state: datasourceState,
-        });
-      }
-    });
-  }
 
-  return visualization.toPreviewExpression(
-    visualizableState.visualizationState,
-    suggestionFrameApi.datasourceLayers
-  );
+    return visualization.toPreviewExpression(
+      visualizableState.visualizationState,
+      suggestionFrameApi.datasourceLayers,
+      datasourceExpressionsByLayers ?? undefined
+    );
+  } catch (error) {
+    showMemoizedErrorNotification(error);
+    return null;
+  }
 }
 
 function preparePreviewExpression(
@@ -479,10 +570,21 @@ function preparePreviewExpression(
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
 
+  const datasourceStatesWithSuggestions = suggestionDatasourceId
+    ? {
+        ...datasourceStates,
+        [suggestionDatasourceId]: {
+          isLoading: false,
+          state: suggestionDatasourceState,
+        },
+      }
+    : datasourceStates;
+
   const expression = getPreviewExpression(
     visualizableState,
     visualization,
     datasourceMap,
+    datasourceStatesWithSuggestions,
     framePublicAPI
   );
 
@@ -490,19 +592,5 @@ function preparePreviewExpression(
     return;
   }
 
-  const expressionWithDatasource = prependDatasourceExpression(
-    expression,
-    datasourceMap,
-    suggestionDatasourceId
-      ? {
-          ...datasourceStates,
-          [suggestionDatasourceId]: {
-            isLoading: false,
-            state: suggestionDatasourceState,
-          },
-        }
-      : datasourceStates
-  );
-
-  return expressionWithDatasource;
+  return typeof expression === 'string' ? fromExpression(expression) : expression;
 }

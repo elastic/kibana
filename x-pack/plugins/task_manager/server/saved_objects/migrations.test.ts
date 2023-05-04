@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { TaskInstanceWithDeprecatedFields } from '../task';
 
 const migrationContext = migrationMocks.createContext();
@@ -108,6 +108,165 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('8.2.0', () => {
+    test('resets attempts and status of a "failed" alerting tasks without schedule interval', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'failed',
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 0,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('resets attempts and status of a "running" alerting tasks without schedule interval', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'running',
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 0,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('does not update the tasks that are not "failed"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'idle',
+        attempts: 3,
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not update the tasks that are not "failed" and has a schedule', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'idle',
+        attempts: 3,
+        schedule: { interval: '1000' },
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('resets "unrecognized" status to "idle" when task type is not in REMOVED_TYPES list', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someValidTask',
+        status: 'unrecognized',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('does not modify "unrecognized" status when task type is in REMOVED_TYPES list', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'sampleTaskRemovedType',
+        status: 'unrecognized',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not modify document when status is "running"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someTask',
+        status: 'running',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not modify document when status is "idle"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someTask',
+        status: 'idle',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not modify document when status is "failed"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someTask',
+        status: 'failed',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+  });
+
+  describe('8.5.0', () => {
+    test('adds enabled: true to tasks that are running, claiming, or idle', () => {
+      const migration850 = getMigrations()['8.5.0'];
+      const activeTasks = [
+        getMockData({
+          status: 'running',
+        }),
+        getMockData({
+          status: 'claiming',
+        }),
+        getMockData({
+          status: 'idle',
+        }),
+      ];
+      activeTasks.forEach((task) => {
+        expect(migration850(task, migrationContext)).toEqual({
+          ...task,
+          attributes: {
+            ...task.attributes,
+            enabled: true,
+          },
+        });
+      });
+    });
+
+    test('does not modify tasks that are failed or unrecognized', () => {
+      const migration850 = getMigrations()['8.5.0'];
+      const inactiveTasks = [
+        getMockData({
+          status: 'failed',
+        }),
+        getMockData({
+          status: 'unrecognized',
+        }),
+      ];
+      inactiveTasks.forEach((task) => {
+        expect(migration850(task, migrationContext)).toEqual(task);
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
@@ -163,7 +322,7 @@ function getMockData(
       ...overwrites,
     },
     updated_at: getUpdatedAt(),
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'task',
   };
 }

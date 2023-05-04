@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/third-party-lens-navigation-prompt-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "thirdPartyLensNavigationPrompt",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "third_party_lens_navigation_prompt"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "dataViews",
+      "embeddable",
+      "developerExamples"
+    ]
+  }
+}

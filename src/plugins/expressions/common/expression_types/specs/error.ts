@@ -22,8 +22,14 @@ export type ExpressionValueError = ExpressionValueBoxed<
   }
 >;
 
-export const isExpressionValueError = (value: unknown): value is ExpressionValueError =>
-  getType(value) === 'error';
+export const isExpressionValueError = (value: unknown): value is ExpressionValueError => {
+  try {
+    return getType(value) === 'error';
+  } catch (e) {
+    // nothing to be here
+  }
+  return false;
+};
 
 /**
  * @deprecated

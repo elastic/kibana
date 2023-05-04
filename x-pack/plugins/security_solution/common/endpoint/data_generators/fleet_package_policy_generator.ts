@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
-import { PackagePolicy } from '../../../../fleet/common';
 import { policyFactory } from '../models/policy_config';
-import { PolicyData } from '../types';
+import type { PolicyData } from '../types';
 
 type PartialPackagePolicy = Partial<Omit<PackagePolicy, 'inputs'>> & {
   inputs?: PackagePolicy['inputs'];
@@ -30,7 +30,6 @@ export class FleetPackagePolicyGenerator extends BaseDataGenerator<PackagePolicy
       updated_by: this.randomUser(),
       policy_id: this.seededUUIDv4(), // agent policy id
       enabled: true,
-      output_id: '',
       inputs: [],
       namespace: 'default',
       package: {

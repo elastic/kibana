@@ -11,14 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
   EuiLink,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiButton,
   EuiPopover,
   EuiContextMenu,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { ScopedHistory } from '@kbn/core/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
 

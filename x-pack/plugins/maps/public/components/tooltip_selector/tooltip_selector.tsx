@@ -192,9 +192,7 @@ export class TooltipSelector extends Component<Props, State> {
                   {(provided, state) => (
                     <div
                       className={classNames('mapTooltipSelector__propertyRow', {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         'mapTooltipSelector__propertyRow-isDragging': state.isDragging,
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver,
                       })}
                     >

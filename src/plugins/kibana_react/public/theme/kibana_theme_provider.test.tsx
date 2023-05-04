@@ -12,8 +12,8 @@ import type { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
-import type { CoreTheme } from 'src/core/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { CoreTheme } from '@kbn/core/public';
 import { KibanaThemeProvider } from './kibana_theme_provider';
 
 describe('KibanaThemeProvider', () => {

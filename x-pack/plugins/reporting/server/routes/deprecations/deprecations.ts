@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RequestHandler } from 'src/core/server';
+import type { Logger, RequestHandler } from '@kbn/core/server';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
 } from '../../../common/constants';
-import { IlmPolicyStatusResponse } from '../../../common/types';
-import { ReportingCore } from '../../core';
-import { IlmPolicyManager, LevelLogger as Logger } from '../../lib';
+import type { IlmPolicyStatusResponse } from '../../../common/types';
+import type { ReportingCore } from '../../core';
+import { IlmPolicyManager } from '../../lib';
 import { deprecations } from '../../lib/deprecations';
+import { getCounters } from '../lib';
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
@@ -27,21 +27,19 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         return handler(ctx, req, res);
       }
 
-      const {
-        core: { elasticsearch },
-      } = ctx;
+      const { elasticsearch } = await ctx.core;
 
       const store = await reporting.getStore();
 
       try {
-        const { body } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
           body: {
             index: [
               {
                 privileges: ['manage'], // required to do anything with the reporting indices
                 names: [store.getReportingIndexPattern()],
                 allow_restricted_indices: true,
-              } as unknown as SecurityHasPrivilegesIndexPrivilegesCheck, // TODO: Needed until `allow_restricted_indices` is added to the types.
+              },
             ],
           },
         });
@@ -50,6 +48,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
           return res.notFound();
         }
       } catch (e) {
+        logger.error(e);
         return res.customError({ statusCode: e.statusCode, body: e.message });
       }
 
@@ -58,50 +57,58 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   };
 
   router.get(
-    {
-      path: API_GET_ILM_POLICY_STATUS,
-      validate: false,
-    },
-    authzWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client: scopedClient },
-          },
-        },
-        _req,
-        res
-      ) => {
-        const checkIlmMigrationStatus = () => {
-          return deprecations.checkIlmMigrationStatus({
-            reportingCore: reporting,
-            // We want to make the current status visible to all reporting users
-            elasticsearchClient: scopedClient.asInternalUser,
-          });
+    { path: API_GET_ILM_POLICY_STATUS, validate: false },
+    authzWrapper(async ({ core }, req, res) => {
+      const counters = getCounters(
+        req.route.method,
+        API_GET_ILM_POLICY_STATUS,
+        reporting.getUsageCounter()
+      );
+
+      const {
+        elasticsearch: { client: scopedClient },
+      } = await core;
+      const checkIlmMigrationStatus = () => {
+        return deprecations.checkIlmMigrationStatus({
+          reportingCore: reporting,
+          // We want to make the current status visible to all reporting users
+          elasticsearchClient: scopedClient.asInternalUser,
+        });
+      };
+
+      try {
+        const response: IlmPolicyStatusResponse = {
+          status: await checkIlmMigrationStatus(),
         };
 
-        try {
-          const response: IlmPolicyStatusResponse = {
-            status: await checkIlmMigrationStatus(),
-          };
-          return res.ok({ body: response });
-        } catch (e) {
-          return res.customError({
-            statusCode: e?.statusCode ?? 500,
-            body: { message: e.message },
-          });
-        }
+        counters.usageCounter();
+
+        return res.ok({ body: response });
+      } catch (e) {
+        logger.error(e);
+        const statusCode = e?.statusCode ?? 500;
+        counters.errorCounter(statusCode);
+        return res.customError({
+          body: { message: e.message },
+          statusCode,
+        });
       }
-    )
+    })
   );
 
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
-    authzWrapper(async ({ core: { elasticsearch } }, _req, res) => {
+    authzWrapper(async ({ core }, req, res) => {
+      const counters = getCounters(
+        req.route.method,
+        API_GET_ILM_POLICY_STATUS,
+        reporting.getUsageCounter()
+      );
+
       const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },
-      } = elasticsearch;
+      } = (await core).elasticsearch;
 
       const scopedIlmPolicyManager = IlmPolicyManager.create({
         client,
@@ -124,11 +131,16 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         await client.indices.putSettings({
           index: indexPattern,
           body: {
-            'index.lifecycle': {
-              name: ILM_POLICY_NAME,
+            index: {
+              lifecycle: {
+                name: ILM_POLICY_NAME,
+              },
             },
           },
         });
+
+        counters.usageCounter();
+
         return res.ok();
       } catch (err) {
         logger.error(err);
@@ -136,14 +148,18 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         if (err instanceof errors.ResponseError) {
           // If there were no reporting indices to update, that's OK because then there is nothing to migrate
           if (err.statusCode === 404) {
+            counters.errorCounter(undefined, 404);
             return res.ok();
           }
+
+          const statusCode = err.statusCode ?? 500;
+          counters.errorCounter(undefined, statusCode);
           return res.customError({
-            statusCode: err.statusCode ?? 500,
             body: {
               message: err.message,
               name: err.name,
             },
+            statusCode,
           });
         }
 

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { taggingApiMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
+export { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';

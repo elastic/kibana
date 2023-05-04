@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_JAVA_HEAP_MEMORY_MAX,
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_HEAP_MEMORY_USED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
+  VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
+  LABEL_TYPE,
   AGENT_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+} from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   heapMemoryUsed: {
@@ -55,37 +61,61 @@ const chartBase: ChartBase = {
 export function getHeapMemoryChart({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const maxMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT
+    : METRIC_JAVA_HEAP_MEMORY_MAX;
+
+  const committedMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED
+    : METRIC_JAVA_HEAP_MEMORY_COMMITTED;
+
+  const usedMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE
+    : METRIC_JAVA_HEAP_MEMORY_USED;
+
+  const additionalFilters = isOpenTelemetry
+    ? [
+        { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
+        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP } },
+      ]
+    : [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }];
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     serviceNodeName,
     start,
     end,
     chartBase,
     aggs: {
-      heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
+      heapMemoryUsed: { avg: { field: usedMemoryField } },
       heapMemoryCommitted: {
-        avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
+        avg: { field: committedMemoryField },
       },
-      heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
+      heapMemoryMax: { avg: { field: maxMemoryField } },
     },
-    additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
+    additionalFilters,
     operationName: 'get_heap_memory_charts',
   });
 }

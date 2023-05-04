@@ -17,7 +17,7 @@ import { docLinks } from '../../../../shared/doc_links';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 
-import { EmptyState } from './';
+import { EmptyState } from '.';
 
 describe('EmptyState', () => {
   it('renders', () => {

@@ -10,8 +10,9 @@ import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
-import { createListStream, createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
   createStats,
@@ -52,7 +53,7 @@ export async function saveAction({
     // export and save the matching indices to mappings.json
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream({ client, stats, keepIndexNames }),
+      createGenerateIndexRecordsStream({ client, stats, keepIndexNames, log }),
       ...createFormatArchiveStreams(),
       createWriteStream(resolve(outputDir, 'mappings.json')),
     ] as [Readable, ...Writable[]]),

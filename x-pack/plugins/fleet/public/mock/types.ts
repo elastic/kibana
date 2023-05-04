@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import type { FleetSetupDeps, FleetStart, FleetStartDeps, FleetStartServices } from '../plugin';
 

@@ -15,6 +15,11 @@ export function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugi
 }
 
 export { config } from './config';
-export type { Layout } from './layouts';
+export type {
+  PdfScreenshotOptions,
+  PdfScreenshotResult,
+  PngScreenshotOptions,
+  PngScreenshotResult,
+} from './formats';
 export type { ScreenshottingStart } from './plugin';
 export type { ScreenshotOptions, ScreenshotResult } from './screenshots';

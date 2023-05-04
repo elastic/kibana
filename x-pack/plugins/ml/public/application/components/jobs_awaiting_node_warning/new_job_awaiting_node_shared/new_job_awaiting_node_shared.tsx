@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { mlApiServicesProvider } from '../../../services/ml_api_service';
 import { HttpService } from '../../../services/http_service';
@@ -52,6 +52,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
       // eslint-disable-next-line no-console
       console.error('Could not determine ML node information', error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIds]);
 
   const checkCloudInfo = useCallback(async () => {
@@ -62,9 +63,11 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
     try {
       const resp = await ml.mlInfo();
       const cloudId = resp.cloudId ?? null;
+      const isCloudTrial = resp.isCloudTrial === true;
       setCloudInfo({
         isCloud: cloudId !== null,
         cloudId,
+        isCloudTrial,
         deploymentId: cloudId === null ? null : extractDeploymentId(cloudId),
       });
     } catch (error) {
@@ -72,14 +75,17 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
       // eslint-disable-next-line no-console
       console.error('Could not determine cloud information', error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unassignedJobCount]);
 
   useEffect(() => {
     checkCloudInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unassignedJobCount]);
 
   useEffect(() => {
     checkNodes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIds]);
 
   if (unassignedJobCount === 0) {

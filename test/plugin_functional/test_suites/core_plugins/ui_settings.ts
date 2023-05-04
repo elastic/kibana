@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('server plugins have access to registered settings', async () => {
-      await supertest.get('/api/ui-settings-plugin').expect(200).expect({ uiSettingsValue: 2 });
+      await supertest.get('/api/ui-settings-plugin').expect(200).expect({ uiSettingsValue: '2' });
     });
   });
 }

@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UIM_APP_LOAD } from './constants';

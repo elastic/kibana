@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Space } from '@kbn/spaces-plugin/common';
 import Axios from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
@@ -24,7 +25,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
   return new (class SpacesService {
     public async create(space: any) {
-      log.debug('creating space');
+      log.debug(`creating space ${space.id}`);
       const { data, status, statusText } = await axios.post('/api/spaces/space', space);
 
       if (status !== 200) {
@@ -32,19 +33,33 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
           `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
         );
       }
-      log.debug('created space');
+      log.debug(`created space ${space.id}`);
     }
 
     public async delete(spaceId: string) {
-      log.debug(`deleting space: ${spaceId}`);
+      log.debug(`deleting space id: ${spaceId}`);
       const { data, status, statusText } = await axios.delete(`/api/spaces/space/${spaceId}`);
 
       if (status !== 204) {
-        throw new Error(
+        log.debug(
           `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
         );
       }
-      log.debug(`deleted space: ${spaceId}`);
+      log.debug(`deleted space id: ${spaceId}`);
+    }
+
+    public async getAll() {
+      log.debug('retrieving all spaces');
+      const { data, status, statusText } = await axios.get<Space[]>('/api/spaces/space');
+
+      if (status !== 200) {
+        throw new Error(
+          `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        );
+      }
+      log.debug(`retrieved ${data.length} spaces`);
+
+      return data;
     }
   })();
 }

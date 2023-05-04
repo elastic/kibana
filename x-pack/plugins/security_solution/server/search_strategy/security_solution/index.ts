@@ -6,21 +6,19 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import {
-  ISearchStrategy,
-  PluginStart,
-  shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
-import {
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
-import { SecuritySolutionFactory } from './factory/types';
-import { EndpointAppContext } from '../../endpoint/types';
-import { KibanaRequest } from '../../../../../../src/core/server';
+import type { SecuritySolutionFactory } from './factory/types';
+import type { EndpointAppContext } from '../../endpoint/types';
 
 function isObj(req: unknown): req is Record<string, unknown> {
   return typeof req === 'object' && req !== null;
@@ -36,7 +34,8 @@ function assertValidRequestType<T extends FactoryQueryTypes>(
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
   endpointContext: EndpointAppContext,
-  getSpaceId?: (request: KibanaRequest) => string
+  getSpaceId?: (request: KibanaRequest) => string,
+  ruleDataClient?: IRuleDataClient | null
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -63,6 +62,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             endpointContext,
             request: deps.request,
             spaceId: getSpaceId && getSpaceId(deps.request),
+            ruleDataClient,
           })
         )
       );

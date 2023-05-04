@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { MlJobSelect } from './index';
+import { MlJobSelect } from '.';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useFormFieldMock } from '../../../../common/mock';
 jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');

@@ -102,7 +102,7 @@ export function ConsoleHistory({ close }: Props) {
     return () => done();
   }, [history]);
 
-  /* eslint-disable */
+  /* eslint-disable jsx-a11y/no-noninteractive-element-to-interactive-role,jsx-a11y/click-events-have-key-events */
   return (
     <>
       <div className="conHistory">
@@ -188,7 +188,11 @@ export function ConsoleHistory({ close }: Props) {
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="danger" onClick={() => clear()}>
+            <EuiButtonEmpty
+              data-test-subj="consoleClearHistoryButton"
+              color="danger"
+              onClick={() => clear()}
+            >
               {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
                 defaultMessage: 'Clear',
               })}
@@ -198,7 +202,11 @@ export function ConsoleHistory({ close }: Props) {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="primary" onClick={() => close()}>
+                <EuiButtonEmpty
+                  data-test-subj="consoleHistoryCloseButton"
+                  color="primary"
+                  onClick={() => close()}
+                >
                   {i18n.translate('console.historyPage.closehistoryButtonLabel', {
                     defaultMessage: 'Close',
                   })}
@@ -207,6 +215,7 @@ export function ConsoleHistory({ close }: Props) {
 
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="consoleHistoryApplyButton"
                   color="primary"
                   disabled={!selectedReq}
                   onClick={() => restoreRequestFromHistory(selectedReq.current)}

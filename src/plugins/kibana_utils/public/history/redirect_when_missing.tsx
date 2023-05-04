@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 
-import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
+import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '..';
+import { KibanaThemeProvider } from '../theme';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown renderers={{ root: Fragment }} {...props} />
+    <ReactMarkdown {...props} />
   </React.Suspense>
 );
 
@@ -45,6 +47,7 @@ export function redirectWhenMissing({
   mapping,
   toastNotifications,
   onBeforeRedirect,
+  theme,
 }: {
   history: History;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -62,6 +65,7 @@ export function redirectWhenMissing({
    * Optional callback invoked directly before a redirect is triggered
    */
   onBeforeRedirect?: (error: SavedObjectNotFound) => void;
+  theme: ThemeServiceStart;
 }) {
   let localMappingObject: Mapping;
 
@@ -92,7 +96,12 @@ export function redirectWhenMissing({
         defaultMessage: 'Saved object is missing',
       }),
       text: (element: HTMLElement) => {
-        ReactDOM.render(<ErrorRenderer>{error.message}</ErrorRenderer>, element);
+        ReactDOM.render(
+          <KibanaThemeProvider theme$={theme.theme$}>
+            <ErrorRenderer>{error.message}</ErrorRenderer>
+          </KibanaThemeProvider>,
+          element
+        );
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });

@@ -16,8 +16,8 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import { BrowserFields } from '../../../../../../timelines/common/search_strategy';
-import { Ecs } from '../../../../../common/ecs';
+import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -34,8 +34,9 @@ describe('DefaultCellRenderer', () => {
   const isExpanded = true;
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 3;
+  const colIndex = 0;
   const setCellProps = jest.fn();
-  const timelineId = 'test';
+  const scopeId = 'test';
   const ecsData = {} as Ecs;
   const browserFields = {} as BrowserFields;
 
@@ -66,8 +67,9 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -100,8 +102,9 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
               truncate={truncate}
             />
           </DroppableWrapper>
@@ -111,7 +114,6 @@ describe('DefaultCellRenderer', () => {
 
     expect(mockImplementation.renderColumn).toBeCalledWith({
       asPlainText: false,
-      browserFields,
       columnName: header.id,
       ecsData,
       eventId,
@@ -120,45 +122,10 @@ describe('DefaultCellRenderer', () => {
       isDraggable: true,
       linkValues,
       rowRenderers: undefined,
-      timelineId,
+      scopeId,
       truncate,
       values: ['2018-11-05T19:03:25.937Z'],
     });
-  });
-
-  test('if in tgrid expanded value, it renders ExpandedCellValueActions', () => {
-    const data = cloneDeep(mockTimelineData[0].data);
-    const header = cloneDeep(defaultHeaders[1]);
-    const isDetails = true;
-    const id = 'event.severity';
-    const wrapper = mount(
-      <TestProviders>
-        <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <DroppableWrapper droppableId="testing">
-            <DefaultCellRenderer
-              browserFields={browserFields}
-              columnId={id}
-              ecsData={ecsData}
-              data={data}
-              eventId={eventId}
-              header={header}
-              isDetails={isDetails}
-              isDraggable={true}
-              isExpandable={isExpandable}
-              isExpanded={isExpanded}
-              linkValues={linkValues}
-              rowIndex={rowIndex}
-              setCellProps={setCellProps}
-              timelineId={timelineId}
-            />
-          </DroppableWrapper>
-        </DragDropContextWrapper>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="data-grid-expanded-cell-value-actions"]').exists()
-    ).toBeTruthy();
   });
 });
 
@@ -196,8 +163,9 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
-              timelineId={'timeline-1-query'}
+              scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -229,8 +197,9 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
-              timelineId={'timeline-1-query'}
+              scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -263,8 +232,9 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
-              timelineId={'timeline-1-query'}
+              scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>

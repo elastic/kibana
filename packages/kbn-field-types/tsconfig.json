@@ -1,13 +1,15 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target_types",
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-field-types/src"
+    "outDir": "target/types",
+    "types": [
+      "jest",
+    ],
   },
-  "include": ["src/**/*"]
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

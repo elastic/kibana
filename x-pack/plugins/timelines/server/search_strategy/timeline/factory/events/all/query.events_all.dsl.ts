@@ -14,12 +14,12 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { getPreferredEsType } from './helpers';
 
 export const buildTimelineEventsAllQuery = ({
   authFilter,
   defaultIndex,
-  docValueFields,
   fields,
   filterQuery,
   pagination: { activePage, querySize },
@@ -28,7 +28,6 @@ export const buildTimelineEventsAllQuery = ({
   timerange,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
-
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
       const { to, from } = timerangeOption;
@@ -58,7 +57,7 @@ export const buildTimelineEventsAllQuery = ({
       return {
         [field]: {
           order: item.direction,
-          unmapped_type: item.type,
+          unmapped_type: getPreferredEsType(item.esTypes),
         },
       };
     });
@@ -68,7 +67,6 @@ export const buildTimelineEventsAllQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         producers: {
           terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
@@ -84,8 +82,16 @@ export const buildTimelineEventsAllQuery = ({
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
-      fields,
-      _source: ['signal.*', 'kibana.alert.*'],
+      fields: [
+        'signal.*',
+        'kibana.alert.*',
+        ...fields,
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      _source: false,
     },
   };
 

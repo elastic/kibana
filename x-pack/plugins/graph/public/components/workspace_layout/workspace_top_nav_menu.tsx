@@ -8,18 +8,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
-import { AppMountParameters, Capabilities, CoreStart } from 'kibana/public';
+import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
-import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
+import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
+import { useInspector } from '../../helpers/use_inspector';
 
 interface WorkspaceTopNavMenuProps {
   workspace: Workspace | undefined;
-  setShowInspect: React.Dispatch<React.SetStateAction<boolean>>;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -30,9 +31,11 @@ interface WorkspaceTopNavMenuProps {
   graphSavePolicy: GraphSavePolicy;
   navigation: NavigationStart;
   capabilities: Capabilities;
+  inspect: InspectorPublicPluginStart;
   coreStart: CoreStart;
   canEditDrillDownUrls: boolean;
   isInitialized: boolean;
+  requestAdapter: RequestAdapter;
 }
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
@@ -40,6 +43,12 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const location = useLocation();
   const history = useHistory();
   const allSavingDisabled = props.graphSavePolicy === 'none';
+  const isInspectDisabled = !props.workspace?.lastRequest || !props.workspace.lastRequest;
+
+  const { onOpenInspector } = useInspector({
+    inspect: props.inspect,
+    requestAdapter: props.requestAdapter,
+  });
 
   // ===== Menubar configuration =========
   const { TopNavMenu } = props.navigation.ui;
@@ -107,7 +116,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   topNavMenu.push({
     key: 'inspect',
     disableButton() {
-      return props.workspace === null;
+      return isInspectDisabled;
     },
     label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
       defaultMessage: 'Inspect',
@@ -116,8 +125,16 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
       defaultMessage: 'Inspect',
     }),
     run: () => {
-      props.setShowInspect((prevShowInspect) => !prevShowInspect);
+      onOpenInspector();
     },
+    tooltip: () => {
+      if (isInspectDisabled) {
+        return i18n.translate('xpack.graph.topNavMenu.inspectButton.disabledTooltip', {
+          defaultMessage: 'Perform a search or expand a node to enable Inspect',
+        });
+      }
+    },
+    testId: 'graphInspectButton',
   });
 
   topNavMenu.push({
@@ -161,9 +178,13 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
           ownFocus: true,
           className: 'gphSettingsFlyout',
           maxWidth: 520,
+          'aria-label': i18n.translate('xpack.graph.settings.ariaLabel', {
+            defaultMessage: 'Settings',
+          }),
         }
       );
     },
+    testId: 'graphSettingsButton',
   });
 
   return (

@@ -7,18 +7,11 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { chunk } from 'lodash';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTableFieldDataColumnType,
-  EuiBasicTable,
-  CriteriaWithPagination,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiTableFieldDataColumnType, CriteriaWithPagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
-import { LinkPanelListItem } from './types';
+import type { LinkPanelListItem } from './types';
 
 // @ts-expect-error TS2769
 const StyledTable = styled(EuiBasicTable)`
@@ -104,7 +97,7 @@ const LinkPanelComponent = ({
 
   const pagination = useMemo(
     () => ({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageIndex,
       pageSize: PAGE_SIZE,
       totalItemCount: listItems.length,

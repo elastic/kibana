@@ -6,7 +6,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import {
   ExceptionListType,
@@ -24,7 +34,9 @@ import {
   getEntryOnMatchAnyChange,
   getEntryOnMatchChange,
   getEntryOnOperatorChange,
+  getEntryOnWildcardChange,
   getFilteredIndexPatterns,
+  getMappingConflictsInfo,
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
 import {
@@ -32,18 +44,25 @@ import {
   AutocompleteFieldListsComponent,
   AutocompleteFieldMatchAnyComponent,
   AutocompleteFieldMatchComponent,
+  AutocompleteFieldWildcardComponent,
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
+import {
+  FILENAME_WILDCARD_WARNING,
+  OperatingSystem,
+  validateFilePathInput,
+} from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { HttpStart } from '@kbn/core/public';
 
-import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
+import { EntryFieldError } from './reducer';
 
-const MyValuesInput = styled(EuiFlexItem)`
+const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
@@ -63,9 +82,11 @@ export interface EntryItemProps {
   ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
+  setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
+  allowCustomOptions?: boolean;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -80,15 +101,25 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
+  setWarningsExist,
   showLabel,
   isDisabled = false,
   operatorsList,
+  allowCustomOptions = false,
 }): JSX.Element => {
+  const sPaddingSize = useEuiPaddingSize('s');
+
   const handleError = useCallback(
     (err: boolean): void => {
-      setErrorsExist(err);
+      setErrorsExist({ [entry.id]: err });
     },
-    [setErrorsExist]
+    [setErrorsExist, entry.id]
+  );
+  const handleWarning = useCallback(
+    (warn: boolean): void => {
+      setWarningsExist(warn);
+    },
+    [setWarningsExist]
   );
 
   const handleFieldChange = useCallback(
@@ -102,10 +133,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const handleOperatorChange = useCallback(
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
-
+      handleError(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry]
+    [onChange, entry, handleError]
   );
 
   const handleFieldMatchValueChange = useCallback(
@@ -126,6 +157,15 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
+  const handleFieldWildcardValueChange = useCallback(
+    (newField: string): void => {
+      const { updatedEntry, index } = getEntryOnWildcardChange(entry, newField);
+
+      onChange(updatedEntry, index);
+    },
+    [onChange, entry]
+  );
+
   const handleFieldListValueChange = useCallback(
     (newField: ListSchema): void => {
       const { updatedEntry, index } = getEntryOnListChange(entry, newField);
@@ -138,9 +178,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const isFieldComponentDisabled = useMemo(
     (): boolean =>
       isDisabled ||
-      indexPattern == null ||
-      (indexPattern != null && indexPattern.fields.length === 0),
-    [isDisabled, indexPattern]
+      (!allowCustomOptions &&
+        (indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0))),
+    [isDisabled, indexPattern, allowCustomOptions]
   );
 
   const renderFieldInput = useCallback(
@@ -165,47 +205,122 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
+          acceptsCustomOptions={entry.nested == null && allowCustomOptions}
           data-test-subj="exceptionBuilderEntryField"
-          fieldInputWidth={275}
+          showMappingConflicts={true}
         />
       );
 
-      if (isFirst) {
+      const warningIconCss = { marginRight: `${sPaddingSize}` };
+      const getMappingConflictsWarning = (field: DataViewFieldBase): React.ReactNode | null => {
+        const conflictsInfo = getMappingConflictsInfo(field);
+        if (!conflictsInfo) {
+          return null;
+        }
         return (
-          <EuiFormRow label={i18n.FIELD} data-test-subj="exceptionBuilderEntryFieldFormRow">
-            {comboBox}
-          </EuiFormRow>
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id={`${entry.id}`}
+              buttonContent={
+                <>
+                  <EuiIcon
+                    data-test-subj="mappingConflictsAccordionIcon"
+                    tabIndex={0}
+                    type="warning"
+                    size="s"
+                    css={warningIconCss}
+                  />
+                  {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
+                </>
+              }
+              arrowDisplay="none"
+              data-test-subj="mappingConflictsAccordion"
+            >
+              <div data-test-subj="mappingConflictsDescription">
+                {conflictsInfo.map((info) => {
+                  const groupDetails = info.groupedIndices.map(
+                    ({ name, count }) =>
+                      `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
+                  );
+                  return (
+                    <>
+                      <EuiSpacer size="s" />
+                      {`${
+                        info.totalIndexCount > 1
+                          ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(
+                              info.type,
+                              info.totalIndexCount
+                            )
+                          : info.type
+                      }: ${groupDetails.join(', ')}`}
+                    </>
+                  );
+                })}
+                <EuiSpacer size="s" />
+              </div>
+            </EuiAccordion>
+          </>
         );
-      } else {
-        return (
-          <EuiFormRow label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
-            {comboBox}
-          </EuiFormRow>
+      };
+
+      const customOptionText =
+        entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
+
+      const helpText =
+        entry.field?.conflictDescriptions == null ? (
+          customOptionText
+        ) : (
+          <>
+            {customOptionText}
+            {getMappingConflictsWarning(entry.field)}
+          </>
         );
-      }
+      return (
+        <EuiFormRow
+          fullWidth
+          label={isFirst ? i18n.FIELD : ''}
+          helpText={helpText}
+          data-test-subj="exceptionBuilderEntryFieldFormRow"
+        >
+          {comboBox}
+        </EuiFormRow>
+      );
     },
     [
       indexPattern,
       entry,
       listType,
       listTypeSpecificIndexPatternFilter,
-      handleFieldChange,
       osTypes,
       isDisabled,
+      handleFieldChange,
+      sPaddingSize,
+      allowCustomOptions,
     ]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = operatorsList
-      ? operatorsList
+    // for event filters forms
+    // show extra operators for wildcards when field is `file.path.text`
+    const isFilePathTextField = entry.field !== undefined && entry.field.name === 'file.path.text';
+    const isEventFilterList = listType === 'endpoint_events';
+    const augmentedOperatorsList =
+      operatorsList && isFilePathTextField && isEventFilterList
+        ? operatorsList
+        : operatorsList?.filter((operator) => operator.type !== OperatorTypeEnum.WILDCARD);
+
+    const operatorOptions = augmentedOperatorsList
+      ? augmentedOperatorsList
       : onlyShowListOperators
       ? EXCEPTION_OPERATORS_ONLY_LISTS
       : getOperatorOptions(
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && allowLargeValueLists
+          isFirst
         );
+
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
@@ -235,6 +350,26 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
+  // show this when wildcard filename with matches operator
+  const getWildcardWarning = (precedingWarning: string): React.ReactNode => {
+    return (
+      <p>
+        {precedingWarning}{' '}
+        <EuiIconTip
+          type="iInCircle"
+          content={
+            <FormattedMessage
+              id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"
+              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the path values. For instance, adding a process.name or file.name field."
+            />
+          }
+          size="m"
+        />
+      </p>
+    );
+  };
+
+  // eslint-disable-next-line complexity
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
@@ -279,6 +414,40 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             data-test-subj="exceptionBuilderEntryFieldMatchAny"
           />
         );
+      case OperatorTypeEnum.WILDCARD:
+        const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
+        let actualWarning: React.ReactNode | string | undefined;
+        if (listType !== 'detection' && listType !== 'rule_default') {
+          let os: OperatingSystem = OperatingSystem.WINDOWS;
+          if (osTypes) {
+            [os] = osTypes as OperatingSystem[];
+          }
+          const warning = validateFilePathInput({ os, value: wildcardValue });
+          actualWarning =
+            warning === FILENAME_WILDCARD_WARNING
+              ? warning && getWildcardWarning(warning)
+              : warning;
+        }
+
+        return (
+          <AutocompleteFieldWildcardComponent
+            autocompleteService={autocompleteService}
+            data-test-subj="exceptionBuilderEntryFieldWildcard"
+            isRequired
+            isDisabled={isFieldComponentDisabled}
+            isLoading={false}
+            isClearable={false}
+            indexPattern={indexPattern}
+            onError={handleError}
+            onChange={handleFieldWildcardValueChange}
+            onWarning={handleWarning}
+            warning={actualWarning}
+            placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
+            rowLabel={isFirst ? i18n.VALUE : undefined}
+            selectedField={entry.correspondingKeywordField ?? entry.field}
+            selectedValue={wildcardValue}
+          />
+        );
       case OperatorTypeEnum.LIST:
         const id = typeof entry.value === 'string' ? entry.value : undefined;
         return (
@@ -293,6 +462,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isClearable={false}
             onChange={handleFieldListValueChange}
             data-test-subj="exceptionBuilderEntryFieldList"
+            allowLargeValueLists={allowLargeValueLists}
           />
         );
       case OperatorTypeEnum.EXISTS:
@@ -319,14 +489,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       className="exceptionItemEntryContainer"
       data-test-subj="exceptionItemEntryContainer"
     >
-      <EuiFlexItem grow={false}>{renderFieldInput(showLabel)}</EuiFlexItem>
+      <FieldFlexItem grow={4}>{renderFieldInput(showLabel)}</FieldFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
-      <MyValuesInput grow={6}>
+      <FieldFlexItem grow={5}>
         {renderFieldValueInput(
           showLabel,
           entry.nested === 'parent' ? OperatorTypeEnum.EXISTS : entry.operator.type
         )}
-      </MyValuesInput>
+      </FieldFlexItem>
     </EuiFlexGroup>
   );
 };

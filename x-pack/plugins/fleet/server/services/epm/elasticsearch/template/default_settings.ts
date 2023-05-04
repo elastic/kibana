@@ -8,22 +8,19 @@
 import { appContextService } from '../../../app_context';
 import type { Field, Fields } from '../../fields/field';
 
-const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text', 'match_only_text', 'wildcard'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
-const flattenFieldsToNameAndType = (
-  fields: Fields,
-  path: string = ''
-): Array<Pick<Field, 'name' | 'type'>> => {
-  let newFields: Array<Pick<Field, 'name' | 'type'>> = [];
+const flattenAndExtractFields = (fields: Fields, path: string = ''): Field[] => {
+  let newFields: Array<Pick<Field, 'name' | 'type' | 'default_field'>> = [];
   fields.forEach((field) => {
     const fieldName = path ? `${path}.${field.name}` : field.name;
     newFields.push({
+      ...field,
       name: fieldName,
-      type: field.type,
     });
     if (field.fields && field.fields.length) {
-      newFields = newFields.concat(flattenFieldsToNameAndType(field.fields, fieldName));
+      newFields = newFields.concat(flattenAndExtractFields(field.fields, fieldName));
     }
   });
   return newFields;
@@ -45,8 +42,13 @@ export function buildDefaultSettings({
   const logger = appContextService.getLogger();
   // Find all field names to set `index.query.default_field` to, which will be
   // the first 1024 keyword or text fields
-  const defaultFields = flattenFieldsToNameAndType(fields).filter(
-    (field) => field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type)
+  const defaultFields = flattenAndExtractFields(fields).filter(
+    (field) =>
+      field.type &&
+      QUERY_DEFAULT_FIELD_TYPES.includes(field.type) &&
+      field.default_field !== false &&
+      field.index !== false &&
+      field.doc_values !== false
   );
   if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
     logger.warn(
@@ -59,20 +61,20 @@ export function buildDefaultSettings({
       : defaultFields
   ).map((field) => field.name);
 
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+
   return {
     index: {
-      // ILM Policy must be added here, for now point to the default global ILM policy name
-      lifecycle: {
-        name: ilmPolicy ? ilmPolicy : type,
-      },
+      ...(isILMPolicyDisabled
+        ? {}
+        : {
+            // ILM Policy must be added here, for now point to the default global ILM policy name
+            lifecycle: {
+              name: ilmPolicy ? ilmPolicy : type,
+            },
+          }),
       // What should be our default for the compression?
       codec: 'best_compression',
-      mapping: {
-        total_fields: {
-          limit: '10000',
-        },
-      },
-
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise
       // this setting is skipped.

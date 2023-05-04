@@ -7,7 +7,7 @@
 
 import { mockDependencies, MockRouter } from '../../__mocks__';
 
-import { registerWorkplaceSearchRoutes } from './';
+import { registerWorkplaceSearchRoutes } from '.';
 
 describe('registerWorkplaceSearchRoutes', () => {
   it('runs without errors', () => {

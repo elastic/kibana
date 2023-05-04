@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
-import { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
+import type { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
 
 export interface RowProps {
   isLoading: boolean;
@@ -57,5 +57,6 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
     </EuiFlexGroup>
   );
 };
+FieldMappingRowComponent.displayName = 'FieldMappingRow';
 
 export const FieldMappingRowStatic = React.memo(FieldMappingRowComponent);

@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }) {
     this.tags(['skipFirefox']);
 
     before(async function () {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/kibana_scripted_fields_on_logstash'
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash'
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await security.testUser.setRoles(['test_logstash_reader', 'global_discover_read']);
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
     });
 
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('query return results with valid scripted field', async function () {
       if (false) {
-        /* the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
+        /* the skipped steps below were used to create the scripted fields in the logstash-* index pattern
         which are now saved in the esArchive.
          */
 
@@ -118,6 +118,7 @@ export default function ({ getService, getPageObjects }) {
         });
       }
 
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');

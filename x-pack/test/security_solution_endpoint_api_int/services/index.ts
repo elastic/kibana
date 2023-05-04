@@ -7,10 +7,16 @@
 
 import { services as xPackAPIServices } from '../../api_integration/services';
 import { ResolverGeneratorProvider } from './resolver';
+import { RolesUsersProvider } from './roles_users';
 import { EndpointTestResources } from '../../security_solution_endpoint/services/endpoint';
+import { EndpointPolicyTestResourcesProvider } from '../../security_solution_endpoint/services/endpoint_policy';
+import { EndpointArtifactsTestResources } from '../../security_solution_endpoint/services/endpoint_artifacts';
 
 export const services = {
   ...xPackAPIServices,
   resolverGenerator: ResolverGeneratorProvider,
   endpointTestResources: EndpointTestResources,
+  endpointPolicyTestResources: EndpointPolicyTestResourcesProvider,
+  endpointArtifactTestResources: EndpointArtifactsTestResources,
+  rolesUsersProvider: RolesUsersProvider,
 };

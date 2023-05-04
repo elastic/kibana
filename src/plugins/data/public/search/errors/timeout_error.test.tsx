@@ -8,11 +8,11 @@
 
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { AbortError } from '../../../../kibana_utils/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
 
 describe('SearchTimeoutError', () => {
   beforeEach(() => {
@@ -32,7 +32,7 @@ describe('SearchTimeoutError', () => {
     const component = mount(e.getErrorMessage(startMock.application));
 
     expect(component.find('EuiButton').length).toBe(1);
-    component.find('EuiButton').simulate('click');
+    component.find('button[data-test-subj="searchTimeoutError"]').simulate('click');
     expect(startMock.application.navigateToApp).toHaveBeenCalledWith('management', {
       path: '/kibana/settings',
     });

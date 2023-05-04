@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { timelineSavedObjectType } from '../timelines';
 import { TIMELINE_ID_REF_NAME } from '../../constants';
-import { TimelineId } from './types';
+import type { TimelineId } from './types';
 
 export function createReference(
   id: string | null | undefined,

@@ -7,8 +7,7 @@
 
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
-import { createCompoundHostKey, createCompoundNetworkKey } from './create_compound_key';
-import { AnomaliesByHost, AnomaliesByNetwork } from '../types';
+import { createCompoundAnomalyKey } from './create_compound_key';
 
 describe('create_explorer_link', () => {
   let anomalies = cloneDeep(mockAnomalies);
@@ -17,22 +16,8 @@ describe('create_explorer_link', () => {
     anomalies = cloneDeep(mockAnomalies);
   });
 
-  test('it creates a compound host key', () => {
-    const anomaliesByHost: AnomaliesByHost = {
-      hostName: 'some-host-name',
-      anomaly: anomalies.anomalies[0],
-    };
-    const key = createCompoundHostKey(anomaliesByHost);
-    expect(key).toEqual('some-host-name-process.name-du-16.193669439507826-job-1');
-  });
-
-  test('it creates a compound network key', () => {
-    const anomaliesByNetwork: AnomaliesByNetwork = {
-      type: 'destination.ip',
-      ip: '127.0.0.1',
-      anomaly: anomalies.anomalies[0],
-    };
-    const key = createCompoundNetworkKey(anomaliesByNetwork);
-    expect(key).toEqual('127.0.0.1-process.name-du-16.193669439507826-job-1');
+  test('it creates a compound anomaly key', () => {
+    const key = createCompoundAnomalyKey(anomalies.anomalies[0]);
+    expect(key).toEqual('process.name-du-16.193669439507826-job-1');
   });
 });

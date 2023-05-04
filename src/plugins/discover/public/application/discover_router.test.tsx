@@ -7,26 +7,24 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Route, RouteProps } from 'react-router-dom';
+import { RouteProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
 import { discoverRouter } from './discover_router';
 import { DiscoverMainRoute } from './main';
-import { DiscoverMainProps } from './main/discover_main_route';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
 
 const pathMap: Record<string, never> = {};
-let mainRouteProps: DiscoverMainProps;
 
 describe('Discover router', () => {
+  const props = {
+    isDev: false,
+  };
   beforeAll(() => {
     const { history } = createSearchSessionMock();
-    mainRouteProps = {
-      history,
-      services: mockDiscoverServices,
-    };
-    const component = shallow(discoverRouter(mockDiscoverServices, history));
+    const component = shallow(discoverRouter(mockDiscoverServices, history, props.isDev));
     component.find(Route).forEach((route) => {
       const routeProps = route.props() as RouteProps;
       const path = routeProps.path;
@@ -39,22 +37,18 @@ describe('Discover router', () => {
   });
 
   it('should show DiscoverMainRoute component for / route', () => {
-    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...mainRouteProps} />);
+    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
   it('should show DiscoverMainRoute component for /view/:id route', () => {
-    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...mainRouteProps} />);
+    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
-  it('should show SingleDocRoute component for /doc/:indexPatternId/:index route', () => {
-    expect(pathMap['/doc/:indexPatternId/:index']).toMatchObject(
-      <SingleDocRoute services={mockDiscoverServices} />
-    );
+  it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
+    expect(pathMap['/doc/:dataViewId/:index']).toMatchObject(<SingleDocRoute />);
   });
 
-  it('should show ContextAppRoute component for /context/:indexPatternId/:id route', () => {
-    expect(pathMap['/context/:indexPatternId/:id']).toMatchObject(
-      <ContextAppRoute services={mockDiscoverServices} />
-    );
+  it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
+    expect(pathMap['/context/:dataViewId/:id']).toMatchObject(<ContextAppRoute />);
   });
 });

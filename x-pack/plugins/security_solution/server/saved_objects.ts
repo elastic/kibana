@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { legacyRuleStatusType } from './lib/detection_engine/rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
-import { ruleAssetType } from './lib/detection_engine/rules/rule_asset/rule_asset_saved_object_mappings';
-// eslint-disable-next-line no-restricted-imports
-import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions/legacy_saved_object_mappings';
+import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions_legacy';
+import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
-import {
-  exceptionsArtifactType,
-  manifestType,
-} from './endpoint/lib/artifacts/saved_object_mappings';
+import { manifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 
 const types = [
   noteType,
   pinnedEventType,
   legacyRuleActionsType,
-  legacyRuleStatusType,
-  ruleAssetType,
+  prebuiltRuleAssetType,
   timelineType,
-  exceptionsArtifactType,
   manifestType,
   signalsMigrationType,
 ];

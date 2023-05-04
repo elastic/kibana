@@ -9,7 +9,7 @@ import {
   EuiCallOut,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ColumnarPage, PageContent } from '../components/page';
 
 const DetailPageContent = euiStyled(PageContent)`
@@ -56,7 +56,7 @@ export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>
-          <EuiCallOut color="danger" title={message} iconType={'alert'}>
+          <EuiCallOut color="danger" title={message} iconType="error">
             <p>
               <FormattedMessage
                 id="xpack.infra.errorPage.tryAgainDescription "

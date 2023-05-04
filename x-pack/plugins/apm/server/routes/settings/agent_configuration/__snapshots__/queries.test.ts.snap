@@ -26,7 +26,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -56,7 +56,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -80,7 +80,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -115,6 +115,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
   },
 }
 `;
@@ -144,38 +145,13 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
-}
-`;
-
-exports[`agent configuration queries getServiceNames fetches service names 1`] = `
-Object {
-  "apm": Object {
-    "events": Array [
-      "transaction",
-      "error",
-      "metric",
-    ],
-  },
-  "body": Object {
-    "aggs": Object {
-      "services": Object {
-        "terms": Object {
-          "field": "service.name",
-          "min_doc_count": 0,
-          "size": 50,
-        },
-      },
-    },
-    "size": 0,
-    "timeout": "1ms",
-  },
+  "index": ".apm-agent-configuration",
 }
 `;
 
 exports[`agent configuration queries listConfigurations fetches configurations 1`] = `
 Object {
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
   "size": 200,
 }
 `;
@@ -233,7 +209,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -280,6 +256,6 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;

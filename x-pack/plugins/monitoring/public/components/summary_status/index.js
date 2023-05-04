@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SummaryStatus } from './summary_status';
+export { SummaryStatus, DefaultStatusIndicator } from './summary_status';

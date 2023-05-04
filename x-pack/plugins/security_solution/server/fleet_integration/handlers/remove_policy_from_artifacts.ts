@@ -7,36 +7,26 @@
 
 import pMap from 'p-map';
 
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
-import { ExceptionListClient } from '../../../../lists/server';
-import { PostPackagePolicyDeleteCallback } from '../../../../fleet/server';
-
-export const ARTIFACT_LISTS_IDS_TO_REMOVE = [
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-];
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 
 /**
  * Removes policy from artifacts
  */
 export const removePolicyFromArtifacts = async (
   exceptionsClient: ExceptionListClient,
-  policy: Parameters<PostPackagePolicyDeleteCallback>[0][0]
+  policy: Parameters<PostPackagePolicyPostDeleteCallback>[0][0]
 ) => {
   let page = 1;
 
   const findArtifactsByPolicy = (currentPage: number) => {
     return exceptionsClient.findExceptionListsItem({
-      listId: ARTIFACT_LISTS_IDS_TO_REMOVE,
-      filter: ARTIFACT_LISTS_IDS_TO_REMOVE.map(
+      listId: ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[],
+      filter: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(
         () => `exception-list-agnostic.attributes.tags:"policy:${policy.id}"`
       ),
-      namespaceType: ARTIFACT_LISTS_IDS_TO_REMOVE.map(() => 'agnostic'),
+      namespaceType: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(() => 'agnostic'),
       page: currentPage,
       perPage: 50,
       sortField: undefined,
@@ -67,6 +57,7 @@ export const removePolicyFromArtifacts = async (
         namespaceType: artifact.namespace_type,
         osTypes: artifact.os_types,
         tags: artifact.tags.filter((currentPolicy) => currentPolicy !== `policy:${policy.id}`),
+        expireTime: artifact.expire_time,
       }),
     {
       /** Number of concurrent executions till the end of the artifacts array */

@@ -8,7 +8,7 @@
 
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { ISearchRequestParams } from '../../index';
+import { ISearchRequestParams } from '../..';
 import type { SearchRequest } from './types';
 
 const sessionId = Date.now();
@@ -42,6 +42,7 @@ export function getSearchParamsFromRequest(
   return {
     index: searchRequest.index.title || searchRequest.index,
     body,
+    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
     track_total_hits,
     ...searchParams,
   };

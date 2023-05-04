@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { StepRuleActions } from './index';
+import { StepRuleActions } from '.';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -31,6 +31,10 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const actionMessageParams = {
   context: [],
   state: [],
@@ -42,6 +46,7 @@ describe('StepRuleActions', () => {
     const wrapper = shallow(
       <StepRuleActions
         actionMessageParams={actionMessageParams}
+        summaryActionMessageParams={actionMessageParams}
         isReadOnlyView={false}
         isLoading={false}
       />

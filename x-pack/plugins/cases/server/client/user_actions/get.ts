@@ -5,34 +5,26 @@
  * 2.0.
  */
 
-import { SavedObjectReference, SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CaseUserActionsResponse,
-  CaseUserActionsResponseRt,
-  CaseUserActionResponse,
-} from '../../../common/api';
-import { SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/api';
+import { CaseUserActionsDeprecatedResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
-import { SUB_CASE_REF_NAME } from '../../common/constants';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { UserActionGet } from './client';
+import type { UserActionGet } from './types';
+import { extractAttributes } from './utils';
 
 export const get = async (
-  { caseId, subCaseId }: UserActionGet,
+  { caseId }: UserActionGet,
   clientArgs: CasesClientArgs
-): Promise<CaseUserActionsResponse> => {
-  const { unsecuredSavedObjectsClient, userActionService, logger, authorization } = clientArgs;
+): Promise<CaseUserActionsDeprecatedResponse> => {
+  const {
+    services: { userActionService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseId);
-
-    const userActions = await userActionService.getAll({
-      unsecuredSavedObjectsClient,
-      caseId,
-      subCaseId,
-    });
+    const userActions = await userActionService.getAll(caseId);
 
     await authorization.ensureAuthorized({
       entities: userActions.saved_objects.map((userAction) => ({
@@ -42,35 +34,14 @@ export const get = async (
       operation: Operations.getUserActions,
     });
 
-    const resultsToEncode =
-      subCaseId == null
-        ? extractAttributesWithoutSubCases(userActions)
-        : extractAttributes(userActions);
+    const resultsToEncode = extractAttributes(userActions);
 
-    return CaseUserActionsResponseRt.encode(resultsToEncode);
+    return CaseUserActionsDeprecatedResponseRt.encode(resultsToEncode);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to retrieve user actions case id: ${caseId} sub case id: ${subCaseId}: ${error}`,
+      message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,
       error,
       logger,
     });
   }
 };
-
-export function extractAttributesWithoutSubCases(
-  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
-): CaseUserActionsResponse {
-  // exclude user actions relating to sub cases from the results
-  const hasSubCaseReference = (references: SavedObjectReference[]) =>
-    references.find((ref) => ref.type === SUB_CASE_SAVED_OBJECT && ref.name === SUB_CASE_REF_NAME);
-
-  return userActions.saved_objects
-    .filter((so) => !hasSubCaseReference(so.references))
-    .map((so) => so.attributes);
-}
-
-function extractAttributes(
-  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
-): CaseUserActionsResponse {
-  return userActions.saved_objects.map((so) => so.attributes);
-}

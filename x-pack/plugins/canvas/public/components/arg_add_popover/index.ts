@@ -6,3 +6,4 @@
  */
 
 export { ArgAddPopover } from './arg_add_popover';
+export type { ArgOptions } from './arg_add_popover';

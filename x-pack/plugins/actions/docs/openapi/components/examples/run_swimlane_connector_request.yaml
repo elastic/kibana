@@ -1,0 +1,12 @@
+summary: Run a Swimlane connector to create an incident.
+value:
+  params:
+    subAction: pushToService
+    subActionParams:
+      comments:
+        - commentId: 1
+          comment: A comment about the incident.
+      incident:
+        caseId: "1000"
+        caseName: Case name
+        description: Description of the incident.

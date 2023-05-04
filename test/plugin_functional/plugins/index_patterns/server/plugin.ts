@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface IndexPatternsTestStartDeps {
   data: DataPluginStart;
@@ -36,7 +36,7 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearch.client.asScoped(req).asCurrentUser,
           req
@@ -51,7 +51,7 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearch.client.asScoped(req).asCurrentUser,
           req
@@ -74,7 +74,7 @@ export class IndexPatternsTestPlugin
         const id = (req.params as Record<string, string>).id;
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearch.client.asScoped(req).asCurrentUser,
           req
@@ -97,7 +97,7 @@ export class IndexPatternsTestPlugin
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearch.client.asScoped(req).asCurrentUser,
           req
@@ -121,7 +121,7 @@ export class IndexPatternsTestPlugin
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearch.client.asScoped(req).asCurrentUser,
           req

@@ -1,21 +1,21 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "allowJs": true,
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./target_types",
-    "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-interpreter/src",
-    "stripInternal": true,
+    "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-common-types"
     ]
   },
   "include": [
-    "src/**/*",
+    "**/*.ts",
+    "**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

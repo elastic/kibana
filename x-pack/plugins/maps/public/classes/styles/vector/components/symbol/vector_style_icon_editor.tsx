@@ -8,19 +8,28 @@
 import React from 'react';
 
 import { Props, StylePropEditor } from '../style_prop_editor';
-// @ts-expect-error
 import { DynamicIconForm } from './dynamic_icon_form';
-// @ts-expect-error
 import { StaticIconForm } from './static_icon_form';
-import { IconDynamicOptions, IconStaticOptions } from '../../../../../../common/descriptor_types';
+import {
+  CustomIcon,
+  IconDynamicOptions,
+  IconStaticOptions,
+} from '../../../../../../common/descriptor_types';
+import { DynamicIconProperty } from '../../properties/dynamic_icon_property';
+import { StaticIconProperty } from '../../properties/static_icon_property';
 
 type IconEditorProps = Omit<Props<IconStaticOptions, IconDynamicOptions>, 'children'>;
 
-export function VectorStyleIconEditor(props: IconEditorProps) {
+export function VectorStyleIconEditor(
+  props: IconEditorProps & {
+    customIcons: CustomIcon[];
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void;
+  }
+) {
   const iconForm = props.styleProperty.isDynamic() ? (
-    <DynamicIconForm {...props} />
+    <DynamicIconForm {...props} styleProperty={props.styleProperty as DynamicIconProperty} />
   ) : (
-    <StaticIconForm {...props} />
+    <StaticIconForm {...props} styleProperty={props.styleProperty as StaticIconProperty} />
   );
 
   return <StylePropEditor {...props}>{iconForm}</StylePropEditor>;

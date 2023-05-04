@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '../../../../../src/plugins/kibana_utils/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionsStart } from './types';
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
-import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
+import type { CreateCommentsMigrationsDeps } from './migrations';
+import { createCommentsMigrations } from './migrations';
+
+/**
+ * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
+ * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
+ */
 
 export const createCaseCommentSavedObjectType = ({
   migrationDeps,
@@ -15,14 +22,13 @@ export const createCaseCommentSavedObjectType = ({
   migrationDeps: CreateCommentsMigrationsDeps;
 }): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
-      associationType: {
-        type: 'keyword',
-      },
       comment: {
         type: 'text',
       },
@@ -34,41 +40,78 @@ export const createCaseCommentSavedObjectType = ({
       },
       actions: {
         properties: {
+          /*
           targets: {
-            type: 'nested',
             properties: {
               hostname: { type: 'keyword' },
               endpointId: { type: 'keyword' },
-            },
-          },
+            }
+          }
+           */
           type: { type: 'keyword' },
         },
       },
       alertId: {
         type: 'keyword',
       },
+      /*
       index: {
         type: 'keyword',
-      },
+      }
+       */
       created_at: {
         type: 'date',
       },
       created_by: {
         properties: {
+          /*
           full_name: {
             type: 'keyword',
-          },
-          username: {
-            type: 'keyword',
-          },
+          }
           email: {
+            type: 'keyword',
+          }
+          profile_uid: {
+            type: 'keyword',
+          }
+           */
+          username: {
             type: 'keyword',
           },
         },
       },
+      /*
+      externalReferenceId: {
+        type: 'keyword',
+      },
+      externalReferenceStorage: {
+        dynamic: false,
+        properties: {
+          // externalReferenceStorage.type
+          type: {
+            type: 'keyword',
+          },
+        },
+      },
+      externalReferenceMetadata: {
+        dynamic: false,
+        properties: {},
+      },
+      persistableStateAttachmentState: {
+        dynamic: false,
+        properties: {},
+      },
+       */
+      externalReferenceAttachmentTypeId: {
+        type: 'keyword',
+      },
+      persistableStateAttachmentTypeId: {
+        type: 'keyword',
+      },
       pushed_at: {
         type: 'date',
       },
+      /*
       pushed_by: {
         properties: {
           username: {
@@ -78,6 +121,9 @@ export const createCaseCommentSavedObjectType = ({
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -92,9 +138,11 @@ export const createCaseCommentSavedObjectType = ({
           },
         },
       },
+      */
       updated_at: {
         type: 'date',
       },
+      /*
       updated_by: {
         properties: {
           username: {
@@ -106,11 +154,15 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
+      */
     },
   },
-  migrations: createCommentsMigrations(migrationDeps),
+  migrations: () => createCommentsMigrations(migrationDeps),
   management: {
     importableAndExportable: true,
     visibleInManagement: false,

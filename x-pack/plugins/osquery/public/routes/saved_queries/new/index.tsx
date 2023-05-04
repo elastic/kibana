@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
@@ -47,9 +47,16 @@ const NewSavedQueryPageComponent = () => {
     [savedQueryListProps]
   );
 
+  const handleSubmit = useCallback(
+    async (payload) => {
+      await mutateAsync(payload);
+    },
+    [mutateAsync]
+  );
+
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <NewSavedQueryForm handleSubmit={mutateAsync} />
+      <NewSavedQueryForm handleSubmit={handleSubmit} />
     </WithHeaderLayout>
   );
 };

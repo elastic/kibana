@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import type { IUiSettingsClient } from 'kibana/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 const settings: Record<string, any> = {
   'theme:darkMode': false,
@@ -29,3 +29,9 @@ const uiSettings: IUiSettingsClient = {
 };
 
 export const getUiSettings = () => uiSettings;
+export const getSettings = () => {
+  return {
+    client: uiSettings,
+    globalClient: uiSettings,
+  };
+};

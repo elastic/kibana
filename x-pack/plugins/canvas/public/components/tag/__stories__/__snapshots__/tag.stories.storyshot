@@ -2,19 +2,19 @@
 
 exports[`Storyshots components/Tags/Tag as badge 1`] = `
 <span
-  className="euiBadge euiBadge--iconLeft"
+  className="euiBadge emotion-euiBadge"
   style={
     Object {
       "backgroundColor": "#666666",
-      "color": "#fff",
+      "color": "#FFF",
     }
   }
 >
   <span
-    className="euiBadge__content"
+    className="euiBadge__content emotion-euiBadge__content"
   >
     <span
-      className="euiBadge__text"
+      className="euiBadge__text emotion-euiBadge__text"
     >
       tag
     </span>
@@ -24,19 +24,19 @@ exports[`Storyshots components/Tags/Tag as badge 1`] = `
 
 exports[`Storyshots components/Tags/Tag as badge with color 1`] = `
 <span
-  className="euiBadge euiBadge--iconLeft"
+  className="euiBadge emotion-euiBadge"
   style={
     Object {
       "backgroundColor": "#327b53",
-      "color": "#fff",
+      "color": "#FFF",
     }
   }
 >
   <span
-    className="euiBadge__content"
+    className="euiBadge__content emotion-euiBadge__content"
   >
     <span
-      className="euiBadge__text"
+      className="euiBadge__text emotion-euiBadge__text"
     >
       tag
     </span>
@@ -46,7 +46,7 @@ exports[`Storyshots components/Tags/Tag as badge with color 1`] = `
 
 exports[`Storyshots components/Tags/Tag as health 1`] = `
 <div
-  className="euiHealth euiHealth--textSizeS"
+  className="euiHealth emotion-euiHealth-s"
 >
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -57,7 +57,9 @@ exports[`Storyshots components/Tags/Tag as health 1`] = `
       <span
         color="#666666"
         data-euiicon-type="dot"
-      />
+      >
+        
+      </span>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -70,7 +72,7 @@ exports[`Storyshots components/Tags/Tag as health 1`] = `
 
 exports[`Storyshots components/Tags/Tag as health with color 1`] = `
 <div
-  className="euiHealth euiHealth--textSizeS"
+  className="euiHealth emotion-euiHealth-s"
 >
   <div
     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -81,7 +83,9 @@ exports[`Storyshots components/Tags/Tag as health with color 1`] = `
       <span
         color="#9b3067"
         data-euiicon-type="dot"
-      />
+      >
+        
+      </span>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"

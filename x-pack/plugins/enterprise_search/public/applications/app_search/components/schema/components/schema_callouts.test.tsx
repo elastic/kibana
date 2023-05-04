@@ -18,18 +18,22 @@ import {
   UnsearchedFieldsCallout,
   UnconfirmedFieldsCallout,
   ConfirmSchemaButton,
+  MissingSubfieldsCallout,
 } from './schema_callouts';
 
-import { SchemaCallouts } from './';
+import { SchemaCallouts } from '.';
 
 describe('SchemaCallouts', () => {
   const values = {
     hasUnconfirmedFields: false,
     hasNewUnsearchedFields: false,
+    hasIncompleteFields: false,
+    incompleteFields: [],
     mostRecentIndexJob: {
       hasErrors: false,
       activeReindexJobId: 'some-id',
     },
+    myRole: { canManageEngines: true },
   };
 
   beforeEach(() => {
@@ -80,6 +84,41 @@ describe('SchemaCallouts', () => {
     expect(wrapper.find(UnconfirmedFieldsCallout)).toHaveLength(1);
   });
 
+  it('renders a missing subfields callout if the schema has incomplete fields', () => {
+    setMockValues({
+      ...values,
+      hasIncompleteFields: true,
+    });
+    const wrapper = shallow(<SchemaCallouts />);
+
+    expect(wrapper.find(MissingSubfieldsCallout)).toHaveLength(1);
+  });
+
+  describe('non-owner/admins', () => {
+    it('does not render an unsearched fields callout if user does not have access', () => {
+      setMockValues({
+        ...values,
+        hasUnconfirmedFields: true,
+        hasNewUnsearchedFields: true,
+        myRole: { canManageEngines: false },
+      });
+      const wrapper = shallow(<SchemaCallouts />);
+
+      expect(wrapper.find(UnsearchedFieldsCallout)).toHaveLength(0);
+    });
+
+    it('does not render an unconfirmed fields callout if user does not have access', () => {
+      setMockValues({
+        ...values,
+        hasUnconfirmedFields: true,
+        myRole: { canManageEngines: false },
+      });
+      const wrapper = shallow(<SchemaCallouts />);
+
+      expect(wrapper.find(UnconfirmedFieldsCallout)).toHaveLength(0);
+    });
+  });
+
   describe('UnsearchedFieldsCallout', () => {
     it('renders an info callout about unsearched fields with a link to the relevance tuning page', () => {
       const wrapper = shallow(<UnsearchedFieldsCallout />);
@@ -114,6 +153,17 @@ describe('SchemaCallouts', () => {
 
       wrapper.simulate('click');
       expect(actions.updateSchema).toHaveBeenCalled();
+    });
+  });
+
+  describe('MissingSubfieldsCallout', () => {
+    it('renders a warning callout about incomplete fields with a link to the subfields support documentation', () => {
+      const wrapper = shallow(<MissingSubfieldsCallout />);
+
+      expect(wrapper.prop('title')).toMatch(/^(?:A field is|\d+ fields are) missing subfields$/);
+      expect(wrapper.find('[data-test-subj="missingSubfieldsLearnMoreLink"]').prop('href')).toEqual(
+        'https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html'
+      );
     });
   });
 });

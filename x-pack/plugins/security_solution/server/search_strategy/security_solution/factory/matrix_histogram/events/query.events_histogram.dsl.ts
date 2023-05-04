@@ -12,9 +12,10 @@ import {
   createQueryFilterClauses,
   calculateTimeSeriesInterval,
 } from '../../../../../utils/build_query';
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 import * as i18n from './translations';
-import { BaseQuery, buildThresholdCardinalityQuery, buildThresholdTermsQuery } from './helpers';
+import type { BaseQuery } from './helpers';
+import { buildThresholdCardinalityQuery, buildThresholdTermsQuery } from './helpers';
 
 export const buildEventsHistogramQuery = ({
   filterQuery,
@@ -23,6 +24,7 @@ export const buildEventsHistogramQuery = ({
   stackByField = 'event.action',
   threshold,
   includeMissingData = true,
+  runtimeMappings,
 }: MatrixHistogramRequestOptions) => {
   const [queryFilterFirstClause, ...queryFilterClauses] = createQueryFilterClauses(filterQuery);
   const stackByIpField =
@@ -162,6 +164,7 @@ export const buildEventsHistogramQuery = ({
           filter,
         },
       },
+      runtime_mappings: runtimeMappings,
       size: 0,
     },
   };

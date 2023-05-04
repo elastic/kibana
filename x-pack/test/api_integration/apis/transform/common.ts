@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -17,7 +17,10 @@ export function generateDestIndex(transformId: string): string {
   return `user-${transformId}`;
 }
 
-export function generateTransformConfig(transformId: string): PutTransformsRequestSchema {
+export function generateTransformConfig(
+  transformId: string,
+  continuous = false
+): PutTransformsRequestSchema {
   const destinationIndex = generateDestIndex(transformId);
 
   return {
@@ -27,5 +30,6 @@ export function generateTransformConfig(transformId: string): PutTransformsReque
       aggregations: { '@timestamp.value_count': { value_count: { field: '@timestamp' } } },
     },
     dest: { index: destinationIndex },
+    ...(continuous ? { sync: { time: { field: '@timestamp', delay: '60s' } } } : {}),
   };
 }

@@ -6,14 +6,15 @@
  */
 
 import React, { Component, CSSProperties } from 'react';
-// @ts-expect-error
-import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
+import { CommonProps } from '@elastic/eui';
+import { styleSvg, buildSrcUrl } from '../../symbol_utils';
 
-interface Props {
+interface Props extends CommonProps {
   symbolId: string;
   fill?: string;
   stroke?: string;
-  style: CSSProperties;
+  style?: CSSProperties;
+  svg: string;
 }
 
 interface State {
@@ -39,8 +40,7 @@ export class SymbolIcon extends Component<Props, State> {
   async _loadSymbol() {
     let imgDataUrl;
     try {
-      const svg = getMakiSymbolSvg(this.props.symbolId);
-      const styledSvg = await styleSvg(svg, this.props.fill, this.props.stroke);
+      const styledSvg = await styleSvg(this.props.svg, this.props.fill, this.props.stroke);
       imgDataUrl = buildSrcUrl(styledSvg);
     } catch (error) {
       // ignore failures - component will just not display an icon

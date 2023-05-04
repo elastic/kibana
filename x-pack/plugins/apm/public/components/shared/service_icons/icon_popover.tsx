@@ -6,13 +6,13 @@
  */
 
 import {
-  EuiButtonEmpty,
-  EuiIcon,
+  EuiButtonIcon,
   EuiLoadingContent,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { PopoverItem } from '.';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 interface IconPopoverProps {
@@ -22,12 +22,9 @@ interface IconPopoverProps {
   onClose: () => void;
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
-  icon: {
-    type?: string;
-    size?: 's' | 'm' | 'l';
-    color?: string;
-  };
+  icon: PopoverItem['icon'];
 }
+
 export function IconPopover({
   icon,
   title,
@@ -46,13 +43,16 @@ export function IconPopover({
       anchorPosition="downCenter"
       ownFocus={false}
       button={
-        <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
-          <EuiIcon
-            type={icon.type}
-            size={icon.size ?? 'l'}
-            color={icon.color}
-          />
-        </EuiButtonEmpty>
+        <EuiButtonIcon
+          display="base"
+          color="text"
+          onClick={onClick}
+          iconType={icon.type}
+          iconSize={icon.size ?? 'l'}
+          className="serviceIcon_button"
+          data-test-subj={`popover_${title}`}
+          size="m"
+        />
       }
       isOpen={isOpen}
       closePopover={onClose}

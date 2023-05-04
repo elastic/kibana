@@ -8,10 +8,10 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { find } from 'lodash';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
-import { Index } from '../../../components/elasticsearch/index/index';
+import { Index } from '../../../components/elasticsearch/index/index.js';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
@@ -24,18 +24,19 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { services } = useKibana<{ data: any }>();
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
-  const [data, setData] = useState({} as any);
-  const [indexLabel, setIndexLabel] = useState(labels.index as any);
-  const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
+  const ccs = globalState.ccs;
+  const [data, setData] = useState<any>({});
+  const [indexLabel, setIndexLabel] = useState(labels.index);
+  const [nodesByIndicesData, setNodesByIndicesData] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<AlertsByName>({});
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
@@ -72,6 +73,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       const response = await services.http?.fetch<{ shards: unknown[]; nodes: unknown[] }>(url, {
         method: 'POST',
         body: JSON.stringify({
+          ccs,
           timeRange: {
             min: bounds.min.toISOString(),
             max: bounds.max.toISOString(),
@@ -103,7 +105,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       });
       setAlerts(alertsResponse);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [services.data?.query.timefilter.timefilter, services.http, clusterUuid, index, ccs]);
 
   return (
     <ItemTemplate

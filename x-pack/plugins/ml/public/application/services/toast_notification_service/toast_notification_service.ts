@@ -6,15 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToastInput, ToastOptions, ToastsStart } from 'kibana/public';
+import { ToastInput, ToastOptions, ToastsStart } from '@kbn/core/public';
 import { useMemo } from 'react';
+import { extractErrorProperties, type ErrorType, MLRequestFailure } from '@kbn/ml-error-utils';
 import { getToastNotifications } from '../../util/dependency_cache';
 import { useNotifications } from '../../contexts/kibana';
-import {
-  ErrorType,
-  extractErrorProperties,
-  MLRequestFailure,
-} from '../../../../common/util/errors';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 
@@ -56,5 +52,6 @@ export function getToastNotificationService() {
  */
 export function useToastNotificationService(): ToastNotificationService {
   const { toasts } = useNotifications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => toastNotificationServiceProvider(toasts), []);
 }

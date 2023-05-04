@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 export const mockHttpValues = {
   http: httpServiceMock.createSetupContract(),
-  errorConnecting: false,
+  errorConnectingMessage: '',
   readOnlyMode: false,
 };
 

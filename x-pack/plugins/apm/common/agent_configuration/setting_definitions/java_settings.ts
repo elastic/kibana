@@ -9,6 +9,28 @@ import { i18n } from '@kbn/i18n';
 import { RawSettingDefinition } from './types';
 
 export const javaSettings: RawSettingDefinition[] = [
+  {
+    key: 'application_packages',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.applicationPackages.label', {
+      defaultMessage: 'Application packages',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.applicationPackages.description',
+      {
+        defaultMessage:
+          'Used to determine whether a stack trace frame is an in-app frame or a library frame. ' +
+          'This allows the APM app to collapse the stack frames of library code, and highlight the stack frames that originate from your application. ' +
+          'Multiple root packages can be set as a comma-separated list; there’s no need to configure sub-packages. ' +
+          'Because this setting helps determine which classes to scan on startup, setting this option can also improve startup time.\n' +
+          '\n' +
+          'You must set this option in order to use the API annotations `@CaptureTransaction` and `@CaptureSpan`.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   // ENABLE_LOG_CORRELATION
   {
     key: 'enable_log_correlation',
@@ -47,6 +69,101 @@ export const javaSettings: RawSettingDefinition[] = [
     ),
     includeAgents: ['java'],
   },
+
+  {
+    key: 'enable_experimental_instrumentations',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.enableExperimentalInstrumentations.label',
+      {
+        defaultMessage: 'Enable experimental instrumentations',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.enableExperimentalInstrumentations.description',
+      {
+        defaultMessage:
+          'Whether to apply experimental instrumentations.\n' +
+          '\n' +
+          'NOTE: Changing this value at runtime can slow down the application temporarily. ' +
+          'Setting to true will enable instrumentations in the experimental group.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'enable_instrumentations',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.enableInstrumentations.label',
+      {
+        defaultMessage: 'Disable instrumentations',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.enableInstrumentations.description',
+      {
+        defaultMessage:
+          'A list of instrumentations which should be selectively enabled. ' +
+          'Valid options are listed in the ' +
+          '[Java APM Agent documentation](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-disable-instrumentations).\n' +
+          '\n' +
+          'When set to non-empty value, only listed instrumentations will be enabled ' +
+          'if they are not disabled through `disable_instrumentations`or `enable_experimental_instrumentations`.\n' +
+          'When not set or empty (default), all instrumentations enabled by default will be enabled ' +
+          'unless they are disabled through `disable_instrumentations` or `enable_experimental_instrumentations`.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'log_sending',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate('xpack.apm.agentConfig.logSending.label', {
+      defaultMessage: 'Log sending (experimental)',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.logSending.description',
+      {
+        defaultMessage:
+          'Experimental, requires latest version of the Java agent.\n' +
+          '\n' +
+          'If set to `true`,\n' +
+          'agent will send logs directly to APM server.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'span_min_duration',
+    type: 'duration',
+    defaultValue: '0ms',
+    min: '0ms',
+    label: i18n.translate('xpack.apm.agentConfig.spanMinDuration.label', {
+      defaultMessage: 'Span minimum duration',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanMinDuration.description',
+      {
+        defaultMessage:
+          'Sets the minimum duration of spans. Spans that execute faster than this threshold are attempted to be discarded.\n' +
+          '\n' +
+          'The attempt fails if they lead up to a span that can’t be discarded. Spans that propagate the trace context to ' +
+          'downstream services, such as outgoing HTTP requests, can’t be discarded. Additionally, spans that lead to an error ' +
+          'or that may be a parent of an async operation can’t be discarded.\n' +
+          '\n' +
+          'However, external calls that don’t propagate context, such as calls to a database, can be discarded using this threshold.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   {
     key: 'stress_monitor_gc_stress_threshold',
     label: i18n.translate(
@@ -234,6 +351,97 @@ export const javaSettings: RawSettingDefinition[] = [
       {
         defaultMessage:
           'Excludes classes for which no profiler-inferred spans should be created. This option supports the wildcard `*`, which matches zero or more characters. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'capture_jmx_metrics',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.captureJmxMetrics.label', {
+      defaultMessage: 'Capture JMX metrics',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureJmxMetrics.description',
+      {
+        defaultMessage:
+          'Report metrics from JMX to the APM Server\n' +
+          '\n' +
+          'Can contain multiple comma separated JMX metric definitions:\n' +
+          '\n' +
+          '`object_name[<JMX object name pattern>] attribute[<JMX attribute>:metric_name=<optional metric name>]`\n' +
+          '\n' +
+          'See the Java agent documentation for more details.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'ignore_exceptions',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.ignoreExceptions.label', {
+      defaultMessage: 'Ignore exceptions',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.ignoreExceptions.description',
+      {
+        defaultMessage:
+          'A list of exceptions that should be ignored and not reported as errors.\n' +
+          'This allows to ignore exceptions thrown in regular control flow that are not actual errors.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'trace_methods',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.traceMethods.label', {
+      defaultMessage: 'Trace methods',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.traceMethods.description',
+      {
+        defaultMessage:
+          'A list of methods for which to create a transaction or span.\n' +
+          '\n' +
+          'If you want to monitor a large number of methods,\n' +
+          'use  `profiling_inferred_spans_enabled`.\n' +
+          '\n' +
+          'This works by instrumenting each matching method to include code that creates a span for the method.\n' +
+          'While creating a span is quite cheap in terms of performance,\n' +
+          'instrumenting a whole code base or a method which is executed in a tight loop leads to significant overhead.\n' +
+          '\n' +
+          'NOTE: Only use wildcards if necessary.\n' +
+          'The more methods you match the more overhead will be caused by the agent.\n' +
+          'Also note that there is a maximum amount of spans per transaction `transaction_max_spans`.\n' +
+          '\n' +
+          'See the Java agent documentation for more details.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'unnest_exceptions',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.unnestExceptions.label', {
+      defaultMessage: 'Unnest exceptions',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.unnestExceptions.description',
+      {
+        defaultMessage:
+          'When reporting exceptions,\n' +
+          'un-nests the exceptions matching the wildcard pattern.\n' +
+          "This can come in handy for Spring's `org.springframework.web.util.NestedServletException`,\n" +
+          'for example.',
       }
     ),
     includeAgents: ['java'],

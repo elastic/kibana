@@ -6,14 +6,23 @@
  */
 
 import { ascending, bisector } from 'd3-array';
+import * as rt from 'io-ts';
 import { pick } from 'lodash';
 
-export interface TimeKey {
-  time: number;
-  tiebreaker: number;
-  gid?: string;
-  fromAutoReload?: boolean;
-}
+export const minimalTimeKeyRT = rt.type({
+  time: rt.number,
+  tiebreaker: rt.number,
+});
+export type MinimalTimeKey = rt.TypeOf<typeof minimalTimeKeyRT>;
+
+export const timeKeyRT = rt.intersection([
+  minimalTimeKeyRT,
+  rt.partial({
+    gid: rt.string,
+    fromAutoReload: rt.boolean,
+  }),
+]);
+export type TimeKey = rt.TypeOf<typeof timeKeyRT>;
 
 export interface UniqueTimeKey extends TimeKey {
   gid: string;
@@ -95,3 +104,7 @@ export const getNextTimeKey = (timeKey: TimeKey) => ({
   time: timeKey.time,
   tiebreaker: timeKey.tiebreaker + 1,
 });
+
+export const isSameTimeKey = (firstKey: TimeKey | null, secondKey: TimeKey | null): boolean =>
+  firstKey === secondKey ||
+  (firstKey != null && secondKey != null && compareTimeKeys(firstKey, secondKey) === 0);

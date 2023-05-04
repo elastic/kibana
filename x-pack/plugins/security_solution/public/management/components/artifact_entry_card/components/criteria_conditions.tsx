@@ -6,14 +6,8 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  CommonProps,
-  EuiExpression,
-  EuiToken,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-} from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -22,7 +16,7 @@ import {
   OS_MAC,
   OS_WINDOWS,
   CONDITION_AND,
-  CONDITION_OPERATOR_TYPE_WILDCARD,
+  CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES,
   CONDITION_OPERATOR_TYPE_NESTED,
   CONDITION_OPERATOR_TYPE_MATCH,
   CONDITION_OPERATOR_TYPE_MATCH_ANY,
@@ -31,8 +25,8 @@ import {
   CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
   CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
-import { ArtifactInfo, ArtifactInfoEntry } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { ArtifactInfo, ArtifactInfoEntry } from '../types';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,
@@ -45,7 +39,7 @@ const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
   [ListOperatorTypeEnum.NESTED]: CONDITION_OPERATOR_TYPE_NESTED,
   [ListOperatorTypeEnum.MATCH_ANY]: CONDITION_OPERATOR_TYPE_MATCH_ANY,
   [ListOperatorTypeEnum.MATCH]: CONDITION_OPERATOR_TYPE_MATCH,
-  [ListOperatorTypeEnum.WILDCARD]: CONDITION_OPERATOR_TYPE_WILDCARD,
+  [ListOperatorTypeEnum.WILDCARD]: CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES,
   [ListOperatorTypeEnum.EXISTS]: CONDITION_OPERATOR_TYPE_EXISTS,
   [ListOperatorTypeEnum.LIST]: CONDITION_OPERATOR_TYPE_LIST,
 });
@@ -56,7 +50,7 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.spacerSizes.xl};
+  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`
@@ -146,15 +140,17 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         {entries.map(({ field, type, value, operator, entries: nestedEntries = [] }) => {
           return (
             <div data-test-subj={getTestId('condition')} key={field + type + value}>
-              <EuiExpression
-                description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
-                value={field}
-                color="subdued"
-              />
-              <EuiExpression
-                description={getEntryOperator(type, operator)}
-                value={getEntryValue(type, value)}
-              />
+              <div className="eui-xScroll">
+                <EuiExpression
+                  description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
+                  value={field}
+                  color="subdued"
+                />
+                <EuiExpression
+                  description={getEntryOperator(type, operator)}
+                  value={getEntryValue(type, value)}
+                />
+              </div>
               {getNestedEntriesContent(type, nestedEntries)}
             </div>
           );

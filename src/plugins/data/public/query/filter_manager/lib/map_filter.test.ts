@@ -7,27 +7,22 @@
  */
 
 import { mapFilter } from './map_filter';
-import { Filter } from '../../../../common';
+import type { Filter, PhraseFilter } from '@kbn/es-query';
+import { getDisplayValueFromFilter } from '../../..';
 
 describe('filter manager utilities', () => {
-  function getDisplayName(filter: Filter) {
-    return typeof filter.meta.value === 'function'
-      ? (filter.meta.value as any)()
-      : filter.meta.value;
-  }
-
   describe('mapFilter()', () => {
     test('should map query filters', async () => {
       const before = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
       };
-      const after = mapFilter(before as Filter);
+      const after = mapFilter(before as Filter) as PhraseFilter;
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '_type');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('apache');
+      expect(getDisplayValueFromFilter(after, [])).toBe('apache');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });
@@ -42,7 +37,7 @@ describe('filter manager utilities', () => {
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '@timestamp');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('exists');
+      expect(getDisplayValueFromFilter(after, [])).toBe('exists');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });
@@ -54,12 +49,12 @@ describe('filter manager utilities', () => {
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', 'query');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('{"test":{}}');
+      expect(getDisplayValueFromFilter(after, [])).toBe('{"test":{}}');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });
 
-    test('should finish with a catch', async (done) => {
+    test('should finish with a catch', async () => {
       const before: any = { meta: { index: 'logstash-*' } };
 
       try {
@@ -67,8 +62,6 @@ describe('filter manager utilities', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
         expect(e.message).toBe('No mappings have been found for filter.');
-
-        done();
       }
     });
   });

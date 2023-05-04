@@ -8,8 +8,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-// @ts-ignore
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Listing } from '../../../components/cluster/listing';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -17,7 +16,7 @@ import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ComponentProps } from '../../route_init';
 import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
 
 const pageTitle = i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
@@ -40,7 +39,7 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
   const externalConfig = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
   const [clusters, setClusters] = useState([] as any);
-  const { update: updateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { update: updateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const fakeScope = {
     $evalAsync: (fn: () => void) => fn(),

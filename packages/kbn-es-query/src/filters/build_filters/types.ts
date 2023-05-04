@@ -7,10 +7,10 @@
  */
 
 import { ExistsFilter } from './exists_filter';
-import { PhrasesFilter } from './phrases_filter';
-import { PhraseFilter } from './phrase_filter';
-import { RangeFilter } from './range_filter';
-import { MatchAllFilter } from './match_all_filter';
+import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
+import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
+import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
+import { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
 
 /**
  * A common type for filters supported by this package
@@ -37,6 +37,7 @@ export enum FILTERS {
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
   SPATIAL_FILTER = 'spatial_filter',
+  COMBINED = 'combined',
 }
 
 /**
@@ -49,7 +50,23 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
-// eslint-disable-next-line
+export type FilterMetaParams =
+  | Filter
+  | Filter[]
+  | RangeFilterMeta
+  | RangeFilterParams
+  | PhraseFilterMeta
+  | PhraseFilterMetaParams
+  | PhrasesFilterMeta
+  | MatchAllFilterMeta
+  | string
+  | string[]
+  | boolean
+  | boolean[]
+  | number
+  | number[];
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FilterMeta = {
   alias?: string | null;
   disabled?: boolean;
@@ -63,11 +80,11 @@ export type FilterMeta = {
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
-  params?: any;
+  params?: FilterMetaParams;
   value?: string;
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Filter = {
   $state?: {
     store: FilterStateStore;
@@ -76,11 +93,13 @@ export type Filter = {
   query?: Record<string, any>;
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
 };
+
+export type AggregateQuery = { sql: string } | { esql: string };
 
 /**
  * An interface for a latitude-longitude pair

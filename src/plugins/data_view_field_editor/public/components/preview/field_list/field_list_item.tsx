@@ -42,12 +42,10 @@ export const PreviewListItem: React.FC<Props> = ({
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
-  /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
     'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
-  /* eslint-enable @typescript-eslint/naming-convention */
 
   const doesContainImage = formattedValue?.includes('<img');
 
@@ -85,7 +83,7 @@ export const PreviewListItem: React.FC<Props> = ({
     if (hasScriptError) {
       return (
         <div>
-          <EuiBadge iconType="alert" color="danger" data-test-subj="scriptErrorBadge">
+          <EuiBadge iconType="warning" color="danger" data-test-subj="scriptErrorBadge">
             {i18n.translate('indexPatternFieldEditor.fieldPreview.scriptErrorBadgeLabel', {
               defaultMessage: 'Script error',
             })}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { ClientConfigType } from '../types';
@@ -37,6 +37,7 @@ export async function mountManagementSection(
     core,
     config,
     services: {
+      uiSettings: coreSetup.uiSettings,
       httpService,
       uiMetricService: services.uiMetricService,
       i18n,

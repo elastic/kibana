@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
-
-export const CONTAINER_CLASSNAME = 'infra-container-element';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 export const prepareMountElement = (element: HTMLElement, testSubject?: string) => {
   // Ensure all wrapping elements have the APP_WRAPPER_CLASS so that the KinanaPageTemplate works as expected

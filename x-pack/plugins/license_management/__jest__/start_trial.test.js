@@ -17,7 +17,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display for gold license', () => {
     const rendered = getComponent(
@@ -27,7 +27,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   test('should not display for trial license', () => {
@@ -58,7 +58,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should not display for active enterprise license', () => {
     const rendered = getComponent(
@@ -78,7 +78,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });
 

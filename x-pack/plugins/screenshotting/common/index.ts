@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export type { Context } from './context';
-export type { LayoutParams } from './layout';
-export { LayoutTypes } from './layout';
+export {
+  SCREENSHOTTING_APP_ID,
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+} from './expression';
+export type { LayoutParams, LayoutType } from './layout';
+export { errors };
+import * as errors from './errors';
+
+export const PLUGIN_ID = 'screenshotting';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote';
+import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote.json';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { AnnotationsTable } from './annotations_table';

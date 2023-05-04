@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import { set, unset } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { unset } from 'lodash';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { handleResponse, getNodeInfo } from './get_node_info';
 import { LegacyRequest } from '../../types';
@@ -18,9 +19,22 @@ interface HitParams {
   value?: string;
 }
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 // deletes, adds, or updates the properties based on a default object
 function createResponseObjHit(params?: HitParams[]): ElasticsearchResponseHit {
   const defaultResponseObj: ElasticsearchResponseHit = {
+    _id: '123123a',
     _index: 'index',
     _source: {
       cluster_uuid: '123',
@@ -189,7 +203,11 @@ describe('get_logstash_info', () => {
       then: jest.fn(),
     });
     const req = {
+      payload: {},
       server: {
+        config: () => ({
+          get: () => undefined,
+        }),
         plugins: {
           elasticsearch: {
             getCluster: () => ({
@@ -199,7 +217,8 @@ describe('get_logstash_info', () => {
         },
       },
     } as unknown as LegacyRequest;
-    await getNodeInfo(req, '.monitoring-logstash-*', {
+
+    await getNodeInfo(req, {
       clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID,
       logstashUuid: 'logstash_uuid',
     });

@@ -8,16 +8,20 @@
 import Path from 'path';
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
-import { maybe } from '../../../plugins/apm/common/utils/maybe';
-import { joinByKey } from '../../../plugins/apm/common/utils/join_by_key';
+import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
+import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
+import {
+  ApmUsername,
+  APM_TEST_PASSWORD,
+} from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
 
 type ArchiveName =
   | 'apm_8.0.0'
-  | 'apm_mappings_only_8.0.0'
   | '8.0.0'
   | 'metrics_8.0.0'
+  | 'infra_metrics_and_apm'
   | 'ml_8.0.0'
   | 'observability_overview'
   | 'rum_8.0.0'
@@ -104,8 +108,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
 
       const esArchiver = getService('esArchiver');
       const logger = getService('log');
-
-      const supertest = getService('legacySupertestAsApmWriteUser');
+      const supertest = getService('supertest');
 
       const logWithTimer = () => {
         const start = process.hrtime();
@@ -129,6 +132,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
 
       Object.keys(byConfig).forEach((config) => {
         const groupsForConfig = byConfig[config];
+
         // register suites for other configs, but skip them so tests are marked as such
         // and their snapshots are not marked as obsolete
         (config === apmFtrConfig.name ? describe : describe.skip)(config, () => {
@@ -148,7 +152,10 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
                 );
 
                 // sync jobs from .ml-config to .kibana SOs
-                await supertest.get('/api/ml/saved_objects/sync').set('kbn-xsrf', 'foo');
+                await supertest
+                  .get('/api/ml/saved_objects/sync')
+                  .set('kbn-xsrf', 'foo')
+                  .auth(ApmUsername.editorUser, APM_TEST_PASSWORD);
               }
               if (condition.archives.length) {
                 log('Loaded all archives');

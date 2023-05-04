@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import { ResolvedColumns } from '../../../public/expression_types/arg';
 
 import { ViewStrings } from '../../../i18n';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
@@ -13,7 +14,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 const { MetricVis: strings } = ViewStrings;
 
 export const metricVis = () => ({
-  name: 'metricVis',
+  name: 'legacyMetricVis',
   displayName: strings.getDisplayName(),
   args: [
     {
@@ -70,7 +71,7 @@ export const metricVis = () => ({
       argType: 'toggle',
     },
   ],
-  resolve({ context }: any) {
+  resolve({ context }: any): ResolvedColumns {
     if (getState(context) !== 'ready') {
       return { columns: [] };
     }

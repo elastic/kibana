@@ -135,7 +135,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      expect(apiResponse.body).to.only.have.keys([
+      expect(apiResponse.body).to.have.keys([
         'username',
         'full_name',
         'email',
@@ -146,6 +146,7 @@ export default function ({ getService }) {
         'lookup_realm',
         'authentication_provider',
         'authentication_type',
+        'elastic_cloud_user',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
       expect(apiResponse.body.authentication_provider).to.eql({ type: 'http', name: '__http__' });
@@ -181,7 +182,7 @@ export default function ({ getService }) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
-        expect(apiResponse.body).to.only.have.keys([
+        expect(apiResponse.body).to.have.keys([
           'username',
           'full_name',
           'email',
@@ -192,6 +193,7 @@ export default function ({ getService }) {
           'lookup_realm',
           'authentication_provider',
           'authentication_type',
+          'elastic_cloud_user',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
         expect(apiResponse.body.authentication_provider).to.eql({ type: 'basic', name: 'basic' });

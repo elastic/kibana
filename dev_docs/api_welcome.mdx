@@ -2,7 +2,7 @@
 id: kibDevDocsApiWelcome
 slug: /kibana-dev-docs/api-meta/welcome
 title: Welcome
-summary: How to use our automatically generated API documentation
+description: How to use our automatically generated API documentation
 date: 2021-02-25
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
@@ -12,7 +12,7 @@ documentation for every plugin that exposes a <DocLink id="kibPlatformIntro" sec
 
 <DocCallOut color="warning" title="Experimental">
 This documentation is being automatically generated using an
- [_experimental_ system](https://github.com/elastic/kibana/blob/main/rfcs/text/0014_api_documentation.md). That means
+ [_experimental_ system](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0014_api_documentation.md). That means
  it may be removed or modified at any time. If you have any questions, feedback or concerns, please create an issue using
   the label `APIDocs`, or reach out to the Kibana Tech Leads
  who are temporarily owning and maintaining this system.
@@ -67,7 +67,7 @@ If that isn't the case, please file an issue, it could be a bug with the system.
 We are [aware of some performance issues](https://github.com/elastic/elastic-docs/issues/274) with deeply nested, or large APIs.
 
 In the short term, the best thing you can do is avoid deeply nested API items. Use interfaces rather than inlined objects. Also consider
-adding `serviceFolders` in your kibana.json. This will automatically split your docs up based on which APIs are defined within the service folders.
+adding `serviceFolders` in your kibana.jsonc. This will automatically split your docs up based on which APIs are defined within the service folders.
 They will get built into a doc with an id of
 `kib${PluginName}${ServiceName}PluginApi`. The data plugin does this, so you
  can [check that out as an example](https://github.com/elastic/kibana/blob/main/src/plugins/data/kibana.json#L13).

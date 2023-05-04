@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ManagementSetup } from 'src/plugins/management/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 
 export interface Dependencies {
   home: HomePublicPluginSetup;
@@ -17,4 +18,5 @@ export interface Dependencies {
   licensing: LicensingPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }

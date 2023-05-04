@@ -43,16 +43,18 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
 
       // Double check that the filter has the correct time range and default filter value
       const startingMatchFilters = await PageObjects.canvas.getMatchFiltersFromDebug();
-      expect(startingMatchFilters[0].value).to.equal('apm');
-      expect(startingMatchFilters[0].column).to.equal('project');
+      const projectQuery = startingMatchFilters[0].query.term.project;
+      expect(projectQuery !== null && typeof projectQuery === 'object').to.equal(true);
+      expect(projectQuery?.value).to.equal('apm');
 
       // Change dropdown value
       await testSubjects.selectValue('canvasDropdownFilter__select', 'beats');
 
       await retry.try(async () => {
         const matchFilters = await PageObjects.canvas.getMatchFiltersFromDebug();
-        expect(matchFilters[0].value).to.equal('beats');
-        expect(matchFilters[0].column).to.equal('project');
+        const newProjectQuery = matchFilters[0].query.term.project;
+        expect(newProjectQuery !== null && typeof newProjectQuery === 'object').to.equal(true);
+        expect(newProjectQuery?.value).to.equal('beats');
       });
     });
 
@@ -66,18 +68,20 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
       });
 
       const startingTimeFilters = await PageObjects.canvas.getTimeFiltersFromDebug();
-      expect(startingTimeFilters[0].column).to.equal('@timestamp');
-      expect(new Date(startingTimeFilters[0].from).toDateString()).to.equal('Sun Oct 18 2020');
-      expect(new Date(startingTimeFilters[0].to).toDateString()).to.equal('Sat Oct 24 2020');
+      const timestampQuery = startingTimeFilters[0].query.range['@timestamp'];
+      expect(timestampQuery !== null && typeof timestampQuery === 'object').to.equal(true);
+      expect(new Date(timestampQuery.gte).toDateString()).to.equal('Sun Oct 18 2020');
+      expect(new Date(timestampQuery.lte).toDateString()).to.equal('Sat Oct 24 2020');
 
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await find.clickByCssSelector('.react-datepicker [aria-label="day-19"]', 20000);
 
       await retry.try(async () => {
         const timeFilters = await PageObjects.canvas.getTimeFiltersFromDebug();
-        expect(timeFilters[0].column).to.equal('@timestamp');
-        expect(new Date(timeFilters[0].from).toDateString()).to.equal('Mon Oct 19 2020');
-        expect(new Date(timeFilters[0].to).toDateString()).to.equal('Sat Oct 24 2020');
+        const newTimestampQuery = timeFilters[0].query.range['@timestamp'];
+        expect(newTimestampQuery !== null && typeof newTimestampQuery === 'object').to.equal(true);
+        expect(new Date(newTimestampQuery.gte).toDateString()).to.equal('Mon Oct 19 2020');
+        expect(new Date(newTimestampQuery.lte).toDateString()).to.equal('Sat Oct 24 2020');
       });
 
       await testSubjects.click('superDatePickerendDatePopoverButton');
@@ -85,9 +89,10 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
 
       await retry.try(async () => {
         const timeFilters = await PageObjects.canvas.getTimeFiltersFromDebug();
-        expect(timeFilters[0].column).to.equal('@timestamp');
-        expect(new Date(timeFilters[0].from).toDateString()).to.equal('Mon Oct 19 2020');
-        expect(new Date(timeFilters[0].to).toDateString()).to.equal('Fri Oct 23 2020');
+        const newTimestampQuery = timeFilters[0].query.range['@timestamp'];
+        expect(newTimestampQuery !== null && typeof newTimestampQuery === 'object').to.equal(true);
+        expect(new Date(newTimestampQuery.gte).toDateString()).to.equal('Mon Oct 19 2020');
+        expect(new Date(newTimestampQuery.lte).toDateString()).to.equal('Fri Oct 23 2020');
       });
     });
   });

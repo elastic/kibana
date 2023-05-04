@@ -5,34 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiText, EuiLoadingContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
-import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { euiStyled, EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  WhenExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { euiStyled, EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/types';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+  WhenExpression,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
+import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
+import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
+import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { InfluencerFilter } from './influencer_filter';
 import { NodeTypeExpression } from './node_type';
 import { SeverityThresholdExpression } from './severity_threshold';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
-import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
-
-import { InfluencerFilter } from './influencer_filter';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
 export interface AlertContextMeta {
   metric?: InfraWaffleMapOptions['metric'];
@@ -44,27 +38,22 @@ type AlertParams = RuleTypeParams &
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
 >;
 
 export const defaultExpression = {
   metric: 'memory_usage' as MetricAnomalyParams['metric'],
-  threshold: ANOMALY_THRESHOLD.MAJOR as MetricAnomalyParams['threshold'],
+  threshold: ML_ANOMALY_THRESHOLD.MAJOR as MetricAnomalyParams['threshold'],
   nodeType: 'hosts' as MetricAnomalyParams['nodeType'],
   influencerFilter: undefined,
 };
 
 export const Expression: React.FC<Props> = (props) => {
   const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
-  const { http, notifications } = useKibanaContextForPlugin().services;
   const { space } = useActiveKibanaSpace();
 
   const { setRuleParams, ruleParams, ruleInterval, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
+  const { source, createDerivedIndexPattern } = useSourceContext();
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
@@ -231,7 +220,7 @@ export const Expression: React.FC<Props> = (props) => {
         </StyledExpression>
         <StyledExpression>
           <SeverityThresholdExpression
-            value={ruleParams.threshold ?? ANOMALY_THRESHOLD.CRITICAL}
+            value={ruleParams.threshold ?? ML_ANOMALY_THRESHOLD.CRITICAL}
             onChange={updateSeverityThreshold}
           />
         </StyledExpression>
@@ -252,7 +241,7 @@ export const Expression: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expression;
+export default withSourceProvider<Props>(Expression)('default');
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;

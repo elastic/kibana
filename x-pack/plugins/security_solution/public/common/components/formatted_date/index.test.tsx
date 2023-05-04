@@ -43,6 +43,18 @@ describe('formatted_date', () => {
       expect(wrapper.text()).toEqual('Feb 25, 2019 @ 22:27:05.000');
     });
 
+    test.each([
+      ['MMMM D, YYYY', 'February 25, 2019'],
+      ['MM/D/YY', '02/25/19'],
+      ['d-m-y', '1-27-2019'],
+    ])('it renders the date in the correct format: %s', (momentDateFormat, expectedResult) => {
+      const wrapper = mount(
+        <PreferenceFormattedDate value={isoDate} dateFormat={momentDateFormat} />
+      );
+
+      expect(wrapper.text()).toEqual(expectedResult);
+    });
+
     test('it renders a UTC ISO8601 date string supplied when no date format configuration exists', () => {
       mockUseDateFormat.mockImplementation(() => '');
       const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
-import { IEventLogService, IEventLogClientService } from '../../../../../plugins/event_log/server';
+import { Plugin, CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IEventLogService, IEventLogClientService } from '@kbn/event-log-plugin/server';
 import {
   logEventRoute,
   registerProviderActionsRoute,
@@ -15,6 +15,8 @@ import {
   isIndexingEntriesRoute,
   isEventLogServiceLoggingEntriesRoute,
   isEventLogServiceEnabledRoute,
+  getEventLogRoute,
+  getEventLogByIdsRoute,
 } from './init_routes';
 
 // this plugin's dependendencies
@@ -34,7 +36,7 @@ export class EventLogFixturePlugin
     this.logger = initializerContext.logger.get('plugins', 'eventLogFixture');
   }
 
-  public setup(core: CoreSetup, { eventLog }: EventLogFixtureSetupDeps) {
+  public setup(core: CoreSetup<EventLogFixtureStartDeps>, { eventLog }: EventLogFixtureSetupDeps) {
     const router = core.http.createRouter();
 
     eventLog.registerProviderActions('event_log_fixture', ['test']);
@@ -60,6 +62,8 @@ export class EventLogFixturePlugin
     isIndexingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceLoggingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceEnabledRoute(router, eventLog, this.logger);
+    getEventLogRoute(router, core);
+    getEventLogByIdsRoute(router, core);
   }
 
   public start() {}

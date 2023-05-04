@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
-import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
-import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import { MlServicesContext } from '../../app';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import type { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;
   currentDataView: DataView; // TODO this should be DataView or null
-  currentSavedSearch: SavedSearchSavedObject | null;
+  // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
+  deprecatedSavedSearchObj: SavedSearchSavedObject | null;
+  selectedSavedSearch: SavedSearch | null;
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
   kibanaVersion: string;

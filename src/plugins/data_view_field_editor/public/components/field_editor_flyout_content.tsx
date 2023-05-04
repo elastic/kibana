@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
   EuiText,
+  EuiTitle,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-
-import type { Field } from '../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
-import { FlyoutPanels } from './flyout_panels';
-import { useFieldEditorContext } from './field_editor_context';
-import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
-import { FieldPreview, useFieldPreviewContext } from './preview';
+import type { Field } from '../types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
+
+import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
+import { useFieldEditorContext } from './field_editor_context';
+import { FlyoutPanels } from './flyout_panels';
+import { FieldPreview, useFieldPreviewContext } from './preview';
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -50,7 +51,9 @@ export interface Props {
    */
   onCancel: () => void;
   /** Optional field to process */
-  field?: Field;
+  fieldToEdit?: Field;
+  /** Optional preselected configuration for new field */
+  fieldToCreate?: Field;
   isSavingField: boolean;
   /** Handler to call when the component mounts.
    *  We will pass "up" data that the parent component might need
@@ -59,15 +62,19 @@ export interface Props {
 }
 
 const FieldEditorFlyoutContentComponent = ({
-  field,
+  fieldToEdit,
+  fieldToCreate,
   onSave,
   onCancel,
   isSavingField,
   onMounted,
 }: Props) => {
   const isMounted = useRef(false);
-  const isEditingExistingField = !!field;
-  const { dataView } = useFieldEditorContext();
+  const isEditingExistingField = !!fieldToEdit;
+  const { dataView, subfields$ } = useFieldEditorContext();
+
+  const isMobile = useIsWithinMaxBreakpoint('s');
+
   const {
     panel: { isVisible: isPanelVisible },
   } = useFieldPreviewContext();
@@ -75,9 +82,9 @@ const FieldEditorFlyoutContentComponent = ({
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
     isSubmitting: false,
-    isValid: field ? true : undefined,
-    submit: field
-      ? async () => ({ isValid: true, data: field })
+    isValid: fieldToEdit ? true : undefined,
+    submit: fieldToEdit
+      ? async () => ({ isValid: true, data: fieldToEdit })
       : async () => ({ isValid: false, data: {} as Field }),
   });
 
@@ -98,7 +105,7 @@ const FieldEditorFlyoutContentComponent = ({
   }, [isFormModified]);
 
   const onClickSave = useCallback(async () => {
-    const { isValid, data } = await submit();
+    const { isValid, data: updatedField } = await submit();
 
     if (!isMounted.current) {
       // User has closed the flyout meanwhile submitting the form
@@ -106,8 +113,8 @@ const FieldEditorFlyoutContentComponent = ({
     }
 
     if (isValid) {
-      const nameChange = field?.name !== data.name;
-      const typeChange = field?.type !== data.type;
+      const nameChange = fieldToEdit?.name !== updatedField.name;
+      const typeChange = fieldToEdit?.type !== updatedField.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -115,10 +122,14 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        onSave(data);
+        if (updatedField.type === 'composite') {
+          onSave({ ...updatedField, fields: subfields$.getValue() });
+        } else {
+          onSave(updatedField);
+        }
       }
     }
-  }, [onSave, submit, field, isEditingExistingField]);
+  }, [onSave, submit, fieldToEdit, isEditingExistingField, subfields$]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -132,10 +143,14 @@ const FieldEditorFlyoutContentComponent = ({
     if (modalVisibility.confirmChangeNameOrType) {
       return (
         <SaveFieldTypeOrNameChangedModal
-          fieldName={field?.name!}
+          fieldName={fieldToEdit?.name!}
           onConfirm={async () => {
-            const { data } = await submit();
-            onSave(data);
+            const { data: updatedField } = await submit();
+            if (updatedField.type === 'composite') {
+              onSave({ ...updatedField, fields: subfields$.getValue() });
+            } else {
+              onSave(updatedField);
+            }
           }}
           onCancel={() => {
             setModalVisibility(defaultModalVisibility);
@@ -186,7 +201,7 @@ const FieldEditorFlyoutContentComponent = ({
     <>
       <FlyoutPanels.Group
         flyoutClassName={euiFlyoutClassname}
-        maxWidth={1180}
+        maxWidth={isMobile ? false : 1180}
         data-test-subj="fieldEditor"
         fixedPanelWidths
       >
@@ -196,12 +211,12 @@ const FieldEditorFlyoutContentComponent = ({
             <FlyoutPanels.Header>
               <EuiTitle data-test-subj="flyoutTitle">
                 <h2>
-                  {field ? (
+                  {fieldToEdit ? (
                     <FormattedMessage
                       id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
                       defaultMessage="Edit field '{fieldName}'"
                       values={{
-                        fieldName: field.name,
+                        fieldName: fieldToEdit.name,
                       }}
                     />
                   ) : (
@@ -218,7 +233,7 @@ const FieldEditorFlyoutContentComponent = ({
                     id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
                     defaultMessage="Data view: {patternName}"
                     values={{
-                      patternName: <i>{dataView.title}</i>,
+                      patternName: <i>{dataView.getName()}</i>,
                     }}
                   />
                 </p>
@@ -226,7 +241,7 @@ const FieldEditorFlyoutContentComponent = ({
             </FlyoutPanels.Header>
 
             <FieldEditor
-              field={field}
+              field={fieldToEdit ?? fieldToCreate}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
             />

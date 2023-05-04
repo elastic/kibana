@@ -6,18 +6,21 @@
  */
 import { Subject } from 'rxjs';
 import { merge } from 'lodash';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
-  createCollectorFetchContextWithKibanaMock,
+  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { HealthStatus } from '../monitoring';
 import { MonitoredHealth } from '../routes/health';
 import { TaskPersistence } from '../task_events';
 import { registerTaskManagerUsageCollector } from './task_manager_usage_collector';
 import { sleep } from '../test_utils';
 import { TaskManagerUsage } from './types';
+import { MonitoredUtilization } from '../routes/background_task_utilization';
+import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
 
 describe('registerTaskManagerUsageCollector', () => {
   let collector: Collector<unknown>;
@@ -25,17 +28,27 @@ describe('registerTaskManagerUsageCollector', () => {
 
   it('should report telemetry on the ephemeral queue', async () => {
     const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
     const usageCollectionMock = createUsageCollectionSetupMock();
-    const fetchContext = createCollectorFetchContextWithKibanaMock();
+    const fetchContext = createCollectorFetchContextMock();
     usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
 
-    registerTaskManagerUsageCollector(usageCollectionMock, monitoringStats$, true, 10, []);
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      true,
+      10,
+      []
+    );
 
     const mockHealth = getMockMonitoredHealth();
     monitoringStats$.next(mockHealth);
+    const mockUtilization = getMockMonitoredUtilization();
+    monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
     expect(usageCollectionMock.makeUsageCollector).toBeCalled();
@@ -52,24 +65,101 @@ describe('registerTaskManagerUsageCollector', () => {
 
   it('should report telemetry on the excluded task types', async () => {
     const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
     const usageCollectionMock = createUsageCollectionSetupMock();
-    const fetchContext = createCollectorFetchContextWithKibanaMock();
+    const fetchContext = createCollectorFetchContextMock();
     usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
 
-    registerTaskManagerUsageCollector(usageCollectionMock, monitoringStats$, true, 10, [
-      'actions:*',
-    ]);
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      true,
+      10,
+      ['actions:*']
+    );
 
     const mockHealth = getMockMonitoredHealth();
     monitoringStats$.next(mockHealth);
+    const mockUtilization = getMockMonitoredUtilization();
+    monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
     expect(usageCollectionMock.makeUsageCollector).toBeCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.task_type_exclusion).toEqual(['actions:*']);
+  });
+
+  it('should report telemetry on background task utilization', async () => {
+    const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    const fetchContext = createCollectorFetchContextMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
+
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      true,
+      10,
+      ['actions:*']
+    );
+
+    const mockHealth = getMockMonitoredHealth();
+    monitoringStats$.next(mockHealth);
+    const mockUtilization = getMockMonitoredUtilization();
+    const mockUtilizationStats =
+      mockUtilization.stats as MonitoredStat<BackgroundTaskUtilizationStat>;
+    monitoringUtilization$.next(mockUtilization);
+    await sleep(1001);
+
+    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+    expect(telemetry.recurring_tasks).toEqual({
+      actual_service_time: mockUtilizationStats?.value.recurring.ran.service_time.actual,
+      adjusted_service_time: mockUtilizationStats?.value.recurring.ran.service_time.adjusted,
+    });
+    expect(telemetry.adhoc_tasks).toEqual({
+      actual_service_time: mockUtilizationStats?.value.adhoc.ran.service_time.actual,
+      adjusted_service_time: mockUtilizationStats?.value.adhoc.ran.service_time.adjusted,
+    });
+  });
+
+  it('should report telemetry on capacity', async () => {
+    const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    const fetchContext = createCollectorFetchContextMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
+
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      true,
+      10,
+      ['actions:*']
+    );
+
+    const mockHealth = getMockMonitoredHealth();
+    monitoringStats$.next(mockHealth);
+    const mockUtilization = getMockMonitoredUtilization();
+    monitoringUtilization$.next(mockUtilization);
+    await sleep(1001);
+
+    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+    expect(telemetry.capacity).toEqual(10);
   });
 });
 
@@ -86,7 +176,6 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         value: {
           max_workers: 10,
           poll_interval: 3000,
-          max_poll_inactivity_cycles: 10,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,
@@ -187,7 +276,65 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
           },
         },
       },
+      capacity_estimation: {
+        timestamp: new Date().toISOString(),
+        status: HealthStatus.OK,
+        value: {
+          observed: {
+            observed_kibana_instances: 10,
+            max_throughput_per_minute: 10,
+            max_throughput_per_minute_per_kibana: 10,
+            minutes_to_drain_overdue: 10,
+            avg_required_throughput_per_minute: 10,
+            avg_required_throughput_per_minute_per_kibana: 10,
+            avg_recurring_required_throughput_per_minute: 10,
+            avg_recurring_required_throughput_per_minute_per_kibana: 10,
+          },
+          proposed: {
+            provisioned_kibana: 10,
+            min_required_kibana: 10,
+            avg_recurring_required_throughput_per_minute_per_kibana: 10,
+            avg_required_throughput_per_minute_per_kibana: 10,
+          },
+        },
+      },
     },
   };
   return merge(stub, overrides) as unknown as MonitoredHealth;
+}
+
+function getMockMonitoredUtilization(overrides = {}): MonitoredUtilization {
+  const stub: MonitoredUtilization = {
+    process_uuid: '1',
+    timestamp: new Date().toISOString(),
+    last_update: new Date().toISOString(),
+    stats: {
+      timestamp: new Date().toISOString(),
+      value: {
+        load: 6,
+        adhoc: {
+          created: {
+            counter: 5,
+          },
+          ran: {
+            service_time: {
+              actual: 3000,
+              adjusted: 2500,
+              task_counter: 10,
+            },
+          },
+        },
+        recurring: {
+          ran: {
+            service_time: {
+              actual: 1000,
+              adjusted: 2000,
+              task_counter: 10,
+            },
+          },
+        },
+      },
+    },
+  };
+  return merge(stub, overrides) as unknown as MonitoredUtilization;
 }

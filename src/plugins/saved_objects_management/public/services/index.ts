@@ -16,5 +16,5 @@ export type {
   SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
 export { SavedObjectsManagementColumnService } from './column_service';
-export type { SavedObjectsManagementColumn, SavedObjectsManagementRecord } from './types';
-export { SavedObjectsManagementAction } from './types';
+export type { SavedObjectsManagementRecord } from './types';
+export { SavedObjectsManagementColumn, SavedObjectsManagementAction } from './types';

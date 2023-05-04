@@ -6,21 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginConfigDescriptor } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, ConfigSchema } from '../config';
-import { registerVisTypeTableUsageCollector } from './usage_collector';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
 export const plugin = () => ({
-  setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
-    if (plugins.usageCollection) {
-      registerVisTypeTableUsageCollector(plugins.usageCollection);
-    }
-  },
+  setup() {},
   start() {},
 });

@@ -157,24 +157,6 @@ describe('Vislib Data Class Test Suite', function () {
     });
   });
 
-  describe('_removeZeroSlices', function () {
-    let data;
-    const pieData = {
-      slices: {
-        children: [{ size: 30 }, { size: 20 }, { size: 0 }],
-      },
-    };
-
-    beforeEach(function () {
-      data = new Data(pieData, mockUiState, () => undefined);
-    });
-
-    it('should remove zero values', function () {
-      const slices = data._removeZeroSlices(data.data.slices);
-      expect(slices.children.length).toBe(2);
-    });
-  });
-
   describe('Data.flatten', function () {
     let serIn;
     let serOut;
@@ -211,62 +193,6 @@ describe('Vislib Data Class Test Suite', function () {
         expect(data.flatten()).toHaveLength(len);
       };
     }
-  });
-
-  describe('geohashGrid methods', function () {
-    let data;
-    const geohashGridData = {
-      hits: 3954,
-      rows: [
-        {
-          title: 'Top 5 _type: apache',
-          label: 'Top 5 _type: apache',
-          geoJson: {
-            type: 'FeatureCollection',
-            features: [],
-            properties: {
-              min: 2,
-              max: 331,
-              zoom: 3,
-              center: [47.517200697839414, -112.06054687499999],
-            },
-          },
-        },
-        {
-          title: 'Top 5 _type: nginx',
-          label: 'Top 5 _type: nginx',
-          geoJson: {
-            type: 'FeatureCollection',
-            features: [],
-            properties: {
-              min: 1,
-              max: 88,
-              zoom: 3,
-              center: [47.517200697839414, -112.06054687499999],
-            },
-          },
-        },
-      ],
-    };
-
-    beforeEach(function () {
-      data = new Data(geohashGridData, mockUiState, () => undefined);
-    });
-
-    describe('getVisData', function () {
-      it('should return the rows property', function () {
-        const visData = data.getVisData();
-        expect(visData[0].title).toEqual(geohashGridData.rows[0].title);
-      });
-    });
-
-    describe('getGeoExtents', function () {
-      it('should return the min and max geoJson properties', function () {
-        const minMax = data.getGeoExtents();
-        expect(minMax.min).toBe(1);
-        expect(minMax.max).toBe(331);
-      });
-    });
   });
 
   describe('null value check', function () {

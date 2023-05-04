@@ -13,9 +13,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
 
   describe('maps in canvas', function () {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
@@ -34,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('edits map by-value embeddable', async () => {
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.toggleContextMenu();
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.maps.saveMap('canvas test map');
         const embeddableCount = await PageObjects.canvas.getEmbeddableCount();

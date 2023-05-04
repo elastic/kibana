@@ -2,34 +2,36 @@
 
 exports[`PageLoading should show a simple page loading component 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow"
+  class="euiPage emotion-euiPage-row-grow"
   style="height:calc(100vh - 50px)"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content emotion-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceAround-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
-                class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                aria-label="Loading"
+                class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+                role="progressbar"
               />
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               Loading…
             </div>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { Tag } from '../../../common/types';
 import { createTag, createTagAttributes } from '../../../common/test_utils';
 import { tagsCacheMock } from './tags_cache.mock';

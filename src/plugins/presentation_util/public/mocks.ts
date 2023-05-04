@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { PresentationUtilPluginStart } from './types';
 import { pluginServices } from './services';
-import { registry } from './services/kibana';
-import { registerExpressionsLanguage } from '.';
+import { registry } from './services/plugin_services';
+import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
+import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
+import { createReduxTools } from './redux_tools/create_redux_tools';
 
 const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {
   pluginServices.setRegistry(
-    registry.start({ coreStart, startPlugins: { dataViews: {}, data: {} } as any })
+    registry.start({ coreStart, startPlugins: { dataViews: {}, uiActions: {} } as any })
   );
 
   const startContract: PresentationUtilPluginStart = {
     ContextProvider: pluginServices.getContextProvider(),
     labsService: pluginServices.getServices().labs,
-    controlsService: pluginServices.getServices().controls,
     registerExpressionsLanguage,
   };
   return startContract;
@@ -29,3 +30,13 @@ const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart 
 export const presentationUtilPluginMock = {
   createStartContract,
 };
+
+/**
+ * A non async-imported version of the real redux embeddable tools package for mocking purposes.
+ */
+export const mockedReduxEmbeddablePackage: ReduxToolsPackage = {
+  createReduxEmbeddableTools,
+  createReduxTools,
+};
+
+export * from './__stories__/fixtures/flights';

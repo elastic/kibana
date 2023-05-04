@@ -10,22 +10,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   EuiPanel,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/public';
+import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
   BOOK_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   SearchableListContainerFactory,
-} from '../../embeddable_examples/public';
+} from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
   embeddableServices: EmbeddableStart;

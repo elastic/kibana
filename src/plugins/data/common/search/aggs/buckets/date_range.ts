@@ -6,27 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
+import { inferTimeZone } from '../../..';
 import { DateRange, dateRangeToAst } from '../../expressions';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { aggDateRangeFnName } from './date_range_fn';
 
-import { KBN_FIELD_TYPES } from '../../../../common/kbn_field_types/types';
-import { BaseAggParams } from '../types';
+import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
+import type { BaseAggParams } from '../types';
+import type { AggTypesDependencies } from '../agg_types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
 });
-
-export interface DateRangeBucketAggDependencies {
-  isDefaultTimezone: () => boolean;
-  getConfig: <T = any>(key: string) => T;
-}
 
 export interface AggParamsDateRange extends BaseAggParams {
   field?: string;
@@ -34,10 +29,7 @@ export interface AggParamsDateRange extends BaseAggParams {
   time_zone?: string;
 }
 
-export const getDateRangeBucketAgg = ({
-  isDefaultTimezone,
-  getConfig,
-}: DateRangeBucketAggDependencies) =>
+export const getDateRangeBucketAgg = ({ aggExecutionContext, getConfig }: AggTypesDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.DATE_RANGE,
     expressionName: aggDateRangeFnName,
@@ -63,7 +55,7 @@ export const getDateRangeBucketAgg = ({
         type: 'field',
         filterFieldTypes: [KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.DATE_RANGE],
         default(agg: IBucketAggConfig) {
-          return agg.getIndexPattern().timeFieldName;
+          return agg.getIndexPattern().getTimeField?.()?.name;
         },
       },
       {
@@ -82,24 +74,13 @@ export const getDateRangeBucketAgg = ({
         // Implimentation method is the same as that of date_histogram
         serialize: () => undefined,
         write: (agg, output) => {
-          const field = agg.getParam('field');
-          let tz = agg.getParam('time_zone');
-
-          if (!tz && field) {
-            tz = get(agg.getIndexPattern(), [
-              'typeMeta',
-              'aggs',
-              'date_range',
-              field.name,
-              'time_zone',
-            ]);
-          }
-          if (!tz) {
-            const detectedTimezone = moment.tz.guess();
-            const tzOffset = moment().format('Z');
-
-            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
-          }
+          const tz = inferTimeZone(
+            agg.params,
+            agg.getIndexPattern(),
+            'date_range',
+            getConfig,
+            aggExecutionContext
+          );
           output.params.time_zone = tz;
         },
       },

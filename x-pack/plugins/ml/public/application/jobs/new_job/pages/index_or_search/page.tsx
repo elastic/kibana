@@ -6,18 +6,12 @@
  */
 
 import React, { FC } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiTitle,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
@@ -25,7 +19,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
-  const { uiSettings, savedObjects } = useMlKibana().services;
+  const { uiSettings, http, savedObjectsManagement } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
   const onObjectSelection = (id: string, type: string) => {
@@ -37,22 +31,16 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
   };
 
   return (
-    <EuiPage data-test-subj="mlPageSourceSelection">
+    <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-                  defaultMessage="Select data view or saved search"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <SavedObjectFinderUi
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+            defaultMessage="Select data view or saved search"
+          />
+        </MlPageHeader>
+        <EuiPageContent hasShadow={false} hasBorder={true}>
+          <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter
@@ -79,14 +67,18 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                     defaultMessage: 'Data view',
                   }
                 ),
+                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
-            uiSettings={uiSettings}
-            savedObjects={savedObjects}
+            services={{
+              uiSettings,
+              http,
+              savedObjectsManagement,
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>
-    </EuiPage>
+    </div>
   );
 };

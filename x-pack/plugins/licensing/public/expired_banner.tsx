@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 interface Props {
   type: string;

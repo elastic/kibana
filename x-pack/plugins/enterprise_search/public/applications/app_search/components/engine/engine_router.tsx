@@ -6,11 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, Redirect, useParams } from 'react-router-dom';
+import { Switch, Redirect, useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
+import { Route } from '@kbn/shared-ux-router';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
 import { AppLogic } from '../../app_logic';
@@ -46,7 +47,7 @@ import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
-import { EngineLogic, getEngineBreadcrumbs } from './';
+import { EngineLogic, getEngineBreadcrumbs } from '.';
 
 export const EngineRouter: React.FC = () => {
   const {

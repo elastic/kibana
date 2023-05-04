@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import {
-  METRIC_JAVA_GC_COUNT,
-  METRIC_JAVA_GC_TIME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ChartBase } from '../../../types';
 
-import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
+import {
+  fetchAndTransformGcMetrics,
+  TIME,
+  RATE,
+} from './fetch_and_transform_gc_metrics';
 
 describe('fetchAndTransformGcMetrics', () => {
   describe('given "jvm.gc.time"', () => {
@@ -49,19 +50,19 @@ describe('fetchAndTransformGcMetrics', () => {
           },
         },
       };
-      const setup = {
-        apmEventClient: { search: () => Promise.resolve(response) },
-        config: { 'xpack.gc.metricsInterval': 0 },
-      } as unknown as Setup;
-      const fieldName = METRIC_JAVA_GC_TIME;
+      const config = { 'xpack.gc.metricsInterval': 0 } as unknown as APMConfig;
+      const apmEventClient = {
+        search: () => Promise.resolve(response),
+      } as unknown as APMEventClient;
 
       const { series } = await fetchAndTransformGcMetrics({
         chartBase,
         environment: 'test environment',
-        fieldName,
+        rateOrTime: TIME,
         kuery: '',
         operationName: 'test operation name',
-        setup,
+        config,
+        apmEventClient,
         serviceName: 'test service name',
         start: 1633456140000,
         end: 1633457078105,
@@ -109,19 +110,19 @@ describe('fetchAndTransformGcMetrics', () => {
           },
         },
       };
-      const setup = {
-        apmEventClient: { search: () => Promise.resolve(response) },
-        config: { 'xpack.gc.metricsInterval': 0 },
-      } as unknown as Setup;
-      const fieldName = METRIC_JAVA_GC_COUNT;
+      const config = { 'xpack.gc.metricsInterval': 0 } as unknown as APMConfig;
+      const apmEventClient = {
+        search: () => Promise.resolve(response),
+      } as unknown as APMEventClient;
 
       const { series } = await fetchAndTransformGcMetrics({
         chartBase,
         environment: 'test environment',
-        fieldName,
+        rateOrTime: RATE,
         kuery: '',
         operationName: 'test operation name',
-        setup,
+        config,
+        apmEventClient,
         serviceName: 'test service name',
         start: 1633456140000,
         end: 1633457078105,

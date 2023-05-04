@@ -11,14 +11,16 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { ListResult } from '../../../common';
+import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
 import { isElasticsearchVersionConflictError } from '../../errors/utils';
+
+import { withPackageSpan } from '../epm/packages/utils';
 
 import { isElasticsearchItemNotFoundError } from './utils';
 import type {
@@ -48,7 +50,7 @@ export const getArtifact = async (
     });
 
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return esSearchHitToArtifact(esData.body);
+    return esSearchHitToArtifact(esData);
   } catch (e) {
     if (isElasticsearchItemNotFoundError(e)) {
       return;
@@ -82,6 +84,58 @@ export const createArtifact = async (
   return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
 };
 
+export const bulkCreateArtifacts = async (
+  esClient: ElasticsearchClient,
+  artifacts: NewArtifact[],
+  refresh = false
+): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
+  const { ids, newArtifactsData } = artifacts.reduce<{
+    ids: string[];
+    newArtifactsData: ArtifactElasticsearchProperties[];
+  }>(
+    (acc, artifact) => {
+      acc.ids.push(uniqueIdFromArtifact(artifact));
+      acc.newArtifactsData.push(newArtifactToElasticsearchProperties(artifact));
+      return acc;
+    },
+    { ids: [], newArtifactsData: [] }
+  );
+
+  const body = ids.flatMap((id, index) => [
+    {
+      create: {
+        _id: id,
+      },
+    },
+    newArtifactsData[index],
+  ]);
+
+  const res = await withPackageSpan('Bulk create fleet artifacts', () =>
+    esClient.bulk({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      body,
+      refresh,
+    })
+  );
+  if (res.errors) {
+    const nonConflictErrors = res.items.reduce<Error[]>((acc, item) => {
+      if (item.create?.status !== 409) {
+        acc.push(new Error(item.create?.error?.reason));
+      }
+      return acc;
+    }, []);
+    if (nonConflictErrors.length > 0) {
+      return { errors: nonConflictErrors };
+    }
+  }
+
+  return {
+    artifacts: ids.map((id, index) =>
+      esSearchHitToArtifact({ _id: id, _source: newArtifactsData[index] })
+    ),
+  };
+};
+
 export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
   try {
     await esClient.delete({
@@ -107,6 +161,8 @@ export const listArtifacts = async (
       from: (page - 1) * perPage,
       ignore_unavailable: true,
       size: perPage,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
       body: {
         sort: [{ [sortField]: { order: sortOrder } }],
       },
@@ -114,11 +170,10 @@ export const listArtifacts = async (
 
     return {
       // @ts-expect-error @elastic/elasticsearch _source is optional
-      items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
+      items: searchResult.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
-      // @ts-expect-error doesn't handle total as number
-      total: searchResult.body.hits.total.value,
+      total: searchResult.hits.total as number,
     };
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);

@@ -8,6 +8,7 @@
 
 // The @babel/parser options documentation can be found here:
 // https://babeljs.io/docs/en/babel-parser#options
+/** @type {import('@babel/core').ParserOptions} */
 module.exports = {
   sourceType: 'unambiguous',
   plugins: [

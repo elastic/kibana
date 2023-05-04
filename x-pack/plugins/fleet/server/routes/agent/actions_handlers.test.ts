@@ -10,12 +10,12 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { NewAgentActionSchema } from '../../types/models';
 import type { ActionsService } from '../../services/agents';
@@ -32,8 +32,8 @@ describe('test actions handlers schema', () => {
   it('validate that new agent actions schema is valid', async () => {
     expect(
       NewAgentActionSchema.validate({
-        type: 'POLICY_CHANGE',
-        data: 'data',
+        type: 'SETTINGS',
+        data: { log_level: 'debug' },
       })
     ).toBeTruthy();
   });
@@ -62,8 +62,8 @@ describe('test actions handlers', () => {
     const postNewAgentActionRequest: PostNewAgentActionRequest = {
       body: {
         action: {
-          type: 'POLICY_CHANGE',
-          data: 'data',
+          type: 'SETTINGS',
+          data: { log_level: 'debug' },
         },
       },
       params: {
@@ -74,11 +74,12 @@ describe('test actions handlers', () => {
     const mockRequest = httpServerMock.createKibanaRequest(postNewAgentActionRequest);
 
     const agentAction = {
-      type: 'POLICY_CHANGE',
+      type: 'SETTINGS',
       id: 'action1',
       sent_at: '2020-03-14T19:45:02.620Z',
       timestamp: '2019-01-04T14:32:03.36764-05:00',
       created_at: '2020-03-14T19:45:02.620Z',
+      data: { log_level: 'debug' },
     } as unknown as AgentAction;
 
     const actionsService: ActionsService = {
@@ -86,6 +87,8 @@ describe('test actions handlers', () => {
         id: 'agent',
       }),
       createAgentAction: jest.fn().mockReturnValueOnce(agentAction),
+      cancelAgentAction: jest.fn(),
+      getAgentActions: jest.fn(),
     } as jest.Mocked<ActionsService>;
 
     const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);

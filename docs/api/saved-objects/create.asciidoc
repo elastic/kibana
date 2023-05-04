@@ -4,7 +4,9 @@
 <titleabbrev>Create saved objects</titleabbrev>
 ++++
 
-experimental[] Create {kib} saved objects.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Create {kib} saved objects.
 
 [[saved-objects-api-create-request]]
 ==== Request
@@ -72,7 +74,7 @@ used to specify a single space, and the "All spaces" identifier (`'*'`) is not a
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/index_patterns/index-pattern/my-pattern  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "attributes": {
     "title": "my-pattern-*"

@@ -9,23 +9,34 @@ import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
-import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
-import { explorerService } from '../../explorer_dashboard_service';
+import type { Query } from '@kbn/es-query';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { QueryErrorMessage } from '@kbn/ml-error-utils';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
+import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
+import { useMlKibana } from '../../../contexts/kibana';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
+
+export interface KQLFilterSettings {
+  filterQuery: InfluencersFilterQuery;
+  queryString: string;
+  tableQueryString: string;
+  isAndOperator: boolean;
+  filteredFields: string[];
+}
 
 export function getKqlQueryValues({
   inputString,
   queryLanguage,
   indexPattern,
 }: {
-  inputString: string | { [key: string]: any };
+  inputString: string | { [key: string]: unknown };
   queryLanguage: string;
   indexPattern: DataView;
-}): { clearSettings: boolean; settings: any } {
+}): { clearSettings: boolean; settings: KQLFilterSettings } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
   const ast = fromKueryExpression(inputString);
@@ -58,8 +69,8 @@ export function getKqlQueryValues({
     clearSettings,
     settings: {
       filterQuery: influencersFilterQuery,
-      queryString: inputString,
-      tableQueryString: inputString,
+      queryString: inputString as string,
+      tableQueryString: inputString as string,
       isAndOperator,
       filteredFields,
     },
@@ -88,7 +99,7 @@ function getInitSearchInputState({
 
 interface ExplorerQueryBarProps {
   filterActive: boolean;
-  filterPlaceHolder: string;
+  filterPlaceHolder?: string;
   indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;
@@ -101,11 +112,27 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   queryString,
   updateLanguage,
 }) => {
+  const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
+  const { services } = useMlKibana();
+  const {
+    unifiedSearch,
+    data,
+    storage,
+    appName,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    dataViews,
+  } = services;
+
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
     getInitSearchInputState({ filterActive, queryString })
   );
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   useEffect(
     function updateSearchInputFromFilter() {
@@ -130,41 +157,52 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
       });
 
       if (clearSettings === true) {
-        explorerService.clearInfluencerFilterSettings();
+        anomalyExplorerCommonStateService.clearFilterSettings();
       } else {
-        explorerService.setInfluencerFilterSettings(settings);
+        anomalyExplorerCommonStateService.setFilterSettings(settings);
       }
     } catch (e) {
       console.log('Invalid query syntax in search bar', e); // eslint-disable-line no-console
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
   return (
     <EuiInputPopover
-      style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
+      css={{ 'max-width': '100%' }}
+      closePopover={setQueryErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput
           bubbleSubmitEvent={false}
           query={searchInput}
-          indexPatterns={[indexPattern]}
+          indexPatterns={[]}
           onChange={searchChangeHandler}
           onSubmit={applyInfluencersFilterQuery}
           placeholder={filterPlaceHolder}
           disableAutoFocus
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
+          appName={appName}
+          deps={{
+            unifiedSearch,
+            notifications,
+            http,
+            docLinks,
+            uiSettings,
+            data,
+            storage,
+            dataViews,
+          }}
         />
       }
-      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+      isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}
     >
       <EuiCode>
         {i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessageQueryBar', {
           defaultMessage: 'Invalid query',
         })}
         {': '}
-        {errorMessage?.message.split('\n')[0]}
+        {queryErrorMessage?.message.split('\n')[0]}
       </EuiCode>
     </EuiInputPopover>
   );

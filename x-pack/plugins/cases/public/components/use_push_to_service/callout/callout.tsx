@@ -9,7 +9,8 @@ import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './types';
+import type { ErrorMessage } from './types';
+import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
 import * as i18n from './translations';
 
 export interface CallOutProps {
@@ -68,5 +69,6 @@ const CallOutComponent = ({
     </EuiCallOut>
   ) : null;
 };
+CallOutComponent.displayName = 'CallOut';
 
 export const CallOut = memo(CallOutComponent);

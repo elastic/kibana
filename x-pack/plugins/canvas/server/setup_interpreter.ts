@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { functions } from '../canvas_plugin_src/functions/server';
 import {
   initFunctions as initExternalFunctions,

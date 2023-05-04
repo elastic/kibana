@@ -9,21 +9,24 @@ import React, { Component, Fragment } from 'react';
 import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { IconStops } from './icon_stops';
-// @ts-expect-error
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
-import { IconDynamicOptions, IconStop } from '../../../../../../common/descriptor_types';
+import {
+  CustomIcon,
+  IconDynamicOptions,
+  IconStop,
+} from '../../../../../../common/descriptor_types';
+import { ICON_SOURCE } from '../../../../../../common/constants';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
 
-const DEFAULT_ICON_STOPS = [
-  { stop: null, icon: PREFERRED_ICONS[0] }, // first stop is the "other" category
-  { stop: '', icon: PREFERRED_ICONS[1] },
+const DEFAULT_ICON_STOPS: IconStop[] = [
+  { stop: null, icon: PREFERRED_ICONS[0], iconSource: ICON_SOURCE.MAKI }, // first stop is the "other" category
+  { stop: '', icon: PREFERRED_ICONS[1], iconSource: ICON_SOURCE.MAKI },
 ];
 
-interface StyleOptionChanges {
+export interface StyleOptionChanges {
   customIconStops?: IconStop[];
   iconPaletteId?: string | null;
   useCustomIconMap: boolean;
@@ -32,6 +35,8 @@ interface StyleOptionChanges {
 interface Props {
   customIconStops?: IconStop[];
   iconPaletteId: string | null;
+  customIcons: CustomIcon[];
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
   onChange: ({ customIconStops, iconPaletteId, useCustomIconMap }: StyleOptionChanges) => void;
   styleProperty: IDynamicStyleProperty<IconDynamicOptions>;
   useCustomIconMap?: boolean;
@@ -86,6 +91,8 @@ export class IconMapSelect extends Component<Props, State> {
         getValueSuggestions={this.props.styleProperty.getValueSuggestions}
         iconStops={this.state.customIconStops}
         onChange={this._onCustomMapChange}
+        onCustomIconsChange={this.props.onCustomIconsChange}
+        customIcons={this.props.customIcons}
       />
     );
   }

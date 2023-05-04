@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObjectsFindResponse } from 'src/core/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
@@ -30,7 +30,8 @@ export class SearchSessionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
-  private readonly supertest = this.ctx.getService('supertest');
+  private readonly security = this.ctx.getService('security');
+  private readonly es = this.ctx.getService('es');
 
   public async find(): Promise<WebElementWrapper> {
     return this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
@@ -49,14 +50,18 @@ export class SearchSessionsService extends FtrService {
     await expect(await (await this.find()).getAttribute('data-save-disabled')).to.be('true');
   }
 
-  public async expectState(state: SessionStateType) {
-    return this.retry.waitFor(`searchSessions indicator to get into state = ${state}`, async () => {
-      const currentState = await (
-        await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
-      ).getAttribute('data-state');
-      this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
-      return currentState === state;
-    });
+  public async expectState(state: SessionStateType, timeout = 10000) {
+    return this.retry.waitForWithTimeout(
+      `searchSessions indicator to get into state = ${state}`,
+      timeout,
+      async () => {
+        const currentState = await (
+          await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
+        ).getAttribute('data-state');
+        this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
+        return currentState === state;
+      }
+    );
   }
 
   public async viewSearchSessions() {
@@ -138,21 +143,31 @@ export class SearchSessionsService extends FtrService {
     this.log.debug('Deleting created search sessions');
     // ignores 409 errs and keeps retrying
     await this.retry.tryForTime(10000, async () => {
-      const { body } = await this.supertest
+      const { body } = await this.security.testUserSupertest
         .post('/internal/session/_find')
         .set('kbn-xsrf', 'anything')
         .set('kbn-system-request', 'true')
-        .send({ page: 1, perPage: 10000, sortField: 'created', sortOrder: 'asc' })
+        .send({
+          page: 1,
+          perPage: 10000,
+          sortField: 'created',
+          sortOrder: 'asc',
+        })
         .expect(200);
 
       const { saved_objects: savedObjects } = body as SavedObjectsFindResponse;
-      if (savedObjects.length) {
+
+      if (savedObjects.length > 0) {
         this.log.debug(`Found created search sessions: ${savedObjects.map(({ id }) => id)}`);
+      } else {
+        this.log.debug(`Found no search sessions to delete`);
+        return;
       }
+
       await Promise.all(
         savedObjects.map(async (so) => {
           this.log.debug(`Deleting search session: ${so.id}`);
-          await this.supertest
+          await this.security.testUserSupertest
             .delete(`/internal/session/${so.id}`)
             .set(`kbn-xsrf`, `anything`)
             .expect(200);
@@ -173,5 +188,15 @@ export class SearchSessionsService extends FtrService {
       this.browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
       this.browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
     ]);
+  }
+
+  public async getAsyncSearchStatus(asyncSearchId: string) {
+    const asyncSearchStatus = await this.es.asyncSearch.status({ id: asyncSearchId });
+    return asyncSearchStatus;
+  }
+
+  public async getAsyncSearchExpirationTime(asyncSearchId: string): Promise<number> {
+    const asyncSearchStatus = await this.getAsyncSearchStatus(asyncSearchId);
+    return Number(asyncSearchStatus.expiration_time_in_millis);
   }
 }

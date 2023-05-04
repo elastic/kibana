@@ -1,0 +1,19 @@
+// Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.
+.visNavItem__goToLens {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-right: $euiSizeM;
+    position: relative;
+  }
+  &::after {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      border-right: $euiBorderThin;
+      bottom: 0;
+      content: '';
+      display: block;
+      pointer-events: none;
+      position: absolute;
+      right: -$euiSizeS;
+      top: 0;
+    }
+  }
+}

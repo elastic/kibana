@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { toLocaleString } from '../../../../util/string_utils';
 import { timeFormatter } from '../../../../../../common/util/date_utils';
 
@@ -79,6 +79,10 @@ export function formatValues(obj) {
         key,
         typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value,
       ];
+
+    // boolean
+    case 'managed':
+      return [key, value.toString()];
 
     default:
       return [key, value];

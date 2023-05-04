@@ -9,9 +9,22 @@ import type { Observable } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { PluginInitializerContext } from 'src/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const ConfigSchema = schema.object({
+  enabled: schema.conditional(
+    schema.contextRef('dev'),
+    true,
+    schema.boolean({ defaultValue: true }),
+    schema.boolean({
+      validate: (rawValue) => {
+        if (rawValue === false) {
+          return 'Spaces can only be disabled in development mode';
+        }
+      },
+      defaultValue: true,
+    })
+  ),
   maxSpaces: schema.number({ defaultValue: 1000 }),
 });
 

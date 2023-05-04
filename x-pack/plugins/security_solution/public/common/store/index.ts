@@ -9,13 +9,13 @@ export * from './model';
 export * from './reducer';
 export * from './selectors';
 
-import { Middleware, Dispatch } from 'redux';
-import { createStore, getStore } from './store';
-import { ImmutableMiddleware, State } from './types';
-import { AppAction } from './actions';
-import { Immutable } from '../../../common/endpoint/types';
+import type { Middleware, Dispatch } from 'redux';
+import { createStoreFactory, createStore, getStore } from './store';
+import type { ImmutableMiddleware, State } from './types';
+import type { AppAction } from './actions';
+import type { Immutable } from '../../../common/endpoint/types';
 
-export { createStore, getStore };
+export { createStoreFactory, createStore, getStore };
 
 /**
  * Takes a selector and an `ImmutableMiddleware`. The

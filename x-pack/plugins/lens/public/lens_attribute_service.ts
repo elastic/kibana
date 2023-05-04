@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '../../../../src/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { AttributeService } from '@kbn/embeddable-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { LensPluginStartDependencies } from './plugin';
-import type { AttributeService } from '../../../../src/plugins/embeddable/public';
 import type {
   LensSavedObjectAttributes,
   LensByValueInput,
@@ -16,7 +17,6 @@ import type {
   LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
-import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
@@ -30,7 +30,8 @@ export function getLensAttributeService(
   core: CoreStart,
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
-  const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
+  const savedObjectStore = new SavedObjectIndexStore(startDependencies.contentManagement.client);
+
   return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
@@ -47,9 +48,8 @@ export function getLensAttributeService(
     },
     unwrapMethod: async (savedObjectId: string): Promise<LensUnwrapResult> => {
       const {
-        saved_object: savedObject,
-        outcome,
-        alias_target_id: aliasTargetId,
+        item: savedObject,
+        meta: { outcome, aliasTargetId, aliasPurpose },
       } = await savedObjectStore.load(savedObjectId);
       const { attributes, references, id } = savedObject;
       const document = {
@@ -60,12 +60,14 @@ export function getLensAttributeService(
       const sharingSavedObjectProps = {
         aliasTargetId,
         outcome,
+        aliasPurpose,
         sourceId: id,
       };
 
       return {
         attributes: {
           ...document,
+          state: document.state as LensSavedObjectAttributes['state'],
         },
         metaInfo: {
           sharingSavedObjectProps,
@@ -73,20 +75,18 @@ export function getLensAttributeService(
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
-      const savedObjectsClient = core.savedObjects.client;
       const overlays = core.overlays;
       return checkForDuplicateTitle(
         {
           title: props.newTitle,
-          copyOnSave: false,
+          displayName: DOC_TYPE,
+          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
           lastSavedTitle: '',
-          getEsType: () => DOC_TYPE,
-          getDisplayName: () => DOC_TYPE,
+          copyOnSave: false,
         },
-        props.isTitleDuplicateConfirmed,
         props.onTitleDuplicate,
         {
-          savedObjectsClient,
+          client: savedObjectStore,
           overlays,
         }
       );

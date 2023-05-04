@@ -44,7 +44,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       try {
         const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const listExists = await lists.getListIndexExists();
         if (!listExists) {
           return siemResponse.error({

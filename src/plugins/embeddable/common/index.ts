@@ -12,6 +12,7 @@ export type {
   EmbeddableStateWithType,
   PanelState,
   EmbeddablePersistableStateService,
+  EmbeddableRegistryDefinition,
 } from './types';
 export { ViewMode } from './types';
 export type { SavedObjectEmbeddableInput } from './lib';

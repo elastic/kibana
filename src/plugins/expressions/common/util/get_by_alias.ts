@@ -11,16 +11,33 @@
  * the given object/array for a case-insensitive match, which could be either the
  * `name` itself, or something under the `aliases` property.
  */
-export function getByAlias<T extends { name?: string; aliases?: string[] }>(
+
+export const ALL_NAMESPACES = '*';
+
+interface Node {
+  name?: string;
+  aliases?: string[];
+  namespace?: string;
+}
+
+export function getByAlias<T extends Node>(
   node: T[] | Record<string, T>,
-  nodeName: string
+  nodeName: string,
+  nodeNamespace?: string
 ): T | undefined {
   const lowerCaseName = nodeName.toLowerCase();
-  return Object.values(node).find(({ name, aliases }) => {
+  return Object.values(node).find(({ name, aliases, namespace }) => {
     if (!name) return false;
-    if (name.toLowerCase() === lowerCaseName) return true;
+    if (name.toLowerCase() === lowerCaseName) {
+      if (!namespace || nodeNamespace === ALL_NAMESPACES || namespace === nodeNamespace) {
+        return true;
+      }
+    }
     return (aliases || []).some((alias) => {
-      return alias.toLowerCase() === lowerCaseName;
+      return (
+        alias.toLowerCase() === lowerCaseName &&
+        (!namespace || nodeNamespace === ALL_NAMESPACES || namespace === nodeNamespace)
+      );
     });
   });
 }

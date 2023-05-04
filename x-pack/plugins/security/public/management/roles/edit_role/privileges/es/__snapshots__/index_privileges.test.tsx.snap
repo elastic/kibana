@@ -12,6 +12,7 @@ exports[`it renders without crashing 1`] = `
   }
   editable={true}
   indexPatterns={Array []}
+  indexType="indices"
   indicesAPIClient={
     Object {
       "getFields": [MockFunction],
@@ -20,7 +21,6 @@ exports[`it renders without crashing 1`] = `
   license={
     Object {
       "features$": Observable {
-        "_isScalar": false,
         "_subscribe": [Function],
       },
       "getFeatures": [MockFunction],

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { NetworkDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 const getAggs = (type: string, ip: string) => {
   return {
@@ -17,16 +16,6 @@ const getAggs = (type: string, ip: string) => {
         },
       },
       aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
-        lastSeen: {
-          max: {
-            field: '@timestamp',
-          },
-        },
         as: {
           filter: {
             exists: {
@@ -37,7 +26,14 @@ const getAggs = (type: string, ip: string) => {
             results: {
               top_hits: {
                 size: 1,
-                _source: [`${type}.as`],
+                _source: false,
+                fields: [
+                  `${type}.as*`,
+                  {
+                    field: '@timestamp',
+                    format: 'strict_date_optional_time',
+                  },
+                ],
                 sort: [
                   {
                     '@timestamp': 'desc' as const,
@@ -57,7 +53,14 @@ const getAggs = (type: string, ip: string) => {
             results: {
               top_hits: {
                 size: 1,
-                _source: [`${type}.geo`],
+                _source: false,
+                fields: [
+                  `${type}.geo*`,
+                  {
+                    field: '@timestamp',
+                    format: 'strict_date_optional_time',
+                  },
+                ],
                 sort: [
                   {
                     '@timestamp': 'desc' as const,
@@ -84,7 +87,14 @@ const getHostAggs = (ip: string) => {
         results: {
           top_hits: {
             size: 1,
-            _source: ['host'],
+            _source: false,
+            fields: [
+              'host*',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
             sort: [
               {
                 '@timestamp': 'desc' as const,
@@ -97,18 +107,13 @@ const getHostAggs = (ip: string) => {
   };
 };
 
-export const buildNetworkDetailsQuery = ({
-  defaultIndex,
-  docValueFields,
-  ip,
-}: NetworkDetailsRequestOptions) => {
+export const buildNetworkDetailsQuery = ({ defaultIndex, ip }: NetworkDetailsRequestOptions) => {
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
         ...getAggs('source', ip),
         ...getAggs('destination', ip),
@@ -120,6 +125,7 @@ export const buildNetworkDetailsQuery = ({
         },
       },
       size: 0,
+      _source: false,
     },
   };
 

@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { mapsTelemetrySavedObjects } from './maps_telemetry';
-export { mapSavedObjects } from './map';
+export {
+  getMapsDataViewMigrations,
+  getMapsFilterMigrations,
+  setupSavedObjects,
+} from './setup_saved_objects';

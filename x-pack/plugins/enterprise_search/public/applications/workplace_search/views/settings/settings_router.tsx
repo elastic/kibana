@@ -6,16 +6,18 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
+  getEditPath,
 } from '../../routes';
-import { staticSourceData } from '../content_sources/source_data';
 
 import { Connectors } from './components/connectors';
 import { Customize } from './components/customize';
@@ -41,11 +43,9 @@ export const SettingsRouter: React.FC = () => {
       <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>
         <OauthApplication />
       </Route>
-      {staticSourceData.map(({ editPath }, i) => (
-        <Route key={i} exact path={editPath}>
-          <SourceConfig sourceIndex={i} />
-        </Route>
-      ))}
+      <Route exact path={getEditPath(':serviceType')}>
+        <SourceConfig />
+      </Route>
       <Route>
         <Redirect to={ORG_SETTINGS_CUSTOMIZE_PATH} />
       </Route>

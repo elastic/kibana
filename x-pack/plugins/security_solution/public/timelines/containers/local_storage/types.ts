@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TableIdLiteral, DataTableModel } from '@kbn/securitysolution-data-table';
 
-export interface TimelinesStorage {
-  getAllTimelines: () => Record<TimelineIdLiteral, TimelineModel>;
-  getTimelineById: (id: TimelineIdLiteral) => TimelineModel | null;
-  addTimeline: (id: TimelineIdLiteral, timeline: TimelineModel) => void;
+export interface DataTablesStorage {
+  getAllDataTables: () => Record<TableIdLiteral, DataTableModel>;
+  getDataTablesById: (id: TableIdLiteral) => DataTableModel | null;
+  addDataTable: (id: TableIdLiteral, table: DataTableModel) => void;
 }

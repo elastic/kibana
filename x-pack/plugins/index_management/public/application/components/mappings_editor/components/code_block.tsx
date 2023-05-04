@@ -6,26 +6,13 @@
  */
 
 import React from 'react';
-
-/**
- * The <EuiCode /> component expect the children provided to be a string (html).
- * This component allows both string and JSX element
- *
- * TODO: Open PR on eui repo to allow both string and React.Node to be passed as children of <EuiCode />
- */
+import { EuiCodeBlock } from '@elastic/eui';
 
 interface Props {
-  children: React.ReactNode;
+  children: React.ReactNode; // Note - ReactNodes (vs strings) will not have syntax highlighting
   padding?: 'small' | 'normal';
 }
 
 export const CodeBlock = ({ children, padding = 'normal' }: Props) => (
-  <div className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge">
-    <pre
-      className="euiCodeBlock__pre"
-      style={{ padding: padding === 'small' ? '6px 12px' : undefined }}
-    >
-      <code className="euiCodeBlock__code">{children}</code>
-    </pre>
-  </div>
+  <EuiCodeBlock paddingSize={padding === 'normal' ? 'l' : 's'}>{children}</EuiCodeBlock>
 );

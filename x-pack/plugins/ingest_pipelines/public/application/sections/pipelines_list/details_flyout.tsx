@@ -7,6 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -23,11 +24,14 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiButton,
+  EuiBadge,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
 import { PipelineDetailsJsonBlock } from './details_json_block';
+import { stringifyJson } from '../../lib/utils';
 
 export interface Props {
   pipeline: Pipeline;
@@ -110,9 +114,24 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
-          <h2>{pipeline.name}</h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
+              <h2>{pipeline.name}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {pipeline.isManaged ? (
+            <EuiFlexItem grow={false}>
+              {' '}
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -166,6 +185,21 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+              </EuiDescriptionListDescription>
+            </>
+          )}
+
+          {/* Metadata (optional) */}
+          {pipeline._meta && (
+            <>
+              <EuiDescriptionListTitle data-test-subj="metaTitle">
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
+                  defaultMessage="Metadata"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiCodeBlock language="json">{stringifyJson(pipeline._meta, false)}</EuiCodeBlock>
               </EuiDescriptionListDescription>
             </>
           )}

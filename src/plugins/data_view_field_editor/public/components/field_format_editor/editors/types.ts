@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ComponentType } from 'react';
-import type { FieldFormat } from '../../../../../field_formats/common';
 import type { FormatSelectEditorProps } from '../field_format_editor';
 
 /**
@@ -18,7 +18,7 @@ export interface FormatEditorProps<P> {
   fieldType: string;
   format: FieldFormat;
   formatParams: { type?: string } & P;
-  onChange: (newParams: { [key: string]: any }) => void;
+  onChange: (newParams: FieldFormatParams) => void;
   onError: FormatSelectEditorProps['onError'];
 }
 
@@ -34,7 +34,7 @@ export type FieldFormatEditor<FormatParams = {}> = ComponentType<
  * A factory for registering field format editor for a field format with `formatId`
  * @public
  */
-export type FieldFormatEditorFactory<FormatParams = any> = (() => Promise<
+export type FieldFormatEditorFactory<FormatParams = {}> = (() => Promise<
   FieldFormatEditor<FormatParams>
 >) & {
   formatId: string;

@@ -6,18 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { InnerLinkPanel } from './inner_link_panel';
-import { LinkPanelListItem, LinkPanelViewProps } from './types';
+import type { LinkPanelListItem, LinkPanelViewProps } from './types';
+import { LinkButton } from '../../../common/components/links';
 
 interface DisabledLinkPanelProps {
   bodyCopy: string;
-  buttonCopy: string;
+  buttonCopy?: string;
   dataTestSubjPrefix: string;
-  docLink: string;
+  docLink?: string;
+  learnMoreUrl?: string;
   LinkPanelViewComponent: React.ComponentType<LinkPanelViewProps>;
   listItems: LinkPanelListItem[];
+  moreButtons?: React.ReactElement;
   titleCopy: string;
 }
 
@@ -26,32 +29,44 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   buttonCopy,
   dataTestSubjPrefix,
   docLink,
+  learnMoreUrl,
   LinkPanelViewComponent,
   listItems,
+  moreButtons,
   titleCopy,
-}) => (
-  <LinkPanelViewComponent
-    listItems={listItems}
-    splitPanel={
-      <InnerLinkPanel
-        body={bodyCopy}
-        button={
-          <EuiButton
-            href={docLink}
-            color="warning"
-            target="_blank"
-            data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
-          >
-            {buttonCopy}
-          </EuiButton>
-        }
-        color="warning"
-        dataTestSubj={`${dataTestSubjPrefix}-inner-panel-danger`}
-        title={titleCopy}
-      />
-    }
-  />
-);
+}) => {
+  return (
+    <LinkPanelViewComponent
+      listItems={listItems}
+      splitPanel={
+        <InnerLinkPanel
+          body={bodyCopy}
+          button={
+            <EuiFlexGroup>
+              {buttonCopy && docLink && (
+                <EuiFlexItem>
+                  <LinkButton
+                    color="warning"
+                    href={docLink}
+                    target="_blank"
+                    data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
+                  >
+                    {buttonCopy}
+                  </LinkButton>
+                </EuiFlexItem>
+              )}
+              {moreButtons && moreButtons}
+            </EuiFlexGroup>
+          }
+          color="warning"
+          dataTestSubj={`${dataTestSubjPrefix}-inner-panel-danger`}
+          learnMoreLink={learnMoreUrl}
+          title={titleCopy}
+        />
+      }
+    />
+  );
+};
 
 export const DisabledLinkPanel = memo(DisabledLinkPanelComponent);
 DisabledLinkPanel.displayName = 'DisabledLinkPanel';

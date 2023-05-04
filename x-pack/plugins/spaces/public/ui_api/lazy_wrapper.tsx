@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
 import React, { lazy, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import type { StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 
 import type { PluginsStart } from '../plugin';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';

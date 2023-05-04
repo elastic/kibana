@@ -22,22 +22,19 @@ import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
   upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-    defaultMessage: 'Upgrade to Elastic 8.x',
+    defaultMessage: 'Upgrade the Elastic Stack',
   }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading.',
+      'Once you’ve resolved all critical issues and verified that your applications are ready, you can upgrade to the next version of the Elastic Stack. Be sure to back up your data again before upgrading.',
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
     {
       defaultMessage:
-        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
+        "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to the next version of the Elastic Stack. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
     }
   ),
-  upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
-    defaultMessage: 'Learn more',
-  }),
   upgradeStepCloudLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepCloudLink', {
     defaultMessage: 'Upgrade on Cloud',
   }),
@@ -71,7 +68,7 @@ const UpgradeStep = () => {
             defaultMessage: 'An error occurred while retrieving the upgrade status',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj="upgradeStatusErrorCallout"
         >
           <p>
@@ -110,7 +107,7 @@ const UpgradeStep = () => {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={docLinks.links.upgrade.upgradingElasticStack}
+              href={docLinks.links.upgrade.upgradingStackOnCloud}
               target="_blank"
               data-test-subj="upgradeSetupDocsLink"
               iconSide="right"
@@ -125,13 +122,13 @@ const UpgradeStep = () => {
   } else {
     callToAction = (
       <EuiButton
-        href={docLinks.links.upgrade.upgradingElasticStack}
+        href={docLinks.links.upgrade.upgradingStackOnPrem}
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
         iconSide="right"
         iconType="popout"
       >
-        {i18nTexts.upgradeStepLink}
+        {i18nTexts.upgradeGuideLink}
       </EuiButton>
     );
   }

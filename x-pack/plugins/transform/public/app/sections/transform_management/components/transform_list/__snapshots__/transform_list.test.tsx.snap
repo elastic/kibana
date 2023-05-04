@@ -10,7 +10,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
     <EuiSpacer
       size="l"
     />
-    <EuiPageContent
+    <EuiPageContent_Deprecated
       color="subdued"
       horizontalPosition="center"
       verticalPosition="center"
@@ -24,6 +24,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
               fill={true}
               isDisabled={true}
               onClick={[MockFunction]}
+              size="m"
             >
               Create your first transform
             </EuiButton>,
@@ -36,7 +37,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
           </h2>
         }
       />
-    </EuiPageContent>
+    </EuiPageContent_Deprecated>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

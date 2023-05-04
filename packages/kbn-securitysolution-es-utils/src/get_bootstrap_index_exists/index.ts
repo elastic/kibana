@@ -22,7 +22,7 @@ export const getBootstrapIndexExists = async (
   index: string
 ): Promise<boolean> => {
   try {
-    const { body } = await esClient.indices.getAlias({
+    const body = await esClient.indices.getAlias({
       index: `${index}-*`,
       name: index,
     });

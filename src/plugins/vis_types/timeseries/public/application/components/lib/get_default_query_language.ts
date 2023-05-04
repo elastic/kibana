@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUISettings } from '../../../services';
-import { UI_SETTINGS } from '../../../../../../data/public';
 
 export function getDefaultQueryLanguage() {
   return getUISettings().get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);

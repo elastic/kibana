@@ -1,0 +1,44 @@
+[[index-patterns-api]]
+== Index patterns APIs
+
+deprecated::[8.0.0,Use <<data-views-api>> instead.]
+
+experimental[] Manage {kib} index patterns.
+
+WARNING: Do not write documents directly to the `.kibana` index. When you write directly
+to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
+
+WARNING: Use the index patterns API for managing {kib} index patterns instead of lower-level <<saved-objects-api, saved objects API>>.
+
+The following index patterns APIs are available: 
+
+* Index patterns
+    ** <<index-patterns-api-get, Get index pattern API>> to retrieve a single {kib} index pattern
+    ** <<index-patterns-api-create, Create index pattern API>> to create {kib} index pattern
+    ** <<index-patterns-api-update, Update index pattern API>> to partially updated {kib} index pattern
+    ** <<index-patterns-api-delete, Delete index pattern API>> to delete {kib} index pattern
+* Default index pattern
+    ** <<index-patterns-api-default-get, Get default index pattern API>> to retrieve a default index pattern
+    ** <<index-patterns-api-default-set, Set default index pattern API>> to set a default index pattern
+* Fields
+    ** <<index-patterns-fields-api-update, Update index pattern field>> to change field metadata, such as `count`, `customLabel` and `format`
+* Runtime fields
+    ** <<index-patterns-runtime-field-api-get, Get runtime field API>> to retrieve a runtime field
+    ** <<index-patterns-runtime-field-api-create, Create runtime field API>> to create a runtime field
+    ** <<index-patterns-runtime-field-api-upsert, Upsert runtime field API>> to create or update a runtime field
+    ** <<index-patterns-runtime-field-api-update, Update runtime field API>> to partially update an existing runtime field
+    ** <<index-patterns-runtime-field-api-delete, Delete runtime field API>> to delete a runtime field
+
+include::index-patterns/get.asciidoc[]
+include::index-patterns/create.asciidoc[]
+include::index-patterns/update.asciidoc[]
+include::index-patterns/delete.asciidoc[]
+include::index-patterns/default-get.asciidoc[]
+include::index-patterns/default-set.asciidoc[]
+include::index-patterns/update-fields.asciidoc[]
+include::index-patterns/runtime-fields/get.asciidoc[]
+include::index-patterns/runtime-fields/create.asciidoc[]
+include::index-patterns/runtime-fields/upsert.asciidoc[]
+include::index-patterns/runtime-fields/update.asciidoc[]
+include::index-patterns/runtime-fields/delete.asciidoc[]
+

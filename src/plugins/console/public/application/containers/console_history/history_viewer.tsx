@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { DevToolsSettings } from '../../../services';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
-// @ts-ignore
 import * as InputMode from '../../models/legacy_core_editor/mode/input';
 const inputMode = new InputMode.Mode();
 import * as editor from '../../models/legacy_core_editor';
 import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_editor_settings';
+import { formatRequestBodyDoc } from '../../../lib/utils';
 
 interface Props {
   settings: DevToolsSettings;
@@ -41,7 +41,9 @@ export function HistoryViewer({ settings, req }: Props) {
   if (viewerRef.current) {
     const { current: viewer } = viewerRef;
     if (req) {
-      const s = req.method + ' ' + req.endpoint + '\n' + (req.data || '');
+      const indent = true;
+      const formattedData = req.data ? formatRequestBodyDoc([req.data], indent).data : '';
+      const s = req.method + ' ' + req.endpoint + '\n' + formattedData;
       viewer.update(s, inputMode);
       viewer.clearSelection();
     } else {

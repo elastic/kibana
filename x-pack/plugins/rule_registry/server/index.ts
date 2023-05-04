@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110907
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
@@ -34,6 +34,7 @@ export type {
 } from './utils/create_lifecycle_executor';
 export { createLifecycleExecutor } from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rule_type_wrapper';
+export { createGetSummarizedAlertsFn } from './utils/create_get_summarized_alerts_fn';
 export * from './utils/persistence_types';
 export type { AlertsClient } from './alert_data_client/alerts_client';
 

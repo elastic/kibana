@@ -18,7 +18,7 @@ export const OutOfDate = React.memo<{ style?: React.CSSProperties }>(({ style, .
       style={style}
       {...otherProps}
     >
-      <EuiIcon className={'eui-alignTop'} size="m" type="alert" color="warning" />
+      <EuiIcon className={'eui-alignTop'} size="m" type="warning" color="warning" />
       <FormattedMessage id="xpack.securitySolution.outOfDateLabel" defaultMessage="Out-of-date" />
     </EuiText>
   );

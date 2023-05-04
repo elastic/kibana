@@ -8,16 +8,23 @@
 
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import type { Adapters } from 'src/plugins/inspector';
-import type { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type {
+  AggGroupNames,
+  AggParam,
+  AggGroupName,
+  TimefilterContract,
+} from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
+import { NavigateToLensContext } from '../../common';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
-  showQueryBar: boolean;
   showFilterBar: boolean;
   showIndexSelection: boolean;
+  showQueryInput: boolean;
   hierarchicalData: boolean;
 }
 
@@ -53,6 +60,7 @@ interface DefaultEditorConfig<TVisParams> {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
+  enableDataViewChange?: boolean;
   defaultSize?: string;
   optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
   optionTabs?: Array<{
@@ -92,12 +100,31 @@ export interface VisTypeDefinition<TVisParams> {
    * If given, it will return the supported triggers for this vis.
    */
   readonly getSupportedTriggers?: (params?: VisParams) => string[];
+  /**
+   * If given, it will navigateToLens with the given viz params.
+   * Every visualization that wants to be edited also in Lens should have this function.
+   * It receives the current visualization params as a parameter and should return the correct config
+   * in order to be displayed in the Lens editor.
+   */
+  readonly navigateToLens?: (
+    vis?: Vis<TVisParams>,
+    timeFilter?: TimefilterContract
+  ) => Promise<NavigateToLensContext | null> | undefined;
+
+  /**
+   * If given, it will provide variables for expression params.
+   * Every visualization that wants to add variables for expression params should have this method.
+   */
+  readonly getExpressionVariables?: (
+    vis?: Vis<TVisParams>,
+    timeFilter?: TimefilterContract
+  ) => Promise<Record<string, unknown>>;
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
    * Using this method we can rewrite the standard mechanism for getting used indexes
    */
-  readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
+  readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
 
   readonly isAccessible?: boolean;
   /**
@@ -113,6 +140,14 @@ export interface VisTypeDefinition<TVisParams> {
    * @default 'production'
    */
   readonly stage?: 'experimental' | 'beta' | 'production';
+  /**
+   * It sets the vis type on a deprecated mode when is true
+   */
+  readonly isDeprecated?: boolean;
+  /**
+   * If returns true, no warning toasts will be shown
+   */
+  readonly suppressWarnings?: () => boolean;
   /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
@@ -131,6 +166,10 @@ export interface VisTypeDefinition<TVisParams> {
    * with the selection of a search source - an index pattern or a saved search.
    */
   readonly requiresSearch?: boolean;
+  /**
+   * In case when the visualization performs an aggregation, this option will be used to display or hide the rows with partial data.
+   */
+  readonly hasPartialRows?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
@@ -140,6 +179,12 @@ export interface VisTypeDefinition<TVisParams> {
    * of this type.
    */
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
+
+  /**
+   * When truthy, it will perform a search and pass the results to the visualization as a `datatable`.
+   * @default false
+   */
+  readonly fetchDatatable?: boolean;
   /**
    * Should be provided to expand base visualization expression with
    * custom exprsesion chain, including render expression.

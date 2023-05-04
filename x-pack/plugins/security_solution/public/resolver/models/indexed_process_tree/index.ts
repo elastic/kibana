@@ -6,8 +6,8 @@
  */
 
 import { orderByTime } from '../process_event';
-import { IndexedProcessTree } from '../../types';
-import { ResolverNode } from '../../../../common/endpoint/types';
+import type { IndexedProcessTree } from '../../types';
+import type { ResolverNode } from '../../../../common/endpoint/types';
 import {
   levelOrder as baseLevelOrder,
   calculateGenerationsAndDescendants,

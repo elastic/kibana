@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { AggregationsTermsAggregationOrder } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -15,42 +20,54 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type ErrorGroupMainStatisticsResponse = Array<{
+  groupId: string;
+  name: string;
+  lastSeen: number;
+  occurrences: number;
+  culprit: string | undefined;
+  handled: boolean | undefined;
+  type: string | undefined;
+}>;
 
 export async function getErrorGroupMainStatistics({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   environment,
-  transactionType,
   sortField,
   sortDirection = 'desc',
   start,
   end,
+  maxNumberOfErrorGroups = 500,
+  transactionName,
+  transactionType,
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
-  transactionType: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   start: number;
   end: number;
-}) {
-  const { apmEventClient } = setup;
-
+  maxNumberOfErrorGroups?: number;
+  transactionName?: string;
+  transactionType?: string;
+}): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
 
   const maxTimestampAggKey = 'max_timestamp';
 
-  const order: AggregationsTermsAggregationOrder = sortByLatestOccurrence
+  const order: AggregationsAggregateOrder = sortByLatestOccurrence
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
@@ -61,12 +78,14 @@ export async function getErrorGroupMainStatistics({
         events: [ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
             filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              ...termQuery(TRANSACTION_TYPE, transactionType),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -77,12 +96,11 @@ export async function getErrorGroupMainStatistics({
           error_groups: {
             terms: {
               field: ERROR_GROUP_ID,
-              size: 500,
+              size: maxNumberOfErrorGroups,
               order,
             },
             aggs: {
               sample: {
-                // change to top_metrics
                 top_hits: {
                   size: 1,
                   _source: [

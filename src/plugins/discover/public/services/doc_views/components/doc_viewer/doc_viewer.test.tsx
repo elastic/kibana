@@ -12,16 +12,12 @@ import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDocViewsRegistry } from '../../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views_types';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 jest.mock('../../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
   return {
-    getServices: () => ({
-      uiSettings: {
-        get: jest.fn(),
-      },
-    }),
     getDocViewsRegistry: () => ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addDocView(view: any) {
@@ -34,6 +30,16 @@ jest.mock('../../../../kibana_services', () => {
         registry = [];
       },
     }),
+  };
+});
+
+jest.mock('../../../../hooks/use_discover_services', () => {
+  return {
+    useDiscoverServices: {
+      uiSettings: {
+        get: jest.fn(),
+      },
+    },
   };
 });
 
@@ -70,7 +76,9 @@ test('Render <DocViewer/> with 1 tab displaying error message', () => {
     component: SomeComponent,
   });
 
-  const renderProps = { hit: {} } as DocViewRenderProps;
+  const renderProps = {
+    hit: buildDataTableRecord({ _index: 't', _id: '1' }),
+  } as DocViewRenderProps;
   const errorMsg = 'Catch me if you can!';
 
   const wrapper = mount(<DocViewer {...renderProps} />);

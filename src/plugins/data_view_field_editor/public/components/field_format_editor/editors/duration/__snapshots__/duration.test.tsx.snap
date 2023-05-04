@@ -5,7 +5,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -36,7 +35,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -72,7 +70,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     describedByIds={Array []}
     display="row"
     error={null}
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -96,7 +93,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -117,7 +113,6 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -186,7 +181,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -217,7 +211,6 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -300,7 +293,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -331,7 +323,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -367,7 +358,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     describedByIds={Array []}
     display="row"
     error={null}
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
@@ -391,7 +381,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -411,7 +400,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -432,7 +420,6 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"

@@ -9,9 +9,8 @@
 import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
-import { IEsSearchResponse } from 'src/plugins/data/common';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { RetryService } from './retry/retry';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { FtrService } from '../ftr_provider_context';
 
 /**
  * Function copied from here:
@@ -46,9 +45,8 @@ interface SendOptions {
 }
 
 /**
- * Bsearch factory which will return a new bsearch capable service that can reduce flake
- * on the CI systems when they are under pressure and bsearch returns an async search
- * response or a sync response.
+ * Bsearch Service that can reduce flake on the CI systems when they are under
+ * pressure and bsearch returns an async search response or a sync response.
  *
  * @example
  * const supertest = getService('supertest');
@@ -57,21 +55,18 @@ interface SendOptions {
  *   supertest,
  *   options: {
  *     defaultIndex: ['large_volume_dns_data'],
- *   }
- *    strategy: 'securitySolutionSearchStrategy',
- *   });
+ *   },
+ *   strategy: 'securitySolutionSearchStrategy',
+ * });
  * expect(response).eql({ ... your value ... });
  */
-export const BSearchFactory = (retry: RetryService) => ({
+export class BsearchService extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
+
   /** Send method to send in your supertest, url, options, and strategy name */
-  send: async <T extends IEsSearchResponse>({
-    supertest,
-    options,
-    strategy,
-    space,
-  }: SendOptions): Promise<T> => {
+  async send<T extends IEsSearchResponse>({ supertest, options, strategy, space }: SendOptions) {
     const spaceUrl = getSpaceUrlPrefix(space);
-    const { body } = await retry.try(async () => {
+    const { body } = await this.retry.try(async () => {
       return supertest
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .set('kbn-xsrf', 'true')
@@ -79,44 +74,32 @@ export const BSearchFactory = (retry: RetryService) => ({
         .expect(200);
     });
 
-    if (body.isRunning) {
-      const result = await retry.try(async () => {
-        const resp = await supertest
-          .post(`${spaceUrl}/internal/bsearch`)
-          .set('kbn-xsrf', 'true')
-          .send({
-            batch: [
-              {
-                request: {
-                  id: body.id,
-                  ...options,
-                },
-                options: {
-                  strategy,
-                },
-              },
-            ],
-          })
-          .expect(200);
-        const [parsedResponse] = parseBfetchResponse(resp);
-        expect(parsedResponse.result.isRunning).equal(false);
-        return parsedResponse.result;
-      });
-      return result;
-    } else {
+    if (!body.isRunning) {
       return body;
     }
-  },
-});
 
-/**
- * Bsearch provider which will return a new bsearch capable service that can reduce flake
- * on the CI systems when they are under pressure and bsearch returns an async search response
- * or a sync response.
- */
-export function BSearchProvider({
-  getService,
-}: FtrProviderContext): ReturnType<typeof BSearchFactory> {
-  const retry = getService('retry');
-  return BSearchFactory(retry);
+    const result = await this.retry.try(async () => {
+      const resp = await supertest
+        .post(`${spaceUrl}/internal/bsearch`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          batch: [
+            {
+              request: {
+                id: body.id,
+                ...options,
+              },
+              options: {
+                strategy,
+              },
+            },
+          ],
+        })
+        .expect(200);
+      const [parsedResponse] = parseBfetchResponse(resp);
+      expect(parsedResponse.result.isRunning).equal(false);
+      return parsedResponse.result as T;
+    });
+    return result;
+  }
 }

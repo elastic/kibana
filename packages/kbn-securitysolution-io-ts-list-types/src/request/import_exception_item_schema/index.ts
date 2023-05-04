@@ -29,8 +29,8 @@ import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { ItemId } from '../../common/item_id';
 import { EntriesArray } from '../../common/entries';
-import { CreateCommentsArray } from '../../common/create_comment';
-import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
+import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
+import { ExpireTimeOrUndefined, expireTimeOrUndefined, ImportCommentsArray } from '../../common';
 
 /**
  * Differences from this and the createExceptionsListItemSchema are
@@ -56,7 +56,7 @@ export const importExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       id, // defaults to undefined if not set during decode
-      comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
+      comments: DefaultImportCommentsArray, // defaults to empty array if not set during decode
       created_at, // defaults undefined if not set during decode
       updated_at, // defaults undefined if not set during decode
       created_by, // defaults undefined if not set during decode
@@ -67,6 +67,7 @@ export const importExceptionListItemSchema = t.intersection([
       namespace_type, // defaults to 'single' if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
+      expire_time: expireTimeOrUndefined,
     })
   ),
 ]);
@@ -76,12 +77,13 @@ export type ImportExceptionListItemSchema = t.OutputOf<typeof importExceptionLis
 // This type is used after a decode since some things are defaults after a decode.
 export type ImportExceptionListItemSchemaDecoded = Omit<
   ImportExceptionListItemSchema,
-  'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments'
+  'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments' | 'expire_time'
 > & {
-  comments: CreateCommentsArray;
+  comments: ImportCommentsArray;
   tags: Tags;
   item_id: ItemId;
   entries: EntriesArray;
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
+  expire_time: ExpireTimeOrUndefined;
 };

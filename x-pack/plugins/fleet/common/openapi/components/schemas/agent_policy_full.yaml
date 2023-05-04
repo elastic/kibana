@@ -1,0 +1,11 @@
+title: Agent policy full response
+type: object
+oneOf:
+  - type: object
+    properties:
+      item:
+        type: string
+  - type: object
+    properties:
+      item:
+        $ref: ./full_agent_policy.yaml

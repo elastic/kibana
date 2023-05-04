@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { notesMigrations } from './migrations/notes';
 
 export const noteSavedObjectType = 'siem-ui-timeline-note';
@@ -35,6 +36,7 @@ export const noteSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const noteType: SavedObjectsType = {
   name: noteSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

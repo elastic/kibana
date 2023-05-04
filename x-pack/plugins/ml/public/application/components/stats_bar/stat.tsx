@@ -6,20 +6,24 @@
  */
 
 import React, { FC } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
 export interface StatsBarStat {
   label: string;
   value: number;
   show?: boolean;
+  'data-test-subj'?: string;
 }
 interface StatProps {
   stat: StatsBarStat;
 }
 
 export const Stat: FC<StatProps> = ({ stat }) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <span className="stat">
-      <span>{stat.label}</span>: <strong>{stat.value}</strong>
+    <span css={{ marginRight: euiTheme.size.s }}>
+      <span>{stat.label}</span>:{' '}
+      <strong data-test-subj={stat['data-test-subj']}>{stat.value}</strong>
     </span>
   );
 };

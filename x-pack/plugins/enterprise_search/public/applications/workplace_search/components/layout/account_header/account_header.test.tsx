@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiHeader, EuiPopover } from '@elastic/eui';
 
-import { AccountHeader } from './';
+import { AccountHeader } from '.';
 
 describe('AccountHeader', () => {
   const mockValues = {

@@ -20,11 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
-import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
 import { isRuntimeMappings } from '../../../../../../../common';
 import { SwitchModal } from './switch_modal';
@@ -144,6 +144,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
         runtimeMappings: combinedRuntimeMappings,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

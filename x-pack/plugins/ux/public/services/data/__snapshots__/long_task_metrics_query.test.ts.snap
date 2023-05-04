@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`longTaskMetricsQuery fetches long task metrics 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "longTaskCount": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.count",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "longTaskMax": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.max",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "longTaskSum": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.longtask.sum",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+        ],
+        "must_not": Array [],
+      },
+    },
+    "size": 0,
+  },
+}
+`;

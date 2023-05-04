@@ -6,19 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { map, last } from 'lodash';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { IndexPattern } from './data_view';
-
-import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
-
-import { IndexPatternField } from '../fields';
-
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
-import { FieldFormat } from '../../../field_formats/common';
-import { RuntimeField } from '../types';
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
+import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
+import { DataViewField } from '../fields';
+import { DataView } from './data_view';
 
 class MockFieldFormatter {}
 
@@ -37,19 +34,21 @@ const runtimeField = {
   name: 'runtime_field',
   runtimeField: runtimeFieldScript,
   scripted: false,
+  esTypes: ['keyword'],
+  type: 'string',
 };
 
-fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
+fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter());
 
 // helper function to create index patterns
-function create(id: string) {
+function create(id: string, spec?: object) {
   const {
     type,
     version,
-    attributes: { timeFieldName, fields, title },
+    attributes: { timeFieldName, fields, title, name },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new IndexPattern({
+  return new DataView({
     spec: {
       id,
       type,
@@ -57,7 +56,9 @@ function create(id: string) {
       timeFieldName,
       fields: { ...JSON.parse(fields), runtime_field: runtimeField },
       title,
+      name,
       runtimeFieldMap,
+      ...spec,
     },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -66,7 +67,7 @@ function create(id: string) {
 }
 
 describe('IndexPattern', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   // create an indexPattern instance for each test
   beforeEach(() => {
@@ -96,11 +97,34 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('isTSDBMode', () => {
+    const tsdbField: FieldSpec = {
+      name: 'tsdb-metric-field',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+      timeSeriesMetric: 'gauge',
+    };
+
+    test('should return false if no fields are tsdb fields', () => {
+      expect(indexPattern.isTSDBMode()).toBe(false);
+    });
+
+    test('should return true if some fields are tsdb fields', () => {
+      indexPattern.fields.add(tsdbField);
+      expect(indexPattern.isTSDBMode()).toBe(true);
+    });
+
+    afterAll(() => {
+      indexPattern.fields.remove(tsdbField);
+    });
+  });
+
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
       const scriptedNames = stubLogstashFields
-        .filter((item: IndexPatternField) => item.scripted === true)
-        .map((item: IndexPatternField) => item.name);
+        .filter((item: DataViewField) => item.scripted === true)
+        .map((item: DataViewField) => item.name);
       const respNames = map(indexPattern.getScriptedFields(), 'name');
 
       expect(respNames).toEqual(scriptedNames);
@@ -149,8 +173,8 @@ describe('IndexPattern', () => {
   describe('getNonScriptedFields', () => {
     test('should return all non-scripted fields', () => {
       const notScriptedNames = stubLogstashFields
-        .filter((item: IndexPatternField) => item.scripted === false)
-        .map((item: IndexPatternField) => item.name);
+        .filter((item: DataViewField) => item.scripted === false)
+        .map((item: DataViewField) => item.name);
       notScriptedNames.push('runtime_field');
       const respNames = map(indexPattern.getNonScriptedFields(), 'name');
 
@@ -184,7 +208,7 @@ describe('IndexPattern', () => {
 
       const scriptedFields = indexPattern.getScriptedFields();
       expect(scriptedFields).toHaveLength(oldCount + 1);
-      expect((indexPattern.fields.getByName(scriptedField.name) as IndexPatternField).name).toEqual(
+      expect((indexPattern.fields.getByName(scriptedField.name) as DataViewField).name).toEqual(
         scriptedField.name
       );
     });
@@ -223,20 +247,80 @@ describe('IndexPattern', () => {
       },
     };
 
+    const runtimeWithAttrs = {
+      ...runtime,
+      popularity: 5,
+      customLabel: 'custom name',
+      format: {
+        id: 'bytes',
+      },
+    };
+
+    const runtimeComposite = {
+      type: 'composite' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world');",
+      },
+      fields: {
+        a: {
+          type: 'keyword' as RuntimePrimitiveTypes,
+        },
+        b: {
+          type: 'long' as RuntimePrimitiveTypes,
+        },
+      },
+    };
+
+    const runtimeCompositeWithAttrs = {
+      type: runtimeComposite.type,
+      script: runtimeComposite.script,
+      fields: {
+        a: {
+          ...runtimeComposite.fields.a,
+          popularity: 3,
+          customLabel: 'custom name a',
+          format: {
+            id: 'bytes',
+          },
+        },
+        b: {
+          ...runtimeComposite.fields.b,
+          popularity: 4,
+          customLabel: 'custom name b',
+          format: {
+            id: 'bytes',
+          },
+        },
+      },
+    };
+
     beforeEach(() => {
       const formatter = {
         toJSON: () => ({ id: 'bytes' }),
       } as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
+      indexPattern.getFormatterForFieldNoDefault = () => undefined;
     });
 
     test('add and remove runtime field to existing field', () => {
-      indexPattern.addRuntimeField('@tags', runtime);
+      indexPattern.addRuntimeField('@tags', runtimeWithAttrs);
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         '@tags': runtime,
         runtime_field: runtimeField.runtimeField,
       });
-      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toEqual(runtime);
+      const field = indexPattern.toSpec()!.fields!['@tags'];
+      expect(field.runtimeField).toEqual(runtime);
+      expect(field.count).toEqual(5);
+      expect(field.format).toEqual({
+        id: 'bytes',
+      });
+      expect(field.customLabel).toEqual('custom name');
+      expect(indexPattern.toSpec().fieldAttrs).toEqual({
+        '@tags': {
+          customLabel: 'custom name',
+          count: 5,
+        },
+      });
 
       indexPattern.removeRuntimeField('@tags');
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
@@ -245,12 +329,36 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toBeUndefined();
     });
 
+    test('ignore runtime field mapping if a mapped field exists with the same name', () => {
+      expect(indexPattern.getRuntimeMappings()).toEqual({
+        runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
+      });
+
+      // add a runtime field called "theme"
+      indexPattern.addRuntimeField('theme', runtimeWithAttrs);
+
+      // add a new mapped field also called "theme"
+      indexPattern.fields.add({
+        name: 'theme',
+        type: 'keyword',
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: false,
+        isMapped: true,
+      });
+
+      expect(indexPattern.getRuntimeMappings()).toEqual({
+        runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
+      });
+    });
+
     test('add and remove runtime field as new field', () => {
-      indexPattern.addRuntimeField('new_field', runtime);
+      indexPattern.addRuntimeField('new_field', runtimeWithAttrs);
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
         new_field: runtime,
       });
+      expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
       expect(indexPattern.toSpec()!.fields!.new_field.runtimeField).toEqual(runtime);
 
       indexPattern.removeRuntimeField('new_field');
@@ -260,12 +368,54 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
 
-    test('should not allow runtime field with * in name', async () => {
+    test('add and remove composite runtime field as new fields', () => {
+      const fieldCount = indexPattern.fields.length;
+      indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+        new_field: runtimeComposite,
+      });
+      expect(indexPattern.fields.length - fieldCount).toEqual(2);
+      expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
+      expect(indexPattern.toSpec()!.fields!['new_field.a']).toBeDefined();
+      expect(indexPattern.toSpec()!.fields!['new_field.b']).toBeDefined();
+      expect(indexPattern.toSpec()!.fieldAttrs).toEqual({
+        'new_field.a': {
+          count: 3,
+          customLabel: 'custom name a',
+        },
+        'new_field.b': {
+          count: 4,
+          customLabel: 'custom name b',
+        },
+      });
+
+      indexPattern.removeRuntimeField('new_field');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
+    });
+
+    test('should not allow runtime field with * in name', () => {
       try {
-        await indexPattern.addRuntimeField('test*123', runtime);
+        indexPattern.addRuntimeField('test*123', runtime);
       } catch (e) {
         expect(e).toBeInstanceOf(CharacterNotAllowedInField);
       }
+    });
+  });
+
+  describe('getIndexPattern', () => {
+    test('should return the index pattern, labeled title on the data view spec', () => {
+      expect(indexPattern.getIndexPattern()).toBe(
+        stubbedSavedObjectIndexPattern().attributes.title
+      );
+    });
+
+    test('setIndexPattern', () => {
+      indexPattern.setIndexPattern('test');
+      expect(indexPattern.getIndexPattern()).toBe('test');
     });
   });
 
@@ -277,6 +427,8 @@ describe('IndexPattern', () => {
           name: 'scriptedFieldWithEmptyFormatter',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
         })
       ).toEqual(
         expect.objectContaining({
@@ -296,22 +448,34 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    });
+
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as unknown as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
-      const restoredPattern = new IndexPattern({
+      const restoredPattern = new DataView({
         spec,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
       });
       expect(restoredPattern.id).toEqual(indexPattern.id);
-      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+    });
+
+    test('creating from spec does not contain references to spec', () => {
+      const sourceFilters = ['test'];
+      const spec = { sourceFilters };
+      const dataView1 = create('test1', spec);
+      const dataView2 = create('test2', spec);
+      expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
     });
   });
 });

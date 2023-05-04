@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { CreateTagOptions } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
 import { TagSavedObject, TagAttributes, ITagsClient } from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagValidationError } from './errors';
@@ -24,12 +25,12 @@ export class TagsClient implements ITagsClient {
     this.soClient = client;
   }
 
-  public async create(attributes: TagAttributes) {
+  public async create(attributes: TagAttributes, options?: CreateTagOptions) {
     const validation = validateTag(attributes);
     if (!validation.valid) {
       throw new TagValidationError('Error validating tag attributes', validation);
     }
-    const raw = await this.soClient.create<TagAttributes>(this.type, attributes);
+    const raw = await this.soClient.create<TagAttributes>(this.type, attributes, options);
     return savedObjectToTag(raw);
   }
 

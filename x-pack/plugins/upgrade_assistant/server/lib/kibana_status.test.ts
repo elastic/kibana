@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { deprecationsServiceMock } from 'src/core/server/mocks';
-import { DomainDeprecationDetails } from 'src/core/server/types';
+import { deprecationsServiceMock } from '@kbn/core/server/mocks';
+import type { DomainDeprecationDetails } from '@kbn/core/server';
 
 import { getKibanaUpgradeStatus } from './kibana_status';
 

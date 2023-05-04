@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
-
-import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+import type { CustomRequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export const createLicensedRouteHandler = <
   P,
   Q,
   B,
-  Context extends RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext }
+  Context extends CustomRequestHandlerContext<{ licensing: LicensingApiRequestHandlerContext }>
 >(
   handler: RequestHandler<P, Q, B, Context>
 ) => {
-  const licensedRouteHandler: RequestHandler<P, Q, B, Context> = (
+  const licensedRouteHandler: RequestHandler<P, Q, B, Context> = async (
     context,
     request,
     responseToolkit
   ) => {
-    const { license } = context.licensing;
+    const { license } = await context.licensing;
     const licenseCheck = license.check('spaces', 'basic');
     if (licenseCheck.state === 'unavailable' || licenseCheck.state === 'invalid') {
       return responseToolkit.forbidden({ body: { message: licenseCheck.message! } });

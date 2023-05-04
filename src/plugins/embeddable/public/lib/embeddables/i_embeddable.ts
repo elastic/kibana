@@ -7,34 +7,38 @@
  */
 
 import { Observable } from 'rxjs';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableError {
-  name: string;
-  message: string;
-}
-
+export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
   editApp?: string;
   editPath?: string;
   defaultTitle?: string;
+  defaultDescription?: string;
   title?: string;
+  description?: string;
   editable?: boolean;
+  // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
+  editableWithExplicitInput?: boolean;
   savedObjectId?: string;
 }
 
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
-  O extends EmbeddableOutput = EmbeddableOutput
+  O extends EmbeddableOutput = EmbeddableOutput,
+  N = any
 > {
   /**
    * Is this embeddable an instance of a Container class, can it contain
@@ -87,6 +91,14 @@ export interface IEmbeddable<
   fatalError?: Error;
 
   /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): boolean;
+
+  /**
    * A functional representation of the isContainer variable, but helpful for typescript to
    * know the shape if this returns true
    */
@@ -102,6 +114,20 @@ export interface IEmbeddable<
    * Examples: title, pie slice colors, custom search columns and sort order.
    **/
   getInput(): Readonly<I>;
+
+  /**
+   * Because embeddables can inherit input from their parents, they also need a way to separate their own
+   * input from input which is inherited. If the embeddable does not have a parent, getExplicitInput
+   * and getInput should return the same.
+   **/
+  getExplicitInput(): Readonly<Partial<I>>;
+
+  /**
+   * Some embeddables contain input that should not be persisted anywhere beyond their own state. This method
+   * is a way for containers to separate input to store from input which can be ephemeral. In most cases, this
+   * will be the same as getExplicitInput
+   **/
+  getPersistableInput(): Readonly<Partial<I>>;
 
   /**
    * Output state is:
@@ -122,6 +148,12 @@ export interface IEmbeddable<
   updateInput(changes: Partial<I>): void;
 
   /**
+   * Updates output state with the given changes.
+   * @param changes
+   */
+  updateOutput(changes: Partial<O>): void;
+
+  /**
    * Returns an observable which will be notified when input state changes.
    */
   getInput$(): Readonly<Observable<I>>;
@@ -137,6 +169,11 @@ export interface IEmbeddable<
   getTitle(): string | undefined;
 
   /**
+   * Returns the description of this embeddable.
+   */
+  getDescription(): string | undefined;
+
+  /**
    * Returns the top most parent embeddable, or itself if this embeddable
    * is not within a parent.
    */
@@ -145,8 +182,17 @@ export interface IEmbeddable<
   /**
    * Renders the embeddable at the given node.
    * @param domNode
+   * @returns A React node to mount or void in the case when rendering is done without React.
    */
-  render(domNode: HTMLElement | Element): void;
+  render(domNode: HTMLElement | Element): N | void;
+
+  /**
+   * Renders a custom embeddable error at the given node.
+   * @param error
+   * @param domNode
+   * @returns A React node or callback that will be called on error destroy.
+   */
+  catchError?(error: EmbeddableError, domNode: HTMLElement | Element): N | (() => void);
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
@@ -170,4 +216,11 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): string[];
+
+  /**
+   * Used to diff explicit embeddable input
+   */
+  getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
+
+  refreshInputFromParent(): void;
 }

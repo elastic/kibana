@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import type { BetaBadgeSize } from '@elastic/eui/src/components/badge/beta_badge/beta_badge';
 import type React from 'react';
 export type TitleProp = string | React.ReactNode;
 
-export interface DraggableArguments {
-  field: string;
-  value: string;
-}
-
 export interface BadgeOptions {
   beta?: boolean;
-  text: string;
-  tooltip?: string;
+  text: React.ReactNode;
+  tooltip?: React.ReactNode;
   color?: EuiBadgeProps['color'];
+  size?: BetaBadgeSize;
 }

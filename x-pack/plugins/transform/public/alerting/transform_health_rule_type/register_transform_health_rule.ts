@@ -7,9 +7,10 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
-import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import { getResultTestConfig } from '../../../common/utils/alerts';
 
 export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleParams> {
   return {
@@ -26,15 +27,29 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
       const validationResult = {
         errors: {
           includeTransforms: new Array<string>(),
+          testsConfig: new Array<string>(),
         } as Record<keyof TransformHealthRuleParams, string[]>,
       };
 
       if (!ruleParams.includeTransforms?.length) {
-        validationResult.errors.includeTransforms?.push(
+        validationResult.errors.includeTransforms.push(
           i18n.translate(
             'xpack.transform.alertTypes.transformHealth.includeTransforms.errorMessage',
             {
               defaultMessage: 'At least one transform has to be selected',
+            }
+          )
+        );
+      }
+
+      const resultTestConfig = getResultTestConfig(ruleParams.testsConfig);
+      const allTestDisabled = Object.values(resultTestConfig).every((v) => !v.enabled);
+      if (allTestDisabled) {
+        validationResult.errors.testsConfig.push(
+          i18n.translate(
+            'xpack.transform.alertTypes.transformHealth.testsConfigTransforms.errorMessage',
+            {
+              defaultMessage: 'At least one health check has to be selected',
             }
           )
         );
@@ -52,12 +67,17 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
   Transform ID: \\{\\{transform_id\\}\\}
   \\{\\{#description\\}\\}Transform description: \\{\\{description\\}\\}
   \\{\\{/description\\}\\}\\{\\{#transform_state\\}\\}Transform state: \\{\\{transform_state\\}\\}
-  \\{\\{/transform_state\\}\\}\\{\\{#failure_reason\\}\\}Failure reason: \\{\\{failure_reason\\}\\}
+  \\{\\{/transform_state\\}\\}\\{\\{#health_status\\}\\}Transform health status: \\{\\{health_status\\}\\}
+  \\{\\{/health_status\\}\\}\\{\\{#issues\\}\\}Issue: \\{\\{issue\\}\\}
+  Issue count: \\{\\{count\\}\\}
+  \\{\\{#details\\}\\}Issue details: \\{\\{details\\}\\}
+  \\{\\{/details\\}\\}\\{\\{#first_occurrence\\}\\}First occurrence: \\{\\{first_occurrence\\}\\}
+  \\{\\{/first_occurrence\\}\\}
+  \\{\\{/issues\\}\\}\\{\\{#failure_reason\\}\\}Failure reason: \\{\\{failure_reason\\}\\}
   \\{\\{/failure_reason\\}\\}\\{\\{#notification_message\\}\\}Notification message: \\{\\{notification_message\\}\\}
   \\{\\{/notification_message\\}\\}\\{\\{#node_name\\}\\}Node name: \\{\\{node_name\\}\\}
   \\{\\{/node_name\\}\\}\\{\\{#timestamp\\}\\}Timestamp: \\{\\{timestamp\\}\\}
   \\{\\{/timestamp\\}\\}
-
 \\{\\{/context.results\\}\\}
 `,
       }

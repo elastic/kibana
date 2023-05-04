@@ -19,7 +19,6 @@ import { generateNodeNoticeText } from './generate_node_notice_text';
  *                                              getInstalledPackages() in ../packages
  *  @property {string} options.nodeDir The directory containing the version of node.js
  *                                     that will ship with Kibana
- *  @return {undefined}
  */
 export async function generateBuildNoticeText(options = {}) {
   const { packages, nodeDir, nodeVersion, noticeFromSource } = options;

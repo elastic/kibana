@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { pickBy, get, isEmpty, isString, unset, set, intersection } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { pickBy, get, isEmpty, isString, unset, intersection } from 'lodash';
 import satisfies from 'semver/functions/satisfies';
 import {
   EuiFlexGroup,
@@ -21,21 +22,19 @@ import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import styled from 'styled-components';
 
-import {
-  agentRouteService,
-  agentPolicyRouteService,
-  AgentPolicy,
-  PLUGIN_ID,
-} from '../../../fleet/common';
-import {
-  pagePathGetters,
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { agentRouteService, agentPolicyRouteService, PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
-} from '../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
 import { ConfigUploader } from './config_uploader';
+import type { ValidationFunc } from '../shared_imports';
 import {
   Form,
   useForm,
@@ -44,8 +43,8 @@ import {
   getUseField,
   FIELD_TYPES,
   fieldValidators,
-  ValidationFunc,
 } from '../shared_imports';
+import { useFetchStatus } from './use_fetch_status';
 
 // https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57
 const RESTRICTED_CONFIG_OPTIONS = [
@@ -244,6 +243,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         } else {
           set(draft, 'inputs[0].config.osquery.value', parsedConfig);
         }
+
         return draft;
       });
 
@@ -311,25 +311,27 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       /* From 0.6.0 we don't provide an input template, so we have to set it here */
       if (satisfies(newPolicy?.package?.version, '>=0.6.0')) {
         const updatedPolicy = produce(newPolicy, (draft) => {
-          if (!draft.inputs.length) {
+          if (editMode && policy?.inputs.length) {
+            set(draft, 'inputs', policy.inputs);
+          } else {
             set(draft, 'inputs[0]', {
               type: 'osquery',
               enabled: true,
               streams: [],
-              policy_template: 'osquery_manager',
+              policy_template: OSQUERY_INTEGRATION_NAME,
             });
-          } else {
-            if (!draft.inputs[0].type) {
-              set(draft, 'inputs[0].type', 'osquery');
-            }
-            if (!draft.inputs[0].policy_template) {
-              set(draft, 'inputs[0].policy_template', 'osquery_manager');
-            }
-            if (!draft.inputs[0].enabled) {
-              set(draft, 'inputs[0].enabled', true);
-            }
           }
+
+          return draft;
         });
+
+        if (updatedPolicy?.inputs[0].config) {
+          setFieldValue(
+            'config',
+            JSON.stringify(updatedPolicy?.inputs[0].config.osquery.value, null, 2)
+          );
+        }
+
         onChange({
           isValid: true,
           updatedPolicy,
@@ -338,6 +340,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { permissionDenied } = useFetchStatus();
 
   return (
     <>
@@ -365,23 +369,27 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         </>
       ) : null}
 
-      <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
-      <EuiSpacer size="xxl" />
-      <StyledEuiAccordion
-        id="advanced"
-        buttonContent={i18n.translate(
-          'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
-          {
-            defaultMessage: 'Advanced',
-          }
-        )}
-      >
-        <EuiSpacer size="xs" />
-        <Form form={configForm}>
-          <CommonUseField path="config" />
-          <ConfigUploader onChange={handleConfigUpload} />
-        </Form>
-      </StyledEuiAccordion>
+      {!permissionDenied && (
+        <>
+          <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
+          <EuiSpacer size="xxl" />
+          <StyledEuiAccordion
+            id="advanced"
+            buttonContent={i18n.translate(
+              'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
+              {
+                defaultMessage: 'Advanced',
+              }
+            )}
+          >
+            <EuiSpacer size="xs" />
+            <Form form={configForm}>
+              <CommonUseField path="config" />
+              <ConfigUploader onChange={handleConfigUpload} />
+            </Form>
+          </StyledEuiAccordion>
+        </>
+      )}
     </>
   );
 });

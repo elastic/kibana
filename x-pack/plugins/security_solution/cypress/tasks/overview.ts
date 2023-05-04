@@ -7,7 +7,7 @@
 
 import { OVERVIEW_HOST_STATS, OVERVIEW_NETWORK_STATS } from '../screens/overview';
 
-export const expand = (statType: string) => {
+const expand = (statType: string) => {
   cy.get(statType).find('button').invoke('click');
 };
 

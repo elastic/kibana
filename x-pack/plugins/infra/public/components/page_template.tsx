@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
-import type { LazyObservabilityPageTemplateProps } from '../../../observability/public';
 
 export const PageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (pageTemplateProps) => {
   const {
     services: {
-      observability: {
+      observabilityShared: {
         navigation: { PageTemplate: Template },
       },
     },

@@ -24,9 +24,9 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { SortBy } from '../../../../hooks/use_process_list';
 import { Process } from './types';
 import { ProcessRow } from './process_row';
@@ -126,6 +126,7 @@ export const ProcessesTable = ({
               values={{
                 metricbeatDocsLink: (
                   <EuiLink
+                    data-test-subj="infraProcessesTableTopNByCpuOrMemoryLink"
                     href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html"
                     target="_blank"
                   >
@@ -140,7 +141,10 @@ export const ProcessesTable = ({
           </EuiText>
         }
         actions={
-          <EuiButton onClick={clearSearchBar}>
+          <EuiButton
+            data-test-subj="infraProcessesTableClearFiltersButton"
+            onClick={clearSearchBar}
+          >
             {i18n.translate('xpack.infra.metrics.nodeDetails.noProcessesClearFilters', {
               defaultMessage: 'Clear filters',
             })}
@@ -151,7 +155,7 @@ export const ProcessesTable = ({
 
   return (
     <>
-      <EuiTable responsive={false}>
+      <EuiTable data-test-subj="infraProcessesTable" responsive={false}>
         <EuiTableHeader>
           <EuiTableHeaderCell width={24} />
           {columns.map((column) => (

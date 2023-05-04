@@ -5,10 +5,94 @@
  * 2.0.
  */
 
-import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/core/server';
+import type { EcsEvent, KibanaRequest, LogMeta } from '@kbn/core/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
+import type {
+  AuditAction,
+  AddAuditEventParams as SavedObjectEventParams,
+} from '../saved_objects/saved_objects_security_extension';
+
+/**
+ * Audit kibana schema using ECS format
+ */
+export interface AuditKibana {
+  /**
+   * The ID of the space associated with this event.
+   */
+  space_id?: string;
+  /**
+   * The ID of the user session associated with this event. Each login attempt
+   * results in a unique session id.
+   */
+  session_id?: string;
+  /**
+   * Saved object that was created, changed, deleted or accessed as part of this event.
+   */
+  saved_object?: {
+    type: string;
+    id: string;
+  };
+  /**
+   * Name of authentication provider associated with a login event.
+   */
+  authentication_provider?: string;
+  /**
+   * Type of authentication provider associated with a login event.
+   */
+  authentication_type?: string;
+  /**
+   * Name of Elasticsearch realm that has authenticated the user.
+   */
+  authentication_realm?: string;
+  /**
+   * Name of Elasticsearch realm where the user details were retrieved from.
+   */
+  lookup_realm?: string;
+  /**
+   * Set of space IDs that a saved object was shared to.
+   */
+  add_to_spaces?: readonly string[];
+  /**
+   * Set of space IDs that a saved object was removed from.
+   */
+  delete_from_spaces?: readonly string[];
+  /**
+   * Set of space IDs that are not authorized for an action.
+   */
+  unauthorized_spaces?: readonly string[];
+  /**
+   * Set of types that are not authorized for an action.
+   */
+  unauthorized_types?: readonly string[];
+}
+
+type EcsHttp = Required<LogMeta>['http'];
+type EcsRequest = Required<EcsHttp>['request'];
+
+/**
+ * Audit request schema using ECS format
+ */
+export interface AuditRequest extends EcsRequest {
+  /**
+   * HTTP request headers
+   */
+  headers?: {
+    'x-forwarded-for'?: string;
+  };
+}
+
+/**
+ * Audit http schema using ECS format
+ */
+export interface AuditHttp extends EcsHttp {
+  /**
+   * HTTP request details
+   */
+  request?: AuditRequest;
+}
 
 /**
  * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.12/index.html
@@ -19,49 +103,20 @@ import type { AuthenticationResult } from '../authentication/authentication_resu
  * @public
  */
 export interface AuditEvent extends LogMeta {
+  /**
+   * Log message
+   */
   message: string;
-  kibana?: {
-    /**
-     * The ID of the space associated with this event.
-     */
-    space_id?: string;
-    /**
-     * The ID of the user session associated with this event. Each login attempt
-     * results in a unique session id.
-     */
-    session_id?: string;
-    /**
-     * Saved object that was created, changed, deleted or accessed as part of this event.
-     */
-    saved_object?: {
-      type: string;
-      id: string;
-    };
-    /**
-     * Name of authentication provider associated with a login event.
-     */
-    authentication_provider?: string;
-    /**
-     * Type of authentication provider associated with a login event.
-     */
-    authentication_type?: string;
-    /**
-     * Name of Elasticsearch realm that has authenticated the user.
-     */
-    authentication_realm?: string;
-    /**
-     * Name of Elasticsearch realm where the user details were retrieved from.
-     */
-    lookup_realm?: string;
-    /**
-     * Set of space IDs that a saved object was shared to.
-     */
-    add_to_spaces?: readonly string[];
-    /**
-     * Set of space IDs that a saved object was removed from.
-     */
-    delete_from_spaces?: readonly string[];
-  };
+
+  /**
+   * Kibana specific fields
+   */
+  kibana?: AuditKibana;
+
+  /**
+   * Fields describing an HTTP request
+   */
+  http?: AuditHttp;
 }
 
 export interface HttpRequestParams {
@@ -97,12 +152,16 @@ export interface UserLoginParams {
   authenticationResult: AuthenticationResult;
   authenticationProvider?: string;
   authenticationType?: string;
+  sessionId?: string;
+  userProfileId?: string;
 }
 
 export function userLoginEvent({
   authenticationResult,
   authenticationProvider,
   authenticationType,
+  sessionId,
+  userProfileId,
 }: UserLoginParams): AuditEvent {
   return {
     message: authenticationResult.user
@@ -114,11 +173,13 @@ export function userLoginEvent({
       outcome: authenticationResult.user ? 'success' : 'failure',
     },
     user: authenticationResult.user && {
+      id: userProfileId,
       name: authenticationResult.user.username,
       roles: authenticationResult.user.roles as string[],
     },
     kibana: {
       space_id: undefined, // Ensure this does not get populated by audit service
+      session_id: sessionId,
       authentication_provider: authenticationProvider,
       authentication_type: authenticationType,
       authentication_realm: authenticationResult.user?.authentication_realm.name,
@@ -134,9 +195,14 @@ export function userLoginEvent({
 export interface UserLogoutParams {
   username?: string;
   provider: AuthenticationProvider;
+  userProfileId?: string;
 }
 
-export function userLogoutEvent({ username, provider }: UserLogoutParams): AuditEvent {
+export function userLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
   return {
     message: `User [${username}] is logging out using ${provider.type} provider [name=${provider.name}]`,
     event: {
@@ -144,12 +210,92 @@ export function userLogoutEvent({ username, provider }: UserLogoutParams): Audit
       category: ['authentication'],
       outcome: 'unknown',
     },
-    user: username
-      ? {
-          name: username,
-        }
-      : undefined,
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
     kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export function userSessionConcurrentLimitLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
+  return {
+    message: `User [${username}] is logging out due to exceeded concurrent sessions limit for ${provider.type} provider [name=${provider.name}]`,
+    event: {
+      action: 'user_logout',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
+    kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export interface SessionCleanupParams {
+  sessionId: string;
+  usernameHash?: string;
+  provider: AuthenticationProvider;
+}
+
+export function sessionCleanupEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing invalid or expired session for user [hash=${usernameHash}]`,
+    event: {
+      action: 'session_cleanup',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export function sessionCleanupConcurrentLimitEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing session for user [hash=${usernameHash}] due to exceeded concurrent sessions limit`,
+    event: {
+      action: 'session_cleanup',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
       authentication_provider: provider.name,
       authentication_type: provider.type,
     },
@@ -182,33 +328,15 @@ export function accessAgreementAcknowledgedEvent({
   };
 }
 
-export enum SavedObjectAction {
-  CREATE = 'saved_object_create',
-  GET = 'saved_object_get',
-  RESOLVE = 'saved_object_resolve',
-  UPDATE = 'saved_object_update',
-  DELETE = 'saved_object_delete',
-  FIND = 'saved_object_find',
-  ADD_TO_SPACES = 'saved_object_add_to_spaces',
-  DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
-  REMOVE_REFERENCES = 'saved_object_remove_references',
-  OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
-  CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
-  COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
-  UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
-}
-
 type VerbsTuple = [string, string, string];
 
-const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
+const savedObjectAuditVerbs: Record<AuditAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
   saved_object_resolve: ['resolve', 'resolving', 'resolved'],
   saved_object_update: ['update', 'updating', 'updated'],
   saved_object_delete: ['delete', 'deleting', 'deleted'],
   saved_object_find: ['access', 'accessing', 'accessed'],
-  saved_object_add_to_spaces: ['update', 'updating', 'updated'],
-  saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
   saved_object_open_point_in_time: [
     'open point-in-time',
     'opening point-in-time',
@@ -236,15 +364,13 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   ],
 };
 
-const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
+const savedObjectAuditTypes: Record<AuditAction, ArrayElement<EcsEvent['type']>> = {
   saved_object_create: 'creation',
   saved_object_get: 'access',
   saved_object_resolve: 'access',
   saved_object_update: 'change',
   saved_object_delete: 'deletion',
   saved_object_find: 'access',
-  saved_object_add_to_spaces: 'change',
-  saved_object_delete_from_spaces: 'change',
   saved_object_open_point_in_time: 'creation',
   saved_object_close_point_in_time: 'deletion',
   saved_object_remove_references: 'change',
@@ -252,20 +378,13 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
   saved_object_update_objects_spaces: 'change',
 };
 
-export interface SavedObjectEventParams {
-  action: SavedObjectAction;
-  outcome?: EcsEventOutcome;
-  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
-  addToSpaces?: readonly string[];
-  deleteFromSpaces?: readonly string[];
-  error?: Error;
-}
-
 export function savedObjectEvent({
   action,
   savedObject,
   addToSpaces,
   deleteFromSpaces,
+  unauthorizedSpaces,
+  unauthorizedTypes,
   outcome,
   error,
 }: SavedObjectEventParams): AuditEvent | undefined {
@@ -298,6 +417,8 @@ export function savedObjectEvent({
       saved_object: savedObject,
       add_to_spaces: addToSpaces,
       delete_from_spaces: deleteFromSpaces,
+      unauthorized_spaces: unauthorizedSpaces,
+      unauthorized_types: unauthorizedTypes,
     },
     error: error && {
       code: error.name,
@@ -322,7 +443,7 @@ const spaceAuditVerbs: Record<SpaceAuditAction, VerbsTuple> = {
   space_find: ['access', 'accessing', 'accessed'],
 };
 
-const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
+const spaceAuditTypes: Record<SpaceAuditAction, ArrayElement<EcsEvent['type']>> = {
   space_create: 'creation',
   space_get: 'access',
   space_update: 'change',
@@ -332,7 +453,7 @@ const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
 
 export interface SpacesAuditEventParams {
   action: SpaceAuditAction;
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }

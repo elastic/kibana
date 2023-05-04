@@ -1,26 +1,35 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibLensPluginApi
 slug: /kibana-dev-docs/api/lens
 title: "lens"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the lens plugin
-date: 2020-11-16
+description: API docs for the lens plugin
+date: 2023-05-04
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'lens']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import lensObj from './lens.json';
+import lensObj from './lens.devdocs.json';
 
 Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana.
 
-Contact [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) for questions regarding this plugin.
+Contact [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) for questions regarding this plugin.
 
 **Code health stats**
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 263 | 0 | 246 | 31 |
+| 611 | 0 | 515 | 52 |
 
 ## Client
+
+### Objects
+<DocDefinitionList data={lensObj.client.objects}/>
+
+### Classes
+<DocDefinitionList data={lensObj.client.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={lensObj.client.interfaces}/>
@@ -33,22 +42,10 @@ Contact [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) 
 ### Setup
 <DocDefinitionList data={[lensObj.server.setup]}/>
 
-### Classes
-<DocDefinitionList data={lensObj.server.classes}/>
-
 ### Interfaces
 <DocDefinitionList data={lensObj.server.interfaces}/>
 
-### Consts, variables and types
-<DocDefinitionList data={lensObj.server.misc}/>
-
 ## Common
-
-### Objects
-<DocDefinitionList data={lensObj.common.objects}/>
-
-### Functions
-<DocDefinitionList data={lensObj.common.functions}/>
 
 ### Interfaces
 <DocDefinitionList data={lensObj.common.interfaces}/>

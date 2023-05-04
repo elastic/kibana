@@ -9,13 +9,13 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { UtilityBarAction } from './index';
+import { UtilityBarAction } from '.';
 
 describe('UtilityBarAction', () => {
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
-        <UtilityBarAction dataTestSubj="alert" iconType="alert">
+        <UtilityBarAction dataTestSubj="alert" iconType="warning">
           {'Test action'}
         </UtilityBarAction>
       </TestProviders>
@@ -29,7 +29,7 @@ describe('UtilityBarAction', () => {
       <TestProviders>
         <UtilityBarAction
           dataTestSubj="alert"
-          iconType="alert"
+          iconType="warning"
           popoverContent={() => <p>{'Test popover'}</p>}
         >
           {'Test action'}

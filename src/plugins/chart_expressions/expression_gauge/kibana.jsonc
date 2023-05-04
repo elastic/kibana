@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expression-gauge-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Expression Gauge plugin adds a `gauge` renderer and function to the expression plugin. The renderer will display the `gauge` chart.",
+  "plugin": {
+    "id": "expressionGauge",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "fieldFormats",
+      "charts",
+      "visualizations",
+      "presentationUtil",
+      "data"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

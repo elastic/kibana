@@ -49,14 +49,13 @@ export function FieldPicker({
   return (
     <EuiPopover
       id="graphFieldPicker"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
       ownFocus
       panelPaddingSize="none"
       button={
         <EuiBadge
           data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldPicker__button--disabled': !hasFields,
           })}
           color="hollow"
@@ -64,7 +63,7 @@ export function FieldPicker({
           aria-disabled={!hasFields}
           onClick={() => {
             if (hasFields) {
-              setOpen(true);
+              setOpen(!open);
             }
           }}
           onClickAriaLabel={badgeDescription}

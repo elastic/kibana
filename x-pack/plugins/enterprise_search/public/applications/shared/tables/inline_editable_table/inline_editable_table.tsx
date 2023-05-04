@@ -11,14 +11,15 @@ import classNames from 'classnames';
 
 import { useActions, useValues, BindLogic } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { PageIntroduction } from '../../page_introduction/page_introduction';
 
 import { ReorderableTable } from '../reorderable_table';
 
 import { ItemWithAnID } from '../types';
 
-import { EMPTY_ITEM } from './constants';
 import { getUpdatedColumns } from './get_updated_columns';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import { FormErrors, InlineEditableTableColumn } from './types';
@@ -28,7 +29,9 @@ import './inline_editable_tables.scss';
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
-  title: string;
+  defaultItem?: Partial<Item>;
+  emptyPropertyAllowed?: boolean;
+  title: string | React.ReactNode;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
   className?: string;
@@ -38,6 +41,8 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   lastItemWarning?: string;
   noItemsMessage?: (editNewItem: () => void) => React.ReactNode;
   uneditableItems?: Item[];
+  bottomRows?: React.ReactNode[];
+  showRowIndex?: boolean;
 }
 
 export const InlineEditableTable = <Item extends ItemWithAnID>(
@@ -54,6 +59,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
   const {
     instanceId,
     columns,
+    defaultItem,
     onAdd,
     onDelete,
     onReorder,
@@ -68,6 +74,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
       props={{
         instanceId,
         columns,
+        defaultItem,
         onAdd,
         onDelete,
         onReorder,
@@ -83,6 +90,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
 
 export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   columns,
+  emptyPropertyAllowed,
   items,
   title,
   addButtonText,
@@ -103,16 +111,17 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   const isEditingItem = (item: Item) => item.id === editingItemId;
   const isActivelyEditing = (item: Item) => isEditing && isEditingItem(item);
 
+  const emptyItem = { id: null } as Item;
   const displayedItems = isEditingUnsavedItem
     ? uneditableItems
-      ? [EMPTY_ITEM, ...items]
-      : [...items, EMPTY_ITEM]
+      ? [emptyItem, ...items]
+      : [...items, emptyItem]
     : items;
 
   const updatedColumns = getUpdatedColumns({
     columns,
-    // TODO We shouldn't need this cast here
-    displayedItems: displayedItems as Item[],
+    displayedItems,
+    emptyPropertyAllowed,
     isActivelyEditing,
     canRemoveLastItem,
     isLoading,
@@ -122,46 +131,29 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-          {!!description && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText
-                data-test-subj="description"
-                color="subdued"
-                size="s"
-                className="inlineEditableTable__descriptionText"
-              >
-                {description}
-              </EuiText>
-            </>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      <PageIntroduction
+        description={description || ''}
+        title={title || ''}
+        actions={[
           <EuiButton
             size="s"
             iconType="plusInCircle"
             disabled={isEditing}
             onClick={editNewItem}
             color="success"
-            data-test-subj="actionButton"
+            data-test-subj="inlineEditableTableActionButton"
           >
             {addButtonText ||
               i18n.translate('xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel', {
                 defaultMessage: 'New row',
               })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+          </EuiButton>,
+        ]}
+      />
+      <EuiSpacer size="l" />
       <ReorderableTable
         className={classNames(className, 'editableTable')}
-        // TODO don't cast
-        items={displayedItems as Item[]}
+        items={displayedItems}
         unreorderableItems={uneditableItems}
         columns={updatedColumns}
         rowProps={(item) => ({

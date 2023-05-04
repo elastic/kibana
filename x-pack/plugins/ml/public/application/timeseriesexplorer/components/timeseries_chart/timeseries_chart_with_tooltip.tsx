@@ -7,11 +7,11 @@
 
 import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
-import { extractErrorMessage } from '../../../../../common/util/errors';
 import { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
@@ -65,6 +65,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
       ),
       ...(error ? { text: extractErrorMessage(error) } : {}),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -105,6 +106,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     return () => {
       unmounted = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedJob.job_id,
     detectorIndex,

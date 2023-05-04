@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { isRuntimeField } from './utils/runtime_field_utils';
 
 export const analyzeFileQuerySchema = schema.object({
@@ -48,7 +49,9 @@ export const runtimeMappingsSchema = schema.object(
     unknowns: 'allow',
     validate: (v: object) => {
       if (Object.values(v).some((o) => !isRuntimeField(o))) {
-        return 'Invalid runtime field';
+        return i18n.translate('xpack.fileUpload.invalidRuntimeFieldMessage', {
+          defaultMessage: 'Invalid runtime field',
+        });
       }
     },
   }

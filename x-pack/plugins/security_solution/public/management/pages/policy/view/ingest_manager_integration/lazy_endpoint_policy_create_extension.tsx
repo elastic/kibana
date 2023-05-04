@@ -6,7 +6,7 @@
  */
 
 import { lazy } from 'react';
-import { PackagePolicyCreateExtensionComponent } from '../../../../../../../fleet/public';
+import type { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const LazyEndpointPolicyCreateExtension = lazy<PackagePolicyCreateExtensionComponent>(
   async () => {

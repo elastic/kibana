@@ -6,13 +6,13 @@
  */
 
 import { serverMock } from '../__mocks__';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { getFinalizeSignalsMigrationRequest } from '../__mocks__/request_responses';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
 import { finalizeSignalsMigrationRoute } from './finalize_signals_migration_route';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
-import { ruleDataServiceMock } from '../../../../../../rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.mock';
+import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
 
 jest.mock('../../migrations/get_migration_saved_objects_by_id');
 

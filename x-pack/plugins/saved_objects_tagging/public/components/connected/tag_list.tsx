@@ -7,27 +7,34 @@
 
 import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedObject } from 'src/core/types';
-import { TagListComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { Tag } from '../../../common/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { Tag, TagWithOptionalId } from '../../../common/types';
 import { getObjectTags } from '../../utils';
 import { TagList } from '../base';
 import { ITagsCache } from '../../services';
 import { byNameTagSorter } from '../../utils';
 
 interface SavedObjectTagListProps {
-  object: SavedObject;
+  object: { references: SavedObjectReference[] };
   tags: Tag[];
+  onClick?: (tag: TagWithOptionalId) => void;
+  tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
-const SavedObjectTagList: FC<SavedObjectTagListProps> = ({ object, tags: allTags }) => {
+const SavedObjectTagList: FC<SavedObjectTagListProps> = ({
+  object,
+  tags: allTags,
+  onClick,
+  tagRender,
+}) => {
   const objectTags = useMemo(() => {
     const { tags } = getObjectTags(object, allTags);
     tags.sort(byNameTagSorter);
     return tags;
   }, [object, allTags]);
 
-  return <TagList tags={objectTags} />;
+  return <TagList tags={objectTags} onClick={onClick} tagRender={tagRender} />;
 };
 
 interface GetConnectedTagListOptions {

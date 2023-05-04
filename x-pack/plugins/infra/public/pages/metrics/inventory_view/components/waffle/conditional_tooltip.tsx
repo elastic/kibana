@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { first } from 'lodash';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
-import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import {
@@ -50,7 +50,16 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
       },
     },
   });
-  const { nodes } = useSnapshot(query, requestMetrics, [], nodeType, sourceId, currentTime, '', '');
+  const { nodes } = useSnapshot({
+    filterQuery: query,
+    metrics: requestMetrics,
+    groupBy: [],
+    nodeType,
+    sourceId,
+    currentTime,
+    accountId: '',
+    region: '',
+  });
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
@@ -59,8 +68,8 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
       <div
         style={{
           borderBottom: `1px solid ${theme?.eui.euiColorMediumShade}`,
-          paddingBottom: theme?.eui.paddingSizes.xs,
-          marginBottom: theme?.eui.paddingSizes.xs,
+          paddingBottom: theme?.eui.euiSizeXS,
+          marginBottom: theme?.eui.euiSizeXS,
         }}
       >
         {node.name}

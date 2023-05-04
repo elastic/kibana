@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Percentile, JobFieldType, FieldVisStats } from './index';
+import type { SupportedAggs } from './field_stats';
+import type { Percentile, SupportedFieldType, FieldVisStats } from '.';
 export interface MetricFieldVisStats {
   avg?: number;
   distribution?: {
@@ -21,22 +22,25 @@ export interface MetricFieldVisStats {
 // The internal representation of the configuration used to build the visuals
 // which display the field information.
 export interface FieldVisConfig {
-  type: JobFieldType;
+  type: SupportedFieldType;
   fieldName: string;
   displayName?: string;
   existsInDocs: boolean;
   aggregatable: boolean;
   loading: boolean;
+  secondaryType: string;
   stats?: FieldVisStats;
   fieldFormat?: any;
   isUnsupportedType?: boolean;
   deletable?: boolean;
+  supportedAggs?: SupportedAggs;
 }
 
 export interface FileBasedFieldVisConfig {
-  type: JobFieldType;
+  type: SupportedFieldType;
   fieldName?: string;
   displayName?: string;
+  secondaryType?: string;
   stats?: FieldVisStats;
   format?: string;
 }

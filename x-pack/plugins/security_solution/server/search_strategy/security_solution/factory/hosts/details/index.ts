@@ -7,8 +7,13 @@
 
 import { get } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type {
   HostAggEsData,
   HostDetailsStrategyResponse,
   HostsQueries,
@@ -17,15 +22,10 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem, getHostEndpoint } from './helpers';
-import { EndpointAppContext } from '../../../../../endpoint/types';
-import {
-  IScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../src/core/server';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
   buildDsl: (options: HostDetailsRequestOptions) => buildHostDetailsQuery(options),
@@ -52,9 +52,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     const formattedHostItem = formatHostItem(aggregations);
     const ident = // endpoint-generated ID, NOT elastic-agent-id
       formattedHostItem.endpoint && formattedHostItem.endpoint.id
-        ? Array.isArray(formattedHostItem.endpoint.id)
-          ? formattedHostItem.endpoint.id[0]
-          : formattedHostItem.endpoint.id
+        ? formattedHostItem.endpoint.id[0]
         : null;
     if (deps == null) {
       return { ...response, inspect, hostDetails: { ...formattedHostItem } };

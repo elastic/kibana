@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export async function fetchAvailableCcs(esClient: ElasticsearchClient): Promise<string[]> {
   const availableCcs = [];
-  const { body: response } = await esClient.cluster.remoteInfo();
+  const response = await esClient.cluster.remoteInfo();
   for (const remoteName in response) {
     if (!response.hasOwnProperty(remoteName)) {
       continue;

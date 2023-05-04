@@ -6,24 +6,25 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
   role="dialog"
 >
   <button
+    aria-label="Close this dialog"
     data-test-subj="euiFlyoutCloseButton"
     onClick={[Function]}
     type="button"
   />
   <div
-    className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+    className="euiFlyoutHeader emotion-euiFlyoutHeader-hasBorder"
   >
     <h2
-      className="euiTitle euiTitle--small"
+      className="euiTitle emotion-euiTitle-s"
     >
       Keyboard shortcuts
     </h2>
   </div>
   <div
-    className="euiFlyoutBody"
+    className="euiFlyoutBody emotion-euiFlyoutBody"
   >
     <div
-      className="euiFlyoutBody__overflow"
+      className="euiFlyoutBody__overflow css-1fk8opf-noBanner"
       tabIndex={0}
     >
       <div
@@ -33,23 +34,24 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Element controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
-            className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            className="euiDescriptionList emotion-euiDescriptionList-column-left"
+            data-type="column"
           >
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Cut
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -62,12 +64,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Copy
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -80,12 +82,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Paste
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -98,12 +100,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Clone
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -116,12 +118,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Delete
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -140,12 +142,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Bring to front
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -158,12 +160,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Bring forward
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -180,12 +182,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Send backward
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -198,12 +200,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Send to back
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -220,12 +222,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Group
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -234,12 +236,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Ungroup
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -248,12 +250,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift up by 10px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -262,12 +264,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift down by 10px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -276,12 +278,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift left by 10px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -290,12 +292,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift right by 10px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -304,12 +306,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift up by 1px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -322,12 +324,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift down by 1px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -340,12 +342,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift left by 1px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -358,12 +360,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Shift right by 1px
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -377,30 +379,31 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Expression controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
-            className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            className="euiDescriptionList emotion-euiDescriptionList-column-left"
+            data-type="column"
           >
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Run whole expression
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -414,30 +417,31 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Editor controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
-            className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            className="euiDescriptionList emotion-euiDescriptionList-column-left"
+            data-type="column"
           >
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Select multiple elements
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -450,12 +454,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Resize from center
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -468,12 +472,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Move, resize, and rotate without snapping
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -486,12 +490,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Select element below
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -504,12 +508,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Undo last action
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -522,12 +526,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Redo last action
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -544,12 +548,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Go to previous page
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -562,12 +566,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Go to next page
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -580,12 +584,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Toggle edit mode
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -598,12 +602,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Show grid
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -616,12 +620,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Refresh workpad
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -634,12 +638,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Zoom in
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -656,12 +660,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Zoom out
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -678,12 +682,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Reset zoom to 100%
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -700,12 +704,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Enter presentation mode
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -733,30 +737,31 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Presentation controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
-            className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            className="euiDescriptionList emotion-euiDescriptionList-column-left"
+            data-type="column"
           >
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Enter presentation mode
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -783,12 +788,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Exit presentation mode
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -797,12 +802,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Go to previous page
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -835,12 +840,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Go to next page
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -873,12 +878,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Refresh workpad
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -891,12 +896,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               </span>
             </dd>
             <dt
-              className="euiDescriptionList__title"
+              className="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-reverse"
             >
               Toggle page cycling
             </dt>
             <dd
-              className="euiDescriptionList__description"
+              className="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed-m"
             >
               <span>
                 <code>
@@ -906,7 +911,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
       </div>

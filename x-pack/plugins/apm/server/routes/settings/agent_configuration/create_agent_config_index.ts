@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   createOrUpdateIndex,
   Mappings,
-} from '../../../../../observability/server';
-import { APMConfig } from '../../..';
-import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
+} from '@kbn/observability-plugin/server';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({
   client,
-  config,
   logger,
 }: {
   client: ElasticsearchClient;
-  config: APMConfig;
   logger: Logger;
 }) {
-  const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
   return createOrUpdateIndex({
-    index,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     client,
     logger,
     mappings,

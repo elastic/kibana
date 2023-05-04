@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { App, AppMountParameters, CoreSetup } from 'kibana/public';
-import { AppNavLinkStatus } from '../../../../core/public';
+import { App, AppMountParameters, CoreSetup } from '@kbn/core/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
 import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 

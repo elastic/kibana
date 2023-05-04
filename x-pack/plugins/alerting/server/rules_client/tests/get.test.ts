@@ -4,20 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { formatLegacyActions } from '../lib';
+
+jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
+  return {
+    formatLegacyActions: jest.fn(),
+  };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -25,7 +32,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -36,6 +43,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -43,6 +51,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -107,6 +117,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -187,6 +198,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -212,11 +224,16 @@ describe('get()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     const rulesClient = new RulesClient(rulesClientParams);
@@ -287,6 +304,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -332,11 +350,16 @@ describe('get()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     const rulesClient = new RulesClient(rulesClientParams);
@@ -498,6 +521,74 @@ describe('get()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    const rule = {
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    test('should call formatLegacyActions if consumer is SIEM', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          consumer: AlertConsumers.SIEM,
+        },
+      });
+      (formatLegacyActions as jest.Mock).mockResolvedValue([
+        {
+          id: 'migrated_rule_mock',
+        },
+      ]);
+
+      const result = await rulesClient.get({ id: '1' });
+
+      expect(formatLegacyActions).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: '1' })],
+        expect.any(Object)
+      );
+
+      expect(result).toEqual({
+        id: 'migrated_rule_mock',
+      });
+    });
+
+    test('should not call formatLegacyActions if consumer is not SIEM', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(rule);
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.get({ id: '1' });
+
+      expect(formatLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

@@ -7,18 +7,12 @@
  */
 
 import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findTestPluginPaths } from '@kbn/test';
 import { services } from '../plugin_functional/services';
-import fs from 'fs';
-import { KIBANA_ROOT } from '@kbn/test';
 
 export default async function ({ readConfigFile }) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
-
-  // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
-  const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
-  const examples = examplesFiles.filter((file) =>
-    fs.statSync(resolve(KIBANA_ROOT, 'examples', file)).isDirectory()
-  );
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     rootTags: ['runOutsideOfCiGroups'],
@@ -33,6 +27,8 @@ export default async function ({ readConfigFile }) {
       require.resolve('./data_view_field_editor_example'),
       require.resolve('./field_formats'),
       require.resolve('./partial_results'),
+      require.resolve('./search'),
+      require.resolve('./content_management'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -62,9 +58,7 @@ export default async function ({ readConfigFile }) {
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
         '--telemetry.optIn=false',
-        ...examples.map(
-          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
-        ),
+        ...findTestPluginPaths(resolve(REPO_ROOT, 'examples')),
       ],
     },
   };

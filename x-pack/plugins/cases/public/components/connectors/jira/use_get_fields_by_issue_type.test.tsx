@@ -9,7 +9,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector } from '../mock';
-import { useGetFieldsByIssueType, UseGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import type { UseGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import * as api from './api';
 
 jest.mock('../../../common/lib/kibana');

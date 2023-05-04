@@ -5,33 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { Adapters } from 'src/plugins/inspector/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter, TimeRange } from '@kbn/es-query';
 
-import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../../../common';
+import { calculateBounds, Query } from '../../..';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 
-interface RequestHandlerParams {
+export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   inspectorAdapters: Adapters;
-  metricsAtAllLevels?: boolean;
-  partialRows?: boolean;
   query?: Query;
   searchSessionId?: string;
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
+  disableShardWarnings?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
+  title?: string;
+  description?: string;
 }
 
 export const handleRequest = ({
@@ -40,14 +43,16 @@ export const handleRequest = ({
   filters,
   indexPattern,
   inspectorAdapters,
-  partialRows,
   query,
   searchSessionId,
   searchSourceService,
   timeFields,
   timeRange,
+  disableShardWarnings,
   getNow,
   executionContext,
+  title,
+  description,
 }: RequestHandlerParams) => {
   return defer(async () => {
     const forceNow = getNow?.();
@@ -56,13 +61,6 @@ export const handleRequest = ({
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
-    // Create a new search source that inherits the original search source
-    // but has the appropriate timeRange applied via a filter.
-    // This is a temporary solution until we properly pass down all required
-    // information for the request to the request handler (https://github.com/elastic/kibana/issues/16641).
-    // Using callParentStartHandlers: true we make sure, that the parent searchSource
-    // onSearchRequestStart will be called properly even though we use an inherited
-    // search source.
     const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
     const requestSearchSource = timeFilterSearchSource.createChild({
       callParentStartHandlers: true,
@@ -112,16 +110,21 @@ export const handleRequest = ({
       requestSearchSource
         .fetch$({
           abortSignal,
+          disableShardFailureWarning: disableShardWarnings,
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,
-            title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-              defaultMessage: 'Data',
-            }),
-            description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the visualization.',
-            }),
+            title:
+              title ??
+              i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+            description:
+              description ??
+              i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the visualization.',
+              }),
           },
           executionContext,
         })
@@ -130,7 +133,7 @@ export const handleRequest = ({
             const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
             const tabifyParams = {
               metricsAtAllLevels: aggs.hierarchical,
-              partialRows,
+              partialRows: aggs.partialRows,
               timeRange: parsedTimeRange
                 ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
                 : undefined,

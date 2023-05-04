@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Command } from 'commander';
@@ -15,8 +15,8 @@ import { getConfigPath } from '@kbn/utils';
 import {
   ElasticsearchService,
   EnrollResult,
-} from '../plugins/interactive_setup/server/elasticsearch_service';
-import { getDetailedErrorMessage } from '../plugins/interactive_setup/server/errors';
+} from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
 import {
   promptToken,
   getCommand,
@@ -24,7 +24,7 @@ import {
   kibanaConfigWriter,
   elasticsearch,
 } from './utils';
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 
 const program = new Command('bin/kibana-setup');
 

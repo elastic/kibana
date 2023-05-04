@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { MetricExpression } from '../types';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ExpressionRow } from './expression_row';
 import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
+import { Comparator } from '../../../../common/alerting/metrics';
+import { MetricExpression } from '../types';
+import { ExpressionRow } from './expression_row';
 
-jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
-  useSourceViaHttp: () => ({
+jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
@@ -52,6 +52,7 @@ describe('ExpressionRow', () => {
           timeWindowSize: [],
         }}
         expression={expression}
+        dataView={{ fields: [], title: 'metricbeat-*' }}
       />
     );
 
@@ -77,7 +78,11 @@ describe('ExpressionRow', () => {
     };
     const { wrapper, update } = await setup(expression as MetricExpression);
     await update();
-    const [valueMatch] = wrapper.html().match('<span class="euiExpression__value">50</span>') ?? [];
+    const [valueMatch] =
+      wrapper
+        .html()
+        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">50</span>') ??
+      [];
     expect(valueMatch).toBeTruthy();
   });
 
@@ -92,7 +97,10 @@ describe('ExpressionRow', () => {
     };
     const { wrapper } = await setup(expression as MetricExpression);
     const [valueMatch] =
-      wrapper.html().match('<span class="euiExpression__value">0.5</span>') ?? [];
+      wrapper
+        .html()
+        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">0.5</span>') ??
+      [];
     expect(valueMatch).toBeTruthy();
   });
 

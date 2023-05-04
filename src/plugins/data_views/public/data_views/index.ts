@@ -7,5 +7,4 @@
  */
 
 export * from '../../common/data_views';
-export * from './redirect_no_index_pattern';
 export * from './data_views_api_client';

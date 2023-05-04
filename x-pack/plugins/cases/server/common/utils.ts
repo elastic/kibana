@@ -5,43 +5,55 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import {
+import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
-} from 'kibana/server';
-import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
-import { AlertInfo } from './types';
-import { LensServerPluginSetup } from '../../../lens/server';
-
+  IBasePath,
+} from '@kbn/core/server';
+import { flatMap, uniqWith, xorWith } from 'lodash';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { isValidOwner } from '../../common/utils/owner';
 import {
-  AssociationType,
-  CaseAttributes,
-  CaseResponse,
-  CasesClientPostRequest,
+  CASE_VIEW_COMMENT_PATH,
+  CASE_VIEW_PATH,
+  CASE_VIEW_TAB_PATH,
+  GENERAL_CASES_OWNER,
+  OWNER_INFO,
+} from '../../common/constants';
+import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import type { AlertInfo, FileAttachmentRequest } from './types';
+
+import type {
+  CasePostRequest,
+  Case,
   CasesFindResponse,
-  CaseStatuses,
   CommentAttributes,
   CommentRequest,
+  CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestUserType,
-  CommentResponse,
-  CommentsResponse,
-  CommentType,
-  ConnectorTypes,
-  SubCaseAttributes,
-  SubCaseResponse,
-  SubCasesFindResponse,
+  Comment,
+  CommentsFindResponse,
   User,
 } from '../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
-import { UpdateAlertRequest } from '../client/alerts/types';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+  ConnectorTypes,
+  ExternalReferenceSORt,
+  FileAttachmentMetadataRt,
+} from '../../common/api';
+import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
+import { dedupAssignees } from '../client/cases/utils';
+import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 
 /**
  * Default sort field for querying saved objects.
@@ -58,9 +70,11 @@ export const transformNewCase = ({
   newCase,
 }: {
   user: User;
-  newCase: CasesClientPostRequest;
-}): CaseAttributes => ({
+  newCase: CasePostRequest;
+}): CaseTransformedAttributes => ({
   ...newCase,
+  duration: null,
+  severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),
@@ -69,6 +83,7 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
+  assignees: dedupAssignees(newCase.assignees) ?? [],
 });
 
 export const transformCases = ({
@@ -80,7 +95,7 @@ export const transformCases = ({
   perPage,
   total,
 }: {
-  casesMap: Map<string, CaseResponse>;
+  casesMap: Map<string, Case>;
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
@@ -97,69 +112,17 @@ export const transformCases = ({
   count_closed_cases: countClosedCases,
 });
 
-export const transformSubCases = ({
-  subCasesMap,
-  open,
-  inProgress,
-  closed,
-  page,
-  perPage,
-  total,
-}: {
-  subCasesMap: Map<string, SubCaseResponse[]>;
-  open: number;
-  inProgress: number;
-  closed: number;
-  page: number;
-  perPage: number;
-  total: number;
-}): SubCasesFindResponse => ({
-  page,
-  per_page: perPage,
-  total,
-  // Squish all the entries in the map together as one array
-  subCases: Array.from(subCasesMap.values()).flat(),
-  count_open_cases: open,
-  count_in_progress_cases: inProgress,
-  count_closed_cases: closed,
-});
-
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
-  subCases,
-  subCaseIds,
 }: {
-  savedObject: SavedObject<CaseAttributes>;
+  savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-  subCases?: SubCaseResponse[];
-  subCaseIds?: string[];
-}): CaseResponse => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
-  totalComment,
-  totalAlerts,
-  ...savedObject.attributes,
-  subCases,
-  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
-});
-
-export const flattenSubCaseSavedObject = ({
-  savedObject,
-  comments = [],
-  totalComment = comments.length,
-  totalAlerts = 0,
-}: {
-  savedObject: SavedObject<SubCaseAttributes>;
-  comments?: Array<SavedObject<CommentAttributes>>;
-  totalComment?: number;
-  totalAlerts?: number;
-}): SubCaseResponse => ({
+}): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
@@ -170,7 +133,7 @@ export const flattenSubCaseSavedObject = ({
 
 export const transformComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
-): CommentsResponse => ({
+): CommentsFindResponse => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
@@ -179,14 +142,14 @@ export const transformComments = (
 
 export const flattenCommentSavedObjects = (
   savedObjects: Array<SavedObject<CommentAttributes>>
-): CommentResponse[] =>
-  savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
+): Comment[] =>
+  savedObjects.reduce((acc: Comment[], savedObject: SavedObject<CommentAttributes>) => {
     return [...acc, flattenCommentSavedObject(savedObject)];
   }, []);
 
 export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
-): CommentResponse => ({
+): Comment => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
@@ -210,7 +173,7 @@ export const getIDsAndIndicesAsArrays = (
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
 const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[] => {
-  if (!isCommentRequestTypeAlertOrGenAlert(comment)) {
+  if (!isCommentRequestTypeAlert(comment)) {
     return [];
   }
 
@@ -234,28 +197,27 @@ export const getAlertInfoFromComments = (comments: CommentRequest[] = []): Alert
   }, []);
 
 type NewCommentArgs = CommentRequest & {
-  associationType: AssociationType;
   createdDate: string;
   owner: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
+  profile_uid?: string;
 };
 
 export const transformNewComment = ({
-  associationType,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
+  profile_uid: profileUid,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
   return {
-    associationType,
     ...comment,
     created_at: createdDate,
-    created_by: { email, full_name, username },
+    created_by: { email, full_name, username, profile_uid: profileUid },
     pushed_at: null,
     pushed_by: null,
     updated_at: null,
@@ -264,7 +226,7 @@ export const transformNewComment = ({
 };
 
 /**
- * A type narrowing function for user comments. Exporting so integration tests can use it.
+ * A type narrowing function for user comments.
  */
 export const isCommentRequestTypeUser = (
   context: CommentRequest
@@ -273,46 +235,45 @@ export const isCommentRequestTypeUser = (
 };
 
 /**
- * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ * A type narrowing function for actions comments.
  */
 export const isCommentRequestTypeActions = (
   context: CommentRequest
-): context is CommentRequestUserType => {
+): context is CommentRequestActionsType => {
   return context.type === CommentType.actions;
 };
 
 /**
- * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ * A type narrowing function for alert comments.
  */
-export const isCommentRequestTypeAlertOrGenAlert = (
+export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
+  return context.type === CommentType.alert;
 };
 
 /**
- * This is used to test if the posted comment is an generated alert. A generated alert will have one or many alerts.
- * An alert is essentially an object with a _id field. This differs from a regular attached alert because the _id is
- * passed directly in the request, it won't be in an object. Internally case will strip off the outer object and store
- * both a generated and user attached alert in the same structure but this function is useful to determine which
- * structure the new alert in the request has.
+ * A type narrowing function for file attachments.
  */
-export const isCommentRequestTypeGenAlert = (
-  context: CommentRequest
-): context is CommentRequestAlertType => {
-  return context.type === CommentType.generatedAlert;
+export const isFileAttachmentRequest = (
+  context: Partial<CommentRequest>
+): context is FileAttachmentRequest => {
+  return (
+    ExternalReferenceSORt.is(context) &&
+    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
+  );
 };
 
 /**
  * Adds the ids and indices to a map of statuses
  */
-export function createAlertUpdateRequest({
+export function createAlertUpdateStatusRequest({
   comment,
   status,
 }: {
   comment: CommentRequest;
   status: CaseStatuses;
-}): UpdateAlertRequest[] {
+}): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 
@@ -321,10 +282,7 @@ export function createAlertUpdateRequest({
  */
 export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
   let totalAlerts = 0;
-  if (
-    comment.attributes.type === CommentType.alert ||
-    comment.attributes.type === CommentType.generatedAlert
-  ) {
+  if (comment.attributes.type === CommentType.alert) {
     if (Array.isArray(comment.attributes.alertId)) {
       totalAlerts += comment.attributes.alertId.length;
     } else {
@@ -335,9 +293,7 @@ export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) 
 };
 
 /**
- * Count the number of alerts for each id in the alert's references. This will result
- * in a map with entries for both the collection and the individual sub cases. So the resulting
- * size of the map will not equal the total number of sub cases.
+ * Count the number of alerts for each id in the alert's references.
  */
 export const groupTotalAlertsByID = ({
   comments,
@@ -363,7 +319,7 @@ export const groupTotalAlertsByID = ({
 };
 
 /**
- * Counts the total alert IDs for a single case or sub case ID.
+ * Counts the total alert IDs for a single case.
  */
 export const countAlertsForID = ({
   comments,
@@ -374,17 +330,6 @@ export const countAlertsForID = ({
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
 };
-
-/**
- * If subCaseID is defined and the case connector feature is disabled this throws an error.
- */
-export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) {
-  if (!ENABLE_CASE_CONNECTOR && subCaseID !== undefined) {
-    throw Boom.badRequest(
-      'The sub case parameters are not supported when the case connector feature is disabled'
-    );
-  }
-}
 
 /**
  * Returns a connector that indicates that no connector was set.
@@ -449,4 +394,65 @@ export const getOrUpdateLensReferences = (
   );
 
   return currentNonLensReferences.concat(newCommentLensReferences);
+};
+
+export const asArray = <T>(field?: T | T[] | null): T[] => {
+  if (field === undefined || field === null) {
+    return [];
+  }
+
+  return Array.isArray(field) ? field : [field];
+};
+
+export const assertUnreachable = (x: never): never => {
+  throw new Error('You should not reach this part of code');
+};
+
+export const getApplicationRoute = (
+  appRouteInfo: { [K in keyof typeof OWNER_INFO]: { appRoute: string } },
+  owner: string
+): string => {
+  const appRoute = isValidOwner(owner)
+    ? appRouteInfo[owner].appRoute
+    : OWNER_INFO[GENERAL_CASES_OWNER].appRoute;
+
+  return appRoute.startsWith('/') ? appRoute : `/${appRoute}`;
+};
+
+export const getCaseViewPath = (params: {
+  publicBaseUrl: NonNullable<IBasePath['publicBaseUrl']>;
+  spaceId: string;
+  caseId: string;
+  owner: string;
+  commentId?: string;
+  tabId?: CASE_VIEW_PAGE_TABS;
+}): string => {
+  const normalizePath = (path: string): string => path.replaceAll('//', '/');
+  const removeEndingSlash = (path: string): string =>
+    path.endsWith('/') ? path.slice(0, -1) : path;
+
+  const { publicBaseUrl, caseId, owner, commentId, tabId, spaceId } = params;
+
+  const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
+  const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
+  const appRoute = getApplicationRoute(OWNER_INFO, owner);
+  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
+
+  if (commentId) {
+    const commentPath = normalizePath(
+      CASE_VIEW_COMMENT_PATH.replace(':detailName', caseId).replace(':commentId', commentId)
+    );
+
+    return `${basePath}${commentPath}`;
+  }
+
+  if (tabId) {
+    const tabPath = normalizePath(
+      CASE_VIEW_TAB_PATH.replace(':detailName', caseId).replace(':tabId', tabId)
+    );
+
+    return `${basePath}${tabPath}`;
+  }
+
+  return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
 };

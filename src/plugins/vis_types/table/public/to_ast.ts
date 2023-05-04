@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { TableVisParams } from '../common';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
 
@@ -41,17 +37,6 @@ const getMetrics = (schemas: ReturnType<typeof getVisSchemas>, visParams: TableV
 };
 
 export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params) => {
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: buildExpression([
-      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
-        id: vis.data.indexPattern!.id!,
-      }),
-    ]),
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows,
-    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
-  });
-
   const schemas = getVisSchemas(vis, params);
   const metrics = getMetrics(schemas, vis.params);
 
@@ -81,7 +66,7 @@ export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params)
     table.addArgument('splitRow', prepareDimension(schemas.split_row[0]));
   }
 
-  const ast = buildExpression([esaggs, table]);
+  const ast = buildExpression([table]);
 
   return ast.toAst();
 };

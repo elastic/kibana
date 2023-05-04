@@ -1,0 +1,68 @@
+[[index-patterns-runtime-field-api-update]]
+=== Update runtime field API
+++++
+<titleabbrev>Update runtime field</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-update>> instead.]
+
+experimental[] Update an existing runtime field
+
+[[index-patterns-runtime-field-update-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
+
+`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
+
+[[index-patterns-runtime-field-update-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`index_pattern_id`::
+(Required, string) The ID of the index pattern.
+
+`name`::
+(Required, string) The name of the runtime field you want to update.
+
+[[index-patterns-runtime-field-update-body]]
+==== Request body
+
+`runtimeField`:: (Required, object) The runtime field definition object.
+
+You can update following fields:
+
+* `type`
+* `script`
+
+
+
+[[index-patterns-runtime-field-update-example]]
+==== Examples
+
+Update an existing runtime field on an index pattern:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<runtime_field_name>
+{
+  "runtimeField": {
+     "script": {
+        "source": "emit(doc["bar"].value)"
+      }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns updated runtime field object and updated index pattern object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {...},
+    "field": {...}
+}
+--------------------------------------------------

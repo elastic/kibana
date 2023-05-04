@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '../../../../../../src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 

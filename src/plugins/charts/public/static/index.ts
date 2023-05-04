@@ -8,5 +8,4 @@
 
 export * from './colors';
 export * from './components';
-export * from './utils';
 export * from '../../common/static/styles';

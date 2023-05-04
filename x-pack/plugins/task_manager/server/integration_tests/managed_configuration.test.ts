@@ -6,24 +6,34 @@
  */
 
 import sinon from 'sinon';
-import {
-  elasticsearchServiceMock,
-  savedObjectsRepositoryMock,
-} from '../../../../../src/core/server/mocks';
-import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
+import { Client } from '@elastic/elasticsearch';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 
-// FAILING: https://github.com/elastic/kibana/issues/120269
-describe.skip('managed configuration', () => {
+describe('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;
   let logger: Logger;
 
   let clock: sinon.SinonFakeTimers;
   const savedObjectsClient = savedObjectsRepositoryMock.create();
   const esStart = elasticsearchServiceMock.createStart();
+
+  const inlineScriptError = new Error('cannot execute [inline] scripts" error') as Error & {
+    meta: unknown;
+  };
+  inlineScriptError.meta = {
+    body: {
+      error: {
+        caused_by: {
+          reason: 'cannot execute [inline] scripts',
+        },
+      },
+    },
+  };
 
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -34,10 +44,10 @@ describe.skip('managed configuration', () => {
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
-      max_poll_inactivity_cycles: 10,
       monitored_aggregated_stats_refresh_rate: 60000,
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug' as const,
         warn_delayed_task_start_in_seconds: 60,
       },
       monitored_stats_required_freshness: 4000,
@@ -57,6 +67,11 @@ describe.skip('managed configuration', () => {
       unsafe: {
         exclude_task_types: [],
       },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
+      worker_utilization_running_average_window: 5,
     });
     logger = context.logger.get('taskManager');
 
@@ -72,6 +87,9 @@ describe.skip('managed configuration', () => {
 
     const coreStart = coreMock.createStart();
     coreStart.elasticsearch = esStart;
+    esStart.client.asInternalUser.child.mockReturnValue(
+      esStart.client.asInternalUser as unknown as Client
+    );
     coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
     taskManagerStart = await taskManager.start(coreStart);
 
@@ -131,16 +149,13 @@ describe.skip('managed configuration', () => {
   });
 
   test('should lower max workers when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
-    esStart
-      .createClient('taskManager')
-      .asInternalUser.search.mockRejectedValueOnce(
-        elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new Error('cannot execute [inline] scripts" error')
-        )
-      );
+    const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+    childEsClient.search.mockImplementationOnce(async () => {
+      throw inlineScriptError;
+    });
 
     await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"cannot execute [inline] scripts" error"`
+      `"cannot execute [inline] scripts\\" error"`
     );
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
@@ -154,16 +169,13 @@ describe.skip('managed configuration', () => {
   });
 
   test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
-    esStart
-      .createClient('taskManager')
-      .asInternalUser.search.mockRejectedValueOnce(
-        elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new Error('cannot execute [inline] scripts" error')
-        )
-      );
+    const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+    childEsClient.search.mockImplementationOnce(async () => {
+      throw inlineScriptError;
+    });
 
     await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"cannot execute [inline] scripts" error"`
+      `"cannot execute [inline] scripts\\" error"`
     );
 
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);

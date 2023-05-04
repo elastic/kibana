@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { date } from '../../../canvas_plugin_src/functions/common/date';
+import type { date } from '../../../canvas_plugin_src/functions/common/date';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { ISO8601, MOMENTJS, JS } from '../../constants';

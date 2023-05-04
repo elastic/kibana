@@ -8,19 +8,36 @@
 
 const preset = require('../jest-preset');
 
+/** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
   ...preset,
-  testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
+  testMatch: ['**/integration_tests/**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
+    ...preset.setupFilesAfterEnv,
+    '<rootDir>/packages/kbn-test/src/jest/setup/after_env.integration.js',
   ],
   reporters: [
     'default',
-    ['@kbn/test/target_node/jest/junit_reporter', { reportName: 'Jest Integration Tests' }],
+    [
+      '<rootDir>/packages/kbn-test/src/jest/junit_reporter',
+      {
+        rootDirectory: '.',
+        reportName: 'Jest Integration Tests',
+      },
+    ],
+    ...(process.env.TEST_GROUP_TYPE_INTEGRATION
+      ? [
+          [
+            '<rootDir>/packages/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+            {
+              testGroupType: process.env.TEST_GROUP_TYPE_INTEGRATION,
+            },
+          ],
+        ]
+      : []),
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]

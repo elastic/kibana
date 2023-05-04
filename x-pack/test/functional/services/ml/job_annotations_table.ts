@@ -191,7 +191,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
     public async clickAnnotationsEditAction(annotationId: string) {
       await this.assertAnnotationsEditActionExists(annotationId);
       await retry.tryForTime(1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           this.rowSelector(annotationId, 'mlAnnotationsActionEdit')
         );
         await testSubjects.existOrFail('mlAnnotationFlyout');
@@ -273,9 +273,9 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         await this.clickAnnotationsEditAction(annotationId);
         await testSubjects.existOrFail('mlAnnotationFlyout');
         await testSubjects.existOrFail('mlAnnotationsFlyoutDeleteButton');
-        await testSubjects.clickWhenNotDisabled('mlAnnotationsFlyoutDeleteButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlAnnotationsFlyoutDeleteButton');
         await testSubjects.existOrFail('mlAnnotationFlyoutConfirmDeleteModal');
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           '~mlAnnotationFlyoutConfirmDeleteModal > ~confirmModalConfirmButton'
         );
       });
@@ -372,7 +372,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
         await this.ensureAnnotationsActionsMenuOpen(annotationId);
         await this.assertAnnotationsDelayedDataChartActionExists();
 
-        await testSubjects.clickWhenNotDisabled('mlAnnotationsActionViewDatafeed');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlAnnotationsActionViewDatafeed');
         await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyout');
         await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutTitle');
 

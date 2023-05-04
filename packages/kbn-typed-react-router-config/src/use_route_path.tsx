@@ -7,6 +7,7 @@
  */
 
 import { last } from 'lodash';
+import { NotFoundRouteException } from './create_router';
 import { useMatchRoutes } from './use_match_routes';
 import { useRouter } from './use_router';
 
@@ -14,7 +15,7 @@ export function useRoutePath() {
   const lastRouteMatch = last(useMatchRoutes());
   const router = useRouter();
   if (!lastRouteMatch) {
-    throw new Error('No route was matched');
+    throw new NotFoundRouteException('No route was matched');
   }
 
   return router.getRoutePath(lastRouteMatch.route);

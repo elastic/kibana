@@ -13,16 +13,15 @@ import {
   VisToExpressionAstParams,
   getVisSchemas,
   VisParams,
-} from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import type { Dimensions } from '../../xy/public';
-import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
+} from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
-import { BUCKET_TYPES } from '../../../data/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams, VislibChartType } from './types';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst = async <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,
@@ -90,12 +89,12 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
   const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
     {
-      type: vis.type.name as Exclude<VislibChartType, 'pie'>,
+      type: vis.type.name as VislibChartType,
       visConfig: JSON.stringify({ ...visConfig, dimensions }),
     }
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeVislib]);
+  const ast = buildExpression([visTypeVislib]);
 
   return ast.toAst();
 };

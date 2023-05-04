@@ -28,7 +28,7 @@ function isTsParameterProperty(param) {
  * @param {string} arg
  */
 const errorMsg = (arg) =>
-  `The constructor argument "${arg}" can't be used in a class property intializer, define the property in the constructor instead`;
+  `The constructor argument "${arg}" can't be used in a class property initializer, define the property in the constructor instead`;
 
 /** @type {Rule} */
 module.exports = {

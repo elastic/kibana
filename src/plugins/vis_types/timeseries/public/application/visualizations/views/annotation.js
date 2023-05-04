@@ -9,8 +9,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
-import reactcss from 'reactcss';
+import { css } from '@emotion/react';
 import { EuiToolTip } from '@elastic/eui';
+
+import './_annotation.scss';
 
 export class Annotation extends Component {
   constructor(props) {
@@ -38,24 +40,22 @@ export class Annotation extends Component {
     const { color, plot, icon, series } = this.props;
     const offset = plot.pointOffset({ x: series[0], y: 0 });
     const tooltip = this.renderTooltip();
-    const style = reactcss({
-      default: {
-        container: {
-          left: offset.left - 6,
-          bottom: 0,
-          top: 5,
-        },
-        line: {
-          backgroundColor: color,
-        },
-        icon: { color },
-      },
-    });
+    const containerCSS = css`
+      left: ${offset.left - 6}px;
+      bottom: 0;
+      top: 5px;
+    `;
+    const lineCSS = css`
+      backgroundcolor: ${color};
+    `;
+    const iconCSS = css`
+      color: ${color};
+    `;
     return (
-      <div className="tvbVisAnnotation" style={style.container}>
-        <div className="tvbVisAnnotation__line" style={style.line} />
+      <div css={containerCSS} className="tvbVisAnnotation">
+        <div css={lineCSS} className="tvbVisAnnotation__line" />
         <EuiToolTip className="tvbVisAnnotation__tooltip" content={tooltip} position="top">
-          <i className={`tvbVisAnnotation__icon fa ${icon}`} style={style.icon} />
+          <i css={iconCSS} className={`tvbVisAnnotation__icon fa ${icon}`} />
         </EuiToolTip>
       </div>
     );

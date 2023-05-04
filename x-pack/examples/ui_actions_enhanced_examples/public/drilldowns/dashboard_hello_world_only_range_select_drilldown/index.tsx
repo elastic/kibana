@@ -7,14 +7,10 @@
 
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
-import {
-  RangeSelectContext,
-  SELECT_RANGE_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
-import { BaseActionFactoryContext } from '../../../../../plugins/ui_actions_enhanced/public/dynamic_actions';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import { RangeSelectContext, SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
 
 export type Config = {
   name: string;
@@ -38,10 +34,7 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
     return [SELECT_RANGE_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps<Config>> = ({
-    config,
-    onConfig,
-  }) => (
+  public readonly CollectConfig = ({ config, onConfig }: CollectConfigProps<Config>) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth
@@ -50,8 +43,6 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
       />
     </EuiFormRow>
   );
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     name: '',

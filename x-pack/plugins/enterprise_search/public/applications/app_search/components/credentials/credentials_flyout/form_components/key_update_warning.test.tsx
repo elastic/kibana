@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { FormKeyUpdateWarning } from './';
+import { FormKeyUpdateWarning } from '.';
 
 describe('FormKeyUpdateWarning', () => {
   it('renders', () => {

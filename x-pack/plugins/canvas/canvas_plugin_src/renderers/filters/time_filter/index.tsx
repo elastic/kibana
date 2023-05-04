@@ -8,8 +8,8 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
-import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererStrings } from '../../../../i18n';
 import { TimeFilter } from './components';
@@ -45,7 +45,7 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
 
       if (filterExpression === undefined || filterExpression.indexOf('timefilter') !== 0) {
         filterExpression = defaultTimeFilterExpression;
-        handlers.setFilter(filterExpression);
+        handlers.event({ name: 'applyFilterAction', data: filterExpression });
       } else if (filterExpression !== '') {
         // NOTE: setFilter() will cause a data refresh, avoid calling unless required
         // compare expression and filter, update filter if needed
@@ -55,14 +55,14 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
         ]);
 
         if (changed) {
-          handlers.setFilter(toExpression(newAst));
+          handlers.event({ name: 'applyFilterAction', data: toExpression(newAst) });
         }
       }
 
       ReactDOM.render(
         <KibanaThemeProvider theme$={theme.theme$}>
           <TimeFilter
-            commit={handlers.setFilter}
+            commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
             filter={filterExpression}
             commonlyUsedRanges={customQuickRanges}
             dateFormat={customDateFormat}

@@ -7,11 +7,11 @@
 
 import { flow } from 'fp-ts/lib/function';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
-import {
-  CreateRulesSchema,
-  UpdateRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request';
-import { Rule } from './types';
+import type {
+  RuleCreateProps,
+  RuleUpdateProps,
+} from '../../../../../common/detection_engine/rule_schema';
+import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these
@@ -31,8 +31,8 @@ import { Rule } from './types';
  * @returns The rule transformed from the output
  */
 export const transformOutput = (
-  rule: CreateRulesSchema | UpdateRulesSchema
-): CreateRulesSchema | UpdateRulesSchema => flow(removeIdFromThreatMatchArray)(rule);
+  rule: RuleCreateProps | RuleUpdateProps
+): RuleCreateProps | RuleUpdateProps => flow(removeIdFromThreatMatchArray)(rule);
 
 /**
  * Transforms the output of rules to compensate for technical debt or UI concerns such as
@@ -84,8 +84,8 @@ export const addIdToThreatMatchArray = (rule: Rule): Rule => {
  * @returns rule The rule but with id removed from the threat array and entries
  */
 export const removeIdFromThreatMatchArray = (
-  rule: CreateRulesSchema | UpdateRulesSchema
-): CreateRulesSchema | UpdateRulesSchema => {
+  rule: RuleCreateProps | RuleUpdateProps
+): RuleCreateProps | RuleUpdateProps => {
   if (rule.type === 'threat_match' && rule.threat_mapping != null) {
     const threatMapWithoutId = rule.threat_mapping.map((mapping) => {
       const newEntries = mapping.entries.map((entry) => removeIdFromItem(entry));

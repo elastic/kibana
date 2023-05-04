@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
+import { Environment } from '../../common/environment_rt';
+import { APIReturnType } from '../services/rest/create_call_apm_api';
 
-function getEnvironmentOptions(environments: string[]) {
-  const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
-    .map((environment) => ({
-      value: environment,
-      text: environment,
-    }));
+type EnvironmentsAPIResponse = APIReturnType<'GET /internal/apm/environments'>;
 
-  return [ENVIRONMENT_ALL, ...environmentOptions];
-}
-
-const INITIAL_DATA = { environments: [] };
-
+const INITIAL_DATA: EnvironmentsAPIResponse = { environments: [] };
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -36,9 +24,12 @@ export function useEnvironmentsFetcher({
 }) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/environments',
+      if (!start || !end) {
+        return;
+      }
+
+      if (serviceName) {
+        return callApmApi('GET /internal/apm/environments', {
           params: {
             query: {
               start,
@@ -48,14 +39,24 @@ export function useEnvironmentsFetcher({
           },
         });
       }
+      return callApmApi('GET /internal/apm/suggestions', {
+        params: {
+          query: {
+            start,
+            end,
+            fieldName: SERVICE_ENVIRONMENT,
+            fieldValue: '',
+          },
+        },
+      }).then((response) => {
+        return { environments: response.terms };
+      });
     },
     [start, end, serviceName]
   );
 
-  const environmentOptions = useMemo(
-    () => getEnvironmentOptions(data.environments),
-    [data?.environments]
-  );
-
-  return { environments: data.environments, status, environmentOptions };
+  return {
+    environments: data.environments as Environment[],
+    status,
+  };
 }

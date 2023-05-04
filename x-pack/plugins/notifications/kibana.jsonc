@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/notifications-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "notifications",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "actions",
+      "licensing"
+    ]
+  }
+}

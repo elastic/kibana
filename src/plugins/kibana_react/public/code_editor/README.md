@@ -11,6 +11,6 @@ This editor component allows easy access to:
 The Monaco editor doesn't automatically resize the editor area on window or container resize so this component includes a [resize detector](https://github.com/maslianok/react-resize-detector) to cause the Monaco editor to re-layout and adjust its size when the window or container size changes
 
 ## Storybook Examples
-To run the CodeEditor storybook, from the root kibana directory, run `yarn storybook codeeditor`
+To run the `CodeEditor` Storybook, from the root kibana directory, run `yarn storybook kibana_react`
 
 All stories for the component live in `code_editor.examples.tsx`

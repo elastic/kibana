@@ -9,6 +9,7 @@
 import { resolve, dirname } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
+import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 
 import del from 'del';
 
@@ -22,7 +23,6 @@ const writeFileAsync = promisify(writeFile);
 export class ScreenshotsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
-  private readonly failureMetadata = this.ctx.getService('failureMetadata');
   private readonly browser = this.ctx.getService('browser');
 
   private readonly SESSION_DIRECTORY = resolve(this.config.get('screenshots.directory'), 'session');
@@ -51,10 +51,10 @@ export class ScreenshotsService extends FtrService {
   async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
     this.log.debug('compareAgainstBaseline');
     const sessionPath = resolve(this.SESSION_DIRECTORY, `${name}.png`);
-    await this.capture(sessionPath, el);
-
     const baselinePath = resolve(this.BASELINE_DIRECTORY, `${name}.png`);
     const failurePath = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
+
+    await this.capture(sessionPath, el);
 
     if (updateBaselines) {
       this.log.debug('Updating baseline snapshot');
@@ -77,13 +77,11 @@ export class ScreenshotsService extends FtrService {
   async take(name: string, el?: WebElementWrapper, subDirectories: string[] = []) {
     const path = resolve(this.SESSION_DIRECTORY, ...subDirectories, `${name}.png`);
     await this.capture(path, el);
-    this.failureMetadata.addScreenshot(name, path);
   }
 
   async takeForFailure(name: string, el?: WebElementWrapper) {
     const path = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
     await this.capture(path, el);
-    this.failureMetadata.addScreenshot(`failure[${name}]`, path);
   }
 
   private async capture(path: string, el?: WebElementWrapper) {
@@ -95,6 +93,12 @@ export class ScreenshotsService extends FtrService {
     } catch (err) {
       this.log.error('SCREENSHOT FAILED');
       this.log.error(err);
+      if (err instanceof NoSuchSessionError) {
+        // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
+        this.log.error(
+          `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
+        );
+      }
     }
   }
 }

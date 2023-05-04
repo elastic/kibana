@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
-import { useUiTracker } from '../../../../../observability/public';
 
 export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration,
@@ -21,7 +21,7 @@ export const useLogAnalysisModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { spaceId, sourceId, timestampField, runtimeMappings } = sourceConfiguration;
+  const { spaceId, sourceId: logViewId, timestampField, runtimeMappings } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
   const trackMetric = useUiTracker({ app: 'infra_logs' });
@@ -31,21 +31,21 @@ export const useLogAnalysisModule = <JobType extends string>({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
-        return await moduleDescriptor.getJobSummary(spaceId, sourceId, services.http.fetch);
+        return await moduleDescriptor.getJobSummary(spaceId, logViewId, services.http.fetch);
       },
       onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,
           spaceId,
-          sourceId,
+          logViewId,
         });
       },
       onReject: () => {
         dispatchModuleStatus({ type: 'failedFetchingJobStatuses' });
       },
     },
-    [spaceId, sourceId]
+    [spaceId, logViewId]
   );
 
   const [, setUpModule] = useTrackedPromise(
@@ -64,7 +64,7 @@ export const useLogAnalysisModule = <JobType extends string>({
           datasetFilter,
           {
             indices: selectedIndices,
-            sourceId,
+            sourceId: logViewId,
             spaceId,
             timestampField,
             runtimeMappings,
@@ -73,7 +73,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         );
         const jobSummaries = await moduleDescriptor.getJobSummary(
           spaceId,
-          sourceId,
+          logViewId,
           services.http.fetch
         );
         return { setupResult, jobSummaries };
@@ -104,7 +104,7 @@ export const useLogAnalysisModule = <JobType extends string>({
           jobSetupResults: jobs,
           jobSummaries,
           spaceId,
-          sourceId,
+          logViewId,
         });
       },
       onReject: (e: any) => {
@@ -114,17 +114,17 @@ export const useLogAnalysisModule = <JobType extends string>({
         }
       },
     },
-    [moduleDescriptor.setUpModule, spaceId, sourceId, timestampField]
+    [moduleDescriptor.setUpModule, spaceId, logViewId, timestampField]
   );
 
   const [cleanUpModuleRequest, cleanUpModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.cleanUpModule(spaceId, sourceId, services.http.fetch);
+        return await moduleDescriptor.cleanUpModule(spaceId, logViewId, services.http.fetch);
       },
     },
-    [spaceId, sourceId]
+    [spaceId, logViewId]
   );
 
   const isCleaningUp = useMemo(
@@ -156,8 +156,8 @@ export const useLogAnalysisModule = <JobType extends string>({
   }, [dispatchModuleStatus]);
 
   const jobIds = useMemo(
-    () => moduleDescriptor.getJobIds(spaceId, sourceId),
-    [moduleDescriptor, spaceId, sourceId]
+    () => moduleDescriptor.getJobIds(spaceId, logViewId),
+    [moduleDescriptor, spaceId, logViewId]
   );
 
   return {

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { Embeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import {
+  Embeddable,
+  ViewMode,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableActionStorage,
   EmbeddableWithDynamicActionsInput,
 } from './embeddable_action_storage';
-import { UiActionsEnhancedSerializedEvent } from '../../../ui_actions_enhanced/public';
-import { of } from '../../../../../src/plugins/kibana_utils/public';
+import { UiActionsEnhancedSerializedEvent } from '@kbn/ui-actions-enhanced-plugin/public';
+import { of } from '@kbn/kibana-utils-plugin/public';
 // use real const to make test fail in case someone accidentally changes it
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/data/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {
   public readonly type = 'test';
@@ -553,7 +558,7 @@ describe('EmbeddableActionStorage', () => {
             events: [
               {
                 eventId: '1',
-                triggers: [OTHER_TRIGGER],
+                triggers: [OTHER_TRIGGER, VALUE_CLICK_TRIGGER],
                 action: {
                   factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
                   name: '',
@@ -561,7 +566,16 @@ describe('EmbeddableActionStorage', () => {
                 },
               },
               {
-                eventId: '2',
+                eventId: '3',
+                triggers: [OTHER_TRIGGER, SELECT_RANGE_TRIGGER],
+                action: {
+                  factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
+                  name: '',
+                  config: {},
+                },
+              },
+              {
+                eventId: '3',
                 triggers: [OTHER_TRIGGER],
                 action: {
                   factoryId: 'SOME_OTHER',
@@ -575,9 +589,10 @@ describe('EmbeddableActionStorage', () => {
       });
       const storage = new EmbeddableActionStorage(embeddable);
 
-      const [event1, event2] = await storage.list();
-      expect(event1.triggers).toEqual([APPLY_FILTER_TRIGGER]);
-      expect(event2.triggers).toEqual([OTHER_TRIGGER]);
+      const [event1, event2, event3] = await storage.list();
+      expect(event1.triggers).toEqual([OTHER_TRIGGER, APPLY_FILTER_TRIGGER]);
+      expect(event2.triggers).toEqual([OTHER_TRIGGER, APPLY_FILTER_TRIGGER]);
+      expect(event3.triggers).toEqual([OTHER_TRIGGER]);
     });
   });
 });

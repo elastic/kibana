@@ -10,7 +10,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { FooterComponent, PagingControlComponent } from './index';
+import { FooterComponent, PagingControlComponent } from '.';
+import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -28,7 +29,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}
@@ -50,7 +51,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={true}
             itemsCount={itemsCount}
@@ -72,7 +73,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}
@@ -124,7 +125,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={true}
             itemsCount={itemsCount}
@@ -146,7 +147,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}
@@ -169,7 +170,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}
@@ -191,7 +192,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={0}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}
@@ -215,7 +216,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}
@@ -227,7 +228,7 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(loadMore).toBeCalled();
     });
 
@@ -238,7 +239,7 @@ describe('Footer Timeline Component', () => {
     //         activePage={0}
     //         updatedAt={updatedAt}
     //         height={100}
-    //         id={'timeline-id'}
+    //         id={TimelineId.test}
     //         isLive={false}
     //         isLoading={false}
     //         itemsCount={itemsCount}
@@ -263,7 +264,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={true}
             isLoading={false}
             itemsCount={itemsCount}
@@ -286,7 +287,7 @@ describe('Footer Timeline Component', () => {
             activePage={0}
             updatedAt={updatedAt}
             height={100}
-            id={'timeline-id'}
+            id={TimelineId.test}
             isLive={false}
             isLoading={false}
             itemsCount={itemsCount}

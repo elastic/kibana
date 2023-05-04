@@ -8,7 +8,7 @@
 
 import { Readable, Writable, Duplex, Transform } from 'stream';
 
-import { createListStream, createPromiseFromStreams, createReduceStream } from './index';
+import { createListStream, createPromiseFromStreams, createReduceStream } from '.';
 
 describe('promiseFromStreams', () => {
   test('pipes together an array of streams', async () => {

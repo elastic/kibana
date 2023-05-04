@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggTermsFnName = 'aggTerms';
 
@@ -86,6 +86,12 @@ export const aggTerms = (): FunctionDefinition => ({
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
+    shardSize: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.terms.shardSize.help', {
+        defaultMessage: 'Number of terms to evaluate during the aggregation.',
+      }),
+    },
     missingBucket: {
       types: ['boolean'],
       help: i18n.translate('data.search.aggs.buckets.terms.missingBucket.help', {
@@ -111,15 +117,29 @@ export const aggTerms = (): FunctionDefinition => ({
       }),
     },
     exclude: {
-      types: ['string'],
+      types: ['string', 'number'],
       help: i18n.translate('data.search.aggs.buckets.terms.exclude.help', {
         defaultMessage: 'Specific bucket values to exclude from results',
       }),
+      multi: true,
     },
     include: {
-      types: ['string'],
+      types: ['string', 'number'],
       help: i18n.translate('data.search.aggs.buckets.terms.include.help', {
         defaultMessage: 'Specific bucket values to include in results',
+      }),
+      multi: true,
+    },
+    includeIsRegex: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.terms.includeIsRegex.help', {
+        defaultMessage: 'When set to true, the include property is handled as regex',
+      }),
+    },
+    excludeIsRegex: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.terms.excludeIsRegex.help', {
+        defaultMessage: 'When set to true, the exclude property is handled as regex',
       }),
     },
     json: {

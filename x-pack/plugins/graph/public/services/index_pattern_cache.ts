@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { IndexPatternProvider } from '../types';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export function createCachedIndexPatternProvider(
-  indexPatternGetter: (id: string) => Promise<IndexPattern>
+  indexPatternGetter: (id: string) => Promise<DataView>
 ): IndexPatternProvider {
-  const cache = new Map<string, IndexPattern>();
+  const cache = new Map<string, DataView>();
 
   return {
     get: async (id: string) => {

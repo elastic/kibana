@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 // Cloud has its own system for managing snapshots and we want to make
 // this clear when Snapshot and Restore is used in a Cloud deployment.
@@ -15,9 +15,7 @@ export const getManagedRepositoryName = async (
   client: ElasticsearchClient
 ): Promise<string | undefined> => {
   try {
-    const {
-      body: { persistent, transient, defaults },
-    } = await client.cluster.getSettings({
+    const { persistent, transient, defaults } = await client.cluster.getSettings({
       filter_path: '*.*managed_repository',
       flat_settings: true,
       include_defaults: true,

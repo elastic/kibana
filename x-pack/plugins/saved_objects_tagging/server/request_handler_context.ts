@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
-import { SecurityPluginSetup } from '../../security/server';
+import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ITagsClient } from '../common/types';
 import { ITagsRequestHandlerContext } from './types';
 import { TagsClient, IAssignmentService, AssignmentService } from './services';
@@ -17,7 +17,7 @@ export class TagsRequestHandlerContext implements ITagsRequestHandlerContext {
 
   constructor(
     private readonly request: KibanaRequest,
-    private readonly coreContext: RequestHandlerContext['core'],
+    private readonly coreContext: CoreRequestHandlerContext,
     private readonly security?: SecurityPluginSetup
   ) {}
 

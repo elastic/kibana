@@ -8,38 +8,43 @@
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
+import { encode } from '@kbn/presentation-util-plugin/common';
 // @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { encode } from '../../../../../../src/plugins/presentation_util/public';
-import { getId } from '../../lib/get_id';
-// @ts-expect-error untyped local
-import { elementsRegistry } from '../../lib/elements_registry';
-// @ts-expect-error untyped local
-import { addElement } from '../../state/actions/elements';
+import { createAsset, notifyError } from '../../lib/assets';
 import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error untyped local
-import { removeAsset, createAsset } from '../../state/actions/assets';
-import { State, AssetType } from '../../../types';
+import { setAsset } from '../../state/actions/assets';
+import { State, AssetType, CanvasWorkpad } from '../../../types';
 
 import { AssetManager as Component } from './asset_manager.component';
+import { getFullWorkpadPersisted } from '../../state/selectors/workpad';
+import { pluginServices } from '../../services';
 
 export const AssetManager = connect(
   (state: State) => ({
     assets: getAssets(state),
+    workpad: getFullWorkpadPersisted(state),
   }),
   (dispatch: Dispatch) => ({
-    onAddAsset: (type: string, content: string) => {
+    onAddAsset: (workpad: CanvasWorkpad, type: AssetType['type'], content: AssetType['value']) => {
       // make the ID here and pass it into the action
-      const assetId = getId('asset');
-      dispatch(createAsset(type, content, assetId));
+      const asset = createAsset(type, content);
+      const { notify, workpad: workpadService } = pluginServices.getServices();
 
-      // then return the id, so the caller knows the id that will be created
-      return assetId;
+      return workpadService
+        .updateAssets(workpad.id, { ...workpad.assets, [asset.id]: asset })
+        .then((res) => {
+          dispatch(setAsset(asset));
+          // then return the id, so the caller knows the id that will be created
+          return asset.id;
+        })
+        .catch((error) => notifyError(error, notify.error));
     },
   }),
   (stateProps, dispatchProps, ownProps) => {
-    const { assets } = stateProps;
+    const { assets, workpad } = stateProps;
     const { onAddAsset } = dispatchProps;
 
     // pull values out of assets object
@@ -49,10 +54,10 @@ export const AssetManager = connect(
     return {
       ...ownProps,
       assets: assetValues,
-      onAddAsset: (file: File) => {
+      onAddAsset: async (file: File) => {
         const [type, subtype] = get(file, 'type', '').split('/');
         if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
-          return encode(file).then((dataurl) => {
+          return await encode(file).then((dataurl) => {
             const dataurlType = 'dataurl';
             const existingId = findExistingAsset(dataurlType, dataurl, assetValues);
 
@@ -60,11 +65,9 @@ export const AssetManager = connect(
               return existingId;
             }
 
-            return onAddAsset(dataurlType, dataurl);
+            return onAddAsset(workpad, dataurlType, dataurl);
           });
         }
-
-        return false;
       },
     };
   }

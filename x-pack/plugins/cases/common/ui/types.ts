@@ -5,41 +5,56 @@
  * 2.0.
  */
 
-import {
-  AssociationType,
-  CaseAttributes,
-  CaseConnector,
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '..';
+import type {
   CasePatchRequest,
   CaseStatuses,
-  CaseType,
-  CommentRequest,
   User,
   ActionConnector,
-  CaseExternalServiceBasic,
-  CaseUserActionResponse,
-  CaseMetricsResponse,
+  UserAction,
+  SingleCaseMetricsResponse,
+  Comment,
+  Case as CaseSnakeCase,
+  UserActionFindResponse,
+  FindTypeField as UserActionFindTypeField,
+  CommentResponseAlertsType,
+  CasesFindResponse,
+  CasesStatusResponse,
+  CasesMetricsResponse,
+  CaseSeverity,
+  CommentResponseExternalReferenceType,
+  CommentResponseTypePersistableState,
+  GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
+  CaseUserActionStatsResponse,
 } from '../api';
-import { SnakeToCamelCase } from '../types';
+import type { PUSH_CASES_CAPABILITY } from '../constants';
+import type { SnakeToCamelCase } from '../types';
+
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
-  metrics: CaseMetricsFeature[];
+  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  metrics: SingleCaseMetricsFeature[];
 }
+
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
-
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
 
 export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
+  };
+  files: {
+    maxSize?: number;
+    allowedMimeTypes: string[];
   };
 }
 
@@ -47,6 +62,12 @@ export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+
+export const SeverityAll = 'all' as const;
+export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
+
+export const UserActionTypeAll = 'all' as const;
+export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -62,134 +83,99 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = CommentRequest & {
-  associationType: AssociationType;
-  id: string;
-  createdAt: string;
-  createdBy: ElasticUser;
-  pushedAt: string | null;
-  pushedBy: string | null;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
+export type CommentUI = SnakeToCamelCase<Comment>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
+export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
+export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
+export type UserActionUI = SnakeToCamelCase<UserAction>;
+export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
+  userActions: UserActionUI[];
 };
-
-export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
-export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
-
-interface BasicCase {
-  id: string;
-  owner: string;
-  closedAt: string | null;
-  closedBy: ElasticUser | null;
-  comments: Comment[];
-  createdAt: string;
-  createdBy: ElasticUser;
-  status: CaseStatuses;
-  title: string;
-  totalAlerts: number;
-  totalComment: number;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-}
-
-export interface SubCase extends BasicCase {
-  associationType: AssociationType;
-  caseParentId: string;
-}
-
-export interface Case extends BasicCase {
-  connector: CaseConnector;
-  description: string;
-  externalService: CaseExternalService | null;
-  subCases?: SubCase[] | null;
-  subCaseIds: string[];
-  settings: CaseAttributes['settings'];
-  tags: string[];
-  type: CaseType;
-}
+export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
+export type CasesUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: CaseUI[] };
+export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
+export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
+export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
+export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
+export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
-  case: Case;
-  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-  aliasTargetId?: string;
+  case: CaseUI;
+  outcome: ResolvedSimpleSavedObject['outcome'];
+  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
-export interface QueryParams {
-  page: number;
-  perPage: number;
+export interface SortingParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';
 }
 
-export interface FilterOptions {
-  search: string;
-  status: CaseStatusWithAllStatus;
-  tags: string[];
-  reporters: User[];
-  owner: string[];
-  onlyCollectionType?: boolean;
-}
-
-export interface CasesStatus {
-  countClosedCases: number | null;
-  countOpenCases: number | null;
-  countInProgressCases: number | null;
-}
-
-export interface AllCases extends CasesStatus {
-  cases: Case[];
+export interface QueryParams extends SortingParams {
   page: number;
   perPage: number;
-  total: number;
+}
+export type PartialQueryParams = Partial<QueryParams>;
+
+export interface UrlQueryParams extends SortingParams {
+  page: string;
+  perPage: string;
 }
 
-export type CaseMetrics = CaseMetricsResponse;
-export type CaseMetricsFeature =
+export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
+  [index: string]: string | string[] | undefined | null;
+}
+
+export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
+
+export interface FilterOptions {
+  search: string;
+  searchFields: string[];
+  severity: CaseSeverityWithAll;
+  status: CaseStatusWithAllStatus;
+  tags: string[];
+  assignees: Array<string | null> | null;
+  reporters: User[];
+  owner: string[];
+}
+export type PartialFilterOptions = Partial<FilterOptions>;
+
+export type SingleCaseMetrics = SingleCaseMetricsResponse;
+export type SingleCaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
+  | 'actions.isolateHost'
   | 'connectors'
   | 'lifespan';
 
 export enum SortFieldCase {
-  createdAt = 'createdAt',
   closedAt = 'closedAt',
+  createdAt = 'createdAt',
+  updatedAt = 'updatedAt',
+  severity = 'severity',
+  status = 'status',
+  title = 'title',
 }
 
-export interface ElasticUser {
-  readonly email?: string | null;
-  readonly fullName?: string | null;
-  readonly username?: string | null;
-}
+export type CaseUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions & { owner: string[] };
+  filterOptions?: FilterOptions;
 }
 
 export interface ApiProps {
   signal: AbortSignal;
 }
 
-export interface BulkUpdateStatus {
-  status: string;
-  id: string;
-  version: string;
-}
 export interface ActionLicense {
   id: string;
   name: string;
   enabled: boolean;
   enabledInConfig: boolean;
   enabledInLicense: boolean;
-}
-
-export interface DeleteCase {
-  id: string;
-  type: CaseType | null;
-  title: string;
 }
 
 export interface FieldMappings {
@@ -199,15 +185,13 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
 >;
 
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
-  updateCase?: (newCase: Case) => void;
-  caseData: Case;
+  caseData: CaseUI;
   onSuccess?: () => void;
   onError?: () => void;
 }
@@ -216,7 +200,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];
@@ -260,7 +244,7 @@ export interface SignalEcs {
 }
 
 export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
-  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
   building_block_type?: string[];
   workflow_status?: string[];
 };
@@ -275,3 +259,22 @@ export interface Ecs {
 }
 
 export type CaseActionConnector = ActionConnector;
+
+export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
+
+export interface CasesPermissions {
+  all: boolean;
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+  push: boolean;
+}
+
+export interface CasesCapabilities {
+  [CREATE_CASES_CAPABILITY]: boolean;
+  [READ_CASES_CAPABILITY]: boolean;
+  [UPDATE_CASES_CAPABILITY]: boolean;
+  [DELETE_CASES_CAPABILITY]: boolean;
+  [PUSH_CASES_CAPABILITY]: boolean;
+}

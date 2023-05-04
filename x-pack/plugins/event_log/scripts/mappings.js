@@ -20,6 +20,9 @@ exports.EcsCustomPropertyMappings = {
       // task specific fields
       task: {
         properties: {
+          id: {
+            type: 'keyword',
+          },
           scheduled: {
             type: 'date',
           },
@@ -47,12 +50,56 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          outcome: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          summary: {
+            properties: {
+              new: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              ongoing: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              recovered: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
         },
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
+          maintenance_window_ids: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          uuid: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           rule: {
             properties: {
+              consumer: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               execution: {
                 properties: {
                   uuid: {
@@ -68,7 +115,32 @@ exports.EcsCustomPropertyMappings = {
                   },
                   metrics: {
                     properties: {
+                      number_of_triggered_actions: {
+                        type: 'long',
+                      },
+                      number_of_generated_actions: {
+                        type: 'long',
+                      },
+                      alert_counts: {
+                        properties: {
+                          active: {
+                            type: 'long',
+                          },
+                          new: {
+                            type: 'long',
+                          },
+                          recovered: {
+                            type: 'long',
+                          },
+                        },
+                      },
+                      number_of_searches: {
+                        type: 'long',
+                      },
                       total_indexing_duration_ms: {
+                        type: 'long',
+                      },
+                      es_search_duration_ms: {
                         type: 'long',
                       },
                       total_search_duration_ms: {
@@ -77,9 +149,40 @@ exports.EcsCustomPropertyMappings = {
                       execution_gap_duration_s: {
                         type: 'long',
                       },
+                      rule_type_run_duration_ms: {
+                        type: 'long',
+                      },
+                      process_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      trigger_actions_duration_ms: {
+                        type: 'long',
+                      },
+                      process_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      claim_to_start_duration_ms: {
+                        type: 'long',
+                      },
+                      prepare_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      total_enrichment_duration_ms: {
+                        type: 'long',
+                      },
                     },
                   },
                 },
+              },
+              revision: {
+                type: 'long',
+              },
+              rule_type_id: {
+                type: 'keyword',
+                ignore_above: 1024,
               },
             },
           },
@@ -111,6 +214,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {
@@ -119,6 +225,30 @@ exports.EcsCustomPropertyMappings = {
       },
       version: {
         type: 'version',
+      },
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          execution: {
+            properties: {
+              source: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -151,4 +281,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'event.type',
   'rule.author',
   'kibana.space_ids',
+  'kibana.alert.maintenance_window_ids',
 ];

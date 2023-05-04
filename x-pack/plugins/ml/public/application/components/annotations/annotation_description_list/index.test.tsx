@@ -9,9 +9,9 @@ import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.jso
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { AnnotationDescriptionList } from './index';
+import { AnnotationDescriptionList } from '.';
 
 describe('AnnotationDescriptionList', () => {
   beforeEach(() => {

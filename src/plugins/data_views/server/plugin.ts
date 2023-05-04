@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
@@ -42,8 +42,9 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+    const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(core.http, core.getStartServices);
+    registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -64,7 +65,6 @@ export class DataViewsServerPlugin
     });
 
     return {
-      indexPatternsServiceFactory: serviceFactory,
       dataViewsServiceFactory: serviceFactory,
     };
   }

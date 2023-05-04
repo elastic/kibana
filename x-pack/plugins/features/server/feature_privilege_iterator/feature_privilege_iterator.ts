@@ -7,8 +7,8 @@
 
 import _ from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../';
-import type { LicenseType } from '../../../licensing/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '..';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
 /**
@@ -135,7 +135,20 @@ function mergeWithSubFeatures(
 
     mergedConfig.cases = {
       all: mergeArrays(mergedConfig.cases?.all ?? [], subFeaturePrivilege.cases?.all ?? []),
+      create: mergeArrays(
+        mergedConfig.cases?.create ?? [],
+        subFeaturePrivilege.cases?.create ?? []
+      ),
       read: mergeArrays(mergedConfig.cases?.read ?? [], subFeaturePrivilege.cases?.read ?? []),
+      update: mergeArrays(
+        mergedConfig.cases?.update ?? [],
+        subFeaturePrivilege.cases?.update ?? []
+      ),
+      delete: mergeArrays(
+        mergedConfig.cases?.delete ?? [],
+        subFeaturePrivilege.cases?.delete ?? []
+      ),
+      push: mergeArrays(mergedConfig.cases?.push ?? [], subFeaturePrivilege.cases?.push ?? []),
     };
   }
   return mergedConfig;

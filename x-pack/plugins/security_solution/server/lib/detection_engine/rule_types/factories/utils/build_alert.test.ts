@@ -7,6 +7,7 @@
 
 import {
   ALERT_INSTANCE_ID,
+  ALERT_NAMESPACE,
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_RULE_CONSUMER,
@@ -16,6 +17,7 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -26,11 +28,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
+import { sampleDocNoSortIdWithTimestamp } from '../../__mocks__/es_results';
 import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
-import { Ancestor, SignalSourceHit } from '../../../signals/types';
+import type { Ancestor, SignalSourceHit } from '../../types';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
 import {
   ALERT_ANCESTORS,
@@ -38,14 +40,18 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
   ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_RULE_INDICES,
 } from '../../../../../../common/field_maps/field_names';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
 };
 
 const SPACE_ID = 'space';
+const reason = 'alert reasonable reason';
+const publicBaseUrl = 'testKibanaBasePath.com';
+const alertUuid = 'test-uuid';
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -56,14 +62,24 @@ describe('buildAlert', () => {
     const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
-    const reason = 'alert reasonable reason';
     const alert = {
-      ...buildAlert([doc], completeRule, SPACE_ID, reason),
+      ...buildAlert(
+        [doc],
+        completeRule,
+        SPACE_ID,
+        reason,
+        completeRule.ruleParams.index as string[],
+        alertUuid,
+        publicBaseUrl,
+        undefined
+      ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
+    const expectedAlertUrl = `${publicBaseUrl}/s/${SPACE_ID}/app/security/alerts/redirect/${alertUuid}?index=${DEFAULT_ALERTS_INDEX}-${SPACE_ID}&timestamp=${timestamp}`;
     const expected = {
       [TIMESTAMP]: timestamp,
+      [EVENT_KIND]: 'signal',
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -124,6 +140,9 @@ describe('buildAlert', () => {
         ],
         to: 'now',
         references: ['http://example.com', 'https://example.com'],
+        related_integrations: [],
+        required_fields: [],
+        setup: '',
         version: 1,
         exceptions_list: [
           {
@@ -146,6 +165,7 @@ describe('buildAlert', () => {
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
       },
+      [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],
         author: ['Elastic'],
@@ -208,6 +228,8 @@ describe('buildAlert', () => {
         timeline_title: 'some-timeline-title',
       }),
       [ALERT_DEPTH]: 1,
+      [ALERT_URL]: expectedAlertUrl,
+      [ALERT_UUID]: alertUuid,
     };
     expect(alert).toEqual(expected);
   });
@@ -225,15 +247,24 @@ describe('buildAlert', () => {
       },
     };
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
-    const reason = 'alert reasonable reason';
     const alert = {
-      ...buildAlert([doc], completeRule, SPACE_ID, reason),
+      ...buildAlert(
+        [doc],
+        completeRule,
+        SPACE_ID,
+        reason,
+        completeRule.ruleParams.index as string[],
+        alertUuid,
+        publicBaseUrl,
+        undefined
+      ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
-
+    const expectedAlertUrl = `${publicBaseUrl}/s/${SPACE_ID}/app/security/alerts/redirect/${alertUuid}?index=${DEFAULT_ALERTS_INDEX}-${SPACE_ID}&timestamp=${timestamp}`;
     const expected = {
       [TIMESTAMP]: timestamp,
+      [EVENT_KIND]: 'signal',
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -245,6 +276,7 @@ describe('buildAlert', () => {
         },
       ],
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, {
         action: 'socket_opened',
         dataset: 'socket',
@@ -300,6 +332,9 @@ describe('buildAlert', () => {
         ],
         to: 'now',
         references: ['http://example.com', 'https://example.com'],
+        related_integrations: [],
+        required_fields: [],
+        setup: '',
         version: 1,
         exceptions_list: [
           {
@@ -384,6 +419,8 @@ describe('buildAlert', () => {
         timeline_title: 'some-timeline-title',
       }),
       [ALERT_DEPTH]: 1,
+      [ALERT_URL]: expectedAlertUrl,
+      [ALERT_UUID]: alertUuid,
     };
     expect(alert).toEqual(expected);
   });
@@ -494,6 +531,103 @@ describe('buildAlert', () => {
             depth: 0,
           },
         ],
+      },
+    };
+    const ancestors = buildAncestors(doc);
+    const expected: Ancestor[] = [
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'signal',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+    ];
+    expect(ancestors).toEqual(expected);
+  });
+
+  test('it builds an ancestor correctly if the parent is an alert', () => {
+    const docId = 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71';
+    const sampleDoc = sampleDocNoSortIdWithTimestamp(docId);
+    const doc = {
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        [TIMESTAMP]: new Date().toISOString(),
+        [EVENT_ACTION]: 'socket_opened',
+        [EVENT_KIND]: 'signal',
+        [EVENT_DATASET]: 'socket',
+        [EVENT_MODULE]: 'system',
+        [ALERT_UUID]: docId,
+        ...flattenWithPrefix(ALERT_NAMESPACE, {
+          depth: 1,
+          ancestors: [
+            {
+              id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+              type: 'event',
+              index: 'myFakeSignalIndex',
+              depth: 0,
+            },
+          ],
+          rule: {
+            uuid: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+          },
+        }),
+      },
+    };
+    const ancestors = buildAncestors(doc);
+    const expected: Ancestor[] = [
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'signal',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+    ];
+    expect(ancestors).toEqual(expected);
+  });
+
+  test('it builds an ancestor correctly if the parent is a legacy alert', () => {
+    const docId = 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71';
+    const sampleDoc = sampleDocNoSortIdWithTimestamp(docId);
+    const doc = {
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        [TIMESTAMP]: new Date().toISOString(),
+        event: {
+          action: 'socket_opened',
+          dataset: 'socket',
+          kind: 'signal',
+          module: 'system',
+        },
+        signal: {
+          depth: 1,
+          ancestors: [
+            {
+              id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+              type: 'event',
+              index: 'myFakeSignalIndex',
+              depth: 0,
+            },
+          ],
+          rule: {
+            id: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+          },
+        },
       },
     };
     const ancestors = buildAncestors(doc);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   SerializedNode,
   UrlTemplate,
@@ -12,7 +14,6 @@ import {
   WorkspaceField,
   GraphWorkspaceSavedObject,
   SerializedWorkspaceState,
-  IndexPatternSavedObject,
   AdvancedSettings,
   GraphData,
   Workspace,
@@ -25,10 +26,6 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
-import {
-  IndexPattern,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../../src/plugins/data/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
@@ -67,24 +64,24 @@ function deserializeUrlTemplate({
  * Returns a status indicating successful migration or failure to look up the index pattern by title.
  * If the workspace is migrated already, a success status is returned as well.
  * @param savedWorkspace The workspace saved object to migrate. The migration will happen in-place and mutate the passed in object
- * @param indexPatterns All index patterns existing in the current space
+ * @param dataViews All data views existing in the current space
  */
 export function migrateLegacyIndexPatternRef(
   savedWorkspace: GraphWorkspaceSavedObject,
-  indexPatterns: IndexPatternSavedObject[]
+  dataViews: DataViewListItem[]
 ): { success: true } | { success: false; missingIndexPattern: string } {
   const legacyIndexPatternRef = savedWorkspace.legacyIndexPatternRef;
   if (!legacyIndexPatternRef) {
     return { success: true };
   }
-  const indexPatternId = indexPatterns.find(
-    (pattern) => pattern.attributes.title === legacyIndexPatternRef
+  const dataViewId = dataViews.find(
+    (dataViewItem) => dataViewItem.title === legacyIndexPatternRef
   )?.id;
-  if (!indexPatternId) {
+  if (!dataViewId) {
     return { success: false, missingIndexPattern: legacyIndexPatternRef };
   }
   const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
-  serializedWorkspaceState.indexPattern = indexPatternId!;
+  serializedWorkspaceState.indexPattern = dataViewId!;
   savedWorkspace.wsState = JSON.stringify(serializedWorkspaceState);
   delete savedWorkspace.legacyIndexPatternRef;
   return { success: true };
@@ -98,7 +95,7 @@ export function lookupIndexPatternId(savedWorkspace: GraphWorkspaceSavedObject) 
 }
 
 // returns all graph fields mapped out of the index pattern
-export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
+export function mapFields(indexPattern: DataView): WorkspaceField[] {
   const blockedFieldNames = ['_id', '_index', '_score', '_source', '_type'];
   const defaultHopSize = 5;
 
@@ -131,10 +128,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
     });
 }
 
-function getFieldsWithWorkspaceSettings(
-  indexPattern: IndexPattern,
-  selectedFields: SerializedField[]
-) {
+function getFieldsWithWorkspaceSettings(indexPattern: DataView, selectedFields: SerializedField[]) {
   const allFields = mapFields(indexPattern);
 
   // merge in selected information into all fields
@@ -216,7 +210,7 @@ export function makeNodeId(field: string, term: string) {
 
 export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   workspaceInstance: Workspace
 ): {
   urlTemplates: UrlTemplate[];

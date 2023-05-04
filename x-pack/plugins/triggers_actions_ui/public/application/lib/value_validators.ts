@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { constant, get, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { constant, get } from 'lodash';
 import { UserConfiguredActionConnector, IErrorObject, Rule } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
@@ -70,24 +71,24 @@ export function getConnectorWithInvalidatedFields(
   return connector;
 }
 
-export function getAlertWithInvalidatedFields(
-  alert: Rule,
+export function getRuleWithInvalidatedFields(
+  rule: Rule,
   paramsErrors: IErrorObject,
   baseAlertErrors: IErrorObject,
   actionsErrors: IErrorObject[]
 ) {
   Object.keys(paramsErrors).forEach((errorKey) => {
-    if (paramsErrors[errorKey].length >= 1 && get(alert.params, errorKey) === undefined) {
-      set(alert.params, errorKey, null);
+    if (paramsErrors[errorKey].length >= 1 && get(rule.params, errorKey) === undefined) {
+      set(rule.params, errorKey, null);
     }
   });
   Object.keys(baseAlertErrors).forEach((errorKey) => {
-    if (baseAlertErrors[errorKey].length >= 1 && get(alert, errorKey) === undefined) {
-      set(alert, errorKey, null);
+    if (baseAlertErrors[errorKey].length >= 1 && get(rule, errorKey) === undefined) {
+      set(rule, errorKey, null);
     }
   });
   actionsErrors.forEach((error: IErrorObject, index: number) => {
-    const actionToValidate = alert.actions.length > index ? alert.actions[index] : null;
+    const actionToValidate = rule.actions.length > index ? rule.actions[index] : null;
     if (actionToValidate) {
       Object.keys(error).forEach((errorKey) => {
         if (error[errorKey].length >= 1 && get(actionToValidate!.params, errorKey) === undefined) {
@@ -96,5 +97,5 @@ export function getAlertWithInvalidatedFields(
       });
     }
   });
-  return alert;
+  return rule;
 }

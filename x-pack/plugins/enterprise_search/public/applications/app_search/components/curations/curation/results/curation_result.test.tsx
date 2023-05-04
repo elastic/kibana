@@ -14,7 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Result } from '../../../result';
 
-import { CurationResult } from './';
+import { CurationResult } from '.';
 
 describe('CurationResult', () => {
   const values = {

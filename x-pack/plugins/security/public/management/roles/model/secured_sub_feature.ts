@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { SubFeatureConfig } from '../../../../../features/common';
-import { SubFeature } from '../../../../../features/common';
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import { SubFeature } from '@kbn/features-plugin/common';
+
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 
 export class SecuredSubFeature extends SubFeature {
   public readonly privileges: SubFeaturePrivilege[];
+  public readonly privilegesTooltip: string;
 
   constructor(
     config: SubFeatureConfig,
     private readonly actionMapping: { [privilegeId: string]: string[] } = {}
   ) {
     super(config);
+
+    this.privilegesTooltip = config.privilegesTooltip || '';
 
     this.privileges = [];
     for (const privilege of this.privilegeIterator()) {
@@ -39,5 +43,9 @@ export class SecuredSubFeature extends SubFeature {
         .map((gp) => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
         .filter((privilege) => predicate(privilege, this));
     }
+  }
+
+  public getDescription() {
+    return this.description;
   }
 }

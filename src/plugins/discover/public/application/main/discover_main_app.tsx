@@ -5,33 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useState } from 'react';
-import { History } from 'history';
+import React, { useCallback, useEffect } from 'react';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useHistory } from 'react-router-dom';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
-import { useDiscoverState } from './utils/use_discover_state';
-import { useUrl } from './utils/use_url';
-import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
-import { DiscoverServices } from '../../build_services';
-import { SavedSearch } from '../../services/saved_searches';
-import { ElasticSearchHit } from '../../types';
+import { useDiscoverState } from './hooks/use_discover_state';
+import { useUrl } from './hooks/use_url';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * Instance of browser history
+   * List of available data views
    */
-  history: History;
-  /**
-   * List of available index patterns
-   */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
+  dataViewList: DataViewListItem[];
   /**
    * Current instance of SavedSearch
    */
@@ -39,41 +33,40 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, services, history, indexPatternList } = props;
-  const { chrome, docLinks, uiSettings: config, data } = services;
-  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+  const { savedSearch, dataViewList } = props;
+  const services = useDiscoverServices();
+  const { chrome, docLinks, data, spaces, history } = services;
+  const usedHistory = useHistory();
   const navigateTo = useCallback(
     (path: string) => {
-      history.push(path);
+      usedHistory.push(path);
     },
-    [history]
+    [usedHistory]
   );
 
   /**
    * State related logic
    */
   const {
-    data$,
-    indexPattern,
     inspectorAdapters,
-    onChangeIndexPattern,
+    onChangeDataView,
     onUpdateQuery,
-    refetch$,
+    persistDataView,
+    updateAdHocDataViewId,
     resetSavedSearch,
     searchSource,
-    state,
     stateContainer,
+    updateDataViewList,
   } = useDiscoverState({
     services,
-    history,
+    history: usedHistory,
     savedSearch,
-    setExpandedDoc,
   });
 
   /**
    * Url / Routing logic
    */
-  useUrl({ history, resetSavedSearch });
+  useUrl({ history: usedHistory, resetSavedSearch });
 
   /**
    * SavedSearch depended initializing
@@ -85,7 +78,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     return () => {
       data.search.session.clear();
     };
-  }, [savedSearch, chrome, docLinks, refetch$, stateContainer, data, config]);
+  }, [savedSearch, chrome, data]);
 
   /**
    * Initializing syncing with state and help menu
@@ -94,28 +87,37 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [stateContainer, chrome, docLinks]);
 
+  /**
+   * Set initial data view list
+   * Can be removed once the state container work was completed
+   */
+  useEffect(() => {
+    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
+  }, [stateContainer, dataViewList]);
+
   const resetCurrentSavedSearch = useCallback(() => {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
 
+  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
+
   return (
-    <DiscoverLayoutMemoized
-      indexPattern={indexPattern}
-      indexPatternList={indexPatternList}
-      inspectorAdapters={inspectorAdapters}
-      expandedDoc={expandedDoc}
-      onChangeIndexPattern={onChangeIndexPattern}
-      onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
-      setExpandedDoc={setExpandedDoc}
-      navigateTo={navigateTo}
-      savedSearch={savedSearch}
-      savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
-      searchSource={searchSource}
-      services={services}
-      state={state}
-      stateContainer={stateContainer}
-    />
+    <DiscoverMainProvider value={stateContainer}>
+      <RootDragDropProvider>
+        <DiscoverLayoutMemoized
+          inspectorAdapters={inspectorAdapters}
+          onChangeDataView={onChangeDataView}
+          onUpdateQuery={onUpdateQuery}
+          resetSavedSearch={resetCurrentSavedSearch}
+          navigateTo={navigateTo}
+          savedSearch={savedSearch}
+          searchSource={searchSource}
+          stateContainer={stateContainer}
+          persistDataView={persistDataView}
+          updateAdHocDataViewId={updateAdHocDataViewId}
+          updateDataViewList={updateDataViewList}
+        />
+      </RootDragDropProvider>
+    </DiscoverMainProvider>
   );
 }

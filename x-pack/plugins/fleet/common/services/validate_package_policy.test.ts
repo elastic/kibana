@@ -10,7 +10,11 @@ import { safeLoad } from 'js-yaml';
 import { installationStatuses } from '../constants';
 import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
 
-import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
+import {
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+} from './validate_package_policy';
 import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
 describe('Fleet - validatePackagePolicy()', () => {
@@ -159,7 +163,6 @@ describe('Fleet - validatePackagePolicy()', () => {
       namespace: 'default',
       policy_id: 'test-policy',
       enabled: true,
-      output_id: 'test-output',
       inputs: [
         {
           type: 'foo',
@@ -241,6 +244,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const invalidPackagePolicy: NewPackagePolicy = {
@@ -253,7 +257,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           enabled: true,
           vars: {
             'foo-input-var-name': { value: undefined, type: 'text' },
-            'foo-input2-var-name': { value: '', type: 'text' },
+            'foo-input2-var-name': { value: undefined, type: 'text' },
             'foo-input3-var-name': { value: [], type: 'text' },
           },
           streams: [
@@ -332,6 +336,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const noErrorsValidationResults = {
@@ -370,6 +375,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           vars: { 'var-name': null },
         },
       },
+      vars: {},
     };
 
     it('returns no errors for valid package policy', () => {
@@ -394,7 +400,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           bar: {
             vars: {
-              'bar-input-var-name': ['Invalid format'],
+              'bar-input-var-name': ['Invalid format for bar-input-var-name: expected array'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
             },
             streams: {
@@ -416,6 +422,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -463,7 +470,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           bar: {
             vars: {
-              'bar-input-var-name': ['Invalid format'],
+              'bar-input-var-name': ['Invalid format for bar-input-var-name: expected array'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
             },
             streams: {
@@ -487,6 +494,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -504,7 +512,8 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -519,7 +528,8 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
+        vars: {},
       });
     });
 
@@ -537,7 +547,8 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -552,7 +563,187 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
+        vars: {},
+      });
+    });
+
+    it('returns no errors when required field is present but empty', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                type: 'foo',
+                policy_template: 'pkgPolicy1',
+                enabled: true,
+                vars: {
+                  'foo-input-var-name': { value: '', type: 'text' },
+                  'foo-input2-var-name': { value: '', type: 'text' },
+                  'foo-input3-var-name': { value: ['test'], type: 'text' },
+                },
+                streams: [
+                  {
+                    data_stream: { dataset: 'foo', type: 'logs' },
+                    enabled: true,
+                    vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
+                  },
+                ],
+              },
+            ],
+          },
+          mockPackage,
+          safeLoad
+        )
+      ).toEqual({
+        name: null,
+        description: null,
+        namespace: null,
+        inputs: {
+          foo: {
+            streams: {
+              foo: {
+                vars: {
+                  'var-name': null,
+                },
+              },
+            },
+            vars: {
+              'foo-input-var-name': null,
+              'foo-input2-var-name': null,
+              'foo-input3-var-name': null,
+            },
+          },
+        },
+        vars: {},
+      });
+    });
+
+    // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
+    it.skip('returns package policy validation error if input var does not exist', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            description: 'Linux Metrics',
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [
+                  {
+                    data_stream: {
+                      dataset: 'linux.memory',
+                      type: 'metrics',
+                    },
+                    enabled: true,
+                  },
+                ],
+                type: 'linux/metrics',
+                vars: {
+                  period: {
+                    type: 'string',
+                    value: '1s',
+                  },
+                },
+              },
+            ],
+            name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
+            namespace: 'default',
+            package: {
+              name: 'linux',
+              title: 'Linux Metrics',
+              version: '0.6.2',
+            },
+            policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
+          },
+          {
+            ...mockPackage,
+            name: 'linux',
+            policy_templates: [
+              {
+                name: 'system',
+                title: 'Linux kernel metrics',
+                description: 'Collect system metrics from Linux operating systems',
+                inputs: [
+                  {
+                    title: 'Collect system metrics from Linux instances',
+                    vars: [
+                      {
+                        name: 'system.hostfs',
+                        type: 'text',
+                        title: 'Proc Filesystem Directory',
+                        multi: false,
+                        required: false,
+                        show_user: true,
+                        description: 'The proc filesystem base directory.',
+                      },
+                    ],
+                    type: 'system/metrics',
+                    description:
+                      'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
+                  },
+                  {
+                    title: 'Collect low-level system metrics from Linux instances',
+                    vars: [],
+                    type: 'linux/metrics',
+                    description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
+                  },
+                ],
+                multiple: true,
+              },
+            ],
+            data_streams: [
+              {
+                dataset: 'linux.memory',
+                package: 'linux',
+                path: 'memory',
+                streams: [
+                  {
+                    input: 'linux/metrics',
+                    title: 'Linux memory metrics',
+                    vars: [
+                      {
+                        name: 'period',
+                        type: 'text',
+                        title: 'Period',
+                        multi: false,
+                        required: true,
+                        show_user: true,
+                        default: '10s',
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    description: 'Linux paging and memory management metrics',
+                  },
+                ],
+                title: 'Linux-only memory metrics',
+                release: 'experimental',
+                type: 'metrics',
+              },
+            ],
+          },
+          safeLoad
+        )
+      ).toEqual({
+        description: null,
+        inputs: {
+          'linux/metrics': {
+            streams: {
+              'linux.memory': {
+                vars: {
+                  period: ['Period is required'],
+                },
+              },
+            },
+            vars: {
+              period: ['period var definition does not exist'],
+            },
+          },
+        },
+        vars: {},
+        name: null,
+        namespace: null,
       });
     });
   });
@@ -679,5 +870,165 @@ describe('Fleet - validationHasErrors()', () => {
         },
       })
     ).toBe(false);
+  });
+});
+
+describe('Fleet - validatePackagePolicyConfig', () => {
+  describe('Integer', () => {
+    it('should return an error message for invalid integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: 'test',
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid integer']);
+    });
+
+    it('should accept valid integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: '12',
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should return an error message for invalid multi integers', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: ['test'],
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+          multi: true,
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid integer']);
+    });
+
+    it('should accept valid multi integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'integer',
+          value: ['12'],
+        },
+        {
+          name: 'myvariable',
+          type: 'integer',
+          multi: true,
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+  });
+
+  describe('Select', () => {
+    it('should return an error message if the value is not an option value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: 'c',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
+    it('should return an error message if the value is an empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
+    it('should accept a select with a valid value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: 'b',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should accept a select with undefined value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
   });
 });

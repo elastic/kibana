@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { canvasStorybookConfig } from './canvas.webpack';
+import { canvasStorybookConfig } from './canvas_webpack';
 
 module.exports = canvasStorybookConfig;
 

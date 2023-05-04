@@ -9,10 +9,11 @@ import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
+import { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
 import { CommonResponseStatusSchema, TransformIdsSchema } from '../../../common/api_schemas/common';
 import { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';
+import { ResetTransformsResponseSchema } from '../../../common/api_schemas/reset_transforms';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 
@@ -21,7 +22,10 @@ export function isRequestTimeout(error: any) {
 }
 
 interface Params {
-  results: CommonResponseStatusSchema | DeleteTransformsResponseSchema;
+  results:
+    | CommonResponseStatusSchema
+    | DeleteTransformsResponseSchema
+    | ResetTransformsResponseSchema;
   id: string;
   items: TransformIdsSchema;
   action: string;
@@ -60,7 +64,10 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     ],
   };
 
-  const newResults: CommonResponseStatusSchema | DeleteTransformsResponseSchema = {};
+  const newResults:
+    | CommonResponseStatusSchema
+    | DeleteTransformsResponseSchema
+    | ResetTransformsResponseSchema = {};
 
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {
@@ -135,7 +142,7 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
 
     // Set error message based on the root cause
     if (root_cause?.[0]) {
-      boomError.message = extractErrorMessage(root_cause[0]);
+      boomError.message = extractErrorMessageBasedOnRootCause(root_cause[0]);
     }
 
     return boomError;
@@ -158,7 +165,7 @@ interface EsError {
 /**
  * Returns an error message based on the root cause
  */
-function extractErrorMessage({ type, reason, script, line, col }: EsError): string {
+function extractErrorMessageBasedOnRootCause({ type, reason, script, line, col }: EsError): string {
   let message = `[${type}] ${reason}`;
 
   if (line !== undefined && col !== undefined) {

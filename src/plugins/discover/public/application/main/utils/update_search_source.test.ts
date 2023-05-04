@@ -7,9 +7,9 @@
  */
 
 import { updateSearchSource } from './update_search_source';
-import { createSearchSourceMock } from '../../../../../data/common/search/search_source/mocks';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import type { SortOrder } from '../../../services/saved_searches';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { dataViewMock } from '../../../__mocks__/data_view';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('updateSearchSource', () => {
@@ -18,12 +18,12 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     updateSearchSource(volatileSearchSourceMock, false, {
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toBe(undefined);
   });
 
@@ -32,12 +32,12 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     updateSearchSource(volatileSearchSourceMock, false, {
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -49,12 +49,12 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     updateSearchSource(volatileSearchSourceMock, false, {
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -66,12 +66,12 @@ describe('updateSearchSource', () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     volatileSearchSourceMock.setParent(persistentSearchSourceMock);
     updateSearchSource(volatileSearchSourceMock, false, {
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });

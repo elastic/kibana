@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
+import React, { useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { TableHeaderColumn } from './table_header_column';
-import { SortOrder, getDisplayedColumns } from './helpers';
-import { getDefaultSort } from '../../lib/get_default_sort';
+import { getDisplayedColumns } from './helpers';
+import { getDefaultSort } from '../../../../utils/sorting';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 interface Props {
   columns: string[];
-  defaultSortOrder: string;
-  hideTimeColumn: boolean;
-  indexPattern: IndexPattern;
-  isShortDots: boolean;
+  dataView: DataView;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
@@ -26,29 +27,37 @@ interface Props {
 
 export function TableHeader({
   columns,
-  defaultSortOrder,
-  hideTimeColumn,
-  indexPattern,
-  isShortDots,
+  dataView,
   onChangeSortOrder,
   onMoveColumn,
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
+  const { uiSettings } = useDiscoverServices();
+  const [defaultSortOrder, hideTimeColumn, isShortDots] = useMemo(
+    () => [
+      uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+      uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
+    ],
+    [uiSettings]
+  );
+  const displayedColumns = getDisplayedColumns(columns, dataView, hideTimeColumn, isShortDots);
 
   return (
     <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
       <th style={{ width: '24px' }} />
-      {displayedColumns.map((col) => {
+      {displayedColumns.map((col, index) => {
         return (
           <TableHeaderColumn
-            key={col.name}
+            key={`${col.name}-${index}`}
             {...col}
-            customLabel={indexPattern.getFieldByName(col.name)?.customLabel}
-            isTimeColumn={indexPattern.timeFieldName === col.name}
+            customLabel={dataView.getFieldByName(col.name)?.customLabel}
+            isTimeColumn={dataView.timeFieldName === col.name}
             sortOrder={
-              sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+              sortOrder.length
+                ? sortOrder
+                : getDefaultSort(dataView, defaultSortOrder, hideTimeColumn)
             }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}

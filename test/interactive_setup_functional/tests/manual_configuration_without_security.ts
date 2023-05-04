@@ -19,7 +19,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Manual configuration without Security)', function () {
-    this.tags(['skipCloud', 'ciGroup2']);
+    this.tags('skipCloud');
 
     let verificationCode: string;
     before(async function () {

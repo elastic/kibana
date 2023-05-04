@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
+import { ToastInputFields } from '@kbn/core/public';
 import { formatMsg } from '../../lib/format_msg';
-import { ToastInputFields } from '../../../../../../src/core/public';
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasNotifyService } from '../notify';
 

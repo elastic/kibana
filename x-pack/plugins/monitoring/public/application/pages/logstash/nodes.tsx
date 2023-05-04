@@ -7,10 +7,9 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
@@ -19,7 +18,7 @@ import { useTable } from '../../hooks/use_table';
 import { LOGSTASH_SYSTEM_ID, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 interface SetupModeProps {
   setupMode: any;
@@ -32,7 +31,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   }) as any;

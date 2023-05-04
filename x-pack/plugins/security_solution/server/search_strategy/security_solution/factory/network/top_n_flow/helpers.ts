@@ -7,21 +7,25 @@
 
 import { getOr } from 'lodash/fp';
 
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-import {
+import type {
   Direction,
   GeoItem,
   SortField,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
   NetworkTopNFlowRequestOptions,
-  NetworkTopTablesFields,
-  FlowTargetSourceDest,
   AutonomousSystemItem,
+  FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy';
+import { NetworkTopTablesFields } from '../../../../../../common/search_strategy';
 import { getOppositeField } from '../helpers';
-import { formatResponseObjectValues } from '../../../../helpers/format_response_object_values';
+import {
+  formatResponseObjectValues,
+  transformLocationFields,
+  unflattenObject,
+} from '../../../../helpers/format_response_object_values';
 
 export const getTopNFlowEdges = (
   response: IEsSearchResponse<unknown>,
@@ -42,7 +46,7 @@ const formatTopNFlowEdges = (
       [flowTarget]: {
         domain: bucket.domain.buckets.map((bucketDomain) => bucketDomain.key),
         ip: bucket.key,
-        location: getGeoItem(bucket),
+        location: getGeoItem(bucket, flowTarget),
         autonomous_system: getAsItem(bucket),
         flows: getOr(0, 'flows.value', bucket),
         [`${getOppositeField(flowTarget)}_ips`]: getOr(
@@ -62,43 +66,41 @@ const formatTopNFlowEdges = (
     },
   }));
 
-const getFlowTargetFromString = (flowAsString: string) =>
-  flowAsString === 'source' ? FlowTargetSourceDest.source : FlowTargetSourceDest.destination;
-
-const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
-  result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0]._source
+const getGeoItem = (
+  result: NetworkTopNFlowBuckets,
+  flowTarget: FlowTargetSourceDest
+): GeoItem | null =>
+  result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0].fields
     ? {
         geo: formatResponseObjectValues(
           getOr(
             '',
-            `location.top_geo.hits.hits[0]._source.${
-              Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-            }.geo`,
-            result
+            `${flowTarget}.geo`,
+            unflattenObject(
+              transformLocationFields(getOr({}, `location.top_geo.hits.hits[0].fields`, result))
+            )
           )
         ),
-        flowTarget: getFlowTargetFromString(
-          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-        ),
+        flowTarget,
       }
     : null;
 
 const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
   result.autonomous_system.top_as.hits.hits.length > 0 &&
-  result.autonomous_system.top_as.hits.hits[0]._source
+  result.autonomous_system.top_as.hits.hits[0].fields
     ? {
         number: getOr(
           null,
-          `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
-          }.as.number`,
+          `autonomous_system.top_as.hits.hits[0].fields['${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0].split('.as.')[0]
+          }.as.number'][0]`,
           result
         ),
         name: getOr(
           '',
-          `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
-          }.as.organization.name`,
+          `autonomous_system.top_as.hits.hits[0].fields['${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0].split('.as')[0]
+          }.as.organization.name'][0]`,
           result
         ),
       }

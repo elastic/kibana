@@ -8,19 +8,27 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
 
+import type {
+  AppMountParameters,
+  CoreStart,
+  CustomBrandingStart,
+  IBasePath,
+} from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AppMountParameters, CoreStart, IBasePath } from 'src/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
   basePath: IBasePath;
+  customBranding: CustomBrandingStart;
 }
 
-export function LoggedOutPage({ basePath }: Props) {
+export function LoggedOutPage({ basePath, customBranding }: Props) {
+  const customBrandingValue = useObservable(customBranding.customBranding$);
   return (
     <AuthenticationStatePage
       title={
@@ -29,6 +37,7 @@ export function LoggedOutPage({ basePath }: Props) {
           defaultMessage="Successfully logged out"
         />
       }
+      logo={customBrandingValue?.logo}
     >
       <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />

@@ -8,12 +8,16 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { actions, Actions } from '../actions';
+import { RuleActionArray } from '../actions';
 
-export const DefaultActionsArray = new t.Type<Actions, Actions | undefined, unknown>(
+export const DefaultActionsArray = new t.Type<
+  RuleActionArray,
+  RuleActionArray | undefined,
+  unknown
+>(
   'DefaultActionsArray',
-  actions.is,
-  (input, context): Either<t.Errors, Actions> =>
-    input == null ? t.success([]) : actions.validate(input, context),
+  RuleActionArray.is,
+  (input, context): Either<t.Errors, RuleActionArray> =>
+    input == null ? t.success([]) : RuleActionArray.validate(input, context),
   t.identity
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { defineAccessAgreementRoutes } from './access_agreement';
 import { defineAccountManagementRoutes } from './account_management';
 import { defineCaptureURLRoutes } from './capture_url';

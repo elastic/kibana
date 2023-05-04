@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const DEPRECATED_CONNECTOR_WARNING_TITLE = i18n.translate(
@@ -31,11 +32,12 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ type = 'warning' }) => (
   <EuiCallOut
     title={DEPRECATED_CONNECTOR_WARNING_TITLE}
     color={type}
-    iconType="alert"
+    iconType="warning"
     data-test-subj="deprecated-connector-warning-callout"
   >
     {DEPRECATED_CONNECTOR_WARNING_DESC}
   </EuiCallOut>
 );
+DeprecatedCalloutComponent.displayName = 'DeprecatedCallout';
 
 export const DeprecatedCallout = React.memo(DeprecatedCalloutComponent);

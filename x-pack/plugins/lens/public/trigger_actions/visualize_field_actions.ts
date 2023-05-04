@@ -10,8 +10,8 @@ import {
   createAction,
   ACTION_VISUALIZE_LENS_FIELD,
   VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
-import type { ApplicationStart } from '../../../../../src/core/public';
+} from '@kbn/ui-actions-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 export const visualizeFieldAction = (application: ApplicationStart) =>
   createAction<VisualizeFieldContext>({

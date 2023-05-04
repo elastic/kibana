@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { IndexManagementPluginSetup } from '../../index_management/server';
-import { RemoteClustersPluginSetup } from '../../remote_clusters/server';
+import { IRouter } from '@kbn/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
+import { RemoteClustersPluginSetup } from '@kbn/remote-clusters-plugin/server';
 import { License, handleEsError } from './shared_imports';
 
 export interface SetupDependencies {

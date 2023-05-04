@@ -12,8 +12,8 @@ exports[`Ccr that it renders normally 1`] = `
         />
       </h1>
     </EuiScreenReaderOnly>
-    <EuiPageContent>
-      <EuiPageContentBody>
+    <EuiPageContent_Deprecated>
+      <EuiPageContentBody_Deprecated>
         <EuiInMemoryTable
           className="monitoringElasticsearchCcrListingTable"
           columns={
@@ -139,8 +139,8 @@ exports[`Ccr that it renders normally 1`] = `
           }
           tableLayout="fixed"
         />
-      </EuiPageContentBody>
-    </EuiPageContent>
+      </EuiPageContentBody_Deprecated>
+    </EuiPageContent_Deprecated>
   </EuiPageBody>
 </EuiPage>
 `;

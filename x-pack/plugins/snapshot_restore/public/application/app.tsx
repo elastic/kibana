@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { EuiPageContent } from '@elastic/eui';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common';
 import {

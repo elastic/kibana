@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import {
   ResolverPaginatedEvents,
   SafeEndpointEvent,
-} from '../../../plugins/security_solution/common/endpoint/types';
-import { eventsIndexPattern } from '../../../plugins/security_solution/common/endpoint/constants';
+} from '@kbn/security-solution-plugin/common/endpoint/types';
+import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   EndpointDocGenerator,
   Event,
-} from '../../../plugins/security_solution/common/endpoint/generate_data';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';
 import { deleteEventsStream } from './data_stream_helper';

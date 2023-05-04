@@ -27,10 +27,12 @@ export const Influencers: FC = () => {
     jobCreator.removeAllInfluencers();
     influencers.forEach((i) => jobCreator.addInfluencer(i));
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [influencers.join()]);
 
   useEffect(() => {
     setInfluencers([...jobCreator.influencers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

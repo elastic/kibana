@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient } from 'kibana/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   RuleType,
-  AlertExecutorOptions,
-  AlertInstance,
+  RuleNotifyWhen,
+  RuleExecutorOptions,
+  Alert,
   RulesClient,
-  AlertServices,
-} from '../../../alerting/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
-import { ActionsClient } from '../../../actions/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   AlertState,
   AlertNodeState,
@@ -28,11 +30,7 @@ import {
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 
 type ExecutedState =
@@ -68,7 +66,7 @@ export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
-    public sanitizedRule?: SanitizedAlert,
+    public sanitizedRule?: SanitizedRule,
     public ruleOptions: RuleOptions = defaultRuleOptions()
   ) {
     const defaultOptions = defaultRuleOptions();
@@ -97,13 +95,20 @@ export class BaseRule {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: (
-        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+        options: RuleExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;
         }
       ): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
+      },
+      // As there is "[key: string]: unknown;" in CommonAlertParams,
+      // we couldn't figure out a schema for validation and created a follow on issue:
+      // https://github.com/elastic/kibana/issues/153754
+      // Below validate function should be overwritten in each monitoring rule type
+      validate: {
+        params: { validate: (params) => params },
       },
     };
   }
@@ -116,7 +121,7 @@ export class BaseRule {
     rulesClient: RulesClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<SanitizedAlert<AlertTypeParams>> {
+  ): Promise<SanitizedRule<RuleTypeParams>> {
     const existingRuleData = await rulesClient.find({
       options: {
         search: this.ruleOptions.id,
@@ -124,8 +129,16 @@ export class BaseRule {
     });
 
     if (existingRuleData.total > 0) {
-      return existingRuleData.data[0] as Alert;
+      return existingRuleData.data[0] as Rule;
     }
+
+    const {
+      defaultParams: params = {},
+      name,
+      id: alertTypeId,
+      throttle = '1d',
+      interval = '1m',
+    } = this.ruleOptions;
 
     const ruleActions = [];
     for (const actionData of actions) {
@@ -140,17 +153,15 @@ export class BaseRule {
           message: '{{context.internalShortMessage}}',
           ...actionData.config,
         },
+        frequency: {
+          summary: false,
+          notifyWhen: RuleNotifyWhen.THROTTLE,
+          throttle,
+        },
       });
     }
 
-    const {
-      defaultParams: params = {},
-      name,
-      id: alertTypeId,
-      throttle = '1d',
-      interval = '1m',
-    } = this.ruleOptions;
-    return await rulesClient.create<AlertTypeParams>({
+    return await rulesClient.create<RuleTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -158,8 +169,6 @@ export class BaseRule {
         consumer: 'monitoring',
         name,
         alertTypeId,
-        throttle,
-        notifyWhen: null,
         schedule: { interval },
         actions: ruleActions,
       },
@@ -218,7 +227,7 @@ export class BaseRule {
     services,
     params,
     state,
-  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+  }: RuleExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
     state: ExecutedState;
   }): Promise<any> {
     this.scopedLogger.debug(
@@ -226,23 +235,14 @@ export class BaseRule {
     );
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const availableCcs = Globals.app.config.ui.ccs.enabled;
-    const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
-    const data = await this.fetchData(params, esClient, clusters, availableCcs);
+    const clusters = await this.fetchClusters(esClient, params as CommonAlertParams);
+    const data = await this.fetchData(params, esClient, clusters);
     return await this.processData(data, clusters, services, state);
   }
 
-  protected async fetchClusters(
-    esClient: ElasticsearchClient,
-    params: CommonAlertParams,
-    ccs?: boolean
-  ) {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (ccs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
-    }
+  protected async fetchClusters(esClient: ElasticsearchClient, params: CommonAlertParams) {
     if (!params.limit) {
-      return await fetchClusters(esClient, esIndexPattern);
+      return await fetchClusters(esClient);
     }
     const limit = parseDuration(params.limit);
     const rangeFilter = this.ruleOptions.fetchClustersRange
@@ -253,14 +253,13 @@ export class BaseRule {
           },
         }
       : undefined;
-    return await fetchClusters(esClient, esIndexPattern, rangeFilter);
+    return await fetchClusters(esClient, rangeFilter);
   }
 
   protected async fetchData(
     params: CommonAlertParams | unknown,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<Array<AlertData & unknown>> {
     throw new Error('Child classes must implement `fetchData`');
   }
@@ -268,7 +267,7 @@ export class BaseRule {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices<AlertInstanceState, never, 'default'>,
+    services: RuleExecutorServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -285,7 +284,7 @@ export class BaseRule {
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
         // quick fix for now so that non node level alerts will use the cluster id
-        const instance = services.alertInstanceFactory(
+        const instance = services.alertFactory.create(
           node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
         );
 
@@ -344,7 +343,7 @@ export class BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     instanceState: AlertInstanceState | AlertState | unknown,
     item: AlertData | unknown,
     cluster?: AlertCluster | unknown
@@ -357,6 +356,7 @@ export class BaseRule {
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }
-    return `${Globals.app.url}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
+
+    return `${Globals.app.url ?? ''}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

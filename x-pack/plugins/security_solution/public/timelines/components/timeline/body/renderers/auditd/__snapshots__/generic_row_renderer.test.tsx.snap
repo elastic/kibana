@@ -4,8 +4,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
 <span>
   <RowRendererContainer>
     <AuditdGenericDetails
-      browserFields={Object {}}
-      contextId="connected-to-test"
+      contextId="connected-to-timeline-test"
       data={
         Object {
           "_id": "27",
@@ -100,7 +99,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
       }
       isDraggable={true}
       text="connected using"
-      timelineId="test"
+      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>
@@ -110,8 +109,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
 <span>
   <RowRendererContainer>
     <AuditdGenericFileDetails
-      browserFields={Object {}}
-      contextId="opened-file-test"
+      contextId="opened-file-timeline-test"
       data={
         Object {
           "_id": "28",
@@ -225,7 +223,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
       fileIcon="document"
       isDraggable={true}
       text="opened file using"
-      timelineId="test"
+      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>

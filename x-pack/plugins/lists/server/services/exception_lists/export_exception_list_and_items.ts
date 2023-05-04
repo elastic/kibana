@@ -6,15 +6,18 @@
  */
 
 import type {
+  ExceptionListItemSchema,
   ExportExceptionDetails,
+  FoundExceptionListItemSchema,
   IdOrUndefined,
   ListIdOrUndefined,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { findExceptionListItem } from './find_exception_list_item';
+import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';
 
 interface ExportExceptionListAndItemsOptions {
@@ -22,6 +25,7 @@ interface ExportExceptionListAndItemsOptions {
   listId: ListIdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
 }
 
 export interface ExportExceptionListAndItemsReturn {
@@ -33,6 +37,7 @@ export const exportExceptionListAndItems = async ({
   id,
   listId,
   namespaceType,
+  includeExpiredExceptions,
   savedObjectsClient,
 }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
   const exceptionList = await getExceptionList({
@@ -45,20 +50,27 @@ export const exportExceptionListAndItems = async ({
   if (exceptionList == null) {
     return null;
   } else {
-    // TODO: Will need to address this when we switch over to
-    // using PIT, don't want it to get lost
-    // https://github.com/elastic/kibana/issues/103944
-    const listItems = await findExceptionListItem({
-      filter: undefined,
+    // Stream the results from the Point In Time (PIT) finder into this array
+    let exceptionItems: ExceptionListItemSchema[] = [];
+    const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+      exceptionItems = [...exceptionItems, ...response.data];
+    };
+    const savedObjectPrefix = getSavedObjectType({ namespaceType });
+    const filter = includeExpiredExceptions
+      ? undefined
+      : `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
+
+    await findExceptionListItemPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
       listId: exceptionList.list_id,
+      maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
       namespaceType: exceptionList.namespace_type,
-      page: 1,
-      perPage: 10000,
+      perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
       savedObjectsClient,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',
     });
-    const exceptionItems = listItems?.data ?? [];
     const { exportData } = getExport([exceptionList, ...exceptionItems]);
 
     // TODO: Add logic for missing lists and items on errors

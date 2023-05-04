@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 
@@ -49,6 +49,15 @@ export const MergeCandidates = ({
           defaultMessage: 'Link summary',
         })}
       </div>
+      {mergeCandidates.length === 0 && (
+        <EuiFlexGroup alignItems="center" style={{ minHeight: 101 }}>
+          <EuiFlexItem component="span">
+            {i18n.translate('xpack.graph.sidebar.linkSummary.noData', {
+              defaultMessage: 'No terms intersection found for the link selection.',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {mergeCandidates.map((mc) => {
         const mergeTerm1ToTerm2ButtonMsg = i18n.translate(
           'xpack.graph.sidebar.linkSummary.mergeTerm1ToTerm2ButtonTooltip',

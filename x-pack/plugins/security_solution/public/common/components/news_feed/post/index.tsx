@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { PreferenceFormattedP1DTDate } from '../../formatted_date';
 import { showNewsItem } from '../helpers';
 import { NewsLink } from '../news_link';
-import { NewsItem } from '../types';
+import type { NewsItem } from '../types';
 
 const NewsItemPreviewImage = styled.img`
   height: 56px;
@@ -32,9 +32,9 @@ export const Post = React.memo<{ newsItem: NewsItem }>(({ newsItem }) => {
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <NewsLink href={linkUrl}>
-          <EuiText size="s">{title}</EuiText>
-        </NewsLink>
+        <EuiText size="s">
+          <NewsLink href={linkUrl}>{title}</NewsLink>
+        </EuiText>
 
         <EuiText color="subdued" size="xs">
           <PreferenceFormattedP1DTDate value={publishOn} />
@@ -45,11 +45,9 @@ export const Post = React.memo<{ newsItem: NewsItem }>(({ newsItem }) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {imageUrl && (
-          <NewsLink href={linkUrl}>
-            <NewsItemPreviewImage alt={title} className="euiPanel" src={imageUrl} />
-          </NewsLink>
-        )}
+        <div>
+          {imageUrl && <NewsItemPreviewImage alt={title} className="euiPanel" src={imageUrl} />}
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

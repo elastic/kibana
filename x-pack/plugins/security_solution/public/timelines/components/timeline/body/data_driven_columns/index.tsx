@@ -10,20 +10,23 @@ import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { Ecs } from '../../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
-import {
-  ColumnHeaderOptions,
-  CellValueElementProps,
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type {
+  SetEventsDeleted,
+  SetEventsLoading,
   ActionProps,
   ControlColumnProps,
-  TimelineTabs,
   RowCellRender,
+} from '../../../../../../common/types';
+import type {
+  CellValueElementProps,
+  ColumnHeaderOptions,
+  TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { OnRowSelected } from '../../events';
-import { inputsModel } from '../../../../../common/store';
+import type { OnRowSelected } from '../../events';
+import type { inputsModel } from '../../../../../common/store';
 import {
   EventsTd,
   EVENTS_TD_CLASS_NAME,
@@ -240,9 +243,10 @@ const TgridTdCell = ({
   tabType,
   timelineId,
 }: CellProps) => {
+  const ariaColIndex = index + ARIA_COLUMN_INDEX_OFFSET;
   return (
     <EventsTd
-      $ariaColumnIndex={index + ARIA_COLUMN_INDEX_OFFSET}
+      $ariaColumnIndex={ariaColIndex}
       key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
       onKeyDown={onKeyDown}
       role="button"
@@ -252,10 +256,11 @@ const TgridTdCell = ({
       <EventsTdContent data-test-subj="cell-container">
         <>
           <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
-            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: index + 2 })}</p>
+            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: ariaColIndex })}</p>
           </EuiScreenReaderOnly>
           <StatefulCell
-            ariaRowindex={ariaRowindex}
+            rowIndex={ariaRowindex - 1}
+            colIndex={ariaColIndex - 1}
             data={data}
             header={header}
             eventId={_id}
@@ -439,12 +444,29 @@ export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
-  data: TimelineNonEcsData[];
+  data?: TimelineNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
+  /*
+   While data _should_ always be defined
+   There is the potential for race conditions where a component using this function
+   is still visible in the UI, while the data has since been removed.
+   To cover all scenarios where this happens we'll check for the presence of data here
+  */
+  if (!data || data.length === 0) return undefined;
   const item = data.find((d) => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;
   }
   return undefined;
+};
+
+export const useGetMappedNonEcsValue = ({
+  data,
+  fieldName,
+}: {
+  data?: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
+  return useMemo(() => getMappedNonEcsValue({ data, fieldName }), [data, fieldName]);
 };

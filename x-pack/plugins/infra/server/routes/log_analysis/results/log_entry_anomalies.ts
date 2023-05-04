@@ -31,7 +31,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
-          sourceId,
+          logView,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
@@ -42,7 +42,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
       const { sort, pagination } = getSortAndPagination(sortParam, paginationParam);
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const {
           data: logEntryAnomalies,
@@ -50,8 +50,8 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
           hasMoreEntries,
           timing,
         } = await getLogEntryAnomalies(
-          requestContext,
-          sourceId,
+          infraMlContext,
+          logView,
           startTime,
           endTime,
           sort,

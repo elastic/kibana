@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceNowSIRGetMapping } from './types';
+import type { ServiceNowSIRGetMapping } from './types';
 
 export const getMapping: ServiceNowSIRGetMapping = () => {
   return [

@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Logs UI: Detects anomalies in count of log entries by category",
   "groups": [
     "logs-ui"
@@ -37,6 +36,7 @@
     "enabled": true
   },
   "custom_settings": {
+    "managed": true,
     "created_by": "ml-module-logs-ui-categories",
     "job_revision": 2
   }

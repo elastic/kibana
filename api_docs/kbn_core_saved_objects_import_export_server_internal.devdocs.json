@@ -1,0 +1,553 @@
+{
+  "id": "@kbn/core-saved-objects-import-export-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+        "id": "def-common.SavedObjectsExportError",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsExportError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+            "section": "def-common.SavedObjectsExportError",
+            "text": "SavedObjectsExportError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsExportError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsExportError.exportSizeExceeded",
+            "type": "Function",
+            "tags": [],
+            "label": "exportSizeExceeded",
+            "description": [],
+            "signature": [
+              "(limit: number) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsExportError",
+                "text": "SavedObjectsExportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.exportSizeExceeded.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsExportError.objectFetchError",
+            "type": "Function",
+            "tags": [],
+            "label": "objectFetchError",
+            "description": [],
+            "signature": [
+              "(objects: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>[]) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsExportError",
+                "text": "SavedObjectsExportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.objectFetchError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
+                  "<unknown>[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsExportError.objectTransformError",
+            "type": "Function",
+            "tags": [],
+            "label": "objectTransformError",
+            "description": [
+              "\nError returned when a {@link SavedObjectsExportTransform | export transform} threw an error"
+            ],
+            "signature": [
+              "(objects: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>[], cause: Error) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsExportError",
+                "text": "SavedObjectsExportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.objectTransformError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
+                  "<unknown>[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.objectTransformError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "cause",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsExportError.invalidTransformError",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidTransformError",
+            "description": [
+              "\nError returned when a {@link SavedObjectsExportTransform | export transform} performed an invalid operation\nduring the transform, such as removing objects from the export, or changing an object's type or id."
+            ],
+            "signature": [
+              "(objectKeys: string[]) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsExportError",
+                "text": "SavedObjectsExportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsExportError.invalidTransformError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objectKeys",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+        "id": "def-common.SavedObjectsImportError",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsImportError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+            "section": "def-common.SavedObjectsImportError",
+            "text": "SavedObjectsImportError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsImportError.importSizeExceeded",
+            "type": "Function",
+            "tags": [],
+            "label": "importSizeExceeded",
+            "description": [],
+            "signature": [
+              "(limit: number) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsImportError",
+                "text": "SavedObjectsImportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsImportError.importSizeExceeded.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsImportError.nonUniqueImportObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "nonUniqueImportObjects",
+            "description": [],
+            "signature": [
+              "(nonUniqueEntries: string[]) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsImportError",
+                "text": "SavedObjectsImportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsImportError.nonUniqueImportObjects.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "nonUniqueEntries",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsImportError.nonUniqueRetryObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "nonUniqueRetryObjects",
+            "description": [],
+            "signature": [
+              "(nonUniqueRetryObjects: string[]) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsImportError",
+                "text": "SavedObjectsImportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsImportError.nonUniqueRetryObjects.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "nonUniqueRetryObjects",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsImportError.nonUniqueRetryDestinations",
+            "type": "Function",
+            "tags": [],
+            "label": "nonUniqueRetryDestinations",
+            "description": [],
+            "signature": [
+              "(nonUniqueRetryDestinations: string[]) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsImportError",
+                "text": "SavedObjectsImportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsImportError.nonUniqueRetryDestinations.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "nonUniqueRetryDestinations",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+            "id": "def-common.SavedObjectsImportError.referencesFetchError",
+            "type": "Function",
+            "tags": [],
+            "label": "referencesFetchError",
+            "description": [],
+            "signature": [
+              "(objects: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>[]) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-common.SavedObjectsImportError",
+                "text": "SavedObjectsImportError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "id": "def-common.SavedObjectsImportError.referencesFetchError.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObject",
+                    "text": "SavedObject"
+                  },
+                  "<unknown>[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

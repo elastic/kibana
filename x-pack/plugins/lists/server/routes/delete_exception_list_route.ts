@@ -40,7 +40,7 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const { list_id: listId, id, namespace_type: namespaceType } = request.query;
         if (listId == null && id == null) {
           return siemResponse.error({

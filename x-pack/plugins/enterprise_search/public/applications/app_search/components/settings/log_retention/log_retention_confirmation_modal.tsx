@@ -133,7 +133,51 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           onSave={() => saveLogRetention(LogRetentionOptions.API, false)}
         />
       )}
-
+      {openedModal === LogRetentionOptions.Audit && (
+        <GenericConfirmationModal
+          data-test-subj="APILogRetentionConfirmationModal"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.title',
+            {
+              defaultMessage: 'Disable Audit writes',
+            }
+          )}
+          subheading={
+            logRetention &&
+            logRetention?.[LogRetentionOptions.Audit].retentionPolicy?.minAgeDays &&
+            i18n.translate(
+              'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.subheading',
+              {
+                defaultMessage: 'Your audit Logs are currently being stored for {minAgeDays} days.',
+                values: {
+                  minAgeDays: logRetention?.[LogRetentionOptions.Audit].retentionPolicy?.minAgeDays,
+                },
+              }
+            )
+          }
+          description={
+            <>
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.description',
+                  {
+                    defaultMessage:
+                      'When you disable writing, engines stop logging audit events. Your existing data is deleted according to the storage time frame.',
+                  }
+                )}
+              </p>
+              <p>
+                <strong>
+                  <EuiTextColor color="danger">{CANNOT_BE_RECOVERED_TEXT}</EuiTextColor>
+                </strong>
+              </p>
+            </>
+          }
+          target={DISABLE_TEXT}
+          onClose={closeModals}
+          onSave={() => saveLogRetention(LogRetentionOptions.Audit, false)}
+        />
+      )}
       {openedModal === LogRetentionOptions.Crawler && (
         <GenericConfirmationModal
           data-test-subj="CrawlerLogRetentionConfirmationModal"

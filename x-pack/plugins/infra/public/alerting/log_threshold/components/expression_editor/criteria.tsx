@@ -9,7 +9,10 @@ import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from 'src/plugins/data_views/common';
+import type {
+  PersistedLogViewReference,
+  ResolvedLogViewField,
+} from '../../../../../common/log_views';
 import { Criterion } from './criterion';
 import {
   PartialRuleParams,
@@ -34,12 +37,12 @@ const QueryBText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCrit
 });
 
 interface SharedProps {
-  fields: DataViewField[];
+  fields: ResolvedLogViewField[];
   criteria?: PartialCriteriaType;
   defaultCriterion: PartialCriterionType;
   errors: Errors['criteria'];
   ruleParams: PartialRuleParams;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   updateCriteria: (criteria: PartialCriteriaType) => void;
 }
 
@@ -64,7 +67,7 @@ interface CriteriaWrapperProps {
   addCriterion: () => void;
   criteria: PartialCountCriteriaType;
   errors: CriterionErrors;
-  sourceId: SharedProps['sourceId'];
+  logViewReference: SharedProps['logViewReference'];
   isRatio?: boolean;
 }
 
@@ -77,7 +80,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
     fields,
     errors,
     ruleParams,
-    sourceId,
+    logViewReference,
     isRatio = false,
   } = props;
 
@@ -105,7 +108,7 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
               <CriterionPreview
                 ruleParams={ruleParams}
                 chartCriterion={criterion}
-                sourceId={sourceId}
+                logViewReference={logViewReference}
                 showThreshold={!isRatio}
               />
             </EuiAccordion>
@@ -246,6 +249,7 @@ const AddCriterionButton = ({ addCriterion }: { addCriterion: () => void }) => {
   return (
     <div>
       <EuiButtonEmpty
+        data-test-subj="infraAddCriterionButtonAddConditionButton"
         color={'primary'}
         iconSide={'left'}
         flush={'left'}

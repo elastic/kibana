@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExportModal } from './export_modal';
 
 describe('ExportModal', () => {
@@ -81,7 +81,7 @@ describe('ExportModal', () => {
         onIncludeReferenceChange={onIncludeReferenceChange}
       />
     );
-    wrapper.find('EuiButton').simulate('click');
+    wrapper.find('EuiButton button').simulate('click');
 
     expect(onExport).toHaveBeenCalledTimes(1);
     expect(onCancel).not.toHaveBeenCalled();

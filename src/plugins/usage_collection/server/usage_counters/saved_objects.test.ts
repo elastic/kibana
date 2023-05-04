@@ -7,8 +7,10 @@
  */
 
 import { serializeCounterKey, storeCounter } from './saved_objects';
-import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
-import { CounterMetric } from './usage_counter';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+
+import { UsageCounters } from '../../common/types';
+
 import moment from 'moment';
 
 describe('counterKey', () => {
@@ -38,7 +40,7 @@ describe('storeCounter', () => {
   });
 
   it('stores counter in a saved object', async () => {
-    const counterMetric: CounterMetric = {
+    const counterMetric: UsageCounters.v1.CounterMetric = {
       domainId: 'a',
       counterName: 'b',
       counterType: 'c',

@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_MODULE_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
-  canAccessML: false,
 };
 
 export const userMlCapabilities = {
-  canAccessML: false,
   // Anomaly Detection
   canGetJobs: false,
   canGetDatafeeds: false,
@@ -32,6 +34,11 @@ export const userMlCapabilities = {
   canDeleteAnnotation: false,
   // Alerts
   canUseMlAlerts: false,
+  // Trained models
+  canGetTrainedModels: false,
+  canTestTrainedModels: false,
+  canGetFieldInfo: false,
+  canGetMlInfo: false,
 };
 
 export const adminMlCapabilities = {
@@ -65,6 +72,10 @@ export const adminMlCapabilities = {
   canUseMlAlerts: false,
   // Model management
   canViewMlNodes: false,
+  // Trained models
+  canCreateTrainedModels: false,
+  canDeleteTrainedModels: false,
+  canStartStopTrainedModels: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -72,9 +83,11 @@ export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
 export type MlCapabilitiesKey = keyof MlCapabilities;
 
-export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
-  keyof MlCapabilities
->;
+export const basicLicenseMlCapabilities = [
+  'canFindFileStructure',
+  'canGetFieldInfo',
+  'canGetMlInfo',
+] as Array<keyof MlCapabilities>;
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {
@@ -88,13 +101,15 @@ export function getPluginPrivileges() {
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
   const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
-  // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+
   const savedObjects = [
     'index-pattern',
     'dashboard',
     'search',
     'visualization',
-    ML_SAVED_OBJECT_TYPE,
+    ML_JOB_SAVED_OBJECT_TYPE,
+    ML_MODULE_SAVED_OBJECT_TYPE,
+    ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
@@ -149,7 +164,7 @@ export function getPluginPrivileges() {
       catalogue: [],
       savedObject: {
         all: [],
-        read: [ML_SAVED_OBJECT_TYPE],
+        read: [ML_JOB_SAVED_OBJECT_TYPE],
       },
       api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: apmUserMlCapabilitiesKeys,

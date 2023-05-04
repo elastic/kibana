@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import type { GetStepsData } from './helpers';
 import {
-  GetStepsData,
   getDefineStepsData,
   getScheduleStepsData,
   getStepsData,
@@ -15,17 +15,20 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
-  getPrePackagedRuleStatus,
-  getPrePackagedTimelineStatus,
+  getPrePackagedRuleInstallationStatus,
+  getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
-  userHasPermissions,
   fillEmptySeverityMappings,
 } from './helpers';
-import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
-import { FilterStateStore } from '@kbn/es-query';
-
-import { Rule } from '../../../containers/detection_engine/rules';
 import {
+  mockRuleWithEverything,
+  mockRule,
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+import { FilterStateStore } from '@kbn/es-query';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
+
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
@@ -33,10 +36,9 @@ import {
   ActionsStepRule,
 } from './types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 
 describe('rule helpers', () => {
-  // @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
-  // https://github.com/elastic/kibana/issues/120236
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -52,8 +54,11 @@ describe('rule helpers', () => {
       const defineRuleStepData = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
+        shouldLoadQueryDynamically: true,
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -83,6 +88,8 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: ['host.name'],
           value: '50',
@@ -99,12 +106,26 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        groupByFields: ['host.name'],
+        groupByDuration: {
+          value: 5,
+          unit: 'm',
+        },
+        groupByRadioSelection: 'per-rule-execution',
+        newTermsFields: ['host.name'],
+        historyWindowSize: '7d',
+        suppressionMissingFields: expect.any(String),
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -123,16 +144,18 @@ describe('rule helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
+        timestampOverrideFallbackDisabled: false,
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
         enabled: true,
-        throttle: 'no_actions',
         actions: [],
+        responseActions: undefined,
       };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -203,11 +226,8 @@ describe('rule helpers', () => {
   describe('getDefineStepsData', () => {
     test('returns with saved_id if value exists on rule', () => {
       const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
-      const expected = {
+      const expected = expect.objectContaining({
         ruleType: 'saved_query',
-        anomalyThreshold: 50,
-        machineLearningJobId: [],
-        index: ['auditbeat-*'],
         queryBar: {
           query: {
             query: '',
@@ -216,25 +236,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
-        threshold: {
-          field: [],
-          value: '100',
-        },
-        threatIndex: [],
-        threatMapping: [],
-        threatQueryBar: {
-          query: {
-            query: '',
-            language: '',
-          },
-          filters: [],
-          saved_id: undefined,
-        },
-        timeline: {
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-          title: 'Untitled timeline',
-        },
-      };
+        shouldLoadQueryDynamically: true,
+      });
 
       expect(result).toEqual(expected);
     });
@@ -245,38 +248,18 @@ describe('rule helpers', () => {
       };
       delete mockedRule.saved_id;
       const result: DefineStepRule = getDefineStepsData(mockedRule);
-      const expected = {
+      const expected = expect.objectContaining({
         ruleType: 'saved_query',
-        anomalyThreshold: 50,
-        machineLearningJobId: [],
-        index: ['auditbeat-*'],
         queryBar: {
           query: {
             query: '',
             language: 'kuery',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
-        threshold: {
-          field: [],
-          value: '100',
-        },
-        threatIndex: [],
-        threatMapping: [],
-        threatQueryBar: {
-          query: {
-            query: '',
-            language: '',
-          },
-          filters: [],
-          saved_id: undefined,
-        },
-        timeline: {
-          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-          title: 'Untitled timeline',
-        },
-      };
+        shouldLoadQueryDynamically: false,
+      });
 
       expect(result).toEqual(expected);
     });
@@ -289,6 +272,32 @@ describe('rule helpers', () => {
 
       expect(result.timeline.id).toBeNull();
       expect(result.timeline.title).toBeNull();
+    });
+
+    describe('suppression on missing fields', () => {
+      test('returns default suppress value in suppress strategy is missing', () => {
+        const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
+        const expected = expect.objectContaining({
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.Suppress,
+        });
+
+        expect(result).toEqual(expected);
+      });
+
+      test('returns suppress value if rule is configured with missing_fields_strategy', () => {
+        const result: DefineStepRule = getDefineStepsData({
+          ...mockRule('test-id'),
+          alert_suppression: {
+            group_by: [],
+            missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+          },
+        });
+        const expected = expect.objectContaining({
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+        });
+
+        expect(result).toEqual(expected);
+      });
     });
   });
 
@@ -353,16 +362,22 @@ describe('rule helpers', () => {
 
   describe('getActionsStepsData', () => {
     test('returns expected ActionsStepRule rule object', () => {
+      const actions: RuleAlertAction[] = [
+        {
+          id: 'id',
+          group: 'group',
+          params: {},
+          action_type_id: 'action_type_id',
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+          },
+        },
+      ];
       const mockedRule = {
         ...mockRule('test-id'),
-        actions: [
-          {
-            id: 'id',
-            group: 'group',
-            params: {},
-            action_type_id: 'action_type_id',
-          },
-        ],
+        actions,
       };
       const result: ActionsStepRule = getActionsStepsData(mockedRule);
       const expected = {
@@ -372,10 +387,15 @@ describe('rule helpers', () => {
             group: 'group',
             params: {},
             actionTypeId: 'action_type_id',
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+            },
           },
         ],
+        responseActions: undefined,
         enabled: mockedRule.enabled,
-        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
@@ -390,6 +410,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -399,32 +420,13 @@ describe('rule helpers', () => {
       const { note, ...mockRuleWithoutNote } = { ...mockRuleWithEverything('test-id') };
       const result: AboutStepRuleDetails = getModifiedAboutDetailsData(mockRuleWithoutNote);
 
-      const aboutRuleDetailsData = { note: '', description: mockRuleWithoutNote.description };
+      const aboutRuleDetailsData = {
+        note: '',
+        description: mockRuleWithoutNote.description,
+        setup: '',
+      };
 
       expect(result).toEqual(aboutRuleDetailsData);
-    });
-  });
-
-  describe('userHasPermissions', () => {
-    test("returns true when user's CRUD operations are null", () => {
-      const result: boolean = userHasPermissions(null);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns false when user cannot CRUD', () => {
-      const result: boolean = userHasPermissions(false);
-      const userHasPermissionsExpectedResult = false;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns true when user can CRUD', () => {
-      const result: boolean = userHasPermissions(true);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
   });
 
@@ -433,7 +435,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 0;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -446,7 +448,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -459,7 +461,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -472,7 +474,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 1;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -482,10 +484,10 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const rulesInstalled = null;
-      const rulesNotInstalled = null;
-      const rulesNotUpdated = null;
-      const result: string = getPrePackagedRuleStatus(
+      const rulesInstalled = undefined;
+      const rulesNotInstalled = undefined;
+      const rulesNotUpdated = undefined;
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -500,7 +502,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 0;
       const timelinesNotInstalled = 1;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -513,7 +515,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 0;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -526,7 +528,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 1;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -539,7 +541,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 0;
       const timelinesNotUpdated = 1;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -549,10 +551,10 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const timelinesInstalled = null;
-      const timelinesNotInstalled = null;
-      const timelinesNotUpdated = null;
-      const result: string = getPrePackagedTimelineStatus(
+      const timelinesInstalled = undefined;
+      const timelinesNotInstalled = undefined;
+      const timelinesNotUpdated = undefined;
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated

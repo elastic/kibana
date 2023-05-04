@@ -7,11 +7,13 @@
  */
 
 import { metricVisFunction } from './metric_vis_function';
-import type { MetricArguments } from '../../common';
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import type { MetricArguments } from '..';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { EXPRESSION_METRIC_NAME } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
-describe('interpreter/functions#metric', () => {
+describe('interpreter/functions#metricVis', () => {
   const fn = functionWrapper(metricVisFunction());
   const context: Datatable = {
     type: 'datatable',
@@ -19,53 +21,28 @@ describe('interpreter/functions#metric', () => {
     columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
   };
   const args: MetricArguments = {
-    percentageMode: false,
-    colorMode: 'None',
-    palette: {
-      type: 'palette',
-      name: '',
-      params: {
-        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
-        stops: [0, 10000],
-        gradient: false,
-        rangeMin: 0,
-        rangeMax: 150,
-        range: 'number',
-      },
-    },
-    showLabels: true,
-    font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
-    metric: [
-      {
-        type: 'vis_dimension',
-        accessor: 0,
-        format: {
-          id: 'number',
-          params: {},
-        },
-      },
-    ],
+    metric: 'col-0-1',
+    progressDirection: 'horizontal',
+    maxCols: 1,
+    inspectorTableId: 'random-id',
   };
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, args, undefined);
-
-    expect(actual).toMatchSnapshot();
-  });
-
-  it('logs correct datatable to inspector', async () => {
-    let loggedTable: Datatable;
-    const handlers = {
-      inspectorAdapters: {
-        tables: {
-          logDatatable: (name: string, datatable: Datatable) => {
-            loggedTable = datatable;
-          },
-        },
+  it('should pass over overrides from variables', async () => {
+    const overrides = {
+      settings: {
+        onBrushEnd: 'ignore',
       },
     };
-    await fn(context, args, handlers as any);
+    const handlers = {
+      variables: { overrides },
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+    const result = await fn(context, args, handlers);
 
-    expect(loggedTable!).toMatchSnapshot();
+    expect(result).toEqual({
+      type: 'render',
+      as: EXPRESSION_METRIC_NAME,
+      value: expect.objectContaining({ overrides }),
+    });
   });
 });

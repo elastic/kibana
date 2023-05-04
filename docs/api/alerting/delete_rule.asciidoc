@@ -1,41 +1,54 @@
 [[delete-rule-api]]
-=== Delete rule API
+== Delete rule API
 ++++
 <titleabbrev>Delete rule</titleabbrev>
 ++++
 
-Permanently remove a rule.
+Permanently removes a rule.
 
-WARNING: Once you delete a rule, you cannot recover it.
+WARNING: After you delete a rule, you cannot recover it.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
 
 [[delete-rule-api-request]]
-==== Request
+=== {api-request-title}
 
 `DELETE <kibana host>:<port>/api/alerting/rule/<id>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
+=== {api-prereq-title}
+
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rule you're deleting. For example, the
+*Management* > *Stack Rules* feature,  *Analytics* > *Discover* or *{ml-app}*
+features, *{observability}*, or *Security* features. For more details, refer to
+<<kibana-feature-privileges>>.
+
 [[delete-rule-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
-  (Required, string) The ID of the rule that you want to remove.
+(Required, string) The identifier of the rule that you want to remove.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
 
 [[delete-rule-api-response-codes]]
-==== Response code
+=== {api-response-codes-title}
 
-`200`::
-  Indicates a successful call.
+`204`::
+Indicates a successful call.
 
-==== Example
-
-Delete a rule with ID:
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
+DELETE api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
 --------------------------------------------------
 // KIBANA

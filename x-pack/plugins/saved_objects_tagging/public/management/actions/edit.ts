@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart, ThemeServiceStart } from 'kibana/public';
+import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { TagWithRelations } from '../../../common';
 import { ITagInternalClient } from '../../services/tags';
 import { getEditModalOpener } from '../../components/edition_modal';

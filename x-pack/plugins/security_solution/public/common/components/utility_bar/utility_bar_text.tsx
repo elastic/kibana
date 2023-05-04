@@ -12,10 +12,16 @@ import { BarText } from './styles';
 export interface UtilityBarTextProps {
   children: string | JSX.Element;
   dataTestSubj?: string;
+  shouldWrap?: boolean;
+  className?: string;
 }
 
-export const UtilityBarText = React.memo<UtilityBarTextProps>(({ children, dataTestSubj }) => (
-  <BarText data-test-subj={dataTestSubj}>{children}</BarText>
-));
+export const UtilityBarText = React.memo<UtilityBarTextProps>(
+  ({ children, dataTestSubj, shouldWrap = false, className }) => (
+    <BarText data-test-subj={dataTestSubj} shouldWrap={shouldWrap} className={className}>
+      {children}
+    </BarText>
+  )
+);
 
 UtilityBarText.displayName = 'UtilityBarText';

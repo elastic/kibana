@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Datatable, DatatableColumn, DatatableRow } from '../../../../expressions/common';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => React.ReactNode | string;
 

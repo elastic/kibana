@@ -8,8 +8,7 @@
 import { Story } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { AndOrBadge, AndOrBadgeProps } from '.';
 

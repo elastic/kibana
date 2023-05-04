@@ -6,27 +6,28 @@
  */
 
 import _ from 'lodash';
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
-import { ITermJoinSource } from '../sources/term_join_source';
+import { IJoinSource } from '../sources/join_sources';
 
 export function buildVectorRequestMeta(
-  source: IVectorSource | ITermJoinSource,
+  source: IVectorSource | IJoinSource,
   fieldNames: string[],
   dataFilters: DataFilters,
   sourceQuery: Query | null | undefined,
-  isForceRefresh: boolean
+  isForceRefresh: boolean,
+  isFeatureEditorOpenForLayer: boolean
 ): VectorSourceRequestMeta {
   return {
     ...dataFilters,
     fieldNames: _.uniq(fieldNames).sort(),
-    geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
     sourceQuery: sourceQuery ? sourceQuery : undefined,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
-    sourceMeta: source.getSyncMeta(),
+    sourceMeta: source.getSyncMeta(dataFilters),
     applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
     isForceRefresh,
+    isFeatureEditorOpenForLayer,
   };
 }

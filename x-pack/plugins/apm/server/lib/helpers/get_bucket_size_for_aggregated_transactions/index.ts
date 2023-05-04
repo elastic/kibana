@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { getBucketSize } from '../get_bucket_size';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 
 export function getBucketSizeForAggregatedTransactions({
   start,
   end,
-  numBuckets = 100,
+  numBuckets = 50,
   searchAggregatedTransactions,
+  searchAggregatedServiceMetrics,
 }: {
   start: number;
   end: number;
   numBuckets?: number;
   searchAggregatedTransactions?: boolean;
+  searchAggregatedServiceMetrics?: boolean;
 }) {
-  const minBucketSize = searchAggregatedTransactions ? 60 : undefined;
+  const minBucketSize =
+    searchAggregatedTransactions || searchAggregatedServiceMetrics
+      ? 60
+      : undefined;
   return getBucketSize({ start, end, numBuckets, minBucketSize });
 }

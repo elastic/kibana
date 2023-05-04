@@ -5,75 +5,179 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
-import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Aggregators } from '../types';
+import moment from 'moment';
+import { isCustom, isNotCountOrCustom } from './metric_expression_params';
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
+import {
+  hasAdditionalContext,
+  KUBERNETES_POD_UID,
+  NUMBER_OF_DOCUMENTS,
+  shouldTermsAggOnContainer,
+  termsAggField,
+  validGroupByForContext,
+} from '../../common/utils';
+import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
-import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
+import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
+import { wrapInCurrentPeriod } from './wrap_in_period';
 
-const COMPOSITE_RESULTS_PER_PAGE = 100;
-
-const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
+const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<string, any>> = (
   filterQuery
 ) => {
-  if (!filterQuery) return null;
-  return JSON.parse(filterQuery);
+  if (!filterQuery) return [];
+  return [JSON.parse(filterQuery)];
+};
+
+export const calculateCurrentTimeframe = (
+  metricParams: MetricExpressionParams,
+  timeframe: { start: number; end: number }
+) => ({
+  ...timeframe,
+  start: moment(timeframe.end)
+    .subtract(
+      metricParams.aggType === Aggregators.RATE ? metricParams.timeSize * 2 : metricParams.timeSize,
+      metricParams.timeUnit
+    )
+    .valueOf(),
+});
+
+export const createBaseFilters = (
+  metricParams: MetricExpressionParams,
+  timeframe: { start: number; end: number },
+  filterQuery?: string
+) => {
+  const rangeFilters = [
+    {
+      range: {
+        '@timestamp': {
+          gte: moment(timeframe.start).toISOString(),
+          lte: moment(timeframe.end).toISOString(),
+        },
+      },
+    },
+  ];
+
+  const metricFieldFilters =
+    isNotCountOrCustom(metricParams) && metricParams.metric
+      ? [
+          {
+            exists: {
+              field: metricParams.metric,
+            },
+          },
+        ]
+      : [];
+
+  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
+
+  return [...rangeFilters, ...metricFieldFilters, ...parsedFilterQuery];
 };
 
 export const getElasticsearchMetricQuery = (
-  { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
+  metricParams: MetricExpressionParams,
   timeframe: { start: number; end: number },
+  compositeSize: number,
+  alertOnGroupDisappear: boolean,
+  lastPeriodEnd?: number,
   groupBy?: string | string[],
-  filterQuery?: string
+  filterQuery?: string,
+  afterKey?: Record<string, string>,
+  fieldsExisted?: Record<string, boolean> | null
 ) => {
-  if (aggType === Aggregators.COUNT && metric) {
-    throw new Error('Cannot aggregate document count with a metric');
+  const { aggType } = metricParams;
+  if (isNotCountOrCustom(metricParams) && !metricParams.metric) {
+    throw new Error(
+      'Can only aggregate without a metric if using the document count or custom aggregator'
+    );
   }
-  if (aggType !== Aggregators.COUNT && !metric) {
-    throw new Error('Can only aggregate without a metric if using the document count aggregator');
-  }
-  const interval = `${timeSize}${timeUnit}`;
-  const to = timeframe.end;
-  const from = timeframe.start;
 
-  const aggregations =
+  // We need to make a timeframe that represents the current timeframe as oppose
+  // to the total timeframe (which includes the last period).
+  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
+
+  const metricAggregations =
     aggType === Aggregators.COUNT
       ? {}
       : aggType === Aggregators.RATE
-      ? networkTraffic('aggregatedValue', metric)
+      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
       : aggType === Aggregators.P95 || aggType === Aggregators.P99
-      ? createPercentileAggregation(aggType, metric)
+      ? createPercentileAggregation(aggType, metricParams.metric)
+      : isCustom(metricParams)
+      ? createCustomMetricsAggregations(
+          'aggregatedValue',
+          metricParams.customMetrics,
+          metricParams.equation
+        )
       : {
           aggregatedValue: {
             [aggType]: {
-              field: metric,
+              field: metricParams.metric,
             },
           },
         };
 
-  const baseAggs =
-    aggType === Aggregators.RATE
+  const bucketSelectorAggregations = createBucketSelector(
+    metricParams,
+    alertOnGroupDisappear,
+    groupBy,
+    lastPeriodEnd
+  );
+
+  const rateAggBucketScript =
+    metricParams.aggType === Aggregators.RATE
+      ? createRateAggsBucketScript(currentTimeframe, 'aggregatedValue')
+      : {};
+
+  const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
+
+  const containerContextAgg =
+    shouldTermsAggOnContainer(groupBy) &&
+    fieldsExisted &&
+    fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
-          aggregatedIntervals: {
-            date_histogram: {
-              field: TIMESTAMP_FIELD,
-              fixed_interval: interval,
-              offset: calculateDateHistogramOffset({ from, to, interval }),
-              extended_bounds: {
-                min: from,
-                max: to,
+          containerContext: {
+            terms: {
+              field: termsAggField[KUBERNETES_POD_UID],
+              size: NUMBER_OF_DOCUMENTS,
+            },
+            aggs: {
+              container: {
+                top_hits: {
+                  size: 1,
+                  _source: {
+                    includes: ['container.*'],
+                  },
+                },
               },
             },
-            aggregations,
           },
         }
-      : aggregations;
+      : void 0;
 
-  const aggs = groupBy
+  const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
+  const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+  if (!containerContextAgg) includesList.push('container.*');
+
+  const additionalContextAgg = hasAdditionalContext(groupBy, validGroupByForContext)
+    ? {
+        additionalContext: {
+          top_hits: {
+            size: 1,
+            _source: {
+              includes: includesList,
+              excludes: excludesList,
+            },
+          },
+        },
+      }
+    : void 0;
+
+  const aggs: any = groupBy
     ? {
         groupings: {
           composite: {
-            size: COMPOSITE_RESULTS_PER_PAGE,
+            size: compositeSize,
             sources: Array.isArray(groupBy)
               ? groupBy.map((field, index) => ({
                   [`groupBy${index}`]: {
@@ -90,44 +194,43 @@ export const getElasticsearchMetricQuery = (
                   },
                 ],
           },
-          aggs: baseAggs,
-        },
-      }
-    : baseAggs;
-
-  const rangeFilters = [
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
-
-  const metricFieldFilters = metric
-    ? [
-        {
-          exists: {
-            field: metric,
+          aggs: {
+            ...currentPeriod,
+            ...rateAggBucketScript,
+            ...bucketSelectorAggregations,
+            ...additionalContextAgg,
+            ...containerContextAgg,
           },
         },
-      ]
-    : [];
+      }
+    : {
+        all: {
+          filters: {
+            filters: {
+              all: {
+                match_all: {},
+              },
+            },
+          },
+          aggs: {
+            ...currentPeriod,
+            ...rateAggBucketScript,
+            ...bucketSelectorAggregations,
+          },
+        },
+      };
 
-  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
+  if (aggs.groupings && afterKey) {
+    aggs.groupings.composite.after = afterKey;
+  }
+
+  const baseFilters = createBaseFilters(metricParams, timeframe, filterQuery);
 
   return {
     track_total_hits: true,
     query: {
       bool: {
-        filter: [
-          ...rangeFilters,
-          ...metricFieldFilters,
-          ...(parsedFilterQuery ? [parsedFilterQuery] : []),
-        ],
+        filter: baseFilters,
       },
     },
     size: 0,

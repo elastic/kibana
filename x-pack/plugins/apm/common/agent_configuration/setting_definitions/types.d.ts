@@ -86,6 +86,13 @@ interface BytesSetting extends BaseSetting {
   units?: string[];
 }
 
+interface StorageSizeSetting extends BaseSetting {
+  type: 'storageSize';
+  min?: string;
+  max?: string;
+  units?: string[];
+}
+
 interface DurationSetting extends BaseSetting {
   type: 'duration';
   min?: string;
@@ -100,6 +107,7 @@ export type RawSettingDefinition =
   | SelectSetting
   | BooleanSetting
   | BytesSetting
+  | StorageSizeSetting
   | DurationSetting;
 
 export type SettingDefinition = RawSettingDefinition & {

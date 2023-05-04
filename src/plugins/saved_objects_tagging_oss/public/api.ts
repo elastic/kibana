@@ -7,13 +7,13 @@
  */
 
 import { Observable } from 'rxjs';
-import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
+import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import { SavedObject, SavedObjectReference } from '../../../core/types';
-import { SavedObjectsFindOptionsReference } from '../../../core/public';
-import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { SavedObject as SavedObjectClass } from '@kbn/saved-objects-plugin/public';
 import { TagDecoratedSavedObject } from './decorator';
-import { ITagsClient, Tag } from '../common';
+import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 
 /**
  * @public
@@ -46,7 +46,7 @@ export interface ITagsCache {
   /**
    * Return an observable that will emit everytime the cache's state mutates.
    */
-  getState$(): Observable<Tag[]>;
+  getState$(params?: { waitForInitialization?: boolean }): Observable<Tag[]>;
 }
 
 /**
@@ -66,6 +66,10 @@ export interface SavedObjectsTaggingApiUi {
    * @param tagId
    */
   getTag(tagId: string): Tag | undefined;
+  /**
+   * Return a list of available tags
+   */
+  getTagList(): Tag[];
 
   /**
    * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
@@ -102,7 +106,9 @@ export interface SavedObjectsTaggingApiUi {
    * )
    * ```
    */
-  getTableColumnDefinition(): EuiTableFieldDataColumnType<SavedObject>;
+  getTableColumnDefinition(
+    options?: GetTableColumnDefinitionOptions
+  ): EuiTableFieldDataColumnType<SavedObject>;
 
   /**
    * Convert given tag name to a {@link SavedObjectsFindOptionsReference | reference }
@@ -154,7 +160,7 @@ export interface SavedObjectsTaggingApiUi {
    * }
    * ```
    */
-  parseSearchQuery(query: string, options?: ParseSearchQueryOptions): ParsedSearchQuery;
+  parseSearchQuery(query: string, options?: ParseSearchQueryOptions): Promise<ParsedSearchQuery>;
 
   /**
    * Returns the object ids for the tag references from given references array
@@ -215,7 +221,15 @@ export interface TagListComponentProps {
   /**
    * The object to display tags for.
    */
-  object: SavedObject;
+  object: { references: SavedObject['references'] };
+  /**
+   * Handler to execute when clicking on a tag
+   */
+  onClick?: (tag: TagWithOptionalId) => void;
+  /**
+   * Handler to render the tag
+   */
+  tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
 /**
@@ -239,7 +253,12 @@ export interface TagSelectorComponentProps {
  *
  * @public
  */
-export interface SavedObjectSaveModalTagSelectorComponentProps {
+export type SavedObjectSaveModalTagSelectorComponentProps = EuiComboBoxProps<
+  | Tag
+  | {
+      type: '__create_option__';
+    }
+> & {
   /**
    * Ids of the initially selected tags.
    * Changing the value of this prop after initial mount will not rerender the component (see component description for more details)
@@ -249,6 +268,28 @@ export interface SavedObjectSaveModalTagSelectorComponentProps {
    * tags selection callback
    */
   onTagsSelected: (ids: string[]) => void;
+};
+
+/**
+ * Options for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}
+ *
+ * @public
+ */
+export interface GetTableColumnDefinitionOptions {
+  /**
+   * By default, the `tags` column definition will be automatically sortable
+   * by tag name.
+   *
+   * However, when paging is performed on the server, we need to remove the sorting
+   * capability from the column to avoid unexpected behavior by triggering fetch request
+   * when sorting by column.
+   *
+   * Should be set to `true` when generating the definition for a table that performs
+   * server-side paging.
+   *
+   * Defaults to false.
+   */
+  serverPaging?: boolean;
 }
 
 /**
@@ -288,6 +329,7 @@ export interface GetSearchBarFilterOptions {
 export interface ParsedSearchQuery {
   searchTerm: string;
   tagReferences: SavedObjectsFindOptionsReference[];
+  tagReferencesToExclude: SavedObjectsFindOptionsReference[];
   valid: boolean;
 }
 

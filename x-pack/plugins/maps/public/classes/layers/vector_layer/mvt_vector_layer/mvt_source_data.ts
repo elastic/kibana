@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
 import { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import { DataRequest } from '../../../util/data_request';
@@ -20,16 +20,24 @@ export interface MvtSourceData {
   tileMaxZoom: number;
   tileUrl: string;
   refreshToken: string;
+  hasLabels: boolean;
+  buffer: number;
 }
 
 export async function syncMvtSourceData({
+  buffer,
+  hasLabels,
   layerId,
+  layerName,
   prevDataRequest,
   requestMeta,
   source,
   syncContext,
 }: {
+  buffer: number;
+  hasLabels: boolean;
   layerId: string;
+  layerName: string;
   prevDataRequest: DataRequest | undefined;
   requestMeta: VectorSourceRequestMeta;
   source: IMvtVectorSource;
@@ -53,7 +61,12 @@ export async function syncMvtSourceData({
         return true;
       },
     });
-    const canSkip = noChangesInSourceState && noChangesInSearchState;
+    const canSkip =
+      !syncContext.forceRefreshDueToDrawing &&
+      noChangesInSourceState &&
+      noChangesInSearchState &&
+      prevData.hasLabels === hasLabels &&
+      prevData.buffer === buffer;
 
     if (canSkip) {
       return;
@@ -63,17 +76,24 @@ export async function syncMvtSourceData({
   syncContext.startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
   try {
     const refreshToken =
-      !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
-        ? uuid()
+      !prevData ||
+      syncContext.forceRefreshDueToDrawing ||
+      (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
+        ? uuidv4()
         : prevData.refreshToken;
 
-    const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
+    const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels, buffer);
+    if (source.isESSource()) {
+      syncContext.inspectorAdapters.vectorTiles.addLayer(layerId, layerName, tileUrl);
+    }
     const sourceData = {
       tileUrl,
       tileSourceLayer: source.getTileSourceLayer(),
       tileMinZoom: source.getMinZoom(),
       tileMaxZoom: source.getMaxZoom(),
       refreshToken,
+      hasLabels,
+      buffer,
     };
     syncContext.stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, sourceData, {});
   } catch (error) {

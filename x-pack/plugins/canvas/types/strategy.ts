@@ -7,7 +7,7 @@
 
 import { TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IKibanaSearchRequest } from 'src/plugins/data/common';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { ExpressionValueFilter } from '.';
 export interface EssqlSearchStrategyRequest extends IKibanaSearchRequest {
   count: number;

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-deprecations-server",
+  "owner": "@elastic/kibana-core"
+}

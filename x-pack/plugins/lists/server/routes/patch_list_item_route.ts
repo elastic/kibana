@@ -31,7 +31,7 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { value, id, meta, _version } = request.body;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const listItem = await lists.updateListItem({
           _version,
           id,

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
+
+const mockLogger = loggingSystemMock.create().get();
 
 describe('actions telemetry', () => {
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byActionTypeId: {
             value: {
@@ -95,9 +97,9 @@ describe('actions telemetry', () => {
             },
           ],
         },
-      })
+      }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test');
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -110,15 +112,36 @@ Object {
     "some.type": 1,
   },
   "countTotal": 4,
+  "hasErrors": false,
+}
+`);
+  });
+
+  test('getTotalCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing actions telemetry task: getTotalCount - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByType": Object {},
+  "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });
 
   test('getInUseTotalCount', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValueOnce(
+    mockEsClient.search.mockResponseOnce(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           refs: {
             actionRefIds: {
@@ -132,37 +155,36 @@ Object {
             hits: [],
           },
         },
-      })
+      }
     );
 
-    mockEsClient.search.mockReturnValueOnce(
-      // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                action: {
-                  id: '1',
-                  actionTypeId: '.server-log',
-                },
-                namespaces: ['default'],
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '1',
+                actionTypeId: '.server-log',
               },
+              namespaces: ['default'],
             },
-            {
-              _source: {
-                action: {
-                  id: '2',
-                  actionTypeId: '.slack',
-                },
-                namespaces: ['default'],
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '2',
+                actionTypeId: '.slack',
               },
+              namespaces: ['default'],
             },
-          ],
-        },
-      })
-    );
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+          },
+        ],
+      },
+    });
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -175,15 +197,16 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 2,
+  "hasErrors": false,
 }
 `);
   });
 
   test('getInUseTotalCount should count preconfigured alert history connector usage', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValueOnce(
+    mockEsClient.search.mockResponseOnce(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           refs: {
             actionRefIds: {
@@ -211,41 +234,41 @@ Object {
             },
           },
         },
-      })
+      }
     );
-    mockEsClient.search.mockReturnValueOnce(
-      // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                action: {
-                  id: '1',
-                  actionTypeId: '.server-log',
-                },
-                namespaces: ['default'],
+    mockEsClient.search.mockResponseOnce({
+      hits: {
+        hits: [
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '1',
+                actionTypeId: '.server-log',
               },
+              namespaces: ['default'],
             },
-            {
-              _source: {
-                action: {
-                  id: '2',
-                  actionTypeId: '.slack',
-                },
-                namespaces: ['default'],
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '2',
+                actionTypeId: '.slack',
               },
+              namespaces: ['default'],
             },
-          ],
-        },
-      })
-    );
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', undefined, [
+          },
+        ],
+      },
+    });
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, [
       {
         id: 'test',
         actionTypeId: '.email',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -259,6 +282,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -275,15 +299,39 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 4,
+  "hasErrors": false,
+}
+`);
+  });
+
+  test('getInUseTotalCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing actions telemetry task: getInUseTotalCount - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByAlertHistoryConnectorType": 0,
+  "countByType": Object {},
+  "countEmailByService": Object {},
+  "countNamespaces": 0,
+  "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });
 
   test('getTotalCount accounts for preconfigured connectors', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byActionTypeId: {
             value: {
@@ -364,14 +412,15 @@ Object {
             },
           ],
         },
-      })
+      }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test', [
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger, [
       {
         id: 'test',
         actionTypeId: '.test',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
       {
@@ -379,6 +428,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -395,15 +445,16 @@ Object {
     "some.type": 1,
   },
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
 
   test('getInUseTotalCount() accounts for preconfigured connectors', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValueOnce(
+    mockEsClient.search.mockResponseOnce(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           refs: {
             actionRefIds: {
@@ -439,50 +490,51 @@ Object {
             },
           },
         },
-      })
+      }
     );
-    mockEsClient.search.mockReturnValueOnce(
-      // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                action: {
-                  id: '1',
-                  actionTypeId: '.server-log',
-                },
-                namespaces: ['default'],
+    mockEsClient.search.mockResponseOnce({
+      hits: {
+        hits: [
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '1',
+                actionTypeId: '.server-log',
               },
+              namespaces: ['default'],
             },
-            {
-              _source: {
-                action: {
-                  id: '2',
-                  actionTypeId: '.slack',
-                },
-                namespaces: ['default'],
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '2',
+                actionTypeId: '.slack',
               },
+              namespaces: ['default'],
             },
-            {
-              _source: {
-                action: {
-                  id: '3',
-                  actionTypeId: '.email',
-                },
-                namespaces: ['default'],
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '3',
+                actionTypeId: '.email',
               },
+              namespaces: ['default'],
             },
-          ],
-        },
-      })
-    );
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', undefined, [
+          },
+        ],
+      },
+    });
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, [
       {
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -502,15 +554,16 @@ Object {
   },
   "countNamespaces": 1,
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
 
   test('getInUseTotalCount() accounts for actions namespaces', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValueOnce(
+    mockEsClient.search.mockResponseOnce(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           refs: {
             actionRefIds: {
@@ -546,45 +599,45 @@ Object {
             },
           },
         },
-      })
+      }
     );
-    mockEsClient.search.mockReturnValueOnce(
-      // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                action: {
-                  id: '1',
-                  actionTypeId: '.server-log',
-                },
-                namespaces: ['test'],
+    mockEsClient.search.mockResponseOnce({
+      hits: {
+        hits: [
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '1',
+                actionTypeId: '.server-log',
               },
+              namespaces: ['test'],
             },
-            {
-              _source: {
-                action: {
-                  id: '2',
-                  actionTypeId: '.slack',
-                },
-                namespaces: ['default'],
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '2',
+                actionTypeId: '.slack',
               },
+              namespaces: ['default'],
             },
-            {
-              _source: {
-                action: {
-                  id: '3',
-                  actionTypeId: '.email',
-                },
-                namespaces: ['test2'],
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '3',
+                actionTypeId: '.email',
               },
+              namespaces: ['test2'],
             },
-          ],
-        },
-      })
-    );
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+          },
+        ],
+      },
+    });
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -601,15 +654,16 @@ Object {
   },
   "countNamespaces": 3,
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
 
   test('getExecutionsTotalCount', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValueOnce(
+    mockEsClient.search.mockResponseOnce(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           totalExecutions: {
             byConnectorTypeId: {
@@ -667,20 +721,50 @@ Object {
               },
             },
           },
+          count_connector_types_by_action_run_outcome_per_day: {
+            actionSavedObjects: {
+              connector_types: {
+                buckets: [
+                  {
+                    key: '.slack',
+                    outcome: {
+                      count: {
+                        buckets: [
+                          { key: 'success', doc_count: 12 },
+                          { key: 'failure', doc_count: 1 },
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    key: '.email',
+                    outcome: {
+                      count: {
+                        buckets: [
+                          { key: 'success', doc_count: 13 },
+                          { key: 'failure', doc_count: 2 },
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
         },
-      })
+      }
     );
 
     // for .slack connectors
-    mockEsClient.search.mockReturnValueOnce(
+    mockEsClient.search.mockResponseOnce(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           avgDuration: { value: 10 },
         },
-      })
+      }
     );
-    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(telemetry).toStrictEqual({
@@ -700,6 +784,42 @@ Object {
         __slack: 7,
       },
       countTotal: 120,
+      countRunOutcomeByConnectorType: {
+        __email: {
+          failure: 2,
+          success: 13,
+        },
+        __slack: {
+          failure: 1,
+          success: 12,
+        },
+      },
+      hasErrors: false,
     });
+  });
+
+  test('getExecutionsPerDayCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing actions telemetry task: getExecutionsPerDayCount - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "avgExecutionTime": 0,
+  "avgExecutionTimeByType": Object {},
+  "countByType": Object {},
+  "countFailed": 0,
+  "countFailedByType": Object {},
+  "countRunOutcomeByConnectorType": Object {},
+  "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
+}
+`);
   });
 });

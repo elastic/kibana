@@ -6,12 +6,13 @@
  */
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
-import { SecuritySubPlugins } from '../../app/types';
+import type { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
 import { mockIndexPattern, mockSourcererState } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
 import { useDeepEqualSelector } from '../hooks/use_selector';
 import { renderHook } from '@testing-library/react-hooks';
+import { initialGroupingState } from './grouping/reducer';
 
 jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => ({
@@ -38,7 +39,16 @@ describe('createInitialState', () => {
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
     };
-    const initState = createInitialState(mockPluginState, defaultState);
+    const initState = createInitialState(
+      mockPluginState,
+      defaultState,
+      {
+        dataTable: { tableById: {} },
+      },
+      {
+        groups: initialGroupingState,
+      }
+    );
     beforeEach(() => {
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
     });
@@ -52,19 +62,30 @@ describe('createInitialState', () => {
     });
 
     test('indicesExist should be FALSE if patternList is empty', () => {
-      const state = createInitialState(mockPluginState, {
-        ...defaultState,
-        defaultDataView: {
-          ...defaultState.defaultDataView,
-          patternList: [],
-        },
-        kibanaDataViews: [
-          {
+      const state = createInitialState(
+        mockPluginState,
+        {
+          ...defaultState,
+          defaultDataView: {
             ...defaultState.defaultDataView,
             patternList: [],
           },
-        ],
-      });
+          kibanaDataViews: [
+            {
+              ...defaultState.defaultDataView,
+              patternList: [],
+            },
+          ],
+        },
+        {
+          dataTable: {
+            tableById: {},
+          },
+        },
+        {
+          groups: initialGroupingState,
+        }
+      );
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));
       const { result } = renderHook(() => useSourcererDataView());
       expect(result.current.indicesExist).toEqual(false);

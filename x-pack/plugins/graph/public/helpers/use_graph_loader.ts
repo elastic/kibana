@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
-import { ToastsStart } from 'kibana/public';
-import { IHttpFetchError, ResponseErrorBody, CoreStart } from 'kibana/public';
+import { useCallback, useMemo, useState } from 'react';
+import type { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { ExploreRequest, GraphExploreCallback, GraphSearchCallback, SearchRequest } from '../types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type {
+  ExploreRequest,
+  GraphExploreCallback,
+  GraphSearchCallback,
+  SearchRequest,
+} from '../types';
 import { formatHttpError } from './format_http_error';
 
 interface UseGraphLoaderProps {
@@ -19,6 +26,7 @@ interface UseGraphLoaderProps {
 
 export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoaderProps) => {
   const [loading, setLoading] = useState(false);
+  const requestAdapter = useMemo(() => new RequestAdapter(), []);
 
   const handleHttpError = useCallback(
     (error: IHttpFetchError<ResponseErrorBody & { status: number; statusText: string }>) => {
@@ -47,21 +55,56 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
     [toastNotifications]
   );
 
+  const getRequestInspector = useCallback(
+    (indexName: string) => {
+      const inspectRequest = requestAdapter.start(
+        i18n.translate('xpack.graph.inspectAdapter.graphExploreRequest.name', {
+          defaultMessage: 'Data',
+        }),
+        {
+          description: i18n.translate(
+            'xpack.graph.inspectAdapter.graphExploreRequest.description',
+            {
+              defaultMessage: 'This request queries Elasticsearch to fetch the data for the Graph.',
+            }
+          ),
+        }
+      );
+      inspectRequest.stats({
+        indexPattern: {
+          label: i18n.translate(
+            'xpack.graph.inspectAdapter.graphExploreRequest.dataView.description.label',
+            { defaultMessage: 'Data view' }
+          ),
+          value: indexName,
+          description: i18n.translate(
+            'xpack.graph.inspectAdapter.graphExploreRequest.dataView.description',
+            { defaultMessage: 'The data view that connected to the Elasticsearch indices.' }
+          ),
+        },
+      });
+      return inspectRequest;
+    },
+    [requestAdapter]
+  );
+
   // Replacement function for graphClientWorkspace's comms so
   // that it works with Kibana.
   const callNodeProxy = useCallback(
     (indexName: string, query: ExploreRequest, responseHandler: GraphExploreCallback) => {
-      const request = {
-        body: JSON.stringify({
-          index: indexName,
-          query,
-        }),
-      };
+      const dsl = { index: indexName, query };
+      const request = { body: JSON.stringify(dsl) };
       setLoading(true);
+
+      requestAdapter.reset();
+      const inspectRequest = getRequestInspector(indexName);
+      inspectRequest.json(dsl);
+
       return coreStart.http
-        .post<{ resp: { timed_out: unknown } }>('../api/graph/graphExplore', request)
+        .post<{ resp: estypes.GraphExploreResponse }>('../api/graph/graphExplore', request)
         .then(function (data) {
           const response = data.resp;
+
           if (response?.timed_out) {
             toastNotifications.addWarning(
               i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
@@ -69,38 +112,48 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
               })
             );
           }
+          inspectRequest.stats({}).ok({ json: response });
           responseHandler(response);
         })
-        .catch(handleHttpError)
+        .catch((e) => {
+          inspectRequest.error({ json: e });
+          handleHttpError(e);
+        })
         .finally(() => setLoading(false));
     },
-    [coreStart.http, handleHttpError, toastNotifications]
+    [coreStart.http, getRequestInspector, handleHttpError, requestAdapter, toastNotifications]
   );
 
   // Helper function for the graphClientWorkspace to perform a query
   const callSearchNodeProxy = useCallback(
     (indexName: string, query: SearchRequest, responseHandler: GraphSearchCallback) => {
-      const request = {
-        body: JSON.stringify({
-          index: indexName,
-          body: query,
-        }),
-      };
+      const dsl = { index: indexName, body: query };
+      const request = { body: JSON.stringify(dsl) };
       setLoading(true);
+
+      requestAdapter.reset();
+      const inspectRequest = getRequestInspector(indexName);
+      inspectRequest.json(dsl);
+
       coreStart.http
-        .post<{ resp: unknown }>('../api/graph/searchProxy', request)
+        .post<{ resp: estypes.GraphExploreResponse }>('../api/graph/searchProxy', request)
         .then(function (data) {
           const response = data.resp;
+          inspectRequest.stats({}).ok({ json: response });
           responseHandler(response);
         })
-        .catch(handleHttpError)
+        .catch((e) => {
+          inspectRequest.error({ json: e });
+          handleHttpError(e);
+        })
         .finally(() => setLoading(false));
     },
-    [coreStart.http, handleHttpError]
+    [coreStart.http, getRequestInspector, handleHttpError, requestAdapter]
   );
 
   return {
     loading,
+    requestAdapter,
     callNodeProxy,
     callSearchNodeProxy,
     handleSearchQueryError,

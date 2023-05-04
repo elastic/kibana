@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObject,
   SavedObjectsImportRetry,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { spaceIdToNamespace } from '../utils/namespace';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
@@ -50,7 +50,8 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     spaceId: string,
     objectsStream: Readable,
     retries: SavedObjectsImportRetry[],
-    createNewCopies: boolean
+    createNewCopies: boolean,
+    compatibilityMode?: boolean
   ) => {
     try {
       const importResponse = await savedObjectsImporter.resolveImportErrors({
@@ -58,6 +59,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
         readStream: objectsStream,
         retries,
         createNewCopies,
+        compatibilityMode,
       });
 
       return {
@@ -99,7 +101,8 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
         spaceId,
         createReadableStreamFromArray(filteredObjects),
         retries,
-        options.createNewCopies
+        options.createNewCopies,
+        options.compatibilityMode
       );
     }
 

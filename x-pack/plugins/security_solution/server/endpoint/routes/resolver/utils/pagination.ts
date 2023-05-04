@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import { SafeResolverEvent } from '../../../../../common/endpoint/types';
+import type { JsonObject } from '@kbn/utility-types';
+import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,
   timestampSafeVersion,
@@ -31,7 +31,7 @@ export type SortFields = [
   {
     '@timestamp': string;
   },
-  { [x: string]: string }
+  { [x: string]: { order: string; unmapped_type?: string } }
 ];
 
 /**
@@ -177,7 +177,10 @@ export class PaginationBuilder {
     tiebreaker: string,
     timeSort: TimeSortDirection = 'asc'
   ): PaginationFields {
-    const sort: SortFields = [{ '@timestamp': timeSort }, { [tiebreaker]: 'asc' }];
+    const sort: SortFields = [
+      { '@timestamp': timeSort },
+      { [tiebreaker]: { order: 'asc', unmapped_type: 'keyword' } },
+    ];
     let searchAfter: SearchAfterFields | undefined;
     if (this.timestamp && this.eventID) {
       searchAfter = [this.timestamp, this.eventID];

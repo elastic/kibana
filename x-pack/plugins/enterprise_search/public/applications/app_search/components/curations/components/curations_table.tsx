@@ -143,7 +143,7 @@ export const CurationsTable: React.FC = () => {
         loading={dataLoading}
         pagination={{
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         }}
         onChange={handlePageChange(onPaginate)}
       />

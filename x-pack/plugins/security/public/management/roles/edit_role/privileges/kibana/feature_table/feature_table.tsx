@@ -7,7 +7,7 @@
 
 import './feature_table.scss';
 
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonGroup,
@@ -17,16 +17,18 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
+import type { AppCategory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AppCategory } from 'src/core/public';
 
 import type { Role } from '../../../../../../../common/model';
 import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
@@ -44,10 +46,15 @@ interface Props {
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
   canCustomizeSubFeaturePrivileges: boolean;
+  allSpacesSelected: boolean;
   disabled?: boolean;
 }
 
-export class FeatureTable extends Component<Props, {}> {
+interface State {
+  expandedPrivilegeControls: Set<string>;
+}
+
+export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
     privilegeIndex: -1,
     showLocks: true,
@@ -66,8 +73,11 @@ export class FeatureTable extends Component<Props, {}> {
         if (!this.featureCategories.has(feature.category.id)) {
           this.featureCategories.set(feature.category.id, []);
         }
+
         this.featureCategories.get(feature.category.id)!.push(feature);
       });
+
+    this.state = { expandedPrivilegeControls: new Set() };
   }
 
   public render() {
@@ -84,7 +94,8 @@ export class FeatureTable extends Component<Props, {}> {
         (feature) =>
           this.props.privilegeCalculator.getEffectivePrimaryFeaturePrivilege(
             feature.id,
-            this.props.privilegeIndex
+            this.props.privilegeIndex,
+            this.props.allSpacesSelected
           ) != null
       ).length;
 
@@ -205,28 +216,36 @@ export class FeatureTable extends Component<Props, {}> {
     const renderFeatureMarkup = (
       buttonContent: EuiAccordionProps['buttonContent'],
       extraAction: EuiAccordionProps['extraAction'],
-      warningIcon: JSX.Element
+      infoIcon: JSX.Element
     ) => {
-      const { canCustomizeSubFeaturePrivileges } = this.props;
       const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
 
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{warningIcon}</EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
+          <EuiFlexItem className="eui-fullWidth">
             <EuiAccordion
               id={`featurePrivilegeControls_${feature.id}`}
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
+              buttonClassName="euiAccordionWithDescription"
               extraAction={extraAction}
-              forceState={
-                canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges ? undefined : 'closed'
-              }
-              arrowDisplay={
-                canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges ? 'left' : 'none'
-              }
+              forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
+              arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}
+              onToggle={(isOpen: boolean) => {
+                if (isOpen) {
+                  this.state.expandedPrivilegeControls.add(feature.id);
+                } else {
+                  this.state.expandedPrivilegeControls.delete(feature.id);
+                }
+
+                this.setState({
+                  expandedPrivilegeControls: new Set([...this.state.expandedPrivilegeControls]),
+                });
+              }}
             >
-              <div className="subFeaturePrivilegeExpandedRegion">
+              <EuiSpacer size="s" />
+              <EuiPanel color="subdued" paddingSize="s" className="subFeaturePanel">
                 <FeatureTableExpandedRow
                   feature={feature}
                   privilegeIndex={this.props.privilegeIndex}
@@ -235,9 +254,13 @@ export class FeatureTable extends Component<Props, {}> {
                   selectedFeaturePrivileges={
                     this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
                   }
+                  allSpacesSelected={this.props.allSpacesSelected}
                   disabled={this.props.disabled}
+                  licenseAllowsSubFeatPrivCustomization={
+                    this.props.canCustomizeSubFeaturePrivileges
+                  }
                 />
-              </div>
+              </EuiPanel>
             </EuiAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -248,9 +271,7 @@ export class FeatureTable extends Component<Props, {}> {
 
     if (feature.reserved && primaryFeaturePrivileges.length === 0) {
       const buttonContent = (
-        <>
-          {<EuiIcon type="empty" size="l" />} <FeatureTableCell feature={feature} />
-        </>
+        <FeatureTableCell className="noSubFeaturePrivileges" feature={feature} />
       );
 
       const extraAction = (
@@ -269,33 +290,42 @@ export class FeatureTable extends Component<Props, {}> {
     const selectedPrivilegeId =
       this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilegeId(
         feature.id,
-        this.props.privilegeIndex
+        this.props.privilegeIndex,
+        this.props.allSpacesSelected
       );
-
-    const options = primaryFeaturePrivileges.map((privilege) => {
-      return {
-        id: `${feature.id}_${privilege.id}`,
-        label: privilege.name,
-        isDisabled: this.props.disabled,
-      };
-    });
+    const options: EuiButtonGroupOptionProps[] = primaryFeaturePrivileges
+      .filter((privilege) => !privilege.disabled) // Don't show buttons for privileges that are disabled
+      .map((privilege) => {
+        const disabledDueToSpaceSelection =
+          privilege.requireAllSpaces && !this.props.allSpacesSelected;
+        return {
+          id: `${feature.id}_${privilege.id}`,
+          label: privilege.name,
+          isDisabled: this.props.disabled || disabledDueToSpaceSelection,
+        };
+      });
 
     options.push({
       id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,
       label: 'None',
-      isDisabled: this.props.disabled,
+      isDisabled: this.props.disabled ?? false,
     });
 
-    let warningIcon = <EuiIconTip type="empty" content={null} />;
+    let infoIcon = <EuiIconTip type="empty" content={null} />;
+
+    const arePrivilegeControlsCollapsed = !this.state.expandedPrivilegeControls.has(feature.id);
+
     if (
+      arePrivilegeControlsCollapsed &&
       this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
         feature.id,
-        this.props.privilegeIndex
+        this.props.privilegeIndex,
+        this.props.allSpacesSelected
       )
     ) {
-      warningIcon = (
+      infoIcon = (
         <EuiIconTip
-          type="alert"
+          type="iInCircle"
           content={
             <FormattedMessage
               id="xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip"
@@ -306,16 +336,12 @@ export class FeatureTable extends Component<Props, {}> {
       );
     }
 
-    const { canCustomizeSubFeaturePrivileges } = this.props;
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
-
-    const showAccordionArrow = canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges;
-
     const buttonContent = (
-      <>
-        {!showAccordionArrow && <EuiIcon type="empty" size="l" />}{' '}
-        <FeatureTableCell feature={feature} />
-      </>
+      <FeatureTableCell
+        className={classNames({ noSubFeaturePrivileges: !hasSubFeaturePrivileges })}
+        feature={feature}
+      />
     );
 
     const extraAction = (
@@ -338,7 +364,7 @@ export class FeatureTable extends Component<Props, {}> {
       />
     );
 
-    return renderFeatureMarkup(buttonContent, extraAction, warningIcon);
+    return renderFeatureMarkup(buttonContent, extraAction, infoIcon);
   };
 
   private onChange = (featureId: string) => (featurePrivilegeId: string) => {

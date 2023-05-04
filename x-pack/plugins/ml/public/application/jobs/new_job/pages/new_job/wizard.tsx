@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useReducer, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
-
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeBuckets } from '../../../../util/time_buckets';
@@ -17,6 +16,7 @@ import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 import { JobCreatorType } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -27,6 +27,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 interface Props {
   jobCreator: JobCreatorType;
   chartLoader: ChartLoader;
+  mapLoader: MapLoader;
   resultsLoader: ResultsLoader;
   chartInterval: TimeBuckets;
   jobValidator: JobValidator;
@@ -37,27 +38,29 @@ interface Props {
 export const Wizard: FC<Props> = ({
   jobCreator,
   chartLoader,
+  mapLoader,
   resultsLoader,
   chartInterval,
   jobValidator,
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
-  const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
-    (s) => s + 1,
-    0
-  );
-  const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
+  const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
+  const jobCreatorUpdate = useCallback(() => {
+    setJobCreatorUpdate((prev) => prev + 1);
+  }, []);
 
-  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<
-    (s: number, action: any) => number
-  >((s) => s + 1, 0);
+  const [jobValidatorUpdated, setJobValidatorUpdate] = useState(0);
+  const jobValidatorUpdate = useCallback(() => {
+    setJobValidatorUpdate((prev) => prev + 1);
+  }, []);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
     jobCreatorUpdate,
     jobCreator,
     chartLoader,
+    mapLoader,
     resultsLoader,
     chartInterval,
     jobValidator,
@@ -82,17 +85,18 @@ export const Wizard: FC<Props> = ({
 
   useEffect(() => {
     const subscription = jobValidator.validationResult$.subscribe(() => {
-      setJobValidatorUpdate(jobValidatorUpdated);
+      jobValidatorUpdate();
     });
 
     return () => {
       return subscription.unsubscribe();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobValidator]);
 
   useEffect(() => {
     jobValidator.validate(() => {
-      setJobValidatorUpdate(jobValidatorUpdated);
+      jobValidatorUpdate();
     });
 
     // if the job config has changed, reset the highestStep
@@ -102,12 +106,14 @@ export const Wizard: FC<Props> = ({
       setHighestStep(currentStep);
       setStringifiedConfigs(tempConfigs);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
 
     setCurrentStep(firstWizardStep);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // disable the step links if the job is running
@@ -120,6 +126,7 @@ export const Wizard: FC<Props> = ({
     if (currentStep >= highestStep) {
       setHighestStep(currentStep);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
   useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);

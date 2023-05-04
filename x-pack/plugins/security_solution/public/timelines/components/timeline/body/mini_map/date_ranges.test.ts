@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 
-import { getDateRange, getDates, MomentUnit } from './date_ranges';
+import type { MomentUnit } from './date_ranges';
+import { getDateRange, getDates } from './date_ranges';
 
 describe('dateRanges', () => {
   describe('#getDates', () => {

@@ -12,11 +12,12 @@
 
 .actAccordionActionForm__button {
   padding: $euiSizeM;
+  padding-left: $euiSizeL;
 }
 
-.actConnectorsListGrid {
-  .euiToolTipAnchor,
-  .euiCard {
-    height: 100%;
-  }
+.actAccordionActionForm .euiAccordion__iconButton {
+  transform: translateX($euiSizeM) rotate(0deg) !important;
+}
+.actAccordionActionForm .euiAccordion__iconButton.euiAccordion__iconButton-isOpen {
+  transform: translateX($euiSizeM) rotate(90deg) !important;
 }

@@ -7,7 +7,8 @@
 
 import path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -24,7 +25,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const config = {
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
-        functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
+        functional: await readConfigFile(
+          require.resolve('../../../../test/functional/config.base.js')
+        ),
       },
       xpack: {
         api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
@@ -53,7 +56,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
+          `--plugin-path=${path.resolve(__dirname, 'plugins/saved_object_test_plugin')}`,
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),

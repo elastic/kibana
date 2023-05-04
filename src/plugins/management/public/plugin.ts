@@ -8,9 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -22,7 +21,8 @@ import {
   AppStatus,
   AppNavLinkStatus,
   AppDeepLink,
-} from '../../../core/public';
+} from '@kbn/core/public';
+import { ManagementSetup, ManagementStart } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -71,11 +71,14 @@ export class ManagementPlugin
 
   private hasAnyEnabledApps = true;
 
+  private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
+    const managementPlugin = this;
 
     if (home) {
       home.featureCatalogue.register({
@@ -89,7 +92,7 @@ export class ManagementPlugin
         icon: 'managementApp',
         path: '/app/management',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         visible: () => this.hasAnyEnabledApps,
       });
     }
@@ -111,6 +114,7 @@ export class ManagementPlugin
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
         });
       },
     });
@@ -121,7 +125,7 @@ export class ManagementPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ManagementStartDependencies) {
+  public start(core: CoreStart, _plugins: ManagementStartDependencies): ManagementStart {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
@@ -136,6 +140,9 @@ export class ManagementPlugin
       });
     }
 
-    return {};
+    return {
+      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
+        this.isSidebarEnabled$.next(isSidebarEnabled),
+    };
   }
 }

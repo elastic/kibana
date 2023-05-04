@@ -13,55 +13,66 @@ import {
   EuiButton,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { findIndex } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
-import {
-  RuleStep,
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
+import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
+import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import {
-  ThrottleSelectField,
-  THROTTLE_OPTIONS,
-  DEFAULT_THROTTLE_OPTION,
-} from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getSchema } from './schema';
+import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { useManageCaseAction } from './use_manage_case_action';
+import { RuleSnoozeSection } from './rule_snooze_section';
 
 interface StepRuleActionsProps extends RuleStepProps {
+  ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
+  summaryActionMessageParams: ActionVariables;
+  ruleType?: Type;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
+  responseActions: [],
   kibanaSiemAppUrl: '',
-  throttle: DEFAULT_THROTTLE_OPTION.value,
 };
 
 const GhostFormField = () => <></>;
 
-const getThrottleOptions = (throttle?: string | null) => {
-  // Add support for throttle options set by the API
-  if (throttle && findIndex(['value', throttle], THROTTLE_OPTIONS) < 0) {
-    return [...THROTTLE_OPTIONS, { value: throttle, text: throttle }];
-  }
-
-  return THROTTLE_OPTIONS;
+const DisplayActionsHeader = () => {
+  return (
+    <>
+      <EuiTitle size="s">
+        <h4>
+          <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+    </>
+  );
 };
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
+  ruleId,
   addPadding = false,
   defaultValues,
   isReadOnlyView,
@@ -70,14 +81,16 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   onSubmit,
   setForm,
   actionMessageParams,
+  summaryActionMessageParams,
+  ruleType,
 }) => {
-  const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
       triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana();
+  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {
@@ -85,6 +98,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       }),
     [application]
   );
+
   const initialState = {
     ...(defaultValues ?? stepActionsDefaultValue),
     kibanaSiemAppUrl: kibanaAbsoluteUrl,
@@ -97,11 +111,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ throttle: formThrottle }] = useFormData<ActionsStepRule>({
-    form,
-    watch: ['throttle'],
-  });
-  const throttle = formThrottle || initialState.throttle;
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -133,70 +142,55 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     };
   }, [getData, setForm]);
 
-  const throttleOptions = useMemo(() => {
-    return getThrottleOptions(throttle);
-  }, [throttle]);
-
-  const throttleFieldComponentProps = useMemo(
-    () => ({
-      idAria: 'detectionEngineStepRuleActionsThrottle',
-      isDisabled: isLoading,
-      isLoading: isLoadingCaseAction,
-      dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
-      hasNoInitialSelection: false,
-      euiFieldProps: {
-        options: throttleOptions,
-      },
-    }),
-    [isLoading, isLoadingCaseAction, throttleOptions]
-  );
-
   const displayActionsOptions = useMemo(
-    () =>
-      throttle !== stepActionsDefaultValue.throttle ? (
-        <>
-          <EuiSpacer />
-          <UseField
-            path="actions"
-            component={RuleActionsField}
-            componentProps={{
-              messageVariables: actionMessageParams,
-              hasErrorOnCreationCaseAction,
-            }}
-          />
-        </>
-      ) : (
-        <UseField path="actions" component={GhostFormField} />
-      ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+    () => (
+      <>
+        <EuiSpacer />
+        <UseField
+          path="actions"
+          component={RuleActionsField}
+          componentProps={{
+            messageVariables: actionMessageParams,
+            summaryMessageVariables: summaryActionMessageParams,
+          }}
+        />
+      </>
+    ),
+    [actionMessageParams, summaryActionMessageParams]
   );
+  const displayResponseActionsOptions = useMemo(() => {
+    if (isQueryRule(ruleType)) {
+      return (
+        <UseArray path="responseActions" initialNumberOfItems={0}>
+          {ResponseActionsForm}
+        </UseArray>
+      );
+    }
+    return null;
+  }, [ruleType]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
       <>
-        <UseField
-          path="throttle"
-          component={ThrottleSelectField}
-          componentProps={throttleFieldComponentProps}
-        />
+        <DisplayActionsHeader />
+        {ruleId && <RuleSnoozeSection ruleId={ruleId} />}
         {displayActionsOptions}
+        {responseActionsEnabled && displayResponseActionsOptions}
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
     ) : (
       <>
         <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
-        <UseField
-          path="throttle"
-          componentProps={throttleFieldComponentProps}
-          component={GhostFormField}
-        />
-        <UseField path="actions" component={GhostFormField} />
-        <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
-        <UseField path="enabled" component={GhostFormField} />
       </>
     );
-  }, [application.capabilities.actions.show, displayActionsOptions, throttleFieldComponentProps]);
+  }, [
+    ruleId,
+    application.capabilities.actions.show,
+    displayActionsOptions,
+    displayResponseActionsOptions,
+    responseActionsEnabled,
+  ]);
 
   if (isReadOnlyView) {
     return (
@@ -229,8 +223,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={() => handleSubmit(false)}
+                data-test-subj="create-enabled-false"
               >
-                {I18n.COMPLETE_WITHOUT_ACTIVATING}
+                {I18n.COMPLETE_WITHOUT_ENABLING}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -239,9 +234,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={() => handleSubmit(true)}
-                data-test-subj="create-activate"
+                data-test-subj="create-enable"
               >
-                {I18n.COMPLETE_WITH_ACTIVATING}
+                {I18n.COMPLETE_WITH_ENABLING}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

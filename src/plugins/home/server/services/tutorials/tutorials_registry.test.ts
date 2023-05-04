@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
-import { coreMock } from '../../../../../core/server/mocks';
-import { CoreSetup } from '../../../../../core/server';
-import { httpServerMock } from '../../../../../core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { CoreSetup } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import {
   TutorialProvider,
@@ -18,8 +18,8 @@ import {
   TutorialsCategory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
-import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import { customIntegrationsMock } from '../../../../custom_integrations/server/mocks';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -27,7 +27,7 @@ const INVALID_TUTORIAL: TutorialSchema = {
   name: '',
   isBeta: false,
   shortDescription: 'short description',
-  euiIconType: 'alert',
+  euiIconType: 'warning',
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
@@ -49,7 +49,7 @@ const VALID_TUTORIAL: TutorialSchema = {
   moduleName: 'test',
   isBeta: false,
   shortDescription: 'short description',
-  euiIconType: 'alert',
+  euiIconType: 'warning',
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
@@ -128,7 +128,7 @@ describe('TutorialsRegistry', () => {
             description: 'short description',
             icons: [
               {
-                src: 'alert',
+                src: 'warning',
                 type: 'eui',
               },
             ],

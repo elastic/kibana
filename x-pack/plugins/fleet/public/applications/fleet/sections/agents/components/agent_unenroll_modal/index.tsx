@@ -85,6 +85,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="agentUnenrollModal"
       title={
         isSingleAgent ? (
           <FormattedMessage
@@ -132,7 +133,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
                 defaultMessage: 'This agent is running Fleet Server',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage

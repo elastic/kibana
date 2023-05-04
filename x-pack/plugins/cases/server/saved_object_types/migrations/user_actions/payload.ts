@@ -9,23 +9,18 @@
 
 import { isEmpty, isPlainObject, isString } from 'lodash';
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../../../src/core/server';
-import {
-  Actions,
-  ActionTypes,
-  CaseStatuses,
-  CommentType,
-  UserActionTypes,
-} from '../../../../common/api';
+} from '@kbn/core/server';
+import type { UserActionTypes } from '../../../../common/api';
+import { Actions, ActionTypes, CaseStatuses, CommentType } from '../../../../common/api';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';
-import { UserActions } from './types';
+import type { UserActions } from './types';
 
 export function payloadMigration(
   doc: SavedObjectUnsanitizedDoc<UserActions>,

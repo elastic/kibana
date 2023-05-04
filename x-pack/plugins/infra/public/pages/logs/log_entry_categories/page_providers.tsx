@@ -6,23 +6,24 @@
  */
 
 import React from 'react';
+import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 
 export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
   const {
     hasFailedLoading,
     isLoading,
     isUninitialized,
-    latestLoadSourceFailures,
-    loadSource,
-    resolvedSourceConfiguration,
-    sourceId,
-  } = useLogSourceContext();
+    resolvedLogView,
+    logViewReference,
+    isPersistedLogView,
+    revertToDefaultLogView,
+  } = useLogViewContext();
   const { space } = useActiveKibanaSpace();
 
   // This is a rather crude way of guarding the dependent providers against
@@ -30,18 +31,23 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
   // React concurrent mode and Suspense in order to handle that more gracefully.
   if (space == null) {
     return null;
+  } else if (!isPersistedLogView) {
+    return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
+    return <ConnectedLogViewErrorPage />;
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
-  } else if (resolvedSourceConfiguration != null) {
+  } else if (resolvedLogView != null) {
+    if (logViewReference.type === 'log-view-inline') {
+      throw new Error('Logs ML features only support persisted Log View references');
+    }
     return (
       <LogEntryCategoriesModuleProvider
-        indexPattern={resolvedSourceConfiguration.indices}
-        sourceId={sourceId}
+        indexPattern={resolvedLogView.indices}
+        logViewId={logViewReference.logViewId}
         spaceId={space.id}
-        timestampField={resolvedSourceConfiguration.timestampField}
-        runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
+        timestampField={resolvedLogView.timestampField}
+        runtimeMappings={resolvedLogView.runtimeMappings}
       >
         <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
       </LogEntryCategoriesModuleProvider>

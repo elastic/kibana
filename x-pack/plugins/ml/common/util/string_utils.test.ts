@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  renderTemplate,
-  getMedianStringLength,
-  stringHash,
-  getGroupQueryText,
-} from './string_utils';
+import { renderTemplate, getMedianStringLength, getGroupQueryText } from './string_utils';
 
 const strings: string[] = [
   'foo',
@@ -50,14 +45,6 @@ describe('ML - string utils', () => {
     test('test median for no strings', () => {
       const result = getMedianStringLength(noStrings);
       expect(result).toBe(0);
-    });
-  });
-
-  describe('stringHash', () => {
-    test('should return a unique number based off a string', () => {
-      const hash1 = stringHash('the-string-1');
-      const hash2 = stringHash('the-string-2');
-      expect(hash1).not.toBe(hash2);
     });
   });
 

@@ -56,7 +56,7 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
       const createdTag = await tagClient.update(tag.id, tagAttributes);
       onSave(createdTag);
     } catch (e) {
-      // if e is HttpFetchError, actual server error payload is in e.body
+      // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
       }

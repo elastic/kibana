@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { RegionMapVisConfig } from './types';
-import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
 import { MapComponent } from '../../embeddable/map_component';
+import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 
 interface Props {
   filters?: Filter[];
@@ -25,16 +26,13 @@ function RegionMapVisualization(props: Props) {
     lon: props.visConfig.mapCenter[1],
     zoom: props.visConfig.mapZoom,
   };
-  function getLayerDescriptors({
-    createRegionMapLayerDescriptor,
-  }: {
-    createRegionMapLayerDescriptor: LazyLoadedMapModules['createRegionMapLayerDescriptor'];
-  }) {
+  function getLayerDescriptors() {
     const layerDescriptor = createRegionMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
   }
   return (
     <MapComponent
+      title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
       timeRange={props.timeRange}

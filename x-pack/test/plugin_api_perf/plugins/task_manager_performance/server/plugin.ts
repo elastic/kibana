@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { firstValueFrom, Subject } from 'rxjs';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import stats from 'stats-lite';
 import prettyMilliseconds from 'pretty-ms';
@@ -18,7 +17,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-} from '../../../../../plugins/task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { PerfState, PerfApi, PerfResult } from './types';
 import { initRoutes } from './init_routes';
 
@@ -35,9 +34,7 @@ export class SampleTaskManagerFixturePlugin
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const performanceState = resetPerfState({});
@@ -144,7 +141,7 @@ export class SampleTaskManagerFixturePlugin
         if (taskInstance.params && taskInstance.params.trackExecutionTimeline) {
           modifiedInstance.state = modifiedInstance.state || {};
           modifiedInstance.state.perf = modifiedInstance.state.perf || {};
-          modifiedInstance.state.perf.id = uuid.v4().replace(/-/gi, '_');
+          modifiedInstance.state.perf.id = uuidv4().replace(/-/gi, '_');
           performance.mark(`perfTask_schedule_${modifiedInstance.state.perf.id}`);
         }
 

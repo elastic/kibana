@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { EffectedPolicySelect, EffectedPolicySelectProps } from './effected_policy_select';
+import type { EffectedPolicySelectProps } from './effected_policy_select';
+import { EffectedPolicySelect } from './effected_policy_select';
 import React from 'react';
 import { forceHTMLElementOffsetWidth } from './test_utils';
 import { fireEvent, act } from '@testing-library/react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+
+jest.mock('../../../common/components/user_privileges');
 
 describe('when using EffectedPolicySelect component', () => {
   const generator = new EndpointDocGenerator('effected-policy-select');
@@ -55,7 +61,10 @@ describe('when using EffectedPolicySelect component', () => {
   describe('and no policy entries exist', () => {
     it('should display no options available message', () => {
       const { getByTestId } = render({ isGlobal: false });
-      expect(getByTestId('test-policiesSelectable').textContent).toEqual('No options available');
+      const euiSelectableMessageElement =
+        getByTestId('test-policiesSelectable').getElementsByClassName('euiSelectableMessage')[0];
+      expect(euiSelectableMessageElement).not.toBeNull();
+      expect(euiSelectableMessageElement.textContent).toEqual('No options available');
     });
   });
 
@@ -148,6 +157,52 @@ describe('when using EffectedPolicySelect component', () => {
         isGlobal: true,
         selected: [componentProps.options[0]],
       });
+    });
+
+    it('should show loader only when by polocy selected', () => {
+      const { queryByTestId } = render({ isLoading: true });
+      expect(queryByTestId('loading-spinner')).toBeNull();
+      selectPerPolicy();
+      expect(queryByTestId('loading-spinner')).not.toBeNull();
+    });
+
+    it('should hide policy link when no policy management privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: {
+          loading: false,
+          canWritePolicyManagement: false,
+          canReadPolicyManagement: false,
+        },
+      });
+      const { queryByTestId } = render({ isGlobal: false });
+      expect(queryByTestId('test-policyLink')).toBeNull();
+    });
+
+    it('should show policy link when all policy management privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: {
+          loading: false,
+          canWritePolicyManagement: true,
+          canReadPolicyManagement: true,
+        },
+      });
+      const { getByTestId } = render({ isGlobal: false });
+      expect(getByTestId('test-policyLink'));
+    });
+
+    it('should show policy link when read policy management privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: {
+          loading: false,
+          canWritePolicyManagement: false,
+          canReadPolicyManagement: true,
+        },
+      });
+      const { getByTestId } = render({ isGlobal: false });
+      expect(getByTestId('test-policyLink'));
     });
   });
 });

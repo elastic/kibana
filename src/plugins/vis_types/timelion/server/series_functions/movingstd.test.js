@@ -9,10 +9,10 @@
 import fn from './movingstd';
 
 import moment from 'moment';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
-import getSeries from './helpers/get_series';
-import getSeriesList from './helpers/get_series_list';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
+import getSeries from './test_helpers/get_series';
+import getSeriesList from './test_helpers/get_series_list';
 
 describe('movingstd.js', () => {
   it('computes the moving standard deviation of a list', async () => {

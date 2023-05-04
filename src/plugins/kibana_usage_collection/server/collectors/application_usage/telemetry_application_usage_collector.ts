@@ -7,25 +7,22 @@
  */
 
 import moment from 'moment';
-import { timer } from 'rxjs';
-import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { type Observable, takeUntil, timer } from 'rxjs';
+import type { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
-  ApplicationUsageDaily,
-  ApplicationUsageTotal,
+  type ApplicationUsageDaily,
+  type ApplicationUsageTotal,
   registerMappings,
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
-import { rollTotals, rollDailyData, serializeKey } from './rollups';
-import {
-  ROLL_TOTAL_INDICES_INTERVAL,
-  ROLL_DAILY_INDICES_INTERVAL,
-  ROLL_INDICES_START,
-} from './constants';
-import { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
+import { rollTotals, serializeKey } from './rollups';
+import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
+import type { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
+import { fetchAllSavedObjects } from './fetch_all_saved_objects';
 
 export const transformByApplicationViews = (
   report: ApplicationUsageViews
@@ -52,24 +49,14 @@ export function registerApplicationUsageCollector(
   logger: Logger,
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+  getSavedObjectsClient: () => ISavedObjectsRepository | undefined,
+  pluginStop$: Observable<void>
 ) {
   registerMappings(registerType);
 
-  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
-    rollTotals(logger, getSavedObjectsClient())
-  );
-
-  const dailyRollingSub = timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(
-    async () => {
-      const success = await rollDailyData(logger, getSavedObjectsClient());
-      // we only need to roll the transactional documents once to assure BWC
-      // once we rolling succeeds, we can stop.
-      if (success) {
-        dailyRollingSub.unsubscribe();
-      }
-    }
-  );
+  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL)
+    .pipe(takeUntil(pluginStop$))
+    .subscribe(() => rollTotals(logger, getSavedObjectsClient()));
 
   const collector = usageCollection.makeUsageCollector<ApplicationUsageTelemetryReport | undefined>(
     {
@@ -81,17 +68,12 @@ export function registerApplicationUsageCollector(
         if (typeof savedObjectsClient === 'undefined') {
           return;
         }
-        const [
-          { saved_objects: rawApplicationUsageTotals },
-          { saved_objects: rawApplicationUsageDaily },
-        ] = await Promise.all([
-          savedObjectsClient.find<ApplicationUsageTotal>({
+        const [rawApplicationUsageTotals, rawApplicationUsageDaily] = await Promise.all([
+          fetchAllSavedObjects<ApplicationUsageTotal>(savedObjectsClient, {
             type: SAVED_OBJECTS_TOTAL_TYPE,
-            perPage: 10000, // We only have 44 apps for now. This limit is OK.
           }),
-          savedObjectsClient.find<ApplicationUsageDaily>({
+          fetchAllSavedObjects<ApplicationUsageDaily>(savedObjectsClient, {
             type: SAVED_OBJECTS_DAILY_TYPE,
-            perPage: 10000, // We can have up to 44 apps * 91 days = 4004 docs. This limit is OK
           }),
         ]);
 

@@ -9,7 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
-import type { RouteValidationFunction } from 'kibana/server';
+import type { RouteValidationFunction } from '@kbn/core/server';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -36,7 +36,7 @@ const formatError = (error: ValidationError) =>
     error.value
   )} does not match expected type ${getErrorType(error)}`;
 
-const formatErrors = (errors: ValidationError[]) =>
+export const formatErrors = (errors: ValidationError[]) =>
   `Failed to validate: \n${errors.map((error) => `  ${formatError(error)}`).join('\n')}`;
 
 export const createPlainError = (message: string) => new Error(message);

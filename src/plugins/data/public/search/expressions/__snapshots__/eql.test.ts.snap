@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`eql correctly handles filter, query and timerange on context 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "fields": Array [],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_phrase": Object {
+                  "gender": "male",
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "query_string": Object {
+                  "query": "*",
+                  "time_zone": true,
+                },
+              },
+            ],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        "query": "test",
+        "size": 4,
+      },
+      "index": "kibana_sample_data_logs",
+    },
+  },
+  "type": "eql_raw_response",
+}
+`;
+
+exports[`eql correctly handles input adds filters 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "fields": Array [],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_phrase": Object {
+                  "gender": "male",
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        "query": "test",
+        "size": 0,
+      },
+      "index": "test",
+    },
+  },
+  "type": "eql_raw_response",
+}
+`;
+
+exports[`eql correctly handles input adds filters to query with filters 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "fields": Array [],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_phrase": Object {
+                  "gender": "male",
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        "query": "test",
+        "size": 4,
+      },
+      "index": "kibana_sample_data_logs",
+    },
+  },
+  "type": "eql_raw_response",
+}
+`;
+
+exports[`eql correctly handles input adds query 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "fields": Array [],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [],
+            "must": Array [
+              Object {
+                "query_string": Object {
+                  "query": "*",
+                  "time_zone": true,
+                },
+              },
+            ],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        "query": "test",
+        "size": 0,
+      },
+      "index": "test",
+    },
+  },
+  "type": "eql_raw_response",
+}
+`;
+
+exports[`eql correctly handles input adds query to a query with filters 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "fields": Array [],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [],
+            "must": Array [
+              Object {
+                "query_string": Object {
+                  "query": "*",
+                  "time_zone": true,
+                },
+              },
+            ],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        "query": "test",
+        "size": 4,
+      },
+      "index": "kibana_sample_data_logs",
+    },
+  },
+  "type": "eql_raw_response",
+}
+`;
+
+exports[`eql correctly handles input ignores timerange 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "fields": Array [],
+        "filter": Object {
+          "bool": Object {
+            "filter": Array [],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        "query": "test",
+        "size": 0,
+      },
+      "index": "test",
+    },
+  },
+  "type": "eql_raw_response",
+}
+`;

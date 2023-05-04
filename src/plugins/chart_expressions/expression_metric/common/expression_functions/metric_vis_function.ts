@@ -8,11 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { visType } from '../types';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
-import { ColorMode } from '../../../../charts/common';
+import {
+  prepareLogTable,
+  Dimension,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import { LayoutDirection } from '@elastic/charts';
+import { MetricVisRenderConfig, visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
@@ -22,19 +26,68 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     defaultMessage: 'Metric visualization',
   }),
   args: {
-    percentageMode: {
-      types: ['boolean'],
-      default: false,
-      help: i18n.translate('expressionMetricVis.function.percentageMode.help', {
-        defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
+    metric: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionMetricVis.function.metric.help', {
+        defaultMessage: 'The primary metric.',
+      }),
+      required: true,
+    },
+    secondaryMetric: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryMetric.help', {
+        defaultMessage: 'The secondary metric (shown above the primary).',
       }),
     },
-    colorMode: {
+    max: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionMetricVis.function.max.help.', {
+        defaultMessage: 'The dimension containing the maximum value.',
+      }),
+    },
+    breakdownBy: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionMetricVis.function.breakdownBy.help', {
+        defaultMessage: 'The dimension containing the labels for sub-categories.',
+      }),
+    },
+    trendline: {
+      types: [EXPRESSION_METRIC_TRENDLINE_NAME],
+      help: i18n.translate('expressionMetricVis.function.trendline.help', {
+        defaultMessage: 'An optional trendline configuration',
+      }),
+    },
+    subtitle: {
       types: ['string'],
-      default: `"${ColorMode.None}"`,
-      options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
-      help: i18n.translate('expressionMetricVis.function.colorMode.help', {
-        defaultMessage: 'Which part of metric to color',
+      help: i18n.translate('expressionMetricVis.function.subtitle.help', {
+        defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
+      }),
+    },
+    secondaryPrefix: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryPrefix.help', {
+        defaultMessage: 'Optional text to be show before secondaryMetric.',
+      }),
+    },
+    progressDirection: {
+      types: ['string'],
+      options: [LayoutDirection.Vertical, LayoutDirection.Horizontal],
+      default: LayoutDirection.Vertical,
+      help: i18n.translate('expressionMetricVis.function.progressDirection.help', {
+        defaultMessage: 'The direction the progress bar should grow.',
+      }),
+      strict: true,
+    },
+    color: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.color.help', {
+        defaultMessage: 'Provides a static visualization color. Overridden by palette.',
+      }),
+    },
+    icon: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.icon.help', {
+        defaultMessage: 'Provides a static visualization icon.',
       }),
     },
     palette: {
@@ -43,59 +96,84 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Provides colors for the values, based on the bounds.',
       }),
     },
-    showLabels: {
-      types: ['boolean'],
-      default: true,
-      help: i18n.translate('expressionMetricVis.function.showLabels.help', {
-        defaultMessage: 'Shows labels under the metric values.',
+    maxCols: {
+      types: ['number'],
+      help: i18n.translate('expressionMetricVis.function.numCols.help', {
+        defaultMessage: 'Specifies the max number of columns in the metric grid.',
+      }),
+      default: 5,
+    },
+    minTiles: {
+      types: ['number'],
+      help: i18n.translate('expressionMetricVis.function.minTiles.help', {
+        defaultMessage:
+          'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
       }),
     },
-    font: {
-      types: ['style'],
-      help: i18n.translate('expressionMetricVis.function.font.help', {
-        defaultMessage: 'Font settings.',
+    inspectorTableId: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.inspectorTableId.help', {
+        defaultMessage: 'An ID for the inspector table',
       }),
-      default: `{font size=60 align="center"}`,
-    },
-    metric: {
-      types: ['vis_dimension'],
-      help: i18n.translate('expressionMetricVis.function.metric.help', {
-        defaultMessage: 'metric dimension configuration',
-      }),
-      required: true,
-      multi: true,
-    },
-    bucket: {
-      types: ['vis_dimension'],
-      help: i18n.translate('expressionMetricVis.function.bucket.help', {
-        defaultMessage: 'bucket dimension configuration',
-      }),
+      multi: false,
+      default: 'default',
     },
   },
   fn(input, args, handlers) {
-    if (args.percentageMode && !args.palette?.params) {
-      throw new Error('Palette must be provided when using percentageMode');
-    }
+    validateAccessor(args.metric, input.columns);
+    validateAccessor(args.secondaryMetric, input.columns);
+    validateAccessor(args.max, input.columns);
+    validateAccessor(args.breakdownBy, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const argsTable: Dimension[] = [
         [
-          args.metric,
+          [args.metric],
           i18n.translate('expressionMetricVis.function.dimension.metric', {
             defaultMessage: 'Metric',
           }),
         ],
       ];
-      if (args.bucket) {
+
+      if (args.secondaryMetric) {
         argsTable.push([
-          [args.bucket],
+          [args.secondaryMetric],
+          i18n.translate('expressionMetricVis.function.dimension.secondaryMetric', {
+            defaultMessage: 'Secondary Metric',
+          }),
+        ]);
+      }
+
+      if (args.breakdownBy) {
+        argsTable.push([
+          [args.breakdownBy],
           i18n.translate('expressionMetricVis.function.dimension.splitGroup', {
             defaultMessage: 'Split group',
           }),
         ]);
       }
-      const logTable = prepareLogTable(input, argsTable);
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+
+      if (args.max) {
+        argsTable.push([
+          [args.max],
+          i18n.translate('expressionMetricVis.function.dimension.maximum', {
+            defaultMessage: 'Maximum',
+          }),
+        ]);
+      }
+
+      const logTable = prepareLogTable(input, argsTable, true);
+      handlers.inspectorAdapters.tables.logDatatable(args.inspectorTableId, logTable);
+
+      if (args.trendline?.inspectorTable && args.trendline.inspectorTableId) {
+        handlers.inspectorAdapters.tables.logDatatable(
+          args.trendline?.inspectorTableId,
+          args.trendline?.inspectorTable
+        );
+      }
     }
 
     return {
@@ -106,23 +184,24 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
+            subtitle: args.subtitle,
+            secondaryPrefix: args.secondaryPrefix,
+            color: args.color,
+            icon: args.icon,
             palette: args.palette?.params,
-            percentageMode: args.percentageMode,
-            metricColorMode: args.colorMode,
-            labels: {
-              show: args.showLabels,
-            },
-            style: {
-              bgColor: args.colorMode === ColorMode.Background,
-              labelColor: args.colorMode === ColorMode.Labels,
-              ...args.font,
-            },
+            progressDirection: args.progressDirection,
+            maxCols: args.maxCols,
+            minTiles: args.minTiles,
+            trends: args.trendline?.trends,
           },
           dimensions: {
-            metrics: args.metric,
-            ...(args.bucket ? { bucket: args.bucket } : {}),
+            metric: args.metric,
+            secondaryMetric: args.secondaryMetric,
+            max: args.max,
+            breakdownBy: args.breakdownBy,
           },
         },
+        overrides: handlers.variables?.overrides as MetricVisRenderConfig['overrides'],
       },
     };
   },

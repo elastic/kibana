@@ -1,0 +1,103 @@
+[[cases-api-get-case]]
+== Get case API
+++++
+<titleabbrev>Get case</titleabbrev>
+++++
+
+Returns information about a case.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
+=== {api-request-title}
+
+`GET <kibana host>:<port>/api/cases/<case ID>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>`
+
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case you're seeking.
+
+=== {api-path-parms-title}
+
+`<case_id>`::
+(Required, string) An identifier for the case to retrieve. Use 
+<<cases-api-find-cases>> to retrieve case IDs.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== {api-query-parms-title}
+
+`includeComments`::
+(Optional, boolean) Determines whether case comments are returned. Defaults to 
+`true`. deprecated:[8.1.0, "The `includeComments` query parameter is deprecated and will be removed in a future release."]
+
+=== {api-response-codes-title}
+
+`200`::
+   Indicates a successful call.
+
+=== {api-examples-title}
+
+Returns case ID `31cdada0-02c1-11ed-85f2-4f7c222ca2fa`:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/31cdada0-02c1-11ed-85f2-4f7c222ca2fa
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object with the retrieved case. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "id":"31cdada0-02c1-11ed-85f2-4f7c222ca2fa",
+  "version":"WzM2LDFd",
+  "comments":[{
+    "id":"2134c1d0-02c2-11ed-85f2-4f7c222ca2fa",
+    "version":"WzM3LDFd",
+    "type":"user",
+    "owner":"cases",
+    "comment":"A new comment",
+    "created_at":"2022-07-13T15:40:32.335Z",
+    "created_by":{"email":null,"full_name":null,"username":"elastic"},
+    "pushed_at":null,
+    "pushed_by":null,
+    "updated_at":null,
+    "updated_by":null
+  }],
+  "totalComment":1,
+  "totalAlerts":0,
+  "title":"Case title 1",
+  "tags":["tag 1"],
+  "settings":{"syncAlerts":true},
+  "owner":"cases",
+  "description":"A case description",
+  "duration":null, <1>
+  "severity":"low",
+  "closed_at":null,
+  "closed_by":null,
+  "created_at":"2022-07-13T15:33:50.604Z",
+  "created_by":{"username":"elastic","email":null,"full_name":null},
+  "status":"open",
+  "updated_at":"2022-07-13T15:40:32.335Z",
+  "updated_by":{"full_name":null,"email":null,"username":"elastic"},
+  "assignees":[{"uid":"u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"}],
+  "connector":{"id":"none","name":"none","type":".none","fields":null},
+  "external_service":null
+}
+--------------------------------------------------
+<1> Duration represents the elapsed time from the creation of the case to its
+closure (in seconds). If the case has not been closed, the duration is set to
+`null`. If the case was closed after less than half a second, the duration is
+rounded down to zero.

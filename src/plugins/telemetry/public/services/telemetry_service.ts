@@ -7,16 +7,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { TelemetryPluginConfig } from '../plugin';
-import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
-import type { UnencryptedTelemetryPayload, EncryptedTelemetryPayload } from '../../common/types';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config/get_telemetry_channel_endpoint';
+import type {
+  UnencryptedTelemetryPayload,
+  EncryptedTelemetryPayload,
+} from '../../common/types/latest';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
   http: CoreStart['http'];
-  notifications: CoreStart['notifications'];
+  notifications: CoreSetup['notifications'];
   isScreenshotMode: boolean;
   currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
@@ -29,7 +32,7 @@ interface TelemetryServiceConstructor {
 export class TelemetryService {
   private readonly http: CoreStart['http'];
   private readonly reportOptInStatusChange: boolean;
-  private readonly notifications: CoreStart['notifications'];
+  private readonly notifications: CoreSetup['notifications'];
   private readonly defaultConfig: TelemetryPluginConfig;
   private readonly isScreenshotMode: boolean;
   private updatedConfig?: TelemetryPluginConfig;
@@ -113,7 +116,9 @@ export class TelemetryService {
    */
   public getUserShouldSeeOptInNotice(): boolean {
     return (
-      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      (!this.config.hidePrivacyStatement &&
+        this.config.telemetryNotifyUserAboutOptInDefault &&
+        this.config.userCanChangeSettings) ??
       false
     );
   }
@@ -136,6 +141,17 @@ export class TelemetryService {
   /** Are there any blockers for sending telemetry */
   public canSendTelemetry = (): boolean => {
     return !this.isScreenshotMode && this.getIsOptedIn();
+  };
+
+  public fetchLastReported = async (): Promise<number | undefined> => {
+    const response = await this.http.get<{ lastReported?: number }>(
+      '/api/telemetry/v2/last_reported'
+    );
+    return response?.lastReported;
+  };
+
+  public updateLastReported = async (): Promise<number | undefined> => {
+    return this.http.put('/api/telemetry/v2/last_reported');
   };
 
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/

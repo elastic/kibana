@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no typed yet
 import { percentileRank } from './percentile_rank';
 import type { Panel, Series } from '../../../../../common/types';
 
@@ -75,7 +74,7 @@ describe('percentile_rank(resp, panel, series, meta, extractFields)', () => {
 
     expect(results).toHaveLength(2);
 
-    expect(results[0]).toHaveProperty('id', 'test:1000:0');
+    expect(results[0]).toHaveProperty('id', 'test╰┄►1000╰┄►0');
     expect(results[0]).toHaveProperty('color', '#000028');
     expect(results[0]).toHaveProperty('label', '(1000) Percentile Rank of cpu');
     expect(results[0].data).toEqual([
@@ -83,7 +82,7 @@ describe('percentile_rank(resp, panel, series, meta, extractFields)', () => {
       [2, 1],
     ]);
 
-    expect(results[1]).toHaveProperty('id', 'test:500:1');
+    expect(results[1]).toHaveProperty('id', 'test╰┄►500╰┄►1');
     expect(results[1]).toHaveProperty('color', '#0000FF');
     expect(results[1]).toHaveProperty('label', '(500) Percentile Rank of cpu');
     expect(results[1].data).toEqual([

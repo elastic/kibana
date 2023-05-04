@@ -6,27 +6,45 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+
+import { useMemo } from 'react';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+
 import {
+  type MlAnomalyRecordDoc,
+  MLAnomalyDoc,
+  ML_JOB_ID,
+  ML_PARTITION_FIELD_VALUE,
+} from '@kbn/ml-anomaly-utils';
+import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
 } from '../../../../common/types/results';
-import { HttpService } from '../http_service';
-import { basePath } from './index';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
-import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
-import { PartitionFieldsConfig } from '../../../../common/types/storage';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../src/core/types/elasticsearch';
-import { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import type { PartitionFieldsConfig } from '../../../../common/types/storage';
+import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { ExplorerChartsData } from '../../../../common/types/results';
+
+import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
+import type { CriteriaField } from '../results_service';
+import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+
+import { basePath } from '.';
+
+export interface CategoryDefinition {
+  categoryId: number;
+  terms: string;
+  regex: string;
+  examples: string[];
+}
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
-    influencers: string[],
+    influencers: MlEntityField[],
     aggregationInterval: string,
     threshold: number,
     earliestMs: number,
@@ -74,7 +92,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
-    return httpService.http<any>({
+    return httpService.http<CategoryDefinition>({
       path: `${basePath()}/results/category_definition`,
       method: 'POST',
       body,
@@ -137,7 +155,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
+    fieldToBucket?: typeof ML_JOB_ID | typeof ML_PARTITION_FIELD_VALUE
   ) {
     const body = JSON.stringify({
       jobIds,
@@ -162,4 +180,72 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  getAnomalyCharts$(
+    jobIds: string[],
+    influencers: MlEntityField[],
+    threshold: number,
+    earliestMs: number,
+    latestMs: number,
+    timeBounds: { min?: number; max?: number },
+    maxResults: number,
+    numberOfPoints: number,
+    influencersFilterQuery?: InfluencersFilterQuery
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      influencers,
+      threshold,
+      earliestMs,
+      latestMs,
+      maxResults,
+      influencersFilterQuery,
+      numberOfPoints,
+      timeBounds,
+    });
+    return httpService.http$<ExplorerChartsData>({
+      path: `${basePath()}/results/anomaly_charts`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getAnomalyRecords$(
+    jobIds: string[],
+    criteriaFields: CriteriaField[],
+    severity: number,
+    earliestMs: number | null,
+    latestMs: number | null,
+    interval: string,
+    functionDescription?: string
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      criteriaFields,
+      threshold: severity,
+      earliestMs,
+      latestMs,
+      interval,
+      functionDescription,
+    });
+    return httpService.http$<{ success: boolean; records: MlAnomalyRecordDoc[] }>({
+      path: `${basePath()}/results/anomaly_records`,
+      method: 'POST',
+      body,
+    });
+  },
 });
+
+export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
+
+/**
+ * Hooks for accessing {@link ResultsApiService} in React components.
+ */
+export function useResultsApiService(): ResultsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => resultsApiProvider(httpService), [httpService]);
+}

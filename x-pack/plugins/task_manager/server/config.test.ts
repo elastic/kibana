@@ -16,12 +16,16 @@ describe('config validation', () => {
           "enabled": false,
           "request_capacity": 10,
         },
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
-        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
           "enabled": false,
+          "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
         "monitored_stats_required_freshness": 4000,
@@ -39,6 +43,7 @@ describe('config validation', () => {
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
+        "worker_utilization_running_average_window": 5,
       }
     `);
   });
@@ -62,12 +67,16 @@ describe('config validation', () => {
           "enabled": false,
           "request_capacity": 10,
         },
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
-        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
           "enabled": false,
+          "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
         "monitored_stats_required_freshness": 4000,
@@ -85,6 +94,7 @@ describe('config validation', () => {
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
+        "worker_utilization_running_average_window": 5,
       }
     `);
   });
@@ -106,12 +116,16 @@ describe('config validation', () => {
           "enabled": false,
           "request_capacity": 10,
         },
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
-        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
           "enabled": false,
+          "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
         "monitored_stats_required_freshness": 4000,
@@ -134,6 +148,7 @@ describe('config validation', () => {
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
+        "worker_utilization_running_average_window": 5,
       }
     `);
   });

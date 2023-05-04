@@ -1,0 +1,184 @@
+{
+  "id": "@kbn/core-saved-objects-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-browser-internal",
+        "id": "def-common.SavedObjectsService",
+        "type": "Class",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectsService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBrowserInternalPluginApi",
+            "section": "def-common.SavedObjectsService",
+            "text": "SavedObjectsService"
+          },
+          " implements ",
+          "CoreService",
+          "<void, ",
+          {
+            "pluginId": "@kbn/core-saved-objects-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+            "section": "def-common.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
+          ">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-root-browser-internal",
+            "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+          },
+          {
+            "plugin": "@kbn/core-root-browser-internal",
+            "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+          },
+          {
+            "plugin": "@kbn/core-root-browser-internal",
+            "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-browser-internal",
+            "id": "def-common.SavedObjectsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-browser-internal",
+            "id": "def-common.SavedObjectsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ http }: { http: ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              },
+              "; }) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+                "section": "def-common.SavedObjectsStart",
+                "text": "SavedObjectsStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-browser-internal",
+                "id": "def-common.SavedObjectsService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http }",
+                "description": [],
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-saved-objects-browser-internal",
+                    "id": "def-common.SavedObjectsService.start.$1.http",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "http",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/core-http-browser",
+                        "scope": "common",
+                        "docId": "kibKbnCoreHttpBrowserPluginApi",
+                        "section": "def-common.HttpSetup",
+                        "text": "HttpSetup"
+                      }
+                    ],
+                    "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-browser-internal",
+            "id": "def-common.SavedObjectsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

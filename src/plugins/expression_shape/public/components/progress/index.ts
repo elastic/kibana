@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { lazy } from 'react';
-
-export const LazyProgressComponent = lazy(() => import('./progress_component'));
-export const LazyProgressDrawer = lazy(() => import('./progress_drawer'));
+export { ProgressComponent } from './progress_component';
+export { ProgressDrawerComponent } from './progress_drawer';

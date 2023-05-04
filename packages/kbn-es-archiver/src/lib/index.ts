@@ -12,9 +12,9 @@ export {
   createCreateIndexStream,
   createDeleteIndexStream,
   createGenerateIndexRecordsStream,
-  deleteKibanaIndices,
-  migrateKibanaIndex,
-  cleanKibanaIndices,
+  deleteSavedObjectIndices,
+  migrateSavedObjectIndices,
+  cleanSavedObjectIndices,
   createDefaultSpace,
 } from './indices';
 
@@ -33,3 +33,5 @@ export {
 export { readDirectory } from './directory';
 
 export { Progress } from './progress';
+
+export { getIndexTemplate } from './index_template';

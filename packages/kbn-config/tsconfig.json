@@ -1,23 +1,27 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./target_types",
-    "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-config/src",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/std",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/doc-links",
+    "@kbn/repo-packages"
   ],
   "exclude": [
-    "**/__fixtures__/**/*"
+    "target/**/*",
   ]
 }

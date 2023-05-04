@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasPlatformService } from '../platform';
 
@@ -22,7 +22,7 @@ const getUISetting = (setting: string) => uiSettings[setting];
 export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getBasePath: () => '/base/path',
   getBasePathInterface: noop,
-  getDocLinkVersion: () => 'dockLinkVersion',
+  getDocLinkVersion: () => 'docLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
   getKibanaVersion: () => 'kibanaVersion',
   getHasWriteAccess: () => true,
@@ -36,4 +36,6 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   setFullscreen: noop,
   redirectLegacyUrl: noop,
   getLegacyUrlConflict: undefined,
+  getHttp: noop,
+  getSavedObjectsManagement: noop,
 });

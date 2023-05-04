@@ -6,11 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getEventMetadata } from './get_event_metadata';
 import { processorEventRt } from '../../../common/processor_event';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const eventMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
@@ -21,15 +20,17 @@ const eventMetadataRoute = createApmServerRoute({
       id: t.string,
     }),
   }),
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
+  handler: async (
+    resources
+  ): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       path: { processorEvent, id },
     } = resources.params;
 
     const metadata = await getEventMetadata({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       processorEvent,
       id,
     });
@@ -40,5 +41,4 @@ const eventMetadataRoute = createApmServerRoute({
   },
 });
 
-export const eventMetadataRouteRepository =
-  createApmServerRouteRepository().add(eventMetadataRoute);
+export const eventMetadataRouteRepository = eventMetadataRoute;

@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
 
-import {
-  AppToast,
-  useStateToaster,
-  ManageGlobalToaster,
-  GlobalToaster,
-  displayErrorToast,
-} from '.';
+import type { AppToast } from '.';
+import { useStateToaster, ManageGlobalToaster, GlobalToaster, displayErrorToast } from '.';
 
 jest.mock('uuid', () => {
   return {
@@ -28,7 +23,7 @@ jest.mock('uuid', () => {
 const mockToast: AppToast = {
   color: 'danger',
   id: 'id-super-id',
-  iconType: 'alert',
+  iconType: 'warning',
   title: 'Test & Test',
   toastLifeTimeMs: 100,
   text: 'Error 1, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
@@ -126,7 +121,9 @@ describe('Toaster', () => {
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test'
+      );
     });
 
     test('Render an error toaster', () => {
@@ -158,7 +155,9 @@ describe('Toaster', () => {
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test ERROR');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test ERROR'
+      );
       expect(wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').exists()).toBe(
         true
       );
@@ -203,10 +202,14 @@ describe('Toaster', () => {
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
 
       expect(wrapper.find('button[data-test-subj="toastCloseButton"]').length).toBe(1);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test'
+      );
       wrapper.find('button[data-test-subj="delete-toast"]').simulate('click');
-      expect(wrapper.find('.euiToast').length).toBe(1);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
+      expect(wrapper.find('div.euiToast').length).toBe(1);
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test II'
+      );
     });
 
     test('Do not show anymore toaster when modal error is open', () => {
@@ -275,14 +278,18 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test II'
+      );
 
       wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').simulate('click');
       expect(wrapper.find('.euiToast').length).toBe(0);
 
       wrapper.find('button[data-test-subj="modal-all-errors-close"]').simulate('click');
-      expect(wrapper.find('.euiToast').length).toBe(1);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+      expect(wrapper.find('div.euiToast').length).toBe(1);
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test'
+      );
     });
   });
 
@@ -292,7 +299,7 @@ describe('Toaster', () => {
         toast: {
           color: 'danger',
           errors: ['message'],
-          iconType: 'alert',
+          iconType: 'error',
           id: '9e1f72a9-7c73-4b7f-a562-09940f7daf4a',
           title: 'Title',
         },

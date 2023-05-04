@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
 
@@ -19,15 +19,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       assignFlyout = tagManagementPage.assignFlyout;
-      await esArchiver.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
       );
       await tagManagementPage.navigateTo();
     });
 
     afterEach(async () => {
-      await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign'
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
       );
     });
 

@@ -20,7 +20,9 @@ export class StyleMeta {
   }
 
   getCategoryFieldMetaDescriptor(fieldName: string): Category[] {
-    return this._descriptor.fieldMeta[fieldName].categories;
+    return this._descriptor.fieldMeta[fieldName]
+      ? this._descriptor.fieldMeta[fieldName].categories
+      : [];
   }
 
   isPointsOnly(): boolean {

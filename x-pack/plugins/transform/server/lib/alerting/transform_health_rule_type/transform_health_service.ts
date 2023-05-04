@@ -5,38 +5,53 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { keyBy } from 'lodash';
+import { keyBy, memoize, partition } from 'lodash';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { TransformStats } from '../../../../common/types/transform_stats';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
   TRANSFORM_HEALTH_CHECK_NAMES,
   TRANSFORM_RULE_TYPE,
+  TRANSFORM_STATE,
 } from '../../../../common/constants';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
-import {
-  NotStartedTransformResponse,
+import type {
+  ErrorMessagesTransformResponse,
+  TransformStateReportResponse,
   TransformHealthAlertContext,
 } from './register_transform_health_rule_type';
-import type { RulesClient } from '../../../../../alerting/server';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
+import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../routes/api/transforms_audit_messages';
 
 interface TestResult {
+  isHealthy: boolean;
   name: string;
   context: TransformHealthAlertContext;
 }
 
-type Transform = estypes.Transform & { id: string; description?: string; sync: object };
+type Transform = estypes.TransformGetTransformTransformSummary & {
+  id: string;
+  description?: string;
+  sync: object;
+};
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 
-export function transformHealthServiceProvider(
-  esClient: ElasticsearchClient,
-  rulesClient?: RulesClient
-) {
+export function transformHealthServiceProvider({
+  esClient,
+  rulesClient,
+  fieldFormatsRegistry,
+}: {
+  esClient: ElasticsearchClient;
+  rulesClient?: RulesClient;
+  fieldFormatsRegistry?: FieldFormatsRegistry;
+}) {
   const transformsDict = new Map<string, Transform>();
 
   /**
@@ -64,7 +79,7 @@ export function transformHealthServiceProvider(
           allow_no_match: true,
           size: 1000,
         })
-      ).body.transforms as Transform[];
+      ).transforms as Transform[];
 
       transformsResponse.forEach((t) => {
         transformsDict.set(t.id, t);
@@ -82,28 +97,147 @@ export function transformHealthServiceProvider(
     return resultTransformIds;
   };
 
+  const getTransformStats = memoize(async (transformIds: string[]): Promise<TransformStats[]> => {
+    return (
+      await esClient.transform.getTransformStats({
+        transform_id: transformIds.join(','),
+      })
+    ).transforms as TransformStats[];
+  });
+
+  function baseTransformAlertResponseFormatter(
+    transformStats: TransformStats
+  ): TransformStateReportResponse {
+    const dateFormatter = fieldFormatsRegistry!.deserialize({ id: FIELD_FORMAT_IDS.DATE });
+
+    return {
+      transform_id: transformStats.id,
+      description: transformsDict.get(transformStats.id)?.description,
+      transform_state: transformStats.state,
+      node_name: transformStats.node?.name,
+      health_status: transformStats.health.status,
+      ...(transformStats.health.issues
+        ? {
+            issues: transformStats.health.issues.map((issue) => {
+              return {
+                issue: issue.issue,
+                details: issue.details,
+                count: issue.count,
+                ...(issue.first_occurrence
+                  ? { first_occurrence: dateFormatter.convert(issue.first_occurrence) }
+                  : {}),
+              };
+            }),
+          }
+        : {}),
+    };
+  }
+
   return {
     /**
-     * Returns report about not started transform
+     * Returns report about not started transforms
+     * @param transformIds
+     *
+     * @return - Partitions with not started and started transforms
+     */
+    async getTransformsStateReport(
+      transformIds: string[]
+    ): Promise<[TransformStateReportResponse[], TransformStateReportResponse[]]> {
+      const transformsStats = await getTransformStats(transformIds);
+
+      return partition(
+        transformsStats.map(baseTransformAlertResponseFormatter),
+        (t) =>
+          t.transform_state !== TRANSFORM_STATE.STARTED &&
+          t.transform_state !== TRANSFORM_STATE.INDEXING
+      );
+    },
+    /**
+     * Returns report about transforms that contain error messages
      * @param transformIds
      */
-    async getNotStartedTransformsReport(
+    async getErrorMessagesReport(
       transformIds: string[]
-    ): Promise<NotStartedTransformResponse[]> {
+    ): Promise<ErrorMessagesTransformResponse[]> {
+      interface TransformErrorsBucket {
+        key: string;
+        doc_count: number;
+        error_messages: estypes.AggregationsTopHitsAggregate;
+      }
+
+      const response = await esClient.search<
+        unknown,
+        Record<'by_transform', estypes.AggregationsMultiBucketAggregateBase<TransformErrorsBucket>>
+      >({
+        index: ML_DF_NOTIFICATION_INDEX_PATTERN,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  level: 'error',
+                },
+              },
+              {
+                terms: {
+                  transform_id: transformIds,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          by_transform: {
+            terms: {
+              field: 'transform_id',
+              size: transformIds.length,
+            },
+            aggs: {
+              error_messages: {
+                top_hits: {
+                  size: 10,
+                  _source: {
+                    includes: ['message', 'level', 'timestamp', 'node_name'],
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // If transform contains errors, it's in a failed state
       const transformsStats = (
         await esClient.transform.getTransformStats({
           transform_id: transformIds.join(','),
         })
-      ).body.transforms;
+      ).transforms;
+      const failedTransforms = new Set(
+        transformsStats.filter((t) => t.state === TRANSFORM_STATE.FAILED).map((t) => t.id)
+      );
+
+      return (response.aggregations?.by_transform.buckets as TransformErrorsBucket[])
+        .map(({ key, error_messages: errorMessages }) => {
+          return {
+            transform_id: key,
+            error_messages: errorMessages.hits.hits.map((v) => v._source),
+          } as ErrorMessagesTransformResponse;
+        })
+        .filter((v) => failedTransforms.has(v.transform_id));
+    },
+    /**
+     * Returns report about unhealthy transforms
+     * @param transformIds
+     */
+    async getUnhealthyTransformsReport(
+      transformIds: string[]
+    ): Promise<TransformStateReportResponse[]> {
+      const transformsStats = await getTransformStats(transformIds);
 
       return transformsStats
-        .filter((t) => t.state !== 'started' && t.state !== 'indexing')
-        .map((t) => ({
-          transform_id: t.id,
-          description: transformsDict.get(t.id)?.description,
-          transform_state: t.state,
-          node_name: t.node?.name,
-        }));
+        .filter((t) => t.health.status !== 'green')
+        .map(baseTransformAlertResponseFormatter);
     },
     /**
      * Returns results of the transform health checks
@@ -120,26 +254,96 @@ export function transformHealthServiceProvider(
       const result: TestResult[] = [];
 
       if (testsConfig.notStarted.enabled) {
-        const response = await this.getNotStartedTransformsReport(transformIds);
-        if (response.length > 0) {
-          const count = response.length;
-          const transformsString = response.map((t) => t.transform_id).join(', ');
+        const [notStartedTransform, startedTransforms] = await this.getTransformsStateReport(
+          transformIds
+        );
 
-          result.push({
-            name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.transform.alertTypes.transformHealth.notStartedMessage',
-                {
+        const isHealthy = notStartedTransform.length === 0;
+
+        const count = isHealthy ? startedTransforms.length : notStartedTransform.length;
+        const transformsString = (isHealthy ? startedTransforms : notStartedTransform)
+          .map((t) => t.transform_id)
+          .join(', ');
+
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
+          context: {
+            results: isHealthy ? startedTransforms : notStartedTransform,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.notStartedRecoveryMessage',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} started.',
+                    values: { count, transformsString },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedMessage', {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} not started.',
+                    '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} not started.',
                   values: { count, transformsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
+      }
+
+      if (testsConfig.errorMessages.enabled) {
+        const response = await this.getErrorMessagesReport(transformIds);
+
+        const isHealthy = response.length === 0;
+        const count = response.length;
+        const transformsString = response.map((t) => t.transform_id).join(', ');
+
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.errorMessages.name,
+          context: {
+            results: isHealthy ? [] : response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.errorMessagesRecoveryMessage',
+                  {
+                    defaultMessage:
+                      'No errors in the {count, plural, one {transform} other {transforms}} messages.',
+                    values: { count: transformIds.length },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesMessage', {
+                  defaultMessage:
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contain}} error messages.',
+                  values: { count, transformsString },
+                }),
+          },
+        });
+      }
+
+      if (testsConfig.healthCheck.enabled) {
+        const response = await this.getUnhealthyTransformsReport(transformIds);
+        const isHealthy = response.length === 0;
+        const count = response.length;
+        const transformsString = response.map((t) => t.transform_id).join(', ');
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name,
+          context: {
+            results: isHealthy ? [] : response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} healthy.',
+                    values: { count, transformsString },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
+                  defaultMessage:
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} unhealthy.',
+                  values: { count, transformsString },
+                }),
+          },
+        });
       }
 
       return result;

@@ -6,13 +6,11 @@
  */
 
 import _ from 'lodash';
+import { stackManagementSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/management/schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { stackManagementSchema } from '../../../../../src/plugins/kibana_usage_collection/server/collectors/management/schema';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/119038
-  describe.skip('Stack Management', function () {
-    this.tags('ciGroup1');
+  describe('Stack Management', function () {
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 
@@ -20,7 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await common.navigateToApp('home'); // Navigate to Home to make sure all the appIds are loaded
-      registeredSettings = await browser.execute(() => window.__registeredUiSettings__);
+      await common.isChromeVisible(); // Make sure the page is fully loaded
+      registeredSettings = await browser.execute(() => {
+        // @ts-expect-error this code runs in the browser
+        return window.__registeredUiSettings__;
+      });
     });
 
     it('registers all UI Settings in the UsageStats interface', () => {

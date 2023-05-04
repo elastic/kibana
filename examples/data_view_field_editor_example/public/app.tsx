@@ -6,23 +6,28 @@
  * Side Public License, v 1.
  */
 
+import {
+  DefaultItemAction,
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { AppMountParameters } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import {
-  EuiPage,
-  EuiPageHeader,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiButton,
-  EuiInMemoryTable,
-  EuiText,
-  DefaultItemAction,
-} from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
-import { DataPublicPluginStart } from '../../../src/plugins/data/public';
-import type { DataView, DataViewField } from '../../../src/plugins/data_views/public';
-import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_field_editor/public';
 
 interface Props {
   dataView?: DataView;
@@ -33,6 +38,8 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   const [fields, setFields] = useState<DataViewField[]>(
     dataView?.fields.getAll().filter((f) => !f.scripted) || []
   );
+  const [preconfigured, setPreconfigured] = useState<boolean>(false);
+
   const refreshFields = () => setFields(dataView?.fields.getAll().filter((f) => !f.scripted) || []);
   const columns = [
     {
@@ -75,22 +82,42 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
     },
   ];
 
+  const preconfigureId = useGeneratedHtmlId({ prefix: 'usePreconfigured' });
   const content = dataView ? (
     <>
       <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
-      <div>
-        <EuiButton
-          onClick={() =>
-            dataViewFieldEditor.openEditor({
-              ctx: { dataView },
-              onSave: refreshFields,
-            })
-          }
-          data-test-subj="addField"
-        >
-          Add field
-        </EuiButton>
-      </div>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={() =>
+              dataViewFieldEditor.openEditor({
+                ctx: { dataView },
+                onSave: refreshFields,
+                fieldToCreate: preconfigured
+                  ? {
+                      name: 'demotestfield',
+                      type: 'boolean',
+                      script: { source: 'emit(true)' }, // optional
+                      customLabel: 'cool demo test field', // optional
+                      format: { id: 'boolean' }, // optional
+                    }
+                  : undefined,
+              })
+            }
+            data-test-subj="addField"
+          >
+            Add field
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="preconfiguredControlWrapper">
+          <EuiCheckbox
+            id={preconfigureId}
+            checked={preconfigured}
+            label="Use preconfigured options"
+            onChange={() => setPreconfigured(!preconfigured)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiInMemoryTable<DataViewField>
         items={fields}
         columns={columns}

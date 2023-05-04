@@ -12,7 +12,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       box={
         Object {
           "incremental": true,
-          "placeholder": "e.g. rare_process_linux",
+          "placeholder": "e.g. Unusual Linux Process",
         }
       }
       data-test-subj="jobs-filter-bar"
@@ -30,6 +30,9 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
             Object {
               "awaitingNodeAssignment": false,
               "bucketSpanSeconds": 900,
+              "customSettings": Object {
+                "security_app_display_name": "Unusual Network Activity",
+              },
               "datafeedId": "datafeed-linux_anomalous_network_activity_ecs",
               "datafeedIndices": Array [
                 "auditbeat-*",
@@ -54,12 +57,15 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "latestResultsTimestampMs": 1571022900000,
               "latestTimestampMs": 1571022859393,
               "memory_status": "ok",
-              "moduleId": "siem_auditbeat",
+              "moduleId": "security_linux_v3",
               "processed_record_count": 32010,
             },
             Object {
               "awaitingNodeAssignment": false,
               "bucketSpanSeconds": 900,
+              "customSettings": Object {
+                "security_app_display_name": "Unusually Linux Processes",
+              },
               "datafeedId": "datafeed-rare_process_by_host_linux_ecs",
               "datafeedIndices": Array [
                 "auditbeat-*",
@@ -81,12 +87,15 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "jobState": "closed",
               "jobTags": Object {},
               "memory_status": "ok",
-              "moduleId": "siem_auditbeat",
+              "moduleId": "security_linux_v3",
               "processed_record_count": 0,
             },
             Object {
               "awaitingNodeAssignment": false,
               "bucketSpanSeconds": 900,
+              "customSettings": Object {
+                "security_app_display_name": "Unusually Windows Processes",
+              },
               "datafeedId": "",
               "datafeedIndices": Array [],
               "datafeedState": "",
@@ -103,10 +112,10 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
               "isElasticJob": true,
               "isInstalled": false,
               "isSingleMetricViewerJob": false,
-              "jobState": "",
+              "jobState": "closed",
               "jobTags": Object {},
               "memory_status": "",
-              "moduleId": "siem_winlogbeat",
+              "moduleId": "security_windows_v3",
               "processed_record_count": 0,
             },
           ]

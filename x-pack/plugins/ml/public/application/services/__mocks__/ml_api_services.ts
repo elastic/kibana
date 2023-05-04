@@ -9,4 +9,10 @@ export const mlApiServicesMock = {
   jobs: {
     jobForCloning: jest.fn(),
   },
+  results: {
+    getAnomalyCharts$: jest.fn(),
+  },
+  notifications: {
+    findMessages: jest.fn(),
+  },
 };

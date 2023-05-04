@@ -8,7 +8,7 @@
 import { XYBrushEvent } from '@elastic/charts';
 import { History } from 'history';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { fromQuery, toQuery } from '../../Links/url_helpers';
+import { fromQuery, toQuery } from '../../links/url_helpers';
 
 export const onBrushEnd = ({
   x,
@@ -39,6 +39,7 @@ export const onBrushEnd = ({
 export function isTimeseriesEmpty(timeseries?: Array<TimeSeries<Coordinate>>) {
   return (
     !timeseries ||
+    timeseries.length === 0 ||
     timeseries
       .map((serie) => serie.data)
       .flat()

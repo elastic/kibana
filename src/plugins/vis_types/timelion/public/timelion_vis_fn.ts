@@ -8,24 +8,27 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
-import { KibanaContext, Query, TimeRange } from '../../../data/public';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
 export interface TimelionRenderValue {
-  visData: TimelionSuccessResponse;
+  visData?: TimelionSuccessResponse;
   visType: 'timelion';
   visParams: TimelionVisParams;
+  syncTooltips: boolean;
+  syncCursor: boolean;
 }
 
 export interface TimelionVisParams {
   expression: string;
   interval: string;
+  ariaLabel?: string;
 }
 
 export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -56,23 +59,54 @@ export const getTimelionVisualizationConfig = (
       default: 'auto',
       help: '',
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('timelion.function.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the timelion',
+      }),
+      required: false,
+    },
   },
-  async fn(input, args, { getSearchSessionId, getExecutionContext }) {
+  async fn(
+    input,
+    args,
+    {
+      getSearchSessionId,
+      getExecutionContext,
+      variables,
+      abortSignal: expressionAbortSignal,
+      isSyncTooltipsEnabled,
+      isSyncCursorEnabled,
+    }
+  ) {
     const { getTimelionRequestHandler } = await import('./async_services');
-    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+    const visParams = {
+      expression: args.expression,
+      interval: args.interval,
+      ariaLabel:
+        args.ariaLabel ??
+        (variables?.embeddableTitle as string) ??
+        getExecutionContext?.()?.description,
+    };
+    let visData: TimelionRenderValue['visData'];
 
-    const visParams = { expression: args.expression, interval: args.interval };
+    if (!expressionAbortSignal.aborted) {
+      const timelionRequestHandler = getTimelionRequestHandler({
+        ...dependencies,
+        expressionAbortSignal,
+      });
 
-    const response = await timelionRequestHandler({
-      timeRange: get(input, 'timeRange') as TimeRange,
-      query: get(input, 'query') as Query,
-      filters: get(input, 'filters') as Filter[],
-      visParams,
-      searchSessionId: getSearchSessionId(),
-      executionContext: getExecutionContext(),
-    });
+      visData = await timelionRequestHandler({
+        timeRange: get(input, 'timeRange') as TimeRange,
+        query: get(input, 'query') as Query,
+        filters: get(input, 'filters') as Filter[],
+        visParams,
+        searchSessionId: getSearchSessionId(),
+        executionContext: getExecutionContext(),
+      });
 
-    response.visType = TIMELION_VIS_NAME;
+      visData.visType = TIMELION_VIS_NAME;
+    }
 
     return {
       type: 'render',
@@ -80,7 +114,9 @@ export const getTimelionVisualizationConfig = (
       value: {
         visParams,
         visType: TIMELION_VIS_NAME,
-        visData: response,
+        visData,
+        syncTooltips: isSyncTooltipsEnabled?.() ?? false,
+        syncCursor: isSyncTooltipsEnabled?.() ?? true,
       },
     };
   },

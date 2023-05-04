@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+import type { Capabilities } from '@kbn/core-capabilities-common';
+
+import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+
+import { ENDPOINT_PRIVILEGES } from './constants';
+
+export type TransformPrivilege =
+  | 'canGetTransform'
+  | 'canCreateTransform'
+  | 'canDeleteTransform'
+  | 'canStartStopTransform';
+
 export interface FleetAuthz {
   fleet: {
     all: boolean;
@@ -26,6 +38,16 @@ export interface FleetAuthz {
 
     readIntegrationPolicies: boolean;
     writeIntegrationPolicies: boolean;
+  };
+
+  packagePrivileges?: {
+    [packageName: string]: {
+      actions: {
+        [key: string]: {
+          executePackageAction: boolean;
+        };
+      };
+    };
   };
 }
 
@@ -68,7 +90,128 @@ export const calculateAuthz = ({
     readPackageSettings: fleet.all && integrations.all,
     writePackageSettings: fleet.all && integrations.all,
 
-    readIntegrationPolicies: fleet.all && integrations.all,
+    readIntegrationPolicies: fleet.all && (integrations.all || integrations.read),
     writeIntegrationPolicies: fleet.all && integrations.all,
   },
 });
+
+export function calculatePackagePrivilegesFromCapabilities(
+  capabilities: Capabilities | undefined
+): FleetAuthz['packagePrivileges'] {
+  if (!capabilities) {
+    return {};
+  }
+
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce(
+    (acc, [privilege, { privilegeName }]) => {
+      return {
+        ...acc,
+        [privilege]: {
+          executePackageAction: (capabilities.siem && capabilities.siem[privilegeName]) || false,
+        },
+      };
+    },
+    {}
+  );
+
+  const transformActions = Object.keys(capabilities.transform).reduce((acc, privilegeName) => {
+    return {
+      ...acc,
+      [privilegeName]: {
+        executePackageAction: capabilities.transform[privilegeName] || false,
+      },
+    };
+  }, {});
+
+  return {
+    endpoint: {
+      actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
+    },
+  };
+}
+
+function getAuthorizationFromPrivileges(
+  kibanaPrivileges: Array<{
+    resource?: string;
+    privilege: string;
+    authorized: boolean;
+  }>,
+  prefix: string,
+  searchPrivilege: string
+): boolean {
+  const privilege = kibanaPrivileges.find((p) =>
+    p.privilege.endsWith(`${prefix}${searchPrivilege}`)
+  );
+  return privilege?.authorized || false;
+}
+
+export function calculatePackagePrivilegesFromKibanaPrivileges(
+  kibanaPrivileges:
+    | Array<{
+        resource?: string;
+        privilege: string;
+        authorized: boolean;
+      }>
+    | undefined
+): FleetAuthz['packagePrivileges'] {
+  if (!kibanaPrivileges || !kibanaPrivileges.length) {
+    return {};
+  }
+
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce(
+    (acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+      const kibanaPrivilege = getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${appId}${privilegeSplit}`,
+        privilegeName
+      );
+      return {
+        ...acc,
+        [privilege]: {
+          executePackageAction: kibanaPrivilege,
+        },
+      };
+    },
+    {}
+  );
+
+  const hasTransformAdmin = getAuthorizationFromPrivileges(
+    kibanaPrivileges,
+    `${TRANSFORM_PLUGIN_ID}-`,
+    `admin`
+  );
+  const transformActions: {
+    [key in TransformPrivilege]: {
+      executePackageAction: boolean;
+    };
+  } = {
+    canCreateTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canDeleteTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canStartStopTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canGetTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        `read`
+      ),
+    },
+  };
+
+  return {
+    endpoint: {
+      actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
+    },
+  };
+}

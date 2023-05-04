@@ -1,0 +1,84 @@
+[[osquery-manager-saved-queries-api-get]]
+=== Get saved query API
+++++
+<titleabbrev>Get saved query</titleabbrev>
+++++
+
+experimental[] Retrieve a single saved query by ID.
+
+
+[[osquery-manager-saved-queries-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/osquery/saved_queries/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/osquery/saved_queries/<id>`
+
+
+[[osquery-manager-saved-queries-api-get-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+(Required, string) The ID of the saved query you want to retrieve.
+
+
+[[osquery-manager-saved-queries-api-get-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+`404`::
+The specified saved query and ID doesn't exist.
+
+
+[[osquery-manager-saved-queries-api-get-example]]
+==== Example
+
+Retrieve the saved query object with the `42ba9c50-0cc5-11ed-aa1d-2b27890bc90d` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/osquery/saved_queries/42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+--------------------------------------------------
+// KIBANA
+
+The API returns the saved query object:
+
+[source,sh]
+--------------------------------------------------
+{
+  "data": {
+    "id": "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d",
+    "type": "osquery-saved-query",
+    "namespaces": [
+      "default"
+    ],
+    "updated_at": "2022-07-26T09:28:08.600Z",
+    "version": "WzQzMTcsMV0=",
+    "attributes": {
+      "id": "saved_query_id",
+      "description": "Saved query description",
+      "query": "select * from uptime;",
+      "platform": "linux,darwin",
+      "version": "2.8.0",
+      "interval": "60",
+      "ecs_mapping": {
+        "host.uptime": {
+          "field": "total_seconds"
+        }
+      },
+      "created_by": "elastic",
+      "created_at": "2022-07-26T09:28:08.597Z",
+      "updated_by": "elastic",
+      "updated_at": "2022-07-26T09:28:08.597Z",
+      "prebuilt": false
+    },
+    "references": [],
+    "coreMigrationVersion": "8.4.0"
+  }
+}
+--------------------------------------------------

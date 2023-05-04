@@ -11,7 +11,7 @@ import {
   createListStream,
   createIntersperseStream,
   createConcatStream,
-} from './index';
+} from '.';
 
 describe('intersperseStream', () => {
   test('places the intersperse value between each provided value', async () => {

@@ -6,118 +6,94 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { Unit } from '@elastic/datemath';
-import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { FieldValueQueryBar } from '../query_bar';
-import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
-import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
-import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
-import { FieldValueThreshold } from '../threshold_input';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import { usePreviewRule } from './use_preview_rule';
+import { formatPreviewRule } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/rule_schema';
+import type {
+  AboutStepRule,
+  DefineStepRule,
+  ScheduleStepRule,
+  TimeframePreviewOptions,
+} from '../../../pages/detection_engine/rules/types';
 
 interface PreviewRouteParams {
-  isDisabled: boolean;
-  index: string[];
-  threatIndex: string[];
-  query: FieldValueQueryBar;
-  threatQuery: FieldValueQueryBar;
-  ruleType: Type;
-  timeFrame: Unit;
-  threatMapping: ThreatMapping;
-  threshold: FieldValueThreshold;
-  machineLearningJobId: string[];
-  anomalyThreshold: number;
+  defineRuleData?: DefineStepRule;
+  aboutRuleData?: AboutStepRule;
+  scheduleRuleData?: ScheduleStepRule;
+  exceptionsList?: List[];
+  timeframeOptions: TimeframePreviewOptions;
 }
 
 export const usePreviewRoute = ({
-  index,
-  isDisabled,
-  query,
-  threatIndex,
-  threatQuery,
-  timeFrame,
-  ruleType,
-  threatMapping,
-  threshold,
-  machineLearningJobId,
-  anomalyThreshold,
+  defineRuleData,
+  aboutRuleData,
+  scheduleRuleData,
+  exceptionsList,
+  timeframeOptions,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
-  const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
+  const { isLoading, response, rule, setRule } = usePreviewRule({
+    timeframeOptions,
+  });
+  const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
+  const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
+  const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
 
   useEffect(() => {
-    setWarnings(response.warnings ?? []);
+    setLogs(response.logs ?? []);
+    setIsAborted(!!response.isAborted);
   }, [response]);
 
-  const addNoiseWarning = useCallback(
-    () => setWarnings([QUERY_PREVIEW_NOISE_WARNING, ...warnings]),
-    [warnings]
-  );
+  const addNoiseWarning = useCallback(() => {
+    setHasNoiseWarning(true);
+  }, [setHasNoiseWarning]);
 
   const clearPreview = useCallback(() => {
     setRule(null);
-    setWarnings([]);
+    setLogs([]);
+    setIsAborted(false);
     setIsRequestTriggered(false);
+    setHasNoiseWarning(false);
   }, [setRule]);
 
   useEffect(() => {
     clearPreview();
-  }, [
-    clearPreview,
-    index,
-    isDisabled,
-    query,
-    threatIndex,
-    threatQuery,
-    timeFrame,
-    ruleType,
-    threatMapping,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
-  ]);
+  }, [clearPreview, defineRuleData, aboutRuleData, scheduleRuleData]);
 
   useEffect(() => {
+    if (!defineRuleData || !aboutRuleData || !scheduleRuleData) {
+      return;
+    }
     if (isRequestTriggered && rule === null) {
       setRule(
         formatPreviewRule({
-          index,
-          query,
-          ruleType,
-          threatIndex,
-          threatMapping,
-          threatQuery,
-          timeFrame,
-          threshold,
-          machineLearningJobId,
-          anomalyThreshold,
+          defineRuleData,
+          aboutRuleData,
+          scheduleRuleData,
+          exceptionsList,
         })
       );
     }
   }, [
-    index,
     isRequestTriggered,
-    query,
     rule,
-    ruleType,
     setRule,
-    threatIndex,
-    threatMapping,
-    threatQuery,
-    timeFrame,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
+    defineRuleData,
+    aboutRuleData,
+    scheduleRuleData,
+    exceptionsList,
   ]);
 
   return {
+    hasNoiseWarning,
     addNoiseWarning,
     createPreview: () => setIsRequestTriggered(true),
     clearPreview,
-    errors: response.errors ?? [],
     isPreviewRequestInProgress: isLoading,
     previewId: response.previewId ?? '',
-    warnings,
+    logs,
+    isAborted,
   };
 };

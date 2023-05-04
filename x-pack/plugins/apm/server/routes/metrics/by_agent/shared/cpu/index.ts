@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+  METRIC_OTEL_SYSTEM_CPU_UTILIZATION,
+} from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   systemCPUMax: {
@@ -55,32 +57,41 @@ const chartBase: ChartBase = {
 export function getCPUChartData({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const systemCpuMetric = isOpenTelemetry
+    ? METRIC_OTEL_SYSTEM_CPU_UTILIZATION
+    : METRIC_SYSTEM_CPU_PERCENT;
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     serviceNodeName,
     start,
     end,
     chartBase,
     aggs: {
-      systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-      systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
+      systemCPUAverage: { avg: { field: systemCpuMetric } },
+      systemCPUMax: { max: { field: systemCpuMetric } },
       processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
       processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
     },

@@ -1,8 +1,0 @@
-{
-  "modules": ["host_metrics"],
-  "indices": ["auditbeat-*"],
-  "auto_start": true,
-  "settings": {
-    "max_page_search_size": 5000
-  }
-}

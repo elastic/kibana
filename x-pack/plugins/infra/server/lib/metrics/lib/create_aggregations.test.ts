@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAggregations } from './create_aggregations';
+import { createAggregations, createCompositeAggregations } from './create_aggregations';
 import moment from 'moment';
 import { MetricsAPIRequest } from '../../../../common/http_api';
 
@@ -20,16 +20,57 @@ const options: MetricsAPIRequest = {
   metrics: [
     { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },
   ],
+  includeTimeseries: true,
 };
 
 describe('createAggregations(options)', () => {
   it('should return groupings aggregation with groupBy', () => {
-    const optionsWithGroupBy = { ...options, groupBy: ['host.name'] };
-    expect(createAggregations(optionsWithGroupBy)).toMatchSnapshot();
+    const optionsWithGroupBy: MetricsAPIRequest = { ...options, groupBy: ['host.name'] };
+    expect(createCompositeAggregations(optionsWithGroupBy)).toMatchSnapshot();
   });
+  it('should return groupings aggregation with afterKey', () => {
+    const optionsWithGroupBy: MetricsAPIRequest = {
+      ...options,
+      groupBy: ['host.name'],
+      afterKey: { group0: 'host-0' },
+    };
+    expect(createCompositeAggregations(optionsWithGroupBy)).toEqual({
+      groupings: expect.objectContaining({
+        composite: expect.objectContaining({
+          after: { group0: 'host-0' },
+        }),
+      }),
+    });
+  });
+
+  it('should return groupings aggregation without date histogram', () => {
+    const optionsWithGroupBy: MetricsAPIRequest = {
+      ...options,
+      groupBy: ['host.name'],
+      includeTimeseries: false,
+    };
+    expect(createCompositeAggregations(optionsWithGroupBy)).toEqual({
+      groupings: expect.objectContaining({
+        aggs: {
+          metric_0: {
+            avg: {
+              field: 'system.cpu.user.pct',
+            },
+          },
+          metricsets: {
+            terms: {
+              field: 'metricset.name',
+            },
+          },
+        },
+      }),
+    });
+  });
+
   it('should return just histogram aggregation without groupBy', () => {
     expect(createAggregations(options)).toMatchSnapshot();
   });
+
   it('should return add offset to histogram', () => {
     const optionsWithAlignDataToEnd = {
       ...options,

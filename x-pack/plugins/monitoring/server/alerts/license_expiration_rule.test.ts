@@ -10,7 +10,7 @@ import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -20,11 +20,6 @@ jest.mock('../lib/alerts/fetch_licenses', () => ({
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
-jest.mock('moment', () => {
-  const moment = function () {};
-  moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
-  return moment;
-});
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -34,7 +29,6 @@ jest.mock('../static_globals', () => ({
         ui: {
           show_license_expiration: true,
           ccs: { enabled: true },
-          metricbeat: { index: 'metricbeat-*' },
           container: { elasticsearch: { enabled: false } },
         },
       },
@@ -70,6 +64,7 @@ describe('LicenseExpirationRule', () => {
 
   describe('execute', () => {
     function FakeDate() {}
+
     FakeDate.prototype.valueOf = () => 1;
 
     const clusterUuid = 'abc123';
@@ -87,13 +82,15 @@ describe('LicenseExpirationRule', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
-          return {
-            replaceState,
-            scheduleActions,
-            getState,
-          };
-        }),
+        alertFactory: {
+          create: jest.fn().mockImplementation(() => {
+            return {
+              replaceState,
+              scheduleActions,
+              getState,
+            };
+          }),
+        },
       },
       state: {},
     };
@@ -116,7 +113,12 @@ describe('LicenseExpirationRule', () => {
       getState.mockReset();
     });
 
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should fire actions', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2023-03-30T00:00:00.000Z'));
       const alert = new LicenseExpirationRule();
       const type = alert.getRuleType();
       await type.executor({
@@ -165,7 +167,7 @@ describe('LicenseExpirationRule', () => {
                 ],
               },
               severity: 'danger',
-              triggeredMS: 1,
+              triggeredMS: 1680134400000,
               lastCheckedMS: 0,
             },
           },
@@ -175,11 +177,11 @@ describe('LicenseExpirationRule', () => {
         action: '[Please update your license.](elasticsearch/nodes)',
         actionPlain: 'Please update your license.',
         internalFullMessage:
-          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. [Please update your license.](elasticsearch/nodes)',
+          'License expiration alert is firing for testCluster. Your license expires in 53 years. [Please update your license.](elasticsearch/nodes)',
         internalShortMessage:
-          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. Please update your license.',
+          'License expiration alert is firing for testCluster. Your license expires in 53 years. Please update your license.',
         clusterName,
-        expiredDate: 'HUMANIZED_DURATION',
+        expiredDate: '53 years',
         state: 'firing',
       });
     });
@@ -199,7 +201,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
@@ -221,7 +222,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
@@ -242,7 +242,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);

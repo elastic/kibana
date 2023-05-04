@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../../../maps/common';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import { ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';
-const SEVERITY_COLOR_RAMP = [
-  {
-    stop: ANOMALY_THRESHOLD.LOW,
-    color: SEVERITY_COLORS.WARNING,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.MINOR,
-    color: SEVERITY_COLORS.MINOR,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.MAJOR,
-    color: SEVERITY_COLORS.MAJOR,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.CRITICAL,
-    color: SEVERITY_COLORS.CRITICAL,
-  },
-];
 
 function getAnomalyFeatures(
   anomalies: AnomaliesTableData['anomalies'],
@@ -54,7 +36,7 @@ function getAnomalyFeatures(
         },
         properties: {
           record_score: Math.floor(anomaly.record_score),
-          [type]: coordinates.map((point: number) => point.toFixed(2)),
+          [type]: coordinates.map((point: number) => Number(point.toFixed(2))),
         },
       });
     }
@@ -133,7 +115,7 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
         fillColor: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
-            customColorRamp: SEVERITY_COLOR_RAMP,
+            customColorRamp: ML_SEVERITY_COLOR_RAMP,
             field: {
               name: 'record_score',
               origin: FIELD_ORIGIN.SOURCE,

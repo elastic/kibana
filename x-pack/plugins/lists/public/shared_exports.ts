@@ -7,4 +7,4 @@
 
 /** DEPRECATED, TRY NOT TO ADD ANYTHING HERE. INSTEAD TRY TO USE AND/OR CREATE kibana packages @kbn/... */
 
-export * as ExceptionBuilder from './exceptions/components/builder/index';
+export * as ExceptionBuilder from './exceptions/components/builder';

@@ -59,6 +59,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                   title: 'new title!',
                 },
                 overwrite: true,
+                managed: false,
               },
             ],
           });
@@ -95,7 +96,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               {
                 id: 'op3767a1-9rcg-53u7-jkb3-3dnb74193awc',
                 type: 'test-hidden-non-importable-exportable',
-                title: 'new title!',
                 meta: {
                   title: 'new title!',
                 },

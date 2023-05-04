@@ -16,9 +16,11 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly pieChart = this.ctx.getService('pieChart');
   private readonly tagCloud = this.ctx.getPageObject('tagCloud');
   private readonly findTimeout = 2500;
 
@@ -31,19 +33,50 @@ export class DashboardExpectService extends FtrService {
   }
 
   async visualizationsArePresent(vizList: string[]) {
-    this.log.debug('Checking all visualisations are present on dashsboard');
+    this.log.debug('Checking all visualisations are present on the dashboard');
     const notLoaded = await this.dashboard.getNotLoadedVisualizations(vizList);
     expect(notLoaded).to.be.empty();
+  }
+
+  /**
+   * Asserts that there is no error embeddables on the dashboard
+   * @throws An error if an error embeddable is present
+   */
+  async noErrorEmbeddablesPresent() {
+    this.log.debug('Ensure that there are no error embeddables on the dashboard');
+
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
+    if (errorEmbeddables.length > 0) {
+      const errorMessages = await Promise.all(
+        errorEmbeddables.map(async (embeddable) => {
+          const panel = await embeddable.findByXpath('./..'); // get the parent of 'embeddableError'
+          let panelTitle = 'Empty title';
+          if (await this.testSubjects.descendantExists('dashboardPanelTitle', panel)) {
+            panelTitle = await (
+              await this.testSubjects.findDescendant('dashboardPanelTitle', panel)
+            ).getVisibleText();
+          }
+          const panelError = await embeddable.getVisibleText();
+          return `${panelTitle}: "${panelError}"`;
+        })
+      );
+
+      throw new Error(
+        `Found error embeddable(s): ${errorMessages.reduce((errorString, error) => {
+          return errorString + '\n' + `\t- ${error}`;
+        }, '')}`
+      );
+    }
   }
 
   async selectedLegendColorCount(color: string, expectedCount: number) {
     this.log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
     await this.retry.try(async () => {
-      const selectedLegendColor = await this.testSubjects.findAll(
-        `legendSelectedColor-${color}`,
-        this.findTimeout
-      );
-      expect(selectedLegendColor.length).to.be(expectedCount);
+      const slicesColors = await this.pieChart.getAllPieSlicesColors();
+      const selectedColors = slicesColors.filter((sliceColor) => {
+        return sliceColor === color;
+      });
+      expect(selectedColors.length).to.be(expectedCount);
     });
   }
 
@@ -190,7 +223,7 @@ export class DashboardExpectService extends FtrService {
 
   async metricValuesExist(values: string[]) {
     this.log.debug(`DashboardExpect.metricValuesExist(${values})`);
-    await this.textWithinCssElementExists(values, '.mtrVis__value');
+    await this.textWithinCssElementExists(values, '.legacyMtrVis__value');
   }
 
   async tsvbMetricValuesExist(values: string[]) {
@@ -226,11 +259,20 @@ export class DashboardExpectService extends FtrService {
   async savedSearchRowCount(expectedMinCount: number) {
     this.log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
     await this.retry.try(async () => {
-      const savedSearchRows = await this.testSubjects.findAll(
-        'docTableExpandToggleColumn',
-        this.findTimeout
-      );
-      expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      const gridExists = await this.find.existsByCssSelector('[data-document-number]');
+      if (gridExists) {
+        const grid = await this.find.byCssSelector('[data-document-number]');
+        // in this case it's the document explorer
+        const docNr = Number(await grid.getAttribute('data-document-number'));
+        expect(docNr).to.be.above(expectedMinCount);
+      } else {
+        // in this case it's the classic table
+        const savedSearchRows = await this.testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          this.findTimeout
+        );
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      }
     });
   }
 
@@ -263,19 +305,38 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
+  // heatmap data
   async seriesElementCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
-    await this.retry.try(async () => {
-      const seriesElements = await this.find.allByCssSelector('.series', this.findTimeout);
-      expect(seriesElements.length).to.be(expectedCount);
-    });
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    this.log.debug(heatmapData.axes?.y[0]);
+    expect(heatmapData.axes?.y[0].labels.length).to.be(expectedCount);
   }
 
+  async heatmapXAxisBuckets(expectedCount: number) {
+    this.log.debug(`DashboardExpect.heatmapXAxisBuckets(${expectedCount})`);
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    expect(heatmapData.axes?.x[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatMapNoResults() {
+    await this.testSubjects.find('heatmapChart>emptyPlaceholder');
+  }
+
+  // legacy controls visualization
   async inputControlItemCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.inputControlItemCount(${expectedCount})`);
     await this.retry.try(async () => {
       const inputControlItems = await this.testSubjects.findAll('inputControlItem');
       expect(inputControlItems.length).to.be(expectedCount);
+    });
+  }
+
+  async controlCount(expectedCount: number) {
+    this.log.debug(`DashboardExpect.controlCount(${expectedCount})`);
+    await this.retry.try(async () => {
+      const controls = await this.testSubjects.findAll('control-frame');
+      expect(controls.length).to.be(expectedCount);
     });
   }
 

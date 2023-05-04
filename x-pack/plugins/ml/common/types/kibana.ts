@@ -7,8 +7,8 @@
 
 // custom edits or fixes for default kibana types which are incomplete
 
-import type { SimpleSavedObject } from 'kibana/public';
-import type { FieldFormatsRegistry } from '../../../../../src/plugins/field_formats/common';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 export type IndexPatternTitle = string;
 

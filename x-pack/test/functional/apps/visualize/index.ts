@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function visualize({ loadTestFile }: FtrProviderContext) {
   describe('Visualize', function visualizeTestSuite() {
-    this.tags(['ciGroup4', 'skipFirefox']);
+    this.tags('skipFirefox');
 
     loadTestFile(require.resolve('./feature_controls/visualize_security'));
     loadTestFile(require.resolve('./feature_controls/visualize_spaces'));
@@ -17,5 +17,6 @@ export default function visualize({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./precalculated_histogram'));
     loadTestFile(require.resolve('./preserve_url'));
     loadTestFile(require.resolve('./reporting'));
+    loadTestFile(require.resolve('./telemetry'));
   });
 }

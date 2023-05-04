@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { AnalyticsLogic } from '../';
+import { AnalyticsLogic } from '..';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSearch, RecentQueriesTable } from '../components';
 import { RECENT_QUERIES } from '../constants';

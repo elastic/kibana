@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { DeepPartial } from '../../../../plugins/ml/common/types/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 // @ts-expect-error not full interface
 const FQ_SM_JOB_CONFIG: Job = {

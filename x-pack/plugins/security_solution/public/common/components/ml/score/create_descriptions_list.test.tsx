@@ -10,7 +10,7 @@ import React from 'react';
 import { mockAnomalies } from '../mock';
 import { createDescriptionList } from './create_description_list';
 import { EuiDescriptionList } from '@elastic/eui';
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 import { waitFor } from '@testing-library/dom';
 
 jest.mock('../../../lib/kibana');
@@ -33,7 +33,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -48,13 +49,14 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
     wrapper
       .find('[data-test-subj="anomaly-description-narrow-range-link"]')
-      .first()
+      .last()
       .simulate('click');
     await waitFor(() => wrapper.update());
 
@@ -69,13 +71,14 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
     wrapper
       .find('[data-test-subj="anomaly-description-narrow-range-link"]')
-      .first()
+      .last()
       .simulate('click');
     await waitFor(() => wrapper.update());
 
@@ -129,13 +132,14 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
     wrapper
       .find('[data-test-subj="anomaly-description-narrow-range-link"]')
-      .first()
+      .last()
       .simulate('click');
     await waitFor(() => wrapper.update());
     expect(narrowDateRange.mock.calls[0][1]).toEqual('hours');

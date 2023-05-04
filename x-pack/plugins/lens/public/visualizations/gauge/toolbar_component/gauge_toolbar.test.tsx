@@ -6,8 +6,7 @@
  */
 
 import React, { FormEvent } from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ToolbarButton } from 'src/plugins/kibana_react/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
@@ -31,7 +30,7 @@ class Harness {
   }
 
   togglePopover() {
-    this.wrapper.find(ToolbarButton).simulate('click');
+    this.wrapper.find('button[data-test-subj="lnsVisualOptionsButton"]').simulate('click');
   }
 
   public get titleLabel() {

@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/lint-ts-projects-cli",
+  "private": true,
+  "version": "1.0.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "main": "./run_lint_ts_projects_cli"
+}

@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/es-ui-shared-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "esUiShared",
+    "server": true,
+    "browser": true,
+    "requiredBundles": [
+      "dataViews",
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "static/validators/string",
+      "static/forms/hook_form_lib",
+      "static/forms/helpers",
+      "static/forms/components",
+      "static/forms/helpers/field_validators/types"
+    ]
+  }
+}

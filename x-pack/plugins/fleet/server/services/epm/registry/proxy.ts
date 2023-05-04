@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import HttpProxyAgent from 'http-proxy-agent';
-import HttpsProxyAgent from 'https-proxy-agent';
-import type {
-  HttpsProxyAgentOptions,
-  HttpsProxyAgent as IHttpsProxyAgent,
-} from 'https-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import type { HttpsProxyAgentOptions } from 'https-proxy-agent';
 
-import { appContextService } from '../../index';
+import { appContextService } from '../..';
 
 export interface RegistryProxySettings {
   proxyUrl: string;
@@ -20,7 +17,7 @@ export interface RegistryProxySettings {
   proxyRejectUnauthorizedCertificates?: boolean;
 }
 
-type ProxyAgent = IHttpsProxyAgent | HttpProxyAgent;
+type ProxyAgent = HttpsProxyAgent | HttpProxyAgent;
 type GetProxyAgentParams = RegistryProxySettings & { targetUrl: string };
 
 export function getRegistryProxyUrl(): string | undefined {
@@ -30,11 +27,10 @@ export function getRegistryProxyUrl(): string | undefined {
 
 export function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   const isHttps = options.targetUrl.startsWith('https:');
-  const agentOptions = isHttps && getProxyAgentOptions(options);
+  const agentOptions = isHttps ? getProxyAgentOptions(options) : options.proxyUrl;
   const agent: ProxyAgent = isHttps
-    ? // @ts-expect-error ts(7009) HttpsProxyAgent isn't a class so TS complains about using `new`
-      new HttpsProxyAgent(agentOptions)
-    : new HttpProxyAgent(options.proxyUrl);
+    ? new HttpsProxyAgent(agentOptions)
+    : new HttpProxyAgent(agentOptions);
 
   return agent;
 }

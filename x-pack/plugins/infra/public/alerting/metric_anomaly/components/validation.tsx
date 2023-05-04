@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 export function validateMetricAnomaly({
   hasInfraMLCapabilities,

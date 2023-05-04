@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createAnyInstanceSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { Config, Platform } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
@@ -39,8 +36,15 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    dockerContextUseLocalArtifact: false,
+    dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {

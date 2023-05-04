@@ -5,72 +5,99 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
+import styled from 'styled-components';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
-import { ActionAgentsStatus } from '../../../action_results/action_agents_status';
+
+const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+  div.euiTabs {
+    padding-left: 8px;
+  }
+`;
 
 interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
   startDate?: string;
+  ecsMapping?: ECSMapping;
+  failedAgentsCount?: number;
   endDate?: string;
+  liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   actionId,
   agentIds,
+  ecsMapping,
   endDate,
+  failedAgentsCount,
   startDate,
+  liveQueryActionId,
+  error,
 }) => {
   const tabs = useMemo(
     () => [
       {
         id: 'results',
         name: 'Results',
+        'data-test-subj': 'osquery-results-tab',
         content: (
-          <>
-            <EuiSpacer />
-            <ResultsTable
-              actionId={actionId}
-              agentIds={agentIds}
-              startDate={startDate}
-              endDate={endDate}
-            />
-          </>
+          <ResultsTable
+            actionId={actionId}
+            agentIds={agentIds}
+            ecsMapping={ecsMapping}
+            startDate={startDate}
+            endDate={endDate}
+            liveQueryActionId={liveQueryActionId}
+            error={error}
+          />
         ),
       },
       {
         id: 'status',
         name: 'Status',
+        'data-test-subj': 'osquery-status-tab',
         content: (
-          <>
-            <EuiSpacer />
-            <ActionResultsSummary
-              actionId={actionId}
-              agentIds={agentIds}
-              expirationDate={endDate}
-            />
-          </>
+          <ActionResultsSummary
+            actionId={actionId}
+            agentIds={agentIds}
+            expirationDate={endDate}
+            error={error}
+          />
         ),
+        append: failedAgentsCount ? (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {failedAgentsCount}
+          </EuiNotificationBadge>
+        ) : null,
       },
     ],
-    [actionId, agentIds, endDate, startDate]
+    [
+      actionId,
+      agentIds,
+      ecsMapping,
+      startDate,
+      endDate,
+      liveQueryActionId,
+      error,
+      failedAgentsCount,
+    ]
   );
 
   return (
-    <>
-      <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
-      <EuiSpacer size="s" />
-      <EuiTabbedContent
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
-    </>
+    <StyledEuiTabbedContent
+      // TODO: extend the EuiTabbedContent component to support EuiTabs props
+      // bottomBorder={false}
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
   );
 };
 

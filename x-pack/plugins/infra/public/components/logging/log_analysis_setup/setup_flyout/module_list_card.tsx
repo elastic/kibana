@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
-import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { mountReactNode } from '../../../../../../../../src/core/public/utils';
+import { CreateJobButton, RecreateJobButton } from '../create_job_button';
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;
@@ -41,12 +41,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   const getMlUrl = async () => {
     if (!ml.locator) {
       toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="xpack.infra.logs.analysis.mlNotAvailable"
-            defaultMessage="ML plugin is not available"
-          />
-        ),
+        title: mlNotAvailableMessage,
       });
       return;
     }
@@ -82,7 +77,10 @@ export const LogAnalysisModuleListCard: React.FC<{
         {viewInMlLink ? (
           <>
             <EuiSpacer size="xs" />
-            <EuiButtonEmpty onClick={navigateToMlApp}>
+            <EuiButtonEmpty
+              data-test-subj="infraLogAnalysisModuleListCardViewInMachineLearningButton"
+              onClick={navigateToMlApp}
+            >
               <FormattedMessage
                 id="xpack.infra.logs.analysis.viewInMlButtonLabel"
                 defaultMessage="View in Machine Learning"
@@ -102,3 +100,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     />
   );
 };
+
+const mlNotAvailableMessage = i18n.translate('xpack.infra.logs.analysis.mlNotAvailable', {
+  defaultMessage: 'ML plugin is not available',
+});

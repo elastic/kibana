@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import loadFunctions from './load_functions.js';
+import loadFunctions from './load_functions';
 const functions = loadFunctions('series_functions/');
 import _ from 'lodash';
 

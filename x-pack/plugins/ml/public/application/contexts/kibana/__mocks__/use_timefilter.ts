@@ -5,10 +5,33 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 
-export const timefilterMock = dataPluginMock.createStartContract().query.timefilter.timefilter;
+jest.mock('./kibana_context');
+
+export const timefilterMock = dataPluginMock.createStartContract().query.timefilter
+  .timefilter as jest.Mocked<TimefilterContract>;
+
+export const createTimefilterMock = () => {
+  return dataPluginMock.createStartContract().query.timefilter
+    .timefilter as jest.Mocked<TimefilterContract>;
+};
 
 export const useTimefilter = jest.fn(() => {
   return timefilterMock;
+});
+
+export const useRefreshIntervalUpdates = jest.fn(() => {
+  return {
+    pause: false,
+    value: 0,
+  };
+});
+
+export const useTimeRangeUpdates = jest.fn(() => {
+  return {
+    from: '',
+    to: '',
+  };
 });

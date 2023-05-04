@@ -23,7 +23,7 @@ export const entSearchAggFilterPath = [
   'aggregations.cluster_heap_committed.value',
 ];
 
-export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
+export const entSearchUuidsAgg = (maxBucketSize: number) => ({
   // Count all unique agents
   total: {
     cardinality: {
@@ -32,7 +32,7 @@ export const entSearchUuidsAgg = (maxBucketSize?: string) => ({
     },
   },
 
-  // Collect all runnng versions
+  // Collect all running versions
   versions: {
     terms: {
       field: 'enterprisesearch.health.version.number',

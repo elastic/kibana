@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { MatchedItem } from '@kbn/data-views-plugin/public';
+import { Tag } from '@kbn/data-views-plugin/public/types';
 import { getMatchedIndices } from './get_matched_indices';
-import { Tag, MatchedItem } from '../types';
 
-jest.mock('./../constants', () => ({
+jest.mock('../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 

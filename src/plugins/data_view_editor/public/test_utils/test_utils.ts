@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getRandomString } from '@kbn/test/jest';
+export { getRandomString } from '@kbn/test-jest-helpers';
 
-export type { TestBed } from '@kbn/test/jest';
-export { registerTestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { registerTestBed } from '@kbn/test-jest-helpers';

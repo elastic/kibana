@@ -9,15 +9,15 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-type LabelMode = 'auto' | 'custom' | 'none';
+export type LabelMode = 'auto' | 'custom' | 'none';
 
-interface Label {
+export interface Label {
   mode: LabelMode;
-  label: string;
+  label: string | undefined;
 }
 
 export interface VisLabelProps {
-  label: string;
+  label: string | undefined;
   mode: LabelMode;
   handleChange: (label: Label) => void;
   placeholder?: string;
@@ -68,7 +68,7 @@ export function VisLabel({
   dataTestSubj,
 }: VisLabelProps) {
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSelect
           fullWidth
@@ -76,17 +76,18 @@ export function VisLabel({
           data-test-subj={`${dataTestSubj}-select`}
           aria-label="Label"
           onChange={({ target }) => {
-            if (target.value === 'custom') {
-              handleChange({ label: '', mode: target.value as LabelMode });
-              return;
-            }
-            handleChange({ label: '', mode: target.value as LabelMode });
+            const title =
+              target.value === 'custom' ? '' : target.value === 'auto' ? undefined : label;
+            handleChange({
+              label: title,
+              mode: target.value as LabelMode,
+            });
           }}
           options={hasAutoOption ? modeEnhancedOptions : modeDefaultOptions}
           value={mode}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiFieldText
           data-test-subj={dataTestSubj}
           compressed

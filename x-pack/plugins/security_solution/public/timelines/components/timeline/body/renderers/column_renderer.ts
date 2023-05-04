@@ -7,16 +7,14 @@
 
 import type React from 'react';
 import type { Filter } from '@kbn/es-query';
-import { BrowserFields } from '../../../../../../../timelines/common/search_strategy';
 
-import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { Ecs } from '../../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
   renderColumn: ({
-    browserFields,
     className,
     columnName,
     eventId,
@@ -26,12 +24,12 @@ export interface ColumnRenderer {
     isDraggable,
     linkValues,
     rowRenderers,
-    timelineId,
+    scopeId,
     truncate,
     values,
+    key,
   }: {
     asPlainText?: boolean;
-    browserFields?: BrowserFields;
     className?: string;
     columnName: string;
     ecsData?: Ecs;
@@ -42,8 +40,9 @@ export interface ColumnRenderer {
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
+    key?: string;
   }) => React.ReactNode;
 }

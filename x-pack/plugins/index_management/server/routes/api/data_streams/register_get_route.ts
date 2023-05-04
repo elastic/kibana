@@ -7,11 +7,11 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
 import { DataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 interface PrivilegesFromEs {
   username: string;
@@ -103,29 +103,25 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
   router.get(
     { path: addBasePath('/data_streams'), validate: { query: querySchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       const includeStats = (request.query as TypeOf<typeof querySchema>).includeStats === 'true';
 
       try {
-        const {
-          body: { data_streams: dataStreams },
-        } = await getDataStreams(client);
+        const { data_streams: dataStreams } = await getDataStreams(client);
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
 
         if (includeStats) {
-          ({
-            body: { data_streams: dataStreamsStats },
-          } = await getDataStreamsStats(client));
+          ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client));
         }
 
         if (config.isSecurityEnabled() && dataStreams.length > 0) {
-          ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(
+          dataStreamsPrivileges = await getDataStreamsPrivileges(
             client,
             dataStreams.map((dataStream) => dataStream.name)
-          ));
+          );
         }
 
         const enhancedDataStreams = enhanceDataStreams({
@@ -156,23 +152,15 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
     },
     async (context, request, response) => {
       const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       try {
-        const [
-          {
-            body: { data_streams: dataStreams },
-          },
-          {
-            body: { data_streams: dataStreamsStats },
-          },
-        ] = await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);
+        const [{ data_streams: dataStreams }, { data_streams: dataStreamsStats }] =
+          await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
           if (config.isSecurityEnabled()) {
-            ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(client, [
-              dataStreams[0].name,
-            ]));
+            dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }
 
           const enhancedDataStreams = enhanceDataStreams({

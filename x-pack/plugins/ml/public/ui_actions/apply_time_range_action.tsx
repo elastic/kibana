@@ -7,16 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { firstValueFrom } from 'rxjs';
 import { MlCoreSetup } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
+const supportedApps = [DASHBOARD_APP_ID];
+
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<SwimLaneDrilldownContext>({
+): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+  return {
     id: 'apply-time-range-selection',
     type: APPLY_TIME_RANGE_SELECTION_ACTION,
     getIconType(context): string {
@@ -49,7 +53,13 @@ export function createApplyTimeRangeSelectionAction(
       });
     },
     async isCompatible({ embeddable, data }) {
-      return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE && data !== undefined;
+      const [{ application }] = await getStartServices();
+      const appId = await firstValueFrom(application.currentAppId$);
+      return (
+        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
+        data !== undefined &&
+        supportedApps.includes(appId!)
+      );
     },
-  });
+  };
 }

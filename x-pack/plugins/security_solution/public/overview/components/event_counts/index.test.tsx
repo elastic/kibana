@@ -8,8 +8,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { OverviewHostProps } from '../overview_host';
-import { OverviewNetworkProps } from '../overview_network';
+import type { OverviewHostProps } from '../overview_host';
+import type { OverviewNetworkProps } from '../overview_network';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 
@@ -49,7 +49,7 @@ describe('EventCounts', () => {
       (wrapper.find('Memo(OverviewNetworkComponent)').first().props() as OverviewNetworkProps)
         .filterQuery
     ).toContain(
-      '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field":"source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}]'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 });

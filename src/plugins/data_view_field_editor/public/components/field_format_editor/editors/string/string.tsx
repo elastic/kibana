@@ -11,13 +11,13 @@ import React, { Fragment } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { StringFormat } from '@kbn/field-formats-plugin/common';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
-import { StringFormat } from '../../../../../../field_formats/common';
 
-interface StringFormatEditorFormatParams {
+export interface StringFormatEditorFormatParams {
   transform: string;
 }
 
