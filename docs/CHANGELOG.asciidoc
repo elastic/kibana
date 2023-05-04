@@ -78,7 +78,7 @@ In 8.8.0 and later, an error appears when you use the project monitor API.
 The privileges for attaching alerts to cases has changed. For more information, refer to {kibana-pull}147985[#147985].
 
 *Impact* +
-To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check <<kibana-privileges.html>> and <<setup-cases>>. 
+To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases]. 
 ====
 // end::notable-breaking-changes[]
 
