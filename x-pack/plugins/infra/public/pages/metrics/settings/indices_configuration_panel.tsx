@@ -134,10 +134,9 @@ export const IndicesConfigurationPanel = ({
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExist"
-              defaultMessage="We couldn’t find any metrics data because the pattern entered doesn’t match any index."
+              defaultMessage="Check that the remote cluster is available or that the remote connection settings are
+              correct."
             />
-            Check that the remote cluster is available or that the remote connection settings are
-            correct.
           </EuiCallOut>
         </>
       )}
