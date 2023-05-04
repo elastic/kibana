@@ -6,16 +6,17 @@
  */
 
 import { getNewRule } from '../../objects/rule';
+import { OVERLAY_CONTAINER } from '../../screens/alerts';
 import {
-  CLOSE_OVERLAY,
-  OVERLAY_CONTAINER,
-  SESSION_VIEWER_BUTTON,
-  ANALYZER_VIEWER_BUTTON,
-} from '../../screens/alerts';
+  closeAnalyzer,
+  closeSessionViewerFromAlertTable,
+  openAnalyzerForFirstAlertInTimeline,
+  openSessionViewerFromAlertTable,
+} from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { esArchiverLoad } from '../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
@@ -29,17 +30,21 @@ describe('Alerts Table Action column', { testIsolation: false }, () => {
     waitForAlertsToPopulate();
   });
 
-  it('session viewer button and session viewer should be visible', () => {
-    cy.get(SESSION_VIEWER_BUTTON).should('be.visible');
-    cy.get(SESSION_VIEWER_BUTTON).eq(0).trigger('click');
-    cy.get(OVERLAY_CONTAINER).should('be.visible');
-    cy.get(CLOSE_OVERLAY).trigger('click');
+  after(() => {
+    esArchiverUnload('process_ancestry');
   });
 
-  it('analyser should be visible', () => {
-    cy.get(ANALYZER_VIEWER_BUTTON).should('be.visible');
-    cy.get(ANALYZER_VIEWER_BUTTON).eq(0).trigger('click');
+  it('should have session viewer button visible & open session viewer on click', () => {
+    openSessionViewerFromAlertTable();
     cy.get(OVERLAY_CONTAINER).should('be.visible');
-    cy.get(CLOSE_OVERLAY).trigger('click');
+    // cleanup
+    closeSessionViewerFromAlertTable();
+  });
+
+  it('should have analyzer button visible & open analyzer on click', () => {
+    openAnalyzerForFirstAlertInTimeline();
+    cy.get(OVERLAY_CONTAINER).should('be.visible');
+    // cleanup
+    closeAnalyzer();
   });
 });

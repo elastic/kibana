@@ -173,7 +173,7 @@ export const LEGEND_ACTIONS = {
 };
 
 export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
-export const ANALYZER_VIEWER_BUTTON = '[data-test-subj="view-in-analyzer"]';
 
 export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+
 export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';
