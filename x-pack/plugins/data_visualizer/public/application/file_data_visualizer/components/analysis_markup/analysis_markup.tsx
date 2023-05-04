@@ -16,7 +16,7 @@ import {
   EuiToolTip,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import { FindFileStructureResponse, InputOverrides } from '@kbn/file-upload-plugin/common';
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { splitGrok2, getGrokField } from '../../../common/util/grok_pattern';
@@ -450,6 +450,7 @@ function processLine(
         //   {value}
         // </EuiLink>
 
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <span
           style={{ cursor: 'pointer' }}
           onClick={() => {

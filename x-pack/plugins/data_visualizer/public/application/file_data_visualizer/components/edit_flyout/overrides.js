@@ -100,10 +100,6 @@ class OverridesUI extends Component {
     );
 
     const { newColumnNames, originalColumnNames } = getColumnNames(columnNames, originalSettings);
-    const { newGrokFieldNames, originalGrokFieldNames } = getGrokFieldNames(
-      grokPattern,
-      originalSettings.grokPattern
-    );
 
     const newGrokFieldNames = getGrokFieldNames(grokPattern, originalSettings.grokPattern);
 
@@ -587,100 +583,4 @@ function getSortedFields(fields) {
   return fields
     .map((f) => ({ label: f }))
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
-}
-
-// Some delimiter characters cannot be used as items in select list.
-// so show a textual description of the character instead.
-function convertDelimiter(d) {
-  switch (d) {
-    case ',':
-      return {
-        delimiter: 'comma',
-      };
-    case '\t':
-      return {
-        delimiter: 'tab',
-      };
-    case ';':
-      return {
-        delimiter: 'semicolon',
-      };
-    case '|':
-      return {
-        delimiter: 'pipe',
-      };
-    case ' ':
-      return {
-        delimiter: 'space',
-      };
-
-    default:
-      return {
-        delimiter: CUSTOM_DROPDOWN_OPTION,
-        customDelimiter: d,
-      };
-  }
-}
-
-// Convert the delimiter textual descriptions back to their real characters.
-function convertDelimiterBack(delimiter, customDelimiter) {
-  switch (delimiter) {
-    case 'comma':
-      return ',';
-    case 'tab':
-      return '\t';
-    case 'semicolon':
-      return ';';
-    case 'pipe':
-      return '|';
-    case 'space':
-      return ' ';
-    case CUSTOM_DROPDOWN_OPTION:
-      return customDelimiter;
-
-    default:
-      return undefined;
-  }
-}
-
-function getColumnNames(columnNames, originalSettings) {
-  const newColumnNames =
-    columnNames === undefined && originalSettings.columnNames !== undefined
-      ? [...originalSettings.columnNames]
-      : columnNames;
-
-  const originalColumnNames = newColumnNames !== undefined ? [...newColumnNames] : [];
-
-  return {
-    newColumnNames,
-    originalColumnNames,
-  };
-}
-
-function getGrokFieldNames(grokPattern, originalGrokPattern) {
-  if (originalGrokPattern === undefined) {
-    return {
-      newGrokFieldNames: [],
-      originalGrokFieldNames: [],
-    };
-  }
-
-  if (grokPattern === undefined) {
-    const originalGrokFieldNames = getFieldsFromGrokPattern(originalGrokPattern).map((f) => f.name);
-    return {
-      newGrokFieldNames: originalGrokFieldNames,
-      originalGrokFieldNames,
-    };
-  }
-
-  const newGrokFieldNames = getFieldsFromGrokPattern(grokPattern).map((f) => f.name);
-
-  return {
-    newGrokFieldNames,
-    originalGrokFieldNames: newGrokFieldNames,
-  };
-}
-
-function isLinesToSampleValid(linesToSample) {
-  return linesToSample > LINES_TO_SAMPLE_VALUE_MIN && linesToSample <= LINES_TO_SAMPLE_VALUE_MAX;
 }
