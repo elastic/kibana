@@ -33,7 +33,7 @@ export const TableCellActions = ({ handleFilterFor, handleFilterOut }: TableCell
           })}
           onClick={handleFilterFor}
         >
-          <EuiIcon type="plusInCircle" size="s" color="primary" />
+          <EuiIcon type="filterInclude" size="s" color="primary" />
         </button>
       </EuiToolTip>
 
@@ -52,7 +52,7 @@ export const TableCellActions = ({ handleFilterFor, handleFilterOut }: TableCell
           })}
           onClick={handleFilterOut}
         >
-          <EuiIcon type="minusInCircle" size="s" color="primary" />
+          <EuiIcon type="filterExclude" size="s" color="primary" />
         </button>
       </EuiToolTip>
     </span>

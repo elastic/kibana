@@ -46,7 +46,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
               action: ML_ENTITY_FIELD_OPERATIONS.ADD,
             });
           })}
-          iconType="plusInCircle"
+          iconType="filterInclude"
           aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
             defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
             values: { influencerFieldName, influencerFieldValue },
@@ -71,7 +71,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
               action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
             });
           })}
-          iconType="minusInCircle"
+          iconType="filterExclude"
           aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
             defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
             values: { influencerFieldName, influencerFieldValue },

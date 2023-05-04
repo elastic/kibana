@@ -138,11 +138,11 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                   <EuiIcon
                     color="primary"
                     size="s"
-                    type="plusInCircle"
+                    type="filterInclude"
                   >
                     <span
                       color="primary"
-                      data-euiicon-type="plusInCircle"
+                      data-euiicon-type="filterInclude"
                       size="s"
                     />
                   </EuiIcon>
@@ -262,11 +262,11 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                   <EuiIcon
                     color="primary"
                     size="s"
-                    type="minusInCircle"
+                    type="filterExclude"
                   >
                     <span
                       color="primary"
-                      data-euiicon-type="minusInCircle"
+                      data-euiicon-type="filterExclude"
                       size="s"
                     />
                   </EuiIcon>

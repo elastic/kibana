@@ -39,7 +39,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
         data-test-subj="addInclusiveFilterButton"
         disabled={disabled}
         onClick={onClick}
-        iconType={'plusInCircle'}
+        iconType={'filterInclude'}
         iconSize={'s'}
       />
     </EuiToolTip>
