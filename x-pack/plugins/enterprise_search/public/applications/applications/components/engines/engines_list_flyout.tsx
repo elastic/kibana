@@ -25,14 +25,15 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
+import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { SEARCH_INDEX_PATH } from '../../routes';
 
 import { EngineError } from '../engine/engine_error';
 
@@ -66,7 +67,10 @@ export const EngineListIndicesFlyout: React.FC = () => {
         <EuiLinkTo
           data-test-subj="engine-index-link"
           data-telemetry-id="entSearchContent-engines-list-viewIndex"
-          to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName })}
+          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
+            indexName,
+          })}`}
+          shouldNotCreateHref
         >
           {indexName}
         </EuiLinkTo>

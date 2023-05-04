@@ -36,13 +36,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '@kbn/react-field';
 
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SchemaField } from '../../../../../common/types/engines';
 
+import { SEARCH_INDEX_TAB_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { EngineIndicesLogic } from './engine_indices_logic';
 
@@ -63,10 +64,10 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       ),
       render: (name: string) => (
         <EuiLinkTo
-          to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
             indexName: name,
             tabId: 'index_mappings',
-          })}
+          })}`}
         >
           {name}
         </EuiLinkTo>
