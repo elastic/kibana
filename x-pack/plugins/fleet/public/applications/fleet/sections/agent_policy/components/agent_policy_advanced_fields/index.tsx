@@ -102,6 +102,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
+  const [isTamperingFlyoutOpen, setTamperingFlyout] = useState(false);
+
   return (
     <>
       <EuiDescribedFormGroup
@@ -310,7 +312,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           onChange={(e) => updateAgentPolicy({ tampering_enabled: e.target.checked })}
         />
         <EuiSpacer size="s" />
-        <EuiLink onClick={() => {}} disabled={agentPolicy.tampering_enabled === false}>
+        <EuiLink
+          onClick={() => {
+            setTamperingFlyout(true);
+          }}
+          disabled={agentPolicy.tampering_enabled === false}
+        >
           {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
             defaultMessage: 'Get uninstall command',
           })}
