@@ -92,6 +92,7 @@ export class ExecutionHandler<
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
+  private maintenanceWindowIds: string[] = [];
 
   constructor({
     rule,
@@ -107,6 +108,7 @@ export class ExecutionHandler<
     ruleLabel,
     previousStartedAt,
     actionsClient,
+    maintenanceWindowIds,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -134,6 +136,7 @@ export class ExecutionHandler<
     );
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
+    this.maintenanceWindowIds = maintenanceWindowIds ?? [];
   }
 
   public async run(
@@ -509,7 +512,9 @@ export class ExecutionHandler<
         }
       }
 
-      if (isSummaryAction(action)) {
+      // By doing that we are not cancelling the summary action but just waiting
+      // for the window maintenance to be over before sending the summary action
+      if (isSummaryAction(action) && this.maintenanceWindowIds.length === 0) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }

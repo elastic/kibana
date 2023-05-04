@@ -485,6 +485,7 @@ export class TaskRunner<
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      maintenanceWindowIds,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
