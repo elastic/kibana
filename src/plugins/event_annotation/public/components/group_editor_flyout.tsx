@@ -18,7 +18,7 @@ import {
   EuiButton,
   htmlIdGenerator,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -46,8 +46,27 @@ export const GroupEditorFlyout = ({
   queryInputServices: QueryInputServices;
 }) => {
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
+  const flyoutBodyOverflowRef = useRef<Element | null>(null);
+  useEffect(() => {
+    if (!flyoutBodyOverflowRef.current) {
+      flyoutBodyOverflowRef.current = document.querySelector('.euiFlyoutBody__overflow');
+    }
+  }, []);
 
-  const [selectedAnnotation, setSelectedAnnotation] = useState<EventAnnotationConfig>();
+  const resetContentScroll = useCallback(
+    () => flyoutBodyOverflowRef.current && flyoutBodyOverflowRef.current.scroll(0, 0),
+    []
+  );
+
+  const [selectedAnnotation, _setSelectedAnnotation] = useState<EventAnnotationConfig>();
+  const setSelectedAnnotation = useCallback(
+    (newValue: EventAnnotationConfig | undefined) => {
+      if ((!newValue && selectedAnnotation) || (newValue && !selectedAnnotation))
+        resetContentScroll();
+      _setSelectedAnnotation(newValue);
+    },
+    [resetContentScroll, selectedAnnotation]
+  );
 
   return (
     <EuiFlyout onClose={onClose} size={'s'}>
