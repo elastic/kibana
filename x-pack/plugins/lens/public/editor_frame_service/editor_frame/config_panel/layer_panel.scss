@@ -68,26 +68,6 @@
   padding: $euiSize;
 }
 
-.lnsLayerPanel__colorIndicator {
-  margin-left: $euiSizeS;
-}
-
-.lnsLayerPanel__paletteContainer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-.lnsLayerPanel__palette {
-  height: $euiSizeXS / 2;
-  border-radius: 0 0 ($euiBorderRadius - 1px) ($euiBorderRadius - 1px);
-
-  &::after {
-    border: none;
-  }
-}
-
 // Start dimension style overrides
 
 .lnsLayerPanel__dimensionContainer {
