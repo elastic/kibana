@@ -113,7 +113,7 @@ import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
-import { extractAndUpdateSecrets, extractAndWriteSecrets } from './secrets';
+import { extractAndUpdateSecrets, extractAndWriteSecrets, deleteSecrets } from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -645,6 +645,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
+    let secretsToDelete: PolicySecretReference[] | undefined;
 
     try {
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -710,7 +711,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         restOfPackagePolicy = secretsRes.packagePolicyUpdate;
         secretReferences = secretsRes.secretReferences;
-
+        secretsToDelete = secretsRes.secretsToDelete;
         inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
       }
 
@@ -789,7 +790,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgName: newPolicy.package!.name,
       currentVersion: newPolicy.package!.version,
     });
-    await Promise.all([bumpPromise, assetRemovePromise]);
+    const deleteSecretsPromise = secretsToDelete?.length
+      ? deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) })
+      : Promise.resolve();
+
+    await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
 
