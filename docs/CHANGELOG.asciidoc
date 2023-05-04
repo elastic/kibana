@@ -204,7 +204,7 @@ Infrastructure::
 
 Machine Learning::
 * Adds support for custom URLs in jobs for Data Frame Analytics {kibana-pull}154287[#154287]
-* Adds support to filter fields from grouping in Explain Log Rate Spikes{kibana-pull}153864[#153864]
+* Adds support to filter fields from grouping in Explain Log Rate Spikes {kibana-pull}153864[#153864]
 * Adds log pattern analysis in Discover {kibana-pull}153449[#153449]
 
 Management::
