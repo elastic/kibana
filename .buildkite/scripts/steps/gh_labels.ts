@@ -9,6 +9,7 @@
 // import { GithubApi } from '../../../src/dev/prs/github_api';
 import { Octokit } from '@octokit/rest';
 
+console.log(`\n### process.env.GITHUB_TOKEN: \n  ${process.env.GITHUB_TOKEN}`);
 const github = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
