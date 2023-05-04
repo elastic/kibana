@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
 import { CasesByStatus } from '../components/detection_response/cases_by_status';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { FiltersGlobal } from '../../common/components/filters_global';
 
 const DetectionResponseComponent = () => {
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
@@ -43,18 +44,13 @@ const DetectionResponseComponent = () => {
 
   return (
     <>
+      <FiltersGlobal>
+        <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+      </FiltersGlobal>
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
-            <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE}>
-              <SiemSearchBar
-                id={InputsModelId.global}
-                indexPattern={indexPattern}
-                hideFilterBar
-                hideQueryInput
-              />
-            </HeaderPage>
-
+            <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="detectionResponseLoader" />
             ) : (
