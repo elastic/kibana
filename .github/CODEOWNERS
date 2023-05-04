@@ -459,6 +459,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
+x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui

@@ -656,10 +656,8 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
-      .plugins;
+    const { data, spaces, savedObjectsTaggingOss } = await this.deps.start().plugins;
     const savedVis = await getSavedVisualization({
-      savedObjectsClient,
       search: data.search,
       dataViews: data.dataViews,
       spaces,
