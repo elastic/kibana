@@ -80,7 +80,7 @@ describe('useEnterpriseSearchContentNav', () => {
         id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/content/engines',
+            href: '/app/enterprise_search/applications',
             id: 'searchApplications',
             name: 'Search Applications',
           },
@@ -238,7 +238,7 @@ describe('useEnterpriseSearchEngineNav', () => {
         id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/content/engines',
+            href: '/app/enterprise_search/applications',
             id: 'searchApplications',
             name: 'Search Applications',
           },
@@ -292,21 +292,21 @@ describe('useEnterpriseSearchEngineNav', () => {
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toEqual({
-      href: `/app/enterprise_search/content/engines/${engineName}`,
+      href: `/app/enterprise_search/applications/search_applications/${engineName}`,
       id: 'engineId',
       items: [
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/preview`,
+          href: `/app/enterprise_search/applications/search_applications/${engineName}/preview`,
           id: 'enterpriseSearchEnginePreview',
           name: 'Search Preview',
         },
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/content`,
+          href: `/app/enterprise_search/applications/search_applications/${engineName}/content`,
           id: 'enterpriseSearchApplicationsContent',
           name: 'Content',
         },
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/connect`,
+          href: `/app/enterprise_search/applications/search_applications/${engineName}/connect`,
           id: 'enterpriseSearchApplicationConnect',
           name: 'Connect',
         },
@@ -338,7 +338,7 @@ describe('useEnterpriseSearchEngineNav', () => {
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toEqual({
-      href: `/app/enterprise_search/content/engines/${engineName}`,
+      href: `/app/enterprise_search/applications/search_applications/${engineName}`,
       id: 'engineId',
       name: engineName,
     });
@@ -379,7 +379,7 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       id: 'applications',
       items: [
         {
-          href: '/app/enterprise_search/content/engines',
+          href: '/app/enterprise_search/applications',
           id: 'searchApplications',
           name: 'Search Applications',
         },

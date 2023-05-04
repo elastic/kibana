@@ -16,15 +16,16 @@ export const NONE_GROUP_KEY = 'none';
 
 export type RawBucket<T> = GenericBuckets & T;
 
-export interface GroupingBucket {
+export type GroupingBucket<T> = RawBucket<T> & {
+  selectedGroup: string;
   isNullGroup?: boolean;
-}
+};
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
 export interface RootAggregation<T> {
   groupByFields?: {
-    buckets?: Array<RawBucket<T> & GroupingBucket>;
+    buckets?: Array<GroupingBucket<T>>;
   };
   groupsCount?: {
     value?: number | null;
