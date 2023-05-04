@@ -8,17 +8,19 @@
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import * as i18n from '../translations';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
-interface UseStats {
+export interface UseStats {
   stats: Record<string, IndicesStatsIndicesStats> | null;
   error: string | null;
   loading: boolean;
 }
 
 export const useStats = (pattern: string): UseStats => {
+  const { httpFetch } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,23 +32,20 @@ export const useStats = (pattern: string): UseStats => {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
 
-        const response = await fetch(`${STATS_ENDPOINT}/${encodedIndexName}`, {
-          method: 'GET',
-          signal: abortController.signal,
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-
-          if (!abortController.signal.aborted) {
-            setStats(json);
+        const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
+          `${STATS_ENDPOINT}/${encodedIndexName}`,
+          {
+            method: 'GET',
+            signal: abortController.signal,
           }
-        } else {
-          throw new Error(response.statusText);
+        );
+
+        if (!abortController.signal.aborted) {
+          setStats(response);
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_STATS(e));
+          setError(i18n.ERROR_LOADING_STATS(e.message));
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -60,7 +59,7 @@ export const useStats = (pattern: string): UseStats => {
     return () => {
       abortController.abort();
     };
-  }, [pattern, setError]);
+  }, [httpFetch, pattern, setError]);
 
   return { stats, error, loading };
 };
