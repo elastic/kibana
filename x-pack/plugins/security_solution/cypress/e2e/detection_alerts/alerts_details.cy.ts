@@ -24,6 +24,8 @@ import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { getUnmappedRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { tablePageSelector } from '../../screens/table_pagination';
+import { getLocalstorageEntryAsObject } from '../../helpers/common';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 
 describe('Alert details flyout', () => {
   describe('With unmapped fields', { testIsolation: false }, () => {
@@ -129,6 +131,50 @@ describe('Alert details flyout', () => {
       openTable();
       filterBy('kibana.alert.url');
       cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should('have.text', alertUrl);
+    });
+
+    it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
+      cy.get(OVERVIEW_RULE).should('be.visible');
+      goToRuleDetails();
+      cy.wait(500); // Wait for the localStorage update to take place
+      visit(ALERTS_URL);
+      cy.get(OVERVIEW_RULE).should('not.exist');
+    });
+
+    describe('localstorage management', () => {
+      it('should store the flyout state in localstorage', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
+        cy.wait(500); // Wait for the localStorage update to take place
+        cy.getAllLocalStorage().then((storage) => {
+          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
+          expect(securityDataTable?.['alerts-page']?.expandedDetail?.query?.panelView).to.eql(
+            'eventDetail'
+          );
+        });
+      });
+
+      it('should remove the flyout details from local storage when closed', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
+        closeAlertFlyout();
+        cy.wait(500); // Wait for the localStorage update to take place
+        cy.getAllLocalStorage().then((storage) => {
+          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
+          expect(securityDataTable?.['alerts-page']?.expandedDetail?.query?.panelView).to.eql(
+            undefined
+          );
+        });
+      });
+
+      it('should not remove the flyout state from localstorage when navigating away without closing the flyout', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
+        goToRuleDetails();
+        cy.wait(500); // Wait for the localStorage update to take place
+        cy.getAllLocalStorage().then((storage) => {
+          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
+          // The object should be set, but the panelView param should no longer be set
+          expect(securityDataTable?.['alerts-page']?.expandedDetail?.query).to.eql({});
+        });
+      });
     });
   });
 });

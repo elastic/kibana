@@ -24,3 +24,17 @@ export const getDataTestSubjectSelectorStartWith = (dataTestSubjectValue: string
  * @param className the value passed to class property of the DOM element
  */
 export const getClassSelector = (className: string) => `.${className}`;
+
+export const getLocalstorageEntryAsObject = (storage: Cypress.StorageByOrigin, field: string) => {
+  const envLocalstorage = storage?.['http://localhost:5620'];
+  let result;
+  if (envLocalstorage && envLocalstorage[field]) {
+    try {
+      result = JSON.parse(envLocalstorage[field] as string);
+    } catch {
+      result = undefined;
+    }
+    return result;
+  }
+  return result;
+};

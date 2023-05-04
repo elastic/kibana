@@ -66,8 +66,12 @@ export const DetailsPanel = React.memo(
       (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
     );
 
-    // Remove the flyout from redux when it is unmounted as it's also stored in localStorage
     useEffect(() => {
+      /**
+       * Removes the flyout from redux when it is unmounted as it's also stored in localStorage
+       * This only works when navigating within the app, if navigating via the url bar,
+       * the localStorage state will be maintained
+       * */
       return () => {
         dispatch(
           dataTableActions.toggleDetailPanel({
