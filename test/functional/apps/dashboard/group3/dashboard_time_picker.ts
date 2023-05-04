@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
+      await PageObjects.dashboard.waitForRenderComplete();
 
       const isLegacyDefault = await PageObjects.discover.useLegacyTable();
       if (isLegacyDefault) {
@@ -92,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
+      await PageObjects.dashboard.waitForRenderComplete();
       log.debug('added saved search');
       const currentUrl = await browser.getCurrentUrl();
       const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
@@ -129,6 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '2015-09-19 06:31:44.000',
         '2015-09-23 18:31:44.000'
       );
+      await PageObjects.dashboard.waitForRenderComplete();
       await pieChart.expectPieSliceCount(10);
     });
   });
