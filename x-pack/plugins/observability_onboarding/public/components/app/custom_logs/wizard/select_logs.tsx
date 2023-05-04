@@ -34,7 +34,7 @@ export function SelectLogs() {
   const { goToStep, getState, setState } = useWizard();
 
   function onBack() {
-    navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
+    navigateToKibanaUrl('/app/observabilityOnboarding');
   }
 
   return (
@@ -42,63 +42,59 @@ export function SelectLogs() {
       title={i18n.translate(
         'xpack.observability_onboarding.selectLogs.chooseType',
         {
-          defaultMessage: 'Choose what logs to collect',
+          defaultMessage: 'What logs do you want to collect?',
         }
       )}
     >
       <StepPanelContent>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false} style={{ width: '50%' }}>
+            <OptionCard
+              title={i18n.translate(
+                'xpack.observability_onboarding.selectLogs.streamLogFiles',
+                {
+                  defaultMessage: 'Stream log files',
+                }
+              )}
+              iconType="desktop"
+              onClick={() => {
+                setState({ ...getState(), logsType: 'log-file' });
+                goToStep('configureLogs');
+              }}
+              description={i18n.translate(
+                'xpack.observability_onboarding.selectLogs.streamLogFiles.description',
+                {
+                  defaultMessage: 'Stream your log file or directory.',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="l" />
         <LogsTypeSection
           title={i18n.translate(
-            'xpack.observability_onboarding.selectLogs.customLogs',
+            'xpack.observability_onboarding.selectLogs.networkStreamingLogs',
             {
-              defaultMessage: 'Custom logs',
+              defaultMessage: 'Network streaming logs',
             }
           )}
         >
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} style={{ width: '50%' }}>
-              <OptionCard
-                title={i18n.translate(
-                  'xpack.observability_onboarding.selectLogs.streamLogFiles',
-                  {
-                    defaultMessage: 'Stream log files',
-                  }
-                )}
-                iconType="desktop"
-                onClick={() => {
-                  setState({ ...getState(), logsType: 'log-file' });
-                  goToStep('configureLogs');
-                }}
-                isSelected={false}
-                description={i18n.translate(
-                  'xpack.observability_onboarding.selectLogs.streamLogFiles.description',
-                  {
-                    defaultMessage: 'Ingest arbitrary custom log files.',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </LogsTypeSection>
-        <EuiHorizontalRule margin="l" />
-        <LogsTypeSection title="Network streaming logs">
           <EuiFlexGroup>
             <EuiFlexItem>
               <OptionCard
                 title={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.sysLog',
                   {
-                    defaultMessage: 'Syslog logs',
+                    defaultMessage: 'TCP/UDP/Syslog',
                   }
                 )}
                 iconType="documents"
                 onClick={() => {}}
-                isSelected={false}
                 description={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.sysLog.description',
                   {
                     defaultMessage:
-                      'Collect raw log data from listening ports.',
+                      'Stream logs over TCP or UDP ports or from your syslog server.',
                   }
                 )}
               />
@@ -108,12 +104,11 @@ export function SelectLogs() {
                 title={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.httpEndpointLogs',
                   {
-                    defaultMessage: 'HTTP Endpoint logs',
+                    defaultMessage: 'HTTP Endpoint',
                   }
                 )}
                 iconType="documents"
                 onClick={() => {}}
-                isSelected={false}
                 description={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.httpEndpointLogs.description',
                   {
@@ -124,21 +119,16 @@ export function SelectLogs() {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
         </LogsTypeSection>
-        <EuiSpacer size="m" />
-        <EuiLink
-          href="#"
-          target="_blank"
-          onClick={(event: MouseEvent) => {
-            event.preventDefault();
-            navigateToAppUrl('/integrations/browse/observability');
-          }}
-        >
-          Explore other integrations
-        </EuiLink>
         <EuiHorizontalRule margin="l" />
-        <LogsTypeSection title="Other">
+        <LogsTypeSection
+          title={i18n.translate(
+            'xpack.observability_onboarding.selectLogs.other',
+            {
+              defaultMessage: 'Other',
+            }
+          )}
+        >
           <EuiFlexGroup>
             <EuiFlexItem>
               <OptionCard
@@ -150,7 +140,6 @@ export function SelectLogs() {
                 )}
                 iconType="exportAction"
                 onClick={() => {}}
-                isSelected={false}
                 description={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.uploadLogFiles.description',
                   {
@@ -170,7 +159,6 @@ export function SelectLogs() {
                 )}
                 iconType="package"
                 onClick={() => {}}
-                isSelected={false}
                 description={i18n.translate(
                   'xpack.observability_onboarding.selectLogs.useOwnShipper.description',
                   {
@@ -181,6 +169,22 @@ export function SelectLogs() {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiLink
+            href="#"
+            target="_blank"
+            onClick={(event: MouseEvent) => {
+              event.preventDefault();
+              navigateToAppUrl('/integrations/browse/observability');
+            }}
+          >
+            {i18n.translate(
+              'xpack.observability_onboarding.exploreOtherIntegrations',
+              {
+                defaultMessage: 'Explore other integrations',
+              }
+            )}
+          </EuiLink>
         </LogsTypeSection>
       </StepPanelContent>
       <StepPanelFooter
@@ -216,13 +220,11 @@ function OptionCard({
   title,
   iconType,
   onClick,
-  isSelected,
   description,
 }: {
   title: string;
   iconType: EuiIconProps['type'];
   onClick: () => void;
-  isSelected: boolean;
   description: string;
 }) {
   return (
@@ -234,7 +236,6 @@ function OptionCard({
       paddingSize="m"
       onClick={onClick}
       hasBorder={true}
-      display={isSelected ? 'primary' : undefined}
       description={description}
     />
   );
