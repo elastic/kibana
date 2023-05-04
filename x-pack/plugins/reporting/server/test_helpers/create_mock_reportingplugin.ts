@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('@kbn/reporting-export-types/server/routes');
+jest.mock('../routes');
 jest.mock('../usage');
 
 import _ from 'lodash';
@@ -42,7 +42,6 @@ export const createMockPluginSetup = (
     logger: loggingSystemMock.createLogger(),
     status: statusServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
-    routes: {},
     ...setupMock,
   };
 };

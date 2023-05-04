@@ -4,12 +4,11 @@
     "outDir": "target/types"
   },
   "include": [
-    "index.ts",
     "common/**/*.ts",
     "common/*.ts",
-    "public/**/*.ts",
-    "public/**/*.tsx",
-    "server/**/*", "../reporting/server/routes",
+    "server/routes/**",
+    "server/**/**/*",
+    "server/**/*.ts", 
   ],
   "kbn_references": [
     "@kbn/reporting-common",

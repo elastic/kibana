@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../reporting_export_types/server/routes/diagnostic/integration_tests", ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../reporting_export_types/server", ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",

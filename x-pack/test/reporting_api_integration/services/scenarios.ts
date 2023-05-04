@@ -10,9 +10,9 @@ import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
 } from '@kbn/reporting-plugin/common/constants';
-import type { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
 import type { JobParamsCSV, JobParamsPNGDeprecated } from '@kbn/reporting-export-types/common';
+import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/routes';
 import { FtrProviderContext } from '../ftr_provider_context';
 function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');
