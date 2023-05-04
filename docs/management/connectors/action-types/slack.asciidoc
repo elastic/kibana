@@ -76,8 +76,7 @@ Channels::
 One or more channels that your Slack app has access to.
 This option is available only in the web API type of connector.
 
-Message:: The message	text, converted to the `text` field in the Webhook JSON payload.
-Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
+Message:: The Slack message text, which cannot contain Markdown, images, or other advanced formatting.
 
 [float]
 [[slack-connector-networking-configuration]]
