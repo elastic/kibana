@@ -57,6 +57,7 @@ export const useFilterInOut = ({
     const existingFilters = filterManager.getFilters();
     const newFilters: Filter[] = updateFiltersArray(existingFilters, key, value, filterType);
     filterManager.setFilters(newFilters);
+    console.log('0000', filterManager.getFilters());
   }, [filterManager, filterType, key, value]);
 
   if (!fieldAndValueValid(key, value)) {

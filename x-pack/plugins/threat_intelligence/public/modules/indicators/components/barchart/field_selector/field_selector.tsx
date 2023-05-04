@@ -21,33 +21,43 @@ export interface IndicatorsFieldSelectorProps {
   defaultStackByValue?: RawIndicatorFieldId;
 }
 
+export interface StackByValueInfo {
+  label: string;
+  type: string;
+}
+
 const DEFAULT_STACK_BY_VALUE = RawIndicatorFieldId.Feed;
 const COMBOBOX_SINGLE_SELECTION = { asPlainText: true };
 
 export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
   ({ indexPattern, valueChange, defaultStackByValue = DEFAULT_STACK_BY_VALUE }) => {
     const styles = useStyles();
-
-    const [selectedField, setSelectedField] = useState<Array<EuiComboBoxOptionOption<string>>>([
+    const defaultStackByValueInfo = indexPattern.fields.find(
+      (f: DataViewField) => f.name === defaultStackByValue
+    );
+    const [selectedField, setSelectedField] = useState<
+      Array<EuiComboBoxOptionOption<StackByValueInfo>>
+    >([
       {
         label: defaultStackByValue,
+        type: defaultStackByValueInfo?.type,
       },
     ]);
-
-    const fields: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    const fields: Array<EuiComboBoxOptionOption<StackByValueInfo>> = useMemo(
       () =>
         indexPattern
           ? indexPattern.fields.map((f: DataViewField) => ({
               label: f.name,
+              type: f.type,
             }))
           : [],
       [indexPattern]
     );
 
     const selectedFieldChange = useCallback(
-      (values: Array<EuiComboBoxOptionOption<string>>) => {
+      (values: Array<EuiComboBoxOptionOption<StackByValueInfo>>) => {
         if (values && values.length > 0) {
-          valueChange(values[0].label);
+          valueChange(values[0]);
         }
         setSelectedField(values);
       },
