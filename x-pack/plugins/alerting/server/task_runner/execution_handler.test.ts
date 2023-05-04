@@ -1299,7 +1299,7 @@ describe('Execution Handler', () => {
       `);
   });
 
-  test('does not schedule actions for the summarized alerts that are filtered out', async () => {
+  test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 0,
@@ -1362,11 +1362,71 @@ describe('Execution Handler', () => {
     );
   });
 
+  test('does not schedule actions for the summarized alerts that are filtered out (summary of alerts onThrottleInterval)', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 0,
+        data: [],
+      },
+      ongoing: {
+        count: 0,
+        data: [],
+      },
+      recovered: { count: 0, data: [] },
+    });
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              id: '1',
+              uuid: '111',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1h',
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+              alertsFilter: {
+                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
+    });
+
+    expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
+      ruleId: '1',
+      spaceId: 'test1',
+      end: new Date('1970-01-01T00:01:30.000Z'),
+      start: new Date('1969-12-31T23:01:30.000Z'),
+      excludedAlertInstanceIds: ['foo'],
+      alertsFilter: {
+        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
+      },
+    });
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
+  });
+
   test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 1,
-        data: [{ ...mockAAD, kibana: { alert: { instance: { id: '1' } } } }],
+        data: [{ ...mockAAD, kibana: { alert: { uuid: '1' } } }],
       },
       ongoing: {
         count: 0,

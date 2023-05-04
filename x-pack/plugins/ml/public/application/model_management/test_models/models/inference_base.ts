@@ -280,7 +280,8 @@ export abstract class InferenceBase<TInferResponse> {
       const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.deploymentId ?? this.model.model_id,
+        this.model.model_id,
+        this.deploymentId,
         {
           docs: this.getInferDocs(),
           ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),

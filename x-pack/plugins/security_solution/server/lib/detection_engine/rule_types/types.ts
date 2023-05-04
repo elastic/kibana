@@ -139,13 +139,9 @@ export interface CreateSecurityRuleTypeWrapperProps {
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
-) => <
-  TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {}
->(
-  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => <TParams extends RuleParams, TState extends RuleTypeState>(
+  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
@@ -159,7 +155,6 @@ export interface CreateRuleOptions {
 export interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
-  hasEnterpriseLicense?: boolean;
 }
 export interface CreateQueryRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;

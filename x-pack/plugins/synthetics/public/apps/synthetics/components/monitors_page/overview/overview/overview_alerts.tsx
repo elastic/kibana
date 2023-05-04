@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,13 +15,41 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
+
+export const useMonitorQueryIds = () => {
+  const { status } = useSelector(selectOverviewStatus);
+
+  const { statusFilter } = useGetUrlParams();
+  return useMemo(() => {
+    let monitorIds = status?.enabledMonitorQueryIds ?? [];
+    switch (statusFilter) {
+      case 'up':
+        monitorIds = status
+          ? Object.entries(status.upConfigs).map(([id, config]) => config.monitorQueryId)
+          : [];
+        break;
+      case 'down':
+        monitorIds = status
+          ? Object.entries(status.downConfigs).map(([id, config]) => config.monitorQueryId)
+          : [];
+        break;
+      case 'disabled':
+        monitorIds = status?.disabledMonitorQueryIds ?? [];
+        break;
+      default:
+        break;
+    }
+    return monitorIds.length > 0 ? monitorIds : ['false-id'];
+  }, [status, statusFilter]);
+};
 
 export const OverviewAlerts = () => {
   const { from, to } = useRefreshedRange(12, 'hours');
@@ -37,6 +65,8 @@ export const OverviewAlerts = () => {
   const { locations } = useGetUrlParams();
 
   const loading = !status?.allIds || status?.allIds.length === 0;
+
+  const monitorIds = useMonitorQueryIds();
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
@@ -65,10 +95,7 @@ export const OverviewAlerts = () => {
                   selectedMetricField: RECORDS_FIELD,
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id':
-                      status?.enabledMonitorQueryIds.length > 0
-                        ? status?.enabledMonitorQueryIds
-                        : ['false-id'],
+                    'monitor.id': monitorIds,
                     ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
@@ -92,10 +119,7 @@ export const OverviewAlerts = () => {
                   },
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id':
-                      status?.enabledMonitorQueryIds.length > 0
-                        ? status?.enabledMonitorQueryIds
-                        : ['false-id'],
+                    'monitor.id': monitorIds,
                     ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                   },
                   dataType: 'alerts',

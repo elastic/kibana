@@ -7,17 +7,17 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { DashboardViewPromptState } from '../hooks/use_dashboard_view_prompt_state';
-import { StatusPropmpt } from './status_prompt';
+import { StatusPrompt } from './status_prompt';
 
-describe('StatusPropmpt', () => {
+describe('StatusPrompt', () => {
   it('hides by default', () => {
-    const { queryByTestId } = render(<StatusPropmpt currentState={null} />);
+    const { queryByTestId } = render(<StatusPrompt currentState={null} />);
     expect(queryByTestId(`dashboardViewEmptyDefault`)).not.toBeInTheDocument();
   });
 
   it('shows when No Read Permission', () => {
     const { queryByTestId } = render(
-      <StatusPropmpt currentState={DashboardViewPromptState.NoReadPermission} />
+      <StatusPrompt currentState={DashboardViewPromptState.NoReadPermission} />
     );
 
     expect(

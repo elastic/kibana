@@ -62,9 +62,6 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
-    return <Loading size="l" />;
-
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
@@ -81,12 +78,16 @@ export const Instructions = (props: InstructionProps) => {
     (fleetServers.length === 0 ||
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
+  useEffect(() => {
+    if (!isIntegrationFlow && showAgentEnrollment) {
+      setSelectionType('radio');
+    } else {
+      setSelectionType('tabs');
+    }
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType]);
 
-  if (!isIntegrationFlow && showAgentEnrollment) {
-    setSelectionType('radio');
-  } else {
-    setSelectionType('tabs');
-  }
+  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
+    return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;
