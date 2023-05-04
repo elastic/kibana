@@ -151,7 +151,7 @@ export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
 export const ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription',
   {
-    defaultMessage: 'Suppress and group alerts for events with missing fieldss',
+    defaultMessage: 'Suppress and group alerts for events with missing fields',
   }
 );
 
