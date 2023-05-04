@@ -128,7 +128,7 @@ export interface ExportTypeDefinition<
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // csv immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }

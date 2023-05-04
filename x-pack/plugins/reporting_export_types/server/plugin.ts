@@ -7,6 +7,7 @@
  */
 
 import { Plugin } from '@kbn/core/server';
+import { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
 import type {
   CreateJobFn,
   ExportTypeDefinition,
@@ -22,9 +23,11 @@ import {
   getTypePrintablePdf,
   getTypePrintablePdfV2,
 } from '.';
+import { setFieldFormats } from './services/services';
 
 export interface ExportTypesPluginSetupDependencies {
   reporting: ReportingSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
 // export interface ReportingExportTypesStartDependencies {
@@ -33,7 +36,7 @@ export interface ExportTypesPluginSetupDependencies {
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
-  public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
+  public setup({}, { reporting, fieldFormats }: ExportTypesPluginSetupDependencies) {
     // Export Type creation
     type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
     type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
@@ -47,9 +50,22 @@ export class ExportTypesPlugin implements Plugin<void, void> {
       getTypePrintablePdfV2,
     ];
     getTypeFns.forEach((getType) => {
-      reporting.registerExportType(
-        getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
-      );
+      if (
+        getType === getTypeCsv ||
+        getType === getTypeCsvFromSavedObject ||
+        getType === getTypeCsvFromSavedObjectImmediate
+      ) {
+        return (
+          setFieldFormats(fieldFormats),
+          reporting.registerExportType(
+            getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
+          )
+        );
+      } else {
+        return reporting.registerExportType(
+          getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
+        );
+      }
     });
   }
 
