@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
           healthStatus: TRANSFORM_HEALTH.green,
           originalStatus: 'stopped',
-          reauthorizeEnabled: false,
+          reauthorizeEnabled: true,
         },
         created_by_user: USER.TRANSFORM_VIEWER,
         current_user: USER.TRANSFORM_POWERUSER,
@@ -202,6 +202,9 @@ export default function ({ getService }: FtrProviderContext) {
               testData.expected.healthDescription,
               testData.expected.healthStatus !== TRANSFORM_HEALTH.green
             );
+            await transform.table.assertTransformRowFields(transformId, {
+              status: 'started',
+            });
           }
 
           await transform.table.clearSearchString(testDataList.length);
