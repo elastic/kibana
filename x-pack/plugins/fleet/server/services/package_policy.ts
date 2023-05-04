@@ -113,7 +113,11 @@ import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
-import { extractAndUpdateSecrets, extractAndWriteSecrets, deleteSecrets } from './secrets';
+import {
+  extractAndUpdateSecrets,
+  extractAndWriteSecrets,
+  deleteSecretsIfNotReferenced as deleteSecrets,
+} from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -791,7 +795,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       currentVersion: newPolicy.package!.version,
     });
     const deleteSecretsPromise = secretsToDelete?.length
-      ? deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) })
+      ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
     await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
@@ -805,8 +809,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
-    options?: { user?: AuthenticatedUser; force?: boolean },
-    currentVersion?: string
+    options?: { user?: AuthenticatedUser; force?: boolean }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
     failedPolicies: Array<{
@@ -831,6 +834,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
+    const allSecretsToDelete: PolicySecretReference[] = [];
 
     const policiesToUpdate: Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>> = [];
     const failedPolicies: Array<{
@@ -847,8 +851,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new Error('Package policy not found');
         }
 
+        let secretReferences: PolicySecretReference[] | undefined;
+
         // id and version are not part of the saved object attributes
-        const { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+        // eslint-disable-next-line prefer-const
+        let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
         if (packagePolicyUpdate.is_managed && !options?.force) {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
@@ -864,7 +871,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
           if (pkgInfo) {
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+            const { secretsStorage: secretsStorageEnabled } =
+              appContextService.getExperimentalFeatures();
+            if (secretsStorageEnabled) {
+              const secretsRes = await extractAndUpdateSecrets({
+                oldPackagePolicy,
+                packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
+                packageInfo: pkgInfo,
+                esClient,
+              });
 
+              restOfPackagePolicy = secretsRes.packagePolicyUpdate;
+              secretReferences = secretsRes.secretReferences;
+              allSecretsToDelete.push(...secretsRes.secretsToDelete);
+              inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
+            }
             inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
           }
@@ -885,6 +906,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ...(elasticsearchPrivileges && {
               elasticsearch: { privileges: elasticsearchPrivileges },
             }),
+            ...(secretReferences?.length && { secret_references: secretReferences }),
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
@@ -928,7 +950,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     });
 
-    await Promise.all([bumpPromise, removeAssetPromise]);
+    const deleteSecretsPromise = allSecretsToDelete.length
+      ? deleteSecrets({ esClient, soClient, ids: allSecretsToDelete.map((s) => s.id) })
+      : Promise.resolve();
+
+    await Promise.all([bumpPromise, removeAssetPromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
 
