@@ -85,7 +85,18 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const { command, isCompleted, isExpired, wasSuccessful } = action;
+    const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
+
+    if (errors) {
+      return (
+        // TODO: temporary solution, waiting for UI
+        <>
+          {errors.map((error) => (
+            <EuiFlexItem>{error}</EuiFlexItem>
+          ))}
+        </>
+      );
+    }
 
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
