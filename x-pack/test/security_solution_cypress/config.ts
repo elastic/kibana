@@ -58,6 +58,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // Set an inexistent directory as the Fleet bundled packages location
         // in order to force Fleet to reach out to the registry to download the
         // packages listed in fleet_packages.json
+        // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
       ],
     },
