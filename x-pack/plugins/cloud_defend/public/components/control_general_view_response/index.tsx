@@ -344,11 +344,7 @@ export const ControlGeneralViewResponse = ({
       <EuiForm component="form" fullWidth error={errorList} isInvalid={errorList.length > 0}>
         {warnFIMUsingSlashStarStar && (
           <EuiFormRow fullWidth>
-            <EuiCallOut
-              color="warning"
-              title={i18n.warningFIMUsingSlashStarStarTitle}
-              iconType="warning"
-            >
+            <EuiCallOut color="warning" title={i18n.warningFIMUsingSlashStarStarTitle}>
               <p>{i18n.warningFIMUsingSlashStarStarText}</p>
             </EuiCallOut>
           </EuiFormRow>
