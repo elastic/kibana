@@ -12,6 +12,7 @@ import { StaleDownConfig } from './status_rule/status_rule_executor';
 
 describe('updateState', () => {
   let spy: jest.SpyInstance<string, []>;
+  jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
   beforeEach(() => {
     spy = jest.spyOn(Date.prototype, 'toISOString');
   });
@@ -243,9 +244,11 @@ describe('setRecoveredAlertsContext', () => {
     });
     expect(setContext).toBeCalledWith({
       idWithLocation,
+      linkMessage: '',
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
-      recoveryReason: 'Monitor has been deleted',
+      recoveryReason: 'The monitor has been deleted',
+      recoveryStatus: 'has been deleted',
     });
   });
 
@@ -284,9 +287,11 @@ describe('setRecoveredAlertsContext', () => {
     });
     expect(setContext).toBeCalledWith({
       idWithLocation,
+      linkMessage: '',
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
-      recoveryReason: 'Location has been removed from the monitor',
+      recoveryReason: 'This location has been removed from the monitor',
+      recoveryStatus: 'has recovered',
     });
   });
 
@@ -298,6 +303,8 @@ describe('setRecoveredAlertsContext', () => {
         getState: () => ({
           idWithLocation,
           monitorName: 'test-monitor',
+          locationId: 'us_west',
+          configId: '12345-67891',
         }),
         setContext,
       },
@@ -324,11 +331,16 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs,
     });
     expect(setContext).toBeCalledWith({
+      configId: '12345-67891',
       idWithLocation,
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
       status: 'up',
-      recoveryReason: 'Monitor has recovered with status Up',
+      recoveryReason: 'The monitor returned to an Up state at 19:02:00 on 25/02/2023',
+      recoveryStatus: 'is now Up',
+      locationId: 'us_west',
+      linkMessage:
+        'Link: https://localhost:5601/app/synthetics/monitor/12345-67891/history?dateRangeEnd=foo%20date%20string&dateRangeStart=foo%20date%20string&locationId=us_west',
     });
   });
 });
