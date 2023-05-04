@@ -51,7 +51,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     hasFooter: false,
   });
 
-  const classes = classnames('fieldEditor__flyoutPanel', className, {
+  const classes = classnames('fieldEditor__flyoutPanel', 'eui-scrollBar', className, {
     'fieldEditor__flyoutPanel--pageBackground': backgroundColor === 'euiPageBackground',
     'fieldEditor__flyoutPanel--emptyShade': backgroundColor === 'euiEmptyShade',
     'fieldEditor__flyoutPanel--leftBorder': border === 'left',
