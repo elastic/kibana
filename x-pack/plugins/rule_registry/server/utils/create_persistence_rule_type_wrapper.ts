@@ -49,8 +49,10 @@ const augmentAlerts = <T>({
       _source: {
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-        [ALERT_MAINTENANCE_WINDOW_IDS]: options?.maintenanceWindowIds ?? [],
         [VERSION]: kibanaVersion,
+        ...(options?.maintenanceWindowIds?.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+          : {}),
         ...commonRuleFields,
         ...alert._source,
       },

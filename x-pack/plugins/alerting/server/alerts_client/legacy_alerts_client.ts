@@ -181,7 +181,6 @@ export class LegacyAlertsClient<
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
-      maintenanceWindowIds,
     });
   }
 
