@@ -108,6 +108,21 @@ function selectorsIncludeConditionsForFIMOperations(
   return !!result;
 }
 
+export function selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
+  selectors: Selector[],
+  selectorNames?: string[]
+) {
+  const result =
+    selectorNames &&
+    selectorNames.reduce((prev, cur) => {
+      const selector = selectors.find((s) => s.name === cur);
+      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      return prev || !!(usesFIM && selector?.targetFilePath?.includes('/**'));
+    }, false);
+
+  return !!result;
+}
+
 export function validateBlockRestrictions(selectors: Selector[], responses: Response[]) {
   const errors: string[] = [];
 

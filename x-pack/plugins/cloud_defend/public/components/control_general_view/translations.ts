@@ -168,6 +168,21 @@ export const errorBlockActionRequiresTargetFilePath = i18n.translate(
   }
 );
 
+export const warningFIMUsingSlashStarStarTitle = i18n.translate(
+  'xpack.cloudDefend.warningFIMUsingSlashStarStarTitle',
+  {
+    defaultMessage: 'Warning: Blocking FIM operations',
+  }
+);
+
+export const warningFIMUsingSlashStarStarText = i18n.translate(
+  'xpack.cloudDefend.warningFIMUsingSlashStarStarText',
+  {
+    defaultMessage:
+      'It is dangerous to block FIM operations (createFile, modifyFile, deleteFile) using a targetFilePath of /**. This can lead to system instability.',
+  }
+);
+
 export const getSelectorIconTooltip = (type: SelectorType) => {
   switch (type) {
     case 'process':

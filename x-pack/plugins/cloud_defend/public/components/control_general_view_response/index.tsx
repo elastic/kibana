@@ -6,6 +6,7 @@
  */
 import React, { useMemo, useState, useCallback, ChangeEvent, useEffect } from 'react';
 import {
+  EuiCallOut,
   EuiIcon,
   EuiToolTip,
   EuiText,
@@ -36,7 +37,11 @@ import {
   ControlFormErrorMap,
 } from '../../types';
 import * as i18n from '../control_general_view/translations';
-import { getSelectorTypeIcon, validateBlockRestrictions } from '../../common/utils';
+import {
+  getSelectorTypeIcon,
+  validateBlockRestrictions,
+  selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar,
+} from '../../common/utils';
 
 // max number of names to show in title (in collapsed state)
 // selectorA, selectorB, selectorC, selectorD [+5]
@@ -68,6 +73,13 @@ export const ControlGeneralViewResponse = ({
   const logSelected = response.actions.includes('log');
   const alertSelected = response.actions.includes('alert');
   const blockSelected = response.actions.includes('block');
+
+  const warnFIMUsingSlashStarStar = useMemo(
+    () =>
+      blockSelected &&
+      selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(selectors, response.match),
+    [blockSelected, response.match, selectors]
+  );
 
   const errors = useMemo(() => {
     const errs: ControlFormErrorMap = {};
@@ -330,6 +342,17 @@ export const ControlGeneralViewResponse = ({
       }
     >
       <EuiForm component="form" fullWidth error={errorList} isInvalid={errorList.length > 0}>
+        {warnFIMUsingSlashStarStar && (
+          <EuiFormRow fullWidth>
+            <EuiCallOut
+              color="warning"
+              title={i18n.warningFIMUsingSlashStarStarTitle}
+              iconType="warning"
+            >
+              <p>{i18n.warningFIMUsingSlashStarStarText}</p>
+            </EuiCallOut>
+          </EuiFormRow>
+        )}
         <EuiFormRow label={i18n.matchSelectors} fullWidth isInvalid={!!errors.match}>
           <EuiComboBox
             aria-label={i18n.matchSelectors}

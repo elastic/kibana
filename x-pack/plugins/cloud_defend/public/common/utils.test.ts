@@ -12,6 +12,7 @@ import {
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
   validateBlockRestrictions,
+  selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar,
 } from './utils';
 import { MOCK_YAML_CONFIGURATION, MOCK_YAML_INVALID_CONFIGURATION } from '../test/mocks';
 
@@ -269,5 +270,55 @@ describe('validateBlockRestrictions', () => {
     const errors = validateBlockRestrictions(selectors, responses);
 
     expect(errors).toHaveLength(0);
+  });
+});
+
+describe('selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar', () => {
+  it('returns true', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+        targetFilePath: ['/**'],
+      },
+    ];
+
+    const response: Response = {
+      type: 'file',
+      match: ['sel1'],
+      actions: ['block', 'alert'],
+    };
+
+    const result = selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
+      selectors,
+      response.match
+    );
+
+    expect(result).toBeTruthy();
+  });
+
+  it('returns false', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+        targetFilePath: ['/usr/bin/**'],
+      },
+    ];
+
+    const response: Response = {
+      type: 'file',
+      match: ['sel1'],
+      actions: ['block', 'alert'],
+    };
+
+    const result = selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
+      selectors,
+      response.match
+    );
+
+    expect(result).toBeFalsy();
   });
 });
