@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { BulkResponse, DeleteResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { keyBy, partition } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -103,35 +103,47 @@ export async function createSecrets(opts: {
   }
 }
 
-export async function deleteSecret(opts: {
+export async function deleteSecrets(opts: {
   esClient: ElasticsearchClient;
-  id: string;
-}): Promise<DeleteResponse['result']> {
-  const { esClient, id } = opts;
-  let res: DeleteResponse;
+  ids: string[];
+}): Promise<void> {
+  const { esClient, ids } = opts;
+  const logger = appContextService.getLogger();
+  const body = ids.flatMap((id) => [
+    {
+      delete: { _index: getSecretsIndex(), _id: id },
+    },
+  ]);
+
+  let res: BulkResponse;
+
   try {
-    res = await esClient.delete({
-      index: getSecretsIndex(),
-      id,
+    res = await esClient.bulk({
+      body,
     });
 
-    auditLoggingService.writeCustomAuditLog({
-      message: `secret deleted: ${id}`,
-      event: {
-        action: 'secret_delete',
-        category: ['database'],
-        type: ['access'],
-        outcome: 'success',
-      },
+    const [errorItems, successItems] = partition(res.items, (a) => a.delete?.error);
+
+    successItems.forEach((item) => {
+      auditLoggingService.writeCustomAuditLog({
+        message: `secret deleted: ${item.delete!._id}`,
+        event: {
+          action: 'secret_delete',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'success',
+        },
+      });
     });
+
+    if (errorItems.length) {
+      throw new Error(JSON.stringify(errorItems));
+    }
   } catch (e) {
-    const logger = appContextService.getLogger();
-    const msg = `Error deleting secret '${id}' from ${getSecretsIndex()} index: ${e}`;
+    const msg = `Error deleting secrets from ${getSecretsIndex()} index: ${e}`;
     logger.error(msg);
     throw new FleetError(msg);
   }
-
-  return res.result;
 }
 
 export async function extractAndWriteSecrets(opts: {

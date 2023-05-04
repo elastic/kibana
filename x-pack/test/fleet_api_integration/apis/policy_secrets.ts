@@ -104,6 +104,7 @@ export default function (providerContext: FtrProviderContext) {
     let createdPackagePolicy: any;
     let createdPackagePolicyId: string;
     let packageVarId: string;
+    let updatedPackageVarId: string;
     let inputVarId: string;
     let streamVarId: string;
     let expectedCompiledStream: any;
@@ -285,7 +286,7 @@ export default function (providerContext: FtrProviderContext) {
       expectCompiledPolicyVars(agentPolicy);
     });
 
-    it('should allow secret values to be updated', async () => {
+    it('should allow secret values to be updated (single policy update API)', async () => {
       const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
       updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
       const updateRes = await supertest
@@ -296,7 +297,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const updatedPackagePolicy = updateRes.body.item;
 
-      const updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
+      updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
       expect(updatedPackageVarId).to.be.an('string');
       expect(
         arrayIdsEqual(updatedPackagePolicy.secret_references, [
@@ -325,6 +326,27 @@ export default function (providerContext: FtrProviderContext) {
       expect(updatedPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(
         streamVarId
       );
+    });
+
+    it('should have correctly deleted the secrets', async () => {
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
+
+      const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        acc[secret._id] = secret._source.value;
+        return acc;
+      }, {});
+      expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
+      expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
+      expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
     });
   });
 }
