@@ -16,6 +16,8 @@ import {
   DropTargetSwapDuplicateCombine,
 } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components/public';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 
@@ -188,11 +190,17 @@ export function EmptyDimensionButton({
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
       >
-        {typeof group.suggestedValue?.() === 'number' ? (
-          <SuggestedValueButton {...buttonProps} />
-        ) : (
-          <DefaultEmptyButton {...buttonProps} />
-        )}
+        <div
+          css={css`
+            border-radius: ${euiThemeVars.euiBorderRadius};
+          `}
+        >
+          {typeof group.suggestedValue?.() === 'number' ? (
+            <SuggestedValueButton {...buttonProps} />
+          ) : (
+            <DefaultEmptyButton {...buttonProps} />
+          )}
+        </div>
       </DragDrop>
     </div>
   );
