@@ -14,7 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 const POPOVER_WIDTH = 300;
 
 /**
- * Icon and tooltip that gives hint to users how suppression for missing fields work
+ * Icon and popover that gives hint to users how suppression for missing fields work
  */
 const SuppressionInfoIconComponent = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -60,6 +60,7 @@ const SuppressionInfoIconComponent = () => {
     </EuiPopover>
   );
 };
+
 export const SuppressionInfoIcon = React.memo(SuppressionInfoIconComponent);
 
 SuppressionInfoIcon.displayName = 'SuppressionInfoIcon';
