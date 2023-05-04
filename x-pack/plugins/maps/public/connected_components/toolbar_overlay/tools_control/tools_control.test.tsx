@@ -16,6 +16,8 @@ const defaultProps = {
   activateDrawFilterMode: () => {},
   deactivateDrawMode: () => {},
   disableToolsControl: false,
+  zoom:1,
+  centerMap: ()=>{}
 };
 
 test('renders', async () => {

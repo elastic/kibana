@@ -76,6 +76,7 @@ export type DrawState = {
   filterLabel?: string; // point radius filter alias
   geometryLabel?: string;
   relation?: ES_SPATIAL_RELATIONS;
+  center?: MapCenter;
 };
 
 export type EditState = {

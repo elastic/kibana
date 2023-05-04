@@ -13,7 +13,7 @@ import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';
 import { UtmForm } from './utm_form';
-
+import { PasteLocationForm } from './paste_location_form';
 const DEGREES_DECIMAL = 'dd';
 const MGRS = 'mgrs';
 const UTM = 'utm';
@@ -43,6 +43,7 @@ interface Props {
 }
 
 interface State {
+  isLocationPopoverOpen: boolean | undefined;
   isPopoverOpen: boolean;
   coordinateSystem: string;
 }
@@ -51,6 +52,7 @@ export class SetViewForm extends Component<Props, State> {
   state: State = {
     coordinateSystem: DEGREES_DECIMAL,
     isPopoverOpen: false,
+    isLocationPopoverOpen: false
   };
 
   _togglePopover = () => {
@@ -64,7 +66,19 @@ export class SetViewForm extends Component<Props, State> {
       isPopoverOpen: false,
     });
   };
+  
+  _toggleLocationPopover = () => {
+    this.setState((prevState) => ({
+      isLocationPopoverOpen: !prevState.isLocationPopoverOpen,
+    }));
+  };
 
+  _closeLocationPopover = () => {
+    this.setState({
+      isLocationPopoverOpen: false,
+    });
+  };
+  
   _onCoordinateSystemChange = (optionId: string) => {
     this._closePopover();
     this.setState({
@@ -127,6 +141,25 @@ export class SetViewForm extends Component<Props, State> {
             onChange={this._onCoordinateSystemChange}
           />
         </EuiPopover>
+        <EuiPopover
+          panelPaddingSize="s"
+          isOpen={this.state.isLocationPopoverOpen}
+          closePopover={this._closeLocationPopover}
+          button={
+            <EuiButtonEmpty iconType="console" size="xs" onClick={this._toggleLocationPopover}>
+              <FormattedMessage
+                id="xpack.maps.setViewControl.pasteLocationSystemButtonLabel"
+                defaultMessage="Paste Location"
+              />
+            </EuiButtonEmpty>
+          }
+        >
+          <PasteLocationForm onSubmit={(lat:number,lon:number)=>{
+            this.props.onSubmit(lat,lon,this.props.zoom)
+          }}/>
+        </EuiPopover>
+
+
         {this._renderForm()}
       </div>
     );
