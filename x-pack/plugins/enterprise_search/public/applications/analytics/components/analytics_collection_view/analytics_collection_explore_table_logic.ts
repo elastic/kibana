@@ -293,7 +293,7 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { eventType: 'page_view', search, timeRange },
+        { search, timeRange },
         {
           formula: {
             aggs: {
