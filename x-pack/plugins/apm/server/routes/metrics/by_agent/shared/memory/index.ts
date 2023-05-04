@@ -70,20 +70,20 @@ export const systemMemory = {
   },
 };
 
-export const cgroupMemoryFilter = {
-  bool: {
-    filter: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
-    should: [
-      { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
-      { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-    ],
-    minimum_should_match: 1,
+export const cgroupMemory = {
+  filter: {
+    bool: {
+      filter: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
+      should: [
+        { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+      minimum_should_match: 1,
+    },
   },
-};
-
-export const percentCgroupMemoryUsedScript = {
-  lang: 'painless',
-  source: `
+  script: {
+    lang: 'painless',
+    source: `
     /*
       When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
@@ -101,7 +101,8 @@ export const percentCgroupMemoryUsedScript = {
 
     return used / total;
     `,
-} as const;
+  },
+};
 
 export async function getMemoryChartData({
   environment,
@@ -164,11 +165,11 @@ export async function getMemoryChartData({
         end,
         chartBase,
         aggs: {
-          memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
-          memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
+          memoryUsedAvg: { avg: { script: cgroupMemory.script } },
+          memoryUsedMax: { max: { script: cgroupMemory.script } },
         },
         additionalFilters: [
-          cgroupMemoryFilter,
+          cgroupMemory.filter,
           ...termQuery(FAAS_ID, serverlessId),
         ],
         operationName: 'get_cgroup_memory_metrics_charts',
