@@ -84,6 +84,7 @@ export const getDataViewStateFromIndexFields = memoizeOne(
 export const useDataView = (): {
   indexFieldsSearch: IndexFieldSearch;
 } => {
+  // test comment
   const { data } = useKibana().services;
   const abortCtrl = useRef<Record<string, AbortController>>({});
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
