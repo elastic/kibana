@@ -153,7 +153,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
-    initSlackApi(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK_API));
+    // initSlackApi(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK_API));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
     initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
     initServiceNowOAuth(
