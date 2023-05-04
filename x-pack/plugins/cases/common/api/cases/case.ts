@@ -198,6 +198,7 @@ const CasesFindRequestSearchFieldsRt = rt.union([
   rt.literal('updated_by.email'),
   rt.literal('updated_by.profile_uid'),
   rt.literal('settings.syncAlerts'),
+  rt.literal('owner'),
 ]);
 
 export const CasesFindRequestRt = rt.partial({
