@@ -102,7 +102,7 @@ function mlFunctionsFactory(client: IScopedClusterClient) {
 }
 
 /*
- * This function is used to get the list of jobs and models.
+ * Function for retrieving lists of jobs, models and saved objects.
  * If any of the elasticsearch APIs are missing, it returns empty arrays
  * so that the sync process does not create or delete any saved objects.
  */
