@@ -533,7 +533,7 @@ export class ExecutionHandler<
           continue;
         }
 
-        if (alert && alert.getMaintenanceWindowIds().length > 0) {
+        if (alert.getMaintenanceWindowIds().length > 0) {
           this.logger.debug(
             `no scheduling of actions "${action.id}" for rule "${
               this.taskInstance.params.alertId
