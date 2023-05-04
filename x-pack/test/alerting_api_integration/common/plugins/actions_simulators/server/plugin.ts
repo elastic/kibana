@@ -39,7 +39,7 @@ export enum ExternalServiceSimulator {
   SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
-  SLACK_API = 'slack_api',
+  //  SLACK_API = 'slack_api',
   JIRA = 'jira',
   RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
