@@ -16,7 +16,7 @@ import type {
   ActionConnector,
   CaseFullExternalService,
   Case,
-  CommentResponse,
+  Comment,
   User,
   CaseAttributes,
   CaseAssignees,
@@ -77,7 +77,7 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: CommentResponse): string => {
+const getCommentContent = (comment: Comment): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
   } else if (comment.type === CommentType.alert) {
