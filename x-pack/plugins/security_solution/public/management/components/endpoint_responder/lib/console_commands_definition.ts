@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UploadActionResult } from '../command_render_components/upload_action';
+import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -139,8 +141,11 @@ export const getEndpointConsoleCommands = ({
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
-  const isGetFileEnabled = ExperimentalFeaturesService.get().responseActionGetFileEnabled;
-  const isExecuteEnabled = ExperimentalFeaturesService.get().responseActionExecuteEnabled;
+  const featureFlags = ExperimentalFeaturesService.get();
+
+  const isGetFileEnabled = featureFlags.responseActionGetFileEnabled;
+  const isExecuteEnabled = featureFlags.responseActionExecuteEnabled;
+  const isUploadEnabled = featureFlags.responseActionUploadEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability =
@@ -484,5 +489,69 @@ export const getEndpointConsoleCommands = ({
       }),
     });
   }
+
+  // `upload` command
+  // planned for 8.9
+  if (isUploadEnabled) {
+    consoleCommands.push({
+      name: 'upload',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.upload.about', {
+          defaultMessage: 'Upload a file to the host',
+        }),
+        isSupported: doesEndpointSupportCommand('upload'),
+      }),
+      RenderComponent: UploadActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator,
+      mustHaveArgs: true,
+      args: {
+        file: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.upload.args.file.about',
+            {
+              defaultMessage: 'The file that will be sent to the host',
+            }
+          ),
+          mustHaveValue: true,
+          SelectorComponent: ArgumentFileSelector,
+        },
+        overwrite: {
+          required: false,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.upload.args.overwrite.about',
+            {
+              defaultMessage: 'Overwrite the file on the host if it already exists',
+            }
+          ),
+          mustHaveValue: false,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 7,
+      helpDisabled: !doesEndpointSupportCommand('upload'),
+      helpHidden: !getRbacControl({
+        commandName: 'upload',
+        privileges: endpointPrivileges,
+      }),
+    });
+  }
+
   return consoleCommands;
 };
