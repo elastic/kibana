@@ -5,15 +5,59 @@
  * 2.0.
  */
 
-export interface KeyValuePair {
+export interface SelectOption {
   label: string;
-  order?: number | null;
+  value: string;
+}
+
+export interface Dependency {
+  field: string;
   value: string | number | boolean | null;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
+export type DependencyLookup = Record<string, string | number | boolean | null>;
+
+export enum DisplayType {
+  TEXTBOX = 'textbox',
+  TEXTAREA = 'textarea',
+  NUMERIC = 'numeric',
+  TOGGLE = 'toggle',
+  DROPDOWN = 'dropdown',
+}
+
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
+}
+
+export interface ConnectorConfigProperties {
+  default_value: string | number | boolean | null;
+  depends_on: Dependency[];
+  display: DisplayType;
+  label: string;
+  options: SelectOption[];
+  order?: number | null;
+  required: boolean;
+  sensitive: boolean;
+  tooltip: string;
+  type: FieldType;
+  ui_restrictions: string[];
+  validations: string[];
+  value: string | number | boolean | null;
+}
+
+export type ConnectorConfiguration = Record<string, ConnectorConfigProperties | null> & {
   extract_full_html?: { label: string; value: boolean };
 };
+
+export interface ConnectorSyncConfigProperties {
+  label: string;
+  value: string | number | boolean | null;
+}
+
+export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigProperties | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -170,7 +214,7 @@ export interface ConnectorSyncJob {
   canceled_at: string | null;
   completed_at: string | null;
   connector: {
-    configuration: ConnectorConfiguration;
+    configuration: ConnectorSyncConfiguration;
     filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
@@ -188,6 +232,7 @@ export interface ConnectorSyncJob {
   metadata: Record<string, unknown>;
   started_at: string | null;
   status: SyncStatus;
+  total_document_count: number | null;
   trigger_method: TriggerMethod;
   worker_hostname: string | null;
 }

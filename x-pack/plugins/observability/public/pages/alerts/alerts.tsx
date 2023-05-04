@@ -28,7 +28,6 @@ import {
   useAlertSearchBarStateContainer,
 } from '../../components/shared/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
-import { getNoDataConfig } from '../../utils/no_data_config';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
 import type { ObservabilityAppServices } from '../../application/types';
@@ -49,7 +48,6 @@ function InternalAlertsPage() {
         timefilter: { timefilter: timeFilterService },
       },
     },
-    docLinks,
     http,
     notifications: { toasts },
     triggersActionsUi: {
@@ -162,25 +160,14 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
-  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
-
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 
-  const noDataConfig = getNoDataConfig({
-    hasData,
-    basePath: http.basePath,
-    docsLink: docLinks.links.observability.guide,
-  });
-
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
-        noDataConfig={noDataConfig}
-        isPageDataLoaded={isAllRequestsComplete}
-        data-test-subj={noDataConfig ? 'noDataPage' : 'alertsPageWithData'}
+        data-test-subj="alertsPageWithData"
         pageHeader={{
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>

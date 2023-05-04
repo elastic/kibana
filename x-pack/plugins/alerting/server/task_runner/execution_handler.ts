@@ -40,10 +40,10 @@ import {
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
+  getSummaryActionTimeBounds,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
-  isSummaryActionPerRuleRun,
   isSummaryActionThrottled,
 } from './rule_action_helper';
 
@@ -91,6 +91,7 @@ export class ExecutionHandler<
   private actionsClient: PublicMethodsOf<ActionsClient>;
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
+  private previousStartedAt: Date | null;
 
   constructor({
     rule,
@@ -104,6 +105,7 @@ export class ExecutionHandler<
     ruleConsumer,
     executionId,
     ruleLabel,
+    previousStartedAt,
     actionsClient,
   }: ExecutionHandlerOptions<
     Params,
@@ -130,6 +132,7 @@ export class ExecutionHandler<
     this.ruleTypeActionGroups = new Map(
       ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
+    this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
   }
 
@@ -205,6 +208,11 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
         if (isSummaryAction(action) && summarizedAlerts) {
+          const { start, end } = getSummaryActionTimeBounds(
+            action,
+            this.rule.schedule,
+            this.previousStartedAt
+          );
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -221,7 +229,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl: this.buildRuleUrl(spaceId, start, end),
               }),
             }),
           };
@@ -419,13 +427,13 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string): string | undefined {
+  private buildRuleUrl(spaceId: string, start?: number, end?: number): string | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
 
     const relativePath = this.ruleType.getViewInAppRelativeUrl
-      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule })
+      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule, start, end })
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
@@ -502,10 +510,7 @@ export class ExecutionHandler<
       }
 
       if (isSummaryAction(action)) {
-        if (summarizedAlerts) {
-          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
-            continue;
-          }
+        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
         continue;

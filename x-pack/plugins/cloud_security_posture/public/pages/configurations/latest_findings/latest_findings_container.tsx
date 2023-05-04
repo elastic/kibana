@@ -8,30 +8,23 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Evaluation } from '../../../../common/types';
-import type { FindingsBaseProps } from '../types';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../../common/types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useLatestFindings } from './use_latest_findings';
 import type { FindingsGroupByNoneQuery } from './use_latest_findings';
-import type { FindingsBaseURLQuery } from '../types';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import {
-  getFindingsPageSizeInfo,
-  getFilters,
-  getPaginationTableParams,
-  useBaseEsQuery,
-  usePersistedQuery,
-} from '../utils/utils';
+import { getFindingsPageSizeInfo, getFilters } from '../utils/utils';
 import { LimitedResultsBar } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
-import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';
-import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
-import { useLimitProperties } from '../utils/get_limit_properties';
+import { useLimitProperties } from '../../../common/utils/get_limit_properties';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
+import { getPaginationTableParams } from '../../../common/hooks/use_cloud_posture_table/utils';
 
 export const getDefaultQuery = ({
   query,
@@ -46,35 +39,39 @@ export const getDefaultQuery = ({
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
-
-  /**
-   * Page URL query to ES query
-   */
-  const baseEsQuery = useBaseEsQuery({
+  const {
+    pageIndex,
+    query,
+    sort,
+    queryError,
+    pageSize,
+    setTableOptions,
+    urlQuery,
+    setUrlQuery,
+    filters,
+    onResetFilters,
+  } = useCloudPostureTable({
     dataView,
-    filters: urlQuery.filters,
-    query: urlQuery.query,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
   });
 
   /**
    * Page ES query result
    */
   const findingsGroupByNone = useLatestFindings({
-    query: baseEsQuery.query,
-    sort: urlQuery.sort,
-    enabled: !baseEsQuery.error,
+    query,
+    sort,
+    enabled: !queryError,
   });
 
-  const slicedPage = usePageSlice(findingsGroupByNone.data?.page, urlQuery.pageIndex, pageSize);
+  const slicedPage = usePageSlice(findingsGroupByNone.data?.page, pageIndex, pageSize);
 
-  const error = findingsGroupByNone.error || baseEsQuery.error;
+  const error = findingsGroupByNone.error || queryError;
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
     total: findingsGroupByNone.data?.total,
-    pageIndex: urlQuery.pageIndex,
+    pageIndex,
     pageSize,
   });
 
@@ -82,7 +79,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     setUrlQuery({
       pageIndex: 0,
       filters: getFilters({
-        filters: urlQuery.filters,
+        filters,
         dataView,
         field: 'result.evaluation',
         value: evaluation,
@@ -95,7 +92,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   const pagination = getPaginationTableParams({
     pageSize,
-    pageIndex: urlQuery.pageIndex,
+    pageIndex,
     totalItemCount: limitedTotalItemCount,
   });
 
@@ -123,10 +120,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
       const newFindingIndex = nextFindingIndex % pageSize;
 
       // if the finding is not in the current page, we need to change the page
-      const pageIndex = Math.floor(nextFindingIndex / pageSize);
+      const flyoutPageIndex = Math.floor(nextFindingIndex / pageSize);
 
       setUrlQuery({
-        pageIndex,
+        pageIndex: flyoutPageIndex,
         findingIndex: newFindingIndex,
       });
     },
@@ -136,9 +133,9 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   return (
     <div data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       <FindingsSearchBar
-        dataView={dataView}
-        setQuery={(query) => {
-          setUrlQuery({ ...query, pageIndex: 0 });
+        dataView={dataView!}
+        setQuery={(newQuery) => {
+          setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
         loading={findingsGroupByNone.isFetching}
       />
@@ -162,7 +159,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 passed: findingsGroupByNone.data.count.passed,
                 failed: findingsGroupByNone.data.count.failed,
                 ...getFindingsPageSizeInfo({
-                  pageIndex: urlQuery.pageIndex,
+                  pageIndex,
                   pageSize,
                   currentPageSize: slicedPage.length,
                 }),
@@ -171,6 +168,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           )}
           <EuiSpacer />
           <FindingsTable
+            onResetFilters={onResetFilters}
             onCloseFlyout={onCloseFlyout}
             onPaginateFlyout={onPaginateFlyout}
             onOpenFlyout={onOpenFlyout}
@@ -179,20 +177,14 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             items={slicedPage}
             pagination={pagination}
             sorting={{
-              sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+              sort: { field: sort.field, direction: sort.direction },
             }}
-            setTableOptions={({ page, sort }) => {
-              setPageSize(page.size);
-              setUrlQuery({
-                sort,
-                pageIndex: page.index,
-              });
-            }}
+            setTableOptions={setTableOptions}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
                 pageIndex: 0,
                 filters: getFilters({
-                  filters: urlQuery.filters,
+                  filters,
                   dataView,
                   field,
                   value,

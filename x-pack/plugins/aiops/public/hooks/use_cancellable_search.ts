@@ -50,6 +50,7 @@ export function useCancellableSearch() {
               if (error.name === 'AbortError') {
                 return resolve(null);
               }
+              setIsFetching(false);
               reject(error);
             },
           });

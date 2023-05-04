@@ -17,7 +17,7 @@ type RuleUpdatesBody = Pick<
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
-  actions: actions.map(({ group, id, params, frequency, uuid }) => ({
+  actions: actions.map(({ group, id, params, frequency, uuid, alertsFilter }) => ({
     group,
     id,
     params,
@@ -26,6 +26,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
       throttle: frequency!.throttle,
       summary: frequency!.summary,
     },
+    alerts_filter: alertsFilter,
     ...(uuid && { uuid }),
   })),
 });

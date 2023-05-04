@@ -170,9 +170,12 @@ export function useFieldStatsSearchStrategy(
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       samplingOption: searchStrategyParams.samplingOption,
     };
+
+    const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,
-      sessionId: searchStrategyParams?.sessionId,
+      sessionId,
+      ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };
 
     const batches = createBatchedRequests(

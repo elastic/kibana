@@ -48,6 +48,7 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
+  RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
@@ -287,6 +288,13 @@ export const RuleForm = ({
   const setActionFrequencyProperty = useCallback(
     (key: string, value: RuleActionParam, index: number) => {
       dispatch({ command: { type: 'setRuleActionFrequency' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
+
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      dispatch({ command: { type: 'setRuleActionAlertsFilter' }, payload: { key, value, index } });
     },
     [dispatch]
   );
@@ -677,6 +685,7 @@ export const RuleForm = ({
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
+            setActionAlertsFilterProperty={setActionAlertsFilterProperty}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />

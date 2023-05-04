@@ -14,6 +14,8 @@ import {
   SchemaField,
 } from '../../../common/types/engines';
 
+import { availableIndices } from './available_indices';
+
 export const fetchEngineFieldCapabilities = async (
   client: IScopedClusterClient,
   engine: EnterpriseSearchEngine
@@ -21,8 +23,9 @@ export const fetchEngineFieldCapabilities = async (
   const { name, updated_at_millis, indices } = engine;
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
+    filters: '-metadata',
     include_unmapped: true,
-    index: indices,
+    index: await availableIndices(client, indices),
   });
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {

@@ -14,6 +14,7 @@ import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { RightPanelTabsType } from './tabs';
 import { tabs } from './tabs';
+import { PanelFooter } from './footer';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
@@ -26,6 +27,7 @@ export interface RightPanelProps extends FlyoutPanel {
   params?: {
     id: string;
     indexName: string;
+    scopeId: string;
   };
 }
 
@@ -34,7 +36,7 @@ export interface RightPanelProps extends FlyoutPanel {
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName } = useRightPanelContext();
+  const { eventId, indexName, scopeId } = useRightPanelContext();
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;
@@ -49,6 +51,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
   };
@@ -57,6 +60,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
     <>
       <PanelHeader selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} />
       <PanelContent selectedTabId={selectedTabId} />
+      <PanelFooter />
     </>
   );
 });

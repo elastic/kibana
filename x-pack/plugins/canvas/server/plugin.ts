@@ -45,6 +45,7 @@ interface PluginsStart {
 
 export class CanvasPlugin implements Plugin {
   private readonly logger: Logger;
+
   constructor(public readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
@@ -89,9 +90,11 @@ export class CanvasPlugin implements Plugin {
       plugins.home.sampleData.addAppLinksToSampleDataset
     );
 
-    // we need the kibana index for the Canvas usage collector
-    const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
-    registerCanvasUsageCollector(plugins.usageCollection, kibanaIndex);
+    const getIndexForType = (type: string) =>
+      coreSetup
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+    registerCanvasUsageCollector(plugins.usageCollection, getIndexForType);
   }
 
   public start(coreStart: CoreStart) {

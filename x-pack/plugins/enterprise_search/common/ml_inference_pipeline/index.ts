@@ -6,6 +6,7 @@
  */
 
 import {
+  IngestInferenceProcessor,
   IngestPipeline,
   IngestRemoveProcessor,
   IngestSetProcessor,
@@ -28,13 +29,20 @@ import {
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
+export const ML_INFERENCE_PREFIX = 'ml.inference.';
+export const ELSER_MODEL_ID = '.elser_model_1';
 
 export interface MlInferencePipelineParams {
   description?: string;
-  fieldMappings: Record<string, string | undefined>;
+  fieldMappings: FieldMapping[];
   inferenceConfig?: InferencePipelineInferenceConfig;
   model: MlTrainedModelConfig;
   pipelineName: string;
+}
+
+export interface FieldMapping {
+  sourceField: string;
+  targetField: string;
 }
 
 /**
@@ -49,91 +57,115 @@ export const generateMlInferencePipelineBody = ({
   model,
   pipelineName,
 }: MlInferencePipelineParams): MlInferencePipeline => {
-  // if model returned no input field, insert a placeholder
+  const inferenceType = Object.keys(model.inference_config)[0];
+  const pipelineDefinition: MlInferencePipeline = {
+    description: description ?? '',
+    processors: [],
+    version: 1,
+  };
+
+  pipelineDefinition.processors = [
+    // Add remove and inference processors
+    ...fieldMappings.flatMap(({ sourceField, targetField }) => {
+      const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
+      const inference = getInferenceProcessor(
+        sourceField,
+        targetField,
+        inferenceConfig,
+        model,
+        pipelineName
+      );
+
+      return [
+        {
+          remove: {
+            field: getMlInferencePrefixedFieldName(targetField),
+            ignore_missing: true,
+          },
+        },
+        ...(remove ? [{ remove }] : []),
+        { inference },
+      ];
+    }),
+    // Add single append processor
+    {
+      append: {
+        field: '_source._ingest.processors',
+        value: [
+          {
+            model_version: model.version,
+            pipeline: pipelineName,
+            processed_timestamp: '{{{ _ingest.timestamp }}}',
+            types: getMlModelTypesForModelConfig(model),
+          },
+        ],
+      },
+    },
+    // Add set processors
+    ...fieldMappings.flatMap(({ targetField }) => {
+      const set = getSetProcessorForInferenceType(targetField, inferenceType);
+
+      return set ? [{ set }] : [];
+    }),
+  ];
+
+  return pipelineDefinition;
+};
+
+export const getInferenceProcessor = (
+  sourceField: string,
+  targetField: string,
+  inferenceConfig: InferencePipelineInferenceConfig | undefined,
+  model: MlTrainedModelConfig,
+  pipelineName: string
+): IngestInferenceProcessor => {
+  // If model returned no input field, insert a placeholder
   const modelInputField =
     model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
 
-  // For now this only works for a single field mapping
-  const sourceField = Object.keys(fieldMappings)[0];
-  const destinationField = fieldMappings[sourceField] ?? sourceField;
-  const inferenceType = Object.keys(model.inference_config)[0];
-  const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
-  const set = getSetProcessorForInferenceType(destinationField, inferenceType);
-
   return {
-    description: description ?? '',
-    processors: [
-      {
-        remove: {
-          field: `ml.inference.${destinationField}`,
-          ignore_missing: true,
-        },
-      },
-      ...(remove ? [{ remove }] : []),
-      {
-        inference: {
-          field_map: {
-            [sourceField]: modelInputField,
-          },
-          inference_config: inferenceConfig,
-          model_id: model.model_id,
-          on_failure: [
-            {
-              append: {
-                field: '_source._ingest.inference_errors',
-                value: [
-                  {
-                    message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
-                    pipeline: pipelineName,
-                    timestamp: '{{{ _ingest.timestamp }}}',
-                  },
-                ],
-              },
-            },
-          ],
-          target_field: `ml.inference.${destinationField}`,
-        },
-      },
+    field_map: {
+      [sourceField]: modelInputField,
+    },
+    inference_config: inferenceConfig,
+    model_id: model.model_id,
+    on_failure: [
       {
         append: {
-          field: '_source._ingest.processors',
+          field: '_source._ingest.inference_errors',
           value: [
             {
-              model_version: model.version,
+              message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
               pipeline: pipelineName,
-              processed_timestamp: '{{{ _ingest.timestamp }}}',
-              types: getMlModelTypesForModelConfig(model),
+              timestamp: '{{{ _ingest.timestamp }}}',
             },
           ],
         },
       },
-      ...(set ? [{ set }] : []),
     ],
-    version: 1,
+    target_field: getMlInferencePrefixedFieldName(targetField),
   };
 };
 
 export const getSetProcessorForInferenceType = (
-  destinationField: string,
+  targetField: string,
   inferenceType: string
 ): IngestSetProcessor | undefined => {
   let set: IngestSetProcessor | undefined;
-  const prefixedDestinationField = `ml.inference.${destinationField}`;
-
   if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
     set = {
-      copy_from: `${prefixedDestinationField}.predicted_value`,
-      description: `Copy the predicted_value to '${destinationField}' if the prediction_probability is greater than 0.5`,
-      field: destinationField,
-      if: `ctx?.ml?.inference != null && ctx.ml.inference['${destinationField}'] != null && ctx.ml.inference['${destinationField}'].prediction_probability > 0.5`,
+      copy_from: `${getMlInferencePrefixedFieldName(targetField)}.predicted_value`,
+      description: `Copy the predicted_value to '${targetField}' if the prediction_probability is greater than 0.5`,
+      field: targetField,
+      if: `ctx?.ml?.inference != null && ctx.ml.inference['${targetField}'] != null && ctx.ml.inference['${targetField}'].prediction_probability > 0.5`,
       value: undefined,
     };
   } else if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
     set = {
-      copy_from: `${prefixedDestinationField}.predicted_value`,
-      description: `Copy the predicted_value to '${destinationField}'`,
-      field: destinationField,
-      if: `ctx?.ml?.inference != null && ctx.ml.inference['${destinationField}'] != null`,
+      copy_from: `${getMlInferencePrefixedFieldName(targetField)}.predicted_value`,
+      description: `Copy the predicted_value to '${targetField}'`,
+      field: targetField,
+      if: `ctx?.ml?.inference != null && ctx.ml.inference['${targetField}'] != null`,
       value: undefined,
     };
   }
@@ -142,7 +174,7 @@ export const getSetProcessorForInferenceType = (
 };
 
 export const getRemoveProcessorForInferenceType = (
-  destinationField: string,
+  targetField: string,
   inferenceType: string
 ): IngestRemoveProcessor | undefined => {
   if (
@@ -150,7 +182,7 @@ export const getRemoveProcessorForInferenceType = (
     inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING
   ) {
     return {
-      field: destinationField,
+      field: targetField,
       ignore_missing: true,
     };
   }
@@ -194,7 +226,9 @@ export const parseMlInferenceParametersFromPipeline = (
     return null;
   }
   return {
-    destination_field: inferenceProcessor.target_field?.replace('ml.inference.', ''),
+    destination_field: inferenceProcessor.target_field
+      ? stripMlInferencePrefix(inferenceProcessor.target_field)
+      : inferenceProcessor.target_field,
     model_id: inferenceProcessor.model_id,
     pipeline_name: name,
     source_field: sourceField,
@@ -227,3 +261,11 @@ export const parseModelStateFromStats = (
 
 export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) =>
   trainedModelStats?.deployment_stats?.reason;
+
+export const getMlInferencePrefixedFieldName = (fieldName: string) =>
+  fieldName.startsWith(ML_INFERENCE_PREFIX) ? fieldName : `${ML_INFERENCE_PREFIX}${fieldName}`;
+
+const stripMlInferencePrefix = (fieldName: string) =>
+  fieldName.startsWith(ML_INFERENCE_PREFIX)
+    ? fieldName.replace(ML_INFERENCE_PREFIX, '')
+    : fieldName;

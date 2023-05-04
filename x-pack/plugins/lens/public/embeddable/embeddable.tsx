@@ -126,6 +126,7 @@ import {
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import { getDatasourceLayers } from '../state_management/utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -609,7 +610,10 @@ export class Embeddable
         },
         visualizationMap: this.deps.visualizationMap,
         activeDatasource: this.activeDatasource,
-        activeDatasourceState: { state: this.activeDatasourceState },
+        activeDatasourceState: {
+          isLoading: !this.activeDatasourceState,
+          state: this.activeDatasourceState,
+        },
         dataViews: {
           indexPatterns: this.indexPatterns,
           indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
@@ -628,7 +632,16 @@ export class Embeddable
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
       },
-      datasourceLayers: {}, // TODO
+      datasourceLayers: getDatasourceLayers(
+        {
+          [this.activeDatasourceId!]: {
+            isLoading: !this.activeDatasourceState,
+            state: this.activeDatasourceState,
+          },
+        },
+        this.deps.datasourceMap,
+        this.indexPatterns
+      ),
       query: this.savedVis.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
@@ -643,7 +656,8 @@ export class Embeddable
         setState: () => {},
         frame: frameDatasourceAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
-          this.activeVisualizationState
+          this.activeVisualizationState,
+          frameDatasourceAPI
         ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
@@ -799,6 +813,13 @@ export class Embeddable
     );
 
     this.activeData = newActiveData;
+
+    // Refresh messanges if info type is found as with active data
+    // these messages can be enriched
+    if (this._userMessages.some(({ severity }) => severity === 'info')) {
+      this.loadUserMessages();
+      this.renderUserMessages();
+    }
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {

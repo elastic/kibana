@@ -57,7 +57,9 @@ export const registerBulkGetRoute = (
       if (!allowHttpApiAccess) {
         throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.bulkGet(req.body);
+      const result = await savedObjects.client.bulkGet(req.body, {
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: result });
     })
   );

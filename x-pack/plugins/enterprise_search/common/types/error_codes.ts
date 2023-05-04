@@ -11,8 +11,10 @@ export enum ErrorCode {
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',
   CRAWLER_ALREADY_EXISTS = 'crawler_already_exists',
   DOCUMENT_NOT_FOUND = 'document_not_found',
+  ENGINE_NOT_FOUND = 'engine_not_found',
   INDEX_ALREADY_EXISTS = 'index_already_exists',
   INDEX_NOT_FOUND = 'index_not_found',
+  MAPPING_UPDATE_FAILED = 'mapping_update_failed',
   PARAMETER_CONFLICT = 'parameter_conflict',
   PIPELINE_ALREADY_EXISTS = 'pipeline_already_exists',
   PIPELINE_IS_IN_USE = 'pipeline_is_in_use',
@@ -20,5 +22,4 @@ export enum ErrorCode {
   RESOURCE_NOT_FOUND = 'resource_not_found',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
-  ENGINE_NOT_FOUND = 'engine_not_found',
 }

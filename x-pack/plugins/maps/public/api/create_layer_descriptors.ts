@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { LayerDescriptor } from '../../common/descriptor_types';
-import { lazyLoadMapModules } from '../lazy_load_bundle';
+import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 
 export const createLayerDescriptors = {
@@ -14,17 +13,21 @@ export const createLayerDescriptors = {
     indexPatternId: string,
     indexPatternTitle: string
   ): Promise<LayerDescriptor[]> {
-    const mapModules = await lazyLoadMapModules();
-    return mapModules.createSecurityLayerDescriptors(indexPatternId, indexPatternTitle);
+    const { createSecurityLayerDescriptors } = await import(
+      '../classes/layers/wizards/solution_layers/security'
+    );
+    return createSecurityLayerDescriptors(indexPatternId, indexPatternTitle);
   },
   async createBasemapLayerDescriptor(): Promise<LayerDescriptor | null> {
-    const mapModules = await lazyLoadMapModules();
-    return mapModules.createBasemapLayerDescriptor();
+    const { createBasemapLayerDescriptor } = await import(
+      '../classes/layers/create_basemap_layer_descriptor'
+    );
+    return createBasemapLayerDescriptor();
   },
   async createESSearchSourceLayerDescriptor(
     params: CreateLayerDescriptorParams
   ): Promise<LayerDescriptor> {
-    const mapModules = await lazyLoadMapModules();
-    return mapModules.createESSearchSourceLayerDescriptor(params);
+    const { createLayerDescriptor } = await import('../classes/sources/es_search_source');
+    return createLayerDescriptor(params);
   },
 };

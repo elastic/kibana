@@ -9,7 +9,26 @@ import * as t from 'io-ts';
 import {
   LimitedSizeArray,
   PositiveIntegerGreaterThanZero,
+  enumeration,
 } from '@kbn/securitysolution-io-ts-types';
+
+/**
+ * describes how alerts will be generated for documents with missing suppress by fields
+ */
+export enum AlertSuppressionMissingFieldsStrategy {
+  // per each document a separate alert will be created
+  DoNotSuppress = 'doNotSuppress',
+  // only alert will be created per suppress by bucket
+  Suppress = 'suppress',
+}
+
+export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
+export const AlertSuppressionMissingFields = enumeration(
+  'AlertSuppressionMissingFields',
+  AlertSuppressionMissingFieldsStrategy
+);
+export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY =
+  AlertSuppressionMissingFieldsStrategy.Suppress;
 
 export const AlertSuppressionGroupBy = LimitedSizeArray({
   codec: t.string,
@@ -41,6 +60,7 @@ export const AlertSuppression = t.intersection([
   t.exact(
     t.partial({
       duration: AlertSuppressionDuration,
+      missing_fields_strategy: AlertSuppressionMissingFields,
     })
   ),
 ]);
@@ -55,6 +75,7 @@ export const AlertSuppressionCamel = t.intersection([
   t.exact(
     t.partial({
       duration: AlertSuppressionDuration,
+      missingFieldsStrategy: AlertSuppressionMissingFields,
     })
   ),
 ]);

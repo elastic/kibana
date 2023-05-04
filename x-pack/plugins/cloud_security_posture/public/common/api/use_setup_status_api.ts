@@ -12,9 +12,9 @@ import { STATUS_ROUTE_PATH } from '../../../common/constants';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 
-export const useCspSetupStatusApi = ({
-  options,
-}: { options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus> } = {}) => {
+export const useCspSetupStatusApi = (
+  options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus>
+) => {
   const { http } = useKibana().services;
   return useQuery<CspSetupStatus, unknown, CspSetupStatus>(
     [getCspSetupStatusQueryKey],

@@ -83,9 +83,9 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="agentUnenrollBtn"
         disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
-        key="unenroll-agent"
         onClick={() => {
           onUnenrollClick();
         }}
@@ -103,8 +103,8 @@ export const TableRowActions: React.FunctionComponent<{
         )}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="agentUpgradeBtn"
         icon="refresh"
-        key="upgrade-agent"
         disabled={!isAgentUpgradeable(agent, kibanaVersion)}
         onClick={() => {
           onUpgradeClick();
@@ -136,25 +136,27 @@ export const TableRowActions: React.FunctionComponent<{
         </EuiContextMenuItem>
       );
     }
-
-    if (diagnosticFileUploadEnabled) {
-      menuItems.push(
-        <EuiContextMenuItem
-          icon="download"
-          key="request-diagnostics"
-          disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
-          onClick={() => {
-            onRequestDiagnosticsClick();
-          }}
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.diagnosticsOneButton"
-            defaultMessage="Request diagnostics .zip"
-          />
-        </EuiContextMenuItem>
-      );
-    }
   }
+    
+  if (diagnosticFileUploadEnabled) {
+    menuItems.push(
+      <EuiContextMenuItem
+        key="requestAgentDiagnosticsBtn"
+        icon="download"
+        data-test-subj="requestAgentDiagnosticsBtn"
+        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        onClick={() => {
+          onRequestDiagnosticsClick();
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.diagnosticsOneButton"
+          defaultMessage="Request diagnostics .zip"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
   return (
     <ContextMenuActions
       isOpen={isMenuOpen}

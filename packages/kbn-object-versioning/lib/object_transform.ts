@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ObjectMigrationDefinition, ObjectTransform, ObjectTransforms, Version } from './types';
+import { ObjectMigrationDefinition, ObjectTransform, Version } from './types';
 import { validateObj, validateVersion } from './utils';
 
 /**
@@ -97,11 +97,8 @@ const getTransformFns = <I = unknown, O = unknown>(
  */
 export const initTransform =
   <UpIn = unknown, UpOut = unknown, DownIn = unknown, DownOut = unknown>(requestVersion: Version) =>
-  (
-    migrationDefinition: ObjectMigrationDefinition
-  ): ObjectTransforms<UpIn, UpOut, DownIn, DownOut> => {
+  (migrationDefinition: ObjectMigrationDefinition) => {
     const { latestVersion } = getVersionsMeta(migrationDefinition);
-
     const getVersion = (v: Version | 'latest'): Version => (v === 'latest' ? latestVersion : v);
 
     const validateFn = (value: unknown, version: number = requestVersion) => {
@@ -120,7 +117,11 @@ export const initTransform =
     };
 
     return {
-      up: (obj, to = 'latest', { validate = true }: { validate?: boolean } = {}) => {
+      up: <I = UpIn, O = UpOut>(
+        obj: I,
+        to: number | 'latest' = 'latest',
+        { validate = true }: { validate?: boolean } = {}
+      ) => {
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
@@ -145,16 +146,12 @@ export const initTransform =
             };
           }
 
-          const fns = getTransformFns<UpIn, UpOut>(
-            requestVersion,
-            targetVersion,
-            migrationDefinition
-          );
+          const fns = getTransformFns<I, O>(requestVersion, targetVersion, migrationDefinition);
 
           const value = fns.reduce((acc, fn) => {
-            const res = fn(acc as unknown as UpIn);
+            const res = fn(acc as unknown as I);
             return res;
-          }, obj as unknown as UpOut);
+          }, obj as unknown as O);
 
           return { value, error: null };
         } catch (e) {
@@ -164,7 +161,11 @@ export const initTransform =
           };
         }
       },
-      down: (obj, from = 'latest', { validate = true }: { validate?: boolean } = {}) => {
+      down: <I = DownIn, O = DownOut>(
+        obj: I,
+        from: number | 'latest' = 'latest',
+        { validate = true }: { validate?: boolean } = {}
+      ) => {
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
@@ -189,16 +190,12 @@ export const initTransform =
             }
           }
 
-          const fns = getTransformFns<DownIn, DownOut>(
-            fromVersion,
-            requestVersion,
-            migrationDefinition
-          );
+          const fns = getTransformFns<I, O>(fromVersion, requestVersion, migrationDefinition);
 
           const value = fns.reduce((acc, fn) => {
-            const res = fn(acc as unknown as DownIn);
+            const res = fn(acc as unknown as I);
             return res;
-          }, obj as unknown as DownOut);
+          }, obj as unknown as O);
 
           return { value: value as any, error: null };
         } catch (e) {

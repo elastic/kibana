@@ -7,13 +7,14 @@ set -euo pipefail
 source .buildkite/scripts/steps/artifacts/env.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana:git-$GIT_ABBREV_COMMIT"
+KIBANA_IMAGE_INPUT="docker.elastic.co/kibana-ci/kibana-serverless:git-$GIT_ABBREV_COMMIT"
+KIBANA_IMAGE_OUTPUT="docker.elastic.co/kibana-ci/kibana:git-$GIT_ABBREV_COMMIT"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
-if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
+if docker manifest inspect $KIBANA_IMAGE_OUTPUT &> /dev/null; then
   echo "Manifest already exists, exiting"
   exit 1
 fi
@@ -26,42 +27,42 @@ node scripts/build \
   --docker-images \
   --docker-namespace="kibana-ci" \
   --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --skip-docker-ubuntu \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
 
 echo "--- Tag images"
-docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-$BASE_VERSION-docker-image.tar.gz"
-docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
+docker rmi "$KIBANA_IMAGE_INPUT"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+docker tag "$KIBANA_IMAGE_INPUT" "$KIBANA_IMAGE_OUTPUT-amd64"
 
-docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
-docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
+docker rmi "$KIBANA_IMAGE_INPUT"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+docker tag "$KIBANA_IMAGE_INPUT" "$KIBANA_IMAGE_OUTPUT-arm64"
 
 echo "--- Push images"
-docker image push "$KIBANA_IMAGE-arm64"
-docker image push "$KIBANA_IMAGE-amd64"
+docker image push "$KIBANA_IMAGE_OUTPUT-arm64"
+docker image push "$KIBANA_IMAGE_OUTPUT-amd64"
 
 echo "--- Create manifest"
-docker rmi "$KIBANA_IMAGE"
 docker manifest create \
-  "$KIBANA_IMAGE" \
-  --amend "$KIBANA_IMAGE-arm64" \
-  --amend "$KIBANA_IMAGE-amd64"
+  "$KIBANA_IMAGE_OUTPUT" \
+  --amend "$KIBANA_IMAGE_OUTPUT-arm64" \
+  --amend "$KIBANA_IMAGE_OUTPUT-amd64"
 
 echo "--- Push manifest"
-docker manifest push "$KIBANA_IMAGE"
+docker manifest push "$KIBANA_IMAGE_OUTPUT"
 docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Container Images
 
-  Manifest: \`$KIBANA_IMAGE\`
+  Manifest: \`$KIBANA_IMAGE_OUTPUT\`
 
-  AMD64: \`$KIBANA_IMAGE-amd64\`
+  AMD64: \`$KIBANA_IMAGE_OUTPUT-amd64\`
 
-  ARM64: \`$KIBANA_IMAGE-arm64\`
+  ARM64: \`$KIBANA_IMAGE_OUTPUT-arm64\`
 EOF
 
 echo "--- Build dependencies report"
@@ -76,19 +77,19 @@ buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.g
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 cd -
 
+# This part is related with updating the configuration of kibana-controller,
+# so that new stack instances contain the latest and greatest image of kibana,
+# and the respective stack components of course.
 echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
-
   cat << EOF | buildkite-agent pipeline upload
 steps:
-  - trigger: k8s-gitops-update-image-tag
+  - trigger: serverless-gitops-update-stack-image-tag
     async: true
     label: ":argo: Update image tag for Kibana"
     branches: main
     build:
       env:
-        MODE: sed
-        TARGET_FILE: kibana-controller.yaml
         IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci

@@ -48,6 +48,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -187,6 +189,7 @@ describe('getAlertSummary()', () => {
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,
         "name": "rule-name",
+        "revision": 0,
         "ruleTypeId": "123",
         "status": "Active",
         "statusEndDate": "2019-02-12T21:01:22.479Z",

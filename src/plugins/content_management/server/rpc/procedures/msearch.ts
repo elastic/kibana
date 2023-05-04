@@ -8,35 +8,25 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { MSearchIn, MSearchOut } from '../../../common';
-import type { StorageContext } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validateRequestVersion } from './utils';
+import { getStorageContext } from './utils';
 
 export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
   schemas: rpcSchemas.mSearch,
   fn: async (ctx, { contentTypes: contentTypes, query }) => {
-    const contentTypesWithStorageContext = contentTypes.map(
-      ({ contentTypeId, version: _version }) => {
-        const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-        const version = validateRequestVersion(_version, contentDefinition.version.latest);
-        const storageContext: StorageContext = {
-          requestHandlerContext: ctx.requestHandlerContext,
-          version: {
-            request: version,
-            latest: contentDefinition.version.latest,
-          },
-          utils: {
-            getTransforms: ctx.getTransformsFactory(contentTypeId),
-          },
-        };
+    const contentTypesWithStorageContext = contentTypes.map(({ contentTypeId, version }) => {
+      const storageContext = getStorageContext({
+        contentTypeId,
+        version,
+        ctx,
+      });
 
-        return {
-          contentTypeId,
-          ctx: storageContext,
-        };
-      }
-    );
+      return {
+        contentTypeId,
+        ctx: storageContext,
+      };
+    });
 
     const result = await ctx.mSearchService.search(contentTypesWithStorageContext, query);
 

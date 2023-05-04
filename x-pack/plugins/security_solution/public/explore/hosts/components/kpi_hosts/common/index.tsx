@@ -18,7 +18,7 @@ import type {
 import type { StatItemsProps, StatItems } from '../../../../components/stat_items';
 import { StatItemsComponent, useKpiMatrixStatus } from '../../../../components/stat_items';
 import type { UpdateDateRange } from '../../../../../common/components/charts/common';
-import type { UserskKpiStrategyResponse } from '../../../../../../common/search_strategy/security_solution/users';
+import type { UsersKpiStrategyResponse } from '../../../../../../common/search_strategy/security_solution/users';
 
 const kpiWidgetHeight = 247;
 
@@ -30,7 +30,7 @@ FlexGroup.displayName = 'FlexGroup';
 
 interface KpiBaseComponentProps {
   fieldsMapping: Readonly<StatItems[]>;
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse;
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UsersKpiStrategyResponse;
   loading?: boolean;
   id: string;
   from: string;

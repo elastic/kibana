@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   RequestHandler,
-  IRouter,
   RequestHandlerContextBase,
   KibanaRequest,
   KibanaResponseFactory,
@@ -18,12 +16,17 @@ import type {
   AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
+  IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
+import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
 import { isValidRouteVersion } from './is_valid_route_version';
+import { injectResponseHeaders } from './inject_response_headers';
+
+import { resolvers } from './handler_resolvers';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
@@ -48,25 +51,24 @@ export class CoreVersionedRoute implements VersionedRoute {
     method,
     path,
     options,
-    validateResponses = false,
   }: {
-    router: IRouter;
+    router: CoreVersionedRouter;
     method: Method;
     path: string;
     options: VersionedRouteConfig<Method>;
-    validateResponses?: boolean;
   }) {
-    return new CoreVersionedRoute(router, method, path, options, validateResponses);
+    return new CoreVersionedRoute(router, method, path, options);
   }
 
+  private isPublic: boolean;
   private constructor(
-    private readonly router: IRouter,
+    private readonly router: CoreVersionedRouter,
     public readonly method: Method,
     public readonly path: string,
-    public readonly options: VersionedRouteConfig<Method>,
-    private readonly validateResponses: boolean = false
+    public readonly options: VersionedRouteConfig<Method>
   ) {
-    this.router[this.method](
+    this.isPublic = this.options.access === 'public';
+    this.router.router[this.method](
       {
         path: this.path,
         validate: passThroughValidation,
@@ -76,6 +78,11 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   }
 
+  /** This method assumes that one or more versions handlers are registered  */
+  private getDefaultVersion(): ApiVersion {
+    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
+  }
+
   private getAvailableVersionsMessage(): string {
     const versions = [...this.handlers.keys()];
     return `Available versions are: ${
@@ -83,26 +90,27 @@ export class CoreVersionedRoute implements VersionedRoute {
     }`;
   }
 
-  /** This is where we must implement the versioned spec once it is available */
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
     req: KibanaRequest,
     res: KibanaResponseFactory
-  ) => {
-    const version = req.headers?.[ELASTIC_HTTP_VERSION_HEADER] as undefined | ApiVersion;
-    if (!version) {
+  ): Promise<IKibanaResponse> => {
+    if (this.handlers.size <= 0) {
       return res.custom({
-        statusCode: 406,
-        body: `Version expected at [${this.method}] [${
-          this.path
-        }]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. ${this.getAvailableVersionsMessage()}`,
+        statusCode: 500,
+        body: `No handlers registered for [${this.method}] [${this.path}].`,
       });
+    }
+    const version = this.getVersion(req);
+
+    const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
+    if (invalidVersionMessage) {
+      return res.badRequest({ body: invalidVersionMessage });
     }
 
     const handler = this.handlers.get(version);
     if (!handler) {
-      return res.custom({
-        statusCode: 406,
+      return res.badRequest({
         body: `No version "${version}" available for [${this.method}] [${
           this.path
         }]. ${this.getAvailableVersionsMessage()}`,
@@ -137,13 +145,13 @@ export class CoreVersionedRoute implements VersionedRoute {
       mutableCoreKibanaRequest.query = {};
     }
 
-    const result = await handler.fn(ctx, mutableCoreKibanaRequest, res);
+    const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.validateResponses && validation?.response?.[result.status]) {
-      const responseValidation = validation.response[result.status];
+    if (this.router.isDev && validation?.response?.[response.status]) {
+      const responseValidation = validation.response[response.status];
       try {
         validate(
-          { body: result.payload },
+          { body: response.payload },
           { body: responseValidation.body, unsafe: { body: validation.response.unsafe?.body } },
           handler.options.version
         );
@@ -155,14 +163,23 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     }
 
-    return result;
+    return injectResponseHeaders(
+      {
+        [ELASTIC_HTTP_VERSION_HEADER]: version,
+      },
+      response
+    );
   };
 
+  private getVersion(request: KibanaRequest): ApiVersion {
+    const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];
+    return Array.isArray(versions) ? versions[0] : versions ?? this.getDefaultVersion();
+  }
+
   private validateVersion(version: string) {
-    if (!isValidRouteVersion(version)) {
-      throw new Error(
-        `Invalid version number. Received "${version}", expected any finite, whole number greater than 0.`
-      );
+    const message = isValidRouteVersion(this.isPublic, version);
+    if (message) {
+      throw new Error(message);
     }
 
     if (this.handlers.has(version as ApiVersion)) {

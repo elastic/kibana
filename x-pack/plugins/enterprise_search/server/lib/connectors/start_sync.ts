@@ -11,7 +11,7 @@ import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import {
-  ConnectorConfiguration,
+  ConnectorSyncConfiguration,
   ConnectorDocument,
   ConnectorSyncJobDocument,
   SyncStatus,
@@ -30,7 +30,7 @@ export const startConnectorSync = async (
   });
   const connector = connectorResult._source;
   if (connector) {
-    const configuration: ConnectorConfiguration = nextSyncConfig
+    const configuration: ConnectorSyncConfiguration = nextSyncConfig
       ? {
           ...connector.configuration,
           nextSyncConfig: { label: 'nextSyncConfig', value: nextSyncConfig },
@@ -76,6 +76,7 @@ export const startConnectorSync = async (
         metadata: {},
         started_at: null,
         status: SyncStatus.PENDING,
+        total_document_count: null,
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
