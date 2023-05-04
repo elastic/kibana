@@ -285,11 +285,11 @@ export const ModelsList: FC<Props> = ({
             : '';
         });
 
-        const curatedModels = models.filter((model) =>
+        const elasticModels = models.filter((model) =>
           ELASTIC_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
         );
-        if (curatedModels.length > 0) {
-          for (const model of curatedModels) {
+        if (elasticModels.length > 0) {
+          for (const model of elasticModels) {
             if (model.state === MODEL_STATE.STARTED) {
               // no need to check for the download status if the model has been deployed
               continue;
