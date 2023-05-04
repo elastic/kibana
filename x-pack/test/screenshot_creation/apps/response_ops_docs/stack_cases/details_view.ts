@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const cases = getService('cases');
   const commonScreenshots = getService('commonScreenshots');
+  const testSubjects = getService('testSubjects');
 
   const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
   let CASE_ID: string;
@@ -26,6 +27,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await cases.api.deleteAllCases();
+    });
+
+    it('case files screenshot', async () => {
+      await cases.navigation.navigateToApp();
+      await cases.navigation.navigateToSingleCase('cases', CASE_ID);
+      const filesTab = await testSubjects.find('case-view-tab-title-files');
+      await filesTab.click();
+      await commonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
     });
 
     it('cases visualization screenshot', async () => {
