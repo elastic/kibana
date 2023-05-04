@@ -8,17 +8,17 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { range, sortBy } from 'lodash';
+import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile, createType } from '../test_utils';
-import { getBaseMigratorParams, noopMigration } from '../fixtures/zdt_base.fixtures';
+import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
-const logFilePath = Path.join(__dirname, 'switch_to_model_version.test.log');
+export const logFilePath = Path.join(__dirname, 'basic_downgrade.test.log');
 
-describe('ZDT with v2 compat - type switching from migration to model version', () => {
+describe('ZDT upgrades - basic downgrade', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
@@ -31,41 +31,12 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
     await delay(10);
   });
 
-  const typeBefore = createType({
-    name: 'switching_type',
+  const typeV1 = createType({
+    name: 'sample_type',
     mappings: {
       properties: {
         text: { type: 'text' },
         keyword: { type: 'keyword' },
-      },
-    },
-    migrations: {
-      '7.0.0': noopMigration,
-      '7.5.0': noopMigration,
-    },
-  });
-
-  const typeAfter = createType({
-    name: 'switching_type',
-    mappings: {
-      properties: {
-        text: { type: 'text' },
-        keyword: { type: 'keyword' },
-        newField1: { type: 'text' },
-        newField2: { type: 'text' },
-      },
-    },
-    migrations: {
-      '7.0.0': noopMigration,
-      '7.5.0': noopMigration,
-      '7.9.0': (doc) => {
-        return {
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            newField1: `new1 ${doc.id}`,
-          },
-        };
       },
     },
     switchToModelVersionAt: '8.0.0',
@@ -73,19 +44,32 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
       1: {
         modelChange: {
           type: 'expansion',
-          transformation: {
-            up: (doc) => {
-              return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    newField2: `new2 ${doc.id}`,
-                  },
-                },
-              };
-            },
-            down: jest.fn(),
+        },
+      },
+    },
+  });
+
+  const typeV2 = createType({
+    name: 'sample_type',
+    mappings: {
+      properties: {
+        text: { type: 'text' },
+        keyword: { type: 'keyword' },
+        newField1: { type: 'text' },
+      },
+    },
+    switchToModelVersionAt: '8.0.0',
+    modelVersions: {
+      1: {
+        modelChange: {
+          type: 'expansion',
+        },
+      },
+      2: {
+        modelChange: {
+          type: 'expansion',
+          addedMappings: {
+            newField1: { type: 'text' },
           },
         },
       },
@@ -95,20 +79,21 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
   const createBaseline = async () => {
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
-      types: [typeBefore],
+      types: [typeV2],
     });
     await runMigrations();
 
-    const sampleObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
+    const sampleAObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
       id: `doc-${number}`,
-      type: 'switching_type',
+      type: 'sample_type',
       attributes: {
         text: `text ${number}`,
         keyword: `kw ${number}`,
+        newField1: `was added in v2`,
       },
     }));
 
-    await savedObjectsRepository.bulkCreate(sampleObjs);
+    await savedObjectsRepository.bulkCreate(sampleAObjs);
   };
 
   it('migrates the documents', async () => {
@@ -117,7 +102,7 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
       logFilePath,
-      types: [typeAfter],
+      types: [typeV1],
     });
 
     await runMigrations();
@@ -129,42 +114,38 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 
+    // check that mappings are still matching v2
     expect(mappings.properties).toEqual(
       expect.objectContaining({
-        switching_type: typeAfter.mappings,
+        sample_type: typeV2.mappings,
       })
     );
 
+    // check that the mappingVersions are still v2
+    expect(mappingMeta.mappingVersions).toEqual({
+      sample_type: '10.2.0',
+    });
+
+    // check that the docVersion are still v2
     expect(mappingMeta.docVersions).toEqual({
-      switching_type: '10.1.0',
+      sample_type: '10.2.0',
     });
 
     const { saved_objects: sampleDocs } = await savedObjectsRepository.find({
-      type: 'switching_type',
+      type: 'sample_type',
     });
-
     expect(sampleDocs).toHaveLength(5);
 
-    const sampleData = sortBy(sampleDocs, 'id').map((object) => ({
-      id: object.id,
-      type: object.type,
-      attributes: object.attributes,
-    }));
-
-    expect(sampleData).toEqual(
-      range(5).map((i) => ({
-        id: `doc-${i}`,
-        type: 'switching_type',
-        attributes: {
-          text: `text ${i}`,
-          keyword: `kw ${i}`,
-          newField1: `new1 doc-${i}`,
-          newField2: `new2 doc-${i}`,
-        },
-      }))
-    );
-
     const records = await parseLogFile(logFilePath);
-    expect(records).toContainLogEntry('Migration completed');
+
+    expect(records).toContainLogEntries(
+      [
+        'INIT -> INDEX_STATE_UPDATE_DONE',
+        'INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT',
+        'DOCUMENTS_UPDATE_INIT -> DONE',
+        'Migration completed',
+      ],
+      { ordered: true }
+    );
   });
 });
