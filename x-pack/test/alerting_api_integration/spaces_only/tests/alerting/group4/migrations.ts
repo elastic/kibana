@@ -692,5 +692,26 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         }),
       ]);
     });
+
+    it('8.8 unmutes only security custom rules', async () => {
+      const nonSecurityRuleId = 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
+      const securityImmutableRuleId = 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43';
+      const securityCustomRuleId = 'alert:88bc8c21-07ba-42eb-ad9c-06820275ac10';
+
+      const { docs } = await es.mget({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        body: { ids: [securityCustomRuleId, nonSecurityRuleId, securityImmutableRuleId] },
+      });
+
+      expect(
+        (docs[0] as estypes.GetGetResult<{ alert: RawRule }>)?._source?.alert.muteAll
+      ).toBeFalsy();
+      expect(
+        (docs[1] as estypes.GetGetResult<{ alert: RawRule }>)?._source?.alert.muteAll
+      ).toBeTruthy();
+      expect(
+        (docs[2] as estypes.GetGetResult<{ alert: RawRule }>)?._source?.alert.muteAll
+      ).toBeTruthy();
+    });
   });
 }
