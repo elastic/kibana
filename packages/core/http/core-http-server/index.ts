@@ -138,4 +138,6 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  VersionedFullValidationConfig,
+  VersionedRouteResponseValidationEntry,
 } from './src/versioning';

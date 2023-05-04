@@ -25,10 +25,11 @@ import type { CoreVersionedRouter } from './core_versioned_router';
 import { validate } from './validate';
 import { isValidRouteVersion } from './is_valid_route_version';
 import { injectResponseHeaders } from './inject_response_headers';
+import { getResponseValidation } from './utils';
 
 import { resolvers } from './handler_resolvers';
 
-type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
+type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 export const passThroughValidation = {
@@ -147,12 +148,18 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.router.isDev && validation?.response?.[response.status]) {
-      const responseValidation = validation.response[response.status];
+    const responseValidation = this.router.isDev
+      ? getResponseValidation(
+          validation,
+          response.status,
+          response.options.headers?.['content-type'] as undefined | string
+        )
+      : undefined;
+    if (responseValidation) {
       try {
         validate(
           { body: response.payload },
-          { body: responseValidation.body, unsafe: { body: validation.response.unsafe?.body } },
+          { body: responseValidation.body, unsafe: { body: validation!.response!.unsafe?.body } },
           handler.options.version
         );
       } catch (e) {

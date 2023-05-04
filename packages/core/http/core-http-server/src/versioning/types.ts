@@ -157,8 +157,7 @@ export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<
 
 export type VersionedSpecValidation = RouteValidationFunction<unknown> | Type<unknown>;
 
-interface VersionedRouteResponseValidationEntry {
-  /** @default application/json */
+export interface VersionedRouteResponseValidationEntry {
   contentType?: string;
   body: VersionedSpecValidation;
 }
@@ -167,7 +166,12 @@ interface VersionedRouteResponseValidationEntry {
 export interface VersionedRouteResponseValidation {
   [statusCode: number]:
     | VersionedRouteResponseValidationEntry
-    | VersionedRouteResponseValidationEntry[];
+    | [
+        // Should have at least two entries to use this notation
+        Required<VersionedRouteResponseValidationEntry>,
+        Required<VersionedRouteResponseValidationEntry>,
+        ...Array<Required<VersionedRouteResponseValidationEntry>>
+      ];
   unsafe?: { body?: boolean };
 }
 
@@ -175,7 +179,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B> {
+export interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental
@@ -195,7 +199,7 @@ interface FullValidationConfig<P, Q, B> {
  * of an endpoint etc.
  * @experimental
  */
-export interface AddVersionOpts<P, Q, B, R> {
+export interface AddVersionOpts<P, Q, B> {
   /**
    * Version to assign to this route
    * @experimental
@@ -223,10 +227,8 @@ export interface VersionedRoute<
    * @returns A versioned route, allows for fluent chaining of version declarations
    * @experimental
    */
-  addVersion<P = unknown, Q = unknown, B = unknown, R = any>(
-    options: AddVersionOpts<P, Q, B, R>,
-    handler: (
-      ...params: Parameters<RequestHandler<P, Q, B, Ctx>>
-    ) => MaybePromise<IKibanaResponse<R>>
+  addVersion<P = unknown, Q = unknown, B = unknown>(
+    options: AddVersionOpts<P, Q, B>,
+    handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => MaybePromise<IKibanaResponse>
   ): VersionedRoute<Method, Ctx>;
 }

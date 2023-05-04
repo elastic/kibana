@@ -20,7 +20,7 @@ import type { CliArgs } from '@kbn/config';
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 
-describe('Routing versioned requests', () => {
+describe('Versioned router', () => {
   let router: IRouter;
   let supertest: Supertest.SuperTest<Supertest.Test>;
 
@@ -280,5 +280,113 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body }) => body.v)
     ).resolves.toEqual('oldest');
+  });
+
+  it('allows multiple response validations to be registered per response status per content type', async () => {
+    await setupServer({ serverless: false, dev: true });
+
+    router.versioned.get({ path: '/test', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              state: schema.oneOf([
+                schema.literal('json'),
+                schema.literal('text'),
+                schema.literal('random'),
+                schema.literal('errorJson'),
+                schema.literal('errorText'),
+              ]),
+            }),
+          },
+          response: {
+            200: [
+              { contentType: 'application/json', body: schema.object({ n: schema.number() }) },
+              { contentType: 'text/plain', body: schema.string() },
+            ],
+            400: [
+              {
+                contentType: 'application/json',
+                body: schema.object({ message: schema.number() }),
+              },
+              { contentType: 'text/plain', body: schema.string() },
+            ],
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        const { state } = req.query;
+        return {
+          json: res.ok({
+            headers: { 'content-type': 'application/json' },
+            body: { n: 'not a number' },
+          }),
+          text: res.ok({ headers: { 'content-type': 'text/plain' }, body: 1 as unknown as string }),
+          random: res.ok({ headers: { 'content-type': 'random' }, body: 'random' }),
+          errorJson: res.badRequest({
+            headers: { 'content-type': 'application/json' },
+            body: 'not an object',
+          }),
+          errorText: res.badRequest({
+            headers: { 'content-type': 'text/plain' },
+            body: { message: 'not an expected error' },
+          }),
+        }[state];
+      }
+    );
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/test?state=json')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/Failed output validation/),
+      })
+    );
+
+    await expect(
+      supertest
+        .get('/test?state=text')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/Failed output validation/),
+      })
+    );
+
+    await expect(
+      supertest
+        .get('/test?state=errorJson')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/Failed output validation/),
+      })
+    );
+
+    await expect(
+      supertest
+        .get('/test?state=errorText')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/Failed output validation/),
+      })
+    );
+
+    await expect(
+      supertest
+        .get('/test?state=random')
+        .expect(200)
+        .then(({ text }) => text)
+    ).resolves.toEqual('random');
   });
 });
