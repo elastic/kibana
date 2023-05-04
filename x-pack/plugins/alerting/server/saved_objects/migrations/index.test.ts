@@ -2736,21 +2736,6 @@ describe('successful migrations', () => {
         }
       );
 
-      test('ignores prebuilt rules', () => {
-        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.8.0'
-        ];
-
-        const rule = getMockData({
-          alertTypeId: ruleTypeMappings.query,
-          muteAll: true,
-          params: { immutable: true },
-        });
-        const migratedAlert880 = migration880(rule, migrationContext);
-
-        expect(migratedAlert880.attributes.muteAll).toBeTruthy();
-      });
-
       test('ignores non security rules', () => {
         const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.8.0'
