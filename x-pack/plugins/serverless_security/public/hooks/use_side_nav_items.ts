@@ -6,13 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { matchPath, useLocation } from 'react-router-dom';
 import { partition } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import { useKibana } from '../services';
 import { useGetLinkProps } from './use_link_props';
+import { useNavLinks } from './use_nav_links';
 
 const isFooterNavItem = (id: string) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -43,8 +43,7 @@ const findItemsByPath = (
  * Returns all the formatted SideNavItems, including external links
  */
 export const useSideNavItems = (): SolutionSideNavItem[] => {
-  const { securitySolution } = useKibana().services;
-  const navLinks = useObservable(securitySolution.navLinks$, []);
+  const navLinks = useNavLinks();
   const getLinkProps = useGetLinkProps();
 
   const securitySideNavItems = useMemo(
@@ -68,7 +67,6 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
             id: navLink.id,
             label: navLink.title,
             ...getLinkProps({ deepLinkId: navLink.id }),
-            // ...(navLink.unauthorized && { unauthorized: true }),
             ...(navLink.categories?.length && { categories: navLink.categories }),
             ...(navLink.links?.length && {
               items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {

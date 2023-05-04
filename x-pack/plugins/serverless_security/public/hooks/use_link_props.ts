@@ -21,7 +21,7 @@ interface GetLinkPropsParams {
   onClick?: MouseEventHandler;
 }
 
-type GetLinkProps = (params: GetLinkPropsParams) => LinkProps;
+export type GetLinkProps = (params: GetLinkPropsParams) => LinkProps;
 
 export const useLinkProps: GetLinkProps = (props) => {
   const { application } = useKibana().services;
