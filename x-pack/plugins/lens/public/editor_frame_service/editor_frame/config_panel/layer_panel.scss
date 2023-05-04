@@ -64,33 +64,6 @@
   padding: $euiSizeS $euiSize;
 }
 
-.lnsLayerPanel__dimensionContainer {
-  position: relative;
-
-  &+& {
-    margin-top: $euiSizeS;
-  }
-}
-
-.lnsLayerPanel__dimensionLink {
-  &:hover {
-    text-decoration: none;
-  }
-}
-
-.domDragDrop-isReplacing {
-  .dimensionTrigger__textLabel {
-    text-decoration: line-through;
-  }
-}
-
-.lnsLayerPanel__triggerTextContent {
-  // Make EUI button content not centered
-  justify-content: flex-start;
-  padding: 0 !important; // sass-lint:disable-line no-important
-  color: $euiTextSubduedColor;
-}
-
 .lnsLayerPanel__styleEditor {
   padding: $euiSize;
 }
@@ -115,12 +88,26 @@
   }
 }
 
+// Start dimension style overrides
+
+.lnsLayerPanel__dimensionContainer {
+  position: relative;
+
+  &+& {
+    margin-top: $euiSizeS;
+  }
+}
+
+.domDragDrop-isReplacing {
+  .dimensionTrigger__textLabel {
+    text-decoration: line-through;
+  }
+}
+
 // Added .lnsLayerPanel__dimension specificity required for animation style override
 .lnsLayerPanel__dimension .lnsLayerPanel__dimensionLink {
-  width: 100%;
-
   &:focus {
-    @include passDownFocusRing('.lnsLayerPanel__triggerTextLabel');
+    @include passDownFocusRing('.dimensionTrigger__textLabel');
     background-color: transparent;
     text-decoration-thickness: $euiBorderWidthThin !important;
   }

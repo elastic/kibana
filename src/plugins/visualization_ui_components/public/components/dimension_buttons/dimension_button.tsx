@@ -74,6 +74,12 @@ export function DimensionButton({
           <EuiToolTip content={message?.content} position="left">
             <EuiLink
               className="lnsLayerPanel__dimensionLink"
+              css={css`
+                width: 100%;
+                &:hover {
+                  text-decoration: none;
+                }
+              `}
               data-test-subj="lnsLayerPanel-dimensionLink"
               onClick={() => onClick(accessorConfig.columnId)}
               aria-label={triggerLinkA11yText(label)}
