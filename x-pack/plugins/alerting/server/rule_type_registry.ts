@@ -13,7 +13,6 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { ruleStateSchema } from '@kbn/alerting-state-types';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,

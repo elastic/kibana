@@ -82,9 +82,9 @@ export class OsqueryTelemetryTask {
         timeout: this.config.timeout,
         stateSchemaByVersion: {
           1: schema.object({
-            lastExecutionTimestamp: schema.string(),
+            lastExecutionTimestamp: schema.maybe(schema.string()),
             runs: schema.number(),
-            hits: schema.number(),
+            hits: schema.maybe(schema.number()),
           }),
         },
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {

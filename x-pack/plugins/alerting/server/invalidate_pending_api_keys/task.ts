@@ -12,6 +12,7 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
@@ -88,6 +89,12 @@ function registerApiKeyInvalidatorTaskDefinition(
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
+      stateSchemaByVersion: {
+        1: schema.object({
+          runs: schema.number(),
+          total_invalidated: schema.number(),
+        }),
+      },
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });
