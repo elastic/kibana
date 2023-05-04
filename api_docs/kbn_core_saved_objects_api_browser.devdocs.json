@@ -130,18 +130,6 @@
             "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/common/ui/types.ts"
           },
@@ -1120,22 +1108,6 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/reference_editor.tsx"
           },
           {
@@ -1157,18 +1129,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
           },
           {
             "plugin": "ml",
@@ -1273,14 +1233,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.test.ts"
           },
           {
             "plugin": "lens",
@@ -1477,10 +1429,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
               },
               {
                 "plugin": "infra",
@@ -2160,10 +2108,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
@@ -2218,14 +2162,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
               },
               {
                 "plugin": "ml",
@@ -2667,10 +2603,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
               },
               {
                 "plugin": "graph",
@@ -3878,14 +3810,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
           },
           {
             "plugin": "aiops",
