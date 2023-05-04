@@ -36,7 +36,7 @@ export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
 const RULE_SNOOZE_DOCS_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.docsLinkText',
   {
-    defaultMessage: 'docs',
+    defaultMessage: 'Learn more',
   }
 );
 
@@ -53,7 +53,7 @@ function RuleSnoozeDescription(): JSX.Element {
   return (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription"
-      defaultMessage="Select when automated actions should be performed. If a rule is snoozed actions will not be performed. Learn more about actions in our {docs}."
+      defaultMessage="Choose when to perform actions or snooze them. Notifications are not created for snoozed actions. {docs}."
       values={{
         docs: (
           <EuiLink href={manageDetectionRulesSnoozeSection} target="_blank">
