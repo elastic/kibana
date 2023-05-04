@@ -166,6 +166,7 @@ describe('embeddable', () => {
       capabilities: {
         canSaveDashboards: true,
         canSaveVisualizations: true,
+        canOpenVisualizations: true,
         discover: {},
         navLinks: {},
       },
@@ -361,6 +362,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -413,6 +415,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -940,6 +943,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -1039,6 +1043,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -1135,6 +1140,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
