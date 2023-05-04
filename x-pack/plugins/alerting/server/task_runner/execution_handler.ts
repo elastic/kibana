@@ -514,7 +514,14 @@ export class ExecutionHandler<
 
       // By doing that we are not cancelling the summary action but just waiting
       // for the window maintenance to be over before sending the summary action
-      if (isSummaryAction(action) && this.maintenanceWindowIds.length === 0) {
+      if (isSummaryAction(action) && this.maintenanceWindowIds.length > 0) {
+        this.logger.debug(
+          `no scheduling of summary actions "${action.id}" for rule "${
+            this.taskInstance.params.alertId
+          }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
+        );
+        continue;
+      } else if (isSummaryAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
@@ -530,7 +537,7 @@ export class ExecutionHandler<
           this.logger.debug(
             `no scheduling of actions "${action.id}" for rule "${
               this.taskInstance.params.alertId
-            }": has active maintenance windows ${alert.getMaintenanceWindowIds()}.`
+            }": has active maintenance windows ${alert.getMaintenanceWindowIds().join()}.`
           );
           continue;
         }
