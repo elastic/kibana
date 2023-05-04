@@ -10,7 +10,7 @@ import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@
 import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { firstNonNullValue } from '../../helpers';
-import type { RawBucket } from '../types';
+import type { GroupingBucket } from '../types';
 import { createGroupFilter, getNullGroupFilter } from './helpers';
 
 interface GroupPanelProps<T> {
@@ -18,14 +18,14 @@ interface GroupPanelProps<T> {
   customAccordionClassName?: string;
   extraAction?: React.ReactNode;
   forceState?: 'open' | 'closed';
-  groupBucket: RawBucket<T>;
+  groupBucket: GroupingBucket<T>;
   groupPanelRenderer?: JSX.Element;
   groupingLevel?: number;
   isLoading: boolean;
   isNullGroup?: boolean;
   nullGroupMessage?: string;
   onGroupClose: () => void;
-  onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
+  onToggleGroup?: (isOpen: boolean, groupBucket: GroupingBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
 }
@@ -81,8 +81,10 @@ const GroupPanelComponent = <T,>({
       lastForceState.current = 'open';
     }
   }, [onGroupClose, forceState, selectedGroup]);
-
-  const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
+  const groupFieldValue = useMemo(
+    () => (groupBucket.selectedGroup === selectedGroup ? firstNonNullValue(groupBucket.key) : null),
+    [groupBucket.key, groupBucket.selectedGroup, selectedGroup]
+  );
 
   const groupFilters = useMemo(
     () =>

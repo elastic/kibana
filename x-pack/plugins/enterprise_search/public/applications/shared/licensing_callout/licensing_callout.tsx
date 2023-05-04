@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../../shared/doc_links/doc_links';
+import { docLinks } from '../doc_links/doc_links';
 
 export enum LICENSING_FEATURE {
   NATIVE_CONNECTOR = 'nativeConnector',
