@@ -20,7 +20,7 @@ export interface EndpointAppContext {
   logFactory: LoggerFactory;
 
   /**
-   * @deprecated use `EndpointAppContext.serverConfig` property intead
+   * @deprecated use `EndpointAppContext.serverConfig` property instead
    */
   config(): Promise<ConfigType>;
 

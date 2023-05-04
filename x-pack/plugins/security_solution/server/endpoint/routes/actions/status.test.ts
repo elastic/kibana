@@ -65,9 +65,15 @@ describe('Endpoint Pending Action Summary API', () => {
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
     const endpointContextMock = createMockEndpointAppContext();
-    Object.assign(endpointContextMock.experimentalFeatures, pendingActionResponsesWithAck);
 
-    registerActionStatusRoutes(routerMock, endpointContextMock);
+    registerActionStatusRoutes(routerMock, {
+      ...endpointContextMock,
+      service: endpointAppContextService,
+      experimentalFeatures: {
+        ...endpointContextMock.experimentalFeatures,
+        pendingActionResponsesWithAck,
+      },
+    });
 
     getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
       const req = httpServerMock.createKibanaRequest(reqParams);

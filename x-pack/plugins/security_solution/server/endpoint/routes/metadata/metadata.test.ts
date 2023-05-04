@@ -108,7 +108,10 @@ describe('test endpoint routes', () => {
     mockAgentPolicyService = startContract.endpointFleetServicesFactory.asInternalUser()
       .agentPolicy as jest.Mocked<AgentPolicyServiceInterface>;
 
-    registerEndpointRoutes(routerMock, createMockEndpointAppContext());
+    registerEndpointRoutes(routerMock, {
+      ...createMockEndpointAppContext(),
+      service: endpointAppContextService,
+    });
   });
 
   afterEach(() => endpointAppContextService.stop());

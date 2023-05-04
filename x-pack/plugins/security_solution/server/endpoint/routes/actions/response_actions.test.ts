@@ -120,7 +120,10 @@ describe('Response actions', () => {
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
 
-      const endpointContext = createMockEndpointAppContext();
+      const endpointContext = {
+        ...createMockEndpointAppContext(),
+        service: endpointAppContextService,
+      };
 
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({

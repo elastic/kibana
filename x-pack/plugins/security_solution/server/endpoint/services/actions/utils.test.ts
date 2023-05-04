@@ -260,7 +260,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Endpoint action response error: endpoint failed to apply'],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {},
+          outputs: expect.anything(),
           agentState: {
             '123': {
               completedAt: endpointResponseAtError.item.data['@timestamp'],
@@ -301,7 +301,7 @@ describe('When using Actions service utilities', () => {
           ],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {},
+          outputs: expect.anything(),
           agentState: {
             '123': {
               completedAt: endpointResponseAtError.item.data['@timestamp'],

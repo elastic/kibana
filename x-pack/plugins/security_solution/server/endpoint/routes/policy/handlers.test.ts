@@ -168,10 +168,13 @@ describe('test policy response handler', () => {
 
     it('should return the summary of all the agent with the given policy name', async () => {
       mockAgentClient.listAgents
-        .mockImplementationOnce(() => Promise.resolve(agentListResult))
-        .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
+        .mockImplementation(() => Promise.resolve(emptyAgentListResult))
+        .mockImplementationOnce(() => Promise.resolve(agentListResult));
 
-      const policySummarysHandler = getAgentPolicySummaryHandler(createMockEndpointAppContext());
+      const policySummarysHandler = getAgentPolicySummaryHandler({
+        ...createMockEndpointAppContext(),
+        service: endpointAppContextService,
+      });
 
       const mockRequest = httpServerMock.createKibanaRequest({
         query: { policy_id: '41a1b470-221b-11eb-8fba-fb9c0d46ace3', package_name: 'endpoint' },
