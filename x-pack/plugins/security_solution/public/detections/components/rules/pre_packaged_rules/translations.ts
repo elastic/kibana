@@ -35,11 +35,10 @@ export const RULE_UPDATES_LINK = i18n.translate(
   }
 );
 
-export const NEW_RULES_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.newRulesCalloutTitle',
+export const ADD_ELASTIC_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addElasticRulesButtonTitle',
   {
-    defaultMessage:
-      'New Elastic rules are available to be installed. Click on the “Add Elastic Rules” button to Review and install.',
+    defaultMessage: 'Add Elastic rules',
   }
 );
 

@@ -53,6 +53,13 @@ export const ADD_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const ADD_RULES_PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRulesPageTitle',
+  {
+    defaultMessage: 'Add Rules',
+  }
+);
+
 export const EDIT_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.editPageTitle',
   {

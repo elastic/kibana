@@ -13,3 +13,10 @@ export const PAGE_TITLE = i18n.translate(
     defaultMessage: 'Add Elastic Rules',
   }
 );
+
+export const INSTALL_ALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonTitle',
+  {
+    defaultMessage: 'Install all',
+  }
+);

@@ -58,11 +58,13 @@ const RulesPageComponent: React.FC = () => {
     invalidateFetchRuleManagementFilters();
   }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
 
-  const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
-  const shouldDisplayUpdateRulesCallout =
-    (preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_upgrade ?? 0) > 0;
-  const shouldDisplayNewRulesCallout =
-    (preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_install ?? 0) > 0;
+  const { data } = usePrebuiltRulesStatus();
+  const rulesToUpgradeCount = data?.attributes?.stats?.num_prebuilt_rules_to_upgrade ?? 0;
+  const rulesToInstallCount = data?.attributes?.stats?.num_prebuilt_rules_to_install ?? 0;
+  const rulesInstalledCount = data?.attributes?.stats?.num_prebuilt_rules_installed ?? 0;
+  // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
+  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0 && rulesInstalledCount === 0;
+  const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
 
   const [
     {
@@ -184,7 +186,6 @@ const RulesPageComponent: React.FC = () => {
               title={NEW_PREBUILT_RULES_CALLOUT_TITLE}
             />
           )}
-          {/* <ChatGPTPlugin />*/}
           <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -17,11 +17,10 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
-import { AllRules } from '../../components/rules_table';
-import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
-
 import * as i18n from './translations';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
+import { RulesTableNew } from '../../components/rules_table/rules_table_new/rules_table_new';
+import { RulesTableNewContextProvider } from '../../components/rules_table/rules_table_new/rules_table_new_context';
 
 const AddRulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
@@ -33,10 +32,6 @@ const AddRulesPageComponent: React.FC = () => {
   // }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
 
   const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
-  const shouldDisplayUpdateRulesCallout =
-    (preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_upgrade ?? 0) > 0;
-  const shouldDisplayNewRulesCallout =
-    (preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_install ?? 0) > 0;
 
   const [
     {
@@ -74,20 +69,20 @@ const AddRulesPageComponent: React.FC = () => {
       {/* <NeedAdminForUpdateRulesCallOut />*/}
       {/* <MissingPrivilegesCallOut />*/}
 
-      <RulesTableContextProvider>
+      <RulesTableNewContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                {/* <LoadPrePackagedRules>*/}
-                {/*  {(renderProps) => <LoadPrePackagedRulesButton {...renderProps} />}*/}
-                {/* </LoadPrePackagedRules>*/}
+                <EuiButton fill iconType="plusInCircle">
+                  {i18n.INSTALL_ALL}
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
-          <AllRules data-test-subj="all-rules" />
+          <RulesTableNew />
         </SecuritySolutionPageWrapper>
-      </RulesTableContextProvider>
+      </RulesTableNewContextProvider>
 
       <SpyRoute pageName={SecurityPageName.rulesAdd} />
     </>

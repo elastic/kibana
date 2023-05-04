@@ -8,10 +8,6 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../../../app/types';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import { useUserData } from '../../user_info';
 import { LoadPrePackagedRules } from './load_prepackaged_rules';
 import { LoadPrePackagedRulesButton } from './load_prepackaged_rules_button';
 import * as i18n from './translations';
@@ -23,9 +19,6 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
-
   return (
     <EmptyPrompt
       data-test-subj="rulesEmptyPrompt"
@@ -37,21 +30,13 @@ const PrePackagedRulesPromptComponent = () => {
             <LoadPrePackagedRules>
               {(renderProps) => (
                 <LoadPrePackagedRulesButton
-                  fill
+                  fill={true}
                   data-test-subj="load-prebuilt-rules"
+                  showBadge={false}
                   {...renderProps}
                 />
               )}
             </LoadPrePackagedRules>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SecuritySolutionLinkButton
-              isDisabled={!hasPermissions}
-              iconType="plusInCircle"
-              deepLinkId={SecurityPageName.rulesCreate}
-            >
-              {i18n.CREATE_RULE_ACTION}
-            </SecuritySolutionLinkButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

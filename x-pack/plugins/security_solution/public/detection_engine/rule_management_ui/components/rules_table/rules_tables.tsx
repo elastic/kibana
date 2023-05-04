@@ -74,7 +74,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     state: {
       rules,
       rulesToUpgrade,
-      rulesToInstall,
       filterOptions,
       isPreflightInProgress,
       isAllSelected,
@@ -87,7 +86,14 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       selectedRuleIds,
       sortingOptions,
     },
-    actions: { setIsAllSelected, setPage, setPerPage, setSelectedRuleIds, setSortingOptions },
+    actions: {
+      setFilterOptions,
+      setIsAllSelected,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+    },
   } = rulesTableContext;
 
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
@@ -135,13 +141,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const paginationMemo = useMemo(() => {
     switch (selectedTab) {
-      case AllRulesTabs.addRules:
-        return {
-          pageIndex: 0,
-          pageSize: 20,
-          totalItemCount: rulesToInstall.length,
-          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-        };
       case AllRulesTabs.updates:
         return {
           pageIndex: 0,
@@ -260,20 +259,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         columns: monitoringColumns,
       };
       break;
-    case AllRulesTabs.updates:
-      currentRules = rulesToUpgrade.map((r) => r.rule);
-      tableProps = {
-        'data-test-subj': 'rules-updates-table',
-        columns: rulesColumns,
-      };
-      break;
-    case AllRulesTabs.addRules:
-      currentRules = rulesToInstall;
-      tableProps = {
-        'data-test-subj': 'rules-new-table',
-        columns: rulesColumns,
-      };
-      break;
     default:
       currentRules = rules;
       tableProps = {
@@ -343,7 +328,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {shouldShowRulesTable && (
         <>
-          <RulesTableFilters />
+          <RulesTableFilters filterOptions={filterOptions} setFilterOptions={setFilterOptions} />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
