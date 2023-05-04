@@ -6,12 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ErrorType } from '@kbn/ml-error-utils';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   getInferenceQuerySchema,
   inferTrainedModelBody,
   inferTrainedModelQuery,
+  modelAndDeploymentIdSchema,
   modelIdSchema,
   optionalModelIdSchema,
   pipelineSimulateBody,
@@ -327,9 +329,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/deployment/_update',
+      path: '/api/ml/trained_models/{modelId}/{deploymentId}/deployment/_update',
       validate: {
-        params: modelIdSchema,
+        params: modelAndDeploymentIdSchema,
         body: updateDeploymentParamsSchema,
       },
       options: {
@@ -338,9 +340,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { modelId } = request.params;
+        const { modelId, deploymentId } = request.params;
         const body = await mlClient.updateTrainedModelDeployment({
           model_id: modelId,
+          deployment_id: deploymentId,
           ...request.body,
         });
         return response.ok({
@@ -361,9 +364,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/deployment/_stop',
+      path: '/api/ml/trained_models/{modelId}/{deploymentId}/deployment/_stop',
       validate: {
-        params: modelIdSchema,
+        params: modelAndDeploymentIdSchema,
         query: forceQuerySchema,
       },
       options: {
@@ -372,13 +375,25 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { modelId } = request.params;
-        const body = await mlClient.stopTrainedModelDeployment({
-          model_id: modelId,
-          force: request.query.force ?? false,
-        });
+        const { deploymentId, modelId } = request.params;
+
+        const results: Record<string, { success: boolean; error?: ErrorType }> = {};
+
+        for (const id of deploymentId.split(',')) {
+          try {
+            const { stopped: success } = await mlClient.stopTrainedModelDeployment({
+              model_id: modelId,
+              deployment_id: id,
+              force: request.query.force ?? false,
+              allow_no_match: false,
+            });
+            results[id] = { success };
+          } catch (error) {
+            results[id] = { success: false, error };
+          }
+        }
         return response.ok({
-          body,
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -428,9 +443,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/infer/{modelId}',
+      path: '/api/ml/trained_models/infer/{modelId}/{deploymentId}',
       validate: {
-        params: modelIdSchema,
+        params: modelAndDeploymentIdSchema,
         query: inferTrainedModelQuery,
         body: inferTrainedModelBody,
       },
@@ -440,9 +455,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { modelId } = request.params;
+        const { modelId, deploymentId } = request.params;
         const body = await mlClient.inferTrainedModel({
           model_id: modelId,
+          deployment_id: deploymentId,
           body: {
             docs: request.body.docs,
             ...(request.body.inference_config

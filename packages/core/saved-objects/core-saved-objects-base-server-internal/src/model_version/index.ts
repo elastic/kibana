@@ -16,17 +16,21 @@ export {
 export {
   getModelVersionMapForTypes,
   getLatestModelVersion,
+  getCurrentVirtualVersion,
+  getVirtualVersionMap,
+  getLatestMigrationVersion,
   type ModelVersionMap,
+  type VirtualVersionMap,
 } from './version_map';
 export {
-  compareModelVersions,
+  compareVirtualVersions,
   type CompareModelVersionMapParams,
   type CompareModelVersionStatus,
   type CompareModelVersionDetails,
   type CompareModelVersionResult,
 } from './version_compare';
 export {
-  getModelVersionsFromMappings,
-  getModelVersionsFromMappingMeta,
+  getVirtualVersionsFromMappings,
+  getVirtualVersionsFromMappingMeta,
 } from './model_version_from_mappings';
 export { getModelVersionDelta } from './get_version_delta';

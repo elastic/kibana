@@ -191,22 +191,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        const operationSelector = opts.isPreviousIncompatible
-          ? `lns-indexPatternDimension-${opts.operation} incompatible`
-          : `lns-indexPatternDimension-${opts.operation}`;
-        async function getAriaPressed() {
-          const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelector);
-          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-          return ariaPressed;
-        }
-
-        // adding retry here as it seems that there is a flakiness of the operation click
-        // it seems that the aria-pressed attribute is updated to true when the button is clicked
-        await retry.waitFor('aria pressed to be true', async () => {
-          const ariaPressedStatus = await getAriaPressed();
-          return ariaPressedStatus === 'true';
-        });
+        await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
@@ -571,6 +556,25 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerClose');
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+    },
+
+    async selectOperation(operation: string, isPreviousIncompatible: boolean = false) {
+      const operationSelector = isPreviousIncompatible
+        ? `lns-indexPatternDimension-${operation} incompatible`
+        : `lns-indexPatternDimension-${operation}`;
+      async function getAriaPressed() {
+        const operationSelectorContainer = await testSubjects.find(operationSelector);
+        await testSubjects.click(operationSelector);
+        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+        return ariaPressed;
+      }
+
+      // adding retry here as it seems that there is a flakiness of the operation click
+      // it seems that the aria-pressed attribute is updated to true when the button is clicked
+      await retry.waitFor('aria pressed to be true', async () => {
+        const ariaPressedStatus = await getAriaPressed();
+        return ariaPressedStatus === 'true';
       });
     },
 

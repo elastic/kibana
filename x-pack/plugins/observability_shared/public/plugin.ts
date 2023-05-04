@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
@@ -13,6 +15,7 @@ import { updateGlobalNavigation } from './services/update_global_navigation';
 
 export interface ObservabilitySharedStart {
   guidedOnboarding: GuidedOnboardingPluginStart;
+  setIsSidebarEnabled: (isEnabled: boolean) => void;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -20,6 +23,11 @@ export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugi
 
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
+  private isSidebarEnabled$: BehaviorSubject<boolean>;
+
+  constructor() {
+    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+  }
 
   public setup() {
     return {
@@ -39,6 +47,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigationSections$: this.navigationRegistry.sections$,
       guidedOnboardingApi: plugins.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
+      isSidebarEnabled$: this.isSidebarEnabled$,
     });
 
     return {
@@ -46,6 +55,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         PageTemplate,
       },
       updateGlobalNavigation,
+      setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),
     };
   }
 

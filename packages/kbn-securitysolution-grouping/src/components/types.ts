@@ -32,6 +32,9 @@ export interface RootAggregation<T> {
   unitsCount?: {
     value?: number | null;
   };
+  unitsCountWithoutNull?: {
+    value?: number | null;
+  };
 }
 
 export type GroupingFieldTotalAggregation<T> = Record<
