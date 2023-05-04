@@ -308,7 +308,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
-          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          // `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
