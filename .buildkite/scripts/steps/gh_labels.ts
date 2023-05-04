@@ -8,8 +8,9 @@
 
 // import { GithubApi } from '../../../src/dev/prs/github_api';
 import { Octokit } from '@octokit/rest';
-import execa from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
+// import execa from 'execa';
+// import { REPO_ROOT } from '@kbn/repo-info';
+import { execSync } from 'child_process';
 
 const github = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -42,19 +43,27 @@ console.log(`\n### prNum: \n  ${prNum}`);
 
 // curl https://api.github.com/repos/elastic/kibana/issues/156373
 // curl https://api.github.com/repos/elastic/kibana/issues/156373 | jq '.labels[].name'
-(async () => {
-  try {
-    const { stdout } = await execa(
-      'curl',
-      [`https://api.github.com/repos/elastic/kibana/issues/${prNum}`],
-      { cwd: REPO_ROOT }
-    );
-    console.log(`\n### stdout: \n  ${stdout}`);
-  } catch (e) {
-    console.log('\n### Whoops, something happenned:');
-    console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
-  }
-})();
+// (async () => {
+//   try {
+//     const { stdout } = await execa(
+//       'curl',
+//       [`https://api.github.com/repos/elastic/kibana/issues/${prNum}`],
+//       { cwd: REPO_ROOT }
+//     );
+
+//     console.log(`\n### stdout: \n  ${stdout}`);
+//   } catch (e) {
+//     console.log('\n### Whoops, something happenned:');
+//     console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
+//   }
+// })();
+
+// const res = execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
+// stdio: ['ignore', 'inherit', 'inherit'],
+// });
+execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
+  stdio: ['ignore', 'inherit', 'inherit'],
+});
 
 export {};
 
