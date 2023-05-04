@@ -74,6 +74,14 @@ export function getTotalsByType(selectors: Selector[], responses: Response[]) {
   return totalsByType;
 }
 
+function selectorUsesFIM(selector?: Selector) {
+  return (
+    !selector?.operation ||
+    selector?.operation.length === 0 ||
+    selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0)
+  );
+}
+
 function selectorsIncludeConditionsForFIMOperations(
   selectors: Selector[],
   conditions: SelectorCondition[],
@@ -84,7 +92,7 @@ function selectorsIncludeConditionsForFIMOperations(
     selectorNames &&
     selectorNames.reduce((prev, cur, index) => {
       const selector = selectors.find((s) => s.name === cur);
-      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const usesFIM = selectorUsesFIM(selector);
       const hasAllConditions =
         !usesFIM ||
         !!(
@@ -116,7 +124,7 @@ export function selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
     selectorNames &&
     selectorNames.reduce((prev, cur) => {
       const selector = selectors.find((s) => s.name === cur);
-      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const usesFIM = selectorUsesFIM(selector);
       return prev || !!(usesFIM && selector?.targetFilePath?.includes('/**'));
     }, false);
 

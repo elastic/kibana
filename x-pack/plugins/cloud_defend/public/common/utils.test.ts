@@ -109,6 +109,33 @@ describe('getRestrictedValuesForCondition', () => {
 });
 
 describe('validateBlockRestrictions', () => {
+  it('reports an error when some of the FIM selectors (no operation) arent using targetFilePath', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1', // no operation means all operations
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['modifyFile'],
+        targetFilePath: ['/**'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1', 'sel2'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(1);
+  });
+
   it('reports an error when some of the FIM selectors arent using targetFilePath', () => {
     const selectors: Selector[] = [
       {
