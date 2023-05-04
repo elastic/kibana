@@ -22,6 +22,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/config-schema",
     "@kbn/core-test-helpers-test-utils",
+    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",
