@@ -65,8 +65,8 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/chat.postMessage`);
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/conversations.list`);
+  // allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/chat.postMessage`);
+  // allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/conversations.list`);
   return allPaths;
 }
 

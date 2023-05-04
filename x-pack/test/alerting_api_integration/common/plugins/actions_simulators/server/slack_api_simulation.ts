@@ -22,6 +22,7 @@ export function initPlugin(router: IRouter, path: string) {
   internalSetSlackApiURL(
     `${kibanaServer.protocol}://${kibanaServer.hostname}:${kibanaServer.port}` + path
   );
+  console.log(`setting Slack API URL to ${`${kibanaServer.protocol}://${kibanaServer.hostname}:${kibanaServer.port}` + path}`);
 
   router.post(
     {
