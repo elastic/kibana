@@ -179,6 +179,7 @@ export class ProjectMonitorFormatter {
         }
       }
     }
+
     await Promise.allSettled([
       this.createMonitorsBulk(normalizedNewMonitors),
       this.updateMonitorsBulk(normalizedUpdateMonitors),
@@ -373,86 +374,103 @@ export class ProjectMonitorFormatter {
       monitor: SyntheticsMonitor;
       previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>;
     }>
-  ): Promise<{
-    editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>>;
-    errors: ServiceLocationErrors;
-    updatedCount: number;
-  }> => {
-    if (monitors.length === 0) {
-      return {
-        editedMonitors: [],
-        errors: [],
-        updatedCount: 0,
-      };
-    }
-    const decryptedPreviousMonitors = await this.getDecryptedMonitors(
-      monitors.map((m) => m.previousMonitor)
-    );
-
-    const monitorsToUpdate = [];
-
-    for (let i = 0; i < decryptedPreviousMonitors.length; i++) {
-      const decryptedPreviousMonitor = decryptedPreviousMonitors[i];
-      const previousMonitor = monitors[i].previousMonitor;
-      const normalizedMonitor = monitors[i].monitor;
-
-      const {
-        attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-      } = normalizeSecrets(decryptedPreviousMonitor);
-
-      const monitorWithRevision = formatSecrets({
-        ...normalizedPreviousMonitorAttributes,
-        ...normalizedMonitor,
-        revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-      });
-      monitorsToUpdate.push({
-        normalizedMonitor,
-        previousMonitor,
-        monitorWithRevision,
-        decryptedPreviousMonitor,
-      });
-    }
-
-    const { editedMonitors, failedConfigs } = await syncEditedMonitorBulk({
-      monitorsToUpdate,
-      routeContext: this.routeContext,
-      privateLocations: this.privateLocations,
-      spaceId: this.spaceId,
-    });
-
-    if (failedConfigs && Object.keys(failedConfigs).length > 0) {
-      const failedConfigsIds = Object.keys(failedConfigs);
-      failedConfigsIds.forEach((id) => {
-        const { config, error } = failedConfigs[id];
-
-        const journeyId = config[ConfigKey.JOURNEY_ID];
-        this.failedMonitors.push({
-          reason: error?.message ?? FAILED_TO_UPDATE_MONITOR,
-          details: i18n.translate(
-            'xpack.synthetics.service.projectMonitors.failedToUpdateJourney',
-            {
-              defaultMessage: 'Failed to update journey: {journeyId}',
-              values: {
-                journeyId,
-              },
-            }
-          ),
-          payload: config,
-        });
-      });
-
-      // remove failed monitors from the list of updated monitors
-      this.updatedMonitors.splice(
-        this.updatedMonitors.findIndex((monitorId) => failedConfigsIds.includes(monitorId)),
-        failedConfigsIds.length
+  ): Promise<
+    | {
+        editedMonitors: Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>>;
+        errors: ServiceLocationErrors;
+        updatedCount: number;
+      }
+    | undefined
+  > => {
+    try {
+      if (monitors.length === 0) {
+        return {
+          editedMonitors: [],
+          errors: [],
+          updatedCount: 0,
+        };
+      }
+      const decryptedPreviousMonitors = await this.getDecryptedMonitors(
+        monitors.map((m) => m.previousMonitor)
       );
-    }
 
-    return {
-      errors: [],
-      editedMonitors: editedMonitors ?? [],
-      updatedCount: monitorsToUpdate.length,
-    };
+      const monitorsToUpdate = [];
+
+      for (let i = 0; i < decryptedPreviousMonitors.length; i++) {
+        const decryptedPreviousMonitor = decryptedPreviousMonitors[i];
+        const previousMonitor = monitors[i].previousMonitor;
+        const normalizedMonitor = monitors[i].monitor;
+
+        const {
+          attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
+        } = normalizeSecrets(decryptedPreviousMonitor);
+
+        const monitorWithRevision = formatSecrets({
+          ...normalizedPreviousMonitorAttributes,
+          ...normalizedMonitor,
+          revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+        });
+        monitorsToUpdate.push({
+          normalizedMonitor,
+          previousMonitor,
+          monitorWithRevision,
+          decryptedPreviousMonitor,
+        });
+      }
+
+      const { editedMonitors, failedConfigs } = await syncEditedMonitorBulk({
+        monitorsToUpdate,
+        routeContext: this.routeContext,
+        privateLocations: this.privateLocations,
+        spaceId: this.spaceId,
+      });
+
+      if (failedConfigs && Object.keys(failedConfigs).length > 0) {
+        const failedConfigsIds = Object.keys(failedConfigs);
+        failedConfigsIds.forEach((id) => {
+          const { config, error } = failedConfigs[id];
+
+          const journeyId = config[ConfigKey.JOURNEY_ID];
+          this.failedMonitors.push({
+            reason: error?.message ?? FAILED_TO_UPDATE_MONITOR,
+            details: i18n.translate(
+              'xpack.synthetics.service.projectMonitors.failedToUpdateJourney',
+              {
+                defaultMessage: 'Failed to update monitor: {journeyId}',
+                values: {
+                  journeyId,
+                },
+              }
+            ),
+            payload: config,
+          });
+        });
+
+        // remove failed monitors from the list of updated monitors
+        this.updatedMonitors.splice(
+          this.updatedMonitors.findIndex((monitorId) => failedConfigsIds.includes(monitorId)),
+          failedConfigsIds.length
+        );
+      }
+
+      return {
+        errors: [],
+        editedMonitors: editedMonitors ?? [],
+        updatedCount: monitorsToUpdate.length,
+      };
+    } catch (e) {
+      this.server.logger.error(e);
+      this.failedMonitors.push({
+        reason: i18n.translate('xpack.synthetics.service.projectMonitors.failedToCreateXMonitors', {
+          defaultMessage: 'Failed to update {length} monitors',
+          values: {
+            length: monitors.length,
+          },
+        }),
+        details: e.message,
+        payload: monitors,
+      });
+    }
   };
 
   private validateMonitor = ({
