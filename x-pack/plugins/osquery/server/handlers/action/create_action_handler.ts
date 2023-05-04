@@ -31,7 +31,6 @@ interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields;
-  error?: string;
 }
 
 export const createActionHandler = async (
@@ -44,7 +43,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
-  const { soClient, metadata, alertData, error } = options;
+  const { soClient, metadata, alertData } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -110,21 +109,19 @@ export const createActionHandler = async (
       : await createDynamicQueries({ params, alertData, agents: selectedAgents, osqueryContext }),
   };
 
-  const fleetActions = !error
-    ? map(
-        filter(osqueryAction.queries, (query) => !query.error),
-        (query) => ({
-          action_id: query.action_id,
-          '@timestamp': moment().toISOString(),
-          expiration: moment().add(5, 'minutes').toISOString(),
-          type: 'INPUT_ACTION',
-          input_type: 'osquery',
-          agents: query.agents,
-          user_id: metadata?.currentUser,
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
-        })
-      )
-    : [];
+  const fleetActions = map(
+    filter(osqueryAction.queries, (query) => !query.error),
+    (query) => ({
+      action_id: query.action_id,
+      '@timestamp': moment().toISOString(),
+      expiration: moment().add(5, 'minutes').toISOString(),
+      type: 'INPUT_ACTION',
+      input_type: 'osquery',
+      agents: query.agents,
+      user_id: metadata?.currentUser,
+      data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+    })
+  );
   if (fleetActions.length) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
@@ -145,7 +142,7 @@ export const createActionHandler = async (
     }
 
     osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-      ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+      ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
       agents: osqueryAction.agents.length,
     });
   }

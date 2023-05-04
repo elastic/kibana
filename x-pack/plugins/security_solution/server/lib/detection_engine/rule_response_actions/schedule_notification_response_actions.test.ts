@@ -53,14 +53,11 @@ describe('ScheduleNotificationResponseActions', () => {
     saved_query_id: undefined,
     ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
   };
-  const osqueryActionMock = {
-    create: jest.fn(),
-    stop: jest.fn(),
-  };
+  const osqueryActionMock = jest.fn();
   const endpointActionMock = jest.fn();
 
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
-    osqueryCreateActionService: osqueryActionMock,
+    osqueryCreateAction: osqueryActionMock,
     endpointAppContextService: endpointActionMock as never,
   });
 
@@ -77,7 +74,7 @@ describe('ScheduleNotificationResponseActions', () => {
     ];
     scheduleNotificationResponseActions({ signals, responseActions });
 
-    expect(osqueryActionMock.create).toHaveBeenCalledWith({
+    expect(osqueryActionMock).toHaveBeenCalledWith({
       ...defaultQueryResultParams,
       query: simpleQuery,
     });
@@ -102,7 +99,7 @@ describe('ScheduleNotificationResponseActions', () => {
     ];
     scheduleNotificationResponseActions({ signals, responseActions });
 
-    expect(osqueryActionMock.create).toHaveBeenCalledWith({
+    expect(osqueryActionMock).toHaveBeenCalledWith({
       ...defaultPackResultParams,
       queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
     });

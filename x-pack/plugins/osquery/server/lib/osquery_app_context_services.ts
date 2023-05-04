@@ -15,7 +15,6 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
 
@@ -83,7 +82,6 @@ export interface OsqueryAppContext {
   security: SecurityPluginStart;
   getStartServices: CoreSetup['getStartServices'];
   telemetryEventsSender: TelemetryEventsSender;
-  licensing: LicensingPluginSetup;
   /**
    * Object readiness is tied to plugin start method
    */
