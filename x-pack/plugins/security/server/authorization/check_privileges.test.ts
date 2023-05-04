@@ -172,43 +172,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
     `);
   });
 
-  test(`throws error when checking for login and user has login but doesn't have version`, async () => {
-    const result = await checkPrivilegesAtSpaceTest({
-      spaceId: 'space_1',
-      kibanaPrivileges: mockActions.login,
-      esHasPrivilegesResponse: {
-        has_all_requested: false,
-        username: 'foo-username',
-        application: {
-          [application]: {
-            'space:space_1': {
-              [mockActions.login]: true,
-            },
-          },
-        },
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "hasAllRequested": false,
-        "privileges": Object {
-          "elasticsearch": Object {
-            "cluster": Array [],
-            "index": Object {},
-          },
-          "kibana": Array [
-            Object {
-              "authorized": true,
-              "privilege": "mock-action:login",
-              "resource": "space_1",
-            },
-          ],
-        },
-        "username": "foo-username",
-      }
-    `);
-  });
-
   test(`successful when checking for two actions and the user has both`, async () => {
     const result = await checkPrivilegesAtSpaceTest({
       spaceId: 'space_1',
@@ -1058,51 +1021,6 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             },
             Object {
               "authorized": false,
-              "privilege": "mock-action:login",
-              "resource": "space_2",
-            },
-          ],
-        },
-        "username": "foo-username",
-      }
-    `);
-  });
-
-  test(`throws error when checking for login and user has login but doesn't have version`, async () => {
-    const result = await checkPrivilegesAtSpacesTest({
-      spaceIds: ['space_1', 'space_2'],
-      kibanaPrivileges: mockActions.login,
-      esHasPrivilegesResponse: {
-        has_all_requested: false,
-        username: 'foo-username',
-        application: {
-          [application]: {
-            'space:space_1': {
-              [mockActions.login]: true,
-            },
-            'space:space_2': {
-              [mockActions.login]: true,
-            },
-          },
-        },
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "hasAllRequested": false,
-        "privileges": Object {
-          "elasticsearch": Object {
-            "cluster": Array [],
-            "index": Object {},
-          },
-          "kibana": Array [
-            Object {
-              "authorized": true,
-              "privilege": "mock-action:login",
-              "resource": "space_1",
-            },
-            Object {
-              "authorized": true,
               "privilege": "mock-action:login",
               "resource": "space_2",
             },
@@ -2431,7 +2349,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                // [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
