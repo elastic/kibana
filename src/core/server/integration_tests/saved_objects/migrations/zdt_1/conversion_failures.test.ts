@@ -9,10 +9,10 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
@@ -24,18 +24,6 @@ export const logFilePath = Path.join(__dirname, 'conversion_failures.test.log');
 
 describe('ZDT upgrades - encountering conversion failures', () => {
   let esServer: TestElasticsearchUtils['es'];
-
-  const startElasticsearch = async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-        },
-      },
-    });
-    return await startES();
-  };
 
   beforeAll(async () => {
     esServer = await startElasticsearch();

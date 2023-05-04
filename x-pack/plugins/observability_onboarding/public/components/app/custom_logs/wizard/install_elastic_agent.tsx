@@ -39,7 +39,7 @@ export function InstallElasticAgent() {
 
   function onContinue() {
     setState({ ...getState(), elasticAgentPlatform, alternativeShippers });
-    goToStep('importData');
+    goToStep('collectLogs');
   }
 
   function createAlternativeShipperToggle(
