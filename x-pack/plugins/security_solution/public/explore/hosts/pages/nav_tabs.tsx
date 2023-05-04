@@ -10,7 +10,6 @@ import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
 import type { HostsNavTab } from './navigation/types';
 import { HOSTS_PATH } from '../../../../common/constants';
-import { TECHNICAL_PREVIEW } from '../../../overview/pages/translations';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}`;
 
@@ -54,10 +53,6 @@ export const navTabsHosts = ({
       name: i18n.NAVIGATION_HOST_RISK_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.risk),
       disabled: false,
-      isBeta: true,
-      betaOptions: {
-        text: TECHNICAL_PREVIEW,
-      },
     },
     [HostsTableType.sessions]: {
       id: HostsTableType.sessions,
