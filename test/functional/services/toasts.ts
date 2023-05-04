@@ -73,7 +73,7 @@ export class ToastsService extends FtrService {
 
   public async assertToastCount(expectedCount: number) {
     await this.retry.tryForTime(5 * 1000, async () => {
-      const toastCount = await this.getToastCount(1000);
+      const toastCount = await this.getToastCount({ timeout: 1000 });
       expect(toastCount).to.eql(
         expectedCount,
         `Toast count should be ${expectedCount} (got ${toastCount})`
@@ -96,13 +96,13 @@ export class ToastsService extends FtrService {
     return await list.findAllByCssSelector(`.euiToast`);
   }
 
-  private async getGlobalToastList(timeout?: number) {
-    return await this.testSubjects.find('globalToastList', timeout);
+  private async getGlobalToastList(options?: { timeout?: number }) {
+    return await this.testSubjects.find('globalToastList', options?.timeout);
   }
 
-  public async getToastCount(timeout?: number) {
-    const list = await this.getGlobalToastList(timeout);
-    const toasts = await list.findAllByCssSelector(`.euiToast`, timeout);
+  public async getToastCount(options?: { timeout?: number }) {
+    const list = await this.getGlobalToastList(options);
+    const toasts = await list.findAllByCssSelector(`.euiToast`, options?.timeout);
     return toasts.length;
   }
 }
