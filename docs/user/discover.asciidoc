@@ -111,14 +111,18 @@ column header, and then select *Move left* or *Move right*.
 +
 * To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
 +
-* For keyboard shortcuts on the document table, click
-image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
-+
 * To view more of the document table,
 click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
++
+* For keyboard shortcuts on the document table, click
+image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
++
+* To set the row height to one or more lines, or automatically
+adjust the height to fit the contents, click
+image:images/row-height-icon.png[icon to open the Row height pop-up, width=24px]
 +
 * To toggle the table in and out of fullscreen mode, click the fullscreen icon
 image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
