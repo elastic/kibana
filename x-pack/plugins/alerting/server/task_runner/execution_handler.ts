@@ -44,7 +44,6 @@ import {
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
-  isSummaryActionPerRuleRun,
   isSummaryActionThrottled,
 } from './rule_action_helper';
 
@@ -511,10 +510,7 @@ export class ExecutionHandler<
       }
 
       if (isSummaryAction(action)) {
-        if (summarizedAlerts) {
-          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
-            continue;
-          }
+        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
         continue;
