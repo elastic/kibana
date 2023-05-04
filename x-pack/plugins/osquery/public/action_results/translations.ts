@@ -20,3 +20,23 @@ export const FAIL_ACTION_RESULTS = i18n.translate(
     defaultMessage: `Failed to fetch action results`,
   }
 );
+
+const platinumLicenseRequired = 'At least Platinum license is required to use Response Actions.';
+const parametersNotFound =
+  "This query hasn't been called due to parameter used and its value not found in the alert.";
+
+export const getSkippedQueryError = (error: string) => {
+  if (error === platinumLicenseRequired) {
+    return i18n.translate('xpack.osquery.liveQueryActionResults.table.wrongLicenseErrorText', {
+      defaultMessage: platinumLicenseRequired,
+    });
+  }
+
+  if (error === parametersNotFound) {
+    return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedErrorText', {
+      defaultMessage: parametersNotFound,
+    });
+  }
+
+  return null;
+};

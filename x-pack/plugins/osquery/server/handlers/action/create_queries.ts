@@ -28,12 +28,14 @@ interface CreateDynamicQueriesParams {
   alertData?: ParsedTechnicalFields;
   agents: string[];
   osqueryContext: OsqueryAppContext;
+  error?: string;
 }
 export const createDynamicQueries = async ({
   params,
   alertData,
   agents,
   osqueryContext,
+  error,
 }: CreateDynamicQueriesParams) =>
   params.queries?.length
     ? map(params.queries, ({ query, ...restQuery }) => {
@@ -43,6 +45,7 @@ export const createDynamicQueries = async ({
           {
             ...replacedQuery,
             ...restQuery,
+            ...(error ? { error } : {}),
             action_id: uuidv4(),
             alert_ids: params.alert_ids,
             agents,
@@ -66,6 +69,7 @@ export const createDynamicQueries = async ({
             ecs_mapping: params.ecs_mapping,
             alert_ids: params.alert_ids,
             agents,
+            ...(error ? { error } : {}),
           },
           (value) => !isEmpty(value)
         ),

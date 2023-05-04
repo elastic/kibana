@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { getSkippedQueryError } from './translations';
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
 import { Direction } from '../../common/search_strategy';
@@ -57,14 +58,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   useEffect(() => {
     if (error) {
+      const errorText = getSkippedQueryError(error);
       edges.forEach((edge) => {
         if (edge.fields) {
-          edge.fields['error.skipped'] = edge.fields.error = [
-            i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedErrorText', {
-              defaultMessage:
-                "This query hasn't been called due to parameter used and its value not found in the alert.",
-            }),
-          ];
+          edge.fields['error.skipped'] = edge.fields.error = [errorText];
         }
       });
     } else if (expired) {

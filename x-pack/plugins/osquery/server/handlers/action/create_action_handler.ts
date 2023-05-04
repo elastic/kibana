@@ -99,6 +99,7 @@ export const createActionHandler = async (
               action_id: uuidv4(),
               id: packQueryId,
               ...replacedQuery,
+              ...(error ? { error } : {}),
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
@@ -107,7 +108,13 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           );
         })
-      : await createDynamicQueries({ params, alertData, agents: selectedAgents, osqueryContext }),
+      : await createDynamicQueries({
+          params,
+          alertData,
+          agents: selectedAgents,
+          osqueryContext,
+          error,
+        }),
   };
 
   const fleetActions = !error
@@ -125,6 +132,7 @@ export const createActionHandler = async (
         })
       )
     : [];
+
   if (fleetActions.length) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
@@ -132,23 +140,23 @@ export const createActionHandler = async (
         fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
       ),
     });
+  }
 
-    const actionsComponentTemplateExists = await esClientInternal.indices.exists({
-      index: `${ACTIONS_INDEX}*`,
-    });
+  const actionsComponentTemplateExists = await esClientInternal.indices.exists({
+    index: `${ACTIONS_INDEX}*`,
+  });
 
-    if (actionsComponentTemplateExists) {
-      await esClientInternal.bulk({
-        refresh: 'wait_for',
-        body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
-      });
-    }
-
-    osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-      ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
-      agents: osqueryAction.agents.length,
+  if (actionsComponentTemplateExists) {
+    await esClientInternal.bulk({
+      refresh: 'wait_for',
+      body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
     });
   }
+
+  osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+    agents: osqueryAction.agents.length,
+  });
 
   return {
     response: osqueryAction,
