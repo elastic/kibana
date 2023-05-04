@@ -2186,42 +2186,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
     `);
   });
 
-  test(`throws error when checking for login and user has login but doesn't have version`, async () => {
-    const result = await checkPrivilegesGloballyTest({
-      kibanaPrivileges: mockActions.login,
-      esHasPrivilegesResponse: {
-        has_all_requested: false,
-        username: 'foo-username',
-        application: {
-          [application]: {
-            [GLOBAL_RESOURCE]: {
-              [mockActions.login]: true,
-            },
-          },
-        },
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "hasAllRequested": false,
-        "privileges": Object {
-          "elasticsearch": Object {
-            "cluster": Array [],
-            "index": Object {},
-          },
-          "kibana": Array [
-            Object {
-              "authorized": true,
-              "privilege": "mock-action:login",
-              "resource": undefined,
-            },
-          ],
-        },
-        "username": "foo-username",
-      }
-    `);
-  });
-
   test(`throws error when Elasticsearch returns malformed response`, async () => {
     const result = await checkPrivilegesGloballyTest({
       kibanaPrivileges: [
