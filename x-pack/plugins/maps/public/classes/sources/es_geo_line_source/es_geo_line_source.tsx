@@ -222,11 +222,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
       searchSource: entitySearchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
-        defaultMessage: 'Get entities within map buffer from data view: {dataViewName}, entities: {splitFieldName}',
+        defaultMessage:
+          'Get entities within map buffer from data view: {dataViewName}, entities: {splitFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           splitFieldName: this._descriptor.splitField,
-        }
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
@@ -307,7 +308,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
           dataViewName: indexPattern.getName(),
           geoFieldName: this._descriptor.geoField,
           numEntities: entityBuckets.length,
-        }
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(

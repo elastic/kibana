@@ -197,12 +197,13 @@ export class ESPewPewSource extends AbstractESAggSource {
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage: 'Get paths from data view: {dataViewName}, source: {sourceFieldName}, destination: {destFieldName}',
+        defaultMessage:
+          'Get paths from data view: {dataViewName}, source: {sourceFieldName}, destination: {destFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           destFieldName: this._descriptor.destGeoField,
           sourceFieldName: this._descriptor.sourceGeoField,
-        }
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
