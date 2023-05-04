@@ -12,6 +12,7 @@ import {
   type ISavedObjectTypeRegistry,
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
+  ALL_SAVED_OBJECT_INDICES,
 } from '@kbn/core-saved-objects-server';
 import {
   readLog,
@@ -23,8 +24,10 @@ import {
   getAggregatedTypesCount,
   currentVersion,
   type KibanaMigratorTestKit,
+  getEsClient,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 // define a type => index distribution
 const RELOCATE_TYPES: Record<string, string> = {
@@ -37,17 +40,14 @@ const RELOCATE_TYPES: Record<string, string> = {
   // overriding `indexPattern: foo` defined in the registry
 };
 
+const PARALLEL_MIGRATORS = 6;
+
 describe('split .kibana index into multiple system indices', () => {
   let esServer: TestElasticsearchUtils['es'];
   let typeRegistry: ISavedObjectTypeRegistry;
-  let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
 
   beforeAll(async () => {
     typeRegistry = await getCurrentVersionTypeRegistry({ oss: false });
-
-    esServer = await startElasticsearch({
-      dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
-    });
   });
 
   beforeEach(async () => {
@@ -55,6 +55,14 @@ describe('split .kibana index into multiple system indices', () => {
   });
 
   describe('when migrating from a legacy version', () => {
+    let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
+
+    beforeAll(async () => {
+      esServer = await startElasticsearch({
+        dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+      });
+    });
+
     it('performs v1 migration and then relocates saved objects into different indices, depending on their types', async () => {
       const updatedTypeRegistry = overrideTypeRegistry(
         typeRegistry,
@@ -364,22 +372,102 @@ describe('split .kibana index into multiple system indices', () => {
         expect(logs).toMatch(`[${index}] Migration completed`);
       });
     });
+
+    afterEach(async () => {
+      // we run the migrator again to ensure that the next time state is loaded everything still works as expected
+      const { runMigrations } = await migratorTestKitFactory();
+      await clearLog();
+      await runMigrations();
+
+      const logs = await readLog();
+      expect(logs).not.toMatch('REINDEX');
+      expect(logs).not.toMatch('CREATE');
+      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS');
+    });
+
+    afterAll(async () => {
+      await esServer?.stop();
+      await delay(2);
+    });
   });
 
-  afterEach(async () => {
-    // we run the migrator again to ensure that the next time state is loaded everything still works as expected
-    const { runMigrations } = await migratorTestKitFactory();
-    await clearLog();
-    await runMigrations();
+  const getAggregatedTypesCountAllIndices = async (esClient: ElasticsearchClient) => {
+    const typeBreakdown = await Promise.all(
+      ALL_SAVED_OBJECT_INDICES.map((index) => getAggregatedTypesCount(esClient, index))
+    );
 
-    const logs = await readLog();
-    expect(logs).not.toMatch('REINDEX');
-    expect(logs).not.toMatch('CREATE');
-    expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS');
-  });
+    return ALL_SAVED_OBJECT_INDICES.reduce<Record<string, Record<string, number> | undefined>>(
+      (acc, index, pos) => {
+        acc[index] = typeBreakdown[pos];
+        return acc;
+      },
+      {}
+    );
+  };
 
-  afterAll(async () => {
-    await esServer?.stop();
-    await delay(10);
+  // eslint-disable-next-line jest/no-focused-tests
+  fdescribe('when multiple Kibana migrators run in parallel', () => {
+    it.each([
+      '7.13.0_concurrent_5k_foo.zip',
+      '7.13.0_with_unknown_so.zip',
+      '7.13.2_so_with_multiple_namespaces.zip',
+      '7.13_1.5k_failed_action_tasks.zip',
+      '7.14.0_xpack_sample_saved_objects.zip',
+      '7.3.0_xpack_sample_saved_objects.zip',
+      '7.7.2_xpack_100k_obj.zip',
+      '7_13_corrupt_and_transform_failures_docs.zip',
+      '8.0.0_document_migration_failure.zip',
+      // '8.0.0_migrated_with_corrupt_outdated_docs.zip' // corrupt package, skipped
+      '8.0.0_migrated_with_outdated_docs.zip',
+      '8.0.0_v1_migrations_sample_data_saved_objects.zip',
+      '8.4.0_with_sample_data_logs.zip',
+    ])('correctly migrates %s archive', async (archive) => {
+      esServer = await startElasticsearch({
+        dataArchive: Path.join(__dirname, '..', 'archives', archive),
+      });
+      const esClient = await getEsClient();
+
+      const breakdownBefore = await getAggregatedTypesCountAllIndices(esClient);
+      expect(breakdownBefore).toMatchSnapshot('before migration');
+
+      for (let i = 0; i < PARALLEL_MIGRATORS; ++i) {
+        await clearLog(Path.join(__dirname, `dot_kibana_split_instance_${i}.log`));
+      }
+
+      const testKits = await Promise.all(
+        new Array(PARALLEL_MIGRATORS)
+          .fill({
+            settings: {
+              migrations: {
+                discardUnknownObjects: currentVersion,
+                discardCorruptObjects: currentVersion,
+              },
+            },
+            kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+            types: typeRegistry.getAllTypes(),
+          })
+          .map((config, index) =>
+            getKibanaMigratorTestKit({
+              ...config,
+              logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
+            })
+          )
+      );
+
+      const results = await Promise.all(testKits.map((testKit) => testKit.runMigrations()));
+      expect(
+        results
+          .flat()
+          .every((result) => result.status === 'migrated' || result.status === 'patched')
+      ).toEqual(true);
+
+      const breakdownAfter = await getAggregatedTypesCountAllIndices(esClient);
+      expect(breakdownAfter).toMatchSnapshot('after migration');
+    });
+
+    afterEach(async () => {
+      await esServer?.stop();
+      await delay(10);
+    });
   });
 });

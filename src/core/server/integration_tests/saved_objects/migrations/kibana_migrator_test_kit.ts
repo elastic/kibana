@@ -282,40 +282,50 @@ const getMigrator = async (
   });
 };
 
-export const getAggregatedTypesCount = async (client: ElasticsearchClient, index: string) => {
-  await client.indices.refresh();
-  const response = await client.search<unknown, { typesAggregation: { buckets: any[] } }>({
-    index,
-    _source: false,
-    aggs: {
-      typesAggregation: {
-        terms: {
-          // assign type __UNKNOWN__ to those documents that don't define one
-          missing: '__UNKNOWN__',
-          field: 'type',
-          size: 100,
-        },
-        aggs: {
-          docs: {
-            top_hits: {
-              size: 10,
-              _source: {
-                excludes: ['*'],
+export const getAggregatedTypesCount = async (
+  client: ElasticsearchClient,
+  index: string
+): Promise<Record<string, number> | undefined> => {
+  try {
+    await client.indices.refresh({ index });
+    const response = await client.search<unknown, { typesAggregation: { buckets: any[] } }>({
+      index,
+      _source: false,
+      aggs: {
+        typesAggregation: {
+          terms: {
+            // assign type __UNKNOWN__ to those documents that don't define one
+            missing: '__UNKNOWN__',
+            field: 'type',
+            size: 100,
+          },
+          aggs: {
+            docs: {
+              top_hits: {
+                size: 10,
+                _source: {
+                  excludes: ['*'],
+                },
               },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  return (response.aggregations!.typesAggregation.buckets as unknown as any).reduce(
-    (acc: any, current: any) => {
-      acc[current.key] = current.doc_count;
-      return acc;
-    },
-    {}
-  );
+    return (response.aggregations!.typesAggregation.buckets as unknown as any).reduce(
+      (acc: any, current: any) => {
+        acc[current.key] = current.doc_count;
+        return acc;
+      },
+      {}
+    );
+  } catch (error) {
+    if (error.meta?.statusCode === 404) {
+      return undefined;
+    }
+    throw error;
+  }
 };
 
 const registerTypes = (
