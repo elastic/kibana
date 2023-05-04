@@ -8,8 +8,9 @@
 
 // import { GithubApi } from '../../../src/dev/prs/github_api';
 import { Octokit } from '@octokit/rest';
+import execa from 'execa';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-console.log(`\n### process.env.GITHUB_TOKEN: \n  ${process.env.GITHUB_TOKEN}`);
 const github = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
@@ -38,7 +39,23 @@ const parse = (x: string) => x[0].match(prNumWithinMsgRe)[1];
 const prNum = pipe(head, parse, parseInt)(`${process.env[parseTarget]}`);
 
 console.log(`\n### prNum: \n  ${prNum}`);
+
 // curl https://api.github.com/repos/elastic/kibana/issues/156373
+// curl https://api.github.com/repos/elastic/kibana/issues/156373 | jq '.labels[].name'
+(async () => {
+  try {
+    const { stdout } = await execa(
+      'curl',
+      [`https://api.github.com/repos/elastic/kibana/issues/${prNum}`],
+      { cwd: REPO_ROOT }
+    );
+    console.log(`\n### stdout: \n  ${stdout}`);
+  } catch (e) {
+    console.log('\n### Whoops, something happenned:');
+    console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
+  }
+})();
+
 export {};
 
 function pipe(...fns: any[]) {
