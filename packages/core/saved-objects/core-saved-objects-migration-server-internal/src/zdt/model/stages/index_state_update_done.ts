@@ -18,7 +18,7 @@ export const indexStateUpdateDone: ModelStage<
     throwBadResponse(state, res as never);
   }
 
-  if (state.newIndexCreation) {
+  if (state.skipDocumentMigration) {
     // we created the index, so we can safely skip the whole document migration
     // and go directly to DONE
     return {

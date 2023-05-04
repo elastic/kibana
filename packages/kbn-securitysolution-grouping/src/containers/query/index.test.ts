@@ -9,6 +9,7 @@
 import type { GroupingQueryArgs } from './types';
 import { getGroupingQuery, parseGroupingQuery } from '.';
 import { getEmptyValue } from './helpers';
+import { GroupingAggregation } from '../../..';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
@@ -154,43 +155,82 @@ describe('group selector', () => {
       });
     });
   });
-
+  const groupingAggs = {
+    groupByFields: {
+      buckets: [
+        {
+          key: ['20.80.64.28', '20.80.64.28'],
+          key_as_string: '20.80.64.28|20.80.64.28',
+          selectedGroup: 'source.ip',
+          doc_count: 75,
+        },
+        {
+          key: ['0.0.0.0', '0.0.0.0'],
+          key_as_string: '0.0.0.0|0.0.0.0',
+          selectedGroup: 'source.ip',
+          doc_count: 75,
+        },
+        {
+          key: ['0.0.0.0', '::'],
+          key_as_string: '0.0.0.0|::',
+          selectedGroup: 'source.ip',
+          doc_count: 75,
+        },
+      ],
+    },
+    unitsCount: {
+      value: 100,
+    },
+    unitsCountWithoutNull: {
+      value: 100,
+    },
+    groupsCount: {
+      value: 20,
+    },
+  };
   it('parseGroupingQuery finds and flags the null group', () => {
-    const data = [
-      {
-        key: ['20.80.64.28', '20.80.64.28'],
-        key_as_string: '20.80.64.28|20.80.64.28',
-        doc_count: 75,
+    const result = parseGroupingQuery('source.ip', groupingAggs);
+    expect(result).toEqual({
+      groupByFields: {
+        buckets: [
+          {
+            key: ['20.80.64.28'],
+            key_as_string: '20.80.64.28',
+            selectedGroup: 'source.ip',
+            doc_count: 75,
+          },
+          {
+            key: ['0.0.0.0'],
+            key_as_string: '0.0.0.0',
+            selectedGroup: 'source.ip',
+            doc_count: 75,
+          },
+          {
+            key: [getEmptyValue()],
+            key_as_string: getEmptyValue(),
+            selectedGroup: 'source.ip',
+            isNullGroup: true,
+            doc_count: 75,
+          },
+        ],
       },
-      {
-        key: ['0.0.0.0', '0.0.0.0'],
-        key_as_string: '0.0.0.0|0.0.0.0',
-        doc_count: 75,
+      unitsCount: {
+        value: 100,
       },
-      {
-        key: ['0.0.0.0', '::'],
-        key_as_string: '0.0.0.0|::',
-        doc_count: 75,
+      unitsCountWithoutNull: {
+        value: 100,
       },
-    ];
-    const result = parseGroupingQuery(data);
-    expect(result).toEqual([
-      {
-        key: ['20.80.64.28'],
-        key_as_string: '20.80.64.28',
-        doc_count: 75,
+      groupsCount: {
+        value: 20,
       },
-      {
-        key: ['0.0.0.0'],
-        key_as_string: '0.0.0.0',
-        doc_count: 75,
-      },
-      {
-        key: [getEmptyValue()],
-        key_as_string: getEmptyValue(),
-        isNullGroup: true,
-        doc_count: 75,
-      },
-    ]);
+    });
+  });
+  it('parseGroupingQuery adjust group count when null field group is present', () => {
+    const result: GroupingAggregation<{}> = parseGroupingQuery('source.ip', {
+      ...groupingAggs,
+      unitsCountWithoutNull: { value: 99 },
+    });
+
+    expect(result.groupsCount?.value).toEqual(21);
   });
 });

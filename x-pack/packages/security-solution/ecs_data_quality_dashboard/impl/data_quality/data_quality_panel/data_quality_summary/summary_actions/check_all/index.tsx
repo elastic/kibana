@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { checkIndex } from './check_index';
+import { useDataQualityContext } from '../../../data_quality_context';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
 import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
@@ -58,6 +59,7 @@ const CheckAllComponent: React.FC<Props> = ({
   setCheckAllTotalIndiciesToCheck,
   setIndexToCheck,
 }) => {
+  const { httpFetch } = useDataQualityContext();
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);
 
@@ -91,6 +93,7 @@ const CheckAllComponent: React.FC<Props> = ({
             ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
             formatBytes,
             formatNumber,
+            httpFetch,
             indexName,
             onCheckCompleted,
             pattern,
@@ -121,6 +124,7 @@ const CheckAllComponent: React.FC<Props> = ({
     cancelIfRunning,
     formatBytes,
     formatNumber,
+    httpFetch,
     incrementCheckAllIndiciesChecked,
     isRunning,
     onCheckCompleted,

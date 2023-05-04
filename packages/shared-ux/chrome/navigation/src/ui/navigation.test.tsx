@@ -9,7 +9,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { getServicesMock } from '../../mocks/src/jest';
-import { PlatformConfigSet, SolutionProperties } from '../../types';
+import { PlatformConfigSet, ChromeNavigationNodeViewModel } from '../../types';
 import { Platform } from '../model';
 import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
@@ -19,17 +19,21 @@ describe('<Navigation />', () => {
 
   const homeHref = '#';
   let platformSections: PlatformConfigSet | undefined;
-  let solutions: SolutionProperties[];
+  let solutions: ChromeNavigationNodeViewModel[];
 
   beforeEach(() => {
     platformSections = { analytics: {}, ml: {}, devTools: {}, management: {} };
-    solutions = [{ id: 'navigation_testing', name: 'Navigation testing', icon: 'gear' }];
+    solutions = [{ id: 'navigation_testing', title: 'Navigation testing', icon: 'gear' }];
   });
 
   test('renders the header logo and top-level navigation buckets', async () => {
     const { findByTestId, findByText } = render(
       <NavigationProvider {...services} navIsOpen={true}>
-        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
+        <Navigation
+          platformConfig={platformSections}
+          navigationTree={solutions}
+          homeHref={homeHref}
+        />
       </NavigationProvider>
     );
 
@@ -48,7 +52,7 @@ describe('<Navigation />', () => {
       <NavigationProvider {...services} navIsOpen={true}>
         <Navigation
           platformConfig={platformSections}
-          solutions={solutions}
+          navigationTree={solutions}
           homeHref={homeHref}
           linkToCloud="deployments"
         />
@@ -68,7 +72,11 @@ describe('<Navigation />', () => {
 
     const { findByTestId, queryByTestId } = render(
       <NavigationProvider {...services} navIsOpen={true}>
-        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
+        <Navigation
+          platformConfig={platformSections}
+          navigationTree={solutions}
+          homeHref={homeHref}
+        />
       </NavigationProvider>
     );
 
@@ -83,15 +91,15 @@ describe('<Navigation />', () => {
     solutions[0].items = [
       {
         id: 'root',
-        name: '',
+        title: '',
         items: [
           {
             id: 'city',
-            name: 'City',
+            title: 'City',
           },
           {
             id: 'town',
-            name: 'Town',
+            title: 'Town',
           },
         ],
       },
@@ -101,7 +109,7 @@ describe('<Navigation />', () => {
       <NavigationProvider {...services} navIsOpen={true}>
         <Navigation
           platformConfig={platformSections}
-          solutions={solutions}
+          navigationTree={solutions}
           homeHref={homeHref}
           activeNavItemId="navigation_testing.root.city"
         />
@@ -118,7 +126,11 @@ describe('<Navigation />', () => {
 
     const { findByTestId } = render(
       <NavigationProvider {...services} navIsOpen={true}>
-        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
+        <Navigation
+          platformConfig={platformSections}
+          navigationTree={solutions}
+          homeHref={homeHref}
+        />
       </NavigationProvider>
     );
 

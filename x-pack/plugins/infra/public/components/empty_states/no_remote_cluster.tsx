@@ -27,6 +27,7 @@ export const NoRemoteCluster = () => {
       color="danger"
       iconType="error"
       titleSize="m"
+      data-test-subj="infraHostsNoRemoteCluster"
       title={i18n.translate('xpack.infra.sourceConfiguration.noRemoteClusterTitle', {
         defaultMessage: "Couldn't connect to the remote cluster",
       })}

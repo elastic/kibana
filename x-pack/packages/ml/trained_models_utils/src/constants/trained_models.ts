@@ -50,14 +50,14 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 export const CURATED_MODEL_TAG = 'curated';
 
 export const CURATED_MODEL_DEFINITIONS = {
-  '.elser_model_1_SNAPSHOT': {
+  '.elser_model_1': {
     config: {
       input: {
         field_names: ['text_field'],
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserDescription', {
-      defaultMessage: 'Elastic Learned Sparse EncodeR',
+      defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
   },
 } as const;
