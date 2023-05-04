@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { APPLICATIONS_PLUGIN } from '../../../../../common/constants';
 import { HttpError } from '../../../../../common/types/api';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
@@ -34,7 +34,7 @@ export const EngineError: React.FC<{ error?: HttpError; notFound?: boolean }> = 
             }
           )}
           backToLink={ENGINES_PATH}
-          productSupportUrl={ENTERPRISE_SEARCH_CONTENT_PLUGIN.SUPPORT_URL}
+          productSupportUrl={APPLICATIONS_PLUGIN.SUPPORT_URL}
         />
       </>
     );
