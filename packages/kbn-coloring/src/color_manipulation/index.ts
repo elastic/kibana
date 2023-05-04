@@ -9,7 +9,7 @@
 import chroma from 'chroma-js';
 import { isColorDark } from '@elastic/eui';
 
-export const checkColorContrast = (color: string, backgroundColor: string) => {
+export const enforceColorContrast = (color: string, backgroundColor: string) => {
   const finalColor =
     chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
   return isColorDark(...finalColor.rgb());

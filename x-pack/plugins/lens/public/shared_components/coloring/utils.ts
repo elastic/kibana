@@ -16,7 +16,7 @@ import {
   reversePalette,
   getPaletteStops,
   CUSTOM_PALETTE,
-  checkColorContrast,
+  enforceColorContrast,
 } from '@kbn/coloring';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -34,7 +34,7 @@ export function getContrastColor(
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;
-  return checkColorContrast(color, backgroundColor) ? lightColor : darkColor;
+  return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
 }
 
 export function getNumericValue(rowValue: number | number[] | undefined) {
