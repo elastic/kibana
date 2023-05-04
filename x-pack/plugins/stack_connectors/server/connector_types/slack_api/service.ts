@@ -141,25 +141,17 @@ export const createExternalService = (
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      console.log('trying to post message', channels, text);
-      // console.log(axiosInstance);
-      // const result: AxiosResponse<PostMessageResponse> = await request({
-      //   axios: axiosInstance,
-      //   method: 'post',
-      //   url: internalGetSlackApiURL() + '/chat.postMessage',
-      //   logger,
-      //   data: { channel: channels[0], text },
-      //   configurationUtilities,
-      // });
-      const result: AxiosResponse<PostMessageResponse> = await axios.post(
-        internalGetSlackApiURL() + '/chat.postMessage',
-        { channel: channels[0], text }
-      );
+      const result: AxiosResponse<PostMessageResponse> = await request({
+        axios: axiosInstance,
+        method: 'post',
+        url: internalGetSlackApiURL() + '/chat.postMessage',
+        logger,
+        data: { channel: channels[0], text },
+        configurationUtilities,
+      });
 
-      console.log('OKAY', result.data);
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
     } catch (error) {
-      console.log('SOME ERROR', error);
       return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
     }
   };
