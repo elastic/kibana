@@ -9,7 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults, get } from 'lodash';
+import { omit, defaults, get, max, isEmpty } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -152,7 +152,7 @@ export class TaskStore {
     try {
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(taskInstance),
+        taskInstanceToAttributes(taskInstance, this.definitions),
         { id: taskInstance.id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
@@ -163,7 +163,7 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(savedObject);
+    return savedObjectToConcreteTaskInstance(savedObject, this.definitions);
   }
 
   /**
@@ -176,7 +176,7 @@ export class TaskStore {
       this.definitions.ensureHas(taskInstance.taskType);
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(taskInstance),
+        attributes: taskInstanceToAttributes(taskInstance, this.definitions),
         id: taskInstance.id,
       };
     });
@@ -197,7 +197,9 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
+    return savedObjects.saved_objects.map((so) =>
+      savedObjectToConcreteTaskInstance(so, this.definitions)
+    );
   }
 
   /**
@@ -223,7 +225,7 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const attributes = taskInstanceToAttributes(doc);
+    const attributes = taskInstanceToAttributes(doc, this.definitions);
 
     let updatedSavedObject;
     try {
@@ -246,7 +248,8 @@ export class TaskStore {
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
-      { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
+      { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) },
+      this.definitions
     );
   }
 
@@ -259,7 +262,7 @@ export class TaskStore {
    */
   public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      attrsById.set(doc.id, taskInstanceToAttributes(doc));
+      attrsById.set(doc.id, taskInstanceToAttributes(doc, this.definitions));
       return attrsById;
     }, new Map());
 
@@ -290,13 +293,16 @@ export class TaskStore {
             error: updatedSavedObject.error,
           })
         : asOk(
-            savedObjectToConcreteTaskInstance({
-              ...updatedSavedObject,
-              attributes: defaults(
-                updatedSavedObject.attributes,
-                attributesByDocId.get(updatedSavedObject.id)!
-              ),
-            })
+            savedObjectToConcreteTaskInstance(
+              {
+                ...updatedSavedObject,
+                attributes: defaults(
+                  updatedSavedObject.attributes,
+                  attributesByDocId.get(updatedSavedObject.id)!
+                ),
+              },
+              this.definitions
+            )
           );
     });
   }
@@ -346,7 +352,7 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    return savedObjectToConcreteTaskInstance(result);
+    return savedObjectToConcreteTaskInstance(result, this.definitions);
   }
 
   /**
@@ -369,7 +375,7 @@ export class TaskStore {
       if (task.error) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
-      return asOk(savedObjectToConcreteTaskInstance(task));
+      return asOk(savedObjectToConcreteTaskInstance(task, this.definitions));
     });
   }
 
@@ -413,7 +419,7 @@ export class TaskStore {
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-          .map(savedObjectToConcreteTaskInstance),
+          .map((doc) => savedObjectToConcreteTaskInstance(doc, this.definitions)),
       };
     } catch (e) {
       this.errors$.next(e);
@@ -502,11 +508,29 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
+function taskInstanceToAttributes(
+  doc: TaskInstance,
+  definitions: TaskTypeDictionary
+): SerializedConcreteTaskInstance {
+  let state = doc.state || {};
+  const taskTypeDef = definitions.get(doc.taskType);
+  if (!isEmpty(state) && !taskTypeDef?.stateSchemaByVersion) {
+    throw new Error(
+      `[taskInstanceToAttributes] stateSchemaByVersion not defined for task type: ${doc.taskType}`
+    );
+  } else if (taskTypeDef?.stateSchemaByVersion) {
+    const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
+    const latest = max(versions);
+    if (latest !== undefined) {
+      // TODO: Forbid unknowns
+      state = taskTypeDef.stateSchemaByVersion.get(latest).validate(state);
+    }
+  }
+
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
-    state: JSON.stringify(doc.state || {}),
+    state: JSON.stringify(state),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
     scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
     startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
@@ -517,17 +541,33 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
 }
 
 export function savedObjectToConcreteTaskInstance(
-  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
+  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>,
+  definitions: TaskTypeDictionary
 ): ConcreteTaskInstance {
+  const taskTypeDef = definitions.get(savedObject.attributes.taskType);
+  let state = parseJSONField(savedObject.attributes.state, 'state', savedObject.id);
+  if (!isEmpty(state) && !taskTypeDef) {
+    throw new Error(
+      `[savedObjectToConcreteTaskInstance] stateSchemaByVersion not defined for task type: ${savedObject.attributes.taskType}`
+    );
+  } else if (taskTypeDef?.stateSchemaByVersion) {
+    const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
+    const latest = max(versions);
+    if (latest !== undefined) {
+      // TODO: Ignore unknowns
+      state = taskTypeDef.stateSchemaByVersion.get(latest).validate(state);
+    }
+  }
+
   return {
     ...savedObject.attributes,
+    state,
     id: savedObject.id,
     version: savedObject.version,
     scheduledAt: new Date(savedObject.attributes.scheduledAt),
     runAt: new Date(savedObject.attributes.runAt),
     startedAt: savedObject.attributes.startedAt ? new Date(savedObject.attributes.startedAt) : null,
     retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
-    state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
   };
 }

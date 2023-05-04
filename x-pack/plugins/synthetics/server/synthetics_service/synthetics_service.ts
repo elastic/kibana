@@ -170,7 +170,6 @@ export class SyntheticsService {
           return {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
-              const { state } = taskInstance;
               try {
                 await service.registerServiceLocations();
 
@@ -193,8 +192,6 @@ export class SyntheticsService {
                 });
                 service.logger.error(e);
               }
-
-              return { state };
             },
             async cancel() {
               service.logger?.warn(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} timed out`);

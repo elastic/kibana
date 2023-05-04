@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
 
@@ -138,6 +138,7 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
+    stateSchemaByVersion: schema.maybe(schema.mapOf(schema.number(), schema.any())),
   },
   {
     validate({ timeout }) {
@@ -158,6 +159,7 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
+  stateSchemaByVersion?: Record<number, ObjectType>;
 };
 
 export enum TaskStatus {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   RunContext,
@@ -63,6 +64,12 @@ export function setupFindingsStatsTask(
     taskManager.registerTaskDefinitions({
       [CSPM_FINDINGS_STATS_TASK_TYPE]: {
         title: 'Aggregate latest findings index for score calculation',
+        stateSchemaByVersion: {
+          1: schema.object({
+            runs: schema.number(),
+            health_status: schema.string(),
+          }),
+        },
         createTaskRunner: taskRunner(coreStartServices, logger),
       },
     });

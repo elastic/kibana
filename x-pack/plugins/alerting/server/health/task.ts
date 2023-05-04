@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { CoreStart, Logger } from '@kbn/core/server';
 import {
   RunContext,
@@ -57,6 +58,12 @@ function registerAlertingHealthCheckTask(
   taskManager.registerTaskDefinitions({
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
+      stateSchemaByVersion: {
+        1: schema.object({
+          runs: schema.number(),
+          health_status: schema.string(),
+        }),
+      },
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },
   });

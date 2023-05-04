@@ -13,6 +13,7 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { ruleStateSchema } from '@kbn/alerting-state-types';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -270,6 +271,18 @@ export class RuleTypeRegistry {
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
+        stateSchemaByVersion: {
+          1: schema.object({
+            alertTypeState: schema.recordOf(schema.string(), schema.any()),
+            // TODO expand any
+            alertInstances: schema.recordOf(schema.string(), schema.any()),
+            // TODO expand any
+            alertRecoveredInstances: schema.recordOf(schema.string(), schema.any()),
+            previousStartedAt: schema.nullable(schema.string()),
+            // TODO expand any
+            summaryActions: schema.any(),
+          }),
+        },
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

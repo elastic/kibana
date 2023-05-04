@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -79,6 +80,13 @@ export class OsqueryTelemetryTask {
       [this.config.type]: {
         title: this.config.title,
         timeout: this.config.timeout,
+        stateSchemaByVersion: {
+          1: schema.object({
+            lastExecutionTimestamp: schema.string(),
+            runs: schema.number(),
+            hits: schema.number(),
+          }),
+        },
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           const { state } = taskInstance;
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
@@ -41,6 +42,12 @@ export class SavedObjectsSyncService {
         description: "This task periodically syncs ML's saved objects",
         timeout: '1m',
         maxAttempts: 3,
+        stateSchemaByVersion: {
+          1: schema.object({
+            runs: schema.number(),
+            totalSavedObjectsSynced: schema.number(),
+          }),
+        },
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {

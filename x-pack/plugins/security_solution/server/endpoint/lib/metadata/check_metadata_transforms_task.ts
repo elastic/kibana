@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type {
   TransformGetTransformStatsResponse,
@@ -54,6 +55,12 @@ export class CheckMetadataTransformsTask {
       [TYPE]: {
         title: 'Security Solution Endpoint Metadata Periodic Tasks',
         timeout: TIMEOUT,
+        stateSchemaByVersion: {
+          1: schema.object({
+            restartAttempts: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+            reinstallAttempts: schema.maybe(schema.number()),
+          }),
+        },
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {

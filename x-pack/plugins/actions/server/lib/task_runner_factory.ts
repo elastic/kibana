@@ -185,7 +185,6 @@ export class TaskRunnerFactory {
         logger.debug(
           `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
         );
-        return { state: {} };
       },
       cleanup: async () => {
         // Cleanup action_task_params object now that we're done with it
