@@ -6,25 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { NavItemProps } from '../../../types';
+import { ChromeNavigationNodeViewModel } from '../../../types';
 
-export const analyticsItemSet: NavItemProps[] = [
+// TODO: Declare ChromeNavigationNode[] (with "link" to app id or deeplink id)
+// and then call an api on the Chrome service to convert to ChromeNavigationNodeViewModel
+// with its "href", "isActive"... metadata
+
+export const analyticsItemSet: ChromeNavigationNodeViewModel[] = [
   {
-    name: '',
+    title: '',
     id: 'root',
     items: [
       {
-        name: 'Discover',
+        title: 'Discover',
         id: 'discover',
         href: '/app/discover',
       },
       {
-        name: 'Dashboard',
+        title: 'Dashboard',
         id: 'dashboard',
         href: '/app/dashboards',
       },
       {
-        name: 'Visualize Library',
+        title: 'Visualize Library',
         id: 'visualize_library',
         href: '/app/visualize',
       },
