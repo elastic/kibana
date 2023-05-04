@@ -24,12 +24,12 @@ ${process.env[parseTarget]}`);
 
 // console.log(`\n### mockBkMsg: \n  ${mockBkMsg}`);
 
-const head = (x: string) => x.split('\n');
+const head = (x: string): string[] => x.split('\n');
 const prNumWithinMsgRe = /\(\#(\d+)\)/;
 // @ts-expect-error
 const parse = (x: string) => x[0].match(prNumWithinMsgRe)[1];
-// const prNum = pipe(head, parse)(mockBkMsg);
-const prNum = pipe(head, parse)(`${process.env[parseTarget]}`);
+// const prNum = pipe(head, parse, parseInt)(mockBkMsg);
+const prNum = pipe(head, parse, parseInt)(`${process.env[parseTarget]}`);
 
 console.log(`\n### prNum: \n  ${prNum}`);
 
