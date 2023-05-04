@@ -19,11 +19,14 @@ import { extract } from './extract';
  */
 export async function install(
   paths: ChromiumArchivePaths,
-  logger: Logger,
   pkg: PackageInfo,
-  chromiumPath: string = path.resolve(__dirname, '../../chromium')
+  chromiumPath: string = path.resolve(__dirname, '../../chromium'),
+  logger: Logger
 ): Promise<string> {
   const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
+
+  // NOTE: if binary checksum fails and the archive must be redownloaded,
+  // binary checksum verification is is not re-attempted after download and extract
   const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 
   if (binaryChecksum !== pkg.binaryChecksum) {

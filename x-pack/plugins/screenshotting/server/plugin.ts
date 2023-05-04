@@ -66,7 +66,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       const logger = this.logger.get('chromium');
       const [config, binaryPath] = await Promise.all([
         createConfig(this.logger, this.config),
-        install(paths, logger, getChromiumPackage()),
+        install(paths, getChromiumPackage(), undefined, logger),
       ]);
       const basePath = http.basePath.serverBasePath;
 

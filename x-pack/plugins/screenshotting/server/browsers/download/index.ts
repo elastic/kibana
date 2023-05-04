@@ -41,7 +41,7 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
   const pathExists = existsSync(resolvedPath);
   if (pathExists && foundChecksum === archiveChecksum) {
     logger?.debug(
-      `Browser archive for ${pkg.platform}/${pkg.architecture} already found in ${resolvedPath}.`
+      `Browser archive for ${pkg.platform}/${pkg.architecture} already found in ${resolvedPath} with matching checksum.`
     );
     return;
   }
@@ -64,7 +64,7 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
     const downloadedChecksum = await fetch(url, resolvedPath, logger);
     if (downloadedChecksum !== archiveChecksum) {
       logger?.warn(
-        `Invalid checksum for ${pkg.platform}/${pkg.architecture}: ` +
+        `Invalid archive checksum for ${pkg.platform}/${pkg.architecture}: ` +
           `expected ${archiveChecksum} got ${downloadedChecksum}`
       );
       invalidChecksums.push(`${url} => ${resolvedPath}`);
@@ -75,7 +75,7 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
 
   if (invalidChecksums.length) {
     const error = new Error(
-      `Error downloading browsers, checksums incorrect for:\n    - ${invalidChecksums.join(
+      `Error downloading browsers, archive checksums incorrect for:\n    - ${invalidChecksums.join(
         '\n    - '
       )}`
     );
