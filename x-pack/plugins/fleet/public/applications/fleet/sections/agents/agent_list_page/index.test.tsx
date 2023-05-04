@@ -251,7 +251,7 @@ describe('agent_list_page', () => {
     });
   });
 
-  describe('Get Uninstall Command', () => {
+  describe('Uninstall agent', () => {
     let renderResult: RenderResult;
 
     beforeEach(async () => {
@@ -296,27 +296,27 @@ describe('agent_list_page', () => {
       });
     });
 
-    it('should not render "Get uninstall command" menu item for managed Agent', async () => {
-      expect(renderResult.queryByTestId('get-uninstall-command-menu-item')).not.toBeInTheDocument();
+    it('should not render "Uninstall agent" menu item for managed Agent', async () => {
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
 
       fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[1]);
 
-      expect(renderResult.queryByTestId('get-uninstall-command-menu-item')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
     });
 
-    it('should render "Get uninstall command" menu item for not managed Agent', async () => {
-      expect(renderResult.queryByTestId('get-uninstall-command-menu-item')).not.toBeInTheDocument();
+    it('should render "Uninstall agent" menu item for not managed Agent', async () => {
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
 
       fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
 
-      expect(renderResult.queryByTestId('get-uninstall-command-menu-item')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
     });
 
-    it('should open uninstall commands flyout when clicking on "Get uninstall command"', () => {
+    it('should open uninstall commands flyout when clicking on "Uninstall agent"', () => {
       fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
       expect(renderResult.queryByTestId('uninstall-command-flyout')).not.toBeInTheDocument();
 
-      fireEvent.click(renderResult.getByTestId('get-uninstall-command-menu-item'));
+      fireEvent.click(renderResult.getByTestId('uninstallAgentMenuItem'));
 
       expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
     });

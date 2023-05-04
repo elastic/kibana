@@ -44,7 +44,7 @@ describe('UninstallCommandFlyout', () => {
     it('renders flyout for Agent', () => {
       const renderResult = render({ target: 'agent' });
 
-      expect(renderResult.queryByText(/Uninstall Elastic Agent/)).toBeInTheDocument();
+      expect(renderResult.queryByText(/Uninstall Elastic Agent on your host/)).toBeInTheDocument();
       expect(renderResult.queryByText(/Uninstall Elastic Defend/)).not.toBeInTheDocument();
     });
 
@@ -52,7 +52,9 @@ describe('UninstallCommandFlyout', () => {
       const renderResult = render({ target: 'endpoint' });
 
       expect(renderResult.queryByText(/Uninstall Elastic Defend/)).toBeInTheDocument();
-      expect(renderResult.queryByText(/Uninstall Elastic Agent/)).not.toBeInTheDocument();
+      expect(
+        renderResult.queryByText(/Uninstall Elastic Agent on your host/)
+      ).not.toBeInTheDocument();
     });
   });
 

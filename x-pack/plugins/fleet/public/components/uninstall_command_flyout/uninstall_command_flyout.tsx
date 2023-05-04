@@ -9,20 +9,32 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+
+import { useStartServices } from '../../hooks';
 
 import { CommandsForPlatforms } from './commands_for_platforms';
 import { useCommands } from './hooks';
 import type { UninstallCommandTarget } from './types';
 
-const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElement } = {
-  agent: (
+const UninstallAgentDescription = () => {
+  const { docLinks } = useStartServices();
+
+  return (
     <>
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.agentUninstallCommandFlyout.firstParagraph"
+          defaultMessage="Uninstall Elastic Agent and unenroll in Fleet to stop communicating with the host."
+        />
+      </p>
       <h3>
         <FormattedMessage
           id="xpack.fleet.agentUninstallCommandFlyout.subtitle"
@@ -32,28 +44,38 @@ const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElem
       <p>
         <FormattedMessage
           id="xpack.fleet.agentUninstallCommandFlyout.description"
-          defaultMessage="Use the below uninstall command to uninstall Agent... [TODO]"
+          defaultMessage="Select the appropriate platform and run the command to uninstall Elastic Agent. Reuse commands to uninstall agents on more than one host. {learnMoreLink}"
+          values={{
+            learnMoreLink: (
+              <EuiLink href={docLinks.links.fleet.uninstallAgent} target="_blank">
+                {i18n.translate('xpack.fleet.agentUninstallCommandFlyout.learnMore', {
+                  defaultMessage: 'Learn more',
+                })}
+              </EuiLink>
+            ),
+          }}
         />
       </p>
     </>
-  ),
-  endpoint: (
-    <>
-      <h3>
-        <FormattedMessage
-          id="xpack.fleet.endpointUninstallCommandFlyout.subtitle"
-          defaultMessage="Uninstall Elastic Defend integration on your host"
-        />
-      </h3>
-      <p>
-        <FormattedMessage
-          id="xpack.fleet.endpointUninstallCommandFlyout.description"
-          defaultMessage="Use the below uninstall command to uninstall Endpoint integration... [TODO]"
-        />
-      </p>
-    </>
-  ),
+  );
 };
+
+const UninstallEndpointDescription = () => (
+  <>
+    <h3>
+      <FormattedMessage
+        id="xpack.fleet.endpointUninstallCommandFlyout.subtitle"
+        defaultMessage="Uninstall Elastic Defend integration on your host"
+      />
+    </h3>
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.endpointUninstallCommandFlyout.description"
+        defaultMessage="Use the below uninstall command to uninstall Endpoint integration... [TODO]"
+      />
+    </p>
+  </>
+);
 
 export interface UninstallCommandFlyoutProps {
   target: UninstallCommandTarget;
@@ -75,14 +97,16 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
           <h2>
             <FormattedMessage
               id="xpack.fleet.agentUninstallCommandFlyout.title"
-              defaultMessage="Get uninstall command"
+              defaultMessage="Uninstall agent"
             />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiText>{DESCRIPTION_PER_TARGET[target]}</EuiText>
+        <EuiText>
+          {target === 'agent' ? <UninstallAgentDescription /> : <UninstallEndpointDescription />}
+        </EuiText>
 
         <EuiSpacer size="l" />
 

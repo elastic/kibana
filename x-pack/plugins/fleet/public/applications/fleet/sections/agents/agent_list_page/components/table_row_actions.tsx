@@ -127,11 +127,11 @@ export const TableRowActions: React.FunctionComponent<{
           }}
           disabled={!agent.active}
           key="getUninstallCommand"
-          data-test-subj="get-uninstall-command-menu-item"
+          data-test-subj="uninstallAgentMenuItem"
         >
           <FormattedMessage
             id="xpack.fleet.agentList.getUninstallCommand"
-            defaultMessage="Get uninstall command"
+            defaultMessage="Uninstall agent"
           />
         </EuiContextMenuItem>
       );
