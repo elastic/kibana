@@ -9,6 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiPanel,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiHeaderLink,
@@ -62,25 +63,6 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <EuiHeaderLink
-        isActive={isMapOpen}
-        color="text"
-        onClick={handleFlyoutClose}
-      >
-        Map
-      </EuiHeaderLink>
-      {isMapOpen && (
-        <EuiFlyout onClose={handleFlyoutClose} size="l" title="Map">
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h1>Map</h1>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <ServiceMap kuery="" environment="ENVIRONMENT_NOT_DEFINED" />
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
       {isLabsButtonEnabled && <Labs />}
       <EuiHeaderLink
         color="text"
@@ -126,6 +108,18 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+      <EuiHeaderLink
+        isActive={isMapOpen}
+        isSelected={isMapOpen}
+        color="text"
+        onClick={handleFlyoutClose}
+        iconType="visMapRegion"
+      >
+        Map
+      </EuiHeaderLink>
+      {isMapOpen && (
+        <ServiceMap kuery="" environment="ENVIRONMENT_NOT_DEFINED" />
+      )}
     </EuiHeaderLinks>
   );
 }

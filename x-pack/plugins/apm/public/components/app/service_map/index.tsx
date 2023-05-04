@@ -2102,8 +2102,8 @@ export function ServiceMap({
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
-  const heightWithPadding = height - PADDING_BOTTOM;
-
+ // const heightWithPadding = height - PADDING_BOTTOM;
+const heightWithPadding = 300;
   if (!license) {
     return null;
   }
@@ -2147,33 +2147,40 @@ export function ServiceMap({
   }
 
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div
-          data-test-subj="ServiceMap"
-          style={{ height: heightWithPadding }}
-          ref={ref}
+    <EuiPanel
+      hasBorder={true}
+      paddingSize="none"
+      style={{
+        position: 'absolute',
+        top: 50,
+        right: 0,
+        width: 300,
+        height: heightWithPadding,
+      }}
+    >
+      <div
+        data-test-subj="ServiceMap"
+        style={{ height: heightWithPadding }}
+        ref={ref}
+      >
+        <Cytoscape
+          elements={data.elements}
+          height={heightWithPadding}
+          serviceName={serviceName}
+          style={getCytoscapeDivStyle(theme, status)}
         >
-          <Cytoscape
-            elements={data.elements}
-            height={heightWithPadding}
-            serviceName={serviceName}
-            style={getCytoscapeDivStyle(theme, status)}
-          >
-            <Controls />
-            {serviceName && <EmptyBanner />}
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover
-              focusedServiceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-            />
-          </Cytoscape>
-        </div>
-      </EuiPanel>
-    </>
+          <Controls />
+          {serviceName && <EmptyBanner />}
+          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+          <Popover
+            focusedServiceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+          />
+        </Cytoscape>
+      </div>
+    </EuiPanel>
   );
 }
