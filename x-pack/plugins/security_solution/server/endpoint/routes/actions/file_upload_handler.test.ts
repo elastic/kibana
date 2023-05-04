@@ -180,7 +180,7 @@ describe('Upload response action create API handler', () => {
           },
           user: undefined,
         },
-        casesClientMock
+        { casesClient: casesClientMock }
       );
     });
 

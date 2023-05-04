@@ -84,7 +84,7 @@ export const actionCreateService = (
   >(
     payload: CreateActionPayload,
     { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
-  ): Promise<ActionDetails> => {
+  ): Promise<ActionDetails<TOutputContent, TParameters>> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);

@@ -106,7 +106,7 @@ export const getActionFileUploadHandler = (
             command: 'upload',
             user,
           },
-          casesClient
+          { casesClient }
         );
 
       await setFileActionId(esClient, logger, data);
