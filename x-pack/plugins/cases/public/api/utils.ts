@@ -16,7 +16,7 @@ import type {
   Case,
   UserActions,
   CommentRequest,
-  CommentResponse,
+  Comment,
   CaseResolveResponse,
   Cases,
 } from '../../common/api';
@@ -25,7 +25,7 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   CaseUI,
-  Comment,
+  CommentUI,
   ResolvedCase,
 } from '../containers/types';
 
@@ -70,11 +70,11 @@ export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): Resolve
   };
 };
 
-export const convertAttachmentsToCamelCase = (attachments: CommentResponse[]): Comment[] => {
+export const convertAttachmentsToCamelCase = (attachments: Comment[]): CommentUI[] => {
   return attachments.map((attachment) => convertAttachmentToCamelCase(attachment));
 };
 
-export const convertAttachmentToCamelCase = (attachment: CommentRequest): Comment => {
+export const convertAttachmentToCamelCase = (attachment: CommentRequest): CommentUI => {
   if (isCommentRequestTypeExternalReference(attachment)) {
     return convertAttachmentToCamelExceptProperty(attachment, 'externalReferenceMetadata');
   }
@@ -83,7 +83,7 @@ export const convertAttachmentToCamelCase = (attachment: CommentRequest): Commen
     return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
   }
 
-  return convertToCamelCase<CommentRequest, Comment>(attachment);
+  return convertToCamelCase<CommentRequest, CommentUI>(attachment);
 };
 
 export const convertUserActionsToCamelCase = (userActions: UserActions) => {
@@ -107,7 +107,7 @@ export const convertUserActionsToCamelCase = (userActions: UserActions) => {
 const convertAttachmentToCamelExceptProperty = (
   attachment: CommentRequest,
   key: string
-): Comment => {
+): CommentUI => {
   const intactValue = get(attachment, key);
   const attachmentWithoutIntactValue = omit(attachment, key);
   const camelCaseAttachmentWithoutIntactValue = convertToCamelCase(attachmentWithoutIntactValue);
@@ -115,7 +115,7 @@ const convertAttachmentToCamelExceptProperty = (
   return {
     ...camelCaseAttachmentWithoutIntactValue,
     [key]: intactValue,
-  } as Comment;
+  } as CommentUI;
 };
 
 export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFindResponseUI => ({
