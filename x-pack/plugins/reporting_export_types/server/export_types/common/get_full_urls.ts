@@ -13,7 +13,7 @@ import {
 } from 'url';
 import { ReportingConfig, TaskPayloadPDF } from '@kbn/reporting-plugin/server';
 import { getAbsoluteUrlFactory } from '@kbn/reporting-plugin/common/get_absolute_url';
-import { TaskPayloadPNG } from '@kbn/reporting-export-types/common/png';
+import { TaskPayloadPNG } from '../../../common/png';
 import { validateUrls } from './validate_urls';
 
 function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
