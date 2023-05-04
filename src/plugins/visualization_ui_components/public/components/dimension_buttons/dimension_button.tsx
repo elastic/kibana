@@ -58,6 +58,15 @@ export function DimensionButton({
         overflow: hidden;
         min-height: ${euiThemeVars.euiSizeXL};
         position: relative;
+
+        &:hover,
+        &:focus {
+          .lnsLayerPanel__dimensionRemove {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+          }
+        }
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
@@ -100,20 +109,13 @@ export function DimensionButton({
         })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
         css={css`
-          margin-right: $euiSizeS;
+          margin-right: ${euiThemeVars.euiSizeS};
           visibility: hidden;
           opacity: 0;
           color: ${euiThemeVars.euiTextSubduedColor};
 
           &:hover {
             color: ${euiThemeVars.euiColorDangerText};
-          }
-
-          &:hover,
-          &:focus {
-            visibility: visible;
-            opacity: 1;
-            transition: opacity ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
           }
         `}
       />
