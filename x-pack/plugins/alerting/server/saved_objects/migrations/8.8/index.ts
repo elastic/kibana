@@ -76,6 +76,8 @@ function addSecuritySolutionActionsFrequency(
 function unmuteSecuritySolutionCustomRules(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
+  // only security custom rules were muted if there is no actions prior 8.8
+  // there is no reason to unmute prebuilt rules
   // "doc.attributes.params.immutable" is set to "true" for prebuilt rules
   if (!isDetectionEngineAADRuleType(doc) || doc.attributes.params.immutable) {
     return doc;
