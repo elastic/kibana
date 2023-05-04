@@ -35,7 +35,7 @@ const successMessage = i18n.translate('xpack.synthetics.settings.addParams.succe
   defaultMessage: 'Successfully added global parameter.',
 });
 
-const failureMessage = i18n.translate('xpack.synthetics.settings.addParams.success', {
+const failureMessage = i18n.translate('xpack.synthetics.settings.addParams.fail', {
   defaultMessage: 'Failed to add global parameter.',
 });
 
@@ -56,6 +56,6 @@ const editSuccessMessage = i18n.translate('xpack.synthetics.settings.editParams.
   defaultMessage: 'Successfully edited global parameter.',
 });
 
-const editFailureMessage = i18n.translate('xpack.synthetics.settings.editParams.success', {
+const editFailureMessage = i18n.translate('xpack.synthetics.settings.editParams.fail', {
   defaultMessage: 'Failed to edit global parameter.',
 });
