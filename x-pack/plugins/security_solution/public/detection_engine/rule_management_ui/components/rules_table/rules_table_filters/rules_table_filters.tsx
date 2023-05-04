@@ -17,7 +17,7 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import { TagsFilter } from '../../tags_filter/tags_filter';
 import { RuleSearchField } from './rule_search_field';
 import { TypeStatusFilterPopover } from '../../type_status_filter/type_status_filter';
-import { FilterOptions } from '../../../../rule_management/logic';
+import type { FilterOptions } from '../../../../rule_management/logic';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};

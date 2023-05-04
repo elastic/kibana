@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiLoadingContent,
-  EuiProgress,
-} from '@elastic/eui';
-import React, { useCallback, useMemo, useRef } from 'react';
+import { EuiEmptyPrompt, EuiInMemoryTable, EuiLoadingContent, EuiProgress } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../../rule_management/logic';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../../detections/pages/detection_engine/rules/types';
 import { RulesTableFilters } from '../rules_table_filters/rules_table_filters';
-import { RulesTableUtilityBar } from '../../rules_table_utility_bar/rules_table_utility_bar';
 import { useRulesTableNewColumns } from './use_rules_table_new_columns';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
@@ -142,13 +135,13 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(({}) => {
             setFilterOptions={setFilterOptions}
             showRuleTypeStatusFilter={false}
           />
-          {/*TODO: Still relies on old context*/}
-          {/*<RulesTableUtilityBar*/}
+          {/* TODO: Still relies on old context*/}
+          {/* <RulesTableUtilityBar*/}
           {/*  canBulkEdit={hasPermissions}*/}
           {/*  onGetBulkItemsPopoverContent={undefined}*/}
           {/*  onToggleSelectAll={undefined}*/}
           {/*  isBulkActionInProgress={false}*/}
-          {/*/>*/}
+          {/* />*/}
           <EuiInMemoryTable
             items={rules}
             isSelectable={false}
@@ -162,7 +155,7 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(({}) => {
             pagination={paginationMemo}
             {...tableProps}
           />
-          {/*<EuiBasicTable*/}
+          {/* <EuiBasicTable*/}
           {/*  itemId="id"*/}
           {/*  items={rules}*/}
           {/*  isSelectable={false}*/}
@@ -178,7 +171,7 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(({}) => {
           {/*    },*/}
           {/*  }}*/}
           {/*  {...tableProps}*/}
-          {/*/>*/}
+          {/* />*/}
         </>
       )}
     </>

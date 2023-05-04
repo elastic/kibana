@@ -25,7 +25,7 @@ import type {
   PaginationOptions,
   SortingOptions,
 } from '../../../../rule_management/logic';
-import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import type { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
   DEFAULT_FILTER_OPTIONS,
@@ -34,7 +34,7 @@ import {
   DEFAULT_SORTING_OPTIONS,
 } from '../rules_table/rules_table_defaults';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
-import { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 export interface RulesTableNewState {
   /**
