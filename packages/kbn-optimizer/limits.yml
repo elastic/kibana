@@ -92,6 +92,7 @@ pageLoadAssetSize:
   ml: 82187
   monitoring: 80000
   navigation: 37269
+  navigationEmbeddable: 17892
   newsfeed: 42228
   observability: 95000
   observabilityOnboarding: 19573
