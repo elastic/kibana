@@ -8,7 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
-import { map } from 'lodash';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
@@ -92,7 +91,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       return (
         // TODO: temporary solution, waiting for UI
         <>
-          {map(errors, (error) => (
+          {errors.map((error) => (
             <EuiFlexItem>{error}</EuiFlexItem>
           ))}
         </>
