@@ -739,5 +739,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
     },
+    synthetics: {
+      featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+    },
   });
 };

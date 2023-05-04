@@ -19,6 +19,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PolicyLink } from './policy_link';
 import { useGetIlmPolicies } from './hooks/use_get_ilm_policies';
 
@@ -91,6 +92,9 @@ export const DataRetentionTab = () => {
 };
 
 const Unprivileged = () => {
+  const {
+    services: { docLinks },
+  } = useKibana();
   return (
     <EuiEmptyPrompt
       data-test-subj="syntheticsUnprivileged"
@@ -108,7 +112,20 @@ const Unprivileged = () => {
         <p>
           <FormattedMessage
             id="xpack.synthetics.params.unprivileged.unprivilegedDescription"
-            defaultMessage="To view Synthetics monitors data usage and retention, you must update privileges. For more information, contact your Kibana administrator."
+            defaultMessage="To view Synthetics monitors data usage and retention, you must update privileges. For more information, contact your Kibana administrator. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink
+                  data-test-subj="syntheticsUnprivilegedLearnMoreLink"
+                  href={docLinks?.links.synthetics.featureRoles}
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.synthetics.monitorManagement.projectDelete.docsLink', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
+              ),
+            }}
           />
         </p>
       }
@@ -117,7 +134,6 @@ const Unprivileged = () => {
           css={css`
             text-align: initial;
           `}
-          // children={INDEX_PRIVILEGES + [SYNTHETICS_INDEX_PATTERN].map((idx) => `\n- \`${idx}\``)}
           children={`\n- ${INDEX_PRIVILEGES} \n- ${CLUSTER_PRIVILEGES}`}
         />
       }
