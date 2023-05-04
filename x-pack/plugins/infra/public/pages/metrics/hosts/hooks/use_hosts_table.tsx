@@ -15,10 +15,10 @@ import { isNumber } from 'lodash/fp';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
-import type {
-  SnapshotNode,
-  SnapshotNodeMetric,
-  SnapshotMetricInput,
+import {
+  InfraAssetMetadataType,
+  InfraAssetMetricsItem,
+  InfraAssetMetricType,
 } from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 import { Sorting, useHostsTableProperties } from './use_hosts_table_url_state';
@@ -29,42 +29,55 @@ import { useUnifiedSearchContext } from './use_unified_search';
  * Columns and items types
  */
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
+type HostMetrics = Record<InfraAssetMetricType, number | null>;
 
-type HostMetric = 'cpu' | 'diskLatency' | 'rx' | 'tx' | 'memory' | 'memoryTotal';
-
-type HostMetrics = Record<HostMetric, SnapshotNodeMetric['avg']>;
-
-export interface HostNodeRow extends HostMetrics {
+interface HostMetadata {
   os?: string | null;
   ip?: string | null;
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
-  name: string;
   id: string;
 }
+export type HostNodeRow = HostMetadata &
+  HostMetrics & {
+    name: string;
+  };
 
 /**
  * Helper functions
  */
-const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefined | null) => {
+const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
   return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 };
 
-const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }) => ({
-    id: `${name}-${path.at(-1)?.os ?? '-'}`,
-    name,
-    os: path.at(-1)?.os ?? '-',
-    ip: path.at(-1)?.ip ?? '',
-    title: {
+const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
+  return nodes.map(({ metrics, metadata, name }) => {
+    const metadataKeyValue = metadata.reduce(
+      (acc, curr) => ({
+        ...acc,
+        [curr.name]: curr.value,
+      }),
+      {} as Record<InfraAssetMetadataType, string | null>
+    );
+
+    return {
       name,
-      cloudProvider: path.at(-1)?.cloudProvider ?? null,
-    },
-    ...metrics.reduce((data, metric) => {
-      data[metric.name as HostMetric] = metric.avg ?? metric.value;
-      return data;
-    }, {} as HostMetrics),
-  })) as HostNodeRow[];
+      id: `${name}-${metadataKeyValue['host.os.name'] ?? '-'}`,
+      title: {
+        name,
+        cloudProvider: (metadataKeyValue['cloud.provider'] as CloudProvider) ?? null,
+      },
+      os: metadataKeyValue['host.os.name'] ?? '-',
+      ip: metadataKeyValue['host.ip'] ?? '',
+      ...metrics.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.name]: curr.value ?? 0,
+        }),
+        {} as HostMetrics
+      ),
+    };
+  });
 };
 
 const isTitleColumn = (cell: any): cell is HostNodeRow['title'] => {

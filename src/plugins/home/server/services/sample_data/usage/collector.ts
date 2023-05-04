@@ -11,11 +11,11 @@ import { fetchProvider, TelemetryResponse } from './collector_fetch';
 
 export function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  getIndexForType: (type: string) => Promise<string>
 ) {
   const collector = usageCollection.makeUsageCollector<TelemetryResponse>({
     type: 'sample-data',
-    fetch: fetchProvider(kibanaIndex),
+    fetch: fetchProvider(getIndexForType),
     isReady: () => true,
     schema: {
       installed: { type: 'array', items: { type: 'keyword' } },

@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+
 import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import {
@@ -23,7 +28,7 @@ import { createDashboard } from './create_dashboard';
 import { getSampleDashboardPanel } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { Observable } from 'rxjs';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 const embeddableId = 'create-dat-dashboard';
 
@@ -51,18 +56,28 @@ test('throws error when provided validation function returns invalid', async () 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
   pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
     .fn()
-    .mockResolvedValue({ dashboardInput: { description: 'wow would you look at that? Wow.' } });
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: `wow would you look at that? Wow.`,
+      },
+    });
   const dashboard = await createDashboard(embeddableId, {}, 0, 'wow-such-id');
   expect(
     pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
-  expect(dashboard.getState().explicitInput.description).toBe('wow would you look at that? Wow.');
+  expect(dashboard.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
 test('pulls state from session storage which overrides state from saved object', async () => {
   pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
     .fn()
-    .mockResolvedValue({ dashboardInput: { description: 'wow this description is okay' } });
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+    });
   pluginServices.getServices().dashboardSessionStorage.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
@@ -80,7 +95,12 @@ test('pulls state from session storage which overrides state from saved object',
 test('pulls state from creation options initial input which overrides all other state sources', async () => {
   pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
     .fn()
-    .mockResolvedValue({ dashboardInput: { description: 'wow this description is okay' } });
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+    });
   pluginServices.getServices().dashboardSessionStorage.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
@@ -210,6 +230,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
       },
     },
   });
+
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
   expect(mockContactCardFactory.create).toHaveBeenCalledWith(
@@ -252,4 +273,64 @@ test('creates a control group from the control group factory and waits for it to
     expect.objectContaining({ controlStyle: 'twoLine' })
   );
   expect(mockControlGroupContainer.untilInitialized).toHaveBeenCalled();
+});
+
+/*
+ * dashboard.getInput$() subscriptions are used to update:
+ * 1) dashboard instance searchSessionId state
+ * 2) child input on parent input changes
+ *
+ * Rxjs subscriptions are executed in the order that they are created.
+ * This test ensures that searchSessionId update subscription is created before child input subscription
+ * to ensure child input subscription includes updated searchSessionId.
+ */
+test('searchSessionId is updated prior to child embeddable parent subscription execution', async () => {
+  const embeddableFactory = {
+    create: new ContactCardEmbeddableFactory((() => null) as any, {} as any),
+    getDefaultInput: jest.fn().mockResolvedValue({
+      timeRange: {
+        to: 'now',
+        from: 'now-15m',
+      },
+    }),
+  };
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(embeddableFactory);
+  let sessionCount = 0;
+  pluginServices.getServices().data.search.session.start = () => {
+    sessionCount++;
+    return `searchSessionId${sessionCount}`;
+  };
+  const dashboard = await createDashboard(embeddableId, {
+    searchSessionSettings: {
+      getSearchSessionIdFromURL: () => undefined,
+      removeSessionIdFromUrl: () => {},
+      createSessionRestorationDataProvider: () => {},
+    } as unknown as DashboardCreationOptions['searchSessionSettings'],
+  });
+  const embeddable = await dashboard.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  expect(embeddable.getInput().searchSessionId).toBe('searchSessionId1');
+
+  dashboard.updateInput({
+    timeRange: {
+      to: 'now',
+      from: 'now-7d',
+    },
+  });
+
+  expect(sessionCount).toBeGreaterThan(1);
+  const embeddableInput = embeddable.getInput();
+  expect((embeddableInput as any).timeRange).toEqual({
+    to: 'now',
+    from: 'now-7d',
+  });
+  expect(embeddableInput.searchSessionId).toBe(`searchSessionId${sessionCount}`);
 });

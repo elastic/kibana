@@ -441,7 +441,11 @@ describe('callAPI', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
         tls: { certificate: 'test-certificate', key: 'test-key' } as any,
       },
-      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as UptimeServerSetup
     );
 
     apiClient.locations = testLocations;
@@ -462,6 +466,8 @@ describe('callAPI', () => {
         stack_version: '8.7.0',
         license_level: 'trial',
         license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+        cloud_id: 'test-id',
+        deployment_id: 'deployment-id',
       },
       headers: {
         'x-kibana-version': '8.7.0',

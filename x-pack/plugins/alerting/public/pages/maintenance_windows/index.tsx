@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -26,12 +26,24 @@ import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
+import { useLicense } from '../../hooks/use_license';
+import { LicensePrompt } from './components/license_prompt';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
-  const { docLinks } = useKibana().services;
+  const {
+    application: { capabilities },
+    chrome,
+    docLinks,
+  } = useKibana().services;
+  const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
+
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows();
+  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+    enabled: hasLicense,
+  });
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
@@ -40,8 +52,35 @@ export const MaintenanceWindowsPage = React.memo(() => {
   }, [navigateToCreateMaintenanceWindow]);
 
   const refreshData = useCallback(() => refetch(), [refetch]);
+  const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
+  const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+  const showEmptyPrompt =
+    !isLoading &&
+    maintenanceWindows.length === 0 &&
+    showWindowMaintenance &&
+    writeWindowMaintenance;
 
-  const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
+  const readOnly = showWindowMaintenance && !writeWindowMaintenance;
+
+  // if the user is read only then display the glasses badge in the global navigation header
+  const setBadge = useCallback(() => {
+    if (readOnly) {
+      chrome.setBadge({
+        text: i18n.READ_ONLY_BADGE_TEXT,
+        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
+        iconType: 'glasses',
+      });
+    }
+  }, [chrome, readOnly]);
+
+  useEffect(() => {
+    setBadge();
+
+    // remove the icon after the component unmounts
+    return () => {
+      chrome.setBadge();
+    };
+  }, [setBadge, chrome]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -66,20 +105,28 @@ export const MaintenanceWindowsPage = React.memo(() => {
             <p>{i18n.MAINTENANCE_WINDOWS_DESCRIPTION}</p>
           </EuiText>
         </EuiPageHeaderSection>
-        {!showEmptyPrompt ? (
+        {!showEmptyPrompt && hasLicense && writeWindowMaintenance ? (
           <EuiPageHeaderSection>
-            <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
+            <EuiButton
+              data-test-subj="mw-create-button"
+              onClick={handleClickCreate}
+              iconType="plusInCircle"
+              fill
+            >
               {i18n.CREATE_NEW_BUTTON}
             </EuiButton>
           </EuiPageHeaderSection>
         ) : null}
       </EuiPageHeader>
-      {showEmptyPrompt ? (
+      {!hasLicense ? (
+        <LicensePrompt />
+      ) : showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : (
         <>
           <EuiSpacer size="xl" />
           <MaintenanceWindowsList
+            readOnly={readOnly}
             refreshData={refreshData}
             loading={isLoading}
             items={maintenanceWindows}

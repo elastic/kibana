@@ -49,7 +49,7 @@ const useDefaultTimezone = () => {
 const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
   const timezone = useDefaultTimezone();
   const DEFAULT_TIMEFRAME = {
-    days: [],
+    days: ISO_WEEKDAYS,
     timezone,
     hours: {
       start: '00:00',
@@ -114,7 +114,9 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
       const newDays = previouslyHasDay
         ? timeframe.days.filter((d) => d !== day)
         : [...timeframe.days, day];
-      updateTimeframe({ days: newDays });
+      if (newDays.length !== 0) {
+        updateTimeframe({ days: newDays });
+      }
     },
     [timeframe, updateTimeframe]
   );
@@ -144,7 +146,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeToggleLabel',
           {
-            defaultMessage: 'Send alert notification within the selected time frame only',
+            defaultMessage: 'if alert is generated during timeframe',
           }
         )}
         checked={timeframeEnabled}

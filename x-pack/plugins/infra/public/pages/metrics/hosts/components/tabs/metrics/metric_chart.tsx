@@ -40,13 +40,13 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest, loading } = useHostsViewContext();
+  const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
   // prevents updates on requestTs and serchCriteria states from relaoding the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: baseRequest.requestTs,
+    lastReloadRequestTime: requestTs,
     ...searchCriteria,
   });
 
@@ -60,22 +60,18 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     visualizationType: 'lineChart',
   });
 
-  const hostsFilterQuery = useMemo(() => {
-    return createHostsFilter(
-      currentPage.map((p) => p.name),
-      dataView
-    );
+  const filters = useMemo(() => {
+    return [
+      createHostsFilter(
+        currentPage.map((p) => p.name),
+        dataView
+      ),
+    ];
   }, [currentPage, dataView]);
 
-  const filters = [
-    ...afterLoadedState.filters,
-    ...afterLoadedState.panelFilters,
-    ...[hostsFilterQuery],
-  ];
   const extraActionOptions = getExtraActions({
     timeRange: afterLoadedState.dateRange,
     filters,
-    query: afterLoadedState.query,
   });
 
   const extraActions: Action[] = [extraActionOptions.openInLens];
@@ -132,7 +128,6 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
-          query={afterLoadedState.query}
           onBrushEnd={handleBrushEnd}
           loading={loading}
           hasTitle

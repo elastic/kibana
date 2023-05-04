@@ -16,31 +16,31 @@ import type {
   CasesBulkGetResponse,
   CasesBulkGetResponseCertainFields,
   CasesBulkGetRequestCertainFields,
-  CaseResponse,
+  Case,
   CaseAttributes,
 } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
-  CasesResponseRt,
+  CasesRt,
   excess,
   throwErrors,
   getTypeForCertainFieldsFromArray,
-  CaseResponseRt,
+  CaseRt,
 } from '../../../common/api';
 import { getTypeProps } from '../../../common/api/runtime_types';
 import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs, SOWithErrors } from '../types';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import type { CaseSavedObject } from '../../common/types';
 import { Operations } from '../../authorization';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
 
 /**
  * Retrieves multiple cases by ids.
  */
-export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseResponse>(
+export const bulkGet = async <Field extends keyof Case = keyof Case>(
   params: CasesBulkGetRequestCertainFields<Field>,
   clientArgs: CasesClientArgs
 ): Promise<CasesBulkGetResponseCertainFields<Field>> => {
@@ -66,7 +66,7 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
       (caseInfo) => caseInfo.error === undefined
-    ) as [CaseSavedObject[], CaseSavedObjectWithErrors];
+    ) as [CaseSavedObjectTransformed[], CaseSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
       await authorization.getAndEnsureAuthorizedEntities({
@@ -103,7 +103,7 @@ export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseRespo
       return pick(flattenedCase, [...fields, 'id', 'version']);
     });
 
-    const typeToEncode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);
+    const typeToEncode = getTypeForCertainFieldsFromArray(CasesRt, fields);
     const casesToReturn = typeToEncode.encode(flattenedCases);
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
@@ -124,7 +124,7 @@ const throwErrorIfFieldsAreInvalid = (fields?: string[]) => {
     return;
   }
 
-  const typeProps = getTypeProps(CaseResponseRt) ?? {};
+  const typeProps = getTypeProps(CaseRt) ?? {};
   const validFields = Object.keys(typeProps);
 
   for (const field of fields) {
@@ -142,7 +142,7 @@ const throwErrorIfCaseIdsReachTheLimit = (ids: string[]) => {
 
 const constructErrors = (
   soBulkGetErrors: CaseSavedObjectWithErrors,
-  unauthorizedCases: CaseSavedObject[]
+  unauthorizedCases: CaseSavedObjectTransformed[]
 ): CasesBulkGetResponse['errors'] => {
   const errors: CasesBulkGetResponse['errors'] = [];
 

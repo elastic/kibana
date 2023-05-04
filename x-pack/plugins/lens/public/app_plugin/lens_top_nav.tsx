@@ -670,6 +670,7 @@ export const LensTopNavMenu = ({
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   newDescription: contextFromEmbeddable ? initialContext.description : '',
+                  panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
                   saveToLibrary:
