@@ -27,8 +27,7 @@ import { getFailedTransactionRate } from '../../lib/transaction_groups/get_faile
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   percentCgroupMemoryUsedScript,
-  percentSystemMemoryUsedScript,
-  systemMemoryFilter,
+  systemMemory,
   cgroupMemoryFilter,
 } from '../metrics/by_agent/shared/memory';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -312,9 +311,7 @@ function getMemoryStats({
       script,
     }: {
       additionalFilters: ESFilter[];
-      script:
-        | typeof percentCgroupMemoryUsedScript
-        | typeof percentSystemMemoryUsedScript;
+      script: typeof percentCgroupMemoryUsedScript | typeof systemMemory.script;
     }): Promise<NodeStats['memoryUsage']> => {
       const response = await apmEventClient.search(
         'get_avg_memory_for_service_map_node',
@@ -363,8 +360,8 @@ function getMemoryStats({
 
     if (!memoryUsage) {
       memoryUsage = await getMemoryUsage({
-        script: percentSystemMemoryUsedScript,
-        additionalFilters: [systemMemoryFilter],
+        script: systemMemory.script,
+        additionalFilters: [systemMemory.filter],
       });
     }
 

@@ -47,18 +47,18 @@ const chartBase: ChartBase = {
   series,
 };
 
-export const systemMemoryFilter = {
-  bool: {
-    filter: [
-      { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-      { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-    ],
+export const systemMemory = {
+  filter: {
+    bool: {
+      filter: [
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+    },
   },
-};
-
-export const percentSystemMemoryUsedScript = {
-  lang: 'painless',
-  source: `
+  script: {
+    lang: 'painless',
+    source: `
     if(doc.containsKey('${METRIC_SYSTEM_FREE_MEMORY}') && doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}')){
       double freeMemoryValue =  doc['${METRIC_SYSTEM_FREE_MEMORY}'].value;
       double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
@@ -67,7 +67,8 @@ export const percentSystemMemoryUsedScript = {
     
     return null;
   `,
-} as const;
+  },
+};
 
 export const cgroupMemoryFilter = {
   bool: {
@@ -185,11 +186,11 @@ export async function getMemoryChartData({
           end,
           chartBase,
           aggs: {
-            memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
-            memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+            memoryUsedAvg: { avg: { script: systemMemory.script } },
+            memoryUsedMax: { max: { script: systemMemory.script } },
           },
           additionalFilters: [
-            systemMemoryFilter,
+            systemMemory.filter,
             ...termQuery(FAAS_ID, serverlessId),
           ],
           operationName: 'get_system_memory_metrics_charts',
