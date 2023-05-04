@@ -8,11 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
+  getAnnotationAccessor,
   isQueryAnnotationConfig,
-  isRangeAnnotationConfig,
-  annotationsIconSet,
 } from '@kbn/event-annotation-plugin/public';
 import {
   createCopiedAnnotation,
@@ -21,7 +18,6 @@ import {
 } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -407,26 +403,8 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   };
 };
 
-export const getSingleColorAnnotationConfig = (
-  annotation: EventAnnotationConfig
-): AccessorConfig => {
-  const annotationIcon = !isRangeAnnotationConfig(annotation)
-    ? annotationsIconSet.find((option) => option.value === annotation?.icon) ||
-      annotationsIconSet.find((option) => option.value === 'triangle')
-    : undefined;
-  const icon = annotationIcon?.icon ?? annotationIcon?.value;
-  return {
-    columnId: annotation.id,
-    triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : 'color',
-    customIcon: icon,
-    color:
-      annotation?.color ||
-      (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
-  };
-};
-
 export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>
-  layer.annotations.map((annotation) => getSingleColorAnnotationConfig(annotation));
+  layer.annotations.map((annotation) => getAnnotationAccessor(annotation));
 
 export const getAnnotationsConfiguration = ({
   state,

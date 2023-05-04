@@ -14,7 +14,10 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationServiceType,
+  getAnnotationAccessor,
+} from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -82,7 +85,6 @@ import {
   getUniqueLabels,
   onAnnotationDrop,
   isDateHistogram,
-  getSingleColorAnnotationConfig,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -1128,7 +1130,7 @@ function getVisualizationInfo(
       palette.push(
         ...layer.annotations
           .filter(({ isHidden }) => !isHidden)
-          .map((annotation) => getSingleColorAnnotationConfig(annotation).color)
+          .map((annotation) => getAnnotationAccessor(annotation).color)
       );
     }
 

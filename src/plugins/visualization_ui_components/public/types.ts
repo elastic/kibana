@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './annotation_editor_controls';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-export * from './group_editor_controls';
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

@@ -9,10 +9,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { AccessorConfig, Message } from './types';
 
 const baseIconProps = {
-  className: 'lnsLayerPanel__colorIndicator',
+  css: css`
+    margin-left: ${euiThemeVars.euiSizeS};
+  `,
 } as const;
 
 const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (

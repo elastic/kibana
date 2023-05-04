@@ -48,6 +48,8 @@ export type {
   QueryInputServices,
 } from './components';
 
+export type { FormatFactory } from './types';
+
 export function plugin() {
   return new VisualizationUiComponentsPlugin();
 }

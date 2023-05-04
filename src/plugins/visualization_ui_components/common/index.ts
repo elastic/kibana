@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './annotation_editor_controls';
-
-export * from './group_editor_controls';
+export {};

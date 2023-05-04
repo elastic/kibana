@@ -7,30 +7,36 @@
  */
 
 import {
-  EuiButton,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiSelect,
-  EuiSpacer,
   EuiText,
   EuiTextArea,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DragContext, DragDrop, ReorderProvider } from '@kbn/dom-drag-drop';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  DimensionButton,
+  DimensionTrigger,
+  EmptyDimensionButton,
+  QueryInputServices,
+} from '@kbn/visualization-ui-components/public';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createCopiedAnnotation,
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
-} from '../../common';
-import { AnnotationEditorControls } from './annotation_editor_controls';
+} from '../../../common';
+import { AnnotationEditorControls } from '../annotation_editor_controls';
+import { getAnnotationAccessor } from './get_annotation_accessor';
 
 export const GroupEditorControls = ({
   group,
@@ -79,6 +85,12 @@ export const GroupEditorControls = ({
   useEffect(() => {
     setNewAnnotationId(uuidv4());
   }, [group.annotations.length]);
+
+  const { dragging } = useContext(DragContext);
+
+  const reorderableGroup = group.annotations.map(({ id }) => ({
+    id,
+  }));
 
   return !selectedAnnotation ? (
     <>
@@ -163,33 +175,63 @@ export const GroupEditorControls = ({
           })}
         >
           <div>
-            {group.annotations.map((annotation) => (
-              <>
-                <EuiButton fullWidth onClick={() => setSelectedAnnotation(annotation)}>
-                  {annotation.label}
-                </EuiButton>
-                <EuiSpacer size="s" />
-              </>
-            ))}
-            <EuiButton
-              data-test-subj="addAnnotation"
-              fullWidth
-              onClick={() => {
-                const newAnnotation = createCopiedAnnotation(
-                  newAnnotationId,
-                  new Date().toISOString()
-                );
+            <ReorderProvider id="annotationsGroup">
+              {group.annotations.map((annotation, index) => (
+                <div
+                  css={css`
+                    margin-top: ${euiThemeVars.euiSizeS};
+                  `}
+                >
+                  <DragDrop
+                    order={[2, 1, 1, index]}
+                    key={annotation.id}
+                    value={{
+                      id: annotation.id,
+                      humanData: {
+                        label: 'TODO',
+                      },
+                    }}
+                    dragType="move"
+                    dropTypes={dragging ? ['reorder'] : undefined}
+                    reorderableGroup={reorderableGroup}
+                    draggable
+                  >
+                    <DimensionButton
+                      groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+                        defaultMessage: 'Annotations',
+                      })}
+                      onClick={() => setSelectedAnnotation(annotation)}
+                      onRemoveClick={() => {}}
+                      accessorConfig={getAnnotationAccessor(annotation)}
+                      label={annotation.label}
+                    >
+                      <DimensionTrigger label={annotation.label} />
+                    </DimensionButton>
+                  </DragDrop>
+                </div>
+              ))}
+            </ReorderProvider>
 
-                update({ ...group, annotations: [...group.annotations, newAnnotation] });
-
-                setSelectedAnnotation(newAnnotation);
-              }}
+            <div
+              css={css`
+                margin-top: ${euiThemeVars.euiSizeS};
+              `}
             >
-              <FormattedMessage
-                id="eventAnnotation.groupEditor.addAnnotation"
-                defaultMessage="Add annotation"
+              <EmptyDimensionButton
+                label="Add annotation"
+                ariaLabel="Add annotation"
+                onClick={() => {
+                  const newAnnotation = createCopiedAnnotation(
+                    newAnnotationId,
+                    new Date().toISOString()
+                  );
+
+                  update({ ...group, annotations: [...group.annotations, newAnnotation] });
+
+                  setSelectedAnnotation(newAnnotation);
+                }}
               />
-            </EuiButton>
+            </div>
           </div>
         </EuiFormRow>
       </EuiForm>
