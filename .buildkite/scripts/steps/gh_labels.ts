@@ -9,7 +9,8 @@
 // import { GithubApi } from '../../../src/dev/prs/github_api';
 
 const parseTarget = process.argv[2] ?? 'BUILDKITE_MESSAGE';
-
 console.log(`\n### parseTarget: \n  ${parseTarget}`);
+
+console.log(`\n### process.env.BUILDKITE_MESSAGE: \n  ${process.env[parseTarget]}`);
 
 export {};
