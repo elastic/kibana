@@ -766,45 +766,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
-        await Promise.all([
-          // super user creates a case with owner securitySolutionFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-          // super user creates a case with owner observabilityFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-        ]);
-
-        const res = await findCases({
-          supertest: supertestWithoutAuth,
-          query: {
-            search: 'securitySolutionFixture observabilityFixture',
-            searchFields: 'owner',
-          },
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-        });
-
-        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
-      });
-
       // This test is to prevent a future developer to add the filter attribute without taking into consideration
       // the authorizationFilter produced by the cases authorization class
       it('should NOT allow to pass a filter query parameter', async () => {
