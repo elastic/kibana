@@ -9,7 +9,7 @@ import path from 'path';
 import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
-// import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -308,7 +308,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
-          // `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
