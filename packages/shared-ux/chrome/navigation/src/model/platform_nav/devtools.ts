@@ -6,30 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { NavItemProps } from '../../../types';
+import { ChromeNavigationNodeViewModel } from '../../../types';
 
-export const devtoolsItemSet: NavItemProps[] = [
+// TODO: Declare ChromeNavigationNode[] (with "link" to app id or deeplink id)
+// and then call an api on the Chrome service to convert to ChromeNavigationNodeViewModel
+// with its "href", "isActive"... metadata
+
+export const devtoolsItemSet: ChromeNavigationNodeViewModel[] = [
   {
-    name: '',
+    title: '',
     id: 'root',
     items: [
       {
-        name: 'Console',
+        title: 'Console',
         id: 'console',
         href: '/app/dev_tools#/console',
       },
       {
-        name: 'Search profiler',
+        title: 'Search profiler',
         id: 'search_profiler',
         href: '/app/dev_tools#/searchprofiler',
       },
       {
-        name: 'Grok debugger',
+        title: 'Grok debugger',
         id: 'grok_debugger',
         href: '/app/dev_tools#/grokdebugger',
       },
       {
-        name: 'Painless lab',
+        title: 'Painless lab',
         id: 'painless_lab',
         href: '/app/dev_tools#/painless_lab',
       },

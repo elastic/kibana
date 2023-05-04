@@ -6,10 +6,9 @@
  */
 
 import type { SecurityAppStore } from '../../../common/store/types';
-import type { DataProvider } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
-import { addProvider } from '../../../timelines/store/timeline/actions';
-import { createAddToNewTimelineCellActionFactory, getToastMessage } from './add_to_new_timeline';
+import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import { createInvestigateInNewTimelineCellActionFactory } from './investigate_in_new_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -52,7 +51,7 @@ const defaultAddProviderAction = {
 };
 
 describe('createAddToNewTimelineCellAction', () => {
-  const addToTimelineCellActionFactory = createAddToNewTimelineCellActionFactory({
+  const addToTimelineCellActionFactory = createInvestigateInNewTimelineCellActionFactory({
     store,
     services,
   });
@@ -175,73 +174,22 @@ describe('createAddToNewTimelineCellAction', () => {
         },
       });
     });
-  });
 
-  describe('getToastMessage', () => {
-    it('handles empty input', () => {
-      const result = getToastMessage({ queryMatch: { value: null } } as unknown as DataProvider);
-      expect(result).toEqual('');
-    });
-    it('handles array input', () => {
-      const result = getToastMessage({
-        queryMatch: { value: ['hello', 'world'] },
-      } as unknown as DataProvider);
-      expect(result).toEqual('hello, world alerts');
-    });
+    it('should open the timeline', async () => {
+      await addToTimelineAction.execute({
+        ...context,
+        metadata: {
+          andFilters: [{ field: 'kibana.alert.severity', value: 'low' }],
+        },
+      });
 
-    it('handles single filter', () => {
-      const result = getToastMessage({
-        queryMatch: { value },
-        and: [{ queryMatch: { field: 'kibana.alert.severity', value: 'critical' } }],
-      } as unknown as DataProvider);
-      expect(result).toEqual(`critical severity alerts from ${value}`);
-    });
-
-    it('handles multiple filters', () => {
-      const result = getToastMessage({
-        queryMatch: { value },
-        and: [
-          {
-            queryMatch: { field: 'kibana.alert.workflow_status', value: 'open' },
-          },
-          {
-            queryMatch: { field: 'kibana.alert.severity', value: 'critical' },
-          },
-        ],
-      } as unknown as DataProvider);
-      expect(result).toEqual(`open, critical severity alerts from ${value}`);
-    });
-
-    it('ignores unrelated filters', () => {
-      const result = getToastMessage({
-        queryMatch: { value },
-        and: [
-          {
-            queryMatch: { field: 'kibana.alert.workflow_status', value: 'open' },
-          },
-          {
-            queryMatch: { field: 'kibana.alert.severity', value: 'critical' },
-          },
-          // currently only supporting the above fields
-          {
-            queryMatch: { field: 'user.name', value: 'something' },
-          },
-        ],
-      } as unknown as DataProvider);
-      expect(result).toEqual(`open, critical severity alerts from ${value}`);
-    });
-
-    it('returns entity only when unrelated filters are passed', () => {
-      const result = getToastMessage({
-        queryMatch: { value },
-        and: [{ queryMatch: { field: 'user.name', value: 'something' } }],
-      } as unknown as DataProvider);
-      expect(result).toEqual(`${value} alerts`);
-    });
-
-    it('returns entity only when no filters are passed', () => {
-      const result = getToastMessage({ queryMatch: { value }, and: [] } as unknown as DataProvider);
-      expect(result).toEqual(`${value} alerts`);
+      expect(mockDispatch).toBeCalledWith({
+        type: showTimeline.type,
+        payload: {
+          id: TimelineId.active,
+          show: true,
+        },
+      });
     });
   });
 });

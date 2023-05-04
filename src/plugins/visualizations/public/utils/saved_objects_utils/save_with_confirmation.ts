@@ -8,15 +8,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type {
-  SavedObjectAttributes,
-  SavedObjectsCreateOptions,
-  OverlayStart,
-  SavedObjectsClientContract,
-} from '@kbn/core/public';
+import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import type { VisSavedObject } from '../../types';
+import { visualizationsClient } from '../../content_management';
+import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
@@ -32,14 +29,14 @@ import type { VisSavedObject } from '../../types';
  * @resolved {SimpleSavedObject}
  */
 export async function saveWithConfirmation(
-  source: SavedObjectAttributes,
+  source: VisualizationSavedObjectAttributes,
   savedObject: Pick<VisSavedObject, 'title' | 'getEsType' | 'displayName'>,
   options: SavedObjectsCreateOptions,
-  services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart }
-) {
-  const { savedObjectsClient, overlays } = services;
+  services: { overlays: OverlayStart }
+): Promise<{ item: VisualizationSavedObject }> {
+  const { overlays } = services;
   try {
-    return await savedObjectsClient.create(savedObject.getEsType(), source, options);
+    return await visualizationsClient.create({ data: source, options });
   } catch (err) {
     // record exists, confirm overwriting
     if (get(err, 'res.status') === 409) {
@@ -61,9 +58,12 @@ export async function saveWithConfirmation(
 
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>
-          savedObjectsClient.create(savedObject.getEsType(), source, {
-            overwrite: true,
-            ...options,
+          visualizationsClient.create({
+            data: source,
+            options: {
+              overwrite: true,
+              ...options,
+            },
           })
         )
         .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
