@@ -23,17 +23,19 @@ import {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsFilter } from '@kbn/alerting-plugin/common';
-import { Alert } from '@kbn/alerts-as-data-utils';
 import { AlertHit, SummarizedAlerts } from '@kbn/alerting-plugin/server/types';
+import { ParsedTechnicalFields } from '../../common';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
+export type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
   ruleDataClient: PublicContract<IRuleDataClient>;
   useNamespace: boolean;
   isLifecycleAlert: boolean;
-  formatAlert?: (alert: Alert) => Alert;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
 }
 
 export const createGetSummarizedAlertsFn =
@@ -98,7 +100,7 @@ interface GetAlertsByExecutionUuidOpts {
   ruleDataClientReader: IRuleDataReader;
   isLifecycleAlert: boolean;
   excludedAlertInstanceIds: string[];
-  formatAlert?: (alert: Alert) => Alert;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
   alertsFilter?: AlertsFilter | null;
 }
 
@@ -137,7 +139,7 @@ interface GetAlertsByExecutionUuidHelperOpts {
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
   excludedAlertInstanceIds: string[];
-  formatAlert?: (alert: Alert) => Alert;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
   alertsFilter?: AlertsFilter | null;
 }
 
@@ -237,7 +239,7 @@ const expandFlattenedAlert = (alert: object) => {
 
 const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
   response: ESSearchResponse<AlertHit, TSearchRequest>,
-  formatAlert?: (alert: Alert) => Alert
+  formatAlert?: (alert: AlertDocument) => AlertDocument
 ): SummarizedAlertsChunk => {
   return {
     count: (response.hits.total as SearchTotalHits).value,
@@ -259,7 +261,7 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
 const doSearch = async (
   ruleDataClientReader: IRuleDataReader,
   request: ESSearchRequest,
-  formatAlert?: (alert: Alert) => Alert
+  formatAlert?: (alert: AlertDocument) => AlertDocument
 ): Promise<SummarizedAlertsChunk> => {
   const response = await ruleDataClientReader.search(request);
   return getHitsWithCount(response as ESSearchResponse<AlertHit>, formatAlert);
@@ -335,7 +337,7 @@ interface GetAlertsByTimeRangeOpts {
   ruleDataClientReader: IRuleDataReader;
   isLifecycleAlert: boolean;
   excludedAlertInstanceIds: string[];
-  formatAlert?: (alert: Alert) => Alert;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
   alertsFilter?: AlertsFilter | null;
 }
 
@@ -376,7 +378,7 @@ interface GetAlertsByTimeRangeHelperOpts {
   end: Date;
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
-  formatAlert?: (alert: Alert) => Alert;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
   excludedAlertInstanceIds: string[];
   alertsFilter?: AlertsFilter | null;
 }
