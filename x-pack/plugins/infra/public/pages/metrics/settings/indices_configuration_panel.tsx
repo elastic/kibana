@@ -113,6 +113,7 @@ export const IndicesConfigurationPanel = ({
             title={METRIC_INDICES_WARNING_TITLE}
             color="warning"
             iconType="warning"
+            data-test-subj="infraIndicesPanelSettingsWarningCallout"
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.metricIndicesDoNotExist"
@@ -124,7 +125,13 @@ export const IndicesConfigurationPanel = ({
       {!remoteClustersExist && !metricIndicesExist && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut size="s" title={REMOTE_CLUSTER_ERROR_TITLE} color="danger" iconType="error">
+          <EuiCallOut
+            data-test-subj="infraIndicesPanelSettingsDangerCallout"
+            size="s"
+            title={REMOTE_CLUSTER_ERROR_TITLE}
+            color="danger"
+            iconType="error"
+          >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExist"
               defaultMessage="We couldn’t find any metrics data because the pattern entered doesn’t match any index."
