@@ -572,7 +572,6 @@ export function LayerPanel(
                             indexPatterns={dataViews.indexPatterns}
                           >
                             <DimensionButton
-                              className="lnsLayerPanel__dimension"
                               accessorConfig={accessorConfig}
                               label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
                               groupLabel={group.groupLabel}
@@ -621,12 +620,16 @@ export function LayerPanel(
 
                   {group.fakeFinalAccessor && (
                     <div
-                      className="lnsLayerPanel__dimension domDragDrop-isDraggable"
+                      className="domDragDrop-isDraggable"
                       css={css`
+                        display: flex;
+                        align-items: center;
+                        border-radius: ${euiThemeVars.euiBorderRadius};
+                        min-height: ${euiThemeVars.euiSizeXL};
+
                         cursor: default !important;
-                        border-color: transparent !important;
-                        margin-top: ${group.accessors.length ? 8 : 0}px !important;
                         background-color: ${euiThemeVars.euiColorLightShade} !important;
+                        border-color: transparent !important;
                         box-shadow: none !important;
                       `}
                     >

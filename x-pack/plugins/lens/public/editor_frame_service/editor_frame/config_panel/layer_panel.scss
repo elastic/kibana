@@ -64,36 +64,6 @@
   padding: $euiSizeS $euiSize;
 }
 
-.lnsLayerPanel__dimensionRemove {
-  margin-right: $euiSizeS;
-  visibility: hidden;
-  opacity: 0;
-}
-
-.lnsLayerPanel__dimension {
-  @include euiFontSizeS;
-  border-radius: $euiBorderRadius;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  min-height: $euiSizeXL;
-  position: relative;
-
-  // NativeRenderer is messing this up
-  >div {
-    flex-grow: 1;
-  }
-
-  &:hover,
-  &:focus {
-    .lnsLayerPanel__dimensionRemove {
-      visibility: visible;
-      opacity: 1;
-      transition: opacity $euiAnimSpeedFast ease-in-out;
-    }
-  }
-}
-
 .lnsLayerPanel__dimensionContainer {
   position: relative;
 
