@@ -654,7 +654,6 @@ describe('Task Runner', () => {
     const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
 
     testAlertingEventLogCalls({
-      generatedActions: 1,
       activeAlerts: 1,
       newAlerts: 1,
       status: 'active',

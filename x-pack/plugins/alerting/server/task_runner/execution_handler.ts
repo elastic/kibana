@@ -197,15 +197,6 @@ export class ExecutionHandler<
           continue;
         }
 
-        if (alert && alert.getMaintenanceWindowIds().length > 0) {
-          this.logger.debug(
-            `no scheduling of actions "${action.id}" for rule "${
-              this.taskInstance.params.alertId
-            }": has active maintenance windows ${alert.getMaintenanceWindowIds()}.`
-          );
-          continue;
-        }
-
         if (!this.isExecutableAction(action)) {
           this.logger.warn(
             `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
@@ -529,6 +520,16 @@ export class ExecutionHandler<
         if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }
+
+        if (alert && alert.getMaintenanceWindowIds().length > 0) {
+          this.logger.debug(
+            `no scheduling of actions "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alert.getMaintenanceWindowIds()}.`
+          );
+          continue;
+        }
+
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {

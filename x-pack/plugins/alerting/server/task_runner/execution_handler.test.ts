@@ -140,6 +140,7 @@ const generateAlert = ({
   scheduleActions = true,
   throttledActions = {},
   lastScheduledActionsGroup = 'default',
+  maintenanceWindowIds,
 }: {
   id: number;
   group?: ActiveActionGroup | 'recovered';
@@ -148,12 +149,14 @@ const generateAlert = ({
   scheduleActions?: boolean;
   throttledActions?: ThrottledActions;
   lastScheduledActionsGroup?: string;
+  maintenanceWindowIds?: string[];
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
     {
       state: state || { test: true },
       meta: {
+        maintenanceWindowIds,
         lastScheduledActions: {
           date: new Date(),
           group: lastScheduledActionsGroup,
@@ -1496,6 +1499,32 @@ describe('Execution Handler', () => {
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
       '(2) alerts have been filtered out for: testActionTypeId:111'
+    );
+  });
+
+  test('does not schedule actions for alerts with maintenance window IDs', async () => {
+    const executionHandler = new ExecutionHandler(generateExecutionParams());
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-1.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      2,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-2.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      3,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
   });
 
