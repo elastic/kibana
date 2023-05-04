@@ -47,6 +47,7 @@ export type {
 export type {
   CaseUI,
   CasesUI,
+  CasesFindResponseUI,
   Ecs,
   CasesFeatures,
   CaseViewRefreshPropInterface,
