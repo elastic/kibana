@@ -15,7 +15,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { combineQueries } from '../../../common/lib/kuery';
+import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
+import { combineQueries, getFieldEsTypes } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
@@ -140,17 +141,32 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
+  const selectedGroupEsTypes = useMemo(
+    () => getFieldEsTypes(selectedGroup, browserFields),
+    [selectedGroup, browserFields]
+  );
+
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
+      selectedGroupEsTypes,
       from,
       runtimeMappings,
       to,
       pageSize,
       pageIndex,
     });
-  }, [additionalFilters, from, pageIndex, pageSize, runtimeMappings, selectedGroup, to]);
+  }, [
+    additionalFilters,
+    from,
+    pageIndex,
+    pageSize,
+    runtimeMappings,
+    selectedGroup,
+    selectedGroupEsTypes,
+    to,
+  ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
 
@@ -176,6 +192,11 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
     skip: isNoneGroup([selectedGroup]),
   });
+
+  const aggs = useMemo(
+    () => parseGroupingQuery(alertsGroupsData?.aggregations),
+    [alertsGroupsData]
+  );
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
@@ -225,7 +246,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     () =>
       getGrouping({
         activePage: pageIndex,
-        data: alertsGroupsData?.aggregations,
+        data: {
+          ...alertsGroupsData?.aggregations,
+          ...aggs,
+        },
         groupingLevel,
         inspectButton: inspect,
         isLoading: loading || isLoadingGroups,
@@ -238,20 +262,21 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         takeActionItems: getTakeActionItems,
       }),
     [
-      alertsGroupsData?.aggregations,
       getGrouping,
-      getTakeActionItems,
+      pageIndex,
+      alertsGroupsData,
+      aggs,
       groupingLevel,
       inspect,
-      isLoadingGroups,
       loading,
-      pageIndex,
+      isLoadingGroups,
       pageSize,
       renderChildComponent,
       onGroupClose,
       selectedGroup,
-      setPageIndex,
+      getTakeActionItems,
       setPageSize,
+      setPageIndex,
     ]
   );
 };
