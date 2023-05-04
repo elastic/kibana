@@ -8,6 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
+  MlInferTrainedModelRequest,
+  MlStopTrainedModelDeploymentRequest,
   UpdateTrainedModelDeploymentRequest,
   UpdateTrainedModelDeploymentResponse,
 } from '../../lib/ml_client/types';
@@ -28,10 +30,10 @@ export interface TrainedModelsProvider {
       params: estypes.MlStartTrainedModelDeploymentRequest
     ): Promise<estypes.MlStartTrainedModelDeploymentResponse>;
     stopTrainedModelDeployment(
-      params: estypes.MlStopTrainedModelDeploymentRequest
+      params: MlStopTrainedModelDeploymentRequest
     ): Promise<estypes.MlStopTrainedModelDeploymentResponse>;
     inferTrainedModel(
-      params: estypes.MlInferTrainedModelRequest
+      params: MlInferTrainedModelRequest
     ): Promise<estypes.MlInferTrainedModelResponse>;
     deleteTrainedModel(
       params: estypes.MlDeleteTrainedModelRequest
@@ -74,7 +76,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.startTrainedModelDeployment(params);
             });
         },
-        async stopTrainedModelDeployment(params: estypes.MlStopTrainedModelDeploymentRequest) {
+        async stopTrainedModelDeployment(params: MlStopTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canStartStopTrainedModels'])
@@ -82,7 +84,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.stopTrainedModelDeployment(params);
             });
         },
-        async inferTrainedModel(params: estypes.MlInferTrainedModelRequest) {
+        async inferTrainedModel(params: MlInferTrainedModelRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])

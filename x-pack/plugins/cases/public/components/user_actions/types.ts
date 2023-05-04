@@ -12,8 +12,8 @@ import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type {
   CaseUI,
   CaseConnectors,
-  CaseUserActions,
-  Comment,
+  UserActionUI,
+  CommentUI,
   UseFetchAlertData,
   CaseUserActionsStats,
 } from '../../containers/types';
@@ -54,8 +54,8 @@ export interface UserActionBuilderArgs {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
-  userAction: CaseUserActions;
-  comments: Comment[];
+  userAction: UserActionUI;
+  comments: CommentUI[];
   index: number;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
