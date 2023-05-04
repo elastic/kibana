@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '@kbn/apm-plugin/common/es_fields/apm';
 import expect from '@kbn/expect';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -245,6 +251,99 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.latencyChartPreview).to.eql([]);
+    });
+
+    it('transaction_duration with no group by parameter', async () => {
+      const options = getOptions();
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.latencyChartPreview.length).to.equal(1);
+      expect(
+        response.body.latencyChartPreview.map(
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+        )
+      ).to.eql(['opbeans-java_production_request']);
+    });
+
+    it('transaction_duration with default group by fields', async () => {
+      const options = {
+        params: {
+          query: {
+            ...getOptions().params.query,
+            groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
+          },
+        },
+      };
+
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.latencyChartPreview.length).to.equal(1);
+      expect(
+        response.body.latencyChartPreview.map(
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+        )
+      ).to.eql(['opbeans-java_production_request']);
+    });
+
+    it('transaction_duration with group by on transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            ...getOptions().params.query,
+            groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+          },
+        },
+      };
+
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.latencyChartPreview.length).to.equal(3);
+      expect(
+        response.body.latencyChartPreview.map(
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+        )
+      ).to.eql([
+        'opbeans-java_production_request_DispatcherServlet#doGet',
+        'opbeans-java_production_request_APIRestController#stats',
+        'opbeans-java_production_request_APIRestController#customers',
+      ]);
+    });
+
+    it('transaction_duration with group by on transaction name and filter on transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            ...getOptions().params.query,
+            transactionName: 'DispatcherServlet#doGet',
+            groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+          },
+        },
+      };
+
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.latencyChartPreview.length).to.equal(1);
+      expect(
+        response.body.latencyChartPreview.map(
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) => item.name
+        )
+      ).to.eql(['opbeans-java_production_request_DispatcherServlet#doGet']);
     });
   });
 }
