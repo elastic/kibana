@@ -14,7 +14,8 @@ import type { OpenAPIV3 } from 'openapi-types';
 import z from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal/src/versioned_router';
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
+import { versionHandlerResolvers } from '@kbn/core-http-router-server-internal';
 import type { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   instanceofZodType,
@@ -216,15 +217,23 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
       (handler) => handler.options.validate !== false && handler.options.validate?.request?.body
     );
 
-    // TODO: this is totally wrong, we need to take the latest version of the path validation
+    /**
+     * Note: for a given route we accept that route params and query params remain BWC
+     *       so we only take the latest version of the params and query params, we also
+     *       assume at this point that we are generating for serverless.
+     */
     let pathObjects: OpenAPIV3.ParameterObject[] = [];
     let queryObjects: OpenAPIV3.ParameterObject[] = [];
-    if (route.handlers[0].options.validate !== false) {
-      const params = route.handlers[0].options.validate.request?.params as any;
+    const version = versionHandlerResolvers.newest(
+      route.handlers.map(({ options: { version: v } }) => v)
+    );
+    const handler = route.handlers.find(({ options: { version: v } }) => v === version);
+    if (handler && handler.options.validate !== false) {
+      const params = handler.options.validate.request?.params as any;
       if (params && instanceofZodType(params)) {
         pathObjects = extractParameterObjects(params, pathParams, 'path') ?? [];
       }
-      const query = route.handlers[0].options.validate.request?.query as any;
+      const query = handler.options.validate.request?.query as any;
       if (query && instanceofZodType(query)) {
         queryObjects = extractParameterObjects(query, pathParams, 'query') ?? [];
       }
