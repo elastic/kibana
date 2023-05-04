@@ -105,13 +105,13 @@ describe('Saved Objects type validator', () => {
 
     const createStubSpec = (): jest.Mocked<SavedObjectsValidationSpec> => {
       const stub = schema.object({}, { unknowns: 'allow', defaultValue: {} });
-      jest.spyOn(stub, 'getSchema');
+      jest.spyOn(stub as any, 'getSchema');
       return stub as jest.Mocked<SavedObjectsValidationSpec>;
     };
 
     const getCalledVersion = () => {
       for (const [version, validation] of Object.entries(validationMap)) {
-        if ((validation.getSchema as jest.MockedFn<any>).mock.calls.length > 0) {
+        if (((validation as any).getSchema as jest.MockedFn<any>).mock.calls.length > 0) {
           return version;
         }
       }
