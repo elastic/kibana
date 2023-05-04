@@ -96,7 +96,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
                   <EuiLink
                     href={docLinks.enterpriseSearchEngines}
                     target="_blank"
-                    data-telemetry-id="entSearchContent-engines-createEngine-docsLink"
+                    data-telemetry-id="entSearchApplications-createEngine-docsLink"
                     external
                   >
                     {i18n.translate(
@@ -183,7 +183,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               disabled={formDisabled}
-              data-telemetry-id="entSearchContent-engines-createEngine-cancel"
+              data-telemetry-id="entSearchApplications-createEngine-cancel"
               onClick={onClose}
             >
               {CANCEL_BUTTON_LABEL}
@@ -193,7 +193,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               isDisabled={createDisabled || formDisabled}
-              data-telemetry-id="entSearchContent-engines-createEngine-submit"
+              data-telemetry-id="entSearchApplications-createEngine-submit"
               fill
               iconType="plusInCircle"
               onClick={() => {
