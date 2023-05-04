@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const COMPLETE_WITHOUT_ENABLING = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithoutEnablingTitle',
@@ -33,10 +33,6 @@ export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
   }
 );
 
-const ruleSnoozeDocsLink = `${
-  getDocLinks({ kibanaBranch: 'main' }).alerting.guide
-}#controlling-rules`;
-
 const RULE_SNOOZE_DOCS_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.docsLinkText',
   {
@@ -44,16 +40,29 @@ const RULE_SNOOZE_DOCS_LINK_TEXT = i18n.translate(
   }
 );
 
-export const RULE_SNOOZE_DESCRIPTION = (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription"
-    defaultMessage="Select when automated actions should be performed. If a rule is snoozed actions will not be performed. Learn more about actions in our {docs}."
-    values={{
-      docs: (
-        <EuiLink href={ruleSnoozeDocsLink} target="_blank">
-          {RULE_SNOOZE_DOCS_LINK_TEXT}
-        </EuiLink>
-      ),
-    }}
-  />
-);
+function RuleSnoozeDescription(): JSX.Element {
+  const {
+    docLinks: {
+      links: {
+        securitySolution: { manageDetectionRules },
+      },
+    },
+  } = useKibana().services;
+  const manageDetectionRulesSnoozeSection = `${manageDetectionRules}#snooze-rules-ui`;
+
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription"
+      defaultMessage="Select when automated actions should be performed. If a rule is snoozed actions will not be performed. Learn more about actions in our {docs}."
+      values={{
+        docs: (
+          <EuiLink href={manageDetectionRulesSnoozeSection} target="_blank">
+            {RULE_SNOOZE_DOCS_LINK_TEXT}
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+}
+
+export const RULE_SNOOZE_DESCRIPTION = <RuleSnoozeDescription />;
