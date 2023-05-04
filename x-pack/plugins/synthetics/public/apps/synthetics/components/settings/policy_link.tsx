@@ -28,6 +28,10 @@ export const PolicyLink = ({ name }: { name: string }) => {
     return <EuiLoadingContent lines={1} />;
   }
 
+  if (!name) {
+    return <>--</>;
+  }
+
   return (
     <EuiLink
       href={`${basePath}/app/${data.app}${data.path}`}

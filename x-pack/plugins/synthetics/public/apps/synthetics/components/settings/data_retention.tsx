@@ -6,14 +6,28 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLink,
+  EuiMarkdownFormat,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { PolicyLink } from './policy_link';
 import { useGetIlmPolicies } from './hooks/use_get_ilm_policies';
 
 export const DataRetentionTab = () => {
-  const { data, loading } = useGetIlmPolicies();
+  const { data, loading, error } = useGetIlmPolicies();
+
+  if (error && (error as unknown as IHttpFetchError<ResponseErrorBody>).body?.statusCode === 403) {
+    return <Unprivileged />;
+  }
 
   const columns = [
     {
@@ -75,6 +89,50 @@ export const DataRetentionTab = () => {
     </div>
   );
 };
+
+const Unprivileged = () => {
+  return (
+    <EuiEmptyPrompt
+      data-test-subj="syntheticsUnprivileged"
+      color="plain"
+      icon={<EuiIcon type="logoObservability" size="xl" />}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.synthetics.noFindingsStates.unprivileged.unprivilegedTitle"
+            defaultMessage="Privileges required"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.synthetics.noFindingsStates.unprivileged.unprivilegedDescription"
+            defaultMessage="To view Synthetics monitors data usage and retention, you must update privileges. For more information, contact your Kibana administrator."
+          />
+        </p>
+      }
+      footer={
+        <EuiMarkdownFormat
+          css={css`
+            text-align: initial;
+          `}
+          // children={INDEX_PRIVILEGES + [SYNTHETICS_INDEX_PATTERN].map((idx) => `\n- \`${idx}\``)}
+          children={`\n- ${INDEX_PRIVILEGES} \n- ${CLUSTER_PRIVILEGES}`}
+        />
+      }
+    />
+  );
+};
+
+const INDEX_PRIVILEGES = i18n.translate('xpack.synthetics.dataRetention.unprivileged.index', {
+  defaultMessage:
+    'Required Elasticsearch index privilege `read`, `monitor` for the following indices: `synthetics-*`',
+});
+
+const CLUSTER_PRIVILEGES = i18n.translate('xpack.synthetics.dataRetention.unprivileged.cluster', {
+  defaultMessage: 'Required Elasticsearch cluster privilege `read_ilm`, `monitor`.',
+});
 
 const CALLOUT_TITLE = i18n.translate('xpack.synthetics.settingsRoute.retentionCalloutTitle', {
   defaultMessage: 'Synthetics data is configured by managed index lifecycle policies',
