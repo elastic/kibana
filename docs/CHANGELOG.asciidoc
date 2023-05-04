@@ -176,6 +176,7 @@ Alerting::
 * Adds query and timeframe params to RuleAction to filter alerts {kibana-pull}152360[#152360]
 * Adds the Cases column to the alerts table {kibana-pull}150963[#150963]
 * Adds filtering and sorting for the case activity {kibana-pull}149396[#149396]
+* Adds the ability to filter user activities with pagination {kibana-pull}152702[#152702]
 
 APM::
 * Adds group-by feature in APM rules {kibana-pull}155001[#155001]
@@ -243,7 +244,6 @@ Alerting::
 * Adds the ability to predefine IDs when you create connectors {kibana-pull}155392[#155392]
 * Adds the ability to allow the footer added to emails sent from {kib} alerting rules to **NOT** be added {kibana-pull}154919[#154919]
 * Adds conditional actions UI for timeframe {kibana-pull}153944[#153944]
-* Adds the ability to filter user activities with pagination {kibana-pull}152702[#152702]
 * Adds a single view in the app function for rule actions variables and UI page {kibana-pull}148671[#148671]
 
 APM::
@@ -258,6 +258,7 @@ APM::
 
 Cases::
 * Adds the ability to set a new connector to default {kibana-pull}151884[#151884]
+* Improves the design of the description markdown editor on the Cases page {kibana-pull}155151[#155151]
 
 Dashboard::
 * Adds support to Dashboard for searching saved objects by tags {kibana-pull}154946[#154946]
@@ -297,6 +298,7 @@ Fleet::
 * Adds proxy ssl key and certificate to agent policy {kibana-pull}152005[#152005]
 * Adds `_meta` field `has_experimental_data_stream_indexing_features` {kibana-pull}151853[#151853]
 * Adds the ability to create templates and pipelines when updating package of a single package policy from type integration to input {kibana-pull}150199[#150199]
+* Adds user's secondary authorization to Transforms {kibana-pull}154665[#154665]
 
 Infrastructure::
 Adds Memory Available Graph To Hosts View {kibana-pull}151863[#151863]
@@ -334,12 +336,11 @@ Machine Learning::
 * Data Frame Analytics exploration: adds actions column with link to discover {kibana-pull}151482[#151482]
 * Allows row expansion for blocked anomaly detection jobs {kibana-pull}151351[#151351]
 * Enhances job and datafeed config editors in the Advanced anomaly detection job wizard to provide suggestions and documentation {kibana-pull}146968[#146968]
+* Adds option to Reauthorize transform on Management page {kibana-pull}154736[#154736]
 
 Management::
 * Adds timezone support for Transforms date histogram pivot configuration {kibana-pull}155535[#155535]
 * Adds more system indices for storing internal data {kibana-pull}154888[#154888]
-* Adds option to Reauthorize transform in Management page {kibana-pull}154736[#154736]
-* Adds secondary authorization header to Transforms in Fleet {kibana-pull}154665[#154665]
 * Adds improvements for supporting counter fields in Transforms {kibana-pull}154171[#154171]
 * Adds `_schedule_now` action to transform list {kibana-pull}153545[#153545]
 * Adds link to Discover from Index Management so users can directly look at documents of their indices {kibana-pull}152640[#152640]
@@ -367,9 +368,6 @@ Querying & Filtering::
 * Adds the ability to avoid duplicate host IP mapping {kibana-pull}155353[#155353]
 * Adds improvements to the saved query terminology {kibana-pull}154517[#154517]
 
-Security::
-* Adds the Cloud_defend process index as a source and merged process event handling {kibana-pull}153213[#153213]
-
 [float]
 [[fixes-v8.8.0]]
 === Bug Fixes
@@ -386,6 +384,9 @@ APM::
 
 Canvas::
 Fixes `createElement` callback {kibana-pull}154398[#154398]
+
+Cases::
+Fixes the Lens visualization in the comment and description markdown on the New Case page {kibana-pull}155897[#155897]
 
 Dashboard::
 * Fixes unsaved changes bug on empty dashboard {kibana-pull}155648[#155648]
@@ -466,9 +467,6 @@ Querying & Filtering::
 Reporting::
 * Fixes report generation when image panel is in the end of the layout {kibana-pull}153846[#153846]
 * Updates Chromium to 111.0.5555.0 (r1095492) and Puppeteer to 19.7.2 {kibana-pull}153033[#153033]
-
-Security::
-Fixes Session view and k8s dashboard {kibana-pull}154982[#154982]
 
 Uptime::
 * Fixes default date range on errors page {kibana-pull}155661[#155661]
