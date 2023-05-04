@@ -22,16 +22,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
+import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
-
-import { SEARCH_INDEX_PATH } from '../../routes';
 
 import { EngineIndicesLogic } from './engine_indices_logic';
 
@@ -87,7 +87,10 @@ export const EngineIndices: React.FC = () => {
         ) : (
           <EuiLinkTo
             data-test-subj="engine-index-link"
-            to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
+            to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
+              indexName: name,
+            })}`}
+            shouldNotCreateHref
           >
             {name}
           </EuiLinkTo>
