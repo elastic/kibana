@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseUserActionsResponseRt } from '../response';
+import { UserActionsRt } from '../response';
 import { ActionTypes } from '../common';
 import { NumberFromString } from '../../../saved_object';
 
@@ -36,7 +36,7 @@ export const UserActionFindRequestRt = rt.partial({
 export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;
 
 export const UserActionFindResponseRt = rt.type({
-  userActions: CaseUserActionsResponseRt,
+  userActions: UserActionsRt,
   page: rt.number,
   perPage: rt.number,
   total: rt.number,
