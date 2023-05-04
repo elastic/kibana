@@ -189,19 +189,6 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       ),
     },
     {
-      key: 'service-map',
-      href: router.link('/mobile-services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate(
-        'xpack.apm.mobileServiceDetails.serviceMapTabLabel',
-        {
-          defaultMessage: 'Service Map',
-        }
-      ),
-    },
-    {
       key: 'alerts',
       href: router.link('/mobile-services/{serviceName}/alerts', {
         path: { serviceName },

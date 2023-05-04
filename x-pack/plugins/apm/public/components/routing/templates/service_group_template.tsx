@@ -161,13 +161,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
       }),
       href: router.link('/services', { query }),
     },
-    {
-      key: 'service-map',
-      label: i18n.translate('xpack.apm.serviceGroup.serviceMap', {
-        defaultMessage: 'Service map',
-      }),
-      href: router.link('/service-map', { query }),
-    },
+
   ];
 
   return tabs

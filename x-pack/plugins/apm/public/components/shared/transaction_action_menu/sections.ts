@@ -306,22 +306,6 @@ export const getSections = ({
         ),
         actions: uptimeActions,
       },
-      {
-        key: 'serviceMap',
-        title: i18n.translate(
-          'xpack.apm.transactionActionMenu.serviceMap.title',
-          {
-            defaultMessage: 'Service map',
-          }
-        ),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.serviceMap.subtitle',
-          {
-            defaultMessage: 'View service map filtered by this trace.',
-          }
-        ),
-        actions: serviceMapActions,
-      },
     ],
     kibana: [{ key: 'kibana', actions: kibanaActions }],
   };

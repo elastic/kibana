@@ -325,16 +325,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       hidden: isInfraTabHidden({ agentName, serverlessType }),
     },
-    {
-      key: 'service-map',
-      href: router.link('/services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-        defaultMessage: 'Service Map',
-      }),
-    },
+
     {
       key: 'logs',
       href: router.link('/services/{serviceName}/logs', {
