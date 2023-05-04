@@ -8,6 +8,13 @@
 import type { AnalysisConfig, ClassificationAnalysis, RegressionAnalysis } from './types';
 import { isClassificationAnalysis, isRegressionAnalysis } from './analytics_utils';
 
+/**
+ * Get the `num_top_feature_importance_values` attribute of DFA regression and classification configurations
+ *
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @returns {(| RegressionAnalysis['regression']['num_top_feature_importance_values']
+  | ClassificationAnalysis['classification']['num_top_feature_importance_values'])}
+ */
 export const getNumTopFeatureImportanceValues = (
   analysis: AnalysisConfig
 ):

@@ -17,18 +17,67 @@ import {
 import { OUTLIER_SCORE } from './constants';
 import { DataFrameAnalyticsConfig } from './types';
 
+/**
+ * ES id _id
+ *
+ * @export
+ * @typedef {EsId}
+ */
 export type EsId = string;
+
+/**
+ * ES source _source
+ *
+ * @export
+ * @typedef {EsDocSource}
+ */
 export type EsDocSource = Record<string, any>;
+
+/**
+ * ES field name
+ *
+ * @export
+ * @typedef {EsFieldName}
+ */
 export type EsFieldName = string;
 
+/**
+ * ES doc
+ *
+ * @export
+ * @interface EsDoc
+ * @typedef {EsDoc}
+ * @extends {Record<string, any>}
+ */
 export interface EsDoc extends Record<string, any> {
+  /**
+   * ES _id
+   * @type {EsId}
+   */
   _id: EsId;
+  /**
+   * ES _source
+   * @type {EsDocSource}
+   */
   _source: EsDocSource;
 }
 
+/**
+ * Max columns
+ * @type {10}
+ */
 export const MAX_COLUMNS = 10;
+
+/**
+ * Default regression columns
+ * @type {8}
+ */
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
+/**
+ * Set of basic numerical types
+ * @type {*}
+ */
 export const BASIC_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.UNSIGNED_LONG,
   ES_FIELD_TYPES.LONG,
@@ -37,6 +86,10 @@ export const BASIC_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.BYTE,
 ]);
 
+/**
+ * Set of extended numerical types
+ * @type {*}
+ */
 export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.DOUBLE,
   ES_FIELD_TYPES.FLOAT,
@@ -44,16 +97,32 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.SCALED_FLOAT,
 ]);
 
+/**
+ * ES field name for copy of the doc _id
+ * @type {"ml__id_copy"}
+ */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
+
+/**
+ * ES field name for ML's incremental id
+ * @type {"ml__incremental_id"}
+ */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__INCREMENTAL_ID = 'ml__incremental_id';
 
-// Used to sort columns:
-// - Anchor on the left ml.outlier_score, ml.is_training, <predictedField>, <actual>
-// - string based columns are moved to the left
-// - feature_influence/feature_importance fields get moved next to the corresponding field column
-// - overall fields get sorted alphabetically
+/**
+ * Used to sort columns:
+ * - Anchor on the left ml.outlier_score, ml.is_training, <predictedField>, <actual>
+ * - string based columns are moved to the left
+ * - feature_influence/feature_importance fields get moved next to the corresponding field column
+ * - overall fields get sorted alphabetically
+ *
+ * @param {string} a First field name to compare for sorting
+ * @param {string} b Second field name to compare for sorting
+ * @param {DataFrameAnalyticsConfig} jobConfig The DFA analysis config
+ * @returns {*}
+ */
 export const sortExplorationResultsFields = (
   a: string,
   b: string,

@@ -94,4 +94,5 @@ export {
   type UpdateDataFrameAnalyticsConfig,
   type RocCurveItem,
   type TrackTotalHitsSearchResponse,
+  type PredictedClass,
 } from './src/types';
