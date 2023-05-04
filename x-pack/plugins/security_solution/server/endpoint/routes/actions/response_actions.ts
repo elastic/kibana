@@ -195,7 +195,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     try {
       action = await endpointContext.service
         .getActionCreateService()
-        .createAction({ ...req.body, command, user }, casesClient);
+        .createAction({ ...req.body, command, user }, { casesClient });
     } catch (err) {
       return res.customError({
         statusCode: 500,
