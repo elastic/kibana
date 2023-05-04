@@ -14,11 +14,12 @@ import {
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { ReactNode, useState } from 'react';
-import * as i18n from './translations';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import type { IconType } from '@elastic/eui/src/components/icon';
 import type { Color } from '@elastic/eui/src/components/call_out/call_out';
 import { css } from '@emotion/react';
+import * as i18n from './translations';
 
 export interface MiniCalloutProps {
   color?: Color;

@@ -184,7 +184,7 @@ const RulesPageComponent: React.FC = () => {
               title={NEW_PREBUILT_RULES_CALLOUT_TITLE}
             />
           )}
-          {/*<ChatGPTPlugin />*/}
+          {/* <ChatGPTPlugin />*/}
           <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>

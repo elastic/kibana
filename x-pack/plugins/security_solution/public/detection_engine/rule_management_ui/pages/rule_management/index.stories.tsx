@@ -7,7 +7,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { RulesPage } from './index';
+import { RulesPage } from '.';
 import mdx from './README.mdx';
 
 const meta: Meta<typeof RulesPage> = {
