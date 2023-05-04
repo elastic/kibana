@@ -19,6 +19,7 @@ import {
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
+export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
 

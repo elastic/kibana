@@ -10,9 +10,9 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IInspectorInfo, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
 import { useInspectorContext } from '../context/inspector/use_inspector_context';
+import { getInspectResponse } from '../../common/utils/get_inspect_response';
 
 export const useEsSearch = <DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
   params: TParams,
