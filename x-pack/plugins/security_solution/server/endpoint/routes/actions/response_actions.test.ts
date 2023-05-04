@@ -67,7 +67,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { ActionCreateService } from '../../services/actions';
+import { actionCreateService } from '../../services/actions';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -132,9 +132,10 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
-        actionCreateService: new ActionCreateService(
+        actionCreateService: actionCreateService(
           mockScopedClient.asInternalUser,
-          endpointContext
+          endpointContext,
+          licenseService
         ),
         licenseService,
       });
@@ -179,6 +180,7 @@ describe('Response actions', () => {
             };
           }
         );
+        const metadataResponse = docGen.generateHostMetadata();
 
         const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
@@ -186,7 +188,7 @@ describe('Response actions', () => {
         );
         ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
-            body: legacyMetadataSearchResponseMock(searchResponse),
+            body: legacyMetadataSearchResponseMock(searchResponse ?? metadataResponse),
           };
         });
 
