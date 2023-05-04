@@ -20,10 +20,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../../../common/constants';
+import { APPLICATIONS_PLUGIN } from '../../../../../../../common/constants';
+import { ENGINES_PATH } from '../../../../../applications/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
-
-import { ENGINES_PATH } from '../../../../routes';
 
 import { CreateEngineMenuItem } from './create_engine_menu_item';
 import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
@@ -66,12 +65,9 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
             data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines-viewEngines`}
             icon="eye"
             onClick={() => {
-              KibanaLogic.values.navigateToUrl(
-                ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
-                {
-                  shouldNotCreateHref: true,
-                }
-              );
+              KibanaLogic.values.navigateToUrl(APPLICATIONS_PLUGIN.URL + ENGINES_PATH, {
+                shouldNotCreateHref: true,
+              });
             }}
           >
             <EuiText>

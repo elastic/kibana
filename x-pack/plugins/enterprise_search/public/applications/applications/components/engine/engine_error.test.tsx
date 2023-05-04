@@ -39,7 +39,7 @@ describe('EngineError', () => {
     expect(wrapper.find(ErrorStatePrompt)).toHaveLength(0);
 
     const notFound = wrapper.find(NotFoundPrompt);
-    expect(notFound.prop('backToLink')).toEqual('/engines');
+    expect(notFound.prop('backToLink')).toEqual('/search_applications');
     expect(notFound.prop('backToContent')).toEqual('Back to Search Applications');
 
     const telemetry = wrapper.find(SendEnterpriseSearchTelemetry);
