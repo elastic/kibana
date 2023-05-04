@@ -99,7 +99,6 @@ image::user/ml/images/classification.png[{classification-cap} results in {kib}]
 For more information about the {dfanalytics} feature, see
 {ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].
 
-[[]]
 [id="xpack-ml-aiops",canonical-url="https://www.elastic.co/guide/en/kibana/current/xpack-ml-aiops.html"]
 == AIOps Labs
 
