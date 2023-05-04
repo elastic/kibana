@@ -272,14 +272,15 @@ export class RuleTypeRegistry {
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion: {
           1: schema.object({
-            alertTypeState: schema.recordOf(schema.string(), schema.any()),
             // TODO expand any
-            alertInstances: schema.recordOf(schema.string(), schema.any()),
+            alertTypeState: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             // TODO expand any
-            alertRecoveredInstances: schema.recordOf(schema.string(), schema.any()),
-            previousStartedAt: schema.nullable(schema.string()),
+            alertInstances: schema.maybe(schema.recordOf(schema.string(), schema.any())),
             // TODO expand any
-            summaryActions: schema.any(),
+            alertRecoveredInstances: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+            previousStartedAt: schema.maybe(schema.nullable(schema.string())),
+            // TODO expand any
+            summaryActions: schema.maybe(schema.any()),
           }),
         },
         createTaskRunner: (context: RunContext) =>
