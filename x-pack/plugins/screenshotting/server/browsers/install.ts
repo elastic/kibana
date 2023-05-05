@@ -24,7 +24,7 @@ export async function install(
   logger: Logger,
   pkg: PackageInfo,
   chromiumPath: string = path.resolve(__dirname, '../../chromium')
-): Promise<ValidChecksum | undefined> {
+): Promise<ValidChecksum> {
   let installedChecksum: ValidChecksum | undefined;
 
   const { architecture, platform } = pkg;

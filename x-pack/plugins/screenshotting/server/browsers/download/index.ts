@@ -19,7 +19,11 @@ type ValidChecksum = string;
  * and ensures that all packages/archives are downloaded and
  * that their checksums match the declared value
  */
-export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, logger?: Logger) {
+export async function download(
+  paths: ChromiumArchivePaths,
+  pkg: PackageInfo,
+  logger?: Logger
+): Promise<ValidChecksum | undefined> {
   const removedFiles = await del(`${paths.archivesPath}/**/*`, {
     force: true,
     onlyFiles: true,
