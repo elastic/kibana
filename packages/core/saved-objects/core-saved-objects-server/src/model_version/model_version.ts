@@ -21,7 +21,7 @@ export interface SavedObjectsModelVersion {
   /**
    * The list of {@link SavedObjectsModelChange | changes} associated with this version.
    */
-  modelChanges: SavedObjectsModelChange[];
+  changes: SavedObjectsModelChange[];
   /**
    * The {@link SavedObjectsModelVersionSchemaDefinitions} associated with this version.
    *
