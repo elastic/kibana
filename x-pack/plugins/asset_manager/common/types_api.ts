@@ -14,7 +14,7 @@ export const assetTypeRT = schema.oneOf([
 ]);
 export type AssetType = typeof assetTypeRT.type;
 
-export type AssetKind = 'host' | 'pod' | 'container' | 'service';
+export type AssetKind = 'cluster' | 'host' | 'pod' | 'container' | 'service';
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'

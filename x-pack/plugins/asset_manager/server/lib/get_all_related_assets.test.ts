@@ -27,6 +27,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-which-does-not-exist',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
@@ -53,6 +54,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAssetWithoutParents: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [],
     };
@@ -82,12 +84,14 @@ describe('getAllRelatedAssets', () => {
     const parentAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const primaryAssetWithDirectParent: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [parentAsset['asset.ean']],
     };
@@ -124,6 +128,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAssetWithIndirectParent: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [],
     };
@@ -131,6 +136,7 @@ describe('getAllRelatedAssets', () => {
     const parentAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.children': [primaryAssetWithIndirectParent['asset.ean']],
     };
@@ -167,6 +173,7 @@ describe('getAllRelatedAssets', () => {
     const directlyReferencedParent: AssetWithoutTimestamp = {
       'asset.ean': 'directly-referenced-parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.children': [],
     };
@@ -174,6 +181,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [directlyReferencedParent['asset.ean']],
     };
@@ -181,6 +189,7 @@ describe('getAllRelatedAssets', () => {
     const indirectlyReferencedParent: AssetWithoutTimestamp = {
       'asset.ean': 'indirectly-referenced-parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.children': [primaryAsset['asset.ean']],
     };
@@ -221,12 +230,14 @@ describe('getAllRelatedAssets', () => {
     const parentAsset: AssetWithoutTimestamp = {
       'asset.ean': 'parent-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
@@ -266,12 +277,14 @@ describe('getAllRelatedAssets', () => {
     const distance6Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-5-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance5Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-5-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance6Parent['asset.ean']],
     };
@@ -279,6 +292,7 @@ describe('getAllRelatedAssets', () => {
     const distance4Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-4-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance5Parent['asset.ean']],
     };
@@ -286,6 +300,7 @@ describe('getAllRelatedAssets', () => {
     const distance3Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-3-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance4Parent['asset.ean']],
     };
@@ -293,6 +308,7 @@ describe('getAllRelatedAssets', () => {
     const distance2Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance3Parent['asset.ean']],
     };
@@ -300,6 +316,7 @@ describe('getAllRelatedAssets', () => {
     const distance1Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2Parent['asset.ean']],
     };
@@ -307,6 +324,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance1Parent['asset.ean']],
     };
@@ -368,12 +386,14 @@ describe('getAllRelatedAssets', () => {
     const distance3Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-3-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance3Parent['asset.ean']],
     };
@@ -381,6 +401,7 @@ describe('getAllRelatedAssets', () => {
     const distance1Parent: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2Parent['asset.ean']],
     };
@@ -388,6 +409,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance1Parent['asset.ean']],
     };
@@ -435,30 +457,35 @@ describe('getAllRelatedAssets', () => {
     const distance2ParentA: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-a',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2ParentB: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-b',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2ParentC: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-c',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance2ParentD: AssetWithoutTimestamp = {
       'asset.ean': 'parent-2-ean-d',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
     };
 
     const distance1ParentA: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean-a',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2ParentA['asset.ean'], distance2ParentB['asset.ean']],
     };
@@ -466,6 +493,7 @@ describe('getAllRelatedAssets', () => {
     const distance1ParentB: AssetWithoutTimestamp = {
       'asset.ean': 'parent-1-ean-b',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance2ParentC['asset.ean'], distance2ParentD['asset.ean']],
     };
@@ -473,6 +501,7 @@ describe('getAllRelatedAssets', () => {
     const primaryAsset: AssetWithoutTimestamp = {
       'asset.ean': 'primary-ean',
       'asset.type': 'k8s.pod',
+      'asset.kind': 'pod',
       'asset.id': uuid(),
       'asset.parents': [distance1ParentA['asset.ean'], distance1ParentB['asset.ean']],
     };
