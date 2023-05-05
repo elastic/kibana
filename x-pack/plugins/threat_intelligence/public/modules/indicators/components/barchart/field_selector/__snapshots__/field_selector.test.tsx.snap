@@ -28,6 +28,7 @@ Object {
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                value="string"
               >
                 threat.feed.name
               </span>
@@ -97,6 +98,7 @@ Object {
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              value="string"
             >
               threat.feed.name
             </span>
