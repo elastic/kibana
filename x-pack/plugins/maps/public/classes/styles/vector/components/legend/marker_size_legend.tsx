@@ -159,10 +159,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
     );
 
     if (fieldMeta.delta > 0) {
-      const smallestMarker = makeMarker(
-        options.minSize,
-        invert ? maxLabel : minLabel
-      );
+      const smallestMarker = makeMarker(options.minSize, invert ? maxLabel : minLabel);
       markers.push(smallestMarker);
 
       const markerDelta = options.maxSize - options.minSize;
@@ -175,10 +172,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
       }
     }
 
-    const largestMarker = makeMarker(
-      options.maxSize,
-      invert ? minLabel : maxLabel
-    );
+    const largestMarker = makeMarker(options.maxSize, invert ? minLabel : maxLabel);
     markers.push(largestMarker);
 
     return (
