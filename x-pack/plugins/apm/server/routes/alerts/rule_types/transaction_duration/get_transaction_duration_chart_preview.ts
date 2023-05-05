@@ -7,7 +7,10 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import {
+  AggregationType,
+  ApmRuleType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -28,7 +31,7 @@ import {
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
-import { getAllGroupByFields } from './get_all_groupby_fields';
+import { getAllGroupByFields } from '../utils/get_all_groupby_fields';
 
 export type TransactionDurationChartPreviewResponse = Array<{
   name: string;
@@ -64,9 +67,15 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        ...termQuery(SERVICE_NAME, serviceName),
-        ...termQuery(TRANSACTION_TYPE, transactionType),
-        ...termQuery(TRANSACTION_NAME, transactionName),
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_TYPE, transactionType, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_NAME, transactionName, {
+          queryEmptyString: false,
+        }),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
@@ -78,7 +87,10 @@ export async function getTransactionDurationChartPreview({
     searchAggregatedTransactions
   );
 
-  const allGroupByFields = getAllGroupByFields(groupBy);
+  const allGroupByFields = getAllGroupByFields(
+    ApmRuleType.TransactionDuration,
+    groupBy
+  );
 
   const aggs = {
     timeseries: {

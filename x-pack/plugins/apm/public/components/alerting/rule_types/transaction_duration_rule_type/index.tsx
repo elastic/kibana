@@ -170,7 +170,7 @@ export function TransactionDurationRuleType(props: Props) {
       allowAll={false}
       currentValue={params.serviceName}
       onChange={(value) => {
-        if (value !== params.serviceName && value !== '') {
+        if (value !== params.serviceName) {
           setRuleParams('serviceName', value);
           setRuleParams('transactionType', undefined);
           setRuleParams('transactionName', undefined);
@@ -180,9 +180,7 @@ export function TransactionDurationRuleType(props: Props) {
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      onChange={(value) =>
-        setRuleParams('transactionType', value !== '' ? value : undefined)
-      }
+      onChange={(value) => setRuleParams('transactionType', value)}
       serviceName={params.serviceName}
     />,
     <EnvironmentField
@@ -197,9 +195,7 @@ export function TransactionDurationRuleType(props: Props) {
     />,
     <TransactionNameField
       currentValue={params.transactionName}
-      onChange={(value) =>
-        setRuleParams('transactionName', value !== '' ? value : undefined)
-      }
+      onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
     <PopoverExpression

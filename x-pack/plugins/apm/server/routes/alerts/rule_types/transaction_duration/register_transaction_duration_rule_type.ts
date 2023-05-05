@@ -64,7 +64,7 @@ import {
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
-import { getAllGroupByFields } from './get_all_groupby_fields';
+import { getAllGroupByFields } from '../utils/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -104,7 +104,10 @@ export function registerTransactionDurationRuleType({
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ params: ruleParams, services, spaceId }) => {
-      const allGroupByFields = getAllGroupByFields(ruleParams.groupBy);
+      const allGroupByFields = getAllGroupByFields(
+        ApmRuleType.TransactionDuration,
+        ruleParams.groupBy
+      );
 
       const config = await firstValueFrom(config$);
 

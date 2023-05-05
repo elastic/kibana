@@ -115,7 +115,6 @@ const transactionDurationChartPreview = createApmServerRoute({
 
 export const alertsChartPreviewRouteRepository = {
   ...transactionErrorRateChartPreview,
-  ...transactionDurationChartPreview,
   ...transactionErrorCountChartPreview,
   ...transactionDurationChartPreview,
 };
