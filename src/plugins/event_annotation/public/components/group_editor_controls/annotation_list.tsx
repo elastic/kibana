@@ -7,13 +7,13 @@
  */
 
 import { css } from '@emotion/react';
-import { DragContext, DragDrop, ReorderProvider } from '@kbn/dom-drag-drop';
+import { DragContext, DragDrop, DropTargetSwapDuplicateCombine } from '@kbn/dom-drag-drop';
 import {
   DimensionButton,
   DimensionTrigger,
   EmptyDimensionButton,
 } from '@kbn/visualization-ui-components/public';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -36,82 +36,96 @@ export const AnnotationList = ({
 
   const { dragging } = useContext(DragContext);
 
-  const reorderableGroup = annotations.map(({ id }) => ({
-    id,
-  }));
+  const addAnnotationText = i18n.translate('eventAnnotation.annotationList.add', {
+    defaultMessage: 'Add annotation',
+  });
+
+  const addNewAnnotation = useCallback(
+    (sourceAnnotationId?: string) => {
+      const source = sourceAnnotationId
+        ? annotations.find(({ id }) => id === sourceAnnotationId)
+        : undefined;
+      const newAnnotation = createCopiedAnnotation(
+        newAnnotationId,
+        new Date().toISOString(),
+        source
+      );
+
+      if (!source) {
+        selectAnnotation(newAnnotation);
+      }
+      updateAnnotations([...annotations, newAnnotation]);
+    },
+    [annotations, newAnnotationId, selectAnnotation, updateAnnotations]
+  );
 
   return (
     <div>
-      <ReorderProvider id="annotationsGroup">
-        {annotations.map((annotation, index) => (
-          <div
-            key={index}
-            css={css`
-              margin-top: ${euiThemeVars.euiSizeS};
-              position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
-            `}
+      {annotations.map((annotation, index) => (
+        <div
+          key={index}
+          css={css`
+            margin-top: ${euiThemeVars.euiSizeS};
+            position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
+          `}
+        >
+          <DragDrop
+            order={[index]}
+            key={annotation.id}
+            value={{
+              id: annotation.id,
+              humanData: {
+                label: annotation.label,
+              },
+            }}
+            dragType="copy"
+            dropTypes={[]}
+            draggable
           >
-            <DragDrop
-              order={[index]}
-              key={annotation.id}
-              value={{
-                id: annotation.id,
-                humanData: {
-                  label: annotation.label,
-                },
-              }}
-              dragType="move"
-              dropTypes={dragging ? ['reorder'] : []}
-              reorderableGroup={reorderableGroup}
-              draggable
-              onDrop={(dropped) => {
-                const newAnnotations = [...annotations];
-                const sourceIndex = newAnnotations.findIndex(({ id }) => id === dropped.id);
-                const targetIndex = index;
-
-                if (sourceIndex !== targetIndex) {
-                  const temp = newAnnotations[sourceIndex];
-                  newAnnotations[sourceIndex] = newAnnotations[targetIndex];
-                  newAnnotations[targetIndex] = temp;
-                }
-
-                updateAnnotations(newAnnotations);
-              }}
+            <DimensionButton
+              groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+                defaultMessage: 'Annotations',
+              })}
+              onClick={() => selectAnnotation(annotation)}
+              onRemoveClick={() =>
+                updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
+              }
+              accessorConfig={getAnnotationAccessor(annotation)}
+              label={annotation.label}
             >
-              <DimensionButton
-                groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
-                  defaultMessage: 'Annotations',
-                })}
-                onClick={() => selectAnnotation(annotation)}
-                onRemoveClick={() =>
-                  updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
-                }
-                accessorConfig={getAnnotationAccessor(annotation)}
-                label={annotation.label}
-              >
-                <DimensionTrigger label={annotation.label} />
-              </DimensionButton>
-            </DragDrop>
-          </div>
-        ))}
-      </ReorderProvider>
+              <DimensionTrigger label={annotation.label} />
+            </DimensionButton>
+          </DragDrop>
+        </div>
+      ))}
 
       <div
         css={css`
           margin-top: ${euiThemeVars.euiSizeS};
         `}
       >
-        <EmptyDimensionButton
-          dataTestSubj="addAnnotation"
-          label="Add annotation"
-          ariaLabel="Add annotation"
-          onClick={() => {
-            const newAnnotation = createCopiedAnnotation(newAnnotationId, new Date().toISOString());
-
-            selectAnnotation(newAnnotation);
-            updateAnnotations([...annotations, newAnnotation]);
+        <DragDrop
+          order={[annotations.length]}
+          getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+          getAdditionalClassesOnDroppable={
+            DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+          }
+          dropTypes={dragging ? ['field_add'] : []}
+          value={{
+            id: 'addAnnotation',
+            humanData: {
+              label: addAnnotationText,
+            },
           }}
-        />
+          onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
+        >
+          <EmptyDimensionButton
+            dataTestSubj="addAnnotation"
+            label={addAnnotationText}
+            ariaLabel={addAnnotationText}
+            onClick={() => addNewAnnotation()}
+          />
+        </DragDrop>
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ export const EmptyDimensionButton = ({
   onClick,
   dataTestSubj,
   iconType,
+  ...otherProps // from Drag&Drop integration
 }: {
   label: React.ReactNode;
   ariaLabel: string;
@@ -27,6 +28,7 @@ export const EmptyDimensionButton = ({
 }) => {
   return (
     <EuiButtonEmpty
+      {...otherProps}
       css={css`
         width: 100%;
         border-radius: ${euiThemeVars.euiBorderRadius} !important;
