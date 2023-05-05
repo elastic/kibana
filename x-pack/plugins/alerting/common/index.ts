@@ -27,7 +27,6 @@ export type {
 } from '@kbn/alerting-state-types';
 export {
   rawAlertInstance,
-  DateFromString,
   wrappedStateRt,
   ActionsCompletion,
   ruleStateSchema,
