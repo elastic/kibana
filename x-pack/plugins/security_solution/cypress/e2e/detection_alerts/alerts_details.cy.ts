@@ -136,7 +136,7 @@ describe('Alert details flyout', () => {
     });
   });
 
-  describe.only('Localstorage management', { testIsolation: false }, () => {
+  describe('Localstorage management', { testIsolation: false }, () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('query_alert');
