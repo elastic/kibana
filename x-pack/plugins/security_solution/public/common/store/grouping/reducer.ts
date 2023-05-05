@@ -10,9 +10,9 @@ import { getDefaultGroupingOptions } from '../../../detections/components/alerts
 import { updateGroups } from './actions';
 import type { Groups } from './types';
 
-const initialState: Groups = {};
+export const initialGroupingState: Groups = {};
 
-export const groupsReducer = reducerWithInitialState(initialState).case(
+export const groupsReducer = reducerWithInitialState(initialGroupingState).case(
   updateGroups,
   (state, { tableId, ...rest }) => ({
     ...state,
