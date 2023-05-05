@@ -143,9 +143,5 @@ export async function runKibanaServer(options: {
     );
   }
 
-  function flatten(x: string) {
-    return;
-  }
-
   await Promise.all(promises);
 }
