@@ -73,7 +73,7 @@ const OptionsFlexItem = styled(EuiFlexItem)`
 
 export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
 
-const CHART_HEIGHT = 180; // px
+const CHART_HEIGHT = 155; // px
 
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';

@@ -45,7 +45,7 @@ const LensComponentWrapper = styled.div<{
   .lnsExpressionRenderer .echLegend {
     ${({ $height, $addHoverActionsPadding }) =>
       $height && $height > HOVER_ACTIONS_PADDING && $addHoverActionsPadding
-        ? `height: ${$height - HOVER_ACTIONS_PADDING}px;`
+        ? `height: ${$height - HOVER_ACTIONS_PADDING * 1.5}px;`
         : ''}
   }
   .expExpressionRenderer__expression {

@@ -40,7 +40,7 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 const DEFAULT_STACK_BY = 'event.dataset';
 
 const ID = 'eventsByDatasetOverview';
-const CHART_HEIGHT = 180;
+const CHART_HEIGHT = 160;
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
