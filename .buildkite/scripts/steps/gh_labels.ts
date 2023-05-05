@@ -7,15 +7,13 @@
  */
 
 // import { GithubApi } from '../../../src/dev/prs/github_api';
-import { Octokit } from '@octokit/rest';
 // import execa from 'execa';
 // import { REPO_ROOT } from '@kbn/repo-info';
 import { execSync } from 'child_process';
 
-const github = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
-});
-console.log(`\n### github: \n${JSON.stringify(github, null, 2)}`);
+// const github = new Octokit({
+//   auth: process.env.GITHUB_TOKEN,
+// });
 const parseTarget = process.argv[2] ?? 'BUILDKITE_MESSAGE';
 
 console.log(`\n### process.env.BUILDKITE_MESSAGE:
@@ -57,16 +55,26 @@ console.log(`\n### prNum: \n  ${prNum}`);
 //     console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
 //   }
 // })();
-
-// const res = execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
-// stdio: ['ignore', 'inherit', 'inherit'],
-// });
-execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
-  stdio: ['ignore', 'inherit', 'inherit'],
-});
-
+try {
+  execSync(
+    `curl https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`,
+    {
+      stdio: ['ignore', 'inherit', 'inherit'],
+    }
+  );
+} catch (e) {
+  console.log('\n### Whoops, something happenned, prolly with jq:');
+  console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
+}
+try {
+  execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
+} catch (e) {
+  console.log('\n### Whoops, something happenned:');
+  console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
+}
 export {};
-
 function pipe(...fns: any[]) {
   return fns.reduce(
     (f, g) =>
