@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
@@ -123,6 +123,31 @@ export const getRelativeViewInAppUrl = ({
   return relativeViewInAppUrl;
 };
 
+const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
+  // const endsAt = state.ends ? moment(state.ends) : moment();
+  // const startedAt = moment(state?.started_at);
+
+  const diffInDays = endsAt.diff(startedAt, 'days');
+  if (diffInDays > 1) {
+    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
+      defaultMessage: '{value} days',
+      values: { value: diffInDays },
+    });
+  }
+  const diffInHours = endsAt.diff(startedAt, 'hours');
+  if (diffInHours > 1) {
+    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.hours', {
+      defaultMessage: '{value} hours',
+      values: { value: diffInHours },
+    });
+  }
+  const diffInMinutes = endsAt.diff(startedAt, 'minutes');
+  return i18n.translate('xpack.synthetics.errorDetails.errorDuration.mins', {
+    defaultMessage: '{value} mins',
+    values: { value: diffInMinutes },
+  });
+};
+
 export const setRecoveredAlertsContext = ({
   alertFactory,
   basePath,
@@ -146,7 +171,12 @@ export const setRecoveredAlertsContext = ({
     const state = alert.getState() as SyntheticsCommonState & SyntheticsMonitorStatusAlertState;
 
     let recoveryReason = '';
-    let recoveryStatus = 'has recovered.';
+    let recoveryStatus = i18n.translate(
+      'xpack.synthetics.alerts.monitorStatus.defaultRecovery.status',
+      {
+        defaultMessage: `has recovered`,
+      }
+    );
     let isUp = false;
     let linkMessage = '';
 
@@ -188,17 +218,24 @@ export const setRecoveredAlertsContext = ({
       isUp = Boolean(upConfig) || false;
       const upTimestamp = upConfig.ping['@timestamp'];
       const checkedAt = moment(upTimestamp).format('HH:MM:SS on DD/MM/YYYY');
-      // const diff = moment(errorStartedAt).diff(upTimestamp, 'hours');
-      // console.log('duration', diff);
+      const duration = getErrorDuration(moment(errorStartedAt), moment(upTimestamp));
       recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
         defaultMessage: `is now Up`,
       });
-      recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reason', {
-        defaultMessage: `The monitor returned to an Up state at {checkedAt}`,
-        values: {
-          checkedAt,
-        },
-      });
+      recoveryReason = errorStartedAt
+        ? i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithDuration', {
+            defaultMessage: `The monitor returned to an Up state at {checkedAt} lasting {duration}`,
+            values: {
+              checkedAt,
+              duration,
+            },
+          })
+        : i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration', {
+            defaultMessage: `The monitor returned to an Up state at {checkedAt}`,
+            values: {
+              checkedAt,
+            },
+          });
 
       const dateRangeEnd = moment(upTimestamp).add('5', 'minutes').toISOString();
 
