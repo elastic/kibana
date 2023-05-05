@@ -340,7 +340,7 @@ Machine Learning::
 
 Management::
 * Adds timezone support for Transforms date histogram pivot configuration {kibana-pull}155535[#155535]
-* Adds more system indices for storing internal data {kibana-pull}154888[#154888]
+* Adds more system indices to store internal data when you upgrade to 8.8.0 {kibana-pull}154888[#154888]
 * Adds improvements for supporting counter fields in Transforms {kibana-pull}154171[#154171]
 * Adds `_schedule_now` action to transform list {kibana-pull}153545[#153545]
 * Adds link to Discover from Index Management so users can directly look at documents of their indices {kibana-pull}152640[#152640]
