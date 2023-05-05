@@ -57,6 +57,5 @@ describe('Execute Report Task', () => {
       },
     } as unknown as RunContext);
     expect(taskRunner).toHaveProperty('run');
-    expect(taskRunner).toHaveProperty('cancel');
   });
 });
