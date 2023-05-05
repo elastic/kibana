@@ -55,7 +55,7 @@ const mockDateRange: TimeRangeBounds = {
   max: moment(validDate).add(numberOfDays, 'days'),
 };
 
-const mockField: string = 'threat.indicator.ip';
+const mockField = { label: 'threat.indicator.ip', value: 'ip' };
 
 export default {
   component: IndicatorsBarChart,
@@ -70,7 +70,7 @@ export const Default: Story<void> = () => (
 
 export const NoData: Story<void> = () => (
   <StoryProvidersComponent kibana={{ timelines: mockKibanaTimelinesService }}>
-    <IndicatorsBarChart indicators={[]} field={''} dateRange={mockDateRange} />
+    <IndicatorsBarChart indicators={[]} field={mockField} dateRange={mockDateRange} />
   </StoryProvidersComponent>
 );
 

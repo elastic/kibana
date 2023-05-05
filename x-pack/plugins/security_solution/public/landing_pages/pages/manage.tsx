@@ -10,8 +10,8 @@ import styled from 'styled-components';
 
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
-import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
-import type { NavLinkItem } from '../../common/components/navigation/types';
+import { useRootNavLink } from '../../common/links/nav_links';
+import type { NavigationLink } from '../../common/links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksIcons } from '../components/landing_links_icons';
@@ -30,14 +30,14 @@ const StyledEuiHorizontalRule = styled(EuiHorizontalRule)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
-type ManagementCategories = Array<{ label: string; links: NavLinkItem[] }>;
+type ManagementCategories = Array<{ label: string; links: NavigationLink[] }>;
 const useManagementCategories = (): ManagementCategories => {
-  const { links = [], categories = [] } = useAppRootNavLink(SecurityPageName.administration) ?? {};
+  const { links = [], categories = [] } = useRootNavLink(SecurityPageName.administration) ?? {};
 
   const manageLinksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
   return categories.reduce<ManagementCategories>((acc, { label, linkIds }) => {
-    const linksItem = linkIds.reduce<NavLinkItem[]>((linksAcc, linkId) => {
+    const linksItem = linkIds.reduce<NavigationLink[]>((linksAcc, linkId) => {
       if (manageLinksById[linkId]) {
         linksAcc.push(manageLinksById[linkId]);
       }
