@@ -436,7 +436,7 @@ export class ProjectMonitorFormatter {
             details: i18n.translate(
               'xpack.synthetics.service.projectMonitors.failedToUpdateJourney',
               {
-                defaultMessage: 'Failed to update monitor: {journeyId}',
+                defaultMessage: 'Failed to update journey: {journeyId}',
                 values: {
                   journeyId,
                 },
