@@ -12,7 +12,6 @@ import path from 'path';
 import { PackageInfo } from '..';
 import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';
-import { md5 } from '../../download/checksum';
 import { install } from '../../install';
 
 /* eslint-disable no-console */
@@ -35,23 +34,19 @@ mockLogger.error = jest.fn((message: string | Error) => {
 
 // test case tuples
 const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture }) => [
-  platform,
   architecture,
+  platform,
 ]);
 
 describe.each(packageInfos)(
-  'Chromium download URLs and checksums: %s-%s',
-  (platform, architecture) => {
+  'Chromium download URLs and checksums: %s/%s',
+  (architecture, platform) => {
     // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
     const chromiumPath = path.resolve(__dirname, '../../../../chromium', architecture, platform);
 
     const originalAxios = axios.defaults.adapter;
-    let binaryChecksum: string;
     beforeAll(async () => {
       axios.defaults.adapter = require('axios/lib/adapters/http'); // allow Axios to send actual requests
-
-      const binaryPath = chromiumArchivePaths.getBinaryPath(pkg, chromiumPath);
-      binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
     });
 
     afterAll(() => {
@@ -70,17 +65,12 @@ describe.each(packageInfos)(
       pkg = { ...originalPkg };
     });
 
-    it('lists the correct archive checksum', async () => {
-      await download(chromiumArchivePaths, pkg, mockLogger); // this will throw if the downloaded file's checksum does not match the listing
-    });
+    it('lists the correct archive checksum and binary checksum', async () => {
+      const downloadedChecksum = await download(chromiumArchivePaths, pkg, mockLogger);
+      expect(downloadedChecksum).toBe(pkg.archiveChecksum);
 
-    it('lists the correct binary checksum', async () => {
-      await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
-
-      assert(
-        binaryChecksum === pkg.binaryChecksum,
-        `Extracted browser binary checksum [${binaryChecksum}] must match package info [${pkg.binaryChecksum}]`
-      );
+      const installedChecksum = await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
+      expect(installedChecksum).toBe(pkg.binaryChecksum);
     });
   }
 );

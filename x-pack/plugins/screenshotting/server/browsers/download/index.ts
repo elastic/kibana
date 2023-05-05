@@ -12,12 +12,12 @@ import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
 import { md5 } from './checksum';
 import { fetch } from './fetch';
 
+type ValidChecksum = string;
+
 /**
  * Clears the unexpected files in the browsers archivesPath
  * and ensures that all packages/archives are downloaded and
  * that their checksums match the declared value
- * @param  {BrowserSpec} browsers
- * @return {Promise<undefined>}
  */
 export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, logger?: Logger) {
   const removedFiles = await del(`${paths.archivesPath}/**/*`, {
@@ -43,7 +43,7 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
     logger?.debug(
       `Browser archive for ${pkg.platform}/${pkg.architecture} already found in ${resolvedPath} with matching checksum.`
     );
-    return;
+    return foundChecksum;
   }
 
   if (!pathExists) {
@@ -60,8 +60,9 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
   }
 
   const url = paths.getDownloadUrl(pkg);
+  let downloadedChecksum: ValidChecksum | undefined;
   try {
-    const downloadedChecksum = await fetch(url, resolvedPath, logger);
+    downloadedChecksum = await fetch(url, resolvedPath, logger);
     if (downloadedChecksum !== archiveChecksum) {
       logger?.warn(
         `Invalid archive checksum for ${pkg.platform}/${pkg.architecture}: ` +
@@ -83,4 +84,6 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
 
     throw error;
   }
+
+  return downloadedChecksum;
 }
