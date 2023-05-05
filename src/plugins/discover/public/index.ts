@@ -15,6 +15,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
+export type { DiscoverStateContainer } from './application/main/services/discover_state';
 export { SEARCH_EMBEDDABLE_TYPE } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
 

@@ -12,6 +12,7 @@ import {
   ObservabilityLogsPluginStart,
   ObservabilityLogsStartDeps,
 } from './types';
+import { InternalStateProvider } from './utils/internal_state_container_context';
 
 export class ObservabilityLogsPlugin
   implements Plugin<ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart>
@@ -22,10 +23,18 @@ export class ObservabilityLogsPlugin
     const { discover } = plugins;
 
     discover.customize('observability-logs', async ({ customizations, stateContainer }) => {
+      const { CustomDataStreamSelector } = await import(
+        './customizations/custom_data_stream_selector'
+      );
+
       customizations.set({
         id: 'search_bar',
         CustomDataViewPicker: () => {
-          return <h1>Test replace</h1>;
+          return (
+            <InternalStateProvider value={stateContainer.internalState}>
+              <CustomDataStreamSelector stateContainer={stateContainer} />
+            </InternalStateProvider>
+          );
         },
       });
 
