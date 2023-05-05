@@ -29,5 +29,9 @@ export interface OverlayFlyoutStart {
  * @public
  */
 export type OverlayFlyoutOpenOptions = Omit<EuiFlyoutProps, 'onClose'> & {
-  onClose?: EuiFlyoutProps['onClose'];
+  /**
+   * EuiFlyout onClose handler.
+   * If provided the consumer is responsible for calling flyout.close() to close the flyout;
+   */
+  onClose?: (flyout: OverlayRef) => void;
 };
