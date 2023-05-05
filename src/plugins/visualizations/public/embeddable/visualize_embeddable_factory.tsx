@@ -66,12 +66,7 @@ export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
     Pick<
       VisualizationsStartDeps,
-      | 'inspector'
-      | 'embeddable'
-      | 'savedObjectsClient'
-      | 'data'
-      | 'savedObjectsTaggingOss'
-      | 'spaces'
+      'inspector' | 'embeddable' | 'data' | 'savedObjectsTaggingOss' | 'spaces'
     >
   >;
 }
@@ -169,7 +164,6 @@ export class VisualizeEmbeddableFactory
     try {
       const savedObject = await getSavedVisualization(
         {
-          savedObjectsClient: startDeps.core.savedObjects.client,
           search: startDeps.plugins.data.search,
           dataViews: startDeps.plugins.data.dataViews,
           spaces: startDeps.plugins.spaces,
@@ -254,7 +248,6 @@ export class VisualizeEmbeddableFactory
       }
       const { core, plugins } = await this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: core.savedObjects.client,
         overlays: core.overlays,
         savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
       });
@@ -273,7 +266,6 @@ export class VisualizeEmbeddableFactory
   }
 
   public async checkTitle(props: OnSaveProps): Promise<boolean> {
-    const savedObjectsClient = await this.deps.start().core.savedObjects.client;
     const overlays = await this.deps.start().core.overlays;
 
     return checkForDuplicateTitle(
@@ -286,7 +278,6 @@ export class VisualizeEmbeddableFactory
       props.isTitleDuplicateConfirmed,
       props.onTitleDuplicate,
       {
-        savedObjectsClient,
         overlays,
       }
     );

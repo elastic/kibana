@@ -6,115 +6,119 @@
  * Side Public License, v 1.
  */
 
-import { NavItemProps } from '../../../types';
+import { ChromeNavigationNodeViewModel } from '../../../types';
 
-export const mlItemSet: NavItemProps[] = [
+// TODO: Declare ChromeNavigationNode[] (with "link" to app id or deeplink id)
+// and then call an api on the Chrome service to convert to ChromeNavigationNodeViewModel
+// with its "href", "isActive"... metadata
+
+export const mlItemSet: ChromeNavigationNodeViewModel[] = [
   {
-    name: '',
+    title: '',
     id: 'root',
     items: [
       {
-        name: 'Overview',
+        title: 'Overview',
         id: 'overview',
         href: '/app/ml/overview',
       },
       {
-        name: 'Notifications',
+        title: 'Notifications',
         id: 'notifications',
         href: '/app/ml/notifications',
       },
     ],
   },
   {
-    name: 'Anomaly detection',
+    title: 'Anomaly detection',
     id: 'anomaly_detection',
     items: [
       {
-        name: 'Jobs',
+        title: 'Jobs',
         id: 'jobs',
         href: '/app/ml/jobs',
       },
       {
-        name: 'Anomaly explorer',
+        title: 'Anomaly explorer',
         id: 'explorer',
         href: '/app/ml/explorer',
       },
       {
-        name: 'Single metric viewer',
+        title: 'Single metric viewer',
         id: 'single_metric_viewer',
         href: '/app/ml/timeseriesexplorer',
       },
       {
-        name: 'Settings',
+        title: 'Settings',
         id: 'settings',
         href: '/app/ml/settings',
       },
     ],
   },
   {
-    name: 'Data frame analytics',
+    title: 'Data frame analytics',
     id: 'data_frame_analytics',
     items: [
       {
-        name: 'Jobs',
+        title: 'Jobs',
         id: 'jobs',
         href: '/app/ml/data_frame_analytics',
       },
       {
-        name: 'Results explorer',
+        title: 'Results explorer',
         id: 'results_explorer',
         href: '/app/ml/data_frame_analytics/exploration',
       },
       {
-        name: 'Analytics map',
+        title: 'Analytics map',
         id: 'analytics_map',
         href: '/app/ml/data_frame_analytics/map',
       },
     ],
   },
   {
-    name: 'Model management',
+    title: 'Model management',
     id: 'model_management',
     items: [
       {
-        name: 'Trained models',
+        title: 'Trained models',
         id: 'trained_models',
         href: '/app/ml/trained_models',
       },
       {
-        name: 'Nodes',
+        title: 'Nodes',
         id: 'nodes',
         href: '/app/ml/nodes',
       },
     ],
   },
   {
-    name: 'Data visualizer',
+    title: 'Data visualizer',
     id: 'data_visualizer',
     items: [
       {
-        name: 'File',
+        title: 'File',
         id: 'file',
         href: '/app/ml/filedatavisualizer',
       },
       {
-        name: 'Data view',
+        title: 'Data view',
         id: 'data_view',
         href: '/app/ml/datavisualizer_index_select',
       },
     ],
   },
   {
-    name: 'AIOps labs',
+    title: 'AIOps labs',
     id: 'aiops_labs',
     items: [
       {
-        name: 'Explain log rate spikes',
+        title: 'Explain log rate spikes',
         id: 'explain_log_rate_spikes',
         href: '/app/ml/aiops/explain_log_rate_spikes_index_select',
       },
       {
-        name: 'Log pattern analysis',
+        title: 'Log pattern analysis',
         id: 'log_pattern_analysis',
         href: '/app/ml/aiops/log_categorization_index_select',
       },

@@ -143,9 +143,16 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      const updatedDataView = await persistDataView(dataView);
-      if (!services.share || !updatedDataView) {
+      if (!services.share) {
         return;
+      }
+      // this prompts the user to save the dataview if adhoc dataview is detected
+      // for text based languages we don't want this check
+      if (!isPlainRecord) {
+        const updatedDataView = await persistDataView(dataView);
+        if (!updatedDataView) {
+          return;
+        }
       }
       const savedSearch = state.savedSearchState.getState();
       const sharingData = await getSharingData(
@@ -197,7 +204,7 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(!isPlainRecord ? [shareSearch] : []),
+    shareSearch,
     ...(services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !isPlainRecord

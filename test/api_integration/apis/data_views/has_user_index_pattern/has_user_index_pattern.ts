@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('has user index pattern API', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156129
+  describe.skip('has user index pattern API', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
         beforeEach(async () => {
