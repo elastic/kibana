@@ -34939,7 +34939,6 @@
     "xpack.synthetics.server.project.delete.toolarge": "删除请求，有效负载太大。每个请求请最多发送 250 个要删除的监测",
     "xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType": "无法将监测更新为不同类型。",
     "xpack.synthetics.service.projectMonitors.failedToUpdateMonitor": "无法创建或更新监测",
-    "xpack.synthetics.service.projectMonitors.failedToUpdateMonitors": "无法创建或更新监测",
     "xpack.synthetics.service.projectMonitors.insufficientFleetPermissions": "权限不足。要配置专用位置，您必须具有 Fleet 和集成写入权限。要解决问题，请通过具有 Fleet 和集成写入权限的用户生成新的 API 密钥。",
     "xpack.synthetics.settings.alertDefaultForm.requiredEmail": "到：选定的电子邮件连接器需要电子邮件",
     "xpack.synthetics.settings.applyChanges": "应用更改",
