@@ -26,7 +26,9 @@ interface FtrConfigsManifest {
   enabled: Array<string | FtrConfigWithOptions>;
 }
 
+// eslint-disable-next-line no-console
 console.log(`REPO_ROOT: ${REPO_ROOT}`);
+// eslint-disable-next-line no-console
 console.log(`cwd: ${process.cwd()}`);
 const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
   Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL), 'utf8')
