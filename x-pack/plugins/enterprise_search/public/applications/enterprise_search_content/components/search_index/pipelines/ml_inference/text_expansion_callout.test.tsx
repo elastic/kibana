@@ -218,7 +218,9 @@ describe('TextExpansionCallOut', () => {
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isCompact={false} isDismissable={false} />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable={false} />
+      );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
     });
     it('does not render description if it is set to compact', () => {
