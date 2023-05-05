@@ -84,7 +84,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(
         response.body.errorRateChartPreview.some(
-          (item: { x: number; y: number | null }) => item.x && item.y
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) =>
+            item.data.some((coordinate) => coordinate.x && coordinate.y)
         )
       ).to.equal(true);
     });
@@ -110,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.errorRateChartPreview[0]).to.eql({
+      expect(response.body.errorRateChartPreview[0].data[0]).to.eql({
         x: 1627974600000,
         y: 1,
       });
@@ -137,11 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(
-        response.body.errorRateChartPreview.every(
-          (item: { x: number; y: number | null }) => item.y === null
-        )
-      ).to.equal(true);
+      expect(response.body.errorRateChartPreview).to.eql([]);
     });
 
     it('error_count (with data)', async () => {
