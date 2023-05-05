@@ -86,7 +86,6 @@ describe('Rule actions normalization', () => {
     test('returns first action throttle if rule.notifyWhen is not set', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: false,
           actions: [
             {
               group: 'group',
@@ -116,7 +115,6 @@ describe('Rule actions normalization', () => {
     test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen and first action notifyWhen are not set', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: false,
           actions: [
             {
               group: 'group',
@@ -145,7 +143,6 @@ describe('Rule actions normalization', () => {
     test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen is not set and there are no actions', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: false,
           actions: [],
         } as unknown as RuleAlertType)
       ).toBe(NOTIFICATION_THROTTLE_RULE);
@@ -154,7 +151,6 @@ describe('Rule actions normalization', () => {
     test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen is "onActiveAlert"', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: false,
           notifyWhen: 'onActiveAlert',
           actions: [],
         } as unknown as RuleAlertType)
@@ -164,7 +160,6 @@ describe('Rule actions normalization', () => {
     test('returns rule.throttle value if rule.notifyWhen is "onThrottleInterval"', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: false,
           notifyWhen: 'onThrottleInterval',
           throttle: '1d',
           actions: [],
@@ -175,11 +170,40 @@ describe('Rule actions normalization', () => {
     test('returns undefined if rule.notifyWhen is "onThrottleInterval" and rule.throttle is not set', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: false,
           notifyWhen: 'onThrottleInterval',
           actions: [],
         } as unknown as RuleAlertType)
       ).toBeUndefined();
+    });
+
+    test('returns first action throttle if rule.notifyWhen is not set even if muteAll is set to true', () => {
+      expect(
+        transformFromAlertThrottle({
+          muteAll: true,
+          actions: [
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1d',
+              },
+            },
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '2d',
+              },
+            },
+          ],
+        } as RuleAlertType)
+      ).toBe('1d');
     });
   });
 
