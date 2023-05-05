@@ -112,5 +112,6 @@ export class FieldEditorService extends FtrService {
 
   public async waitUntilClosed() {
     await this.testSubjects.waitForDeleted('fieldEditor');
+    await this.testSubjects.missingOrFail('fieldEditor');
   }
 }
