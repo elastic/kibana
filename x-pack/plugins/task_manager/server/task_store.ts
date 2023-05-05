@@ -513,21 +513,23 @@ function taskInstanceToAttributes(
   definitions: TaskTypeDictionary
 ): SerializedConcreteTaskInstance {
   let state = doc.state || {};
-  const hasTypeDef = definitions.has(doc.taskType);
-  const taskTypeDef = hasTypeDef ? definitions.get(doc.taskType) : null;
-  if (!hasTypeDef || (!isEmpty(state) && !taskTypeDef?.stateSchemaByVersion)) {
-    throw new Error(
-      `[taskInstanceToAttributes] stateSchemaByVersion not defined for task type: ${doc.taskType}`
-    );
-  } else if (taskTypeDef?.stateSchemaByVersion) {
-    const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
-    const latest = max(versions);
-    if (latest !== undefined) {
-      // TODO: Don't extendsDeep all the time
-      state = taskTypeDef.stateSchemaByVersion
-        .get(latest)
-        .extendsDeep({ unknowns: 'forbid' })
-        .validate(state);
+  if (!isEmpty(state)) {
+    const hasTypeDef = definitions.has(doc.taskType);
+    const taskTypeDef = hasTypeDef ? definitions.get(doc.taskType) : null;
+    if (!hasTypeDef || !taskTypeDef?.stateSchemaByVersion) {
+      throw new Error(
+        `[taskInstanceToAttributes] stateSchemaByVersion not defined for task type: ${doc.taskType}`
+      );
+    } else if (taskTypeDef?.stateSchemaByVersion) {
+      const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
+      const latest = max(versions);
+      if (latest !== undefined) {
+        // TODO: Don't extendsDeep all the time
+        state = taskTypeDef.stateSchemaByVersion
+          .get(latest)
+          .extendsDeep({ unknowns: 'forbid' })
+          .validate(state);
+      }
     }
   }
 
@@ -548,24 +550,26 @@ export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>,
   definitions: TaskTypeDictionary
 ): ConcreteTaskInstance {
-  const hasTypeDef = definitions.has(savedObject.attributes.taskType);
-  const taskTypeDef = hasTypeDef ? definitions.get(savedObject.attributes.taskType) : null;
   let state = parseJSONField(savedObject.attributes.state, 'state', savedObject.id);
-  if (!hasTypeDef) {
-    state = {};
-  } else if (!isEmpty(state) && !taskTypeDef) {
-    throw new Error(
-      `[savedObjectToConcreteTaskInstance] stateSchemaByVersion not defined for task type: ${savedObject.attributes.taskType}`
-    );
-  } else if (taskTypeDef?.stateSchemaByVersion) {
-    const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
-    const latest = max(versions);
-    if (latest !== undefined) {
-      // TODO: Don't extendsDeep all the time
-      state = taskTypeDef.stateSchemaByVersion
-        .get(latest)
-        .extendsDeep({ unknowns: 'ignore' })
-        .validate(state);
+  if (!isEmpty(state)) {
+    const hasTypeDef = definitions.has(savedObject.attributes.taskType);
+    const taskTypeDef = hasTypeDef ? definitions.get(savedObject.attributes.taskType) : null;
+    if (!hasTypeDef) {
+      state = {};
+    } else if (!taskTypeDef) {
+      throw new Error(
+        `[savedObjectToConcreteTaskInstance] stateSchemaByVersion not defined for task type: ${savedObject.attributes.taskType}`
+      );
+    } else if (taskTypeDef?.stateSchemaByVersion) {
+      const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
+      const latest = max(versions);
+      if (latest !== undefined) {
+        // TODO: Don't extendsDeep all the time
+        state = taskTypeDef.stateSchemaByVersion
+          .get(latest)
+          .extendsDeep({ unknowns: 'ignore' })
+          .validate(state);
+      }
     }
   }
 
