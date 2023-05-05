@@ -31,10 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by value TSVB viz to a Lens viz', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
-      await visualBuilder.setTime();
+      await visualBuilder.resetPage();
       await testSubjects.click('visualizeSaveButton');
 
       await timeToVisualize.saveFromModal('My TSVB to Lens viz 1', {

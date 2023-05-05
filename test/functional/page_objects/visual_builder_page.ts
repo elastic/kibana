@@ -34,6 +34,17 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly visualize = this.ctx.getPageObject('visualize');
+
+  public async resetPage(
+    fromTime = 'Sep 19, 2015 @ 06:31:44.000',
+    toTime = 'Sep 22, 2015 @ 18:31:44.000'
+  ) {
+    await this.visualize.navigateToNewVisualization();
+    await this.visualize.clickVisualBuilder();
+    await this.checkVisualBuilderIsPresent();
+    await this.setTime(fromTime, toTime);
+  }
 
   public async setTime(
     fromTime = 'Sep 19, 2015 @ 06:31:44.000',
