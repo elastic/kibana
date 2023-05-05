@@ -35,3 +35,4 @@ export {
 } from './model_version_from_mappings';
 export { getModelVersionDelta } from './get_version_delta';
 export { buildModelVersionTransformFn } from './build_transform_fn';
+export { aggregateAddedMapping } from './aggregate_model_changes';

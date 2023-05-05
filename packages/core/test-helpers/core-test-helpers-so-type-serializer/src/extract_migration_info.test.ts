@@ -173,23 +173,24 @@ describe('extractMigrationInfo', () => {
       const type = createType({
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: {
-                up: jest.fn(),
-                down: jest.fn(),
+            changes: [
+              {
+                type: 'data_backfill',
+                transform: jest.fn(),
               },
-            },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: {
-                  type: 'boolean',
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: {
+                    type: 'boolean',
+                  },
                 },
               },
-            },
+            ],
           },
         },
       });
@@ -198,15 +199,15 @@ describe('extractMigrationInfo', () => {
       expect(output.modelVersions).toEqual([
         {
           version: '1',
-          changeType: 'expansion',
-          hasMigration: true,
+          changeTypes: ['data_backfill'],
+          hasTransformation: true,
           newMappings: [],
         },
         {
           version: '2',
-          changeType: 'expansion',
+          changeTypes: ['mappings_addition'],
+          hasTransformation: false,
           newMappings: ['foo.type'],
-          hasMigration: false,
         },
       ]);
     });
@@ -215,23 +216,24 @@ describe('extractMigrationInfo', () => {
       const type = createType({
         modelVersions: () => ({
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: {
-                up: jest.fn(),
-                down: jest.fn(),
+            changes: [
+              {
+                type: 'data_backfill',
+                transform: jest.fn(),
               },
-            },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: {
-                  type: 'boolean',
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: {
+                    type: 'boolean',
+                  },
                 },
               },
-            },
+            ],
           },
         }),
       });
@@ -240,15 +242,15 @@ describe('extractMigrationInfo', () => {
       expect(output.modelVersions).toEqual([
         {
           version: '1',
-          changeType: 'expansion',
-          hasMigration: true,
+          changeTypes: ['data_backfill'],
+          hasTransformation: true,
           newMappings: [],
         },
         {
           version: '2',
-          changeType: 'expansion',
+          changeTypes: ['mappings_addition'],
+          hasTransformation: false,
           newMappings: ['foo.type'],
-          hasMigration: false,
         },
       ]);
     });
@@ -273,23 +275,24 @@ describe('extractMigrationInfo', () => {
         },
         modelVersions: {
           '1': {
-            modelChange: {
-              type: 'expansion',
-              transformation: {
-                up: jest.fn(),
-                down: jest.fn(),
+            changes: [
+              {
+                type: 'data_backfill',
+                transform: jest.fn(),
               },
-            },
+            ],
           },
           '2': {
-            modelChange: {
-              type: 'expansion',
-              addedMappings: {
-                foo: {
-                  type: 'boolean',
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  foo: {
+                    type: 'boolean',
+                  },
                 },
               },
-            },
+            ],
           },
         },
         switchToModelVersionAt: '8.8.0',
@@ -304,15 +307,15 @@ describe('extractMigrationInfo', () => {
           modelVersions: [
             {
               version: '1',
-              changeType: 'expansion',
-              hasMigration: true,
+              changeTypes: ['data_backfill'],
+              hasTransformation: true,
               newMappings: [],
             },
             {
               version: '2',
-              changeType: 'expansion',
+              changeTypes: ['mappings_addition'],
+              hasTransformation: false,
               newMappings: ['foo.type'],
-              hasMigration: false,
             },
           ],
         })

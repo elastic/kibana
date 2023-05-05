@@ -25,9 +25,7 @@ describe('ModelVersion map utilities', () => {
   });
 
   const dummyModelVersion = (): SavedObjectsModelVersion => ({
-    modelChange: {
-      type: 'expansion',
-    },
+    changes: [],
   });
 
   const dummyMigration = jest.fn();
