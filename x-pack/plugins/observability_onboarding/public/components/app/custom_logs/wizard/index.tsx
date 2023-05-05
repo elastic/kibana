@@ -14,6 +14,9 @@ import { Inspect } from './inspect';
 
 interface WizardState {
   datasetName: string;
+  logFilePaths: string[];
+  namespace: string;
+  customConfigurations: string;
   logsType?:
     | 'system'
     | 'sys'
@@ -33,7 +36,10 @@ interface WizardState {
 }
 
 const initialState: WizardState = {
-  datasetName: '',
+  datasetName: 'filename',
+  logFilePaths: [],
+  namespace: 'default',
+  customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
   alternativeShippers: {
     filebeat: false,
