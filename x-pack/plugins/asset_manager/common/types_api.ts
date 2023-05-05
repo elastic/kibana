@@ -46,6 +46,7 @@ export interface ECSDocument extends WithTimestamp {
   'orchestrator.cluster.version'?: string;
 
   'cloud.provider'?: CloudProviderName;
+  'cloud.instance.id'?: string;
   'cloud.region'?: string;
   'cloud.service.name'?: string;
 

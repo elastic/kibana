@@ -74,7 +74,7 @@ export async function collectServices({ esClient }: { esClient: Client }): Promi
   const esResponse = await esClient.search(dsl);
   const serviceEnvironment = esResponse.aggregations?.service_environment as { buckets: any[] };
 
-  const services = serviceEnvironment.buckets.reduce<Asset[]>((acc: any, hit: any) => {
+  const services = serviceEnvironment.buckets.reduce<Asset[]>((acc: Asset[], hit: any) => {
     const [serviceName, environment] = hit.key;
     const containerHosts = hit.container_host.buckets;
 
@@ -102,7 +102,7 @@ export async function collectServices({ esClient }: { esClient: Client }): Promi
       }
     });
 
-    acc.services.push(service);
+    acc.push(service);
 
     return acc;
   }, []);

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { collectHosts } from './hosts';
 export { collectServices } from './services';
