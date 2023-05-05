@@ -487,6 +487,7 @@ export type ResponseActionUploadParameters = UploadActionApiRequestBody['paramet
 };
 
 export interface ResponseActionUploadOutputContent {
+  code: string;
   /** Full path to the file on the host machine where it was saved */
   path: string;
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */

@@ -122,6 +122,32 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (command === 'upload' && !output) {
+      let uploadOutput = output as ActionResponseOutput<ResponseActionUploadOutputContent>;
+
+      if (overrides.error) {
+        uploadOutput = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_some-error',
+            path: '',
+            disk_free_space: 0,
+          },
+        };
+      } else {
+        uploadOutput = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_success',
+            path: '/disk1/file/saved/here',
+            disk_free_space: 4825566125475,
+          },
+        };
+      }
+
+      output = uploadOutput as typeof output;
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
