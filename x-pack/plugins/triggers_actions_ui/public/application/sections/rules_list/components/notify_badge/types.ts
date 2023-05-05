@@ -14,12 +14,12 @@ export type RuleSnoozeSettings = Pick<
 
 export interface RulesListNotifyBadgeProps {
   /**
-   *  Rule's snooze settings, if `undefined` is passed the component is shown in loading state
+   *  Rule's snooze settings
    */
   snoozeSettings: RuleSnoozeSettings | undefined;
   /**
    * Displays the component in the loading state. If isLoading = false and snoozeSettings aren't set
-   * the component is shown in disabled state.
+   * and the component is shown in disabled state.
    */
   loading?: boolean;
   /**
