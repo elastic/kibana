@@ -789,6 +789,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
 #CC# /src/plugins/home/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
+#CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
 ### Observability Plugins
 
