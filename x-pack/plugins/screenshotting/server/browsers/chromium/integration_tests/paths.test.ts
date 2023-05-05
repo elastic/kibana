@@ -60,7 +60,7 @@ describe('Chromium Archive Paths', () => {
     console.log(binaryPath);
 
     await download(paths, pkg, mockLogger);
-    await install(paths, pkg, chromiumPath, mockLogger);
+    await install(paths, mockLogger, pkg, chromiumPath);
 
     const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 

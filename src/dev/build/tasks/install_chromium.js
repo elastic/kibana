@@ -43,7 +43,7 @@ export const InstallChromium = {
         platform,
         'node_modules/@kbn/screenshotting-plugin/chromium'
       );
-      await install(logger, pkg, path);
+      await install(path, logger, pkg);
     }
   },
 };

@@ -19,9 +19,9 @@ import { extract } from './extract';
  */
 export async function install(
   paths: ChromiumArchivePaths,
+  logger: Logger,
   pkg: PackageInfo,
-  chromiumPath: string = path.resolve(__dirname, '../../chromium'),
-  logger: Logger
+  chromiumPath: string = path.resolve(__dirname, '../../chromium')
 ): Promise<string> {
   const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
 
