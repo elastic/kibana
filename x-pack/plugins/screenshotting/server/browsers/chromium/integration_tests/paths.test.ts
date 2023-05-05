@@ -8,8 +8,8 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import assert from 'assert';
 import axios from 'axios';
-import del from 'del';
 import path from 'path';
+import { PackageInfo } from '..';
 import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';
 import { md5 } from '../../download/checksum';
@@ -29,51 +29,58 @@ mockLogger.error = jest.fn((message: string | Error) => {
 });
 
 /**
- * NOTE: these test cases download actual browsers. Running the suite is expected to take a long time.
+ * NOTE: these test cases download actual browsers. Running the suite could take
+ * a long time with a clean cache.
  */
 
-describe('Chromium Archive Paths', () => {
-  const originalAxios = axios.defaults.adapter;
-  beforeAll(async () => {
-    axios.defaults.adapter = require('axios/lib/adapters/http');
+// test case tuples
+const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture }) => [
+  platform,
+  architecture,
+]);
 
-    // remove existing archives to force downloads
-    const removedFiles = await del(`${chromiumArchivePaths.archivesPath}/**/*`, {
-      force: true,
+describe.each(packageInfos)(
+  'Chromium download URLs and checksums: %s-%s',
+  (platform, architecture) => {
+    // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
+    const chromiumPath = path.resolve(__dirname, '../../../../chromium', architecture, platform);
+
+    const originalAxios = axios.defaults.adapter;
+    let binaryChecksum: string;
+    beforeAll(async () => {
+      axios.defaults.adapter = require('axios/lib/adapters/http'); // allow Axios to send actual requests
+
+      const binaryPath = chromiumArchivePaths.getBinaryPath(pkg, chromiumPath);
+      binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
     });
 
-    removedFiles.forEach((rm) => mockLogger?.warn(`Deleting test workspace file ${rm}`));
-  });
-  afterAll(() => {
-    axios.defaults.adapter = originalAxios;
-  });
+    afterAll(() => {
+      axios.defaults.adapter = originalAxios;
+    });
 
-  // test case tuples
-  const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture }) => [
-    platform,
-    architecture,
-  ]);
-
-  it.each(packageInfos)('list the correct checksums, %s-%s', async (platform, architecture) => {
-    const pkg = chromiumArchivePaths.packages.find(
+    // Allow package definition to be altered to check error handling
+    const originalPkg = chromiumArchivePaths.packages.find(
       (packageInfo) =>
         packageInfo.platform === platform && packageInfo.architecture === architecture
     );
+    assert(originalPkg);
 
-    assert(pkg);
+    let pkg: PackageInfo = originalPkg;
+    beforeEach(() => {
+      pkg = { ...originalPkg };
+    });
 
-    const chromiumPath = path.resolve(__dirname, '../../../../chromium');
-    const binaryPath = chromiumArchivePaths.getBinaryPath(pkg, chromiumPath);
-    console.log(binaryPath);
+    it('lists the correct archive checksum', async () => {
+      await download(chromiumArchivePaths, pkg, mockLogger); // this will throw if the downloaded file's checksum does not match the listing
+    });
 
-    await download(chromiumArchivePaths, pkg, mockLogger);
-    await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
+    it('lists the correct binary checksum', async () => {
+      await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
 
-    const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
-
-    assert(
-      binaryChecksum === pkg.binaryChecksum,
-      `extracted browser binary checksum [${binaryChecksum}] must match package info [${pkg.binaryChecksum}]`
-    );
-  });
-});
+      assert(
+        binaryChecksum === pkg.binaryChecksum,
+        `Extracted browser binary checksum [${binaryChecksum}] must match package info [${pkg.binaryChecksum}]`
+      );
+    });
+  }
+);
