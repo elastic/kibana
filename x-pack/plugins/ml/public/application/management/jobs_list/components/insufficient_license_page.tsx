@@ -61,7 +61,6 @@ export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
                     defaultMessage="Upgrade your subscription"
                   />
                 </EuiButtonEmpty>
-                ,
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -76,7 +75,6 @@ export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
                     defaultMessage="Start trial"
                   />
                 </EuiButton>
-                ,
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
