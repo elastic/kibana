@@ -5,3 +5,7 @@
   min-height: $euiSizeXL;
   width: 100%;
 }
+
+.filterQueryInput__popover {
+  width: $euiSize * 60;
+}

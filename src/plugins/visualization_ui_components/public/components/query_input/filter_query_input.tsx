@@ -102,7 +102,7 @@ export function FilterQueryInput({
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
             anchorClassName="eui-fullWidth"
-            panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
+            panelClassName="filterQueryInput__popover"
             initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={
               <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
