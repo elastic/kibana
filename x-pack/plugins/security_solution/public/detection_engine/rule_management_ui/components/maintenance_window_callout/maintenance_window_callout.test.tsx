@@ -8,8 +8,12 @@
 import React from 'react';
 import { render, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_FEATURE_ID,
+} from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { MaintenanceWindowCallout } from './maintenance_window_callout';
@@ -21,6 +25,8 @@ jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
+
+jest.mock('../../../../common/lib/kibana');
 
 const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
   title: 'Maintenance window 1',
@@ -46,6 +52,9 @@ const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
   ],
 };
 
+const useKibanaMock = useKibana as jest.Mock;
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+
 describe('MaintenanceWindowCallout', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
@@ -54,6 +63,18 @@ describe('MaintenanceWindowCallout', () => {
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    useKibanaMock.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [MAINTENANCE_WINDOW_FEATURE_ID]: {
+              save: true,
+              show: true,
+            },
+          },
+        },
+      },
+    });
   });
 
   afterEach(() => {
@@ -62,7 +83,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should be visible if currently there is at least one "running" maintenance window', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -70,7 +91,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should be visible if currently there are multiple "running" maintenance windows', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       RUNNING_MAINTENANCE_WINDOW_1,
       RUNNING_MAINTENANCE_WINDOW_2,
     ]);
@@ -81,7 +102,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should NOT be visible if currently there are no active (running or upcoming) maintenance windows', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -89,7 +110,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should NOT be visible if currently there are no "running" maintenance windows', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -121,7 +142,7 @@ describe('MaintenanceWindowCallout', () => {
     };
 
     const mockError = new Error('Network error');
-    (fetchActiveMaintenanceWindows as jest.Mock).mockRejectedValue(mockError);
+    fetchActiveMaintenanceWindowsMock.mockRejectedValue(mockError);
 
     render(<MaintenanceWindowCallout />, { wrapper: createReactQueryWrapper() });
 
@@ -132,5 +153,45 @@ describe('MaintenanceWindowCallout', () => {
         toastMessage: "Notification actions won't run while a maintenance window is running.",
       });
     });
+  });
+
+  it('should return null if window maintenance privilege is NONE', async () => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [MAINTENANCE_WINDOW_FEATURE_ID]: {
+              save: false,
+              show: false,
+            },
+          },
+        },
+      },
+    });
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+
+    const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should work as expected if window maintenance privilege is READ ', async () => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [MAINTENANCE_WINDOW_FEATURE_ID]: {
+              save: false,
+              show: true,
+            },
+          },
+        },
+      },
+    });
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+
+    const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+
+    expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
   });
 });

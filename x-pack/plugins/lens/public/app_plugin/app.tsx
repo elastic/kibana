@@ -72,6 +72,7 @@ export function App({
   initialContext,
   theme$,
   coreStart,
+  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
