@@ -328,7 +328,7 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
-    it('should have correctly deleted the secrets', async () => {
+    it('should have correctly deleted unused secrets after update', async () => {
       const searchRes = await es.search({
         index: '.fleet-test-secrets',
         body: {
@@ -347,6 +347,24 @@ export default function (providerContext: FtrProviderContext) {
       expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
       expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
       expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should delete all secrets on package policy delete', async () => {
+      return supertest
+        .delete(`/api/fleet/package_policies/${createdPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(0);
     });
   });
 }
