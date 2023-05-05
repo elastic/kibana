@@ -20,6 +20,7 @@ export const TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY =
 const isDismissed = () => localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY) === 'true';
 
 export const useTextExpansionCallOutData = ({
+  isCompact = false,
   isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
   const { ingestionMethod } = useValues(IndexViewLogic);
@@ -52,6 +53,7 @@ export const useTextExpansionCallOutData = ({
   return {
     dismiss,
     ingestionMethod,
+    isCompact,
     isCreateButtonDisabled,
     isDismissable,
     isStartButtonDisabled,
