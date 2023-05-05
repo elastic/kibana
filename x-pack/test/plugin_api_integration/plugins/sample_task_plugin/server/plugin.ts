@@ -6,6 +6,7 @@
  */
 
 import { random } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
@@ -99,6 +100,11 @@ export class SampleTaskManagerFixturePlugin
         ...defaultSampleTaskConfig,
         title: 'Sample Task',
         description: 'A sample task for testing the task_manager.',
+        stateSchemaByVersion: {
+          1: schema.object({
+            count: schema.maybe(schema.number()),
+          }),
+        },
       },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,

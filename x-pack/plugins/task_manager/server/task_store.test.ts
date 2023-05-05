@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
@@ -49,6 +50,11 @@ const taskDefinitions = new TaskTypeDictionary(mockLogger());
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
+    stateSchemaByVersion: {
+      1: schema.object({
+        foo: schema.string(),
+      }),
+    },
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
