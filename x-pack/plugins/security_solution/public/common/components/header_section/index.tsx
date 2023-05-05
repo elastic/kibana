@@ -71,6 +71,7 @@ export interface HeaderSectionProps extends HeaderProps {
   inspectTitle?: React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
+  tooltipTitle?: string;
 }
 
 export const getHeaderAlignment = ({
@@ -111,6 +112,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleQuery,
   toggleStatus = true,
   tooltip,
+  tooltipTitle,
 }) => {
   const toggle = useCallback(() => {
     if (toggleQuery) {
@@ -174,6 +176,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                               {' '}
                               <EuiIconTip
                                 color="subdued"
+                                title={tooltipTitle}
                                 content={tooltip}
                                 size="l"
                                 type="iInCircle"

@@ -16,7 +16,7 @@ import {
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import {
-  CURATED_MODEL_TAG,
+  ELASTIC_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
@@ -357,7 +357,7 @@ export function useModelActions({
         icon: 'download',
         type: 'icon',
         isPrimary: true,
-        available: (item) => item.tags.includes(CURATED_MODEL_TAG),
+        available: (item) => item.tags.includes(ELASTIC_MODEL_TAG),
         enabled: (item) => !item.state && !isLoading,
         onClick: async (item) => {
           try {

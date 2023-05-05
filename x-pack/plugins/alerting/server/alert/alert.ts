@@ -63,7 +63,7 @@ export class Alert<
     this.context = {} as Context;
     this.meta = meta;
     this.meta.uuid = meta.uuid ?? uuidV4();
-
+    this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -229,6 +229,7 @@ export class Alert<
           // for a recovered alert, we only care to track the flappingHistory,
           // the flapping flag, and the UUID
           meta: {
+            maintenanceWindowIds: this.meta.maintenanceWindowIds,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,
@@ -295,5 +296,13 @@ export class Alert<
       (alert) =>
         get(alert, ALERT_UUID) === this.getId() || get(alert, ALERT_UUID) === this.getUuid()
     );
+  }
+
+  setMaintenanceWindowIds(maintenanceWindowIds: string[] = []) {
+    this.meta.maintenanceWindowIds = maintenanceWindowIds;
+  }
+
+  getMaintenanceWindowIds() {
+    return this.meta.maintenanceWindowIds ?? [];
   }
 }

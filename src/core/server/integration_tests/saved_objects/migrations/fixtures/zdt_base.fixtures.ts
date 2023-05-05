@@ -10,7 +10,12 @@ import { SavedObjectsModelVersion, SavedObjectMigrationFn } from '@kbn/core-save
 import { createType } from '../test_utils';
 import { type KibanaMigratorTestKitParams } from '../kibana_migrator_test_kit';
 
-export const getBaseMigratorParams = (): KibanaMigratorTestKitParams => ({
+export const getBaseMigratorParams = ({
+  // default to true here as most tests need to run the full migration
+  runOnNonMigratorNodes = true,
+}: {
+  runOnNonMigratorNodes?: boolean;
+} = {}): KibanaMigratorTestKitParams => ({
   kibanaIndex: '.kibana',
   kibanaVersion: '8.8.0',
   settings: {
@@ -18,6 +23,7 @@ export const getBaseMigratorParams = (): KibanaMigratorTestKitParams => ({
       algorithm: 'zdt',
       zdt: {
         metaPickupSyncDelaySec: 5,
+        runOnNonMigratorNodes,
       },
     },
   },
