@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -193,17 +193,25 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
-  const [queriedGroup, setQueriedGroup] = useState('');
+  const queriedGroup = useRef('');
 
   const aggs = useMemo(
     // queriedGroup because `selectedGroup` updates before the query response
-    () => parseGroupingQuery(queriedGroup, alertsGroupsData?.aggregations),
-    [alertsGroupsData?.aggregations, queriedGroup]
+    () => {
+      console.log('update aggs and groupsCount', queriedGroup.current);
+      console.log('total htis', alertsGroupsData?.aggregations?.groupsCount?.value);
+      return parseGroupingQuery(queriedGroup.current, alertsGroupsData?.aggregations);
+    },
+    [alertsGroupsData?.aggregations]
   );
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
-      setQueriedGroup(queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '');
+      queriedGroup.current = queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '';
+      console.log(
+        'set queriedGroup.current to',
+        queryGroups?.aggs?.groupsCount?.cardinality?.field ?? ''
+      );
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
