@@ -26,6 +26,14 @@ describe('can_redirect_request', () => {
     expect(canRedirectRequest(request)).toBe(false);
   });
 
+  it('returns false if request has a x-elastic-internal-origin header', () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { 'x-elastic-internal-origin': 'something' },
+    });
+
+    expect(canRedirectRequest(request)).toBe(false);
+  });
+
   it('returns false for api routes', () => {
     expect(
       canRedirectRequest(httpServerMock.createKibanaRequest({ path: '/api/security/some' }))

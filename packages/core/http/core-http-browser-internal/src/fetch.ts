@@ -19,7 +19,10 @@ import type {
   HttpResponse,
   HttpFetchOptionsWithPath,
 } from '@kbn/core-http-browser';
-import { ELASTIC_HTTP_VERSION_HEADER, INTERNAL_ACCESS_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
@@ -131,7 +134,7 @@ export class Fetch {
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
         [ELASTIC_HTTP_VERSION_HEADER]: version,
-        [INTERNAL_ACCESS_REQUEST]: 'Kibana',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
         ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),
       }),
     };
@@ -228,7 +231,7 @@ const validateFetchArguments = (
     headerName.startsWith('kbn-')
   );
   const invalidInternalOriginProducHeader = Object.keys(fullOptions.headers ?? {}).filter(
-    (headerName) => headerName.includes(INTERNAL_ACCESS_REQUEST)
+    (headerName) => headerName.includes(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)
   );
 
   if (invalidKbnHeaders.length) {

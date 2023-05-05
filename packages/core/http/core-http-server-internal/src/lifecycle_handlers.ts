@@ -9,7 +9,7 @@
 import { Env } from '@kbn/config';
 import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
-import { INTERNAL_ACCESS_REQUEST } from '@kbn/core-http-common/src/constants';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import { HttpConfig } from './http_config';
 import { LifecycleRegistrar } from './http_server';
 
@@ -49,7 +49,7 @@ export const createRestrictInternalRoutesPostAuthHandler = (
     const isInternalRoute = request.route.options.access === 'internal';
 
     // only check if the header is present, not it's content.
-    const hasInternalKibanaRequestHeader = INTERNAL_ACCESS_REQUEST in request.headers;
+    const hasInternalKibanaRequestHeader = X_ELASTIC_INTERNAL_ORIGIN_REQUEST in request.headers;
 
     if (isRestrictionEnabled && isInternalRoute && !hasInternalKibanaRequestHeader) {
       // throw 400
