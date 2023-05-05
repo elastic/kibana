@@ -22,6 +22,12 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/config-schema",
     "@kbn/core-test-helpers-test-utils",
+    "@kbn/security-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/rison",
+    "@kbn/licensing-plugin",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -36,8 +36,8 @@
     "@kbn/generate-csv",
     "@kbn/reporting-common",
     "@kbn/core-test-helpers-test-utils",
-    "@kbn/kibana-utils-plugin",
     "@kbn/core-http-server",
+    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",
