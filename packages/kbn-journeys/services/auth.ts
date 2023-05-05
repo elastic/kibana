@@ -20,9 +20,9 @@ export interface Credentials {
 }
 
 function extractCookieValue(authResponse: AxiosResponse) {
-  if (authResponse.status !== 200) {
-    throw new Error('Kibana auth failed');
-  }
+  // if (authResponse.status !== 200) {
+  //   throw new Error('Kibana auth failed');
+  // }
   return authResponse.headers['set-cookie']?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
 }
 export class Auth {
@@ -53,7 +53,7 @@ export class Auth {
         providerType: 'basic',
         providerName: provider,
         currentURL: new URL('/login?next=%2F', baseUrl).href,
-        params: credentials ?? { username: this.getUsername, password: this.getPassword },
+        params: credentials ?? { username: this.getUsername(), password: this.getPassword() },
       },
       headers: {
         'content-type': 'application/json',
@@ -64,6 +64,8 @@ export class Auth {
       validateStatus: () => true,
       maxRedirects: 0,
     });
+
+    this.log.info(`login status = ${authResponse.status}`);
 
     const cookie = extractCookieValue(authResponse);
     if (cookie) {
