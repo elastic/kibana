@@ -37,6 +37,7 @@
     "@kbn/reporting-common",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/core-http-server",
+    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",
