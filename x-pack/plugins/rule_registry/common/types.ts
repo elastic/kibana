@@ -314,7 +314,7 @@ export interface BrowserField {
   category: string;
   description?: string | null;
   example?: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  fields: Record<string, Partial<BrowserField>>;
   format?: string;
   indexes: string[];
   name: string;
@@ -325,4 +325,4 @@ export interface BrowserField {
   runtimeField?: RuntimeField;
 }
 
-export type BrowserFields = Record<string, Partial<BrowserField>>;
+export type BrowserFields = Record<string, BrowserField>;

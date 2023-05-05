@@ -6,11 +6,15 @@
  */
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useState } from 'react';
+import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import memoizeOne from 'memoize-one';
+import { useEffect, useState } from 'react';
 import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
+import { useAlertDataView } from '../../../hooks/use_alert_data_view';
+import { getCategory } from '../../field_browser/helpers';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
@@ -25,32 +29,52 @@ export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, Fetc
 
 const INVALID_FEATURE_ID = 'siem';
 
+/**
+ * HOT Code path where the fields can be 16087 in length or larger. This is
+ * VERY mutatious on purpose to improve the performance of the transform.
+ */
+export const getDataViewStateFromIndexFields = memoizeOne(
+  (
+    _title: string,
+    fields: DataViewFieldBase[],
+    _includeUnmapped: boolean = false
+  ): BrowserFields => {
+    // Adds two dangerous casts to allow for mutations within this function
+    type DangerCastForMutation = Record<string, {}>;
+
+    return fields.reduce<BrowserFields>((browserFields, field) => {
+      // mutate browserFields
+      const category = getCategory(field.name);
+      if (browserFields[category] == null) {
+        (browserFields as DangerCastForMutation)[category] = {};
+      }
+      if (browserFields[category].fields == null) {
+        browserFields[category].fields = {};
+      }
+      browserFields[category].fields[field.name] = field as unknown as BrowserField;
+
+      return browserFields;
+    }, {});
+  },
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
+);
+
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
   initialBrowserFields,
 }: FetchAlertsArgs): [boolean | undefined, BrowserFields] => {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const [isLoading, setIsLoading] = useState<boolean | undefined>(undefined);
   const [browserFields, setBrowserFields] = useState<BrowserFields>(
     () => initialBrowserFields ?? {}
   );
 
-  const getBrowserFieldInfo = useCallback(async () => {
-    if (!http) return Promise.resolve({});
-
-    try {
-      return await http.get<BrowserFields>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
-        query: { featureIds },
-      });
-    } catch (e) {
-      toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
-      return {};
-    }
-  }, [featureIds, http, toasts]);
+  const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
   useEffect(() => {
     if (initialBrowserFields) {
@@ -60,21 +84,23 @@ export const useFetchBrowserFieldCapabilities = ({
       return;
     }
 
-    if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) {
+    if (dataView == null) {
       return;
     }
 
-    setIsLoading(true);
+    setBrowserFields(
+      getDataViewStateFromIndexFields(
+        dataView.id ?? '',
+        dataView.fields != null ? dataView.fields : []
+      )
+    );
+  }, [featureIds, initialBrowserFields, loading, dataView]);
 
-    const callApi = async () => {
-      const browserFieldsInfo = await getBrowserFieldInfo();
+  useEffect(() => {
+    if (error) {
+      toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
+    }
+  }, [error, toasts]);
 
-      setBrowserFields(browserFieldsInfo);
-      setIsLoading(false);
-    };
-
-    callApi();
-  }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields]);
-
-  return [isLoading, browserFields];
+  return [loading, browserFields];
 };
