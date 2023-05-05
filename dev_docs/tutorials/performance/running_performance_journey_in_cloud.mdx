@@ -13,7 +13,7 @@ Cloud deployments.
 The process takes a few steps:
 - Create a cloud deployment
 - Re-configure deployment with APM enabled and reporting metrics to the monitoring cluster
-- Create a user with `superuser` role
+- Create a user with `superuser` role to run tests with
 - Checkout the branch that matches your cloud deployment version
 - Run the performance journey
 
@@ -23,7 +23,6 @@ We use [kibana-ops-e2e-perf](https://kibana-ops-e2e-perf.kb.us-central1.gcp.clou
 If you would like to report APM metrics to a different cluster, make sure to change `secret_token` and `server_url` values.
 
 #### Change Elasticsearch configuration
-
 In the ESS Admin Console, find your deployment and navigate to `Security` page. Click `Add Settings` under `Elasticsearch keystore` and add new entry:
 Setting name: `tracing.apm.secret_token`
 Secret: "CTs9y3cvcfq13bQqsB"
@@ -75,6 +74,7 @@ Save changes and make sure cluster is restarted successfully.
 ### Run the journey
 Make sure you have created user with `superuser` role and the Kibana repo branch is matching your deployment version.
 Set env variables to run FTR against your cloud deployment:
+
 ```
 export TEST_KIBANA_URL=https://<username>:<password>@<kibana_url>
 export TEST_ES_URL=https://<username>:<password>@j<elasticsearch_url>:<port>
