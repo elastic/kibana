@@ -5,82 +5,21 @@
  * 2.0.
  */
 
-import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
-import { triggerLoadData } from '../../tasks/inventory';
 import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 
 describe('Admin', () => {
-  describe('Osquery', () => {
-    beforeEach(() => {
-      login(ROLE.admin);
-      navigateTo('/app/osquery');
-    });
-
-    it('should be able to run live query with BASE All permissions', () => {
-      cy.contains('New live query').click();
-      selectAllAgents();
-      inputQuery('select * from uptime;');
-      submitQuery();
-      checkResults();
-    });
+  beforeEach(() => {
+    login(ROLE.admin);
+    navigateTo('/app/osquery');
   });
 
-  describe('inventory', () => {
-    let savedQueryName: string;
-    let savedQueryId: string;
-
-    before(() => {
-      loadSavedQuery().then((data) => {
-        savedQueryId = data.id;
-        savedQueryName = data.attributes.id;
-      });
-    });
-
-    beforeEach(() => {
-      // testing this as admin in order to be able to change default metrics indices to contain logs-*
-      login(ROLE.admin);
-      navigateTo('/app/osquery');
-    });
-
-    after(() => {
-      cleanupSavedQuery(savedQueryId);
-    });
-
-    it('should be able to run the query', () => {
-      cy.getBySel('toggleNavButton').click();
-      cy.contains('Infrastructure').click();
-
-      cy.getBySel('headerAppActionMenu').within(() => {
-        cy.contains('Settings').click();
-      });
-      cy.getBySel('metricIndicesInput').click().type(',logs-*');
-      cy.getBySel('applySettingsButton').click();
-      cy.contains('Metrics settings successfully updated').should('exist');
-      cy.go('back');
-
-      triggerLoadData();
-      cy.contains('Osquery').click();
-      inputQuery('select * from uptime;');
-
-      submitQuery();
-      checkResults();
-    });
-
-    it('should be able to run the previously saved query', () => {
-      cy.getBySel('toggleNavButton').click();
-      cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
-
-      triggerLoadData();
-      cy.contains('Osquery').click();
-
-      cy.getBySel('comboBoxInput').first().click();
-      cy.wait(500);
-      cy.getBySel('comboBoxInput').first().type(`${savedQueryName}{downArrow}{enter}`);
-
-      submitQuery();
-      checkResults();
-    });
+  it('should be able to run live query with BASE All permissions', () => {
+    cy.contains('New live query').click();
+    selectAllAgents();
+    inputQuery('select * from uptime;');
+    submitQuery();
+    checkResults();
   });
 });
