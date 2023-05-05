@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
+  ResponseHeaders,
 } from '@kbn/core/server';
-import type { ResponseHeaders } from '@kbn/core/server';
 import { internalSetSlackApiURL } from '@kbn/stack-connectors-plugin/common/slack_api/lib';
 import { kbnTestConfig } from '@kbn/test';
 import { schema } from '@kbn/config-schema';
