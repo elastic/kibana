@@ -28,4 +28,6 @@ export interface OverlayFlyoutStart {
 /**
  * @public
  */
-export type OverlayFlyoutOpenOptions = EuiFlyoutProps;
+export type OverlayFlyoutOpenOptions = Omit<EuiFlyoutProps, 'onClose'> & {
+  onClose?: EuiFlyoutProps['onClose']
+}
