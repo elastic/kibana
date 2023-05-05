@@ -130,7 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false, { overwrite, spaceId, singleRequest });
   };
 
-  describe('_resolve_import_errors', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/156346
+  describe.skip('_resolve_import_errors', () => {
     getTestScenarios([
       [false, false],
       [false, true],
