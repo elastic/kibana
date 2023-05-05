@@ -44,7 +44,7 @@ const UninstallAgentDescription = () => {
       <p>
         <FormattedMessage
           id="xpack.fleet.agentUninstallCommandFlyout.description"
-          defaultMessage="Select the appropriate platform and run the command to uninstall Elastic Agent. Reuse commands to uninstall agents on more than one host. {learnMoreLink}"
+          defaultMessage="Select the appropriate platform and run the command to uninstall Elastic Agent. Reuse the command to uninstall agents on more than one host. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docLinks.links.fleet.uninstallAgent} target="_blank">
