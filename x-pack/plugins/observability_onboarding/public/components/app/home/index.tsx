@@ -25,7 +25,7 @@ import { breadcrumbsApp } from '../../../application/app';
 export function Home() {
   useBreadcrumbs([], breadcrumbsApp);
 
-  const navigateToKibanaUrl = useKibanaNavigation();
+  const { navigateToKibanaUrl } = useKibanaNavigation();
 
   const handleClickSystemLogs = () => {};
   const handleClickCustomLogs = () => {

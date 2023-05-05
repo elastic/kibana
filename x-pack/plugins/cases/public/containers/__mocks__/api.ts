@@ -7,8 +7,9 @@
 
 import type {
   ActionLicense,
-  CasesUI,
+  CasesFindResponseUI,
   CaseUI,
+  CasesUI,
   CasesStatus,
   FetchCasesProps,
   FindCaseUserActions,
@@ -101,7 +102,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<CasesUI> => Promise.resolve(allCases);
+}: FetchCasesProps): Promise<CasesFindResponseUI> => Promise.resolve(allCases);
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<CaseUI> =>
   Promise.resolve(basicCasePost);
@@ -111,12 +112,12 @@ export const patchCase = async (
   updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
   version: string,
   signal: AbortSignal
-): Promise<CaseUI[]> => Promise.resolve([basicCase]);
+): Promise<CasesUI> => Promise.resolve([basicCase]);
 
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<CaseUI[]> => Promise.resolve(allCases.cases);
+): Promise<CasesUI> => Promise.resolve(allCases.cases);
 
 export const createAttachments = async (
   newComment: CommentRequest,

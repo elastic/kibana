@@ -901,8 +901,8 @@
               "pluginId": "cases",
               "scope": "common",
               "docId": "kibCasesPluginApi",
-              "section": "def-common.CasesUI",
-              "text": "CasesUI"
+              "section": "def-common.CasesFindResponseUI",
+              "text": "CasesFindResponseUI"
             },
             ">; getCasesStatus: (query: { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }>; getCasesMetrics: (query: { features: string[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; }>; bulkGet: <Field extends \"id\" | \"connector\" | \"tags\" | \"description\" | \"title\" | \"version\" | \"duration\" | \"status\" | \"settings\" | \"owner\" | \"severity\" | \"assignees\" | \"closed_at\" | \"closed_by\" | \"created_at\" | \"created_by\" | \"external_service\" | \"updated_at\" | \"updated_by\" | \"totalComment\" | \"totalAlerts\" | \"comments\" = \"id\" | \"connector\" | \"tags\" | \"description\" | \"title\" | \"version\" | \"duration\" | \"status\" | \"settings\" | \"owner\" | \"severity\" | \"assignees\" | \"closed_at\" | \"closed_by\" | \"created_at\" | \"created_by\" | \"external_service\" | \"updated_at\" | \"updated_by\" | \"totalComment\" | \"totalAlerts\" | \"comments\">(params: ",
             {
@@ -2280,10 +2280,10 @@
       },
       {
         "parentPluginId": "cases",
-        "id": "def-common.CasesUI",
+        "id": "def-common.CasesFindResponseUI",
         "type": "Type",
         "tags": [],
-        "label": "CasesUI",
+        "label": "CasesFindResponseUI",
         "description": [],
         "signature": [
           "Omit<{ cases: { description: string; status: ",
@@ -2379,10 +2379,32 @@
             "pluginId": "cases",
             "scope": "common",
             "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesUI",
+            "text": "CasesUI"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CasesUI",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesUI",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
             "section": "def-common.CaseUI",
             "text": "CaseUI"
           },
-          "[]; }"
+          "[]"
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
@@ -2486,7 +2508,7 @@
             "text": "CommentType"
           },
           ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | (string | number | boolean | any | any | null)[] | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | (string | number | boolean | any | any | null)[] | null; } | (string | number | boolean | { [x: string]: string | number | boolean | any | any | null; } | any | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null)[] | null; }; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; pushedAt: string | null; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
-          "Comment",
+          "CommentUI",
           "[]; }"
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
