@@ -13,6 +13,7 @@ jest.mock('../../utils/persist_saved_search', () => ({
 }));
 import { onSaveSearch } from './on_save_search';
 import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { getDiscoverStateContainer } from '../../services/discover_state';
 import { ReactElement } from 'react';
@@ -47,6 +48,35 @@ describe('onSaveSearch', () => {
     });
 
     expect(savedObjectsPlugin.showSaveModal).toHaveBeenCalled();
+  });
+
+  it('should consider whether a data view is time based', async () => {
+    let saveModal: ReactElement | undefined;
+    jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementation((modal) => {
+      saveModal = modal;
+    });
+
+    await onSaveSearch({
+      dataView: dataViewMock,
+      navigateTo: jest.fn(),
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+      state: getStateContainer(),
+      updateAdHocDataViewId: jest.fn(),
+    });
+
+    expect(saveModal?.props.isTimeBased).toBe(false);
+
+    await onSaveSearch({
+      dataView: dataViewWithTimefieldMock,
+      navigateTo: jest.fn(),
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+      state: getStateContainer(),
+      updateAdHocDataViewId: jest.fn(),
+    });
+
+    expect(saveModal?.props.isTimeBased).toBe(true);
   });
 
   it('should pass tags to the save modal', async () => {
