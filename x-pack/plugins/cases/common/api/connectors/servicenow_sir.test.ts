@@ -27,7 +27,7 @@ describe('ServiceNowSIRFieldsRT', () => {
     });
   });
 
-  it('has only name and owner in request', () => {
+  it('removes foo:bar attributes from request', () => {
     const query = ServiceNowSIRFieldsRT.decode({ ...defaultReq, foo: 'bar' });
 
     expect(query).toMatchObject({

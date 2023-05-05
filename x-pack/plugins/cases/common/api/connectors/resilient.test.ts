@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { JiraFieldsRT } from './jira';
+import { ResilientFieldsRT } from './resilient';
 
-describe('JiraFieldsRT', () => {
+describe('ResilientFieldsRT', () => {
   const defaultRequest = {
-    issueType: 'bug',
-    priority: 'high',
-    parent: '2',
+    severityCode: '6',
+    incidentTypes: ['19'],
   };
 
   it('has expected attributes in request', () => {
-    const query = JiraFieldsRT.decode(defaultRequest);
+    const query = ResilientFieldsRT.decode(defaultRequest);
 
     expect(query).toMatchObject({
       _tag: 'Right',
@@ -24,7 +23,7 @@ describe('JiraFieldsRT', () => {
   });
 
   it('removes foo:bar attributes from request', () => {
-    const query = JiraFieldsRT.decode({
+    const query = ResilientFieldsRT.decode({
       ...defaultRequest,
       foo: 'bar',
     });

@@ -17,7 +17,7 @@ describe('SwimlaneFieldsRT', () => {
     });
   });
 
-  it('has only name and owner in request', () => {
+  it('removes foo:bar attributes from request', () => {
     const query = SwimlaneFieldsRT.decode({ caseId: 'basic-case-id', foo: 'bar' });
 
     expect(query).toMatchObject({
