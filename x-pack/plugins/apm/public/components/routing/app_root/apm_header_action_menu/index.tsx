@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -28,6 +28,8 @@ import { useServiceName } from '../../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
 import { ServiceMap } from '../../../app/service_map';
+import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { MapSizeContext } from '../../../../context/map_size_context';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -55,10 +57,13 @@ export function ApmHeaderActionMenu() {
     false
   );
 
+  const { mapSize } = useContext(MapSizeContext);
+
   // Service map flyout
+  // const [isMapOpen, setIsMapOpen] = useLocalStorage('map menu state', false);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const handleFlyoutClose = () => {
-    setIsMapOpen((prevState) => !prevState);
+    setIsMapOpen(!isMapOpen);
   };
 
   return (
@@ -88,7 +93,6 @@ export function ApmHeaderActionMenu() {
         />
       )}
       <EuiHeaderLink
-        color="primary"
         href={kibanaHref('/app/home#/tutorial/apm')}
         iconType="indexOpen"
         data-test-subj="apmAddDataHeaderLink"
@@ -107,18 +111,21 @@ export function ApmHeaderActionMenu() {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
-      <InspectorHeaderLink />
       <EuiHeaderLink
+        color="primary"
         isActive={isMapOpen}
         isSelected={isMapOpen}
-        color="text"
         onClick={handleFlyoutClose}
         iconType="visMapRegion"
       >
         Map
       </EuiHeaderLink>
       {isMapOpen && (
-        <ServiceMap kuery="" environment="ENVIRONMENT_NOT_DEFINED" />
+        <ServiceMap
+          kuery=""
+          environment="ENVIRONMENT_NOT_DEFINED"
+          size={mapSize}
+        />
       )}
     </EuiHeaderLinks>
   );

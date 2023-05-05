@@ -18,7 +18,7 @@ import {
 } from '@kbn/observability-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
+import React, { useState } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
@@ -42,6 +42,7 @@ import { apmRouter } from '../apm_route_config';
 import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
 import { TrackPageview } from '../track_pageview';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
+import { MapSizeContext } from '../../../context/map_size_context';
 
 const storage = new Storage(localStorage);
 
@@ -55,6 +56,7 @@ export function ApmAppRoot({
   const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
+  const [mapSize, setMapSize] = useState<'big' | 'small'>('small');
 
   return (
     <RedirectAppLinks
@@ -63,48 +65,54 @@ export function ApmAppRoot({
       data-test-subj="apmMainContainer"
       role="main"
     >
-      <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
-          <i18nCore.Context>
-            <TimeRangeIdContextProvider>
-              <RouterProvider history={history} router={apmRouter as any}>
-                <ApmErrorBoundary>
-                  <RedirectDependenciesToDependenciesInventory>
-                    <RedirectWithDefaultEnvironment>
-                      <RedirectWithDefaultDateRange>
-                        <RedirectWithOffset>
-                          <TrackPageview>
-                            <UpdateExecutionContextOnRouteChange>
-                              <BreadcrumbsContextProvider>
-                                <UrlParamsProvider>
-                                  <LicenseProvider>
-                                    <AnomalyDetectionJobsContextProvider>
-                                      <InspectorContextProvider>
-                                        <ApmThemeProvider>
-                                          <MountApmHeaderActionMenu />
+      <MapSizeContext.Provider value={{ mapSize, setMapSize }}>
+        <ApmPluginContext.Provider value={apmPluginContextValue}>
+          <KibanaContextProvider
+            services={{ ...core, ...pluginsStart, storage }}
+          >
+            <i18nCore.Context>
+              <TimeRangeIdContextProvider>
+                <RouterProvider history={history} router={apmRouter as any}>
+                  <ApmErrorBoundary>
+                    <RedirectDependenciesToDependenciesInventory>
+                      <RedirectWithDefaultEnvironment>
+                        <RedirectWithDefaultDateRange>
+                          <RedirectWithOffset>
+                            <TrackPageview>
+                              <UpdateExecutionContextOnRouteChange>
+                                <BreadcrumbsContextProvider>
+                                  <UrlParamsProvider>
+                                    <LicenseProvider>
+                                      <AnomalyDetectionJobsContextProvider>
+                                        <InspectorContextProvider>
+                                          <ApmThemeProvider>
+                                            <MountApmHeaderActionMenu />
 
-                                          <Route
-                                            component={ScrollToTopOnPathChange}
-                                          />
-                                          <RouteRenderer />
-                                        </ApmThemeProvider>
-                                      </InspectorContextProvider>
-                                    </AnomalyDetectionJobsContextProvider>
-                                  </LicenseProvider>
-                                </UrlParamsProvider>
-                              </BreadcrumbsContextProvider>
-                            </UpdateExecutionContextOnRouteChange>
-                          </TrackPageview>
-                        </RedirectWithOffset>
-                      </RedirectWithDefaultDateRange>
-                    </RedirectWithDefaultEnvironment>
-                  </RedirectDependenciesToDependenciesInventory>
-                </ApmErrorBoundary>
-              </RouterProvider>
-            </TimeRangeIdContextProvider>
-          </i18nCore.Context>
-        </KibanaContextProvider>
-      </ApmPluginContext.Provider>
+                                            <Route
+                                              component={
+                                                ScrollToTopOnPathChange
+                                              }
+                                            />
+                                            <RouteRenderer />
+                                          </ApmThemeProvider>
+                                        </InspectorContextProvider>
+                                      </AnomalyDetectionJobsContextProvider>
+                                    </LicenseProvider>
+                                  </UrlParamsProvider>
+                                </BreadcrumbsContextProvider>
+                              </UpdateExecutionContextOnRouteChange>
+                            </TrackPageview>
+                          </RedirectWithOffset>
+                        </RedirectWithDefaultDateRange>
+                      </RedirectWithDefaultEnvironment>
+                    </RedirectDependenciesToDependenciesInventory>
+                  </ApmErrorBoundary>
+                </RouterProvider>
+              </TimeRangeIdContextProvider>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </ApmPluginContext.Provider>
+      </MapSizeContext.Provider>
     </RedirectAppLinks>
   );
 }
