@@ -44,7 +44,7 @@ const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader = () => {
   const { from, to } = useGlobalTime();
-  const filterQuery = useGlobalFilterQuery();
+  const { filterQuery } = useGlobalFilterQuery();
   const timerange = useMemo(
     () => ({
       from,

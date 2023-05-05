@@ -30,8 +30,10 @@ import { CasesTable } from '../components/detection_response/cases_table';
 import { CasesByStatus } from '../components/detection_response/cases_by_status';
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
+import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 
 const DetectionResponseComponent = () => {
+  const { filterQuery } = useGlobalFilterQuery();
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
@@ -59,7 +61,10 @@ const DetectionResponseComponent = () => {
                   <EuiFlexGroup>
                     {canReadAlerts && (
                       <EuiFlexItem>
-                        <AlertsByStatus signalIndexName={signalIndexName} />
+                        <AlertsByStatus
+                          signalIndexName={signalIndexName}
+                          additionalFilters={filterQuery ? [filterQuery] : undefined}
+                        />
                       </EuiFlexItem>
                     )}
                     {canReadCases && (

@@ -73,7 +73,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     return filter ? filter : undefined;
   }, [riskEntity, selectedSeverity]);
 
-  const filterQuery = useGlobalFilterQuery({
+  const { filterQuery } = useGlobalFilterQuery({
     extraFilters: severityFilter ? [severityFilter] : undefined,
   });
 
