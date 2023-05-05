@@ -99,7 +99,8 @@ export class JourneyFtrHarness {
 
   private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
-    this.context = await browser.newContext();
+    const browserContextArgs = this.auth.isCloud() ? {} : { bypassCSP: true };
+    this.context = await browser.newContext(browserContextArgs);
 
     if (this.journeyConfig.shouldAutoLogin()) {
       const cookie = await this.auth.login();
