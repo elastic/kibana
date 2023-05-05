@@ -23,6 +23,7 @@ export interface UseGetGroupSelectorArgs {
   groupingId: string;
   groupingState: GroupMap;
   maxGroupingLevels?: number;
+  onOptionsChange?: (newOptions: GroupOption[]) => void;
   onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
   tracker?: (
     type: UiCounterMetricType,
@@ -30,6 +31,64 @@ export interface UseGetGroupSelectorArgs {
     count?: number | undefined
   ) => void;
 }
+
+interface UseGetGroupSelectorStateless
+  extends Pick<
+    UseGetGroupSelectorArgs,
+    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels'
+  > {
+  onGroupChange: (selectedGroups: string[]) => void;
+}
+
+export const useGetGroupSelectorStateless = ({
+  defaultGroupingOptions,
+  groupingId,
+  fields,
+  onGroupChange,
+  maxGroupingLevels,
+}: UseGetGroupSelectorStateless) => {
+  const setSelectedGroups = useCallback(
+    (activeGroups: string[]) => {
+      onGroupChange(activeGroups);
+    },
+    [onGroupChange]
+  );
+
+  const onChange = useCallback(
+    (groupSelection: string) => {
+      const selectedGroups = ['none'];
+      if (selectedGroups.find((selected) => selected === groupSelection)) {
+        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
+        if (groups.length === 0) {
+          setSelectedGroups(['none']);
+        } else {
+          setSelectedGroups(groups);
+        }
+        return;
+      }
+
+      const newSelectedGroups = isNoneGroup([groupSelection])
+        ? [groupSelection]
+        : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
+      setSelectedGroups(newSelectedGroups);
+    },
+    [setSelectedGroups]
+  );
+
+  return (
+    <GroupSelector
+      {...{
+        groupingId,
+        groupsSelected: ['none'],
+        'data-test-subj': 'alerts-table-group-selector',
+        onGroupChange: onChange,
+        fields,
+        maxGroupingLevels,
+        options: defaultGroupingOptions,
+      }}
+    />
+  );
+};
 
 export const useGetGroupSelector = ({
   defaultGroupingOptions,
@@ -39,6 +98,7 @@ export const useGetGroupSelector = ({
   groupingState,
   maxGroupingLevels = 1,
   onGroupChange,
+  onOptionsChange,
   tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
@@ -59,17 +119,21 @@ export const useGetGroupSelector = ({
   const setOptions = useCallback(
     (newOptions: GroupOption[]) => {
       dispatch(groupActions.updateGroupOptions({ id: groupingId, newOptionList: newOptions }));
+      onOptionsChange?.(newOptions);
     },
-    [dispatch, groupingId]
+    [dispatch, groupingId, onOptionsChange]
   );
 
   const onChange = useCallback(
     (groupSelection: string) => {
+      console.log('onChange', groupSelection);
       if (selectedGroups.find((selected) => selected === groupSelection)) {
         const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
         if (groups.length === 0) {
+          console.log('onchnge 1', 'none');
           setSelectedGroups(['none']);
         } else {
+          console.log('onchnge 2', groups);
           setSelectedGroups(groups);
         }
         return;
@@ -79,6 +143,7 @@ export const useGetGroupSelector = ({
         ? [groupSelection]
         : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
       setSelectedGroups(newSelectedGroups);
+      console.log('onchnge 3', newSelectedGroups);
 
       // built-in telemetry: UI-counter
       tracker?.(

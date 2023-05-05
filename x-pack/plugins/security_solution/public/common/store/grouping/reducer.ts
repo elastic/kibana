@@ -6,17 +6,21 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { updateGroupSelector } from './actions';
-import type { GroupModel } from './types';
+import { getDefaultGroupingOptions } from '../../../detections/components/alerts_table/grouping_settings';
+import { updateGroups } from './actions';
+import type { Groups } from './types';
 
-export const initialGroupingState: GroupModel = {
-  groupSelector: null,
-};
+const initialState: Groups = {};
 
-export const groupsReducer = reducerWithInitialState(initialGroupingState).case(
-  updateGroupSelector,
-  (state, { groupSelector }) => ({
+export const groupsReducer = reducerWithInitialState(initialState).case(
+  updateGroups,
+  (state, { tableId, ...rest }) => ({
     ...state,
-    groupSelector,
+    [tableId]: {
+      activeGroups: [],
+      options: getDefaultGroupingOptions(tableId),
+      ...(state[tableId] ? state[tableId] : {}),
+      ...rest,
+    },
   })
 );
