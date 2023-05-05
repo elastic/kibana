@@ -294,6 +294,6 @@ export const OPEN_IN_ALERTS_TITLE_HOSTNAME = i18n.translate(
 export const OPEN_IN_ALERTS_TITLE_USERNAME = i18n.translate(
   'xpack.securitySolution.detectionResponse.openInAlertsUserName',
   {
-    defaultMessage: 'Username',
+    defaultMessage: 'User name',
   }
 );

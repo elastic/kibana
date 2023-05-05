@@ -111,11 +111,17 @@ export const HoverActionsPopover: React.FC<Props> = ({
       // This hack is required because we anchor the popover to the hover content instead
       // of anchoring it to the button that triggers the popover.
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
+      <div
+        ref={contentRef}
+        onMouseEnter={onMouseEnter}
+        onClick={closeExtraActions}
+        onFocus={onMouseEnter}
+        onBlur={closePopover}
+      >
         {children}
       </div>
     );
-  }, [onMouseEnter, closeExtraActions, children]);
+  }, [onMouseEnter, closeExtraActions, children, closePopover]);
 
   const panelStyle = useMemo(
     () => (anchorPosition === 'rightCenter' ? { marginTop: euiThemeVars.euiSizeS } : {}),
@@ -149,6 +155,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
                   action={action}
                   actionContext={actionContext}
                   showTooltip={showActionTooltips}
+                  onClick={closePopover}
                 />
               ))}
               {extraActions.length > 0 && (

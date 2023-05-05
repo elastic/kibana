@@ -140,7 +140,7 @@ describe('UserAlertsTable', () => {
     fireEvent.click(getByTestId('userSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'User name' },
     ]);
   });
 
@@ -151,7 +151,7 @@ describe('UserAlertsTable', () => {
     fireEvent.click(getByTestId('userSeverityAlertsTable-criticalLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'User name' },
       {
         fieldName: 'kibana.alert.severity',
         selectedOptions: ['critical'],
