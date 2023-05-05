@@ -94,14 +94,6 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       {stepData != null && stepDataDetails != null && (
         <EuiFlexGroup gutterSize="xs" direction="column" css={fullHeight}>
           <EuiFlexItem grow={false} key="header">
-            <div
-              data-test-subj="test"
-              css={css`
-                padding-left: 200px;
-              `}
-            >
-              TEST
-            </div>
             <HeaderSection title={i18n.ABOUT_TEXT}>
               {toggleOptions.length > 0 && (
                 <EuiButtonGroup
