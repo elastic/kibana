@@ -29,6 +29,10 @@ const prNumWithinMsgRe = /\(\#(\d+)\)/;
 try {
   const labels = pipe(head, parse, parseInt, fetchLabels)(`${process.env[parseTarget]}`);
   execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
+  execSync(`buildkite-agent annotate --context 'trez-gh-labels' `, {
+    input: labels,
+    stdio: ['pipe', 'inherit', 'inherit'],
+  });
   console.log('\n--- Labels from GET:');
   execSync(`buildkite-agent meta-data get gh_labels`);
 } catch (e) {
