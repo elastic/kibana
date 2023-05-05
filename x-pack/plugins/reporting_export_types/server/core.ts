@@ -17,9 +17,10 @@ import {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ReportingConfig } from '@kbn/reporting-plugin/server';
 import { ReportingConfigType } from '@kbn/reporting-plugin/server/config/schema';
-import { ExportTypesRegistry } from '@kbn/reporting-plugin/server/lib';
+import { checkLicense, ExportTypesRegistry } from '@kbn/reporting-plugin/server/lib';
 import { reportingEventLoggerFactory } from '@kbn/reporting-plugin/server/lib/event_logger/logger';
 import { IReport, ReportingStore } from '@kbn/reporting-plugin/server/lib/store';
 import { ReportTaskParams } from '@kbn/reporting-plugin/server/lib/tasks';
@@ -29,7 +30,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { ExecuteReportTask } from './routes/lib/execute_report';
 
 export interface ReportingExportTypesSetupDeps {
@@ -43,6 +44,7 @@ export interface ReportingExportTypesSetupDeps {
 }
 
 export interface ReportingExportTypesStartDeps {
+  licensing: LicensingPluginStart;
   store: ReportingStore;
   esClient: IClusterClient;
   data: DataPluginStart;
@@ -185,5 +187,17 @@ export class ReportingExportTypesCore {
     // @ts-ignore
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * License registry
+   */
+  public async getLicenseInfo() {
+    const { license$ } = (await this.getPluginStartDeps()).licensing;
+    const registry = this.getExportTypesRegistry();
+
+    return await Rx.firstValueFrom(
+      license$.pipe(map((license: any) => checkLicense(registry, license)))
+    );
   }
 }

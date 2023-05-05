@@ -51,13 +51,13 @@ export const authorizedUserPreRouting = <P, Q, B>(
         const authorizedRoles = [superuserRole, ...allowedRoles];
 
         if (!user.roles.find((role) => authorizedRoles.includes(role))) {
-          const body = i18n.translate('xpack.reporting.userAccessError.message', {
+          const body = i18n.translate('xpack.reportingExportTypes.userAccessError.message', {
             defaultMessage: `Ask your administrator for access to reporting features. {grantUserAccessDocs}.`,
             values: {
               grantUserAccessDocs:
                 `<a href=${docLinks.links.reporting.grantUserAccess} style="font-weight: 600;"
                     target="_blank" rel="noopener">` +
-                i18n.translate('xpack.reporting.userAccessError.learnMoreLink', {
+                i18n.translate('xpack.reportingExportTypes.userAccessError.learnMoreLink', {
                   defaultMessage: 'Learn more',
                 }) +
                 '</a>',

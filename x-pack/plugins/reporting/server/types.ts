@@ -76,7 +76,7 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
 ) => Promise<TaskRunResult>;
 
 export type CreateJobFnFactory<CreateJobFnType> = (
-  reporting: ReportingCore,
+  reporting: ReportingCore | ReportingExportTypesCore,
   logger: Logger
 ) => CreateJobFnType;
 

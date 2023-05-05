@@ -183,7 +183,7 @@ export class RequestHandler {
       statusCode: 500,
       body:
         err?.message ||
-        i18n.translate('xpack.reporting.errorHandler.unknownError', {
+        i18n.translate('xpack.reportingExportTypes.errorHandler.unknownError', {
           defaultMessage: 'Unknown error',
         }),
     });
