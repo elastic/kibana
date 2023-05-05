@@ -316,6 +316,13 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
+export interface ActionDetailsAgentState {
+  isCompleted: boolean;
+  wasSuccessful: boolean;
+  errors: undefined | string[];
+  completedAt: string | undefined;
+}
+
 export interface ActionDetails<
   TOutputContent extends object = object,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
@@ -360,15 +367,7 @@ export interface ActionDetails<
    * A map by Agent ID holding information about the action for the specific agent.
    * Helpful when action is sent to multiple agents
    */
-  agentState: Record<
-    string,
-    {
-      isCompleted: boolean;
-      wasSuccessful: boolean;
-      errors: undefined | string[];
-      completedAt: string | undefined;
-    }
-  >;
+  agentState: Record<string, ActionDetailsAgentState>;
   /**  action status */
   status: ResponseActionStatus;
   /** user that created the action */
