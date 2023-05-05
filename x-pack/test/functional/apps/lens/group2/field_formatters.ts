@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const fieldEditor = getService('fieldEditor');
 
-  describe('lens fields formatters tests', () => {
+  // flaky test: https://github.com/elastic/kibana/issues/156153
+  describe.skip('lens fields formatters tests', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -45,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.URL);
         await fieldEditor.setUrlFieldFormat('https://www.elastic.co?{{value}}');
         await fieldEditor.save();
+        await fieldEditor.waitUntilClosed();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.searchField('runtime');
         await PageObjects.lens.waitForField('runtimefield');
@@ -66,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.STATIC_LOOKUP);
         await fieldEditor.setStaticLookupFormat('CN', 'China');
         await fieldEditor.save();
+        await fieldEditor.waitUntilClosed();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
@@ -81,6 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.COLOR);
         await fieldEditor.setColorFormat('CN', '#ffffff', '#ff0000');
         await fieldEditor.save();
+        await fieldEditor.waitUntilClosed();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
@@ -98,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.STRING);
         await fieldEditor.setStringFormat('lower');
         await fieldEditor.save();
+        await fieldEditor.waitUntilClosed();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
@@ -113,6 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.TRUNCATE);
         await fieldEditor.setTruncateFormatLength('3');
         await fieldEditor.save();
+        await fieldEditor.waitUntilClosed();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
