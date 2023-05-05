@@ -13,23 +13,25 @@ import chalk from 'chalk';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-
-type PuppeteerRelease = string;
-type ChromeVersion = string;
-type ChromiumCommit = string;
-
-// We forked the Puppeteer node module for Kibana,
-// So we need to translate OUR version to the official Puppeteer Release
-const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
-  '5.4.1-patch.1': '5.4.1',
-};
+import {
+  type ChromeVersion,
+  type ChromiumCommit,
+  type ChromiumDashVersionType,
+  ChromiumDashVersionSchema,
+  forkCompatibilityMap,
+  PuppeteerPackageSchema,
+  type PuppeteerPackageType,
+  type PuppeteerRelease,
+} from './util';
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
-  const puppeteerPackageJson = JSON.parse(
+  const { version }: PuppeteerPackageType = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
   );
-  const { version } = puppeteerPackageJson;
+
+  PuppeteerPackageSchema.validate({ version });
+
   if (version == null) {
     throw new Error(
       'Could not get the Puppeteer version! Check node_modules/puppteer/package.json'
@@ -83,9 +85,17 @@ async function getChromiumCommit(version: ChromeVersion, log: ToolingLog): Promi
   const url = `https://chromiumdash.appspot.com/fetch_version?version=${version}`;
   log.info(`Fetching ${url}`);
   const fetchResponse = await fetch(url);
-  const chromeJson = await fetchResponse.json();
-  const revision = chromeJson.chromium_main_branch_position;
-  const commit = chromeJson.hashes.chromium;
+  const chromeJson: ChromiumDashVersionType = await fetchResponse.json();
+
+  const {
+    chromium_main_branch_position: revision,
+    hashes: { chromium: commit },
+  } = chromeJson;
+
+  ChromiumDashVersionSchema.validate({
+    chromium_main_branch_position: revision,
+    hashes: { chromium: commit },
+  });
 
   if (commit == null) {
     throw new Error(`Could not find a Chromium commit! Check ${url} in a browser.`);
