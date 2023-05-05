@@ -116,12 +116,12 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   const onOpenFlyout = useCallback(
     (vulnerabilityRow: VulnerabilityRecord) => {
       const vulnerabilityIndex = slicedPage.findIndex(
-        (vulnerability: VulnerabilityRecord) =>
-          vulnerability.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
-          vulnerability.resource?.id === vulnerabilityRow.resource?.id &&
-          vulnerability.vulnerability.package.name ===
+        (vulnerabilityRecord: VulnerabilityRecord) =>
+          vulnerabilityRecord.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
+          vulnerabilityRecord.resource?.id === vulnerabilityRow.resource?.id &&
+          vulnerabilityRecord.vulnerability.package.name ===
             vulnerabilityRow.vulnerability.package.name &&
-          vulnerability.vulnerability.package.version ===
+          vulnerabilityRecord.vulnerability.package.version ===
             vulnerabilityRow.vulnerability.package.version
       );
       setUrlQuery({
