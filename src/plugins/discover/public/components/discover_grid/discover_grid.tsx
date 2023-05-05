@@ -136,6 +136,10 @@ export interface DiscoverGridProps {
    */
   showTimeCol: boolean;
   /**
+   * Determines whether the full screen button should be displayed
+   */
+  showFullScreenButton?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
@@ -228,6 +232,7 @@ export const DiscoverGrid = ({
   setExpandedDoc,
   settings,
   showTimeCol,
+  showFullScreenButton = true,
   sort,
   useNewFieldsApi,
   isSortEnabled = true,
@@ -510,14 +515,16 @@ export const DiscoverGrid = ({
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           }
         : {
             ...toolbarVisibilityDefaults,
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           },
-    [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
+    [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
