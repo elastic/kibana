@@ -62,6 +62,16 @@ try {
       stdio: ['ignore', 'inherit', 'inherit'],
     }
   );
+  execSync(
+    `buildkite-agent meta-data set "gh_labels " < curl -s https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`,
+    {
+      stdio: ['ignore', 'inherit', 'inherit'],
+    }
+  );
+  // execSync(`buildkite-agent meta-data set '${key}'`, {
+  //   input: value,
+  //   stdio: ['pipe', 'inherit', 'inherit'],
+  // });
 } catch (e) {
   console.log('\n### Whoops, something happenned, prolly with jq:');
   console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
