@@ -34,6 +34,7 @@ import { ChartContent } from './chart_content';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -69,9 +70,12 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, riskEntity);
-
-    return filter ? JSON.stringify(filter.query) : undefined;
+    return filter ? filter : undefined;
   }, [riskEntity, selectedSeverity]);
+
+  const filterQuery = useGlobalFilterQuery({
+    extraFilters: severityFilter ? [severityFilter] : undefined,
+  });
 
   const timerange = useMemo(
     () => ({
@@ -87,7 +91,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     refetch: refetchKpi,
     inspect: inspectKpi,
   } = useRiskScoreKpi({
-    filterQuery: severityFilter,
+    filterQuery,
     skip: !toggleStatus,
     timerange,
     riskEntity,
@@ -110,7 +114,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isLicenseValid,
     isModuleEnabled,
   } = useRiskScore({
-    filterQuery: severityFilter,
+    filterQuery,
     skip: !toggleStatus,
     pagination: {
       cursorStart: 0,
