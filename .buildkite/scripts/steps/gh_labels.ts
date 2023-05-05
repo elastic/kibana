@@ -55,20 +55,15 @@ console.log(`\n### prNum: \n  ${prNum}`);
 //     console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
 //   }
 // })();
+const fetchLabels = (x: string) =>
+  execSync(`curl -s https://api.github.com/repos/elastic/kibana/issues/${x} | jq '.labels[].name'`)
+    .toString()
+    .trim()
+    .split('\n');
 try {
-  console.log('\n### Labels base:');
-  execSync(
-    `curl -s https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`,
-    {
-      stdio: ['ignore', 'inherit', 'inherit'],
-    }
-  );
-  const labels = () =>
-    execSync(
-      `curl -s https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`
-    ).toString();
-  console.log(`\n### labels from execSync w/ toString(): \n  ${labels()}`);
-  execSync(`buildkite-agent meta-data set gh_labels ${labels()}`);
+  const labels = fetchLabels(prNum);
+  console.log(`\n### labels from execSync w/ toString(): \n  ${labels}`);
+  execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
   console.log('\n### Labels from GET:');
   execSync(`buildkite-agent meta-data get gh_labels`);
 } catch (e) {
