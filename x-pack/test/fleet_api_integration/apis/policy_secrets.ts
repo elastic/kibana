@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// 👋 Hello, investigating a test failure in this file?
+// Each test relies on the previous test completing successfully.
+// So start investigating from earliest test failure in the file.
+
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
@@ -101,6 +106,9 @@ export default function (providerContext: FtrProviderContext) {
       });
       return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
+
+    let duplicatedAgentPolicyId: string;
+    let duplicatedPackagePolicyId: string;
     let createdPackagePolicy: any;
     let createdPackagePolicyId: string;
     let packageVarId: string;
@@ -110,17 +118,17 @@ export default function (providerContext: FtrProviderContext) {
     let expectedCompiledStream: any;
     let expectedCompiledInput: any;
 
-    function expectCompiledPolicyVars(policy: any) {
+    function expectCompiledPolicyVars(policy: any, packageVarIdIn: string = packageVarId) {
       expect(
         arrayIdsEqual(policy.secret_references, [
-          { id: packageVarId },
+          { id: packageVarIdIn },
           { id: streamVarId },
           { id: inputVarId },
         ])
       ).to.eql(true);
-      expect(policy.inputs[0].package_var_secret).to.eql(secretVar(packageVarId));
+      expect(policy.inputs[0].package_var_secret).to.eql(secretVar(packageVarIdIn));
       expect(policy.inputs[0].input_var_secret).to.eql(secretVar(inputVarId));
-      expect(policy.inputs[0].streams[0].package_var_secret).to.eql(secretVar(packageVarId));
+      expect(policy.inputs[0].streams[0].package_var_secret).to.eql(secretVar(packageVarIdIn));
       expect(policy.inputs[0].streams[0].input_var_secret).to.eql(secretVar(inputVarId));
       expect(policy.inputs[0].streams[0].stream_var_secret).to.eql(secretVar(streamVarId));
     }
@@ -347,6 +355,62 @@ export default function (providerContext: FtrProviderContext) {
       expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
       expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
       expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should not duplicate secrets after duplicating agent policy', async () => {
+      const { body: agentPolicy } = await supertest
+        .post(`/api/fleet/agent_policies/${agentPolicyId}/copy`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'copy',
+        })
+        .expect(200);
+
+      duplicatedAgentPolicyId = agentPolicy.item.id;
+
+      const { data: policyDoc } = await getLatestPolicyRevision(duplicatedAgentPolicyId);
+
+      duplicatedPackagePolicyId = policyDoc.inputs[0].package_policy_id;
+
+      expectCompiledPolicyVars(policyDoc, updatedPackageVarId);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3);
+
+      const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        acc[secret._id] = secret._source.value;
+        return acc;
+      }, {});
+
+      expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
+      expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
+      expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should not delete used secrets on package policy delete', async () => {
+      return supertest
+        .delete(`/api/fleet/package_policies/${duplicatedPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3);
     });
 
     it('should delete all secrets on package policy delete', async () => {
