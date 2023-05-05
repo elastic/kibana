@@ -17,19 +17,19 @@ import {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import { ReportingConfig } from '@kbn/reporting-plugin/server';
+import { ReportingConfigType } from '@kbn/reporting-plugin/server/config/schema';
 import { ExportTypesRegistry } from '@kbn/reporting-plugin/server/lib';
 import { reportingEventLoggerFactory } from '@kbn/reporting-plugin/server/lib/event_logger/logger';
 import { IReport, ReportingStore } from '@kbn/reporting-plugin/server/lib/store';
 import { ReportTaskParams } from '@kbn/reporting-plugin/server/lib/tasks';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ReportingExportTypesConfigType } from './config';
-import { ReportingExportTypesConfig } from './config/config';
 import { ExecuteReportTask } from './routes/lib/execute_report';
 
 export interface ReportingExportTypesSetupDeps {
@@ -49,24 +49,21 @@ export interface ReportingExportTypesStartDeps {
   logger: Logger;
   security?: SecurityPluginStart;
   uiSettings: UiSettingsServiceStart;
+  screenshotting: ScreenshottingStart;
 }
 
 export class ReportingExportTypesCore {
   private pluginSetupDeps?: ReportingExportTypesSetupDeps;
   private pluginStartDeps?: ReportingExportTypesStartDeps;
-  //   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingExportTypesStartDeps>(); // observe async background startDeps
-  private config?: ReportingExportTypesConfig;
   private deprecatedAllowedRoles: false | string[] = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private executeTask: ExecuteReportTask;
-  //   private exportTypesRegistry = getExportTypesRegistry();
   private executing: Set<string>;
   private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
+  private config?: ReportingConfigType;
 
-  constructor(
-    private logger: Logger,
-    context: PluginInitializerContext<ReportingExportTypesConfigType>
-  ) {
+  constructor(private logger: Logger, context: PluginInitializerContext) {
     // this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
@@ -116,11 +113,11 @@ export class ReportingExportTypesCore {
     return new ReportingEventLogger(report, task);
   }
 
-  public getConfig(): ReportingExportTypesConfig {
+  public getConfig(): ReportingConfig {
     if (!this.config) {
       throw new Error('Config is not yet initialized');
     }
-    return this.config;
+    return this.config as unknown as ReportingConfig;
   }
 
   public async getDataService() {
@@ -179,5 +176,14 @@ export class ReportingExportTypesCore {
 
   public getKibanaShutdown$(): Rx.Observable<void> {
     return this.kibanaShuttingDown$.pipe(take(1));
+  }
+
+  /*
+   * Allows config to be set in the background
+   */
+  public setConfig(config: ReportingConfig) {
+    // @ts-ignore
+    this.config = config;
+    this.pluginSetup$.next(true);
   }
 }

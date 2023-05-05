@@ -9,9 +9,10 @@ import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
-import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import { getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 import { DiagnosticResponse } from '.';
 import { ReportingExportTypesCore } from '../../core';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(
@@ -39,18 +40,18 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
 const path = `${API_DIAGNOSE_URL}/browser`;
 
 export const registerDiagnoseBrowser = (reporting: ReportingExportTypesCore, logger: Logger) => {
-  const { router } = reporting;
+  const { router } = reporting.getPluginSetupDeps();
 
   router.post(
     { path: `${path}`, validate: {} },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-      const { docLinks } = reporting;
+      const { docLinks } = reporting.getPluginSetupDeps();
 
       const logsToHelpMap = logsToHelpMapFactory(docLinks);
       try {
-        const { screenshotting } = reporting;
+        const { screenshotting } = await reporting.getPluginStartDeps();
         const logs = await lastValueFrom(screenshotting.diagnose());
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 

@@ -11,14 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
 import { lastValueFrom } from 'rxjs';
 import { getAbsoluteUrlFactory } from '@kbn/reporting-plugin/common/get_absolute_url';
-import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import { getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 import { generatePngObservable } from '../..';
 import { ReportingExportTypesCore } from '../../core';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 
 export const registerDiagnoseScreenshot = (reporting: ReportingExportTypesCore, logger: Logger) => {
-  const { router } = reporting;
+  const { router } = reporting.getPluginSetupDeps();
 
   router.post(
     { path, validate: {} },

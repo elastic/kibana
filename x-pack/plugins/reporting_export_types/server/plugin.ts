@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
+import { Plugin, PluginInitializerContext, Logger, CoreSetup } from '@kbn/core/server';
 import { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
 import type {
   CreateJobFn,
@@ -45,7 +45,7 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     this.logger = initContext.logger.get();
   }
 
-  public setup({}, { reporting, fieldFormats }: ExportTypesPluginSetupDependencies) {
+  public setup(core: CoreSetup, { reporting, fieldFormats }: ExportTypesPluginSetupDependencies) {
     const reportingExportTypesCore = new ReportingExportTypesCore(this.logger, this.initContext);
 
     /**
@@ -69,10 +69,11 @@ export class ExportTypesPlugin implements Plugin<void, void> {
         getType === getTypeCsvFromSavedObjectImmediate
       ) {
         return (
-          setFieldFormats(fieldFormats),
+          // setFieldFormats(fieldFormats),
           reporting.registerExportType(
             getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
-          )
+          ),
+          setFieldFormats(fieldFormats)
         );
       } else {
         return reporting.registerExportType(
