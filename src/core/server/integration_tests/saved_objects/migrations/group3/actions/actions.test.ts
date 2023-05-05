@@ -706,7 +706,9 @@ describe('migration actions', () => {
 
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
-  describe('reindex & waitForReindexTask', () => {
+  //
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/156903
+  describe.skip('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
