@@ -7,10 +7,11 @@
 
 import { useEffect, useState } from 'react';
 
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
 import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
 
-interface UseUnallowedValues {
+export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
   error: string | null;
   loading: boolean;
@@ -27,6 +28,7 @@ export const useUnallowedValues = ({
     string,
     UnallowedValueCount[]
   > | null>(null);
+  const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -39,14 +41,9 @@ export const useUnallowedValues = ({
 
     async function fetchData() {
       try {
-        // if (indexName === '.ds-logs-endpoint.alerts-default-2023.01.17-000001') {
-        //   throw new Error(
-        //     'simulated useUnallowedValues failure just for .ds-logs-endpoint.alerts-default-2023.01.17-000001'
-        //   );
-        // }
-
         const searchResults = await fetchUnallowedValues({
           abortController,
+          httpFetch,
           indexName,
           requestItems,
         });
@@ -61,7 +58,7 @@ export const useUnallowedValues = ({
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(e);
+          setError(e.message);
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -75,7 +72,7 @@ export const useUnallowedValues = ({
     return () => {
       abortController.abort();
     };
-  }, [indexName, requestItems, setError]);
+  }, [httpFetch, indexName, requestItems, setError]);
 
   return { unallowedValues, error, loading };
 };

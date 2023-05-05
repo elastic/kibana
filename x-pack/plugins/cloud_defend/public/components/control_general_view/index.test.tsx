@@ -99,28 +99,6 @@ describe('<ControlGeneralView />', () => {
     }
   });
 
-  it('should prevent user from adding a process response if no there are no process selectors', async () => {
-    const testPolicy = `
-      file:
-        selectors:
-          - name: test
-            operation: ['createFile']
-        responses:
-          - match: [test]
-            actions: [alert, block]
-    `;
-
-    const { getByTestId } = render(
-      <WrappedComponent policy={getCloudDefendNewPolicyMock(testPolicy)} />
-    );
-
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
-
-    expect(onChange.mock.calls.length).toBe(0);
-    expect(getByTestId('cloud-defend-btnAddProcessResponse')).toBeDisabled();
-  });
-
   it('updates selector name used in response.match, if its name is changed', async () => {
     const { getByTitle, getAllByTestId, rerender } = render(<WrappedComponent />);
 

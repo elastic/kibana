@@ -63,7 +63,7 @@ export const SearchApplicationAPI = () => {
               )}{' '}
               <EuiLink
                 href={docLinks.apiKeys}
-                data-telemetry-id="entSearchContent-searchApplications-api-step1-learnMoreLink"
+                data-telemetry-id="entSearchApplications-searchApplication-api-step1-learnMoreLink"
                 external
                 target="_blank"
               >
@@ -83,7 +83,7 @@ export const SearchApplicationAPI = () => {
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
-                data-telemetry-id="entSearchContent-searchApplications-api-step1-createApiKeyButton"
+                data-telemetry-id="entSearchApplications-searchApplication-api-step1-createApiKeyButton"
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.searchApplication.api.step1.createAPIKeyButton',
@@ -97,7 +97,7 @@ export const SearchApplicationAPI = () => {
               <EuiButton
                 iconSide="left"
                 iconType="popout"
-                data-telemetry-id="entSearchContent-searchApplications-api-step1-viewKeysButton"
+                data-telemetry-id="entSearchApplications-searchApplication-api-step1-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
                     shouldNotCreateHref: true,
