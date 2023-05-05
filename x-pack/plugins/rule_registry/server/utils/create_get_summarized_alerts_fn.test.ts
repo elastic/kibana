@@ -12,6 +12,7 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_END,
   ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -201,6 +202,15 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
+                },
+              },
+              {
                 term: {
                   [EVENT_ACTION]: 'open',
                 },
@@ -237,6 +247,15 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
+                },
+              },
+              {
                 term: {
                   [EVENT_ACTION]: 'active',
                 },
@@ -270,6 +289,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
                 },
               },
               {
@@ -932,6 +960,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
                 },
               },
               {
@@ -2128,6 +2165,15 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
+                },
+              },
+              {
                 term: {
                   [EVENT_ACTION]: 'open',
                 },
@@ -2214,6 +2260,15 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
+                },
+              },
+              {
                 term: {
                   [EVENT_ACTION]: 'active',
                 },
@@ -2297,6 +2352,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_MAINTENANCE_WINDOW_IDS,
+                    },
+                  },
                 },
               },
               {

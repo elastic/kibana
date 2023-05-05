@@ -62,7 +62,6 @@ export const queryExecutor = async ({
 
     const license = await firstValueFrom(licensing.license$);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
-    const hasEnterpriseLicense = license.hasAtLeast('enterprise');
 
     const result =
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
@@ -98,7 +97,6 @@ export const queryExecutor = async ({
           };
 
     if (
-      hasPlatinumLicense &&
       completeRule.ruleParams.responseActions?.length &&
       result.createdSignalsCount &&
       scheduleNotificationResponseActionsService
@@ -106,7 +104,6 @@ export const queryExecutor = async ({
       scheduleNotificationResponseActionsService({
         signals: result.createdSignals,
         responseActions: completeRule.ruleParams.responseActions,
-        hasEnterpriseLicense,
       });
     }
 
