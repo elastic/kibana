@@ -169,10 +169,11 @@ function useServicesDetailedStatisticsFetcher({
   const cy = useContext(CytoscapeContext);
   cy.add(currentPageMapElements);
   window.cy = cy;
-  console.log({ currentPageMapElements });
+
   // // We do a fit if we're going from 0 to >0 elements
   // const fit = cy.elements().length === 0;
   // cy.trigger('custom:data', [fit]);
+
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (

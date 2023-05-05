@@ -18,7 +18,7 @@ import {
 } from '@kbn/observability-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
@@ -64,7 +64,6 @@ export function ApmAppRoot({
 
   const theme = { eui: euiDarkVars, darkMode: true };
   const cy = cytoscape(getCytoscapeOptions(theme, false));
-  useCytoscapeEventHandlers({ cy, serviceName: 'test', theme });
 
   return (
     <RedirectAppLinks
@@ -74,54 +73,55 @@ export function ApmAppRoot({
       role="main"
     >
       <MapSizeContext.Provider value={{ mapSize, setMapSize }}>
-        <CytoscapeContext.Provider value={cy}>
-          <ApmPluginContext.Provider value={apmPluginContextValue}>
-            <KibanaContextProvider
-              services={{ ...core, ...pluginsStart, storage }}
-            >
-              <i18nCore.Context>
-                <TimeRangeIdContextProvider>
-                  <RouterProvider history={history} router={apmRouter as any}>
-                    <ApmErrorBoundary>
-                      <RedirectDependenciesToDependenciesInventory>
-                        <RedirectWithDefaultEnvironment>
-                          <RedirectWithDefaultDateRange>
-                            <RedirectWithOffset>
-                              <TrackPageview>
-                                <UpdateExecutionContextOnRouteChange>
-                                  <BreadcrumbsContextProvider>
-                                    <UrlParamsProvider>
-                                      <LicenseProvider>
-                                        <AnomalyDetectionJobsContextProvider>
-                                          <InspectorContextProvider>
-                                            <ApmThemeProvider>
+        <ApmPluginContext.Provider value={apmPluginContextValue}>
+          <KibanaContextProvider
+            services={{ ...core, ...pluginsStart, storage }}
+          >
+            <i18nCore.Context>
+              <TimeRangeIdContextProvider>
+                <RouterProvider history={history} router={apmRouter as any}>
+                  <ApmErrorBoundary>
+                    <RedirectDependenciesToDependenciesInventory>
+                      <RedirectWithDefaultEnvironment>
+                        <RedirectWithDefaultDateRange>
+                          <RedirectWithOffset>
+                            <TrackPageview>
+                              <UpdateExecutionContextOnRouteChange>
+                                <BreadcrumbsContextProvider>
+                                  <UrlParamsProvider>
+                                    <LicenseProvider>
+                                      <AnomalyDetectionJobsContextProvider>
+                                        <InspectorContextProvider>
+                                          <ApmThemeProvider>
+                                            <CytoscapeContext.Provider
+                                              value={cy}
+                                            >
                                               <MountApmHeaderActionMenu />
-
                                               <Route
                                                 component={
                                                   ScrollToTopOnPathChange
                                                 }
                                               />
                                               <RouteRenderer />
-                                            </ApmThemeProvider>
-                                          </InspectorContextProvider>
-                                        </AnomalyDetectionJobsContextProvider>
-                                      </LicenseProvider>
-                                    </UrlParamsProvider>
-                                  </BreadcrumbsContextProvider>
-                                </UpdateExecutionContextOnRouteChange>
-                              </TrackPageview>
-                            </RedirectWithOffset>
-                          </RedirectWithDefaultDateRange>
-                        </RedirectWithDefaultEnvironment>
-                      </RedirectDependenciesToDependenciesInventory>
-                    </ApmErrorBoundary>
-                  </RouterProvider>
-                </TimeRangeIdContextProvider>
-              </i18nCore.Context>
-            </KibanaContextProvider>
-          </ApmPluginContext.Provider>
-        </CytoscapeContext.Provider>
+                                            </CytoscapeContext.Provider>
+                                          </ApmThemeProvider>
+                                        </InspectorContextProvider>
+                                      </AnomalyDetectionJobsContextProvider>
+                                    </LicenseProvider>
+                                  </UrlParamsProvider>
+                                </BreadcrumbsContextProvider>
+                              </UpdateExecutionContextOnRouteChange>
+                            </TrackPageview>
+                          </RedirectWithOffset>
+                        </RedirectWithDefaultDateRange>
+                      </RedirectWithDefaultEnvironment>
+                    </RedirectDependenciesToDependenciesInventory>
+                  </ApmErrorBoundary>
+                </RouterProvider>
+              </TimeRangeIdContextProvider>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </ApmPluginContext.Provider>
       </MapSizeContext.Provider>
     </RedirectAppLinks>
   );
@@ -130,6 +130,10 @@ export function ApmAppRoot({
 function MountApmHeaderActionMenu() {
   const { setHeaderActionMenu, theme$ } =
     useApmPluginContext().appMountParameters;
+
+  const cy = useContext(CytoscapeContext);
+  const theme = { eui: euiDarkVars, darkMode: true };
+  useCytoscapeEventHandlers({ cy, serviceName: 'test', theme });
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>

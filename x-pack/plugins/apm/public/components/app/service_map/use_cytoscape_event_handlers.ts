@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
 import { useEffect } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 /*
@@ -97,6 +98,8 @@ export function useCytoscapeEventHandlers({
 }) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
+  const { core } = useApmPluginContext();
+
   useEffect(() => {
     const nodeHeight = getNodeHeight(theme);
 
@@ -153,6 +156,11 @@ export function useCytoscapeEventHandlers({
     const selectHandler: cytoscape.EventHandler = (event) => {
       trackApmEvent({ metric: 'service_map_node_select' });
       resetConnectedEdgeStyle(event.cy, event.target);
+
+      const serviceName = event.target.data('service.name');
+      core.application.navigateToUrl(
+        core.http.basePath.prepend(`/app/apm/services/${serviceName}`)
+      );
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
