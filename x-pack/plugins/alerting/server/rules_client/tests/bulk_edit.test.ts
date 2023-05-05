@@ -2417,7 +2417,7 @@ describe('bulkEdit()', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.rules).toHaveLength(0);
       expect(result.errors[0].message).toBe(
-        'Error updating rule: the interval is longer than the action frequencies: 5m, 10s'
+        `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
     });
   });

@@ -687,7 +687,7 @@ async function getUpdatedAttributesFromOperations(
       }
       default: {
         if (operation.field === 'schedule') {
-          validateScheduleOperation(operation.value, attributes.actions);
+          validateScheduleOperation(operation.value, attributes.actions, rule.id);
         }
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
           operation,
@@ -748,7 +748,8 @@ function validateScheduleInterval(
  */
 function validateScheduleOperation(
   schedule: RawRule['schedule'],
-  actions: RawRule['actions']
+  actions: RawRule['actions'],
+  ruleId: string
 ): void {
   const scheduleInterval = parseDuration(schedule.interval);
   const actionsWithInvalidThrottles = [];
@@ -765,9 +766,7 @@ function validateScheduleOperation(
 
   if (actionsWithInvalidThrottles.length > 0) {
     throw Error(
-      `Error updating rule: the interval is longer than the action frequencies: ${actionsWithInvalidThrottles
-        .map((action) => action.frequency?.throttle)
-        .join(', ')}`
+      `Error updating rule with ID "${ruleId}": the interval ${schedule.interval} is longer than the action frequencies`
     );
   }
 }
