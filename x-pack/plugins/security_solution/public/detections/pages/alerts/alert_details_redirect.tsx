@@ -11,6 +11,7 @@ import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { FilterItemObj } from '../../../common/components/filter_group/types';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
@@ -64,7 +65,7 @@ export const AlertDetailsRedirect = () => {
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
   const statusPageFilter: FilterItemObj = {
-    fieldName: 'kibana.alert.workflow_status',
+    fieldName: ALERT_WORKFLOW_STATUS,
     title: 'Status',
     selectedOptions: [],
     existsSelected: false,

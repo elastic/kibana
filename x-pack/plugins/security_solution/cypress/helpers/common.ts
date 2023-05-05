@@ -26,6 +26,7 @@ export const getDataTestSubjectSelectorStartWith = (dataTestSubjectValue: string
 export const getClassSelector = (className: string) => `.${className}`;
 
 export const getLocalstorageEntryAsObject = (storage: Cypress.StorageByOrigin, field: string) => {
+  // baseUrl value from x-pack/plugins/security_solution/cypress/cypress.config.ts
   const envLocalstorage = storage?.['http://localhost:5620'];
   let result;
   if (envLocalstorage && envLocalstorage[field]) {
