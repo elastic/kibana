@@ -42,7 +42,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 }) => {
   const [requestInFlight, setRequestInFlightLoading] = useState(false);
   const isLoading = loading || requestInFlight;
-  const isDisabled = !!disabled || !snoozeSettings;
+  const isDisabled = Boolean(disabled) || !snoozeSettings;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
