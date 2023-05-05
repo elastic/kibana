@@ -8,28 +8,21 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiPanel,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiHeaderLink,
   EuiHeaderLinks,
-  EuiTitle,
 } from '@elastic/eui';
-import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useContext } from 'react';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
+import { apmLabsButton } from '@kbn/observability-plugin/common';
+import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { useServiceName } from '../../../../hooks/use_service_name';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
+import { ServiceMap } from '../../../app/service_map';
+import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
-import { useServiceName } from '../../../../hooks/use_service_name';
-import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
-import { ServiceMap } from '../../../app/service_map';
-import { useLocalStorage } from '../../../../hooks/use_local_storage';
-import { MapSizeContext } from '../../../../context/map_size_context';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -57,13 +50,16 @@ export function ApmHeaderActionMenu() {
     false
   );
 
-  const { mapSize } = useContext(MapSizeContext);
-
   // Service map flyout
   // const [isMapOpen, setIsMapOpen] = useLocalStorage('map menu state', false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
+  //  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isMapOpenAsString, setIsMapOpen] = useLocalStorage(
+    'isMapOpen',
+    'false'
+  );
+  const isMapOpen = isMapOpenAsString !== 'false';
   const handleFlyoutClose = () => {
-    setIsMapOpen(!isMapOpen);
+    setIsMapOpen(String(!isMapOpen));
   };
 
   return (
@@ -121,11 +117,7 @@ export function ApmHeaderActionMenu() {
         Map
       </EuiHeaderLink>
       {isMapOpen && (
-        <ServiceMap
-          kuery=""
-          environment="ENVIRONMENT_NOT_DEFINED"
-          size={mapSize}
-        />
+        <ServiceMap kuery="" environment="ENVIRONMENT_NOT_DEFINED" />
       )}
     </EuiHeaderLinks>
   );

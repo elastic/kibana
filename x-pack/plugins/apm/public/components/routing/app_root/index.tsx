@@ -42,7 +42,6 @@ import { apmRouter } from '../apm_route_config';
 import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
 import { TrackPageview } from '../track_pageview';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
-import { MapSizeContext } from '../../../context/map_size_context';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
 import cytoscape from 'cytoscape';
 import { getCytoscapeOptions } from '../../app/service_map/cytoscape_options';
@@ -60,10 +59,10 @@ export function ApmAppRoot({
   const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const [mapSize, setMapSize] = useState<'big' | 'small'>('small');
 
   const theme = { eui: euiDarkVars, darkMode: true };
   const cy = cytoscape(getCytoscapeOptions(theme, false));
+  window.cy = cy;
 
   return (
     <RedirectAppLinks
@@ -72,57 +71,51 @@ export function ApmAppRoot({
       data-test-subj="apmMainContainer"
       role="main"
     >
-      <MapSizeContext.Provider value={{ mapSize, setMapSize }}>
-        <ApmPluginContext.Provider value={apmPluginContextValue}>
-          <KibanaContextProvider
-            services={{ ...core, ...pluginsStart, storage }}
-          >
-            <i18nCore.Context>
-              <TimeRangeIdContextProvider>
-                <RouterProvider history={history} router={apmRouter as any}>
-                  <ApmErrorBoundary>
-                    <RedirectDependenciesToDependenciesInventory>
-                      <RedirectWithDefaultEnvironment>
-                        <RedirectWithDefaultDateRange>
-                          <RedirectWithOffset>
-                            <TrackPageview>
-                              <UpdateExecutionContextOnRouteChange>
-                                <BreadcrumbsContextProvider>
-                                  <UrlParamsProvider>
-                                    <LicenseProvider>
-                                      <AnomalyDetectionJobsContextProvider>
-                                        <InspectorContextProvider>
-                                          <ApmThemeProvider>
-                                            <CytoscapeContext.Provider
-                                              value={cy}
-                                            >
-                                              <MountApmHeaderActionMenu />
-                                              <Route
-                                                component={
-                                                  ScrollToTopOnPathChange
-                                                }
-                                              />
-                                              <RouteRenderer />
-                                            </CytoscapeContext.Provider>
-                                          </ApmThemeProvider>
-                                        </InspectorContextProvider>
-                                      </AnomalyDetectionJobsContextProvider>
-                                    </LicenseProvider>
-                                  </UrlParamsProvider>
-                                </BreadcrumbsContextProvider>
-                              </UpdateExecutionContextOnRouteChange>
-                            </TrackPageview>
-                          </RedirectWithOffset>
-                        </RedirectWithDefaultDateRange>
-                      </RedirectWithDefaultEnvironment>
-                    </RedirectDependenciesToDependenciesInventory>
-                  </ApmErrorBoundary>
-                </RouterProvider>
-              </TimeRangeIdContextProvider>
-            </i18nCore.Context>
-          </KibanaContextProvider>
-        </ApmPluginContext.Provider>
-      </MapSizeContext.Provider>
+      <ApmPluginContext.Provider value={apmPluginContextValue}>
+        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
+          <i18nCore.Context>
+            <TimeRangeIdContextProvider>
+              <RouterProvider history={history} router={apmRouter as any}>
+                <ApmErrorBoundary>
+                  <RedirectDependenciesToDependenciesInventory>
+                    <RedirectWithDefaultEnvironment>
+                      <RedirectWithDefaultDateRange>
+                        <RedirectWithOffset>
+                          <TrackPageview>
+                            <UpdateExecutionContextOnRouteChange>
+                              <BreadcrumbsContextProvider>
+                                <UrlParamsProvider>
+                                  <LicenseProvider>
+                                    <AnomalyDetectionJobsContextProvider>
+                                      <InspectorContextProvider>
+                                        <ApmThemeProvider>
+                                          <CytoscapeContext.Provider value={cy}>
+                                            <MountApmHeaderActionMenu />
+                                            <Route
+                                              component={
+                                                ScrollToTopOnPathChange
+                                              }
+                                            />
+                                            <RouteRenderer />
+                                          </CytoscapeContext.Provider>
+                                        </ApmThemeProvider>
+                                      </InspectorContextProvider>
+                                    </AnomalyDetectionJobsContextProvider>
+                                  </LicenseProvider>
+                                </UrlParamsProvider>
+                              </BreadcrumbsContextProvider>
+                            </UpdateExecutionContextOnRouteChange>
+                          </TrackPageview>
+                        </RedirectWithOffset>
+                      </RedirectWithDefaultDateRange>
+                    </RedirectWithDefaultEnvironment>
+                  </RedirectDependenciesToDependenciesInventory>
+                </ApmErrorBoundary>
+              </RouterProvider>
+            </TimeRangeIdContextProvider>
+          </i18nCore.Context>
+        </KibanaContextProvider>
+      </ApmPluginContext.Provider>
     </RedirectAppLinks>
   );
 }

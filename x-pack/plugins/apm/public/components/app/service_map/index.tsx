@@ -8,36 +8,35 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import React, { ReactNode, useContext } from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import React, { ReactNode } from 'react';
+import { Environment } from '../../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
-  invalidLicenseMessage,
   SERVICE_MAP_TIMEOUT_ERROR,
+  invalidLicenseMessage,
 } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useAnyOfApmParams, useApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTheme } from '../../../hooks/use_theme';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { LicensePrompt } from '../../shared/license_prompt';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Controls } from './controls';
+import { ControlsBottom } from './controls_bottom';
 import { Cytoscape } from './cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
+import { DisabledPrompt } from './disabled_prompt';
 import { EmptyBanner } from './empty_banner';
 import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
-import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { Environment } from '../../../../common/environment_rt';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { DisabledPrompt } from './disabled_prompt';
-import { ControlsBottom } from './controls_bottom';
 
 function useMapElements() {
   //return useContext(MapContext);
@@ -114,25 +113,30 @@ export function ServiceMap({
   start,
   end,
   serviceGroupId,
-  size,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
-  size: 'big' | 'small';
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
   const serviceName = 'test service name';
+  const status = FETCH_STATUS.SUCCESS;
   //  const serviceName = useServiceName();
-
+  const [mapSize, setMapSize] = useLocalStorage<'big' | 'small'>(
+    'mapSize',
+    'small'
+  );
   const { config } = useApmPluginContext();
   const data = { elements: [] };
   const { ref, height, width } = useRefDimensions();
   const dimensions =
-    size === 'big' ? { height: 900, width: 900 } : { height: 300, width: 300 };
+    mapSize === 'big'
+      ? { height: 900, width: 900 }
+      : { height: 300, width: 300 };
+
   // Temporary hack to work around bottom padding introduced by EuiPage
   //const PADDING_BOTTOM = 24;
   //const heightWithPadding = height - PADDING_BOTTOM;
@@ -157,27 +161,27 @@ export function ServiceMap({
     );
   }
 
-  if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
-    return (
-      <PromptContainer>
-        <EmptyPrompt />
-      </PromptContainer>
-    );
-  }
+  // if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
+  //   return (
+  //     <PromptContainer>
+  //       <EmptyPrompt />
+  //     </PromptContainer>
+  //   );
+  // }
 
-  if (
-    status === FETCH_STATUS.FAILURE &&
-    error &&
-    'body' in error &&
-    error.body?.statusCode === 500 &&
-    error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
-  ) {
-    return (
-      <PromptContainer>
-        <TimeoutPrompt isGlobalServiceMap={!serviceName} />
-      </PromptContainer>
-    );
-  }
+  // if (
+  //   status === FETCH_STATUS.FAILURE &&
+  //   error &&
+  //   'body' in error &&
+  //   error.body?.statusCode === 500 &&
+  //   error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
+  // ) {
+  //   return (
+  //     <PromptContainer>
+  //       <TimeoutPrompt isGlobalServiceMap={!serviceName} />
+  //     </PromptContainer>
+  //   );
+  // }
 
   return (
     <EuiPanel
@@ -203,7 +207,7 @@ export function ServiceMap({
           style={getCytoscapeDivStyle(theme, status)}
         >
           <Controls />
-          <ControlsBottom />
+          <ControlsBottom mapSize={mapSize} setMapSize={setMapSize} />
           {serviceName && <EmptyBanner />}
           {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
           <Popover

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -167,8 +167,10 @@ function useServicesDetailedStatisticsFetcher({
     };
   });
   const cy = useContext(CytoscapeContext);
-  cy.add(currentPageMapElements);
-  window.cy = cy;
+
+  useEffect(() => {
+    cy.add(currentPageMapElements);
+  }, [currentPageMapElements]);
 
   // // We do a fit if we're going from 0 to >0 elements
   // const fit = cy.elements().length === 0;

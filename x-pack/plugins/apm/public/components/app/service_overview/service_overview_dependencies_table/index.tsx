@@ -8,7 +8,7 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode, useContext, useEffect } from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
@@ -47,7 +47,7 @@ export function ServiceOverviewDependenciesTable({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName, transactionType, agentName } = useApmServiceContext();
 
   const trackEvent = useUiTracker();
 
@@ -123,14 +123,23 @@ export function ServiceOverviewDependenciesTable({
     }
   });
   const cy = useContext(CytoscapeContext);
-  if (Array.isArray(dependencyNodes)) {
-    cy.add(dependencyNodes);
-  }
-  if (Array.isArray(dependencyEdges)) {
-    cy.add(dependencyEdges);
-  }
-  window.cy = cy;
-
+  useEffect(() => {
+    if (cy.$(`#{serviceName}`).length === 0) {
+      cy.add({
+        data: {
+          id: serviceName,
+          'agent.name': agentName,
+          'service.name': serviceName,
+        },
+      });
+    }
+    if (Array.isArray(dependencyNodes)) {
+      cy.add(dependencyNodes);
+    }
+    if (Array.isArray(dependencyEdges)) {
+      cy.add(dependencyEdges);
+    }
+  }, [serviceName, agentName, dependencyNodes, dependencyEdges]);
   const dependencies =
     data?.serviceDependencies.map((dependency) => {
       const { location } = dependency;

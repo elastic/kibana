@@ -156,11 +156,6 @@ export function useCytoscapeEventHandlers({
     const selectHandler: cytoscape.EventHandler = (event) => {
       trackApmEvent({ metric: 'service_map_node_select' });
       resetConnectedEdgeStyle(event.cy, event.target);
-
-      const serviceName = event.target.data('service.name');
-      core.application.navigateToUrl(
-        core.http.basePath.prepend(`/app/apm/services/${serviceName}`)
-      );
     };
     const unselectHandler: cytoscape.EventHandler = (event) => {
       resetConnectedEdgeStyle(
@@ -195,8 +190,16 @@ export function useCytoscapeEventHandlers({
       }
     };
     const tapendHandler: cytoscape.EventHandler = (event) => {
+      const serviceName = event.target.data('service.name');
+      const dependencyName = event.target.data('label');
+
       if (!event.target.isNode || !event.target.isNode()) {
         setCursor('grab', event);
+      } else {
+        const path = serviceName
+          ? `/app/apm/services/${serviceName}`
+          : `/app/apm/dependencies/overview?dependencyName=${dependencyName}`;
+        core.application.navigateToUrl(core.http.basePath.prepend(path));
       }
     };
 

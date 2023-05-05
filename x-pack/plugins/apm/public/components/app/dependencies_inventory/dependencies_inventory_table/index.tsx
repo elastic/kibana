@@ -7,7 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
@@ -16,6 +16,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
+import { CytoscapeContext } from '../../../../context/cytoscape_context';
 
 export function DependenciesInventoryTable() {
   const {
@@ -26,6 +27,7 @@ export function DependenciesInventoryTable() {
       kuery,
       comparisonEnabled,
       offset,
+      dependencyName,
     },
   } = useApmParams('/dependencies/inventory');
 
@@ -57,6 +59,59 @@ export function DependenciesInventoryTable() {
     },
     [start, end, environment, offset, kuery, comparisonEnabled]
   );
+
+  const dependencyEdges = data?.serviceDependencies.map((dep) => {
+    if (dep.location.serviceName) {
+      return {
+        data: {
+          id: `${dep.location.serviceName}~>${dependencyName}`,
+          label: `${dep.location.serviceName} to ${dependencyName}`,
+          source: dep.location.serviceName,
+          target: dependencyName,
+        },
+      };
+    } else if (dep.location.dependencyName) {
+      return {
+        data: {
+          id: `${dep.location.dependencyName}~>${dependencyName}`,
+          label: `${dep.location.dependencyName} to ${dependencyName}`,
+          source: dep.location.dependencyName,
+          target: dependencyName,
+        },
+      };
+    }
+  });
+
+  const dependencyNodes = data?.dependencies.map((dep) => {
+    if (dep.location.serviceName) {
+      return {
+        data: {
+          id: dep.location.serviceName,
+          'agent.name': dep.location.agentName,
+          'service.name': dep.location.serviceName,
+        },
+      };
+    } else if (dep.location.dependencyName) {
+      return {
+        data: {
+          id: `>${dep.location.dependencyName}`,
+          label: dep.location.dependencyName,
+          'span.destination.service.resource': dep.location.dependencyName,
+          'span.subtype': dep.location.spanSubType,
+          'span.type': dep.location.spanType,
+        },
+      };
+    }
+  });
+  const cy = useContext(CytoscapeContext);
+  useEffect(() => {
+    if (Array.isArray(dependencyNodes)) {
+      cy.add(dependencyNodes);
+    }
+    if (Array.isArray(dependencyEdges)) {
+      cy.add(dependencyEdges);
+    }
+  }, [dependencyNodes, dependencyEdges]);
 
   const dependencies =
     data?.dependencies.map((dependency) => {
