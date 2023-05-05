@@ -1348,7 +1348,8 @@ describe('migration actions', () => {
     });
   });
 
-  describe('waitForPickupUpdatedMappingsTask', () => {
+  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/156904
+  describe.skip('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
