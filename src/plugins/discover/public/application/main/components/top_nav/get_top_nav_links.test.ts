@@ -132,6 +132,13 @@ test('getTopNavLinks result for sql mode', () => {
         "testId": "discoverOpenButton",
       },
       Object {
+        "description": "Share Search",
+        "id": "share",
+        "label": "Share",
+        "run": [Function],
+        "testId": "shareTopNavButton",
+      },
+      Object {
         "description": "Open Inspector for search",
         "id": "inspect",
         "label": "Inspect",
