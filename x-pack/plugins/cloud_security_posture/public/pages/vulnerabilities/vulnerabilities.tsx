@@ -114,12 +114,21 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   };
 
   const onOpenFlyout = useCallback(
-    (rowIndex: number) => {
+    (vulnerabilityRow: VulnerabilityRecord) => {
+      const vulnerabilityIndex = slicedPage.findIndex(
+        (vulnerability: VulnerabilityRecord) =>
+          vulnerability.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
+          vulnerability.resource?.id === vulnerabilityRow.resource?.id &&
+          vulnerability.vulnerability.package.name ===
+            vulnerabilityRow.vulnerability.package.name &&
+          vulnerability.vulnerability.package.version ===
+            vulnerabilityRow.vulnerability.package.version
+      );
       setUrlQuery({
-        vulnerabilityIndex: rowIndex,
+        vulnerabilityIndex,
       });
     },
-    [setUrlQuery]
+    [setUrlQuery, slicedPage]
   );
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
@@ -224,16 +233,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              const index = slicedPage.findIndex(
-                (vulnerability: VulnerabilityRecord) =>
-                  vulnerability.vulnerability?.id === vulnerabilityRow.vulnerability?.id &&
-                  vulnerability.resource?.id === vulnerabilityRow.resource?.id &&
-                  vulnerability.vulnerability.package.name ===
-                    vulnerabilityRow.vulnerability.package.name &&
-                  vulnerability.vulnerability.package.version ===
-                    vulnerabilityRow.vulnerability.package.version
-              );
-              onOpenFlyout(index);
+              onOpenFlyout(vulnerabilityRow);
             }}
           />
         );
@@ -281,7 +281,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         );
       }
     };
-  }, [data?.page, onOpenFlyout, slicedPage]);
+  }, [data?.page, onOpenFlyout]);
 
   const onPaginateFlyout = useCallback(
     (nextVulnerabilityIndex: number) => {
