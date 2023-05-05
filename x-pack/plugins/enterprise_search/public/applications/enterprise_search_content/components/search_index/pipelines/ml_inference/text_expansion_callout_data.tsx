@@ -9,6 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useValues } from 'kea';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { TextExpansionCallOutProps, TextExpansionCallOutState } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
@@ -20,6 +22,7 @@ const isDismissed = () => localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED
 export const useTextExpansionCallOutData = ({
   isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { isCreateButtonDisabled, isStartButtonDisabled } = useValues(TextExpansionCalloutLogic);
 
   const [show, setShow] = useState<boolean>(() => {
@@ -48,6 +51,7 @@ export const useTextExpansionCallOutData = ({
 
   return {
     dismiss,
+    ingestionMethod,
     isCreateButtonDisabled,
     isDismissable,
     isStartButtonDisabled,
