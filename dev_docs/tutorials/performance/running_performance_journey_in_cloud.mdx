@@ -20,23 +20,24 @@ The process takes a few steps:
 ### Re-configure deployment for Kibana and Elasticsearch
 We use [kibana-ops-e2e-perf](https://kibana-ops-e2e-perf.kb.us-central1.gcp.cloud.es.io/) cluster to monitor performance testing.
 
-If you would like to report APM metrics to this cluster, you need to copy `APM_SERVER_URL` and `APM_PUBLIC_TOKEN`
-from [journey_apm_config.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-journeys/journey/journey_apm_config.ts)
+If you would like to report APM metrics to a different cluster, make sure to change `secret_token` and `server_url` values.
 
 #### Change Elasticsearch configuration
 
 In the ESS Admin Console, find your deployment and navigate to `Security` page. Click `Add Settings` under `Elasticsearch keystore` and add new entry:
 Setting name: `tracing.apm.secret_token`
-Secret: <APM_PUBLIC_TOKEN value>
+Secret: "CTs9y3cvcfq13bQqsB"
+
 Navigate to Advanced Edit page and change Deployment configuration by adding the following JSON object to `resources.elasticsearch.plan.elasticsearch`:
+
 ```
 "user_settings_override_json": {
   "tracing.apm.enabled": "true",
+  "tracing.apm.environment": "development",
   "tracing.apm.agent.service_name": "elasticsearch",
-  "tracing.apm.agent.server_url": <APM_SERVER_URL value>,
+  "tracing.apm.agent.server_url": "https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443",
   "tracing.apm.agent.metrics_interval": "120s",
-  "tracing.apm.agent.transaction_sample_rate": "1",
-  "tracing.apm.agent.environment": "development"
+  "tracing.apm.agent.transaction_sample_rate": "1"
 }
 ```
 
@@ -44,26 +45,26 @@ Save changes and make sure cluster is restarted successfully.
 
 #### Change Kibana configuration
 Navigate to Advanced Edit page and change Deployment Configuration by adding the following JSON object to `resources.kibana.plan.kibana`:
+
 ```
 "user_settings_override_json": {
   "elastic.apm.active": true,
-  "elastic.apm.centralConfig": false,
   "elastic.apm.breakdownMetrics": false,
+  "elastic.apm.captureBody": "all",
+  "elastic.apm.captureRequestHeaders": "true",
   "elastic.apm.captureSpanStackTraces": false,
+  "elastic.apm.centralConfig": false,
+  "elastic.apm.contextPropagationOnly": "false",
   "elastic.apm.environment": "development",
-  "elastic.apm.agent.service_name": "kibana-ess",
-  "elastic.apm.secretToken": <APM_PUBLIC_TOKEN value>,
-  "elastic.apm.agent.server_url": <APM_SERVER_URL value>,
-  "elastic.apm.agent.contextPropagationOnly": "false",
-  "elastic.apm.agent.captureBody": "all",
-  "elastic.apm.agent.captureRequestHeaders": "true",
-  "elastic.apm.agent.longFieldMaxLength": "300000",
-  "elastic.apm.agent.metrics_interval": "120s",
-  "elastic.apm.agent.transaction_sample_rate": "1",
+  "elastic.apm.globalLabels.deploymentId": "<DEPLOYMENT_ID>",
+  "elastic.apm.globalLabels.journeyName": "<YOUR_JOURNEY_NAME>",
+  "elastic.apm.longFieldMaxLength": "300000",
+  "elastic.apm.metricsInterval": "120s",
   "elastic.apm.propagateTracestate": true,
   "elastic.apm.sanitizeFieldNames": "password,passwd,pwd,secret,*key,*token*,*session*,*credit*,*card*,*auth*,set-cookie,pw,pass,connect.sid",
-  "elastic.apm.globalLabels.deploymentId": <DEPLOYMENT_ID>,
-  "elastic.apm.globalLabels.journeyName": <YOUR_JOURNEY_NAME>
+  "elastic.apm.secretToken": "CTs9y3cvcfq13bQqsB",
+  "elastic.apm.serverUrl": "https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443",
+  "elastic.apm.transactionSampleRate": 1
 }
 ```
 
