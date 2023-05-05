@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { CasesUI, CasesStatus, CasesMetrics } from '../../common/ui';
+import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
 import {
   CASE_FIND_URL,
   CASE_METRICS_URL,
@@ -40,7 +40,7 @@ export const getCases = async ({
   http,
   signal,
   query,
-}: HTTPService & { query: CasesFindRequest }): Promise<CasesUI> => {
+}: HTTPService & { query: CasesFindRequest }): Promise<CasesFindResponseUI> => {
   const res = await http.get<CasesFindResponse>(CASE_FIND_URL, { query, signal });
   return convertAllCasesToCamel(decodeCasesFindResponse(res));
 };

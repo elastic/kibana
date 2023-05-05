@@ -42,6 +42,7 @@ export type { Case, Cases, CasesBulkGetRequest, CasesBulkGetResponse } from './a
 export type {
   CaseUI,
   CasesUI,
+  CasesFindResponseUI,
   Ecs,
   CasesFeatures,
   CaseViewRefreshPropInterface,

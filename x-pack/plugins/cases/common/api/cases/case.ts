@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
 import { UserRt } from '../user';
-import { CommentResponseRt } from './comment';
+import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
@@ -258,7 +258,7 @@ export const CaseRt = rt.intersection([
     version: rt.string,
   }),
   rt.partial({
-    comments: rt.array(CommentResponseRt),
+    comments: rt.array(CommentRt),
   }),
 ]);
 
