@@ -6,4 +6,5 @@
  */
 
 export { collectHosts } from './hosts';
+export { collectPods } from './pods';
 export { collectServices } from './services';
