@@ -184,21 +184,35 @@ export const GroupEditorControls = ({
                   key={index}
                   css={css`
                     margin-top: ${euiThemeVars.euiSizeS};
+                    position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
                   `}
                 >
                   <DragDrop
-                    order={[2, 1, 1, index]}
+                    order={[index]}
                     key={annotation.id}
                     value={{
                       id: annotation.id,
                       humanData: {
-                        label: 'TODO',
+                        label: annotation.label,
                       },
                     }}
                     dragType="move"
-                    dropTypes={dragging ? ['reorder'] : undefined}
+                    dropTypes={dragging ? ['reorder'] : []}
                     reorderableGroup={reorderableGroup}
                     draggable
+                    onDrop={(dropped) => {
+                      const newAnnotations = [...group.annotations];
+                      const sourceIndex = newAnnotations.findIndex(({ id }) => id === dropped.id);
+                      const targetIndex = index;
+
+                      if (sourceIndex !== targetIndex) {
+                        const temp = newAnnotations[sourceIndex];
+                        newAnnotations[sourceIndex] = newAnnotations[targetIndex];
+                        newAnnotations[targetIndex] = temp;
+                      }
+
+                      update({ ...group, annotations: newAnnotations });
+                    }}
                   >
                     <DimensionButton
                       groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
