@@ -85,7 +85,7 @@ interface AlertsHistogramPanelProps {
   extraActions?: Action[];
   filters?: Filter[];
   headerChildren?: React.ReactNode;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   legendPosition?: Position;
   onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
@@ -444,7 +444,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
                 id={visualizationId}
-                inspectTitle={inspectTitle}
+                inspectTitle={inspectTitle ?? title}
                 scopeId={SourcererScopeName.detections}
                 stackByField={selectedStackByOption}
                 timerange={timerange}
