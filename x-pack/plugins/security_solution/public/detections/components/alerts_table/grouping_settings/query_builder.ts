@@ -167,16 +167,9 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
               },
             },
           },
@@ -208,7 +201,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },
