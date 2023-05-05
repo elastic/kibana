@@ -179,7 +179,7 @@ export const warningFIMUsingSlashStarStarText = i18n.translate(
   'xpack.cloudDefend.warningFIMUsingSlashStarStarText',
   {
     defaultMessage:
-      'It is dangerous to block FIM operations (createFile, modifyFile, deleteFile) using a targetFilePath of /**. This can lead to system instability. Note: selectors without operation will match on all operations.',
+      'It is dangerous to block FIM operations using a targetFilePath of /**. This can lead to system instability. Note that selectors without operation will match on all operations, including createFile, modifyFile or deleteFile',
   }
 );
 
