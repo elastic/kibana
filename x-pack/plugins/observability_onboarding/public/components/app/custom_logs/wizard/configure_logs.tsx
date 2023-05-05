@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWizard } from '.';
 import {
@@ -30,6 +30,7 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
+import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
   const { goToStep, goBack, getState, setState } = useWizard();
@@ -40,6 +41,15 @@ export function ConfigureLogs() {
   const [customConfigurations, setCustomConfigurations] = useState(
     wizardState.customConfigurations
   );
+
+  useEffect(() => {
+    if (logFilePaths.length > 0) {
+      setDatasetName(getFilename(logFilePaths[0]));
+      return;
+    }
+
+    setDatasetName('');
+  }, [logFilePaths]);
 
   function onBack() {
     goBack();
@@ -195,7 +205,9 @@ export function ConfigureLogs() {
                       }
                     )}
                     value={datasetName}
-                    onChange={(event) => setDatasetName(event.target.value)}
+                    onChange={(event) =>
+                      setDatasetName(replaceSpecialChars(event.target.value))
+                    }
                   />
                 </EuiFormRow>
                 <EuiSpacer size="l" />
@@ -244,12 +256,26 @@ export function ConfigureLogs() {
                 </EuiFormRow>
                 <EuiSpacer size="l" />
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.observability_onboarding.configureLogs.customConfig',
-                    {
-                      defaultMessage: 'Custom configurations',
-                    }
-                  )}
+                  label={
+                    <>
+                      <span>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.customConfig',
+                          {
+                            defaultMessage: 'Custom configurations',
+                          }
+                        )}
+                      </span>
+                      <span>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.customConfig.optional',
+                          {
+                            defaultMessage: 'Optional',
+                          }
+                        )}
+                      </span>
+                    </>
+                  }
                   helpText={
                     <FormattedMessage
                       id="xpack.observability_onboarding.configureLogs.customConfig.helper"

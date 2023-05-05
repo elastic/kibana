@@ -36,7 +36,7 @@ interface WizardState {
 }
 
 const initialState: WizardState = {
-  datasetName: 'filename',
+  datasetName: '',
   logFilePaths: [],
   namespace: 'default',
   customConfigurations: '',
