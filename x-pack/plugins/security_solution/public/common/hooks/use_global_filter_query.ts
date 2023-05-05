@@ -53,14 +53,14 @@ export const useGlobalFilterQuery = ({
     [dataView, query, filters, uiSettings]
   );
 
-  const filterQueryStr = useMemo(
+  const filterQueryStringified = useMemo(
     () => (filterQuery ? JSON.stringify(filterQuery) : undefined),
     [filterQuery]
   );
 
   useInvalidFilterQuery({
     id: queryId,
-    filterQuery: filterQueryStr,
+    filterQuery: filterQueryStringified,
     kqlError,
     query,
     startDate: from,
