@@ -13,6 +13,7 @@ export class FieldEditorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly common = this.ctx.getPageObject('common');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -113,5 +114,6 @@ export class FieldEditorService extends FtrService {
   public async waitUntilClosed() {
     await this.testSubjects.waitForDeleted('fieldEditor');
     await this.testSubjects.missingOrFail('fieldEditor');
+    await this.common.sleep(1000);
   }
 }
