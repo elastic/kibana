@@ -123,4 +123,9 @@ describe('LensEmbeddable', () => {
   it('should render with searchSessionId', () => {
     expect(mockEmbeddableComponent.mock.calls[0][0].searchSessionId).toEqual(mockSearchSessionId);
   });
+
+  it('should not sync highlight state between visualizations', () => {
+    expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
+    expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
+  });
 });

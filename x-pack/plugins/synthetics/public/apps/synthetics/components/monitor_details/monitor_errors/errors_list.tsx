@@ -32,9 +32,11 @@ import {
 export const ErrorsList = ({
   errorStates,
   loading,
+  location,
 }: {
   errorStates: PingState[];
   loading: boolean;
+  location: ReturnType<typeof useSelectedLocation>;
 }) => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
 
@@ -50,7 +52,7 @@ export const ErrorsList = ({
 
   const format = useDateFormatForTest();
 
-  const selectedLocation = useSelectedLocation();
+  const selectedLocation = location;
 
   const lastTestRun = errorStates?.sort((a, b) => {
     return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
