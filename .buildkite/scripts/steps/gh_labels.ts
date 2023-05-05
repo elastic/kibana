@@ -63,7 +63,7 @@ try {
     }
   );
   execSync(
-    `buildkite-agent meta-data set "gh_labels " < curl -s https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`,
+    `buildkite-agent meta-data set gh_labels < <(curl -s https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name')`,
     {
       stdio: ['ignore', 'inherit', 'inherit'],
     }
