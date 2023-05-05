@@ -52,7 +52,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Open list of options"
@@ -121,7 +121,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Open list of options"
@@ -247,7 +247,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Open list of options"
@@ -316,7 +316,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Open list of options"

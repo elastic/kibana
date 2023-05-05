@@ -7,7 +7,7 @@
  */
 
 import type { MatcherFunction } from 'expect';
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 
 const toContainLogEntry: MatcherFunction<[entry: string]> = (actual, entry) => {
   if (!Array.isArray(actual)) {
@@ -27,8 +27,44 @@ const toContainLogEntry: MatcherFunction<[entry: string]> = (actual, entry) => {
   }
 };
 
+const toContainLogEntries: MatcherFunction<[entries: string[], options: { ordered?: boolean }]> = (
+  actual,
+  entries,
+  options = {}
+) => {
+  if (!Array.isArray(actual)) {
+    throw new Error('actual must be an array');
+  }
+  const { ordered = true } = options;
+  const logEntries = actual as LogRecord[];
+  let previousEntryIdx = -1;
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const index = logEntries.findIndex((item) => item.message.includes(entry));
+    if (index === -1) {
+      return {
+        pass: false,
+        message: () => `Entry "${entry}" not found in log file`,
+      };
+    }
+    if (ordered && index < previousEntryIdx) {
+      return {
+        pass: false,
+        message: () => `Entry "${entry}" found but order was not respected`,
+      };
+    }
+    previousEntryIdx = index;
+  }
+  return {
+    pass: true,
+    message: () => `All entries found in log file`,
+  };
+};
+
 expect.extend({
   toContainLogEntry,
+  toContainLogEntries,
 });
 
 declare global {
@@ -36,6 +72,8 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toContainLogEntry(entry: string): R;
+
+      toContainLogEntries(entries: string[], options?: { ordered?: boolean }): R;
     }
   }
 }

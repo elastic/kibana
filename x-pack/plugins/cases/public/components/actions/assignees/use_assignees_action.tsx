@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { CaseUI } from '../../../../common';
+import type { CaseUI, CasesUI } from '../../../../common';
 import type { UseActionProps } from '../types';
 import { useItemsAction } from '../use_items_action';
 import * as i18n from './translations';
@@ -27,7 +27,7 @@ export const useAssigneesAction = ({ onAction, onActionSuccess, isDisabled }: Us
         })),
     });
 
-  const getAction = (selectedCases: CaseUI[]) => {
+  const getAction = (selectedCases: CasesUI) => {
     return {
       name: i18n.EDIT_ASSIGNEES,
       onClick: () => openFlyout(selectedCases),
