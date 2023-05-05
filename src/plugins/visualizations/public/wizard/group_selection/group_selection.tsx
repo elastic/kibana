@@ -215,7 +215,8 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
-  // hide the experimental visualization if lab mode is not enabled
+  // hide both the hidden visualizations and, if lab mode is not enabled, the experimental visualizations
+  // TODO: Remove the showExperimental logic as part of https://github.com/elastic/kibana/issues/152833
   if (visType.hidden || (!showExperimental && visType.stage === 'experimental')) {
     return null;
   }
