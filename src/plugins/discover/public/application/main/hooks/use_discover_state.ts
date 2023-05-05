@@ -171,10 +171,12 @@ export function useDiscoverState({
         services,
       });
 
-      restoreStateFromSavedSearch({
-        savedSearch: newSavedSearch,
-        timefilter: services.timefilter,
-      });
+      if (newDataView.isTimeBased()) {
+        restoreStateFromSavedSearch({
+          savedSearch: newSavedSearch,
+          timefilter: services.timefilter,
+        });
+      }
 
       await stateContainer.appState.update(newAppState, true);
       setState(newAppState);

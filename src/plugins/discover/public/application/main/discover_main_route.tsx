@@ -176,10 +176,12 @@ export function DiscoverMainRoute(props: Props) {
           currentSavedSearch.searchSource.setField('index', currentDataView);
         }
 
-        restoreStateFromSavedSearch({
-          savedSearch: currentSavedSearch,
-          timefilter: services.timefilter,
-        });
+        if (currentDataView.isTimeBased()) {
+          restoreStateFromSavedSearch({
+            savedSearch: currentSavedSearch,
+            timefilter: services.timefilter,
+          });
+        }
 
         setSavedSearch(currentSavedSearch);
 
