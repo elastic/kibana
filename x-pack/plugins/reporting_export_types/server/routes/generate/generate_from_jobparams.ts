@@ -9,17 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import rison from '@kbn/rison';
 import { API_BASE_URL } from '@kbn/reporting-plugin/common/constants';
-import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import type { BaseParams } from '@kbn/reporting-plugin/server/types';
-import {
-  authorizedUserPreRouting,
-  getCounters,
-  RequestHandler,
-} from '@kbn/reporting-plugin/server/routes/lib';
+import { getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import { ReportingExportTypesCore } from '../../core';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
+import { RequestHandler } from '../lib/request_handler';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
+export function registerJobGenerationRoutes(reporting: ReportingExportTypesCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 

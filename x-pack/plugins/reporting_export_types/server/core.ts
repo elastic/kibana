@@ -6,4 +6,178 @@
  * Side Public License, v 1.
  */
 
-export class ReportingExportTypesCore {}
+import {
+  DocLinksServiceSetup,
+  IClusterClient,
+  IRouter,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import { ExportTypesRegistry } from '@kbn/reporting-plugin/server/lib';
+import { reportingEventLoggerFactory } from '@kbn/reporting-plugin/server/lib/event_logger/logger';
+import { IReport, ReportingStore } from '@kbn/reporting-plugin/server/lib/store';
+import { ReportTaskParams } from '@kbn/reporting-plugin/server/lib/tasks';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
+import { ReportingExportTypesConfigType } from './config';
+import { ReportingExportTypesConfig } from './config/config';
+import { ExecuteReportTask } from './routes/lib/execute_report';
+
+export interface ReportingExportTypesSetupDeps {
+  spaces?: SpacesPluginSetup;
+  docLinks: DocLinksServiceSetup;
+  router: IRouter<any>;
+  security?: SecurityPluginSetup;
+  usageCounter?: UsageCounter;
+  logger: Logger;
+  exportTypesRegistry: ExportTypesRegistry;
+}
+
+export interface ReportingExportTypesStartDeps {
+  store: ReportingStore;
+  esClient: IClusterClient;
+  data: DataPluginStart;
+  logger: Logger;
+  security?: SecurityPluginStart;
+  uiSettings: UiSettingsServiceStart;
+}
+
+export class ReportingExportTypesCore {
+  private pluginSetupDeps?: ReportingExportTypesSetupDeps;
+  private pluginStartDeps?: ReportingExportTypesStartDeps;
+  //   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
+  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingExportTypesStartDeps>(); // observe async background startDeps
+  private config?: ReportingExportTypesConfig;
+  private deprecatedAllowedRoles: false | string[] = false; // DEPRECATED. If `false`, the deprecated features have been disableed
+  private executeTask: ExecuteReportTask;
+  //   private exportTypesRegistry = getExportTypesRegistry();
+  private executing: Set<string>;
+  private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
+
+  constructor(
+    private logger: Logger,
+    context: PluginInitializerContext<ReportingExportTypesConfigType>
+  ) {
+    // this.packageInfo = context.env.packageInfo;
+    const syncConfig = context.config.get<ReportingConfigType>();
+    this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
+
+    this.executing = new Set();
+  }
+
+  /*
+   * Gives synchronous access to the setupDeps
+   */
+  public getPluginSetupDeps() {
+    if (!this.pluginSetupDeps) {
+      throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
+    }
+    return this.pluginSetupDeps;
+  }
+
+  /*
+   * Gives async access to the startDeps
+   */
+  public async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
+    }
+
+    return await Rx.firstValueFrom(this.pluginStart$);
+  }
+  /*
+   * If deprecated feature has not been disabled,
+   * this returns an array of allowed role names
+   * that have access to Reporting.
+   */
+  public getDeprecatedAllowedRoles(): string[] | false {
+    return this.deprecatedAllowedRoles;
+  }
+
+  /*
+   *
+   * Track usage of code paths for telemetry
+   */
+  public getUsageCounter(): UsageCounter | undefined {
+    return this.pluginSetupDeps?.usageCounter;
+  }
+
+  public getEventLogger(report: IReport, task?: { id: string }) {
+    const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
+    return new ReportingEventLogger(report, task);
+  }
+
+  public getConfig(): ReportingExportTypesConfig {
+    if (!this.config) {
+      throw new Error('Config is not yet initialized');
+    }
+    return this.config;
+  }
+
+  public async getDataService() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.data;
+  }
+
+  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
+    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
+    return scopedUiSettingsService;
+  }
+
+  public async getEsClient() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.esClient;
+  }
+
+  public async getStore() {
+    return (await this.getPluginStartDeps()).store;
+  }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
+  }
+
+  public async scheduleTask(report: ReportTaskParams) {
+    return await this.executeTask.scheduleTask(report);
+  }
+
+  public getExportTypesRegistry() {
+    return this.getPluginSetupDeps().exportTypesRegistry;
+  }
+
+  public countConcurrentReports(): number {
+    return this.executing.size;
+  }
+
+  public trackReport(reportId: string) {
+    this.executing.add(reportId);
+  }
+
+  public untrackReport(reportId: string) {
+    this.executing.delete(reportId);
+  }
+
+  public getKibanaShutdown$(): Rx.Observable<void> {
+    return this.kibanaShuttingDown$.pipe(take(1));
+  }
+}

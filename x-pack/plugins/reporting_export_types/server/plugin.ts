@@ -39,7 +39,6 @@ export interface ExportTypesPluginStartDependencies {
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
-  private reportingExportTypesCore = new ReportingExportTypesCore();
   private logger: Logger;
 
   constructor(private initContext: PluginInitializerContext) {
@@ -47,6 +46,8 @@ export class ExportTypesPlugin implements Plugin<void, void> {
   }
 
   public setup({}, { reporting, fieldFormats }: ExportTypesPluginSetupDependencies) {
+    const reportingExportTypesCore = new ReportingExportTypesCore(this.logger, this.initContext);
+
     /**
      * Export types to the central reporting plugin
      */
@@ -83,7 +84,7 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     /**
      * Export Types Plugin Routes
      */
-    registerRoutes(this.reportingExportTypesCore, this.logger);
+    registerRoutes(reportingExportTypesCore, this.logger);
   }
 
   // do nothing

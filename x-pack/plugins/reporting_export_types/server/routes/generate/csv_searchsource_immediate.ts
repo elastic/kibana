@@ -11,10 +11,11 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import moment from 'moment';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '@kbn/reporting-plugin/common/constants';
-import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { PassThroughStream } from '@kbn/reporting-plugin/server/lib';
-import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import { getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import { ReportingExportTypesCore } from '../../core';
 import { runTaskFnFactory } from './execute_job';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
@@ -40,11 +41,10 @@ const path = `${API_BASE_GENERATE_V1}/immediate/csv_searchsource`;
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
-  reporting: ReportingCore,
+  reporting: ReportingExportTypesCore,
   parentLogger: Logger
 ) {
-  const setupDeps = reporting.getPluginSetupDeps();
-  const { router } = setupDeps;
+  const { router } = reporting.getPluginSetupDeps();
 
   // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
   // public method to return this array

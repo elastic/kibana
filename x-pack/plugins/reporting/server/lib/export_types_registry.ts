@@ -77,21 +77,5 @@ export class ExportTypesRegistry {
  */
 export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
-  // type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
-  // type RunFnType = any;
-  // const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
-  //   getTypeCsv,
-  //   getTypeCsvFromSavedObject,
-  //   getTypeCsvFromSavedObjectImmediate,
-  //   getTypePng,
-  //   getTypePngV2,
-  //   getTypePrintablePdf,
-  //   getTypePrintablePdfV2,
-  // ];
-  // getTypeFns.forEach((getType) => {
-  //   registry.register(
-  //     getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
-  //   );
-  // });
   return registry;
 }

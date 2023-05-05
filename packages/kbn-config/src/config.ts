@@ -31,6 +31,7 @@ export function isConfigPath(value: unknown): value is ConfigPath {
  * @internal
  */
 export interface Config {
+  kbnConfig: any;
   /**
    * Returns whether or not there is a config value located at the specified path.
    * @param configPath Path to locate value at.

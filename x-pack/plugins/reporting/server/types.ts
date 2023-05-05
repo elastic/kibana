@@ -30,6 +30,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ReportingExportTypesCore } from '@kbn/reporting-export-types/server/core';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
 import type { ReportTaskParams } from './lib/tasks';
@@ -80,7 +81,7 @@ export type CreateJobFnFactory<CreateJobFnType> = (
 ) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
-  reporting: ReportingCore,
+  reporting: ReportingCore | ReportingExportTypesCore,
   logger: Logger
 ) => RunTaskFnType;
 
