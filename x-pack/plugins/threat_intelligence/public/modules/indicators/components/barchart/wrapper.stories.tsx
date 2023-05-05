@@ -14,6 +14,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
@@ -115,6 +116,12 @@ const uiSettingsMock = {
 
 const timelinesMock = mockKibanaTimelinesService;
 
+const mockField = { label: 'threat.indicator.ip', value: 'ip' };
+
+const mockOnFieldChange = function (value: EuiComboBoxOptionOption<string>): void {
+  window.alert(value.label);
+};
+
 export const Default: Story<void> = () => {
   return (
     <StoryProvidersComponent
@@ -125,10 +132,8 @@ export const Default: Story<void> = () => {
         timeRange={mockTimeRange}
         indexPattern={mockIndexPattern}
         series={[]}
-        field={''}
-        onFieldChange={function (value: string): void {
-          throw new Error('Function not implemented.');
-        }}
+        field={mockField}
+        onFieldChange={mockOnFieldChange}
       />
     </StoryProvidersComponent>
   );
@@ -148,10 +153,8 @@ export const InitialLoad: Story<void> = () => {
         series={[]}
         isLoading={true}
         isFetching={false}
-        field={''}
-        onFieldChange={function (value: string): void {
-          throw new Error('Function not implemented.');
-        }}
+        field={mockField}
+        onFieldChange={mockOnFieldChange}
       />
     </StoryProvidersComponent>
   );
@@ -194,10 +197,8 @@ export const UpdatingData: Story<void> = () => {
         series={mockIndicators}
         isLoading={false}
         isFetching={true}
-        field={''}
-        onFieldChange={function (value: string): void {
-          throw new Error('Function not implemented.');
-        }}
+        field={mockField}
+        onFieldChange={mockOnFieldChange}
       />
     </StoryProvidersComponent>
   );

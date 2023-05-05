@@ -35,3 +35,10 @@ export const ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL = i18n.translate(
     defaultMessage: 'View details',
   }
 );
+
+export const ALERTS_TABLE_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.title',
+  {
+    defaultMessage: 'Alerts table',
+  }
+);
