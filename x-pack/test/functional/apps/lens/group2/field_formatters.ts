@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const retry = getService('retry');
   const fieldEditor = getService('fieldEditor');
+  const testSubjects = getService('testSubjects');
 
   describe('lens fields formatters tests', () => {
     before(async () => {
@@ -30,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
+      await testSubjects.missingOrFail('fieldEditor');
       await PageObjects.lens.clickField('runtimefield');
       await PageObjects.lens.removeField('runtimefield');
       await fieldEditor.confirmDelete();
@@ -45,10 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.URL);
         await fieldEditor.setUrlFieldFormat('https://www.elastic.co?{{value}}');
         await fieldEditor.save();
-        await Promise.all([
-          PageObjects.header.waitUntilLoadingHasFinished(),
-          fieldEditor.waitUntilClosed(),
-        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.searchField('runtime');
         await PageObjects.lens.waitForField('runtimefield');
         await PageObjects.lens.dragFieldToWorkspace('runtimefield');
@@ -69,10 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.STATIC_LOOKUP);
         await fieldEditor.setStaticLookupFormat('CN', 'China');
         await fieldEditor.save();
-        await Promise.all([
-          PageObjects.header.waitUntilLoadingHasFinished(),
-          fieldEditor.waitUntilClosed(),
-        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('China');
@@ -87,10 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.COLOR);
         await fieldEditor.setColorFormat('CN', '#ffffff', '#ff0000');
         await fieldEditor.save();
-        await Promise.all([
-          PageObjects.header.waitUntilLoadingHasFinished(),
-          fieldEditor.waitUntilClosed(),
-        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getDatatableCellSpanStyle(0, 0);
@@ -107,10 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.STRING);
         await fieldEditor.setStringFormat('lower');
         await fieldEditor.save();
-        await Promise.all([
-          PageObjects.header.waitUntilLoadingHasFinished(),
-          fieldEditor.waitUntilClosed(),
-        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('cn');
@@ -125,10 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.setFormat(FIELD_FORMAT_IDS.TRUNCATE);
         await fieldEditor.setTruncateFormatLength('3');
         await fieldEditor.save();
-        await Promise.all([
-          PageObjects.header.waitUntilLoadingHasFinished(),
-          fieldEditor.waitUntilClosed(),
-        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('dal...');
