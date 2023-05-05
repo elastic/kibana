@@ -43,9 +43,14 @@ ls(
 );
 
 async function ls(dir: string) {
-  const { stdout } = await execa('ls', ['-la', dir]);
-  // eslint-disable-next-line no-console
-  console.log(`ls ${dir}:\n${stdout}\nls (end)`);
+  try {
+    const { stdout } = await execa('ls', ['-la', dir]);
+    // eslint-disable-next-line no-console
+    console.log(`ls ${dir}:\n${stdout}\nls (end)`);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(`ls ${dir}: ERROR: ${e}`);
+  }
 }
 
 const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
