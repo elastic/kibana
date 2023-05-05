@@ -20,13 +20,13 @@ import {
 import { checkParamsVersion, cryptoFactory } from '@kbn/reporting-plugin/server/lib';
 import { Report } from '@kbn/reporting-plugin/server/lib/store';
 import { Counters } from '@kbn/reporting-plugin/server/routes/lib';
-import { ReportingExportTypesCore } from '../../core';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
 };
 
-const getDownloadBaseUrl = (reporting: ReportingExportTypesCore) => {
+const getDownloadBaseUrl = (reporting: ReportingCore) => {
   const config = reporting.getConfig();
   return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 };
@@ -36,7 +36,7 @@ const getDownloadBaseUrl = (reporting: ReportingExportTypesCore) => {
  */
 export class RequestHandler {
   constructor(
-    private reporting: ReportingExportTypesCore,
+    private reporting: ReportingCore,
     private user: ReportingUser,
     private context: ReportingRequestHandlerContext,
     private req: KibanaRequest,

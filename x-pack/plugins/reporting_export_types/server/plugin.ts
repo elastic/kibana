@@ -85,7 +85,7 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     /**
      * Export Types Plugin Routes
      */
-    registerRoutes(reportingExportTypesCore, this.logger);
+    // registerRoutes(reportingExportTypesCore, this.logger);
   }
 
   // do nothing

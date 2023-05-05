@@ -39,15 +39,18 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
 
 const path = `${API_DIAGNOSE_URL}/browser`;
 
-export const registerDiagnoseBrowser = (reporting: ReportingExportTypesCore, logger: Logger) => {
-  const { router } = reporting.getPluginSetupDeps();
+export const registerDiagnoseBrowser = async (
+  reporting: ReportingExportTypesCore,
+  logger: Logger
+) => {
+  const { router } = await reporting.getPluginSetupDeps();
 
   router.post(
     { path: `${path}`, validate: {} },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-      const { docLinks } = reporting.getPluginSetupDeps();
+      const { docLinks } = await reporting.getPluginSetupDeps();
 
       const logsToHelpMap = logsToHelpMapFactory(docLinks);
       try {
