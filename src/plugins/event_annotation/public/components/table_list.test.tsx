@@ -88,7 +88,7 @@ describe('annotation list view', () => {
   it('renders a table list view', () => {
     expect(wrapper.debug()).toMatchInlineSnapshot(`
       "<Fragment>
-        <Memo(TableListComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function: onClickTitle]} onFetchSuccess={[Function: onFetchSuccess]} />
+        <Memo(TableListComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function (anonymous)]} onFetchSuccess={[Function: onFetchSuccess]} />
       </Fragment>"
     `);
   });
@@ -198,6 +198,16 @@ describe('annotation list view', () => {
 
       expect(wrapper.find(GroupEditorFlyout).exists()).toBeFalsy();
       expect(wrapper.find(TableList).prop('refreshListBouncer')).not.toBe(initialBouncerValue); // (should refresh list)
+    });
+
+    it('opens editor when title is clicked', async () => {
+      act(() => {
+        wrapper.find(TableList).prop('onClickTitle')!({ id: '1234' } as UserContentCommonSchema);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(wrapper.find(GroupEditorFlyout).exists()).toBeTruthy();
     });
   });
 });

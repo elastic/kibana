@@ -28,6 +28,18 @@ const SELECTORS = {
   BACK_BUTTON: '[data-test-subj="backToGroupSettings"]',
 };
 
+const assertGroupEditingState = (component: ShallowWrapper) => {
+  expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeTruthy();
+  expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeTruthy();
+  expect(component.exists(SELECTORS.BACK_BUTTON)).toBeFalsy();
+};
+
+const assertAnnotationEditingState = (component: ShallowWrapper) => {
+  expect(component.exists(SELECTORS.BACK_BUTTON)).toBeTruthy();
+  expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeFalsy();
+  expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeFalsy();
+};
+
 describe('group editor flyout', () => {
   const annotation = getDefaultManualAnnotation('my-id', 'some-timestamp');
 
@@ -91,22 +103,23 @@ describe('group editor flyout', () => {
     expect(updateGroup).toHaveBeenCalledWith(newGroup);
   });
   test('specific annotation editing', () => {
-    const assertGroupEditingState = () => {
-      expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeTruthy();
-      expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeTruthy();
-      expect(component.exists(SELECTORS.BACK_BUTTON)).toBeFalsy();
-    };
-
-    assertGroupEditingState();
+    assertGroupEditingState(component);
 
     component.find(GroupEditorControls).prop('setSelectedAnnotation')(annotation);
 
-    expect(component.exists(SELECTORS.BACK_BUTTON)).toBeTruthy();
-    expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeFalsy();
-    expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeFalsy();
+    assertAnnotationEditingState(component);
 
     component.find(SELECTORS.BACK_BUTTON).simulate('click');
 
-    assertGroupEditingState();
+    assertGroupEditingState(component);
+  });
+  it('removes active annotation instead of signaling close', () => {
+    component.find(GroupEditorControls).prop('setSelectedAnnotation')(annotation);
+
+    assertAnnotationEditingState(component);
+
+    component.find(EuiFlyout).prop('onClose')({} as MouseEvent);
+
+    assertGroupEditingState(component);
   });
 });

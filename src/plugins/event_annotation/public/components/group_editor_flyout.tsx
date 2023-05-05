@@ -29,7 +29,7 @@ import { GroupEditorControls } from './group_editor_controls';
 export const GroupEditorFlyout = ({
   group,
   updateGroup,
-  onClose,
+  onClose: parentOnClose,
   onSave,
   savedObjectsTagging,
   dataViews,
@@ -67,6 +67,8 @@ export const GroupEditorFlyout = ({
     },
     [resetContentScroll, selectedAnnotation]
   );
+
+  const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
 
   return (
     <EuiFlyout onClose={onClose} size={'s'}>

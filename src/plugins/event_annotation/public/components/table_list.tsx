@@ -72,6 +72,17 @@ export const EventAnnotationGroupTableList = ({
     [eventAnnotationService, listingLimit]
   );
 
+  const editItem = useCallback(
+    ({ id }: EventAnnotationGroupContent) => {
+      if (visualizeCapabilities.save) {
+        eventAnnotationService
+          .loadAnnotationGroup(id)
+          .then((group) => setGroupToEditInfo({ group, id }));
+      }
+    },
+    [eventAnnotationService, visualizeCapabilities.save]
+  );
+
   const [groupToEditInfo, setGroupToEditInfo] = useState<{
     group: EventAnnotationGroupConfig;
     id: string;
@@ -111,14 +122,7 @@ export const EventAnnotationGroupTableList = ({
             ? (items) => eventAnnotationService.deleteAnnotationGroups(items.map(({ id }) => id))
             : undefined
         }
-        editItem={
-          visualizeCapabilities.save
-            ? ({ id }) =>
-                eventAnnotationService
-                  .loadAnnotationGroup(id)
-                  .then((group) => setGroupToEditInfo({ group, id }))
-            : undefined
-        }
+        editItem={editItem}
         listingLimit={listingLimit}
         initialPageSize={initialPageSize}
         initialFilter={''}
@@ -129,9 +133,7 @@ export const EventAnnotationGroupTableList = ({
         entityNamePlural={i18n.translate('eventAnnotation.tableList.entityNamePlural', {
           defaultMessage: 'annotation groups',
         })}
-        onClickTitle={(item) => {
-          // TODO - what happens if I click here?
-        }}
+        onClickTitle={editItem}
         {...parentProps}
       />
       {flyout}
