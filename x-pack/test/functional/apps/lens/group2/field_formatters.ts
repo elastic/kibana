@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const fieldEditor = getService('fieldEditor');
 
-  // flaky test: https://github.com/elastic/kibana/issues/156153
-  describe.skip('lens fields formatters tests', () => {
+  describe('lens fields formatters tests', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
