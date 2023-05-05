@@ -59,7 +59,8 @@ const fetchLabels = (x: string) =>
   execSync(`curl -s https://api.github.com/repos/elastic/kibana/issues/${x} | jq '.labels[].name'`)
     .toString()
     .trim()
-    .split('\n');
+    .split('\n')
+    .join('');
 try {
   const labels = fetchLabels(prNum);
   console.log(`\n### labels from execSync w/ toString(): \n  ${labels}`);
