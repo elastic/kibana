@@ -85,7 +85,7 @@ export async function showCategorizeFlyout(
         {
           'data-test-subj': 'aiopsCategorizeFlyout',
           ownFocus: true,
-          closeButtonAriaLabel: 'aiopsCategorizeFlyout',
+          closeButtonProps: { 'aria-label': 'aiopsCategorizeFlyout' },
           onClose: onFlyoutClose,
           size: 'l',
         }
