@@ -23,7 +23,6 @@ describe('ALL - Inventory', () => {
   });
 
   beforeEach(() => {
-    // testing this as admin in order to be able to change default metrics indices to contain logs-*
     login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
