@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { UploadActionUIRequestBody } from '../../../../../common/endpoint/schema/actions';
+import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
+import { useSendUploadEndpointRequest } from '../../../hooks/response_actions/use_send_upload_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 
 export const UploadActionResult = memo<
@@ -13,7 +16,43 @@ export const UploadActionResult = memo<
     file: File;
     overwrite?: boolean;
   }>
->((props) => {
+>(({ command, setStore, store, status, setStatus, ResultComponent }) => {
+  const actionCreator = useSendUploadEndpointRequest();
+
+  const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
+    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { comment, overwrite, file } = command.args.args;
+
+    if (!endpointId) {
+      return;
+    }
+
+    const reqBody: UploadActionUIRequestBody = {
+      endpoint_ids: [endpointId],
+      comment: comment?.[0],
+      parameters:
+        overwrite !== undefined
+          ? {
+              overwrite: overwrite?.[0],
+            }
+          : {},
+      file: file[0],
+    };
+
+    return reqBody;
+  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+
+  const { result, actionDetails } = useConsoleActionSubmitter<UploadActionUIRequestBody>({
+    ResultComponent,
+    setStore,
+    store,
+    status,
+    setStatus,
+    actionCreator,
+    actionRequestBody,
+    dataTestSubj: 'upload',
+  });
+
   return <div>{'UploadActionResult placeholder'}</div>;
 });
 UploadActionResult.displayName = 'UploadActionResult';

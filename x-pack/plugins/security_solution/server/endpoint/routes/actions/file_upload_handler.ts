@@ -13,7 +13,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import {
-  type UploadActionRequestBody,
+  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -59,7 +59,12 @@ export const registerActionFileUploadRoute = (
 
 export const getActionFileUploadHandler = (
   endpointContext: EndpointAppContext
-): RequestHandler<never, never, UploadActionRequestBody, SecuritySolutionRequestHandlerContext> => {
+): RequestHandler<
+  never,
+  never,
+  UploadActionApiRequestBody,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointContext.logFactory.get('uploadAction');
   const maxFileBytes = endpointContext.serverConfig.maxUploadResponseActionFileBytes;
 
