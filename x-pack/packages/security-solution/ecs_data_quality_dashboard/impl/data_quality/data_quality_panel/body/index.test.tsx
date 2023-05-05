@@ -7,7 +7,7 @@
 
 import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../helpers';
@@ -25,7 +25,7 @@ const formatNumber = (value: number | undefined) =>
 const ilmPhases: string[] = ['hot', 'warm', 'unmanaged'];
 
 describe('IndexInvalidValues', () => {
-  test('it renders the data quality summary', () => {
+  test('it renders the data quality summary', async () => {
     render(
       <TestProviders>
         <Body
@@ -44,14 +44,16 @@ describe('IndexInvalidValues', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('dataQualitySummary')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('dataQualitySummary')).toBeInTheDocument();
+    });
   });
 
   describe('patterns', () => {
     const patterns = ['.alerts-security.alerts-default', 'auditbeat-*', 'logs-*', 'packetbeat-*'];
 
     patterns.forEach((pattern) => {
-      test(`it renders the '${pattern}' pattern`, () => {
+      test(`it renders the '${pattern}' pattern`, async () => {
         render(
           <TestProviders>
             <Body
@@ -70,7 +72,9 @@ describe('IndexInvalidValues', () => {
           </TestProviders>
         );
 
-        expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();
+        await waitFor(() => {
+          expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();
+        });
       });
     });
 
@@ -94,7 +98,9 @@ describe('IndexInvalidValues', () => {
       );
 
       const items = await screen.findAllByTestId('bodyPatternSpacer');
-      expect(items).toHaveLength(patterns.length - 1);
+      await waitFor(() => {
+        expect(items).toHaveLength(patterns.length - 1);
+      });
     });
   });
 });
