@@ -17,4 +17,4 @@ properties:
     description: The display name for the connector.
     example: my-connector
   secrets:
-    $ref: 'secrets_properties_slack.yaml' 
+    $ref: 'secrets_properties_slack_webhook.yaml'
