@@ -63,7 +63,26 @@ export function ConfigureLogs() {
   }
 
   return (
-    <StepPanel title="Choose what logs to collect">
+    <StepPanel
+      title="Choose what logs to collect"
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButton color="ghost" fill onClick={onBack}>
+              Back
+            </EuiButton>,
+            <EuiButton
+              color="primary"
+              fill
+              onClick={onContinue}
+              isDisabled={!(logsType && uploadType)}
+            >
+              Continue
+            </EuiButton>,
+          ]}
+        />
+      }
+    >
       <StepPanelContent>
         <LogsTypeSection
           title="System logs"
@@ -152,21 +171,6 @@ export function ConfigureLogs() {
           </EuiFlexGroup>
         </LogsTypeSection>
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="ghost" fill onClick={onBack}>
-            Back
-          </EuiButton>,
-          <EuiButton
-            color="primary"
-            fill
-            onClick={onContinue}
-            isDisabled={!(logsType && uploadType)}
-          >
-            Continue
-          </EuiButton>,
-        ]}
-      />
     </StepPanel>
   );
 }

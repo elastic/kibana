@@ -21,7 +21,13 @@ import type {
   Cases,
 } from '../../common/api';
 import { isCommentUserAction } from '../../common/utils/user_actions';
-import type { CasesUI, CaseUI, CommentUI, ResolvedCase } from '../containers/types';
+import type {
+  CasesFindResponseUI,
+  CasesUI,
+  CaseUI,
+  CommentUI,
+  ResolvedCase,
+} from '../containers/types';
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
@@ -54,8 +60,7 @@ export const convertCaseToCamelCase = (theCase: Case): CaseUI => {
   };
 };
 
-export const convertCasesToCamelCase = (cases: Cases): CaseUI[] =>
-  cases.map(convertCaseToCamelCase);
+export const convertCasesToCamelCase = (cases: Cases): CasesUI => cases.map(convertCaseToCamelCase);
 
 export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): ResolvedCase => {
   const { case: theCase, ...rest } = res;
@@ -113,7 +118,7 @@ const convertAttachmentToCamelExceptProperty = (
   } as CommentUI;
 };
 
-export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesUI => ({
+export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFindResponseUI => ({
   cases: convertCasesToCamelCase(snakeCases.cases),
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,

@@ -6,7 +6,7 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import type { ActionLicense, CasesUI, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
+import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
 import type {
   ResolvedCase,
@@ -19,6 +19,8 @@ import type {
   FindCaseUserActions,
   CaseUsers,
   CaseUserActionsStats,
+  CasesFindResponseUI,
+  CasesUI,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -419,7 +421,7 @@ const basicAction = {
   type: 'title',
 };
 
-export const cases: CaseUI[] = [
+export const cases: CasesUI = [
   basicCase,
   {
     ...pushedCase,
@@ -437,7 +439,7 @@ export const cases: CaseUI[] = [
   caseWithRegisteredAttachments,
 ];
 
-export const allCases: CasesUI = {
+export const allCases: CasesFindResponseUI = {
   cases,
   page: 1,
   perPage: 5,
