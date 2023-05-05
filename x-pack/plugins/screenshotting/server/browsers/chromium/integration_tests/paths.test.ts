@@ -28,6 +28,10 @@ mockLogger.error = jest.fn((message: string | Error) => {
   console.error(message);
 });
 
+/**
+ * NOTE: these test cases download actual browsers. Running the suite is expected to take a long time.
+ */
+
 describe('Chromium Archive Paths', () => {
   const originalAxios = axios.defaults.adapter;
   beforeAll(async () => {
@@ -44,6 +48,7 @@ describe('Chromium Archive Paths', () => {
     axios.defaults.adapter = originalAxios;
   });
 
+  // test case tuples
   const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture }) => [
     platform,
     architecture,
