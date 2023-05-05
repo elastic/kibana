@@ -36,9 +36,7 @@ const CasesConfigureBasicRt = rt.intersection([
 
 export const CasesConfigureRequestRt = CasesConfigureBasicRt;
 export const CasesConfigurePatchRt = rt.intersection([
-  rt.exact(
-    rt.partial(CasesConfigureBasicWithoutOwnerRt.type.props),
-  ),
+  rt.exact(rt.partial(CasesConfigureBasicWithoutOwnerRt.type.props)),
   rt.strict({ version: rt.string }),
 ]);
 
