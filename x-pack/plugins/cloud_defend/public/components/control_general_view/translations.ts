@@ -160,6 +160,29 @@ export const errorActionRequired = i18n.translate('xpack.cloudDefend.errorAction
   defaultMessage: 'At least one action is required.',
 });
 
+export const errorBlockActionRequiresTargetFilePath = i18n.translate(
+  'xpack.cloudDefend.errorBlockActionRequiresTargetFilePath',
+  {
+    defaultMessage:
+      'The "block" action requires targetFilePath be included in all "match" selectors using FIM operations or in at least one "exclude" selector. Note that selectors without operation will match on all operations, including createFile, modifyFile or deleteFile',
+  }
+);
+
+export const warningFIMUsingSlashStarStarTitle = i18n.translate(
+  'xpack.cloudDefend.warningFIMUsingSlashStarStarTitle',
+  {
+    defaultMessage: 'Warning: Blocking FIM operations',
+  }
+);
+
+export const warningFIMUsingSlashStarStarText = i18n.translate(
+  'xpack.cloudDefend.warningFIMUsingSlashStarStarText',
+  {
+    defaultMessage:
+      'It is dangerous to block FIM operations using a targetFilePath of /**. This can lead to system instability. Note that selectors without operation will match on all operations, including createFile, modifyFile or deleteFile',
+  }
+);
+
 export const getSelectorIconTooltip = (type: SelectorType) => {
   switch (type) {
     case 'process':

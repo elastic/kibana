@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
@@ -24,9 +25,10 @@ export class ServerlessSearchPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     _startDeps: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
+    core.chrome.project.setSideNavComponent(createComponent(core));
     return {};
   }
 

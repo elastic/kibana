@@ -155,7 +155,6 @@ export interface CreateRuleOptions {
 export interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
-  hasEnterpriseLicense?: boolean;
 }
 export interface CreateQueryRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;

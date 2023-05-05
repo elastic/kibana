@@ -34,9 +34,9 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
-  CURATED_MODEL_DEFINITIONS,
-  CURATED_MODEL_TAG,
-  CURATED_MODEL_TYPE,
+  ELASTIC_MODEL_DEFINITIONS,
+  ELASTIC_MODEL_TAG,
+  ELASTIC_MODEL_TYPE,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -143,8 +143,8 @@ export const ModelsList: FC<Props> = ({
     []
   );
 
-  const isCuratedModel = useCallback(
-    (item: ModelItem) => item.tags.includes(CURATED_MODEL_TAG),
+  const isElasticModel = useCallback(
+    (item: ModelItem) => item.tags.includes(ELASTIC_MODEL_TAG),
     []
   );
 
@@ -196,7 +196,7 @@ export const ModelsList: FC<Props> = ({
                   model.model_type,
                   ...Object.keys(model.inference_config),
                   ...(isBuiltInModel(model as ModelItem) ? [BUILT_IN_MODEL_TYPE] : []),
-                  ...(isCuratedModel(model as ModelItem) ? [CURATED_MODEL_TYPE] : []),
+                  ...(isElasticModel(model as ModelItem) ? [ELASTIC_MODEL_TYPE] : []),
                 ],
               }
             : {}),
@@ -285,11 +285,11 @@ export const ModelsList: FC<Props> = ({
             : '';
         });
 
-        const curatedModels = models.filter((model) =>
-          CURATED_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
+        const elasticModels = models.filter((model) =>
+          ELASTIC_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
         );
-        if (curatedModels.length > 0) {
-          for (const model of curatedModels) {
+        if (elasticModels.length > 0) {
+          for (const model of elasticModels) {
             if (model.state === MODEL_STATE.STARTED) {
               // no need to check for the download status if the model has been deployed
               continue;
@@ -545,7 +545,7 @@ export const ModelsList: FC<Props> = ({
         selectable: (item) =>
           !isPopulatedObject(item.pipelines) &&
           !isBuiltInModel(item) &&
-          !(isCuratedModel(item) && !item.state),
+          !(isElasticModel(item) && !item.state),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
@@ -584,13 +584,13 @@ export const ModelsList: FC<Props> = ({
 
   const resultItems = useMemo<ModelItem[]>(() => {
     const idSet = new Set(items.map((i) => i.model_id));
-    const notDownloaded: ModelItem[] = Object.entries(CURATED_MODEL_DEFINITIONS)
+    const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
       .filter(([modelId]) => !idSet.has(modelId))
       .map(([modelId, modelDefinition]) => {
         return {
           model_id: modelId,
-          type: [CURATED_MODEL_TYPE],
-          tags: [CURATED_MODEL_TAG],
+          type: [ELASTIC_MODEL_TYPE],
+          tags: [ELASTIC_MODEL_TAG],
           putModelConfig: modelDefinition.config,
           description: modelDefinition.description,
         } as ModelItem;
