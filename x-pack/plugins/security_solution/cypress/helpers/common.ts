@@ -34,7 +34,6 @@ export const getLocalstorageEntryAsObject = (storage: Cypress.StorageByOrigin, f
     } catch {
       result = undefined;
     }
-    return result;
   }
   return result;
 };
