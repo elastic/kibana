@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { RangeFieldMeta } from '../../../../../../common/descriptor_types';
 import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
 import { RightAlignedText } from './right_aligned_text';
+import { getMaxLabel, getMinLabel } from './get_ordinal_label';
 
 const FONT_SIZE = 10;
 const HALF_FONT_SIZE = FONT_SIZE / 2;
@@ -107,6 +108,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
       const circleCenterY = circleBottomY - radius;
       const circleTopY = circleCenterY - radius;
       const textOffset = this.state.maxLabelWidth + HALF_FONT_SIZE;
+      const textY = circleTopY + HALF_FONT_SIZE;
       return (
         <g key={radius}>
           <line
@@ -120,7 +122,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
             setWidth={this._onRightAlignedWidthChange}
             style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
             x={circleCenterX * 2.25 + textOffset}
-            y={circleTopY + HALF_FONT_SIZE}
+            y={textY > svgHeight ? svgHeight : textY}
             value={formattedValue}
           />
           <circle style={circleStyle} cx={circleCenterX} cy={circleCenterY} r={radius} />
@@ -144,10 +146,22 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const markers = [];
 
+    const maxLabel = getMaxLabel(
+      this.props.style.isFieldMetaEnabled(),
+      fieldMeta.isMaxOutsideStdRange,
+      this._formatValue(fieldMeta.max)
+    );
+
+    const minLabel = getMinLabel(
+      this.props.style.isFieldMetaEnabled(),
+      fieldMeta.isMinOutsideStdRange,
+      this._formatValue(fieldMeta.min)
+    );
+
     if (fieldMeta.delta > 0) {
       const smallestMarker = makeMarker(
         options.minSize,
-        this._formatValue(invert ? fieldMeta.max : fieldMeta.min)
+        invert ? maxLabel : minLabel
       );
       markers.push(smallestMarker);
 
@@ -163,7 +177,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const largestMarker = makeMarker(
       options.maxSize,
-      this._formatValue(invert ? fieldMeta.min : fieldMeta.max)
+      invert ? minLabel : maxLabel
     );
     markers.push(largestMarker);
 
