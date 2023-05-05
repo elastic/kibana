@@ -24,10 +24,13 @@ If you would like to report APM metrics to a different cluster, make sure to cha
 
 #### Change Elasticsearch configuration
 In the ESS Admin Console, find your deployment and navigate to `Security` page. Click `Add Settings` under `Elasticsearch keystore` and add new entry:
-Setting name: `tracing.apm.secret_token`
-Secret: "CTs9y3cvcfq13bQqsB"
 
-Navigate to Advanced Edit page and change Deployment configuration by adding the following JSON object to `resources.elasticsearch.plan.elasticsearch`:
+```
+Setting name: tracing.apm.secret_token
+Secret: CTs9y3cvcfq13bQqsB
+```
+
+Navigate to `Advanced Edit` page and change `Deployment Configuration` by adding the following JSON object to `resources.elasticsearch.plan.elasticsearch`:
 
 ```
 "user_settings_override_json": {
@@ -43,7 +46,7 @@ Navigate to Advanced Edit page and change Deployment configuration by adding the
 Save changes and make sure cluster is restarted successfully.
 
 #### Change Kibana configuration
-Navigate to Advanced Edit page and change Deployment Configuration by adding the following JSON object to `resources.kibana.plan.kibana`:
+Navigate to `Advanced Edit` page and change `Deployment Configuration` by adding the following JSON object to `resources.kibana.plan.kibana`:
 
 ```
 "user_settings_override_json": {
