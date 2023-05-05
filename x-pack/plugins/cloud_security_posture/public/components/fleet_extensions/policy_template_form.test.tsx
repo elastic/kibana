@@ -251,7 +251,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'kspm-2',
+        name: 'kspm',
       },
     });
   });
@@ -293,7 +293,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'cspm-2',
+        name: 'cspm',
       },
     });
   });
@@ -335,7 +335,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'vuln_mgmt-2',
+        name: 'vuln_mgmt',
       },
     });
   });
