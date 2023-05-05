@@ -25,7 +25,3 @@ export function getRawRecordType(query?: Query | AggregateQuery) {
 
   return RecordRawType.DOCUMENT;
 }
-
-export function isPlainRecord(query?: Query | AggregateQuery): query is AggregateQuery {
-  return getRawRecordType(query) === RecordRawType.PLAIN;
-}

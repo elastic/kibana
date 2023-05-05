@@ -174,7 +174,7 @@ export const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.
   defaultMessage: 'Failed to run steps',
 });
 
-export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
+export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.testErrorLabel', {
   defaultMessage: 'Error running test',
 });
 

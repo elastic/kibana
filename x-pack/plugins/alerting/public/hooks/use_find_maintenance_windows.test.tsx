@@ -53,4 +53,12 @@ describe('useFindMaintenanceWindows', () => {
       expect(mockAddDanger).toBeCalledWith('Unable to load maintenance windows.')
     );
   });
+
+  it('should not try to find maintenance windows if not enabled', async () => {
+    renderHook(() => useFindMaintenanceWindows({ enabled: false }), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+
+    await waitFor(() => expect(findMaintenanceWindows).toHaveBeenCalledTimes(0));
+  });
 });
