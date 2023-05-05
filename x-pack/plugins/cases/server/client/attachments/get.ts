@@ -24,11 +24,10 @@ import {
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import type { CasesClientArgs } from '../types';
-import { combineFilters, stringToKueryNode } from '../utils';
+import { buildAttachmentTypeFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CasesClient } from '../client';
-import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -98,7 +97,7 @@ export const getAllAlertsAttachToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  { caseID, queryParams }: FindArgs,
+  { caseID, queryParams }: FindCommentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsFindResponse> {
   const {
@@ -113,13 +112,7 @@ export async function find(
       await authorization.getAuthorizationFilter(Operations.findComments);
 
     const id = caseID;
-    const { filter, ...queryWithoutFilter } = queryParams ?? {};
-
-    // if the fields property was defined, make sure we include the 'owner' field in the response
-    const fields = includeFieldsRequiredForAuthentication(queryWithoutFilter.fields);
-
-    // combine any passed in filter property and the filter for the appropriate owner
-    const combinedFilter = combineFilters([stringToKueryNode(filter), authorizationFilter]);
+    const { type, ...queryWithoutType } = queryParams ?? {};
 
     const args = queryParams
       ? {
@@ -133,9 +126,8 @@ export async function find(
             page: DEFAULT_PAGE,
             perPage: DEFAULT_PER_PAGE,
             sortField: 'created_at',
-            filter: combinedFilter,
-            ...queryWithoutFilter,
-            fields,
+            filter: combineFilters([buildAttachmentTypeFilter(type), authorizationFilter]),
+            ...queryWithoutType,
           },
         }
       : {
@@ -146,7 +138,7 @@ export async function find(
             page: DEFAULT_PAGE,
             perPage: DEFAULT_PER_PAGE,
             sortField: 'created_at',
-            filter: combinedFilter,
+            filter: authorizationFilter,
           },
         };
 

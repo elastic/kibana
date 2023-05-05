@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../runtime_types';
-import { SavedObjectFindOptionsRt } from '../../saved_object';
+import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
 
@@ -273,8 +273,25 @@ export const CommentsFindResponseRt = rt.type({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindQueryParamsRt = rt.partial({
-  ...SavedObjectFindOptionsRt.props,
+export const CommentTypeFilterRt = rt.array(rt.literal('user'));
+
+export const FindCommentsQueryParamsRt = rt.partial({
+  /**
+   * The attachment type we want to filter by
+   */
+  type: CommentTypeFilterRt,
+  /**
+   * The page of objects to return
+   */
+  page: NumberFromString,
+  /**
+   * The number of objects to return for a page
+   */
+  perPage: NumberFromString,
+  /**
+   * Order to sort the response
+   */
+  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 });
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
@@ -295,7 +312,7 @@ export const BulkGetAttachmentsResponseRt = rt.type({
   ),
 });
 
-export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
+export type FindCommentsQueryParams = rt.TypeOf<typeof FindCommentsQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
@@ -307,6 +324,7 @@ export type AttributesTypeExternalReferenceNoSO = rt.TypeOf<
   typeof AttributesTypeExternalReferenceNoSORt
 >;
 export type AttributesTypePersistableState = rt.TypeOf<typeof AttributesTypePersistableStateRt>;
+export type CommentTypeFilter = rt.TypeOf<typeof CommentTypeFilterRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentAttributesNoSO = rt.TypeOf<typeof CommentAttributesNoSORt>;
 export type CommentAttributesWithoutRefs = rt.TypeOf<typeof CommentAttributesWithoutRefsRt>;
