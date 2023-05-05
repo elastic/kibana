@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import type { BenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import type { SuperTest, Test } from 'supertest';
-//import { createPackagePolicy } from './status';
+import { FtrProviderContext } from '../../ftr_provider_context';
+// import { createPackagePolicy } from './status';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -35,22 +35,22 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
 
       const { body: agentPolicyResponse2 } = await supertest
-      .post(`/api/fleet/agent_policies`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({
-        name: 'Test policy 2',
-        namespace: 'default',
-      });
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 2',
+          namespace: 'default',
+        });
 
       agentPolicyId2 = agentPolicyResponse2.item.id;
 
       const { body: agentPolicyResponse3 } = await supertest
-      .post(`/api/fleet/agent_policies`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({
-        name: 'Test policy 3',
-        namespace: 'default',
-      });
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 3',
+          namespace: 'default',
+        });
 
       agentPolicyId3 = agentPolicyResponse3.item.id;
 
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.items.length).equal(3);
-      expect(res.total).equal(3)
+      expect(res.total).equal(3);
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.items.length).equal(2);
-      expect(res.total).equal(3)
+      expect(res.total).equal(3);
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.items.length).equal(1);
-      expect(res.total).equal(3)
+      expect(res.total).equal(3);
     });
 
     it(`Should return empty array when we set page to be above the last page number`, async () => {
@@ -126,8 +126,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-        expect(res.items.length).equal(0);
-        expect(res.total).equal(3)
+      expect(res.items.length).equal(0);
+      expect(res.total).equal(3);
     });
   });
 }
