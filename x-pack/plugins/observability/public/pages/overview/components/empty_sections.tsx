@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 
 import { ISection } from '../../../typings/section';
-import { paths } from '../../../config/paths';
 import { ObservabilityAppServices } from '../../../application/types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
@@ -133,21 +132,6 @@ const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
         defaultMessage: 'Install RUM Agent',
       }),
       href: http.basePath.prepend('/app/home#/tutorial/apm'),
-    },
-    {
-      id: 'alert',
-      title: i18n.translate('xpack.observability.emptySection.apps.alert.title', {
-        defaultMessage: 'No alerts found.',
-      }),
-      icon: 'watchesApp',
-      description: i18n.translate('xpack.observability.emptySection.apps.alert.description', {
-        defaultMessage:
-          'Detect complex conditions within Observability and trigger actions when those conditions are met.',
-      }),
-      linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
-        defaultMessage: 'Create rule',
-      }),
-      href: http.basePath.prepend(paths.observability.rules),
     },
   ];
 };
