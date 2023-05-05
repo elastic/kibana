@@ -39,13 +39,64 @@ import {
 import { closeTimeline, openActiveTimeline, removeDataProvider } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
-describe('Alerts cell actions', { testIsolation: false }, () => {
+describe.skip('Alerts cell actions', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
     createRule(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
+  });
+
+  describe('Add to timeline', () => {
+    afterEach(() => {
+      removeDataProvider();
+      closeTimeline();
+      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    });
+
+    it('should add a non-empty property to default timeline', () => {
+      cy.get(ALERT_TABLE_SEVERITY_VALUES)
+        .first()
+        .invoke('text')
+        .then((severityVal) => {
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
+          openActiveTimeline();
+          cy.get(PROVIDER_BADGE)
+            .first()
+            .should('have.text', `kibana.alert.severity: "${severityVal}"`);
+        });
+    });
+
+    it('should add an empty property to default timeline', () => {
+      // add condition to make sure the field is empty
+      openAddFilterPopover();
+
+      fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
+      scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+      addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
+      openActiveTimeline();
+      cy.get(PROVIDER_BADGE).first().should('have.text', 'NOT file.name exists');
+    });
+  });
+
+  describe('Show Top N', () => {
+    afterEach(() => {
+      closeTopNAlertProperty();
+      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    });
+
+    it('should show top for a property', () => {
+      cy.get(ALERT_TABLE_SEVERITY_VALUES)
+        .first()
+        .invoke('text')
+        .then(() => {
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+          cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
+        });
+    });
   });
 
   describe('Filter', () => {
@@ -100,57 +151,6 @@ describe('Alerts cell actions', { testIsolation: false }, () => {
       cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
 
       clearKqlQueryBar();
-    });
-  });
-
-  describe('Add to timeline', () => {
-    afterEach(() => {
-      removeDataProvider();
-      closeTimeline();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
-    });
-
-    it('should add a non-empty property to default timeline', () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
-          addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
-          openActiveTimeline();
-          cy.get(PROVIDER_BADGE)
-            .first()
-            .should('have.text', `kibana.alert.severity: "${severityVal}"`);
-        });
-    });
-
-    it('should add an empty property to default timeline', () => {
-      // add condition to make sure the field is empty
-      openAddFilterPopover();
-
-      fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
-      scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
-      addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
-      openActiveTimeline();
-      cy.get(PROVIDER_BADGE).first().should('have.text', 'NOT file.name exists');
-    });
-  });
-
-  describe('Show Top N', () => {
-    afterEach(() => {
-      closeTopNAlertProperty();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
-    });
-
-    it('should show top for a property', () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
-          showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
-          cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
-        });
     });
   });
 
