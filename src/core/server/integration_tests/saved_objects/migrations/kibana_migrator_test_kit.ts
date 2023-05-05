@@ -42,6 +42,7 @@ import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
 
@@ -53,6 +54,7 @@ export const currentVersion = env.packageInfo.version;
 export const nextMinor = new SemVer(currentVersion).inc('minor').format();
 export const currentBranch = env.packageInfo.branch;
 export const defaultKibanaIndex = '.kibana_migrator_tests';
+export const defaultNodeRoles: NodeRoles = { migrator: true, ui: true, backgroundTasks: true };
 
 export interface GetEsClientParams {
   settings?: Record<string, any>;
@@ -64,6 +66,7 @@ export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
   kibanaVersion?: string;
   kibanaBranch?: string;
+  nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   logFilePath?: string;
@@ -121,6 +124,7 @@ export const getKibanaMigratorTestKit = async ({
   kibanaBranch = currentBranch,
   types = [],
   logFilePath = defaultLogFilePath,
+  nodeRoles = defaultNodeRoles,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   const loggingSystem = new LoggingSystem();
@@ -146,7 +150,8 @@ export const getKibanaMigratorTestKit = async ({
     loggerFactory,
     kibanaIndex,
     kibanaVersion,
-    kibanaBranch
+    kibanaBranch,
+    nodeRoles
   );
 
   const runMigrations = async () => {
@@ -255,7 +260,8 @@ const getMigrator = async (
   loggerFactory: LoggerFactory,
   kibanaIndex: string,
   kibanaVersion: string,
-  kibanaBranch: string
+  kibanaBranch: string,
+  nodeRoles: NodeRoles
 ) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -279,6 +285,7 @@ const getMigrator = async (
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
+    nodeRoles,
   });
 };
 
@@ -371,7 +378,9 @@ export const getCompatibleMappingsMigrator = async ({
   filterDeprecated = false,
   kibanaVersion = nextMinor,
   settings = {},
-}: GetMutatedMigratorParams & { filterDeprecated?: boolean } = {}) => {
+}: GetMutatedMigratorParams & {
+  filterDeprecated?: boolean;
+} = {}) => {
   const types = baselineTypes
     .filter((type) => !filterDeprecated || type.name !== 'deprecated')
     .map<SavedObjectsType>((type) => {
