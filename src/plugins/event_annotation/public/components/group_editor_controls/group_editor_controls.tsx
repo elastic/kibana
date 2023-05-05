@@ -9,26 +9,15 @@
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSelect, EuiText, EuiTextArea } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { DragContext, DragDrop, ReorderProvider } from '@kbn/dom-drag-drop';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import {
-  DimensionButton,
-  DimensionTrigger,
-  EmptyDimensionButton,
-  QueryInputServices,
-} from '@kbn/visualization-ui-components/public';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  createCopiedAnnotation,
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-} from '../../../common';
+import { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../../common';
 import { AnnotationEditorControls } from '../annotation_editor_controls';
-import { getAnnotationAccessor } from './get_annotation_accessor';
+import { AnnotationList } from './annotation_list';
 
 export const GroupEditorControls = ({
   group,
@@ -83,17 +72,6 @@ export const GroupEditorControls = ({
     () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
     [dataViews, group.indexPatternId]
   );
-
-  const [newAnnotationId, setNewAnnotationId] = useState<string>(uuidv4());
-  useEffect(() => {
-    setNewAnnotationId(uuidv4());
-  }, [group.annotations.length]);
-
-  const { dragging } = useContext(DragContext);
-
-  const reorderableGroup = group.annotations.map(({ id }) => ({
-    id,
-  }));
 
   return !selectedAnnotation ? (
     <>
@@ -177,85 +155,11 @@ export const GroupEditorControls = ({
             defaultMessage: 'Annotations',
           })}
         >
-          <div>
-            <ReorderProvider id="annotationsGroup">
-              {group.annotations.map((annotation, index) => (
-                <div
-                  key={index}
-                  css={css`
-                    margin-top: ${euiThemeVars.euiSizeS};
-                    position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
-                  `}
-                >
-                  <DragDrop
-                    order={[index]}
-                    key={annotation.id}
-                    value={{
-                      id: annotation.id,
-                      humanData: {
-                        label: annotation.label,
-                      },
-                    }}
-                    dragType="move"
-                    dropTypes={dragging ? ['reorder'] : []}
-                    reorderableGroup={reorderableGroup}
-                    draggable
-                    onDrop={(dropped) => {
-                      const newAnnotations = [...group.annotations];
-                      const sourceIndex = newAnnotations.findIndex(({ id }) => id === dropped.id);
-                      const targetIndex = index;
-
-                      if (sourceIndex !== targetIndex) {
-                        const temp = newAnnotations[sourceIndex];
-                        newAnnotations[sourceIndex] = newAnnotations[targetIndex];
-                        newAnnotations[targetIndex] = temp;
-                      }
-
-                      update({ ...group, annotations: newAnnotations });
-                    }}
-                  >
-                    <DimensionButton
-                      groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
-                        defaultMessage: 'Annotations',
-                      })}
-                      onClick={() => setSelectedAnnotation(annotation)}
-                      onRemoveClick={() =>
-                        update({
-                          ...group,
-                          annotations: group.annotations.filter(({ id }) => id !== annotation.id),
-                        })
-                      }
-                      accessorConfig={getAnnotationAccessor(annotation)}
-                      label={annotation.label}
-                    >
-                      <DimensionTrigger label={annotation.label} />
-                    </DimensionButton>
-                  </DragDrop>
-                </div>
-              ))}
-            </ReorderProvider>
-
-            <div
-              css={css`
-                margin-top: ${euiThemeVars.euiSizeS};
-              `}
-            >
-              <EmptyDimensionButton
-                dataTestSubj="addAnnotation"
-                label="Add annotation"
-                ariaLabel="Add annotation"
-                onClick={() => {
-                  const newAnnotation = createCopiedAnnotation(
-                    newAnnotationId,
-                    new Date().toISOString()
-                  );
-
-                  setSelectedAnnotation(newAnnotation);
-                  update({ ...group, annotations: [...group.annotations, newAnnotation] });
-                }}
-              />
-            </div>
-          </div>
+          <AnnotationList
+            annotations={group.annotations}
+            selectAnnotation={setSelectedAnnotation}
+            update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
+          />
         </EuiFormRow>
       </EuiForm>
     </>
