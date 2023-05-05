@@ -25,13 +25,15 @@ const fetchLabels = (prNumber: string | number) =>
 
 const head = (x: string): string[] => x.split('\n');
 const prNumWithinMsgRe = /\(\#(\d+)\)/;
+// const setMeta = (x: string) => execSync(`buildkite-agent meta-data set gh_labels ${x}`);
 
 try {
   const labels = pipe(head, parse, parseInt, fetchLabels)(`${process.env[parseTarget]}`);
   execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
   execSync(`buildkite-agent annotate --context 'gh_labels_context' ${labels}`);
   console.log('\n--- Labels from GET:');
-  execSync(`buildkite-agent meta-data get gh_labels`);
+  const fetched = execSync(`buildkite-agent meta-data get gh_labels`).toString();
+  console.log(`\n### fetched: \n  ${fetched}`);
 } catch (e) {
   console.log('\n### Whoops, something happenned, prolly with jq:');
   console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
