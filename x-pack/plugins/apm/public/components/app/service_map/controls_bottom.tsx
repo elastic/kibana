@@ -14,7 +14,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { APMQueryParams } from '../../shared/links/url_helpers';
-import { CytoscapeContext } from './cytoscape';
+import { CytoscapeContext } from '../../../context/cytoscape_context';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { MapSizeContext } from '../../../context/map_size_context';

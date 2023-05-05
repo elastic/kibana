@@ -113,13 +113,16 @@ export function useCytoscapeEventHandlers({
         resetConnectedEdgeStyle(event.cy);
       }
 
-      // Run the layout on nodes that are not selected and have not been manually
-      // positioned.
-      event.cy
-        .elements('[!hasBeenDragged]')
-        .difference('node:selected')
-        .layout(getLayoutOptions({ fit, nodeHeight, theme }))
-        .run();
+      if (event.cy.container()) {
+        console.log('layout?');
+        // Run the layout on nodes that are not selected and have not been manually
+        // positioned.
+        event.cy
+          .elements('[!hasBeenDragged]')
+          .difference('node:selected')
+          .layout(getLayoutOptions({ fit, nodeHeight, theme }))
+          .run();
+      }
     };
 
     const layoutstopHandler: cytoscape.EventHandler = (event) => {
@@ -166,7 +169,6 @@ export function useCytoscapeEventHandlers({
     };
     const dragHandler: cytoscape.EventHandler = (event) => {
       setCursor('grabbing', event);
-
       applyCubicBezierStyles(event.target.connectedEdges());
 
       if (!event.target.data('hasBeenDragged')) {
@@ -196,6 +198,7 @@ export function useCytoscapeEventHandlers({
         debugHandler
       );
       cy.on('custom:data', dataHandler);
+      cy.on('add', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);

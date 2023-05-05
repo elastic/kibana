@@ -13,6 +13,7 @@ import React, {
   CSSProperties,
   memo,
   ReactNode,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -21,12 +22,9 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
+import { CytoscapeContext } from '../../../context/cytoscape_context';
 
 cytoscape.use(dagre);
-
-export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
-  undefined
-);
 
 export interface CytoscapeProps {
   children?: ReactNode;
@@ -67,9 +65,17 @@ function CytoscapeComponent({
 }: CytoscapeProps) {
   const theme = useTheme();
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
-  const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
-    elements,
+  //const [ref, cy] = useCytoscape({
+  // ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
+  // elements,
+  //});
+  const ref = useRef(null);
+  const cy = useContext(CytoscapeContext);
+
+  useEffect(() => {
+    if (ref.current) {
+      cy.mount(ref.current);
+    }
   });
   useCytoscapeEventHandlers({ cy, serviceName, theme });
 

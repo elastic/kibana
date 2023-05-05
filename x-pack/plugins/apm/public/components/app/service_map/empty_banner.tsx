@@ -25,58 +25,5 @@ const EmptyBannerContainer = euiStyled.div`
 `;
 
 export function EmptyBanner() {
-  const theme = useTheme();
-  const cy = useContext(CytoscapeContext);
-  const [nodeCount, setNodeCount] = useState(0);
-  const { docLinks } = useApmPluginContext().core;
-
-  useEffect(() => {
-    const handler: cytoscape.EventHandler = (event) =>
-      setNodeCount(event.cy.nodes().length);
-
-    if (cy) {
-      cy.on('add remove', 'node', handler);
-    }
-
-    return () => {
-      if (cy) {
-        cy.removeListener('add remove', 'node', handler);
-      }
-    };
-  }, [cy]);
-
-  // Only show if there's a single node.
-  if (!cy || nodeCount !== 1) {
-    return null;
-  }
-
-  // Since we're absolutely positioned, we need to get the full width and
-  // subtract the space for controls and margins.
-  const width =
-    cy.width() -
-    parseInt(theme.eui.euiSizeXXL, 10) -
-    parseInt(theme.eui.euiSizeL, 10);
-
-  return (
-    <EmptyBannerContainer style={{ width }}>
-      <EuiCallOut
-        title={i18n.translate('xpack.apm.serviceMap.emptyBanner.title', {
-          defaultMessage: "Looks like there's only a single service.",
-        })}
-      >
-        {i18n.translate('xpack.apm.serviceMap.emptyBanner.message', {
-          defaultMessage:
-            "We will map out connected services and external requests if we can detect them. Please make sure you're running the latest version of the APM agent.",
-        })}{' '}
-        <EuiLink
-          data-test-subj="apmEmptyBannerLearnMoreInTheDocsLink"
-          href={docLinks.links.apm.supportedServiceMaps}
-        >
-          {i18n.translate('xpack.apm.serviceMap.emptyBanner.docsLink', {
-            defaultMessage: 'Learn more in the docs',
-          })}
-        </EuiLink>
-      </EuiCallOut>
-    </EmptyBannerContainer>
-  );
+  return null;
 }

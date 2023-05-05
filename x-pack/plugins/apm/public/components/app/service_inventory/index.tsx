@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -30,6 +30,7 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
+import { CytoscapeContext } from '../../../context/cytoscape_context';
 
 const initialData = {
   requestId: '',
@@ -156,6 +157,22 @@ function useServicesDetailedStatisticsFetcher({
     tiebreakerField,
   }).slice(page * pageSize, (page + 1) * pageSize);
 
+  const currentPageMapElements = mainStatisticsData.items.map((item) => {
+    return {
+      data: {
+        id: item.serviceName,
+        'agent.name': item.agentName,
+        'service.name': item.serviceName,
+      },
+    };
+  });
+  const cy = useContext(CytoscapeContext);
+  cy.add(currentPageMapElements);
+  window.cy = cy;
+  console.log({ currentPageMapElements });
+  // // We do a fit if we're going from 0 to >0 elements
+  // const fit = cy.elements().length === 0;
+  // cy.trigger('custom:data', [fit]);
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (
