@@ -522,8 +522,11 @@ function taskInstanceToAttributes(
     const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
     const latest = max(versions);
     if (latest !== undefined) {
-      // TODO: Forbid unknowns
-      state = taskTypeDef.stateSchemaByVersion.get(latest).validate(state);
+      // TODO: Don't extendsDeep all the time
+      state = taskTypeDef.stateSchemaByVersion
+        .get(latest)
+        .extendsDeep({ unknowns: 'forbid' })
+        .validate(state);
     }
   }
 
@@ -554,8 +557,11 @@ export function savedObjectToConcreteTaskInstance(
     const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
     const latest = max(versions);
     if (latest !== undefined) {
-      // TODO: Ignore unknowns
-      state = taskTypeDef.stateSchemaByVersion.get(latest).validate(state);
+      // TODO: Don't extendsDeep all the time
+      state = taskTypeDef.stateSchemaByVersion
+        .get(latest)
+        .extendsDeep({ unknowns: 'ignore' })
+        .validate(state);
     }
   }
 
