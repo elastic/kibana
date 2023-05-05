@@ -28,6 +28,7 @@ import {
   enableCriticalPath,
   enableInfrastructureHostsView,
   profilingElasticsearchPlugin,
+  syntheticsThrottlingEnabled,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -354,4 +355,29 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
+  [syntheticsThrottlingEnabled]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
+      defaultMessage: 'Enable Synthetics throttling (Experimental)',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentDescription', {
+      defaultMessage:
+        'Enable Synthetics throttling UI configurations. Throttling is disabled by default. On Elastic managed infrastructure public location, throttling has some issues, {link}',
+      values: {
+        link: throttlingDocsLink({
+          href: 'https://github.com/elastic/synthetics/blob/main/THROTTLING.md',
+        }),
+      },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
 };
+
+function throttlingDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.throttlingDocsLinkText',
+    { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}
