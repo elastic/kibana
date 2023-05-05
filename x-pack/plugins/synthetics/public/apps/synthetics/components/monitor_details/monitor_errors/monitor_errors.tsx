@@ -20,9 +20,11 @@ import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 export const MonitorErrors = () => {
   const { errorStates, loading, data } = useMonitorErrors();
+  const location = useSelectedLocation();
 
   const initialLoading = !data;
 
@@ -40,7 +42,7 @@ export const MonitorErrors = () => {
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates ?? []} loading={loading} />
+        <ErrorsTabContent location={location} errorStates={errorStates ?? []} loading={loading} />
       </div>
     </MonitorPendingWrapper>
   );

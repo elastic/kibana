@@ -8,6 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -40,6 +41,8 @@ export interface RunZeroDowntimeMigrationOpts {
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
   elasticsearchClient: ElasticsearchClient;
+  /** The node roles of the Kibana instance */
+  nodeRoles: NodeRoles;
 }
 
 export const runZeroDowntimeMigration = async (

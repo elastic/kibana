@@ -9,6 +9,7 @@ interface ObjectToRemove {
   id: string;
   type: string;
   plugin: string;
+  isInternal?: boolean;
 }
 
 export class ObjectRemover {
@@ -19,15 +20,20 @@ export class ObjectRemover {
     this.supertest = supertest;
   }
 
-  add(id: ObjectToRemove['id'], type: ObjectToRemove['type'], plugin: ObjectToRemove['plugin']) {
-    this.objectsToRemove.push({ id, type, plugin });
+  add(
+    id: ObjectToRemove['id'],
+    type: ObjectToRemove['type'],
+    plugin: ObjectToRemove['plugin'],
+    isInternal?: ObjectToRemove['isInternal']
+  ) {
+    this.objectsToRemove.push({ id, type, plugin, isInternal });
   }
 
   async removeAll() {
     await Promise.all(
-      this.objectsToRemove.map(({ id, type, plugin }) => {
+      this.objectsToRemove.map(({ id, type, plugin, isInternal }) => {
         return this.supertest
-          .delete(`/api/${plugin}/${type}/${id}`)
+          .delete(`/${isInternal ? 'internal' : 'api'}/${plugin}/${type}/${id}`)
           .set('kbn-xsrf', 'foo')
           .expect(204);
       })
