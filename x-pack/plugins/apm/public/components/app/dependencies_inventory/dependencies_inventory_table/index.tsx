@@ -105,12 +105,7 @@ export function DependenciesInventoryTable() {
   });
   const cy = useContext(CytoscapeContext);
   useEffect(() => {
-    if (Array.isArray(dependencyNodes)) {
-      cy.add(dependencyNodes);
-    }
-    if (Array.isArray(dependencyEdges)) {
-      cy.add(dependencyEdges);
-    }
+    cy.add([...(dependencyNodes ?? []), ...(dependencyEdges ?? [])]);
   }, [dependencyNodes, dependencyEdges]);
 
   const dependencies =

@@ -46,6 +46,7 @@ import { CytoscapeContext } from '../../../context/cytoscape_context';
 import cytoscape from 'cytoscape';
 import { getCytoscapeOptions } from '../../app/service_map/cytoscape_options';
 import { useCytoscapeEventHandlers } from '../../app/service_map/use_cytoscape_event_handlers';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 const storage = new Storage(localStorage);
 
@@ -123,10 +124,10 @@ export function ApmAppRoot({
 function MountApmHeaderActionMenu() {
   const { setHeaderActionMenu, theme$ } =
     useApmPluginContext().appMountParameters;
-
+  const { serviceName } = useApmServiceContext();
   const cy = useContext(CytoscapeContext);
   const theme = { eui: euiDarkVars, darkMode: true };
-  useCytoscapeEventHandlers({ cy, serviceName: 'test', theme });
+  useCytoscapeEventHandlers({ cy, serviceName, theme });
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>

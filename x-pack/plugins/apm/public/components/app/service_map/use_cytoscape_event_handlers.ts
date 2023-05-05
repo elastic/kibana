@@ -9,7 +9,7 @@ import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
@@ -120,9 +120,13 @@ export function useCytoscapeEventHandlers({
         console.log('layout?');
         // Run the layout on nodes that are not selected and have not been manually
         // positioned.
+        console.log({
+          options: getLayoutOptions({ fit, nodeHeight, theme }),
+          fit,
+          eles: event.cy.elements('[!hasBeenDragged]'),
+        });
         event.cy
           .elements('[!hasBeenDragged]')
-          .difference('node:selected')
           .layout(getLayoutOptions({ fit, nodeHeight, theme }))
           .run();
       }
@@ -190,22 +194,28 @@ export function useCytoscapeEventHandlers({
       }
     };
     const tapendHandler: cytoscape.EventHandler = (event) => {
-      const serviceName = event.target.data('service.name');
+      const tappedServiceName = event.target.data('service.name');
       const dependencyName = event.target.data('label');
 
       if (!event.target.isNode || !event.target.isNode()) {
         setCursor('grab', event);
-      } else {
-        const path = serviceName
-          ? `/app/apm/services/${serviceName}`
+      } else if (tappedServiceName !== serviceName) {
+        const path = tappedServiceName
+          ? `/app/apm/services/${tappedServiceName}`
           : `/app/apm/dependencies/overview?dependencyName=${dependencyName}`;
         core.application.navigateToUrl(core.http.basePath.prepend(path));
+        event.cy.zoom(1);
+        event.cy.animate({
+          ...getAnimationOptions(theme),
+          center: { eles: event.target },
+          // fit: { eles, padding: getNodeHeight(theme) },
+        });
       }
     };
 
     if (cy) {
       cy.on(
-        'custom:data drag dragfree layoutstop select tapstart tapend unselect',
+        'add custom:data drag dragfree layoutstop select tapstart tapend unselect',
         debugHandler
       );
       cy.on('custom:data', dataHandler);
@@ -224,10 +234,11 @@ export function useCytoscapeEventHandlers({
     return () => {
       if (cy) {
         cy.removeListener(
-          'custom:data drag dragfree layoutstop select tapstart tapend unselect',
+          'add custom:data drag dragfree layoutstop select tapstart tapend unselect',
           undefined,
           debugHandler
         );
+        cy.removeListener('add', undefined, dataHandler);
         cy.removeListener('custom:data', undefined, dataHandler);
         cy.removeListener('layoutstop', undefined, layoutstopHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
