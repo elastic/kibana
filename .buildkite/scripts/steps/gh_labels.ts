@@ -9,31 +9,28 @@
 import { execSync } from 'child_process';
 
 const parseTarget = process.argv[2] ?? 'BUILDKITE_MESSAGE';
-// console.log(`\n### process.env.BUILDKITE_MESSAGE:
-// ${process.env[parseTarget]}`);
 
 // @ts-expect-error
 const parse = (x: string) => x[0].match(prNumWithinMsgRe)[1];
+const prNumWithinMsgRe = /\(\#(\d+)\)/;
 const fetchLabels = (prNumber: string | number) =>
   execSync(
     `curl -s https://api.github.com/repos/elastic/kibana/issues/${prNumber} | jq '.labels[].name'`
   )
     .toString()
-    .trim()
     .split('\n')
     .map((x: string) => x.replaceAll('"', ''));
-
 const head = (x: string): string[] => x.split('\n');
-const prNumWithinMsgRe = /\(\#(\d+)\)/;
 // const setMeta = (x: string) => execSync(`buildkite-agent meta-data set gh_labels ${x}`);
 
 try {
   const labels = pipe(head, parse, parseInt, fetchLabels)(`${process.env[parseTarget]}`);
   execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
-  execSync(`buildkite-agent annotate --context 'gh_labels_context' ${labels}`);
-  console.log('\n--- Labels from GET:');
-  const fetched = execSync(`buildkite-agent meta-data get gh_labels`).toString();
-  console.log(`\n### fetched: \n  ${fetched}`);
+  execSync(
+    `buildkite-agent annotate --context 'default' --style 'info' "Github Labels: ${labels}"`
+  );
+  // const fetched = execSync(`buildkite-agent meta-data get gh_labels`).toString();
+  // console.log(`\n### fetched: \n  ${fetched}`);
 } catch (e) {
   console.log('\n### Whoops, something happenned, prolly with jq:');
   console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
