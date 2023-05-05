@@ -76,9 +76,10 @@ export function getTotalsByType(selectors: Selector[], responses: Response[]) {
 
 function selectorUsesFIM(selector?: Selector) {
   return (
-    !selector?.operation ||
-    selector?.operation.length === 0 ||
-    selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0)
+    selector &&
+    (!selector.operation ||
+      selector.operation.length === 0 ||
+      selector.operation.some((r) => FIM_OPERATIONS.indexOf(r) >= 0))
   );
 }
 
@@ -90,7 +91,7 @@ function selectorsIncludeConditionsForFIMOperations(
 ) {
   const result =
     selectorNames &&
-    selectorNames.reduce((prev, cur, index) => {
+    selectorNames.reduce((prev, cur) => {
       const selector = selectors.find((s) => s.name === cur);
       const usesFIM = selectorUsesFIM(selector);
       const hasAllConditions =
@@ -103,15 +104,11 @@ function selectorsIncludeConditionsForFIMOperations(
         );
 
       if (requireForAll) {
-        if (index === 0) {
-          return hasAllConditions;
-        }
-
         return prev && hasAllConditions;
       } else {
         return prev || hasAllConditions;
       }
-    }, false);
+    }, requireForAll);
 
   return !!result;
 }

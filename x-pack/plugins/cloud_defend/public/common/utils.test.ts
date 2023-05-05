@@ -298,6 +298,20 @@ describe('validateBlockRestrictions', () => {
 
     expect(errors).toHaveLength(0);
   });
+
+  it('passes validation if block is used, but no selectors in match', () => {
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: [],
+        actions: ['alert', 'block'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions([], responses);
+
+    expect(errors).toHaveLength(0);
+  });
 });
 
 describe('selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar', () => {
