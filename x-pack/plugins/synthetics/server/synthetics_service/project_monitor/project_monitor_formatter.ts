@@ -461,7 +461,7 @@ export class ProjectMonitorFormatter {
     } catch (e) {
       this.server.logger.error(e);
       this.failedMonitors.push({
-        reason: i18n.translate('xpack.synthetics.service.projectMonitors.failedToCreateXMonitors', {
+        reason: i18n.translate('xpack.synthetics.service.projectMonitors.failedToUpdateXMonitors', {
           defaultMessage: 'Failed to update {length} monitors',
           values: {
             length: monitors.length,
