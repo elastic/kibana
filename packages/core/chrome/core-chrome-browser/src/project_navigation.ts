@@ -7,6 +7,7 @@
  */
 
 import type { ComponentType } from 'react';
+import { ChromeBreadcrumb } from './breadcrumb';
 
 /** @internal */
 type AppId = string;
@@ -44,3 +45,11 @@ export interface SideNavCompProps {
 
 /** @public */
 export type SideNavComponent = ComponentType<SideNavCompProps>;
+
+/** @public */
+export type ChromeProjectBreadcrumb = ChromeBreadcrumb;
+
+/** @public */
+export interface ChromeSetProjectBreadcrumbsParams {
+  absolute: boolean;
+}

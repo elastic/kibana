@@ -15,7 +15,12 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { ChromeProjectNavigation, SideNavComponent } from './project_navigation';
+import type {
+  ChromeProjectNavigation,
+  SideNavComponent,
+  ChromeProjectBreadcrumb,
+  ChromeSetProjectBreadcrumbsParams,
+} from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -183,5 +188,18 @@ export interface ChromeStart {
      * @remarks Has no effect if the chrome style is not `project`.
      */
     setSideNavComponent(component: SideNavComponent | null): void;
+
+    /**
+     * Set project breadcrumbs
+     *
+     * @param breadcrumbs
+     * @param params.absolute If true, the breadcrumbs will be set as absolute, otherwise they will be appended to the default ones. false by default.
+     *
+     * @remarks Has no effect if the chrome style is not `project`.
+     */
+    setBreadcrumbs(
+      breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
+      params?: Partial<ChromeSetProjectBreadcrumbsParams>
+    ): void;
   };
 }

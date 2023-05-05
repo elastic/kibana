@@ -29,6 +29,7 @@ import type {
   ChromeUserBanner,
   ChromeStyle,
   ChromeProjectNavigation,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { SideNavComponent as ISideNavComponent } from '@kbn/core-chrome-browser';
@@ -184,6 +185,13 @@ export class ChromeService {
       projectNavigation.setProjectNavigation(config);
     };
 
+    const setProjectBreadcrumbs = (
+      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
+      params?: ChromeSetProjectBreadcrumbsParams
+    ) => {
+      projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
+    };
+
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -254,7 +262,7 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$,
               }}
               actionMenu$={application.currentActionMenu$}
-              breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+              breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
               navControlsRight$={navControls.getRight$()}
@@ -376,6 +384,7 @@ export class ChromeService {
       project: {
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
+        setBreadcrumbs: setProjectBreadcrumbs,
       },
     };
   }

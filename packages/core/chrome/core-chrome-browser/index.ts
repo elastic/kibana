@@ -34,4 +34,6 @@ export type {
   ChromeProjectNavigationNode,
   SideNavCompProps,
   SideNavComponent,
+  ChromeProjectBreadcrumb,
+  ChromeSetProjectBreadcrumbsParams,
 } from './src';
