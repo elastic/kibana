@@ -17,6 +17,7 @@ Table of Contents
 	- [Plugin Status](#plugin-status)
 	- [Rule Types](#rule-types)
 		- [Methods](#methods)
+		- [Alerts as Data](#alerts-as-data)
 		- [Executor](#executor)
 		- [Action variables](#action-variables)
 	- [Recovered Alerts](#recovered-alerts)
@@ -38,16 +39,13 @@ Table of Contents
 
 > Disclaimer: We are actively working to update the terminology of the Alerting Framework. While all user-facing terminology has been updated, much of the codebase is still a work in progress.
 
-
-> References to `rule` and `rule type` entities are still named `AlertType` within the codebase.
-
 **Rule Type**: A function that takes parameters and executes actions on alerts.
 
 **Rule**: A configuration that defines a schedule, a rule type w/ parameters, state information and actions.
 
 **Alert**: The alert(s) created from a rule execution.
 
-A Kibana rule detects a condition and executes one or more actions when that condition occurs.  Rules work by going through the followings steps:
+A Kibana rule checks the condition defined by its rule type and executes one or more actions when that condition is met.  Rules work by going through the followings steps:
 
 1. Run a periodic check to detect a condition (the check is provided by a rule type).
 2. Convert that condition into one or more stateful alerts.
@@ -88,20 +86,23 @@ The following table describes the properties of the `options` object.
 |name|A user-friendly name for the rule type. These will be displayed in dropdowns when choosing rule types.|string|
 |actionGroups|An explicit list of groups the rule type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Each rule type's `actions` validation will use this list to ensure configured groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the rule type. |Array<{id:string, name:string}>|
 |defaultActionGroupId|ID value for the default action group for the rule type.|string|
-|recoveryActionGroup|The action group to use when an alert goes from an active state to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used. |{id:string, name:string}|
-|actionVariables|An explicit list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description for each. The Alerting UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
+|recoveryActionGroup|(Optional) The action group to use when an alert goes from an active state to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used. |{id:string, name:string}|
+|actionVariables|(Optional) An explicit list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description for each. The Alerting UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
 |validate.params|When developing a rule type, you can choose to accept a series of parameters. You may also choose to have the parameters validated before they are passed to the `executor` function or created as a saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.|Function|
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
-|ruleTaskTimeout|The length of time a rule can run before being cancelled due to timeout. By default, this value is "5m".|string|
-|cancelAlertsOnRuleTimeout|Whether to skip writing alerts and scheduling actions if a rule execution is cancelled due to timeout. By default, this value is set to "true".|boolean|
+|ruleTaskTimeout|(Optional) The length of time a rule can run before being cancelled due to timeout. If not specified, the default value of "5m" is used.|string|
+|cancelAlertsOnRuleTimeout|(Optional) Whether to skip writing alerts and scheduling actions if a rule execution is cancelled due to timeout. If not specified, the default value of "true" is used.|boolean|
 |useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
-|defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
-|doesSetRecoveryContext|Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
+|defaultScheduleInterval|(Optional) The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
+|doesSetRecoveryContext|(Optional) Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
 |getSummarizedAlerts|(Optional) When developing a rule type, you can choose to implement this hook for retrieving summarized alerts based on execution UUID or time range. This hook will be invoked when an alert summary action is configured for the rule.|Function|
+|alerts|(Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.|IRuleTypeAlerts|
+|autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
+|getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
 
 ### Executor
 
@@ -139,6 +140,56 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |rule.updatedAt|The date and this this rule was last updated.|
 |rule.throttle|The configured throttle interval for this rule.|
 |rule.notifyWhen|The configured notification type for this rule.|
+
+### Alerts as Data
+
+The `alerts` property on a rule type should contain the information needed for the framework to install the Elasticsearch assets required to support writing alert documents.
+
+|Property|Description|Type|
+|---|---|---|
+|context|The namespace to use for this rule type. Multiple rule types can specify the same value for their alert context.|string|
+|mappings|Specify custom mappings for this rule type. These mappings will be translated into a component template.|ComponentTemplateSpec|
+|useEcs|(Optional) Whether to include the ECS component template for this rule type's alerts. If not specified, this value defaults to `false`.|boolean|
+|useLegacyAlerts|(Optional) Whether to include the legacy alert component template for this rule type's alerts. This should only be used by rule types that previously registered with the rule registry. If not specified, this value defaults to `false`.|boolean|
+|isSpaceAware|(Optional) Whether this rule type's alerts should be space-aware. If set to `true`, space specific alerts indices will be created during rule execution. If not specified, this value defaults to `false`.|boolean|
+|secondaryAlias|(Optional) Secondary alias to include. This option is included to support the signals alias for detection rules.|string|
+
+Regardless of whether any rule type specifies an `alerts` definition, the alerting framework will install the following common Elasticsearch assets on plugin setup:
+
+|Type|Name|Descripton|
+|---|---|---|
+|ILM Policy|`.alerts-ilm-policy`|Roll over after 30 days or if index exceeds 50 gigabytes|
+|Component Template|`.alerts-framework-mappings`|Includes mappings for all framework alerting fields|
+|Component Template|`.alerts-legacy-alert-mappings`|Includes mappings for all legacy alert fields. Use these mappings along with the framework mappings to match the rule registry technical mappings.|
+|Component Template|`.alerts-ecs-mappings`|Includes mappings for all ECS fields, excluding those of type `constant_keyword`|
+
+When a rule type specifies an `alerts` definition, the alerting framework will install Elasticsearch assets for the rule type on plugin setup. The following example definition
+
+```js
+{
+  context: `mySpecialRule`,
+  mappings: {
+    fieldMap: {
+      mySpecialRuleField: {
+        type: 'keyword',
+        required: false
+      }
+    }
+  },
+  useEcs: true
+}
+```
+
+will result in the following assets being installed:
+
+|Type|Name|Descripton|
+|---|---|---|
+|Component Template|`.alerts-mySpecialRule-mappings`|Includes mappings for fields in the specified fieldMap|
+|Index Template|`.alerts-mySpecialRule.alerts-default-index-template`|Includes references to the framework component template, the `.alerts-mySpecialRule-mappings` component template and the ECS component templates because `useEcs: true`|
+|Alias|`.alerts-mySpecialRule.alerts-default`||
+|Index|`.internal.alerts-mySpecialRule.alerts-default-000001`|Concrete write index for the `.alerts-mySpecialRule.alerts-default` alias|
+
+It is important to note that while multiple rule types can specify the same `context` in order to consolidate their alerts into a single index, the `alerts` definition must be the same across all these rule types. If, for example, RuleTypeA registers alert context `ourRules` with `useEcs: true` and RuleTypeB registers alert context `ourRules` with `useEcs: false`, an error will be thrown during registration.
 
 ### Action Variables
 

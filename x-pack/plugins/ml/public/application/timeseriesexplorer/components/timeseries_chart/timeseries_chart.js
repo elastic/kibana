@@ -18,10 +18,7 @@ import d3 from 'd3';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import {
-  getFormattedSeverityScore,
-  getSeverityWithLow,
-} from '../../../../../common/util/anomaly_utils';
+import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,

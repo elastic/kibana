@@ -73,10 +73,12 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
           <EuiSpacer size="s" />
           <AlertsSearchBar
             appName="siem"
+            disableQueryLanguageSwitcher={true}
             featureIds={['siem']}
             query={query.kql}
             filters={query.filters ?? []}
             onQueryChange={onQueryChange}
+            onQuerySubmit={onQueryChange}
             onFiltersUpdated={onFiltersUpdated}
             showFilterBar
             submitOnBlur
