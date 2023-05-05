@@ -10,10 +10,10 @@ import assert from 'assert';
 import axios from 'axios';
 import del from 'del';
 import path from 'path';
+import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';
 import { md5 } from '../../download/checksum';
 import { install } from '../../install';
-import { ChromiumArchivePaths } from '../paths';
 
 /* eslint-disable no-console */
 
@@ -28,15 +28,13 @@ mockLogger.error = jest.fn((message: string | Error) => {
   console.error(message);
 });
 
-const paths = new ChromiumArchivePaths();
-
 describe('Chromium Archive Paths', () => {
   const originalAxios = axios.defaults.adapter;
   beforeAll(async () => {
     axios.defaults.adapter = require('axios/lib/adapters/http');
 
     // remove existing archives to force downloads
-    const removedFiles = await del(`${paths.archivesPath}/**/*`, {
+    const removedFiles = await del(`${chromiumArchivePaths.archivesPath}/**/*`, {
       force: true,
     });
 
@@ -46,9 +44,13 @@ describe('Chromium Archive Paths', () => {
     axios.defaults.adapter = originalAxios;
   });
 
-  const packageInfos = paths.packages.map(({ platform, architecture }) => [platform, architecture]);
+  const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture }) => [
+    platform,
+    architecture,
+  ]);
+
   it.each(packageInfos)('list the correct checksums, %s-%s', async (platform, architecture) => {
-    const pkg = paths.packages.find(
+    const pkg = chromiumArchivePaths.packages.find(
       (packageInfo) =>
         packageInfo.platform === platform && packageInfo.architecture === architecture
     );
@@ -56,11 +58,11 @@ describe('Chromium Archive Paths', () => {
     assert(pkg);
 
     const chromiumPath = path.resolve(__dirname, '../../../../chromium');
-    const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
+    const binaryPath = chromiumArchivePaths.getBinaryPath(pkg, chromiumPath);
     console.log(binaryPath);
 
-    await download(paths, pkg, mockLogger);
-    await install(paths, mockLogger, pkg, chromiumPath);
+    await download(chromiumArchivePaths, pkg, mockLogger);
+    await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
 
     const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 
