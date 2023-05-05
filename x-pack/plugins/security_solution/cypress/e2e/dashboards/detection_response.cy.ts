@@ -109,7 +109,7 @@ describe('Detection response view', () => {
     });
   });
 
-  context.only('Redirection to AlertPage', { testIsolation: false }, () => {
+  context('Redirection to AlertPage', { testIsolation: false }, () => {
     afterEach(() => {
       navigateFromHeaderTo(DETECTION_RESPONSE);
     });

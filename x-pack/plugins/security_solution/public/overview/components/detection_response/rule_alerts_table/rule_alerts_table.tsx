@@ -97,31 +97,29 @@ export const getTableColumns: GetTableColumns = ({
     field: 'alert_count',
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
-    render: (alertCount: number, { name }) => {
-      return (
-        <SecurityCellActions
-          field={{
-            name: ALERT_RULE_NAME,
-            value: name,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
-          }}
+    render: (alertCount: number, { name }) => (
+      <SecurityCellActions
+        field={{
+          name: ALERT_RULE_NAME,
+          value: name,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
+      >
+        <EuiLink
+          data-test-subj="severityRuleAlertsTable-alertCountLink"
+          disabled={alertCount === 0}
+          onClick={() => openRuleInAlertsPage(name)}
         >
-          <EuiLink
-            data-test-subj="severityRuleAlertsTable-alertCountLink"
-            disabled={alertCount === 0}
-            onClick={() => openRuleInAlertsPage(name)}
-          >
-            <FormattedCount count={alertCount} />
-          </EuiLink>
-        </SecurityCellActions>
-      );
-    },
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
+    ),
   },
   {
     field: 'severity',
