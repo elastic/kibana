@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
+  PluginConfigDescriptor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;
@@ -23,6 +24,17 @@ interface FixtureSetupDeps {
 interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
+
+export const config: PluginConfigDescriptor = {
+  schema: schema.object(
+    {
+      nothing: schema.maybe(schema.boolean()),
+    },
+    {
+      unknowns: 'allow',
+    }
+  ),
+};
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, { spaces }: FixtureSetupDeps) {
