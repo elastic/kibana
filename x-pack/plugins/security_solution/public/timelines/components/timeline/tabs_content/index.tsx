@@ -34,6 +34,7 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { SecurityAssistant } from '../../../../security_assistant/security_assistant';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -130,6 +131,17 @@ const PinnedTab: React.FC<{
 ));
 PinnedTab.displayName = 'PinnedTab';
 
+const SecurityAssistantTab: React.FC<{
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
+  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+    <SecurityAssistant />
+  </Suspense>
+));
+SecurityAssistantTab.displayName = 'SecurityAssistant';
+
 type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
@@ -201,6 +213,17 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
           data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
+        </HideShowContainer>
+        <HideShowContainer
+          $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
+          isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
+          data-test-subj={`timeline-tab-content-security-assistant`}
+        >
+          <SecurityAssistantTab
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+          />
         </HideShowContainer>
       </>
     );
@@ -309,6 +332,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.session);
   }, [setActiveTab]);
 
+  const setSecurityAssistantAsActiveTab = useCallback(() => {
+    setActiveTab(TimelineTabs.securityAssistant);
+  }, [setActiveTab]);
+
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {
       setQueryAsActiveTab();
@@ -388,6 +415,15 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
                 <CountBadge>{numberOfPinnedEvents}</CountBadge>
               </div>
             )}
+          </StyledEuiTab>
+          <StyledEuiTab
+            data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
+            onClick={setSecurityAssistantAsActiveTab}
+            disabled={timelineType === TimelineType.template}
+            isSelected={activeTab === TimelineTabs.securityAssistant}
+            key={TimelineTabs.securityAssistant}
+          >
+            <span>{'Security Assistant++'}</span>
           </StyledEuiTab>
         </EuiTabs>
       )}
