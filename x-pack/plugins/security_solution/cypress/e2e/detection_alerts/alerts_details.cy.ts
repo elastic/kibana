@@ -27,7 +27,7 @@ import { tablePageSelector } from '../../screens/table_pagination';
 import { getLocalstorageEntryAsObject } from '../../helpers/common';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 
-describe('Alert details flyout', () => {
+describe.only('Alert details flyout', () => {
   describe('With unmapped fields', { testIsolation: false }, () => {
     before(() => {
       cleanKibana();
