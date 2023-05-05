@@ -14,6 +14,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
@@ -114,6 +115,7 @@ const uiSettingsMock = {
 } as unknown as IUiSettingsClient;
 
 const timelinesMock = mockKibanaTimelinesService;
+const mockField = { label: 'threat.indicator.ip', value: 'ip' };
 
 export const Default: Story<void> = () => {
   return (
@@ -125,8 +127,8 @@ export const Default: Story<void> = () => {
         timeRange={mockTimeRange}
         indexPattern={mockIndexPattern}
         series={[]}
-        field={''}
-        onFieldChange={function (value: string): void {
+        field={mockField}
+        onFieldChange={function (value: EuiComboBoxOptionOption<string>): void {
           throw new Error('Function not implemented.');
         }}
       />
@@ -148,8 +150,8 @@ export const InitialLoad: Story<void> = () => {
         series={[]}
         isLoading={true}
         isFetching={false}
-        field={''}
-        onFieldChange={function (value: string): void {
+        field={mockField}
+        onFieldChange={function (value: EuiComboBoxOptionOption<string>): void {
           throw new Error('Function not implemented.');
         }}
       />
@@ -194,8 +196,8 @@ export const UpdatingData: Story<void> = () => {
         series={mockIndicators}
         isLoading={false}
         isFetching={true}
-        field={''}
-        onFieldChange={function (value: string): void {
+        field={mockField}
+        onFieldChange={function (value: EuiComboBoxOptionOption<string>): void {
           throw new Error('Function not implemented.');
         }}
       />
