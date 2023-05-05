@@ -48,7 +48,7 @@ export const bulkGet = async (
 
   try {
     const fields = Object.keys(CasesBulkGetResponseFieldsRt.props).filter(
-      (field) => field !== 'totalComments'
+      (field) => !['totalComments', 'id', 'version'].includes(field)
     );
 
     const request = pipe(
@@ -92,10 +92,9 @@ export const bulkGet = async (
       };
     });
 
-    const casesToReturn = CasesBulkGetResponseRt.props.cases.encode(flattenedCases);
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
 
-    return { cases: casesToReturn, errors };
+    return CasesBulkGetResponseRt.encode({ cases: flattenedCases, errors });
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({

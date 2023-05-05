@@ -40,10 +40,7 @@ export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
   );
 
 export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
-  pipe(
-    CasesBulkGetResponseRt.props.cases.decode(res.cases),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  pipe(CasesBulkGetResponseRt.decode(res), fold(throwErrors(createToasterPlainError), identity));
 
   return res;
 };
