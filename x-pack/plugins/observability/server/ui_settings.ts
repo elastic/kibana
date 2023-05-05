@@ -357,7 +357,7 @@ export const uiSettings: Record<string, UiSettings> = {
   },
   [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
+    name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
       defaultMessage: 'Enable Synthetics throttling (Experimental)',
     }),
     value: false,
