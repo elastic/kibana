@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import type { UploadActionUIRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import { useSendUploadEndpointRequest } from '../../../hooks/response_actions/use_send_upload_endpoint_request';
@@ -53,6 +54,14 @@ export const UploadActionResult = memo<
     dataTestSubj: 'upload',
   });
 
-  return <div>{'UploadActionResult placeholder'}</div>;
+  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
+    return (
+      <ResultComponent>
+        <EndpointUploadActionResult action={actionDetails} />
+      </ResultComponent>
+    );
+  }
+
+  return result;
 });
 UploadActionResult.displayName = 'UploadActionResult';
