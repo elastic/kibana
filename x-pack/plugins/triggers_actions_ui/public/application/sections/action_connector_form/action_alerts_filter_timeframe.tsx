@@ -49,11 +49,11 @@ const useDefaultTimezone = () => {
 const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
   const timezone = useDefaultTimezone();
   const DEFAULT_TIMEFRAME = {
-    days: ISO_WEEKDAYS,
+    days: [],
     timezone,
     hours: {
       start: '00:00',
-      end: '23:59',
+      end: '00:00',
     },
   };
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
