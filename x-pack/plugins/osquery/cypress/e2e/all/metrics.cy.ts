@@ -9,6 +9,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { triggerLoadData } from '../../tasks/inventory';
 
 describe('ALL - Inventory', () => {
   let savedQueryName: string;
@@ -22,7 +23,8 @@ describe('ALL - Inventory', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    // testing this as admin in order to be able to change default metrics indices to contain logs-*
+    login(ROLE.admin);
     navigateTo('/app/osquery');
   });
 
@@ -34,7 +36,15 @@ describe('ALL - Inventory', () => {
     cy.getBySel('toggleNavButton').click();
     cy.contains('Infrastructure').click();
 
-    cy.getBySel('nodeContainer').first().click();
+    cy.getBySel('headerAppActionMenu').within(() => {
+      cy.contains('Settings').click();
+    });
+    cy.getBySel('metricIndicesInput').click().type(',logs-*');
+    cy.getBySel('applySettingsButton').click();
+    cy.contains('Metrics settings successfully updated').should('exist');
+    cy.go('back');
+
+    triggerLoadData();
     cy.contains('Osquery').click();
     inputQuery('select * from uptime;');
 
@@ -46,8 +56,7 @@ describe('ALL - Inventory', () => {
     cy.getBySel('toggleNavButton').click();
     cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 
-    cy.wait(500);
-    cy.getBySel('nodeContainer').first().click();
+    triggerLoadData();
     cy.contains('Osquery').click();
 
     cy.getBySel('comboBoxInput').first().click();

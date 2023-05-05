@@ -338,7 +338,9 @@ describe('Alert Event Details', () => {
         cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
       });
       cy.contains('Cancel').click();
-      cy.contains(TIMELINE_NAME).click();
+      cy.getBySel('flyoutBottomBar').within(() => {
+        cy.contains(TIMELINE_NAME).click();
+      });
       cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
       // timeline unsaved changes modal
       cy.visit('/app/osquery');
