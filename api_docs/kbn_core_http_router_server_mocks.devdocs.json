@@ -35,15 +35,7 @@
             "section": "def-common.VersionedRouter",
             "text": "VersionedRouter"
           },
-          "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ">>"
+          "<any>>"
         ],
         "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
         "deprecated": false,
@@ -64,15 +56,7 @@
         "label": "RouterMock",
         "description": [],
         "signature": [
-          "{ versioned: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.VersionedRouter",
-            "text": "VersionedRouter"
-          },
-          "<any>; routerPath: string; get: jest.MockInstance<void, [route: ",
+          "{ routerPath: string; get: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -264,13 +248,21 @@
             "section": "def-common.RouterRoute",
             "text": "RouterRoute"
           },
-          "[], []>; } & ",
+          "[], []>; versioned: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouterWithVersion",
-            "text": "IRouterWithVersion"
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<any>; } & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IRouter",
+            "text": "IRouter"
           },
           "<any>"
         ],
