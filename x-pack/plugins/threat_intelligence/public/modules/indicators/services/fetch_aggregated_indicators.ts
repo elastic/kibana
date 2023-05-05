@@ -58,6 +58,9 @@ export interface FetchAggregatedIndicatorsParams {
 /**
  * Converts data received from an Elastic search with date_histogram aggregation enabled to something usable in the "@elastic/chart" BarChart component
  * @param aggregations An array of {@link Aggregation} objects to process
+ * @param userTimeZone User's timezone as a string
+ * @param userFormat User's time format as a string
+ * @param field Field Eui combobox options
  * @returns An array of  {@link ChartSeries} directly usable in a BarChart component
  */
 export const convertAggregationToChartSeries = (

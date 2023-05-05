@@ -115,7 +115,12 @@ const uiSettingsMock = {
 } as unknown as IUiSettingsClient;
 
 const timelinesMock = mockKibanaTimelinesService;
+
 const mockField = { label: 'threat.indicator.ip', value: 'ip' };
+
+const mockOnFieldChange = function (value: EuiComboBoxOptionOption<string>): void {
+  window.alert(value.label);
+};
 
 export const Default: Story<void> = () => {
   return (
@@ -128,9 +133,7 @@ export const Default: Story<void> = () => {
         indexPattern={mockIndexPattern}
         series={[]}
         field={mockField}
-        onFieldChange={function (value: EuiComboBoxOptionOption<string>): void {
-          throw new Error('Function not implemented.');
-        }}
+        onFieldChange={mockOnFieldChange}
       />
     </StoryProvidersComponent>
   );
@@ -151,9 +154,7 @@ export const InitialLoad: Story<void> = () => {
         isLoading={true}
         isFetching={false}
         field={mockField}
-        onFieldChange={function (value: EuiComboBoxOptionOption<string>): void {
-          throw new Error('Function not implemented.');
-        }}
+        onFieldChange={mockOnFieldChange}
       />
     </StoryProvidersComponent>
   );
@@ -197,9 +198,7 @@ export const UpdatingData: Story<void> = () => {
         isLoading={false}
         isFetching={true}
         field={mockField}
-        onFieldChange={function (value: EuiComboBoxOptionOption<string>): void {
-          throw new Error('Function not implemented.');
-        }}
+        onFieldChange={mockOnFieldChange}
       />
     </StoryProvidersComponent>
   );
