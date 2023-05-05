@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { collectContainers } from './containers';
 export { collectHosts } from './hosts';
 export { collectPods } from './pods';
 export { collectServices } from './services';
