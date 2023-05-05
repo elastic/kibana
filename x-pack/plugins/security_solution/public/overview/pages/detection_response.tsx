@@ -46,11 +46,11 @@ const DetectionResponseComponent = () => {
 
   return (
     <>
-      <FiltersGlobal>
-        <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
-      </FiltersGlobal>
       {indicesExist ? (
         <>
+          <FiltersGlobal>
+            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+          </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />
             {isSourcererLoading ? (
