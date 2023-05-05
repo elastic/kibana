@@ -33,7 +33,7 @@ function getRequestHeaders(auth) {
     'kbn-version': pkg.version,
     'Content-Type': 'application/json',
     Authorization: auth,
-    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
   };
 }
 
