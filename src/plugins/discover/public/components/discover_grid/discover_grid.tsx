@@ -138,7 +138,7 @@ export interface DiscoverGridProps {
   /**
    * Determines whether the full screen button should be displayed
    */
-  showFullScreenButton: boolean;
+  showFullScreenButton?: boolean;
   /**
    * Manage user sorting control
    */
