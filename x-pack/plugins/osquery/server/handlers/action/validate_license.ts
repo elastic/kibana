@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { LICENSE_TOO_LOW } from '../../../common/translations/errors';
 
 export interface OsqueryActiveLicenses {
   isActivePlatinumLicense: boolean;
@@ -22,10 +22,3 @@ export const validateLicense = (license?: OsqueryActiveLicenses) => {
     return LICENSE_TOO_LOW;
   }
 };
-
-export const LICENSE_TOO_LOW = i18n.translate(
-  'xpack.osquery.liveQueryActions.error.licenseTooLow',
-  {
-    defaultMessage: 'At least Platinum license is required to use Response Actions.',
-  }
-);

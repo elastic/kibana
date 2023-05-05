@@ -7,21 +7,13 @@
 
 import { isEmpty, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { i18n } from '@kbn/i18n';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
-
-export const PARAMETER_NOT_FOUND = i18n.translate(
-  'xpack.osquery.liveQueryActions.error.notFoundParameters',
-  {
-    defaultMessage:
-      "This query hasn't been called due to parameter used and its value not found in the alert.",
-  }
-);
 
 interface CreateDynamicQueriesParams {
   params: CreateLiveQueryRequestBodySchema;
@@ -30,6 +22,7 @@ interface CreateDynamicQueriesParams {
   osqueryContext: OsqueryAppContext;
   error?: string;
 }
+
 export const createDynamicQueries = async ({
   params,
   alertData,
