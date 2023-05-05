@@ -45,7 +45,6 @@ import {
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
 import { assert } from '../../../common/utils/helpers';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -250,27 +249,17 @@ const usePolicyTemplateInitialName = ({
   newPolicy: NewPackagePolicy;
   updatePolicy: (policy: NewPackagePolicy) => void;
 }) => {
-  const getSetupStatus = useCspSetupStatusApi();
-  const installedPackagePolicyCount = Object.entries(getSetupStatus?.data ?? {})?.find(
-    ([key, _value]) => key === integration
-  )?.[1]?.installedPackagePolicies;
-
-  const currentPackagePolicyCount =
-    typeof installedPackagePolicyCount === 'number' ? installedPackagePolicyCount + 1 : undefined;
-
   useEffect(() => {
     if (!integration) return;
     if (isEditPage) return;
     if (isLoading) return;
 
-    const sequenceSuffix = currentPackagePolicyCount ? `-${currentPackagePolicyCount}` : '';
-    const currentIntegrationName = `${integration}${sequenceSuffix}`;
-    if (newPolicy.name === currentIntegrationName) {
+    if (newPolicy.name === integration) {
       return;
     }
     updatePolicy({
       ...newPolicy,
-      name: currentIntegrationName,
+      name: integration,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, integration, isEditPage]);
