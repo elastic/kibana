@@ -123,12 +123,18 @@ export type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
   SavedObjectsModelChange,
+  SavedObjectsModelMappingsAdditionChange,
+  SavedObjectsModelMappingsDeprecationChange,
+  SavedObjectsModelDataBackfillChange,
   SavedObjectsModelExpansionChange,
   SavedObjectModelTransformationDoc,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationFn,
   SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelVersionSchemaDefinitions,
+  SavedObjectModelVersionCreateSchema,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.

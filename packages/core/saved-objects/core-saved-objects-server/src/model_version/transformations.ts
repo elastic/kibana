@@ -79,3 +79,11 @@ export interface SavedObjectModelBidirectionalTransformation<
    */
   down: SavedObjectModelTransformationFn<NewAttributes, PreviousAttributes>;
 }
+
+/**
+ * @TODO DOC
+ */
+export type SavedObjectModelDataBackfillFn<
+  InputAttributes = unknown,
+  OutputAttributes = unknown
+> = SavedObjectModelTransformationFn<InputAttributes, OutputAttributes>;
