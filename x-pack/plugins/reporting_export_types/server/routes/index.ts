@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { CustomRequestHandlerContext, IRouter, Logger } from '@kbn/core/server';
-import { ReportingStart } from '@kbn/reporting-plugin/server';
-import { ReportingExportTypesCore } from '../core';
+import { ReportingCore, ReportingStart } from '@kbn/reporting-plugin/server';
+// import { ReportingExportTypesCore } from '../core';
 import { registerDiagnosticRoutes } from './diagnostic';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate';
 export { registerDiagnosticRoutes } from './diagnostic';
 export type { DiagnosticResponse } from './diagnostic';
 
-export function registerRoutes(reporting: ReportingExportTypesCore, logger: Logger) {
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDiagnosticRoutes(reporting, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
 }
