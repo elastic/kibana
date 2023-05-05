@@ -9,14 +9,14 @@ import * as rt from 'io-ts';
 import { MAX_DELETE_FILES } from '../../../constants';
 import { limitedArraySchema, NonEmptyString } from '../../../schema';
 
-export const SingleFileAttachmentMetadataRt = rt.type({
+export const SingleFileAttachmentMetadataRt = rt.strict({
   name: rt.string,
   extension: rt.string,
   mimeType: rt.string,
   created: rt.string,
 });
 
-export const FileAttachmentMetadataRt = rt.type({
+export const FileAttachmentMetadataRt = rt.strict({
   files: rt.array(SingleFileAttachmentMetadataRt),
 });
 

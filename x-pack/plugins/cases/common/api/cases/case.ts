@@ -265,7 +265,7 @@ export const CaseRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(CommentRt), // janki update
+      comments: rt.array(CommentRt),
     })
   ),
 ]);
