@@ -83,7 +83,7 @@ export interface SavedObjectsModelDataBackfillChange<
  */
 export interface SavedObjectsModelExpansionChange<PreviousAttributes = any, NewAttributes = any> {
   /** @deprecated (to surface in inline definition) */
-  type: 'test_expansion';
+  type: 'test_bidirectional_migration';
   /**
    * (optional) A bidirectional transformation to migrate the document from and/or to the previous model version.
    */
