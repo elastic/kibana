@@ -35,7 +35,7 @@ const LensComponentWrapper = styled.div<{
   width?: string | number;
   $addHoverActionsPadding?: boolean;
 }>`
-  height: ${({ $height }) => $height ?? 'auto'};
+  height: ${({ $height }) => `${$height}px` ?? 'auto'};
   width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
