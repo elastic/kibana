@@ -14,14 +14,14 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import type { CasesUI, CaseUI } from '../../../common/ui/types';
+import type { CasesFindResponseUI, CasesUI, CaseUI } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<CaseUI>['columns'];
-  data: CasesUI;
+  data: CasesFindResponseUI;
   goToCreateCase?: () => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
@@ -29,7 +29,7 @@ interface CasesTableProps {
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<CaseUI>['onChange'];
   pagination: Pagination;
-  selectedCases: CaseUI[];
+  selectedCases: CasesUI;
   selection: EuiTableSelectionType<CaseUI>;
   sorting: EuiBasicTableProps<CaseUI>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;

@@ -100,7 +100,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Saved Views', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156513
+    describe.skip('Saved Views', () => {
       before(async () => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();
