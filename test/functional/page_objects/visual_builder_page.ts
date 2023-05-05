@@ -35,21 +35,6 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
 
-  public async resetPage(
-    fromTime = 'Sep 19, 2015 @ 06:31:44.000',
-    toTime = 'Sep 22, 2015 @ 18:31:44.000'
-  ) {
-    await this.common.navigateToUrl('visualize', 'create?type=metrics', {
-      useActualUrl: true,
-    });
-    this.log.debug('Wait for initializing TSVB editor');
-    await this.checkVisualBuilderIsPresent();
-    this.log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
-    await this.setTime(fromTime, toTime);
-    // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
-    await this.common.sleep(2000);
-  }
-
   public async setTime(
     fromTime = 'Sep 19, 2015 @ 06:31:44.000',
     toTime = 'Sep 22, 2015 @ 18:31:44.000'

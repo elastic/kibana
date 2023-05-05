@@ -27,7 +27,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await visualBuilder.resetPage();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisualBuilder();
+      await visualBuilder.checkVisualBuilderIsPresent();
+      await visualBuilder.setTime();
       await visualBuilder.clickTopN();
       await visualBuilder.checkTopNTabIsPresent();
     });
