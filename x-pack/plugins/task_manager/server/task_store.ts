@@ -513,8 +513,9 @@ function taskInstanceToAttributes(
   definitions: TaskTypeDictionary
 ): SerializedConcreteTaskInstance {
   let state = doc.state || {};
-  const taskTypeDef = definitions.get(doc.taskType);
-  if (!isEmpty(state) && !taskTypeDef?.stateSchemaByVersion) {
+  const hasTypeDef = definitions.has(doc.taskType);
+  const taskTypeDef = hasTypeDef ? definitions.get(doc.taskType) : null;
+  if (!hasTypeDef || (!isEmpty(state) && !taskTypeDef?.stateSchemaByVersion)) {
     throw new Error(
       `[taskInstanceToAttributes] stateSchemaByVersion not defined for task type: ${doc.taskType}`
     );
@@ -547,9 +548,12 @@ export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>,
   definitions: TaskTypeDictionary
 ): ConcreteTaskInstance {
-  const taskTypeDef = definitions.get(savedObject.attributes.taskType);
+  const hasTypeDef = definitions.has(savedObject.attributes.taskType);
+  const taskTypeDef = hasTypeDef ? definitions.get(savedObject.attributes.taskType) : null;
   let state = parseJSONField(savedObject.attributes.state, 'state', savedObject.id);
-  if (!isEmpty(state) && !taskTypeDef) {
+  if (!hasTypeDef) {
+    state = {};
+  } else if (!isEmpty(state) && !taskTypeDef) {
     throw new Error(
       `[savedObjectToConcreteTaskInstance] stateSchemaByVersion not defined for task type: ${savedObject.attributes.taskType}`
     );

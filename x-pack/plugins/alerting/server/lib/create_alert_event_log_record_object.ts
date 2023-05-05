@@ -28,7 +28,7 @@ interface CreateAlertEventLogRecordParams {
   alertUuid?: string;
   task?: {
     scheduled?: string;
-    scheduleDelay?: number;
+    scheduleDelay?: string;
   };
   savedObjects: Array<{
     type: string;

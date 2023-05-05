@@ -158,6 +158,9 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
         scheduledTaskIdToCreate = id;
       }
     } catch (err) {
+      context.logger.error(
+        `enable(): Failed to check if task is unrecognized ${id}: ${err.message}`
+      );
       scheduledTaskIdToCreate = id;
     }
   } else {

@@ -40,7 +40,7 @@ describe('createAlertEventLogRecordObject', () => {
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
-          scheduleDelay: 0,
+          scheduleDelay: '0',
         },
         savedObjects: [
           {

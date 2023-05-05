@@ -1857,9 +1857,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult.state.previousStartedAt).toEqual(
-      new Date(originalAlertSate.previousStartedAt)
-    );
+    expect(runnerResult.state.previousStartedAt).toEqual(originalAlertSate.previousStartedAt);
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 

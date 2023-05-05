@@ -18,9 +18,6 @@ import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 
-// 1,000,000 nanoseconds in 1 millisecond
-const Millis2Nanos = 1000 * 1000;
-
 export interface RuleContextOpts {
   ruleId: string;
   ruleType: UntypedNormalizedRuleType;
@@ -341,7 +338,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     ruleRevision: context.ruleRevision,
     task: {
       scheduled: context.taskScheduledAt.toISOString(),
-      scheduleDelay: Millis2Nanos * context.taskScheduleDelay,
+      scheduleDelay: millisToNanos(context.taskScheduleDelay),
     },
     savedObjects: [
       {
