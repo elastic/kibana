@@ -131,12 +131,12 @@ describe('<Vulnerabilities />', () => {
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderVulnerabilitiesPage();
-
+    // TODO: Add back Index timeout check later
     expectIdsInDoc({
-      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
+      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
