@@ -38,39 +38,35 @@ const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture
   platform,
 ]);
 
-describe.each(packageInfos)(
-  'Chromium download URLs and checksums: %s/%s',
-  (architecture, platform) => {
-    // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
-    const chromiumPath = path.resolve(__dirname, '../../../../chromium', architecture, platform);
+describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) => {
+  // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
+  const chromiumPath = path.resolve(__dirname, '../../../../chromium', architecture, platform);
 
-    const originalAxios = axios.defaults.adapter;
-    beforeAll(async () => {
-      axios.defaults.adapter = require('axios/lib/adapters/http'); // allow Axios to send actual requests
-    });
+  const originalAxios = axios.defaults.adapter;
+  beforeAll(async () => {
+    axios.defaults.adapter = require('axios/lib/adapters/http'); // allow Axios to send actual requests
+  });
 
-    afterAll(() => {
-      axios.defaults.adapter = originalAxios;
-    });
+  afterAll(() => {
+    axios.defaults.adapter = originalAxios;
+  });
 
-    // Allow package definition to be altered to check error handling
-    const originalPkg = chromiumArchivePaths.packages.find(
-      (packageInfo) =>
-        packageInfo.platform === platform && packageInfo.architecture === architecture
-    );
-    assert(originalPkg);
+  // Allow package definition to be altered to check error handling
+  const originalPkg = chromiumArchivePaths.packages.find(
+    (packageInfo) => packageInfo.platform === platform && packageInfo.architecture === architecture
+  );
+  assert(originalPkg);
 
-    let pkg: PackageInfo = originalPkg;
-    beforeEach(() => {
-      pkg = { ...originalPkg };
-    });
+  let pkg: PackageInfo = originalPkg;
+  beforeEach(() => {
+    pkg = { ...originalPkg };
+  });
 
-    it('lists the correct archive checksum and binary checksum', async () => {
-      const downloadedChecksum = await download(chromiumArchivePaths, pkg, mockLogger);
-      expect(downloadedChecksum).toBe(pkg.archiveChecksum);
+  it('lists the correct archive checksum and binary checksum', async () => {
+    const downloadedChecksum = await download(chromiumArchivePaths, pkg, mockLogger);
+    expect(downloadedChecksum).toBe(pkg.archiveChecksum);
 
-      const installedChecksum = await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
-      expect(installedChecksum).toBe(pkg.binaryChecksum);
-    });
-  }
-);
+    const installedChecksum = await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
+    expect(installedChecksum).toBe(pkg.binaryChecksum);
+  });
+});
