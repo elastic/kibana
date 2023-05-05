@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -14,7 +15,6 @@ import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { dateFormatter } from '../../../common/utils/dates';
 import { search } from '../../../utils/search';
-import { StackByValueInfo } from '../components/barchart/field_selector';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
@@ -52,7 +52,7 @@ export interface FetchAggregatedIndicatorsParams {
   filters: Filter[];
   filterQuery: Query;
   timeRange: TimeRange;
-  field: StackByValueInfo;
+  field: EuiComboBoxOptionOption<string>;
 }
 
 /**
@@ -64,7 +64,7 @@ export const convertAggregationToChartSeries = (
   aggregations: Aggregation[],
   userTimeZone: string,
   userFormat: string,
-  field: StackByValueInfo
+  field: EuiComboBoxOptionOption<string>
 ): ChartSeries[] =>
   aggregations.reduce(
     (accumulated: ChartSeries[], current: Aggregation) =>
@@ -73,7 +73,7 @@ export const convertAggregationToChartSeries = (
           x: val.key_as_string,
           y: val.doc_count,
           g:
-            field.type === 'date'
+            field.value === 'date'
               ? dateFormatter(moment(current.key), userTimeZone, userFormat)
               : current.key,
         }))
@@ -108,7 +108,7 @@ export const createFetchAggregatedIndicators =
     const sharedParams = getIndicatorQueryParams({ timeRange, filters, filterQuery });
 
     const searchRequestBody = {
-      fields: [TIMESTAMP_FIELD, field],
+      fields: [TIMESTAMP_FIELD, field.label],
       size: 0,
       ...sharedParams,
     };

@@ -17,13 +17,8 @@ import { COMBOBOX_PREPEND_LABEL } from './translations';
 
 export interface IndicatorsFieldSelectorProps {
   indexPattern: SecuritySolutionDataViewBase;
-  valueChange: (value: string) => void;
+  valueChange: (value: EuiComboBoxOptionOption<string>) => void;
   defaultStackByValue?: RawIndicatorFieldId;
-}
-
-export interface StackByValueInfo {
-  label: string;
-  type: string;
 }
 
 const DEFAULT_STACK_BY_VALUE = RawIndicatorFieldId.Feed;
@@ -35,27 +30,25 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
     const defaultStackByValueInfo = indexPattern.fields.find(
       (f: DataViewField) => f.name === defaultStackByValue
     );
-    const [selectedField, setSelectedField] = useState<
-      Array<EuiComboBoxOptionOption<StackByValueInfo>>
-    >([
+    const [selectedField, setSelectedField] = useState<Array<EuiComboBoxOptionOption<string>>>([
       {
         label: defaultStackByValue,
-        type: defaultStackByValueInfo?.type,
+        value: defaultStackByValueInfo?.type,
       },
     ]);
-    const fields: Array<EuiComboBoxOptionOption<StackByValueInfo>> = useMemo(
+    const fields: Array<EuiComboBoxOptionOption<string>> = useMemo(
       () =>
         indexPattern
           ? indexPattern.fields.map((f: DataViewField) => ({
               label: f.name,
-              type: f.type,
+              value: f.type,
             }))
           : [],
       [indexPattern]
     );
 
     const selectedFieldChange = useCallback(
-      (values: Array<EuiComboBoxOptionOption<StackByValueInfo>>) => {
+      (values: Array<EuiComboBoxOptionOption<string>>) => {
         if (values && values.length > 0) {
           valueChange(values[0]);
         }

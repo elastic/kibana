@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useInspector, useKibana } from '../../../hooks';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useSourcererDataView } from '.';
@@ -18,7 +19,6 @@ import {
   FetchAggregatedIndicatorsParams,
 } from '../services/fetch_aggregated_indicators';
 import { useDateFormat, useTimeZone } from '../../../hooks/use_kibana_ui_settings';
-import { StackByValueInfo } from '../components/barchart/field_selector';
 
 export interface UseAggregatedIndicatorsParam {
   /**
@@ -43,7 +43,7 @@ export interface UseAggregatedIndicatorsValue {
    * aggregated indicators.
    * @param field the selected Indicator field
    */
-  onFieldChange: (field: StackByValueInfo) => void;
+  onFieldChange: (field: EuiComboBoxOptionOption<string>) => void;
   /**
    * The min and max times returned by the aggregated Indicators query.
    */
@@ -51,7 +51,7 @@ export interface UseAggregatedIndicatorsValue {
   /**
    * Indicator field used to query the aggregated Indicators.
    */
-  selectedField: StackByValueInfo;
+  selectedField: EuiComboBoxOptionOption<string>;
 
   /** Is initial load in progress? */
   isLoading?: boolean;
@@ -83,9 +83,9 @@ export const useAggregatedIndicators = ({
 
   const { inspectorAdapters } = useInspector();
 
-  const [field, setField] = useState<StackByValueInfo>({
+  const [field, setField] = useState<EuiComboBoxOptionOption<string>>({
     label: DEFAULT_FIELD,
-    type: 'string',
+    value: 'string',
   });
 
   const aggregatedIndicatorsQuery = useMemo(

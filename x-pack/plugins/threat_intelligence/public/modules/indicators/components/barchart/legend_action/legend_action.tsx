@@ -6,7 +6,13 @@
  */
 
 import React, { useState, VFC } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBoxOptionOption,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import moment from 'moment';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
@@ -19,8 +25,6 @@ import {
   TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { BUTTON_LABEL } from './translations';
-import { StackByValueInfo } from '../field_selector';
-import { useTimeZone } from '../../../../../hooks/use_kibana_ui_settings';
 
 export interface IndicatorBarchartLegendActionProps {
   /**
@@ -30,7 +34,7 @@ export interface IndicatorBarchartLegendActionProps {
   /**
    * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimelineContextMenu} to populate the timeline.
    */
-  field: StackByValueInfo;
+  field: EuiComboBoxOptionOption<string>;
 }
 
 export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionProps> = ({
@@ -39,7 +43,7 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const group = field.type === 'date' ? moment(data).toISOString() : data;
+  const group = field.value === 'date' ? moment(data).toISOString() : data;
   const popoverItems = [
     <FilterInContextMenu
       key={FILTER_IN_BUTTON_TEST_ID}

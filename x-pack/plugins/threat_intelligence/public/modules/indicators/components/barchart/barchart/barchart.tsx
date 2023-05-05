@@ -7,12 +7,11 @@
 
 import React, { VFC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { IndicatorBarchartLegendAction } from '../legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../../common/utils/dates';
 import type { ChartSeries } from '../../../services';
-import { StackByValueInfo } from '../field_selector';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
@@ -31,7 +30,7 @@ export interface IndicatorsBarChartProps {
   /**
    * Indicator field selected in the IndicatorFieldSelector component, passed to AddToTimeline to populate the timeline.
    */
-  field: StackByValueInfo;
+  field: EuiComboBoxOptionOption<string>;
   /**
    * Option height value to override the default {@link DEFAULT_CHART_HEIGHT} default barchart height.
    */
