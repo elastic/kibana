@@ -23,7 +23,7 @@ import { initPlugin as initServiceNowOAuth } from './servicenow_oauth_simulation
 import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
-// import { initPlugin as initSlackApi } from './slack_api_simulation';
+import { initPlugin as initSlackApi } from './slack_api_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
@@ -39,7 +39,7 @@ export enum ExternalServiceSimulator {
   SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
-  //  SLACK_API = 'slack_api',
+  SLACK_API = 'slack_api',
   JIRA = 'jira',
   RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
@@ -65,8 +65,8 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
-  // allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/chat.postMessage`);
-  // allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/conversations.list`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/chat.postMessage`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SLACK_API}/conversations.list`);
   return allPaths;
 }
 
@@ -153,7 +153,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
-    // initSlackApi(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK_API));
+    initSlackApi(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK_API));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
     initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
     initServiceNowOAuth(
