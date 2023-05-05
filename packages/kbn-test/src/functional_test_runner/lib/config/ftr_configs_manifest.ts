@@ -35,6 +35,12 @@ console.log(`cwd: ${process.cwd()}`);
 ls('.');
 ls(REPO_ROOT);
 ls(`${REPO_ROOT}/.buildkite`);
+ls(
+  '/var/lib/buildkite-agent/builds/kb-n2-4-spot-8d94c28da2235528/elastic/kibana-pull-request/kibana-build-xpack/'
+);
+ls(
+  '/var/lib/buildkite-agent/builds/kb-n2-4-spot-8d94c28da2235528/elastic/kibana-pull-request/kibana-build-xpack/.buildkite/'
+);
 
 async function ls(dir: string) {
   const { stdout } = await execa('ls', ['-la', dir]);
