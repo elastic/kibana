@@ -6,8 +6,9 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
-import { EuiText } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useMemo } from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
@@ -15,76 +16,140 @@ import type {
   ActionDetails,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ActionDetailsAgentState,
+  ActionResponseOutput,
 } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-interface EndpointUploadActionResultProps {
-  action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>;
-  /** The agent id to display the result for. If undefined, the first agent will be used */
-  agentId?: string;
-  'data-test-subj'?: string;
-}
-
 const LABELS = Object.freeze<Record<string, string>>({
-  path: i18n.translate('xpack.securitySolution.uploadActionResult.savedTo', {
+  path: i18n.translate('xpack.securitySolution.endpointUploadActionResult.savedTo', {
     defaultMessage: 'File saved to',
   }),
 
-  disk_free_space: i18n.translate('xpack.securitySolution.uploadActionResult.freeDiskSpace', {
-    defaultMessage: 'Free disk space on drive',
-  }),
+  disk_free_space: i18n.translate(
+    'xpack.securitySolution.endpointUploadActionResult.freeDiskSpace',
+    {
+      defaultMessage: 'Free disk space on drive',
+    }
+  ),
 
-  noAgentResponse: i18n.translate('xpack.securitySolution.uploadActionResult.missingAgentResult', {
-    defaultMessage: 'Error: Agent result missing',
+  noAgentResponse: i18n.translate(
+    'xpack.securitySolution.endpointUploadActionResult.missingAgentResult',
+    {
+      defaultMessage: 'Error: Agent result missing',
+    }
+  ),
+
+  host: i18n.translate('xpack.securitySolution.endpointUploadActionResult.host', {
+    defaultMessage: 'Host',
   }),
 });
+
+interface EndpointUploadActionResultProps {
+  action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>;
+  /** The agent id to display the result for. If undefined, the output for ALL agents will be displayed */
+  agentId?: string;
+  'data-test-subj'?: string;
+}
 
 export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const agentState = action?.agentState[agentId ?? action.agents[0]];
-    const agentResult = action?.outputs?.[agentId ?? action.agents[0]];
+    type DisplayHosts = Array<{
+      name: string;
+      state: ActionDetailsAgentState;
+      result: undefined | ActionResponseOutput<ResponseActionUploadOutputContent>;
+    }>;
+    const outputs = useMemo<DisplayHosts>(() => {
+      const hosts: DisplayHosts = [];
+      const agents = agentId ? [agentId] : action.agents;
+
+      for (const agent of agents) {
+        hosts.push({
+          name: action.hosts[agent].name,
+          state: action.agentState[agent],
+          result: action.outputs?.[agent],
+        });
+      }
+
+      return hosts;
+    }, [action.agentState, action.agents, action.hosts, action.outputs, agentId]);
+
+    const showHostName = outputs.length > 1;
 
     if (action.command !== 'upload') {
-      return null;
+      window.console.warn(`EndpointUploadActionResult: called with a non-upload action`);
+      return <></>;
     }
 
-    // Use case: action log
-    if (!agentState.isCompleted) {
-      return (
-        <div data-test-subj={getTestId('pending')}>
-          <FormattedMessage
-            id="xpack.securitySolution.uploadActionResult.pendingMessage"
-            defaultMessage="Action pending."
-          />
-        </div>
+    if (outputs.length === 0) {
+      window.console.warn(
+        `EndpointUploadActionResult: Agent id [${agentId}] not in list of agents for action`
       );
-    }
-
-    // if we don't have an agent result (for whatever reason)
-    if (!agentResult) {
-      return <div data-test-subj={getTestId('noResultError')}>{LABELS.noAgentResponse}</div>;
-    }
-
-    // Error result
-    if (!agentState.wasSuccessful) {
-      return (
-        <EndpointActionFailureMessage
-          action={action as ActionDetails}
-          data-test-subj={getTestId('error')}
-        />
-      );
+      return <></>;
     }
 
     return (
-      <div data-test-subj={getTestId('success')}>
-        <KeyValueDisplay name={LABELS.path} value={agentResult.content.path} />
-        <KeyValueDisplay
-          name={LABELS.disk_free_space}
-          value={numeral(agentResult.content.disk_free_space).format('0.00b')}
-        />
-      </div>
+      <>
+        {outputs.map(({ name, state, result }) => {
+          // Use case: action log
+          if (!state.isCompleted) {
+            return (
+              <HostUploadResult
+                name={showHostName ? name : undefined}
+                data-test-subj={getTestId('pending')}
+                key={name}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpointUploadActionResult.pendingMessage"
+                  defaultMessage="Action pending."
+                />
+              </HostUploadResult>
+            );
+          }
+
+          // if we don't have an agent result (for whatever reason)
+          if (!result) {
+            return (
+              <HostUploadResult
+                name={showHostName ? name : undefined}
+                data-test-subj={getTestId('noResultError')}
+                key={name}
+              >
+                {LABELS.noAgentResponse}
+              </HostUploadResult>
+            );
+          }
+
+          // Error result
+          if (!state.wasSuccessful) {
+            return (
+              <HostUploadResult
+                name={showHostName ? name : undefined}
+                data-test-subj={getTestId('actionFailure')}
+                key={name}
+              >
+                <EndpointActionFailureMessage action={action as ActionDetails} />
+              </HostUploadResult>
+            );
+          }
+
+          return (
+            <HostUploadResult
+              name={showHostName ? name : undefined}
+              data-test-subj={getTestId('success')}
+              key={name}
+            >
+              <KeyValueDisplay name={LABELS.path} value={result.content.path} />
+              <KeyValueDisplay
+                name={LABELS.disk_free_space}
+                value={numeral(result.content.disk_free_space).format('0.00b')}
+              />
+            </HostUploadResult>
+          );
+        })}
+      </>
     );
   }
 );
@@ -96,7 +161,13 @@ export interface KeyValueDisplayProps {
 }
 const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
   return (
-    <EuiText className="eui-textBreakWord" size="s">
+    <EuiText
+      className="eui-textBreakWord"
+      size="s"
+      css={`
+        white-space: pre-wrap;
+      `}
+    >
       <strong>
         {name}
         {': '}
@@ -106,3 +177,22 @@ const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
   );
 });
 KeyValueDisplay.displayName = 'KeyValueDisplay';
+
+type HostUploadResultProps = PropsWithChildren<{
+  name?: string;
+  'data-test-subj'?: string;
+}>;
+const HostUploadResult = memo<HostUploadResultProps>(
+  ({ name, children, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <div data-test-subj={dataTestSubj}>
+        {name && <KeyValueDisplay name={LABELS.host} value={name} />}
+
+        {children}
+
+        {name && <EuiSpacer />}
+      </div>
+    );
+  }
+);
+HostUploadResult.displayName = 'HostUploadResult';
