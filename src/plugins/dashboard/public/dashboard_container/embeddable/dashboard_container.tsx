@@ -27,6 +27,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -331,9 +332,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const {
       explicitInput: { timeRange, refreshInterval },
       componentState: {
-        lastSavedInput: { timeRestore: lastSavedTimeRestore },
+        lastSavedInput: {
+          controlGroupInput: lastSavedControlGroupInput,
+          timeRestore: lastSavedTimeRestore,
+        },
       },
     } = this.getState();
+
+    if (
+      this.controlGroup &&
+      lastSavedControlGroupInput &&
+      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
+    ) {
+      this.controlGroup.updateInput(lastSavedControlGroupInput);
+    }
 
     // if we are using the unified search integration, we need to force reset the time picker.
     if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
