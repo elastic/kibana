@@ -57,7 +57,7 @@ console.log(`\n### prNum: \n  ${prNum}`);
 // })();
 try {
   execSync(
-    `curl https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`,
+    `curl -s https://api.github.com/repos/elastic/kibana/issues/${prNum} | jq '.labels[].name'`,
     {
       stdio: ['ignore', 'inherit', 'inherit'],
     }
@@ -66,14 +66,14 @@ try {
   console.log('\n### Whoops, something happenned, prolly with jq:');
   console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
 }
-try {
-  execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
-    stdio: ['ignore', 'inherit', 'inherit'],
-  });
-} catch (e) {
-  console.log('\n### Whoops, something happenned:');
-  console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
-}
+// try {
+//   execSync(`curl https://api.github.com/repos/elastic/kibana/issues/${prNum}`, {
+//     stdio: ['ignore', 'inherit', 'inherit'],
+//   });
+// } catch (e) {
+//   console.log('\n### Whoops, something happenned:');
+//   console.log(`\n### Error (stringified): \n${JSON.stringify(e, null, 2)}`);
+// }
 export {};
 function pipe(...fns: any[]) {
   return fns.reduce(
