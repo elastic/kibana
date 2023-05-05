@@ -54,7 +54,7 @@ function registerAlertingTelemetryTask(
       stateSchemaByVersion: {
         1: schema.object({
           has_errors: schema.boolean(),
-          error_messages: schema.arrayOf(schema.any()),
+          error_messages: schema.maybe(schema.arrayOf(schema.any())),
           runs: schema.number(),
           count_total: schema.number(),
           count_by_type: schema.recordOf(schema.string(), schema.number()),
