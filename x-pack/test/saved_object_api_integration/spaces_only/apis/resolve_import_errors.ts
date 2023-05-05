@@ -131,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/156346
+  // FLAKY: https://github.com/elastic/kibana/issues/155846
   describe.skip('_resolve_import_errors', () => {
     getTestScenarios([
       [false, false],
