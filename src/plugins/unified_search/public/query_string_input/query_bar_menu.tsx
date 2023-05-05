@@ -47,6 +47,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   toggleFilterBarMenuPopover: (value: boolean) => void;
   openQueryBarMenu: boolean;
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   savedQueryService: SavedQueryService;
@@ -72,6 +73,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
 function QueryBarMenuComponent({
   language,
   nonKqlMode,
+  disableQueryLanguageSwitcher,
   dateRangeFrom,
   dateRangeTo,
   onQueryChange,
@@ -158,6 +160,7 @@ function QueryBarMenuComponent({
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
+    disableQueryLanguageSwitcher,
     closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
