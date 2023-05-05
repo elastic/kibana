@@ -446,6 +446,11 @@ storiesOf('SearchBar', module)
       },
     } as unknown as SearchBarProps)
   )
+  .add('without switch query language', () =>
+    wrapSearchBarInContext({
+      disableQueryLanguageSwitcher: true,
+    } as SearchBarProps)
+  )
   .add('show only query bar without submit', () =>
     wrapSearchBarInContext({
       showDatePicker: false,

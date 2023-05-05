@@ -85,7 +85,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
             key={tabId}
             isSelected={selectedTab === tabId}
             onClick={() => setSelectedTab(tabId as TabId)}
-            data-telemetry-id={`entSearchContent-engines-api-integration-tab-${tabId}`}
+            data-telemetry-id={`entSearchApplications-api-integration-tab-${tabId}`}
           >
             {tab.title}
           </EuiTab>
