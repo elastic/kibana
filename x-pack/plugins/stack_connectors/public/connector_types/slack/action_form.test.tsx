@@ -172,6 +172,6 @@ describe('ActionForm - Slack API Connector', () => {
       </IntlProvider>
     );
 
-    expect(await screen.findByText('Selected channel is required.')).toBeInTheDocument();
+    expect(await screen.findByText('Channel is required.')).toBeInTheDocument();
   });
 });

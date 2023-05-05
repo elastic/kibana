@@ -256,7 +256,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 openDeleteEngineModal();
                 sendEnterpriseSearchTelemetry({
                   action: 'clicked',
-                  metric: 'entSearchContent-engines-engineView-deleteEngine',
+                  metric: 'entSearchApplications-engineView-deleteEngine',
                 });
               }
             }}

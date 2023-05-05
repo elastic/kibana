@@ -17,6 +17,7 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
   ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import {
   QueryDslQueryContainer,
@@ -291,6 +292,15 @@ const getQueryByExecutionUuid = ({
     {
       term: {
         [ALERT_RULE_UUID]: ruleId,
+      },
+    },
+    {
+      bool: {
+        must_not: {
+          exists: {
+            field: ALERT_MAINTENANCE_WINDOW_IDS,
+          },
+        },
       },
     },
   ];
