@@ -27,7 +27,6 @@ import type {
 } from '@kbn/core-http-context-server-internal';
 import { Router } from '@kbn/core-http-router-server-internal';
 
-import { IRouterWithVersion } from '@kbn/core-http-server/src/router';
 import { CspConfigType, cspConfig } from './csp';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
@@ -82,8 +81,8 @@ export class HttpService
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
-  public getRegisteredRouters(): IRouterWithVersion[] {
-    return this.httpServer.getRegisteredRouters() as IRouterWithVersion[];
+  public getRegisteredRouters(): IRouter[] {
+    return this.httpServer.getRegisteredRouters();
   }
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {

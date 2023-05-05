@@ -155,6 +155,7 @@ const createInternalSetupContractMock = () => {
     getServerInfo: jest.fn(),
     registerPrebootRoutes: jest.fn(),
     registerRouterAfterListening: jest.fn(),
+    getRegisteredRouters: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());

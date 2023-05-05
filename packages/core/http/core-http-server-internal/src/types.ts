@@ -63,7 +63,7 @@ export interface InternalHttpServiceSetup
   ) => IContextContainer;
 
   registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
-  getRegisteredRouters: () => IRouterWithVersion[];
+  getRegisteredRouters: () => IRouter[];
 }
 
 /** @internal */
