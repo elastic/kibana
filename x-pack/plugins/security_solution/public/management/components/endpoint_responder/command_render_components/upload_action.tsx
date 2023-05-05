@@ -6,6 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type {
+  ResponseActionUploadParameters,
+  ResponseActionUploadOutputContent,
+} from '../../../../../common/endpoint/types';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import type { UploadActionUIRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -13,10 +17,14 @@ import { useSendUploadEndpointRequest } from '../../../hooks/response_actions/us
 import type { ActionRequestComponentProps } from '../types';
 
 export const UploadActionResult = memo<
-  ActionRequestComponentProps<{
-    file: File;
-    overwrite?: boolean;
-  }>
+  ActionRequestComponentProps<
+    {
+      file: File;
+      overwrite?: boolean;
+    },
+    ResponseActionUploadOutputContent,
+    ResponseActionUploadParameters
+  >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendUploadEndpointRequest();
 
@@ -43,7 +51,11 @@ export const UploadActionResult = memo<
     return reqBody;
   }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<UploadActionUIRequestBody>({
+  const { result, actionDetails } = useConsoleActionSubmitter<
+    UploadActionUIRequestBody,
+    ResponseActionUploadOutputContent,
+    ResponseActionUploadParameters
+  >({
     ResultComponent,
     setStore,
     store,

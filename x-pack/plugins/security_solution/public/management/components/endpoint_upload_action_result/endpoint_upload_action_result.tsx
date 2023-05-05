@@ -18,6 +18,7 @@ import type {
   ResponseActionUploadParameters,
   ActionDetailsAgentState,
   ActionResponseOutput,
+  MaybeImmutable,
 } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
@@ -46,14 +47,20 @@ const LABELS = Object.freeze<Record<string, string>>({
 });
 
 interface EndpointUploadActionResultProps {
-  action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>;
+  action: MaybeImmutable<
+    ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>
+  >;
   /** The agent id to display the result for. If undefined, the output for ALL agents will be displayed */
   agentId?: string;
   'data-test-subj'?: string;
 }
 
 export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
-  ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
+  ({ action: _action, agentId, 'data-test-subj': dataTestSubj }) => {
+    const action = _action as ActionDetails<
+      ResponseActionUploadOutputContent,
+      ResponseActionUploadParameters
+    >;
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     type DisplayHosts = Array<{
