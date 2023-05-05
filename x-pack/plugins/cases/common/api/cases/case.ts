@@ -176,8 +176,6 @@ const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   'connector.name': null,
   'connector.type': null,
-  'connector.fields.key': null,
-  'connector.fields.value': null,
   'external_service.pushed_by.username': null,
   'external_service.pushed_by.full_name': null,
   'external_service.pushed_by.email': null,
