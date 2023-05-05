@@ -506,8 +506,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       messageSigningService: plugins.fleet?.messageSigningService,
       actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
-        this.endpointContext,
-        licenseService
+        this.endpointContext
       ),
     });
 

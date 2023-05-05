@@ -28,13 +28,14 @@ const parametersNotFound =
 export const getSkippedQueryError = (error: string) => {
   if (error === platinumLicenseRequired) {
     return i18n.translate('xpack.osquery.liveQueryActionResults.table.wrongLicenseErrorText', {
-      defaultMessage: `${platinumLicenseRequired}`,
+      defaultMessage: 'At least Platinum license is required to use Response Actions.',
     });
   }
 
   if (error === parametersNotFound) {
     return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedErrorText', {
-      defaultMessage: `${parametersNotFound}`,
+      defaultMessage:
+        "This query hasn't been called due to parameter used and its value not found in the alert.",
     });
   }
 
