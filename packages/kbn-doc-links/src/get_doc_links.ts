@@ -727,7 +727,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       troubleshooting: `${SECURITY_SOLUTION_DOCS}ts-management.html#ts-endpoints`,
     },
     legal: {
-      privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+      privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
