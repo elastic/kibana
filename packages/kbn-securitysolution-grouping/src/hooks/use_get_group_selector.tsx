@@ -40,6 +40,11 @@ interface UseGetGroupSelectorStateless
   onGroupChange: (selectedGroups: string[]) => void;
 }
 
+// only use this component to use a group selector that displays when isNoneGroup is true
+// by selecting a group with the groupSelectorStateless component
+// the contents are within the grouping component and from that point
+// the grouping component will handle the group selector. When the group selector is set back to none,
+// the consumer can again use the groupSelectorStateless component to select a new group
 export const useGetGroupSelectorStateless = ({
   defaultGroupingOptions,
   groupingId,
@@ -47,32 +52,11 @@ export const useGetGroupSelectorStateless = ({
   onGroupChange,
   maxGroupingLevels,
 }: UseGetGroupSelectorStateless) => {
-  const setSelectedGroups = useCallback(
-    (activeGroups: string[]) => {
-      onGroupChange(activeGroups);
-    },
-    [onGroupChange]
-  );
-
   const onChange = useCallback(
     (groupSelection: string) => {
-      const selectedGroups = ['none'];
-      if (selectedGroups.find((selected) => selected === groupSelection)) {
-        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
-        if (groups.length === 0) {
-          setSelectedGroups(['none']);
-        } else {
-          setSelectedGroups(groups);
-        }
-        return;
-      }
-
-      const newSelectedGroups = isNoneGroup([groupSelection])
-        ? [groupSelection]
-        : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
-      setSelectedGroups(newSelectedGroups);
+      onGroupChange([groupSelection]);
     },
-    [setSelectedGroups]
+    [onGroupChange]
   );
 
   return (
@@ -126,14 +110,11 @@ export const useGetGroupSelector = ({
 
   const onChange = useCallback(
     (groupSelection: string) => {
-      console.log('onChange', groupSelection);
       if (selectedGroups.find((selected) => selected === groupSelection)) {
         const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
         if (groups.length === 0) {
-          console.log('onchnge 1', 'none');
           setSelectedGroups(['none']);
         } else {
-          console.log('onchnge 2', groups);
           setSelectedGroups(groups);
         }
         return;
@@ -143,7 +124,6 @@ export const useGetGroupSelector = ({
         ? [groupSelection]
         : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
       setSelectedGroups(newSelectedGroups);
-      console.log('onchnge 3', newSelectedGroups);
 
       // built-in telemetry: UI-counter
       tracker?.(
