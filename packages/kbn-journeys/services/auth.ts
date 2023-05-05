@@ -20,9 +20,6 @@ export interface Credentials {
 }
 
 function extractCookieValue(authResponse: AxiosResponse) {
-  // if (authResponse.status !== 200) {
-  //   throw new Error('Kibana auth failed');
-  // }
   return authResponse.headers['set-cookie']?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
 }
 export class Auth {
@@ -65,7 +62,11 @@ export class Auth {
       maxRedirects: 0,
     });
 
-    this.log.info(`login status = ${authResponse.status}`);
+    if (authResponse.status !== 200) {
+      throw new Error(
+        `Kibana auth failed: code: ${authResponse.status}, message: ${authResponse.statusText}`
+      );
+    }
 
     const cookie = extractCookieValue(authResponse);
     if (cookie) {
