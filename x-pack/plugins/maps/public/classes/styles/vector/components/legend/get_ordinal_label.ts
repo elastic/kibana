@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export function getMaxLabel(isFieldMetaEnabled: boolean, isMinOutsideStdRange: boolean, max: number | string) {
-  return isFieldMetaEnabled && isMinOutsideStdRange ? `> ${max}` : max;
+export function getMaxLabel(isFieldMetaEnabled: boolean, isMaxOutsideStdRange: boolean, max: number | string) {
+  return isFieldMetaEnabled && isMaxOutsideStdRange ? `> ${max}` : max;
 }
 
 export function getMinLabel(isFieldMetaEnabled: boolean, isMinOutsideStdRange: boolean, min: number | string) {
