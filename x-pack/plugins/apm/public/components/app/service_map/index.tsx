@@ -110,12 +110,14 @@ export function ServiceMap({
   start,
   end,
   serviceGroupId,
+  isOpen,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
+  isOpen: boolean;
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
@@ -199,6 +201,7 @@ export function ServiceMap({
         right: 0,
         width: dimensions.width,
         height: heightWithPadding,
+        display: isOpen ? 'block' : 'none',
       }}
     >
       <div
@@ -209,10 +212,9 @@ export function ServiceMap({
           width: dimensions.width,
         }}
         ref={ref}
-      >
-        <Controls />
-        <ControlsBottom mapSize={mapSize} setMapSize={setMapSize} />
-      </div>
+      />
+      <Controls />
+      <ControlsBottom mapSize={mapSize} setMapSize={setMapSize} />
     </EuiPanel>
   );
 }

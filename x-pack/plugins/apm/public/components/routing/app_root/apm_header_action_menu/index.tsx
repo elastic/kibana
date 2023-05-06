@@ -114,9 +114,12 @@ export function ApmHeaderActionMenu() {
       >
         Map
       </EuiHeaderLink>
-      <div style={{ display: isMapOpen ? 'block' : 'none' }}>
-        <ServiceMap kuery="" environment="ENVIRONMENT_NOT_DEFINED" />
-      </div>
+
+      <ServiceMap
+        isOpen={isMapOpen}
+        kuery=""
+        environment="ENVIRONMENT_NOT_DEFINED"
+      />
     </EuiHeaderLinks>
   );
 }
