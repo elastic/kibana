@@ -69,14 +69,15 @@ function getLayoutOptions({
   // };
   return {
     randomize: true,
-    animate: !fit,
     animationDuration: animationOptions.duration,
     animationEasing: animationOptions.easing,
-    fit,
     name: 'fcose',
     padding: nodeHeight,
-    nodeSeparation: 200,
-    idealEdgeLength: (_edge) => 100,
+    idealEdgeLength: (edge) => 100,
+    //    nodeSeparation: 200,
+    tilingPaddingVertical: 75,
+    // Represents the amount of the horizontal space to put between the zero degree members during the tiling operation(can also be a function)
+    tilingPaddingHorizontal: 75,
     // spacingFactor: 1.2,
     // edgeSep: 32,
     // rankSep: 128,
