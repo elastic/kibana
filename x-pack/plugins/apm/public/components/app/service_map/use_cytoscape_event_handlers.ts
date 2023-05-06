@@ -120,9 +120,6 @@ export function useCytoscapeEventHandlers({
     const nodeHeight = getNodeHeight(theme);
 
     const expandHandler: cytoscape.EventHandler = (event, mapSize) => {
-      if (mapSize === 'small') {
-        event.cy.zoom(event.cy.zoom() * 0.5);
-      }
       const eles = serviceName
         ? event.cy.$(`#${serviceName}`)
         : event.cy.elements();
@@ -206,7 +203,7 @@ export function useCytoscapeEventHandlers({
       const debugEnabled = sessionStorage.getItem('apm_debug') === 'true';
       if (debugEnabled) {
         // eslint-disable-next-line no-console
-        console.debug('cytoscape:', event, args);
+        console.debug('cytoscape:', { ...event, args });
       }
     };
     const dragHandler: cytoscape.EventHandler = (event) => {
@@ -247,14 +244,18 @@ export function useCytoscapeEventHandlers({
         });
       }
     };
+    const openHandler: cytoscape.EventHandler = (event) => {
+      dataHandler(event, event.cy.elements());
+    };
 
     if (cy) {
       cy.on(
-        'add custom:data custom:expand drag dragfree layoutstop select tapstart tapend unselect',
+        'add custom:data custom:expand custom:open drag dragfree layoutstop select tapstart tapend unselect',
         debugHandler
       );
       cy.on('custom:data', dataHandler);
       cy.on('custom:expand', expandHandler);
+      cy.on('custom:open', openHandler);
       cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
@@ -269,12 +270,13 @@ export function useCytoscapeEventHandlers({
     return () => {
       if (cy) {
         cy.removeListener(
-          'add custom:data custom:expand drag dragfree layoutstop select tapstart tapend unselect',
+          'add custom:data custom:expand custom:open drag dragfree layoutstop select tapstart tapend unselect',
           undefined,
           debugHandler
         );
         cy.removeListener('custom:data', undefined, dataHandler);
         cy.removeListener('custom:expand', undefined, dataHandler);
+        cy.removeListener('custom:open', undefined, openHandler);
         cy.removeListener('layoutstop', undefined, layoutstopHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);

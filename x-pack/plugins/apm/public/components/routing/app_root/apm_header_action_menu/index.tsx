@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { useServiceName } from '../../../../hooks/use_service_name';
@@ -23,6 +23,7 @@ import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { Labs } from './labs';
+import { CytoscapeContext } from '../../../../context/cytoscape_context';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
@@ -55,9 +56,13 @@ export function ApmHeaderActionMenu() {
     'isMapOpen',
     'false'
   );
+  const cy = useContext(CytoscapeContext);
   const isMapOpen = isMapOpenAsString !== 'false';
   const handleFlyoutClose = () => {
     setIsMapOpen(String(!isMapOpen));
+    if (!isMapOpen) {
+      cy.trigger('custom:open');
+    }
   };
 
   return (
