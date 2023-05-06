@@ -30,8 +30,8 @@ export async function install(
   const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 
   if (binaryChecksum === pkg.binaryChecksum) {
+    // validated a previously extracted browser binary
     logger.info(`Browser executable: ${binaryPath}`);
-    // validated a previously downloaded browser
     return binaryPath;
   }
 
@@ -52,6 +52,17 @@ export async function install(
     await extract(archive, chromiumPath);
   } catch (error) {
     logger.error(error);
+  }
+
+  // check the newly extracted browser binary
+  const downloadedBinaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
+  if (downloadedBinaryChecksum !== pkg.binaryChecksum) {
+    const error = new Error(
+      `Error installing browsers, binary checksums incorrect for [${architecture}/${platform}]`
+    );
+    logger?.error(error);
+
+    throw error;
   }
 
   logger.info(`Browser executable has been installed: ${binaryPath}`);
