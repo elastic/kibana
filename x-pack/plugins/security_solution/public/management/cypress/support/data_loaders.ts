@@ -8,17 +8,23 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import { sendEndpointActionResponse } from '../../../../scripts/endpoint/agent_emulator/services/endpoint_response_actions';
+import {
+  sendEndpointActionResponse,
+  sendFleetActionResponse,
+} from '../../../../scripts/endpoint/common/response_actions';
+import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
+import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
+import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
+import type {
+  CreateAndEnrollEndpointHostOptions,
+  CreateAndEnrollEndpointHostResponse,
+} from '../../../../scripts/endpoint/common/endpoint_host_services';
 import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
   deleteIndexedEndpointPolicyResponse,
   indexEndpointPolicyResponse,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type {
-  ActionDetails,
-  HostPolicyResponse,
-  LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
 import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
   IndexedEndpointRuleAlerts,
@@ -39,6 +45,10 @@ import {
   deleteIndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import {
+  createAndEnrollEndpointHost,
+  destroyEndpointHost,
+} from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
  * Cypress plugin for adding data loading related `task`s
@@ -151,9 +161,64 @@ export const dataLoaders = (
     sendHostActionResponse: async (data: {
       action: ActionDetails;
       state: { state?: 'success' | 'failure' };
-    }): Promise<LogsEndpointActionResponse> => {
+    }): Promise<null> => {
       const { esClient } = await stackServicesPromise;
-      return sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
+      const fleetResponse = await sendFleetActionResponse(esClient, data.action, {
+        state: data.state.state,
+      });
+
+      if (!fleetResponse.error) {
+        await sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
+      }
+
+      return null;
+    },
+
+    deleteAllEndpointData: async ({
+      endpointAgentIds,
+    }: {
+      endpointAgentIds: string[];
+    }): Promise<DeleteAllEndpointDataResponse> => {
+      const { esClient } = await stackServicesPromise;
+      return deleteAllEndpointData(esClient, endpointAgentIds);
+    },
+  });
+};
+
+export const dataLoadersForRealEndpoints = (
+  on: Cypress.PluginEvents,
+  config: Cypress.PluginConfigOptions
+): void => {
+  const stackServicesPromise = createRuntimeServices({
+    kibanaUrl: config.env.KIBANA_URL,
+    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
+    username: config.env.ELASTICSEARCH_USERNAME,
+    password: config.env.ELASTICSEARCH_PASSWORD,
+    asSuperuser: true,
+  });
+
+  on('task', {
+    createEndpointHost: async (
+      options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
+    ): Promise<CreateAndEnrollEndpointHostResponse> => {
+      const { kbnClient, log } = await stackServicesPromise;
+      return createAndEnrollEndpointHost({
+        useClosestVersionMatch: true,
+        ...options,
+        log,
+        kbnClient,
+      }).then((newHost) => {
+        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 120000).then(() => {
+          return newHost;
+        });
+      });
+    },
+
+    destroyEndpointHost: async (
+      createdHost: CreateAndEnrollEndpointHostResponse
+    ): Promise<null> => {
+      const { kbnClient } = await stackServicesPromise;
+      return destroyEndpointHost(kbnClient, createdHost).then(() => null);
     },
   });
 };

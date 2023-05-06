@@ -29,6 +29,7 @@
     },
     "@kbn/rison",
     "@kbn/datemath",
+    "@kbn/guided-onboarding-plugin",
     "@kbn/alerting-plugin"
   ]
 }
