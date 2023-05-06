@@ -51,8 +51,6 @@ export function ApmHeaderActionMenu() {
   );
 
   // Service map flyout
-  // const [isMapOpen, setIsMapOpen] = useLocalStorage('map menu state', false);
-  //  const [isMapOpen, setIsMapOpen] = useState(false);
   const [isMapOpenAsString, setIsMapOpen] = useLocalStorage(
     'isMapOpen',
     'false'

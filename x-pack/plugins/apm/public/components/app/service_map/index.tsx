@@ -38,11 +38,6 @@ import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 
-function useMapElements() {
-  //return useContext(MapContext);
-  return [{ data: { id: 'my-service' } }];
-}
-
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
@@ -122,16 +117,15 @@ export function ServiceMap({
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
-  const serviceName = 'test service name';
   const status = FETCH_STATUS.SUCCESS;
-  //  const serviceName = useServiceName();
+  const serviceName = useServiceName();
   const [mapSize, setMapSize] = useLocalStorage<'big' | 'small'>(
     'mapSize',
     'small'
   );
   const { config } = useApmPluginContext();
   const data = { elements: [] };
-  const { ref, height, width } = useRefDimensions();
+  const { ref, height } = useRefDimensions();
   const dimensions =
     mapSize === 'big'
       ? { height: 900, width: 900 }

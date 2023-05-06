@@ -100,7 +100,7 @@ export function DependenciesDetailTable() {
           id: `>${dep.location.dependencyName}~>>${dependencyName}`,
           label: `${dep.location.dependencyName} to ${dependencyName}`,
           source: `>${dep.location.dependencyName}`,
-          target: `>${ddependencyName}`,
+          target: `>${dependencyName}`,
         },
       };
     }
