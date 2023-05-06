@@ -79,7 +79,6 @@ function CytoscapeComponent({
       cy.mount(ref.current);
     }
   });
-  useCytoscapeEventHandlers({ cy, serviceName, theme });
 
   // Add items from the elements prop to the cytoscape collection and remove
   // items that no longer are in the list, then trigger an event to notify

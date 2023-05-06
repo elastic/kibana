@@ -119,7 +119,7 @@ export function useCytoscapeEventHandlers({
   useEffect(() => {
     const nodeHeight = getNodeHeight(theme);
 
-    const resizeHandler: cytoscape.EventHandler = (event, mapSize) => {
+    const expandHandler: cytoscape.EventHandler = (event, mapSize) => {
       if (mapSize === 'small') {
         event.cy.zoom(event.cy.zoom() * 0.5);
       }
@@ -250,12 +250,12 @@ export function useCytoscapeEventHandlers({
 
     if (cy) {
       cy.on(
-        'add custom:data drag dragfree layoutstop resize select tapstart tapend unselect',
+        'add custom:data custom:expand drag dragfree layoutstop select tapstart tapend unselect',
         debugHandler
       );
       cy.on('custom:data', dataHandler);
+      cy.on('custom:expand', expandHandler);
       cy.on('layoutstop', layoutstopHandler);
-      cy.on('resize', resizeHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
@@ -269,13 +269,13 @@ export function useCytoscapeEventHandlers({
     return () => {
       if (cy) {
         cy.removeListener(
-          'add custom:data drag dragfree layoutstop resize select tapstart tapend unselect',
+          'add custom:data custom:expand drag dragfree layoutstop select tapstart tapend unselect',
           undefined,
           debugHandler
         );
         cy.removeListener('custom:data', undefined, dataHandler);
+        cy.removeListener('custom:expand', undefined, dataHandler);
         cy.removeListener('layoutstop', undefined, layoutstopHandler);
-        cy.removeListener('resize', undefined, resizeHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
         cy.removeListener('select', 'node', selectHandler);

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -157,18 +157,23 @@ function useServicesDetailedStatisticsFetcher({
     tiebreakerField,
   }).slice(page * pageSize, (page + 1) * pageSize);
 
-  const currentPageMapElements = mainStatisticsData.items.map((item) => {
-    return {
-      data: {
-        id: item.serviceName,
-        'agent.name': item.agentName,
-        'service.name': item.serviceName,
-      },
-    };
-  });
+  const currentPageMapElements = useMemo(
+    () =>
+      mainStatisticsData.items.map((item) => {
+        return {
+          data: {
+            id: item.serviceName,
+            'agent.name': item.agentName,
+            'service.name': item.serviceName,
+          },
+        };
+      }),
+    [mainStatisticsData.items]
+  );
   const cy = useContext(CytoscapeContext);
 
   useEffect(() => {
+    console.log({ currentPageMapElements });
     const addedElements = cy.add(currentPageMapElements);
     cy.trigger('custom:data', [addedElements]);
   }, [currentPageMapElements]);

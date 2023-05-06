@@ -8,7 +8,7 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useContext, useEffect } from 'react';
+import React, { ReactNode, useContext, useEffect, useMemo } from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
@@ -79,49 +79,57 @@ export function ServiceOverviewDependenciesTable({
     [start, end, serviceName, environment, offset, comparisonEnabled]
   );
 
-  const dependencyEdges = data?.serviceDependencies.map((dep) => {
-    if (dep.location.serviceName) {
-      return {
-        data: {
-          id: `${serviceName}~>${dep.location.serviceName}`,
-          label: `${serviceName} to ${dep.location.serviceName}`,
-          source: serviceName,
-          target: dep.location.serviceName,
-        },
-      };
-    } else if (dep.location.dependencyName) {
-      return {
-        data: {
-          id: `${serviceName}~>${dep.location.dependencyName}`,
-          label: `${serviceName} to ${dep.location.dependencyName}`,
-          source: serviceName,
-          target: `>${dep.location.dependencyName}`,
-        },
-      };
-    }
-  });
+  const dependencyEdges = useMemo(
+    () =>
+      data?.serviceDependencies.map((dep) => {
+        if (dep.location.serviceName) {
+          return {
+            data: {
+              id: `${serviceName}~>${dep.location.serviceName}`,
+              label: `${serviceName} to ${dep.location.serviceName}`,
+              source: serviceName,
+              target: dep.location.serviceName,
+            },
+          };
+        } else if (dep.location.dependencyName) {
+          return {
+            data: {
+              id: `${serviceName}~>${dep.location.dependencyName}`,
+              label: `${serviceName} to ${dep.location.dependencyName}`,
+              source: serviceName,
+              target: `>${dep.location.dependencyName}`,
+            },
+          };
+        }
+      }),
+    [data]
+  );
 
-  const dependencyNodes = data?.serviceDependencies.map((dep) => {
-    if (dep.location.serviceName) {
-      return {
-        data: {
-          id: dep.location.serviceName,
-          'agent.name': dep.location.agentName,
-          'service.name': dep.location.serviceName,
-        },
-      };
-    } else if (dep.location.dependencyName) {
-      return {
-        data: {
-          id: `>${dep.location.dependencyName}`,
-          label: dep.location.dependencyName,
-          'span.destination.service.resource': dep.location.dependencyName,
-          'span.subtype': dep.location.spanSubType,
-          'span.type': dep.location.spanType,
-        },
-      };
-    }
-  });
+  const dependencyNodes = useMemo(
+    () =>
+      data?.serviceDependencies.map((dep) => {
+        if (dep.location.serviceName) {
+          return {
+            data: {
+              id: dep.location.serviceName,
+              'agent.name': dep.location.agentName,
+              'service.name': dep.location.serviceName,
+            },
+          };
+        } else if (dep.location.dependencyName) {
+          return {
+            data: {
+              id: `>${dep.location.dependencyName}`,
+              label: dep.location.dependencyName,
+              'span.destination.service.resource': dep.location.dependencyName,
+              'span.subtype': dep.location.spanSubType,
+              'span.type': dep.location.spanType,
+            },
+          };
+        }
+      }),
+    [data]
+  );
   const cy = useContext(CytoscapeContext);
   useEffect(() => {
     const thisServiceOnMap = cy.$(`#{serviceName}`)[0];

@@ -48,7 +48,7 @@ export function ControlsBottom({ mapSize, setMapSize }) {
   const isExpanded = mapSize === 'big';
   function expand() {
     setMapSize(isExpanded ? 'small' : 'big');
-    cy.resize([mapSize]);
+    cy.trigger('custom:expand', [mapSize]);
     center();
   }
 
