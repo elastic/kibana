@@ -37,6 +37,7 @@ import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
