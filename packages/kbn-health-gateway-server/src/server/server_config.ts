@@ -40,7 +40,7 @@ const configSchema = schema.object(
       defaultValue: 120000,
     }),
     ssl: sslSchema,
-    restrictInternalAPis: schema.boolean({ defaultValue: false }),
+    restrictInternalApis: schema.boolean({ defaultValue: false }),
   },
   {
     validate: (rawConfig) => {
@@ -90,6 +90,6 @@ export class ServerConfig implements IHttpConfig {
       allowCredentials: false,
       allowOrigin: ['*'],
     };
-    this.restrictInternalApis = rawConfig.restrictInternalAPis;
+    this.restrictInternalApis = rawConfig.restrictInternalApis;
   }
 }

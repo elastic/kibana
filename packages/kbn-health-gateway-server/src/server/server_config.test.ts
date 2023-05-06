@@ -194,17 +194,17 @@ describe('server config', () => {
     test('can specify retriction on access to internal APIs', () => {
       const validOptions = [false, true];
       for (const val of validOptions) {
-        const { restrictInternalAPis } = config.schema.validate({ restrictInternalAPis: val });
-        expect(restrictInternalAPis).toBe(val);
+        const { restrictInternalApis } = config.schema.validate({ restrictInternalAPis: val });
+        expect(restrictInternalApis).toBe(val);
       }
     });
 
     test('throws if not boolean', () => {
       const configSchema = config.schema;
-      expect(() => configSchema.validate({ restricInternalApis: 100 })).toThrowError(
+      expect(() => configSchema.validate({ restrictInternalApis: 100 })).toThrowError(
         'restrictInternalApis]: expected value of type [boolean] but got [number]'
       );
-      expect(() => configSchema.validate({ restricInternalApis: 'false' })).toThrowError(
+      expect(() => configSchema.validate({ restrictInternalApis: 'false' })).toThrowError(
         'restrictInternalApis]: expected value of type [boolean] but got [string]'
       );
     });
