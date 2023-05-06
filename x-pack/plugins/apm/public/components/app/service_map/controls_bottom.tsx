@@ -9,6 +9,8 @@ import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useContext } from 'react';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
+import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
+import { useTheme } from '../../../hooks/use_theme';
 
 const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.euiSize};
@@ -28,10 +30,26 @@ const Panel = euiStyled(EuiPanel)`
 
 export function ControlsBottom({ mapSize, setMapSize }) {
   const cy = useContext(CytoscapeContext);
+  const theme = useTheme();
 
+  function center() {
+    if (cy) {
+      const selectedNode = cy.$('node:selected');
+      const eles = selectedNode.length === 1 ? selectedNode : cy.elements();
+      cy.animate({
+        ...getAnimationOptions(theme),
+        center: {
+          eles,
+        },
+        fit: { eles, padding: getNodeHeight(theme) },
+      });
+    }
+  }
   const isExpanded = mapSize === 'big';
   function expand() {
     setMapSize(isExpanded ? 'small' : 'big');
+    cy.resize([mapSize]);
+    center();
   }
 
   if (!cy) {

@@ -7,6 +7,7 @@
 
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
+import fcose from 'cytoscape-fcose';
 import { isEqual } from 'lodash';
 import React, {
   createContext,
@@ -24,7 +25,8 @@ import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
 
-cytoscape.use(dagre);
+//cytoscape.use(dagre);
+cytoscape.use(fcose);
 
 export interface CytoscapeProps {
   children?: ReactNode;

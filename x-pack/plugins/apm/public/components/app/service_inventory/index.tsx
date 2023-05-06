@@ -169,7 +169,8 @@ function useServicesDetailedStatisticsFetcher({
   const cy = useContext(CytoscapeContext);
 
   useEffect(() => {
-    cy.add(currentPageMapElements);
+    const addedElements = cy.add(currentPageMapElements);
+    cy.trigger('custom:data', [addedElements]);
   }, [currentPageMapElements]);
 
   // // We do a fit if we're going from 0 to >0 elements

@@ -27,7 +27,6 @@ export function DependenciesInventoryTable() {
       kuery,
       comparisonEnabled,
       offset,
-      dependencyName,
     },
   } = useApmParams('/dependencies/inventory');
 
@@ -59,28 +58,7 @@ export function DependenciesInventoryTable() {
     },
     [start, end, environment, offset, kuery, comparisonEnabled]
   );
-
-  const dependencyEdges = data?.serviceDependencies.map((dep) => {
-    if (dep.location.serviceName) {
-      return {
-        data: {
-          id: `${dep.location.serviceName}~>${dependencyName}`,
-          label: `${dep.location.serviceName} to ${dependencyName}`,
-          source: dep.location.serviceName,
-          target: dependencyName,
-        },
-      };
-    } else if (dep.location.dependencyName) {
-      return {
-        data: {
-          id: `${dep.location.dependencyName}~>${dependencyName}`,
-          label: `${dep.location.dependencyName} to ${dependencyName}`,
-          source: dep.location.dependencyName,
-          target: dependencyName,
-        },
-      };
-    }
-  });
+  console.log({ data });
 
   const dependencyNodes = data?.dependencies.map((dep) => {
     if (dep.location.serviceName) {
@@ -104,9 +82,11 @@ export function DependenciesInventoryTable() {
     }
   });
   const cy = useContext(CytoscapeContext);
+  console.log({ dependencyNodes });
   useEffect(() => {
-    cy.add([...(dependencyNodes ?? []), ...(dependencyEdges ?? [])]);
-  }, [dependencyNodes, dependencyEdges]);
+    const addedNodes = cy.add([...(dependencyNodes ?? [])]);
+    cy.trigger('custom:data', [addedNodes]);
+  }, [dependencyNodes]);
 
   const dependencies =
     data?.dependencies.map((dependency) => {

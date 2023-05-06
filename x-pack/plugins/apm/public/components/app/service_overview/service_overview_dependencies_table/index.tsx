@@ -124,22 +124,23 @@ export function ServiceOverviewDependenciesTable({
   });
   const cy = useContext(CytoscapeContext);
   useEffect(() => {
-    if (cy.$(`#{serviceName}`).length === 0) {
-      cy.add({
-        data: {
-          id: serviceName,
-          'agent.name': agentName,
-          'service.name': serviceName,
-        },
-      });
-    }
-    if (Array.isArray(dependencyNodes)) {
-      cy.add(dependencyNodes);
-    }
-    if (Array.isArray(dependencyEdges)) {
-      cy.add(dependencyEdges);
-    }
+    const thisServiceOnMap = cy.$(`#{serviceName}`)[0];
+    const thisServiceForMap = {
+      data: {
+        id: serviceName,
+        'agent.name': agentName,
+        'service.name': serviceName,
+      },
+    };
+
+    const addedElements = cy.add([
+      ...(!thisServiceOnMap ? [thisServiceForMap] : []),
+      ...(dependencyNodes ?? []),
+      ...(dependencyEdges ?? []),
+    ]);
+    cy.trigger('custom:data', [addedElements]);
   }, [serviceName, agentName, dependencyNodes, dependencyEdges]);
+
   const dependencies =
     data?.serviceDependencies.map((dependency) => {
       const { location } = dependency;

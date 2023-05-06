@@ -773,6 +773,7 @@
     "cuid": "^2.1.8",
     "cytoscape": "^3.10.0",
     "cytoscape-dagre": "^2.2.2",
+    "cytoscape-fcose": "^2.2.0",
     "d3": "3.5.17",
     "d3-array": "2.12.1",
     "d3-brush": "^3.0.0",

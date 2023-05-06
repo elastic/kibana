@@ -53,22 +53,37 @@ function getLayoutOptions({
 
   // @ts-expect-error Some of the dagre-specific layout options don't work with
   // the types.
+  // return {
+  //   animationDuration: animationOptions.duration,
+  //   animationEasing: animationOptions.easing,
+  //   fit,
+  //   name: 'dagre',
+  //   animate: !fit,
+  //   padding: nodeHeight,
+  //   spacingFactor: 1.2,
+  //   nodeSep: nodeHeight,
+  //   edgeSep: 32,
+  //   rankSep: 128,
+  //   rankDir: 'LR',
+  //   ranker: 'network-simplex',
+  // };
   return {
+    randomize: true,
+    animate: !fit,
     animationDuration: animationOptions.duration,
     animationEasing: animationOptions.easing,
     fit,
-    name: 'dagre',
-    animate: !fit,
+    name: 'fcose',
     padding: nodeHeight,
-    spacingFactor: 1.2,
-    nodeSep: nodeHeight,
-    edgeSep: 32,
-    rankSep: 128,
-    rankDir: 'LR',
-    ranker: 'network-simplex',
+    nodeSeparation: 200,
+    idealEdgeLength: (_edge) => 100,
+    // spacingFactor: 1.2,
+    // edgeSep: 32,
+    // rankSep: 128,
+    // rankDir: 'LR',
+    // ranker: 'network-simplex',
   };
 }
-
 function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
   const container = event.cy.container();
 
@@ -103,7 +118,23 @@ export function useCytoscapeEventHandlers({
   useEffect(() => {
     const nodeHeight = getNodeHeight(theme);
 
-    const dataHandler: cytoscape.EventHandler = (event, fit) => {
+    const resizeHandler: cytoscape.EventHandler = (event, mapSize) => {
+      console.log({ mapSize });
+      if (mapSize === 'small') {
+        event.cy.zoom(event.cy.zoom() * 0.5);
+      }
+      event.cy.animate({
+        ...getAnimationOptions(theme),
+        center: {
+          eles: serviceName
+            ? event.cy.$(`#${serviceName}`)
+            : event.cy.elements(),
+        },
+        // fit: { eles, padding: getNodeHeight(theme) },
+      });
+    };
+
+    const dataHandler: cytoscape.EventHandler = (event) => {
       if (serviceName) {
         const node = event.cy.getElementById(serviceName);
         resetConnectedEdgeStyle(event.cy, node);
@@ -121,18 +152,27 @@ export function useCytoscapeEventHandlers({
         // Run the layout on nodes that are not selected and have not been manually
         // positioned.
         console.log({
-          options: getLayoutOptions({ fit, nodeHeight, theme }),
-          fit,
-          eles: event.cy.elements('[!hasBeenDragged]'),
+          options: getLayoutOptions({ fit: true, nodeHeight, theme }),
+          eles: event.cy.elements('[!hasBeenDragged]').json(),
         });
         event.cy
           .elements('[!hasBeenDragged]')
-          .layout(getLayoutOptions({ fit, nodeHeight, theme }))
+          .layout(getLayoutOptions({ fit: true, nodeHeight, theme }))
           .run();
       }
     };
 
     const layoutstopHandler: cytoscape.EventHandler = (event) => {
+      event.cy.animate({
+        ...getAnimationOptions(theme),
+        center: {
+          eles: serviceName
+            ? event.cy.$(`#${serviceName}`)
+            : event.cy.elements(),
+        },
+        // fit: { eles, padding: getNodeHeight(theme) },
+      });
+
       applyCubicBezierStyles(event.cy.edges());
     };
 
@@ -215,12 +255,12 @@ export function useCytoscapeEventHandlers({
 
     if (cy) {
       cy.on(
-        'add custom:data drag dragfree layoutstop select tapstart tapend unselect',
+        'add custom:data drag dragfree layoutstop resize select tapstart tapend unselect',
         debugHandler
       );
       cy.on('custom:data', dataHandler);
-      cy.on('add', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
+      cy.on('resize', resizeHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
@@ -234,13 +274,13 @@ export function useCytoscapeEventHandlers({
     return () => {
       if (cy) {
         cy.removeListener(
-          'add custom:data drag dragfree layoutstop select tapstart tapend unselect',
+          'add custom:data drag dragfree layoutstop resize select tapstart tapend unselect',
           undefined,
           debugHandler
         );
-        cy.removeListener('add', undefined, dataHandler);
         cy.removeListener('custom:data', undefined, dataHandler);
         cy.removeListener('layoutstop', undefined, layoutstopHandler);
+        cy.removeListener('resize', undefined, resizeHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
         cy.removeListener('select', 'node', selectHandler);
