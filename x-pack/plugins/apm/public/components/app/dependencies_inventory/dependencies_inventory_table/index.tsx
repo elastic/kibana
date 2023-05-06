@@ -58,7 +58,6 @@ export function DependenciesInventoryTable() {
     },
     [start, end, environment, offset, kuery, comparisonEnabled]
   );
-  console.log({ data });
 
   const dependencyNodes = data?.dependencies.map((dep) => {
     if (dep.location.serviceName) {
@@ -82,7 +81,6 @@ export function DependenciesInventoryTable() {
     }
   });
   const cy = useContext(CytoscapeContext);
-  console.log({ dependencyNodes });
   useEffect(() => {
     const addedNodes = cy.add([...(dependencyNodes ?? [])]);
     cy.trigger('custom:data', [addedNodes]);

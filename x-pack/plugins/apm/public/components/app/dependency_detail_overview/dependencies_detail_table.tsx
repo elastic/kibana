@@ -105,7 +105,6 @@ export function DependenciesDetailTable() {
       };
     }
   });
-  console.log({ data, dependencyNodes, dependencyEdges });
   const cy = useContext(CytoscapeContext);
   useEffect(() => {
     const thisDepOnMap = cy.$(`>#{dependencyName}`)[0];

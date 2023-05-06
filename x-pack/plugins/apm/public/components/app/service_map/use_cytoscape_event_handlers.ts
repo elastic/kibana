@@ -119,7 +119,6 @@ export function useCytoscapeEventHandlers({
     const nodeHeight = getNodeHeight(theme);
 
     const resizeHandler: cytoscape.EventHandler = (event, mapSize) => {
-      console.log({ mapSize });
       if (mapSize === 'small') {
         event.cy.zoom(event.cy.zoom() * 0.5);
       }
@@ -148,13 +147,8 @@ export function useCytoscapeEventHandlers({
       }
 
       if (event.cy.container()) {
-        console.log('layout?');
         // Run the layout on nodes that are not selected and have not been manually
         // positioned.
-        console.log({
-          options: getLayoutOptions({ fit: true, nodeHeight, theme }),
-          eles: event.cy.elements('[!hasBeenDragged]').json(),
-        });
         event.cy
           .elements('[!hasBeenDragged]')
           .layout(getLayoutOptions({ fit: true, nodeHeight, theme }))
