@@ -21,7 +21,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiLink,
-  EuiTextColor,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -368,13 +368,19 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
                       <b>{rule.apiKeyOwner}</b>
                       {rule.apiKeyCreatedByUser ? (
-                        <EuiTextColor color="subdued">
+                        <>
                           &nbsp;
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey"
-                            defaultMessage="(user-managed)"
+                          <EuiIconTip
+                            position="right"
+                            content={i18n.translate(
+                              'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
+                              {
+                                defaultMessage:
+                                  'This rule is associated with an API key.  Modifying this rule with either remove or switch the API key owner.',
+                              }
+                            )}
                           />
-                        </EuiTextColor>
+                        </>
                       ) : null}
                     </EuiText>
                   </EuiFlexItem>

@@ -115,13 +115,13 @@ describe('rule_details', () => {
       expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe('elastic');
     });
 
-    it('renders the user-managed label when apiKeyCreatedByUser is true', async () => {
+    it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
       const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
       const wrapper = mountWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
       );
       expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe(
-        'elastic (user-managed)'
+        'elastic Info'
       );
     });
 
