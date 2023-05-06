@@ -5,22 +5,20 @@
  * 2.0.
  */
 
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
+import type { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
-import { ProjectType } from '@kbn/serverless-types';
-
-import {
+import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
+import type { ServerlessConfig } from './config';
+import type {
   ServerlessPluginSetup,
-  ServerlessPluginStart,
   ServerlessPluginSetupDependencies,
+  ServerlessPluginStart,
   ServerlessPluginStartDependencies,
 } from './types';
-import { ServerlessConfig } from './config';
-import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 
 export class ServerlessPlugin
   implements
@@ -62,7 +60,11 @@ export class ServerlessPlugin
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
 
-    return {};
+    return {
+      setServerlessNavigation: (navigation: React.ComponentType) => {
+        core.chrome.project.setSideNavComponent(navigation);
+      },
+    };
   }
 
   public stop() {}

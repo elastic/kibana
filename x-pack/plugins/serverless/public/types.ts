@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessPluginStart {}
+export interface ServerlessPluginStart {
+  setServerlessNavigation: (component: ComponentType) => void;
+}
 
 export interface ServerlessPluginSetupDependencies {
   management: ManagementSetup;

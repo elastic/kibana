@@ -15,10 +15,11 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/core",
     "@kbn/enterprise-search-plugin",
     "@kbn/management-plugin",
-    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/serverless",
+    "@kbn/shared-ux-chrome-navigation"
   ]
 }
