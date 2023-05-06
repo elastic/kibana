@@ -281,13 +281,6 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   }
 );
 
-export const ADD_TO_CASE_DISABLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
-  {
-    defaultMessage: 'Add to case is not supported for this selection',
-  }
-);
-
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
