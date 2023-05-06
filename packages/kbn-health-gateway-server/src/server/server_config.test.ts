@@ -20,6 +20,7 @@ describe('server config', () => {
           "valueInBytes": 1048576,
         },
         "port": 3000,
+        "restrictInternalApis": false,
         "shutdownTimeout": "PT30S",
         "socketTimeout": 120000,
         "ssl": Object {
@@ -58,7 +59,6 @@ describe('server config', () => {
             "TLSv1.3",
           ],
           "truststore": Object {},
-          "restrictInternalApis": false,
         },
       }
     `);
@@ -191,12 +191,22 @@ describe('server config', () => {
   });
 
   describe('restrictInternalApis', () => {
+    test('is false by default', () => {
+      const configSchema = config.schema;
+      const obj = {};
+      expect(new ServerConfig(configSchema.validate(obj)).restrictInternalApis).toBe(false);
+    });
+
     test('can specify retriction on access to internal APIs', () => {
-      const validOptions = [false, true];
-      for (const val of validOptions) {
-        const { restrictInternalApis } = config.schema.validate({ restrictInternalAPis: val });
-        expect(restrictInternalApis).toBe(val);
-      }
+      const configSchema = config.schema;
+      expect(
+        new ServerConfig(configSchema.validate({ restrictInternalApis: true })).restrictInternalApis
+      ).toBe(true);
+
+      expect(
+        new ServerConfig(configSchema.validate({ restrictInternalApis: false }))
+          .restrictInternalApis
+      ).toBe(false);
     });
 
     test('throws if not boolean', () => {
@@ -204,7 +214,7 @@ describe('server config', () => {
       expect(() => configSchema.validate({ restrictInternalApis: 100 })).toThrowError(
         'restrictInternalApis]: expected value of type [boolean] but got [number]'
       );
-      expect(() => configSchema.validate({ restrictInternalApis: 'false' })).toThrowError(
+      expect(() => configSchema.validate({ restrictInternalApis: 'something' })).toThrowError(
         'restrictInternalApis]: expected value of type [boolean] but got [string]'
       );
     });
