@@ -10,6 +10,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import type { Evaluation } from '../../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -36,7 +37,8 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  sortDirection: 'asc',
+  sortDirection: 'desc',
+  sort: { field: 'compliance_score' as keyof CspFinding, direction: 'desc' },
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
@@ -73,7 +75,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByResource = useFindingsByResource({
-    sortDirection: urlQuery.sortDirection,
+    sortDirection: urlQuery.sort.direction,
     query,
     enabled: !queryError,
   });
@@ -149,7 +151,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             })}
             setTableOptions={setTableOptions}
             sorting={{
-              sort: { field: 'compliance_score', direction: urlQuery.sortDirection },
+              sort: { field: 'compliance_score', direction: urlQuery.sort.direction },
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
