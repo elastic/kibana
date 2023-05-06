@@ -118,8 +118,9 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
 
   const groupInRedux = useDeepEqualSelector((state) => groupIdSelector()(state, props.tableId));
   useEffect(() => {
+    // only ever set to `none` - siem only handles group selector when `none` is selected
     if (isNoneGroup(selectedGroups)) {
-      console.log('set active groups from selected', selectedGroups);
+      // set active groups from selected groups
       dispatch(
         updateGroups({
           activeGroups: selectedGroups,
@@ -131,7 +132,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
 
   useEffect(() => {
     if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {
-      console.log('set selected groups from active', groupInRedux.activeGroups);
+      // set selected groups from active groups
       setSelectedGroups(groupInRedux.activeGroups);
     }
   }, [groupInRedux, setSelectedGroups]);
