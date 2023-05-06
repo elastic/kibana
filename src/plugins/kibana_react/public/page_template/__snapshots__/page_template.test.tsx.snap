@@ -205,7 +205,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
       >
         <div
           aria-label="Solution"
-          class="euiAvatar euiAvatar--m euiAvatar--user kbnPageTemplateSolutionNavAvatar emotion-euiAvatar-m-user-plain"
+          class="euiAvatar euiAvatar--m euiAvatar--user kbnPageTemplateSolutionNavAvatar emotion-euiAvatar-user-m-uppercase-plain"
           role="img"
           title="Solution"
         >
