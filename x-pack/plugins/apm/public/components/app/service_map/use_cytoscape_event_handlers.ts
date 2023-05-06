@@ -134,26 +134,28 @@ export function useCytoscapeEventHandlers({
       });
     };
 
-    const dataHandler: cytoscape.EventHandler = (event) => {
-      if (serviceName) {
-        const node = event.cy.getElementById(serviceName);
-        resetConnectedEdgeStyle(event.cy, node);
-        // Add the "primary" class to the node if its id matches the serviceName.
-        if (event.cy.nodes().length > 0) {
-          event.cy.nodes().removeClass('primary');
-          node.addClass('primary');
+    const dataHandler: cytoscape.EventHandler = (event, addedElements) => {
+      if (addedElements.length > 0) {
+        if (serviceName) {
+          const node = event.cy.getElementById(serviceName);
+          resetConnectedEdgeStyle(event.cy, node);
+          // Add the "primary" class to the node if its id matches the serviceName.
+          if (event.cy.nodes().length > 0) {
+            event.cy.nodes().removeClass('primary');
+            node.addClass('primary');
+          }
+        } else {
+          resetConnectedEdgeStyle(event.cy);
         }
-      } else {
-        resetConnectedEdgeStyle(event.cy);
-      }
 
-      if (event.cy.container()) {
-        // Run the layout on nodes that are not selected and have not been manually
-        // positioned.
-        event.cy
-          .elements('[!hasBeenDragged]')
-          .layout(getLayoutOptions({ fit: true, nodeHeight, theme }))
-          .run();
+        if (event.cy.container()) {
+          // Run the layout on nodes that are not selected and have not been manually
+          // positioned.
+          event.cy
+            .elements('[!hasBeenDragged]')
+            .layout(getLayoutOptions({ fit: true, nodeHeight, theme }))
+            .run();
+        }
       }
     };
 
