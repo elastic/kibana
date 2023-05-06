@@ -77,7 +77,7 @@ export const useIsUpgradingSecurityPackages = () => {
       const { mutationKey, variables } = options;
 
       // The mutation is bulk Fleet packages installation. Check if the packages include the prebuilt rules package
-      if (mutationKey === BULK_INSTALL_FLEET_PACKAGES_MUTATION_KEY) {
+      if (mutationKey === BULK_INSTALL_FLEET_PACKAGES_MUTATION_KEY && variables) {
         return (variables as BulkInstallFleetPackagesProps).packages.includes(
           PREBUILT_RULES_PACKAGE_NAME
         );

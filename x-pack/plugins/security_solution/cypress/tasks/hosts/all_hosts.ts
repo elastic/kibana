@@ -17,4 +17,5 @@ export const waitForAllHostsToBeLoaded = () => {
    * enough for all host table to be visible
    */
   cy.get(ALL_HOSTS_TABLE, { timeout: 40000 }).should('be.visible');
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };

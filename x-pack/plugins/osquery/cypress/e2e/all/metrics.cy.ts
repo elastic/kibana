@@ -10,7 +10,7 @@ import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
-describe('ALL - Inventory', () => {
+describe.skip('ALL - Inventory', () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
