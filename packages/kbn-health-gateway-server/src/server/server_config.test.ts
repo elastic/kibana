@@ -58,6 +58,7 @@ describe('server config', () => {
             "TLSv1.3",
           ],
           "truststore": Object {},
+          "restrictInternalApis": false,
         },
       }
     `);
@@ -186,6 +187,26 @@ describe('server config', () => {
           "enabled": false,
         }
       `);
+    });
+  });
+
+  describe('restrictInternalApis', () => {
+    test('can specify retriction on access to internal APIs', () => {
+      const validOptions = [false, true];
+      for (const val of validOptions) {
+        const { restrictInternalAPis } = config.schema.validate({ restrictInternalAPis: val });
+        expect(restrictInternalAPis).toBe(val);
+      }
+    });
+
+    test('throws if not boolean', () => {
+      const configSchema = config.schema;
+      expect(() => configSchema.validate({ restricInternalApis: 100 })).toThrowError(
+        'restrictInternalApis]: expected value of type [boolean] but got [number]'
+      );
+      expect(() => configSchema.validate({ restricInternalApis: 'false' })).toThrowError(
+        'restrictInternalApis]: expected value of type [boolean] but got [string]'
+      );
     });
   });
 });

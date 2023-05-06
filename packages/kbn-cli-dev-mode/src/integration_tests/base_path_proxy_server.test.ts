@@ -46,6 +46,7 @@ describe('BasePathProxyServer', () => {
       },
       ssl: { enabled: false },
       maxPayload: new ByteSizeValue(1024),
+      restrictInternalApis: false,
     };
 
     const serverOptions = getServerOptions(config);
