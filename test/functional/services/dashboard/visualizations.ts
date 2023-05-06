@@ -30,6 +30,8 @@ export class DashboardVisualizationsService extends FtrService {
     await this.dashboardAddPanel.clickAddNewEmbeddableLink('metrics');
     await this.visualize.clickVisualBuilder();
     await this.visualize.saveVisualizationExpectSuccess(name);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
   }
 
   async createSavedSearch({
@@ -80,6 +82,7 @@ export class DashboardVisualizationsService extends FtrService {
       await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.addSavedSearch(name);
+    await this.dashboard.waitForRenderComplete();
   }
 
   async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
@@ -95,6 +98,8 @@ export class DashboardVisualizationsService extends FtrService {
       saveAsNew: false,
       redirectToOrigin: true,
     });
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
   }
 
   async createAndEmbedMetric(name: string) {
@@ -109,6 +114,8 @@ export class DashboardVisualizationsService extends FtrService {
     await this.testSubjects.click('savedObjectTitlelogstash-*');
     await this.testSubjects.exists('visualizesaveAndReturnButton');
     await this.testSubjects.click('visualizesaveAndReturnButton');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
   }
 
   async createAndEmbedMarkdown({ name, markdown }: { name: string; markdown: string }) {
@@ -121,5 +128,7 @@ export class DashboardVisualizationsService extends FtrService {
     await this.visEditor.setMarkdownTxt(markdown);
     await this.visEditor.clickGo();
     await this.testSubjects.click('visualizesaveAndReturnButton');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
   }
 }
