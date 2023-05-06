@@ -64,7 +64,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
 
 function createKibanaRequestMock<P = any, Q = any, B = any>({
   path = '/path',
-  headers = { accept: 'something/html' },
+  headers = { accept: 'something/html', 'x-elastic-internal-origin': 'someOrigin' },
   params = {},
   body = {},
   query = {},
