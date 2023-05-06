@@ -64,7 +64,7 @@ export async function download(
   }
 
   const url = paths.getDownloadUrl(pkg);
-  let downloadedChecksum: ValidChecksum | undefined;
+  let downloadedChecksum: string | undefined;
   try {
     downloadedChecksum = await fetch(url, resolvedPath, logger);
     if (downloadedChecksum !== archiveChecksum) {

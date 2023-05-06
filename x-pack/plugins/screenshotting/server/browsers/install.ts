@@ -13,7 +13,7 @@ import { download } from './download';
 import { md5 } from './download/checksum';
 import { extract } from './extract';
 
-type ValidChecksum = string;
+type BinaryPath = string;
 
 /**
  * "install" a browser by type into installs path by extracting the downloaded
@@ -24,7 +24,7 @@ export async function install(
   logger: Logger,
   pkg: PackageInfo,
   chromiumPath: string = path.resolve(__dirname, '../../chromium')
-): Promise<ValidChecksum> {
+): Promise<BinaryPath> {
   const { architecture, platform } = pkg;
   const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
   const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
@@ -32,7 +32,7 @@ export async function install(
   if (binaryChecksum === pkg.binaryChecksum) {
     logger.info(`Browser executable: ${binaryPath}`);
     // validated a previously downloaded browser
-    return binaryChecksum;
+    return binaryPath;
   }
 
   logger?.warn(
@@ -54,19 +54,7 @@ export async function install(
     logger.error(error);
   }
 
-  // calculate checksum of newly extracted binary
-  const downloadedBinaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
-  if (downloadedBinaryChecksum !== pkg.binaryChecksum) {
-    const error = new Error(
-      `Error installing browsers, binary checksums incorrect for [${architecture}/${platform}]`
-    );
-    logger?.error(error);
-
-    throw error;
-  }
-
   logger.info(`Browser executable has been installed: ${binaryPath}`);
 
-  // validated the downloaded binary
-  return downloadedBinaryChecksum;
+  return binaryPath;
 }

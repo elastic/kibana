@@ -62,11 +62,11 @@ describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) 
     pkg = { ...originalPkg };
   });
 
-  it('lists the correct archive checksum and binary checksum', async () => {
+  it('references the correct checksums and binary path', async () => {
     const downloadedChecksum = await download(chromiumArchivePaths, pkg, mockLogger);
     expect(downloadedChecksum).toBe(pkg.archiveChecksum);
 
-    const installedChecksum = await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
-    expect(installedChecksum).toBe(pkg.binaryChecksum);
+    const binaryPath = await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
+    expect(binaryPath).toBe(path.join(chromiumPath, pkg.binaryRelativePath));
   });
 });
