@@ -47,8 +47,11 @@ import cytoscape from 'cytoscape';
 import { getCytoscapeOptions } from '../../app/service_map/cytoscape_options';
 import { useCytoscapeEventHandlers } from '../../app/service_map/use_cytoscape_event_handlers';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import fcose from 'cytoscape-fcose';
 
 const storage = new Storage(localStorage);
+
+cytoscape.use(fcose);
 
 export function ApmAppRoot({
   apmPluginContextValue,

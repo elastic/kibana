@@ -123,14 +123,13 @@ export function useCytoscapeEventHandlers({
       if (mapSize === 'small') {
         event.cy.zoom(event.cy.zoom() * 0.5);
       }
+      const eles = serviceName
+        ? event.cy.$(`#${serviceName}`)
+        : event.cy.elements();
       event.cy.animate({
         ...getAnimationOptions(theme),
-        center: {
-          eles: serviceName
-            ? event.cy.$(`#${serviceName}`)
-            : event.cy.elements(),
-        },
-        // fit: { eles, padding: getNodeHeight(theme) },
+        center: { eles },
+        fit: { eles, padding: getNodeHeight(theme) },
       });
     };
 
@@ -160,14 +159,13 @@ export function useCytoscapeEventHandlers({
     };
 
     const layoutstopHandler: cytoscape.EventHandler = (event) => {
+      const eles = serviceName
+        ? event.cy.$(`#${serviceName}`)
+        : event.cy.elements();
       event.cy.animate({
         ...getAnimationOptions(theme),
-        center: {
-          eles: serviceName
-            ? event.cy.$(`#${serviceName}`)
-            : event.cy.elements(),
-        },
-        // fit: { eles, padding: getNodeHeight(theme) },
+        center: { eles },
+        fit: { eles, padding: nodeHeight },
       });
 
       applyCubicBezierStyles(event.cy.edges());
@@ -204,11 +202,11 @@ export function useCytoscapeEventHandlers({
         serviceName ? event.cy.getElementById(serviceName) : undefined
       );
     };
-    const debugHandler: cytoscape.EventHandler = (event) => {
+    const debugHandler: cytoscape.EventHandler = (event, ...args) => {
       const debugEnabled = sessionStorage.getItem('apm_debug') === 'true';
       if (debugEnabled) {
         // eslint-disable-next-line no-console
-        console.debug('cytoscape:', event);
+        console.debug('cytoscape:', event, args);
       }
     };
     const dragHandler: cytoscape.EventHandler = (event) => {

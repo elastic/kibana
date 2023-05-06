@@ -11,7 +11,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useContext, useEffect } from 'react';
 import { Environment } from '../../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
@@ -38,6 +38,7 @@ import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { useServiceName } from '../../../hooks/use_service_name';
+import { CytoscapeContext } from '../../../context/cytoscape_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -131,7 +132,17 @@ export function ServiceMap({
     mapSize === 'big'
       ? { height: 900, width: 900 }
       : { height: 300, width: 300 };
+  const cy = useContext(CytoscapeContext);
 
+  useEffect(() => {
+    if (ref.current) {
+      cy.mount(ref.current);
+    }
+
+    return () => {
+      cy.unmount();
+    };
+  });
   // Temporary hack to work around bottom padding introduced by EuiPage
   //const PADDING_BOTTOM = 24;
   //const heightWithPadding = height - PADDING_BOTTOM;
@@ -192,27 +203,15 @@ export function ServiceMap({
     >
       <div
         data-test-subj="ServiceMap"
-        style={{ height: heightWithPadding, width: dimensions.width }}
+        style={{
+          ...getCytoscapeDivStyle(theme, status),
+          height: heightWithPadding,
+          width: dimensions.width,
+        }}
         ref={ref}
       >
-        <Cytoscape
-          elements={data.elements}
-          height={heightWithPadding}
-          serviceName={serviceName}
-          style={getCytoscapeDivStyle(theme, status)}
-        >
-          <Controls />
-          <ControlsBottom mapSize={mapSize} setMapSize={setMapSize} />
-          {serviceName && <EmptyBanner />}
-          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-          <Popover
-            focusedServiceName={serviceName}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-          />
-        </Cytoscape>
+        <Controls />
+        <ControlsBottom mapSize={mapSize} setMapSize={setMapSize} />
       </div>
     </EuiPanel>
   );
