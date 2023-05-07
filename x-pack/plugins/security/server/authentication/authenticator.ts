@@ -138,6 +138,7 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
 
 function assertRequest(request: KibanaRequest) {
+  // console.log('request:', request);
   if (!(request instanceof CoreKibanaRequest)) {
     throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
