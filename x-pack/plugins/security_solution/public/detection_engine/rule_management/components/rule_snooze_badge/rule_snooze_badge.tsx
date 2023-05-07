@@ -42,6 +42,7 @@ export function RuleSnoozeBadge({
 
   return (
     <RulesListNotifyBadge
+      ruleId={ruleId}
       snoozeSettings={snoozeSettings}
       loading={!snoozeSettings}
       disabled={!hasCRUDPermissions}

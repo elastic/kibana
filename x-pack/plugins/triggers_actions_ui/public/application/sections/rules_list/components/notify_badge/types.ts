@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { RuleTableItem, SnoozeSchedule } from '../../../../../types';
-
-export type RuleSnoozeSettings = Pick<
-  RuleTableItem,
-  'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
->;
+import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 
 export interface RulesListNotifyBadgeProps {
   /**
@@ -36,4 +31,9 @@ export interface RulesListNotifyBadgeProps {
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
   'snoozeSettings' | 'loading' | 'disabled' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
->;
+> & {
+  /**
+   * Rule's SO id
+   */
+  ruleId: string;
+};

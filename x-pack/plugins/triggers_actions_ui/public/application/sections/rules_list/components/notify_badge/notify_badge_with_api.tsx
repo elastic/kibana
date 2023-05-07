@@ -15,23 +15,27 @@ import { RulesListNotifyBadgePropsWithApi } from './types';
 
 export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   RulesListNotifyBadgePropsWithApi
-> = ({ snoozeSettings, loading, disabled, showTooltipInline, showOnHover, onRuleChanged }) => {
+> = ({
+  ruleId,
+  snoozeSettings,
+  loading,
+  disabled,
+  showTooltipInline,
+  showOnHover,
+  onRuleChanged,
+}) => {
   const { http } = useKibana().services;
 
   const onSnoozeRule = useCallback(
     (snoozeSchedule: SnoozeSchedule) =>
-      snoozeSettings?.id
-        ? snoozeRuleApi({ http, id: snoozeSettings.id, snoozeSchedule })
-        : Promise.resolve(),
-    [http, snoozeSettings?.id]
+      ruleId ? snoozeRuleApi({ http, id: ruleId, snoozeSchedule }) : Promise.resolve(),
+    [http, ruleId]
   );
 
   const onUnsnoozeRule = useCallback(
     (scheduleIds?: string[]) =>
-      snoozeSettings?.id
-        ? unsnoozeRuleApi({ http, id: snoozeSettings.id, scheduleIds })
-        : Promise.resolve(),
-    [http, snoozeSettings?.id]
+      ruleId ? unsnoozeRuleApi({ http, id: ruleId, scheduleIds }) : Promise.resolve(),
+    [http, ruleId]
   );
 
   return (
