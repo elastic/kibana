@@ -1,0 +1,13 @@
+.serverlessSearchHeaderTitle {
+  color: $euiColorEmptyShade;
+}
+
+.serverlessSearchHeaderSection {
+  background-color: $euiColorPrimary;
+  color: $euiColorEmptyShade;
+  min-height: 291px;
+}
+
+.serverlessSearchHeaderSection > div {
+  padding-top: 0;
+}

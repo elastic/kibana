@@ -345,7 +345,9 @@ export interface DocLinks {
     putSnapshotLifecyclePolicy: string;
     putIndexTemplateV1: string;
     putWatch: string;
+    restApis: string;
     searchPreference: string;
+    securityApis: string;
     simulatePipeline: string;
     timeUnits: string;
     unfreezeIndex: string;
@@ -475,6 +477,9 @@ export interface DocLinks {
     readonly javaInstallation: string;
     readonly javaIntroduction: string;
     readonly javaRestLow: string;
+    readonly jsAdvancedConfig: string;
+    readonly jsApiReference: string;
+    readonly jsBasicConfig: string;
     readonly jsClientConnecting: string;
     readonly jsIntro: string;
     readonly netGuide: string;
@@ -489,6 +494,9 @@ export interface DocLinks {
     readonly pythonGuide: string;
     readonly pythonOverview: string;
     readonly rubyAuthentication: string;
+    readonly rubyAdvancedConfig: string;
+    readonly rubyBasicConfig: string;
+    readonly rubyExamples: string;
     readonly rubyOverview: string;
     readonly rustGuide: string;
     readonly rustOverview: string;
@@ -508,5 +516,8 @@ export interface DocLinks {
   readonly searchUI: {
     readonly appSearch: string;
     readonly elasticsearch: string;
+  };
+  readonly serverlessSearch: {
+    readonly integrations: string;
   };
 }
