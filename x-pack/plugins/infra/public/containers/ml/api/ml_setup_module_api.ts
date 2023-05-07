@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
-import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-plugin/common/constants/app';
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../common/infra_ml';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
@@ -37,7 +36,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     query,
   } = requestArgs;
 
-  const response = await fetch(`${ML_INTERNAL_BASE_PATH}/modules/setup/${moduleId}`, {
+  const response = await fetch(`/internal/ml/modules/setup/${moduleId}`, {
     method: 'POST',
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
