@@ -1630,7 +1630,9 @@
             "section": "def-server.GetSummarizedAlertsFnOpts",
             "text": "GetSummarizedAlertsFnOpts"
           },
-          ") => Promise<{ new: { count: number; data: { _id: string; _index: string; }[]; }; ongoing: { count: number; data: { _id: string; _index: string; }[]; }; recovered: { count: number; data: { _id: string; _index: string; }[]; }; }>"
+          ") => Promise<",
+          "SummarizedAlerts",
+          ">"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_get_summarized_alerts_fn.ts",
         "deprecated": false,
@@ -1979,7 +1981,9 @@
             "section": "def-server.GetSummarizedAlertsFnOpts",
             "text": "GetSummarizedAlertsFnOpts"
           },
-          ") => Promise<{ new: { count: number; data: { _id: string; _index: string; }[]; }; ongoing: { count: number; data: { _id: string; _index: string; }[]; }; recovered: { count: number; data: { _id: string; _index: string; }[]; }; }>; id: string; name: string; validate: { params: ",
+          ") => Promise<",
+          "SummarizedAlerts",
+          ">; id: string; name: string; producer: string; validate: { params: ",
           "RuleTypeParamsValidator",
           "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           {
@@ -1989,7 +1993,7 @@
             "section": "def-server.IRuleTypeAlerts",
             "text": "IRuleTypeAlerts"
           },
-          " | undefined; producer: string; actionGroups: ",
+          " | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
