@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -14,7 +14,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('dashboard elements', () => {
+  describe('Dashboard elements - Markdown & Image embeddable', () => {
     before(async () => {
       log.debug('Starting before method');
       await browser.setWindowSize(1280, 800);
@@ -31,8 +31,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('dashboard elements', function () {
-      loadTestFile(require.resolve('./input_control_vis'));
-      loadTestFile(require.resolve('./controls'));
       loadTestFile(require.resolve('./_markdown_vis'));
       loadTestFile(require.resolve('./image_embeddable'));
     });
