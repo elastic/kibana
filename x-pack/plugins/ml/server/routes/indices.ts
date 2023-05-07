@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { indicesSchema } from './schemas/indices_schema';
@@ -24,7 +25,7 @@ export function indicesRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/indices/field_caps',
+      path: `${ML_INTERNAL_BASE_PATH}/indices/field_caps`,
       validate: {
         body: indicesSchema,
       },

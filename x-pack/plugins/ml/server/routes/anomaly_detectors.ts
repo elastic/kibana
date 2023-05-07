@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -43,7 +44,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -72,7 +73,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
       validate: {
         params: jobIdSchema,
       },
@@ -105,7 +106,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_stats`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -134,7 +135,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_stats`,
       validate: {
         params: jobIdSchema,
       },
@@ -169,7 +170,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.put(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
       validate: {
         params: jobIdSchema,
         body: schema.object(anomalyDetectionJobSchema),
@@ -211,7 +212,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/_update',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_update`,
       validate: {
         params: jobIdSchema,
         body: anomalyDetectionUpdateJobSchema,
@@ -248,7 +249,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/_open',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_open`,
       validate: {
         params: jobIdSchema,
       },
@@ -281,7 +282,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/_close',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_close`,
       validate: {
         params: jobIdSchema,
         query: forceQuerySchema,
@@ -321,7 +322,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/_reset',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_reset`,
       validate: {
         params: jobIdSchema,
         query: jobResetQuerySchema,
@@ -361,7 +362,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.delete(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
       validate: {
         params: jobIdSchema,
         query: forceQuerySchema,
@@ -399,7 +400,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/_validate/detector',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_validate/detector`,
       validate: {
         body: schema.any(),
       },
@@ -431,7 +432,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/_forecast',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast`,
       validate: {
         params: jobIdSchema,
         body: forecastAnomalyDetector,
@@ -474,7 +475,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/results/records',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/records`,
       validate: {
         params: jobIdSchema,
         body: getRecordsSchema,
@@ -513,7 +514,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/results/buckets/{timestamp?}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/buckets/{timestamp?}`,
       validate: {
         params: getBucketParamsSchema,
         body: getBucketsSchema,
@@ -553,7 +554,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/overall_buckets`,
       validate: {
         params: jobIdSchema,
         body: getOverallBucketsSchema,
@@ -592,7 +593,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/results/categories/{categoryId}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/categories/{categoryId}`,
       validate: {
         params: getCategoriesSchema,
       },
@@ -626,7 +627,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots`,
       validate: {
         params: getModelSnapshotsSchema,
       },
@@ -659,7 +660,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}`,
       validate: {
         params: getModelSnapshotsSchema,
       },
@@ -694,7 +695,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update`,
       validate: {
         params: updateModelSnapshotsSchema,
         body: updateModelSnapshotBodySchema,
@@ -730,7 +731,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.delete(
     {
-      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}`,
       validate: {
         params: updateModelSnapshotsSchema,
       },

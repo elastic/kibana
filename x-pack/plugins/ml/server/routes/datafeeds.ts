@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -29,7 +30,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/datafeeds',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds`,
       validate: false,
       options: {
         tags: ['access:ml:canGetDatafeeds'],
@@ -58,7 +59,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/datafeeds/{datafeedId}',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
       validate: {
         params: datafeedIdSchema,
       },
@@ -89,7 +90,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/datafeeds/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/_stats`,
       validate: false,
       options: {
         tags: ['access:ml:canGetDatafeeds'],
@@ -118,7 +119,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/datafeeds/{datafeedId}/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stats`,
       validate: {
         params: datafeedIdSchema,
       },
@@ -154,7 +155,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.put(
     {
-      path: '/api/ml/datafeeds/{datafeedId}',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
       validate: {
         params: datafeedIdSchema,
         body: datafeedConfigSchema,
@@ -196,7 +197,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/datafeeds/{datafeedId}/_update',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_update`,
       validate: {
         params: datafeedIdSchema,
         body: datafeedConfigSchema,
@@ -238,7 +239,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.delete(
     {
-      path: '/api/ml/datafeeds/{datafeedId}',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
       validate: {
         params: datafeedIdSchema,
         query: deleteDatafeedQuerySchema,
@@ -280,7 +281,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/datafeeds/{datafeedId}/_start',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_start`,
       validate: {
         params: datafeedIdSchema,
         body: startDatafeedSchema,
@@ -322,7 +323,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/datafeeds/{datafeedId}/_stop',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stop`,
       validate: {
         params: datafeedIdSchema,
       },
@@ -358,7 +359,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/datafeeds/{datafeedId}/_preview',
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_preview`,
       validate: {
         params: datafeedIdSchema,
       },

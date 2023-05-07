@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
@@ -30,7 +31,7 @@ export function systemRoutes(
    */
   router.post(
     {
-      path: '/api/ml/_has_privileges',
+      path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
       validate: {
         body: schema.maybe(schema.any()),
       },
@@ -93,7 +94,7 @@ export function systemRoutes(
    */
   router.get(
     {
-      path: '/api/ml/ml_capabilities',
+      path: `${ML_INTERNAL_BASE_PATH}/ml_capabilities`,
       validate: false,
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -129,7 +130,7 @@ export function systemRoutes(
    */
   router.get(
     {
-      path: '/api/ml/ml_node_count',
+      path: `${ML_INTERNAL_BASE_PATH}/ml_node_count`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs', 'access:ml:canGetDatafeeds'],
@@ -156,7 +157,7 @@ export function systemRoutes(
    */
   router.get(
     {
-      path: '/api/ml/info',
+      path: `${ML_INTERNAL_BASE_PATH}/info`,
       validate: false,
       options: {
         tags: ['access:ml:canGetMlInfo'],
@@ -187,7 +188,7 @@ export function systemRoutes(
    */
   router.post(
     {
-      path: '/api/ml/es_search',
+      path: `${ML_INTERNAL_BASE_PATH}/es_search`,
       validate: {
         body: schema.maybe(schema.any()),
       },
@@ -215,7 +216,7 @@ export function systemRoutes(
    */
   router.post(
     {
-      path: '/api/ml/index_exists',
+      path: `${ML_INTERNAL_BASE_PATH}/index_exists`,
       validate: {
         body: schema.object({ indices: schema.arrayOf(schema.string()) }),
       },

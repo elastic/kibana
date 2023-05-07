@@ -13,6 +13,7 @@ import moment from 'moment';
 import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -135,7 +136,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 disabled={false}
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
-                apiPath="/api/ml/fields_service/time_field_range"
+                apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
               />
             </EuiFlexItem>
             <EuiFlexItem />

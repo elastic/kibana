@@ -7,6 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';
@@ -122,7 +123,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics`,
       validate: {
         query: analyticsQuerySchema,
       },
@@ -156,7 +157,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}`,
       validate: {
         params: analyticsIdSchema,
         query: analyticsQuerySchema,
@@ -192,7 +193,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/_stats`,
       validate: false,
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
@@ -221,7 +222,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_stats`,
       validate: {
         params: analyticsIdSchema,
       },
@@ -257,7 +258,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.put(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}`,
       validate: {
         params: analyticsIdSchema,
         body: dataAnalyticsJobConfigSchema,
@@ -297,7 +298,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/_evaluate',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/_evaluate`,
       validate: {
         body: dataAnalyticsEvaluateSchema,
       },
@@ -335,7 +336,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/_explain',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/_explain`,
       validate: {
         body: dataAnalyticsExplainSchema,
       },
@@ -371,7 +372,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.delete(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}`,
       validate: {
         params: analyticsIdSchema,
         query: deleteDataFrameAnalyticsJobSchema,
@@ -476,7 +477,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_start`,
       validate: {
         params: analyticsIdSchema,
       },
@@ -511,7 +512,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_stop`,
       validate: {
         params: analyticsIdSchema,
         query: stopsDataFrameAnalyticsJobQuerySchema,
@@ -547,7 +548,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}/_update',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/_update`,
       validate: {
         params: analyticsIdSchema,
         body: dataAnalyticsJobUpdateSchema,
@@ -586,7 +587,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}/messages',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/{analyticsId}/messages`,
       validate: {
         params: analyticsIdSchema,
       },
@@ -621,7 +622,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/jobs_exist',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/jobs_exist`,
       validate: {
         body: jobsExistSchema,
       },
@@ -671,7 +672,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/map/{analyticsId}',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/map/{analyticsId}`,
       validate: {
         params: analyticsIdSchema,
         query: analyticsMapQuerySchema,
@@ -716,7 +717,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.get(
     {
-      path: '/api/ml/data_frame/analytics/new_job_caps/{indexPattern}',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/new_job_caps/{indexPattern}`,
       validate: {
         params: analyticsNewJobCapsParamsSchema,
         query: analyticsNewJobCapsQuerySchema,
@@ -759,7 +760,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/validate',
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/validate`,
       validate: {
         body: dataAnalyticsJobConfigSchema,
       },

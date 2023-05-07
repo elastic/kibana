@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
@@ -56,7 +57,7 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/filters',
+      path: `${ML_INTERNAL_BASE_PATH}/filters`,
       validate: false,
       options: {
         tags: ['access:ml:canGetFilters'],
@@ -89,7 +90,7 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/filters/{filterId}',
+      path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
       validate: {
         params: filterIdSchema,
       },
@@ -123,7 +124,7 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.put(
     {
-      path: '/api/ml/filters',
+      path: `${ML_INTERNAL_BASE_PATH}/filters`,
       validate: {
         body: createFilterSchema,
       },
@@ -160,7 +161,7 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.put(
     {
-      path: '/api/ml/filters/{filterId}',
+      path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
       validate: {
         params: filterIdSchema,
         body: updateFilterSchema,
@@ -195,7 +196,7 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.delete(
     {
-      path: '/api/ml/filters/{filterId}',
+      path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
       validate: {
         params: filterIdSchema,
       },
@@ -230,7 +231,7 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/filters/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/filters/_stats`,
       validate: false,
       options: {
         tags: ['access:ml:canGetFilters'],

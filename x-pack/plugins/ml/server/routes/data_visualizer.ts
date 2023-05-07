@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { FieldsForHistograms } from '@kbn/ml-agg-utils';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import {
@@ -46,7 +47,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/data_visualizer/get_field_histograms/{indexPattern}',
+      path: `${ML_INTERNAL_BASE_PATH}/data_visualizer/get_field_histograms/{indexPattern}`,
       validate: {
         params: indexPatternSchema,
         body: dataVisualizerFieldHistogramsSchema,

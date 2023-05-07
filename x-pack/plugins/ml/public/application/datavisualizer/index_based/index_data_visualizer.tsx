@@ -15,6 +15,7 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -141,7 +142,7 @@ export const IndexDataVisualizerPage: FC = () => {
     const { dataViewId, dataViewTitle } = params;
     try {
       const modules = await http.fetch<RecognizerModule[]>(
-        `/api/ml/modules/recognize/${dataViewTitle}`,
+        `${ML_INTERNAL_BASE_PATH}/modules/recognize/${dataViewTitle}`,
         {
           method: 'GET',
         }

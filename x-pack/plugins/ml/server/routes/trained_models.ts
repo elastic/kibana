@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ErrorType } from '@kbn/ml-error-utils';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
@@ -37,7 +38,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
-      path: '/api/ml/trained_models/{modelId?}',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId?}`,
       validate: {
         params: optionalModelIdSchema,
         query: getInferenceQuerySchema,
@@ -136,7 +137,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
-      path: '/api/ml/trained_models/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/_stats`,
       validate: false,
       options: {
         tags: ['access:ml:canGetTrainedModels'],
@@ -163,7 +164,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
-      path: '/api/ml/trained_models/{modelId}/_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/_stats`,
       validate: {
         params: modelIdSchema,
       },
@@ -195,7 +196,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
-      path: '/api/ml/trained_models/{modelId}/pipelines',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/pipelines`,
       validate: {
         params: modelIdSchema,
       },
@@ -225,7 +226,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.put(
     {
-      path: '/api/ml/trained_models/{modelId}',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}`,
       validate: {
         params: modelIdSchema,
         body: schema.any(),
@@ -263,7 +264,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.delete(
     {
-      path: '/api/ml/trained_models/{modelId}',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}`,
       validate: {
         params: modelIdSchema,
       },
@@ -295,7 +296,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/deployment/_start',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/deployment/_start`,
       validate: {
         params: modelIdSchema,
         query: threadingParamsSchema,
@@ -329,7 +330,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/{deploymentId}/deployment/_update',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/{deploymentId}/deployment/_update`,
       validate: {
         params: modelAndDeploymentIdSchema,
         body: updateDeploymentParamsSchema,
@@ -364,7 +365,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/{deploymentId}/deployment/_stop',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/{deploymentId}/deployment/_stop`,
       validate: {
         params: modelAndDeploymentIdSchema,
         query: forceQuerySchema,
@@ -410,7 +411,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/pipeline_simulate',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/pipeline_simulate`,
       validate: {
         body: pipelineSimulateBody,
       },
@@ -443,7 +444,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/infer/{modelId}/{deploymentId}',
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/infer/{modelId}/{deploymentId}`,
       validate: {
         params: modelAndDeploymentIdSchema,
         query: inferTrainedModelQuery,

@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
@@ -73,7 +74,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    */
   router.post(
     {
-      path: '/api/ml/validate/estimate_bucket_span',
+      path: `${ML_INTERNAL_BASE_PATH}/validate/estimate_bucket_span`,
       validate: {
         body: estimateBucketSpanSchema,
       },
@@ -120,7 +121,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    */
   router.post(
     {
-      path: '/api/ml/validate/calculate_model_memory_limit',
+      path: `${ML_INTERNAL_BASE_PATH}/validate/calculate_model_memory_limit`,
       validate: {
         body: modelMemoryLimitSchema,
       },
@@ -152,7 +153,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    */
   router.post(
     {
-      path: '/api/ml/validate/cardinality',
+      path: `${ML_INTERNAL_BASE_PATH}/validate/cardinality`,
       validate: {
         body: validateCardinalitySchema,
       },
@@ -185,7 +186,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    */
   router.post(
     {
-      path: '/api/ml/validate/job',
+      path: `${ML_INTERNAL_BASE_PATH}/validate/job`,
       validate: {
         body: validateJobSchema,
       },
@@ -223,7 +224,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
    */
   router.post(
     {
-      path: '/api/ml/validate/datafeed_preview',
+      path: `${ML_INTERNAL_BASE_PATH}/validate/datafeed_preview`,
       validate: {
         body: validateDatafeedPreviewSchema,
       },

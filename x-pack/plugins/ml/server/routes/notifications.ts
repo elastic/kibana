@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { NotificationsService } from '../models/notifications_service';
 import {
   getNotificationsCountQuerySchema,
@@ -23,7 +24,7 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
-      path: '/api/ml/notifications',
+      path: `${ML_INTERNAL_BASE_PATH}/notifications`,
       validate: {
         query: getNotificationsQuerySchema,
       },
@@ -59,7 +60,7 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
-      path: '/api/ml/notifications/count',
+      path: `${ML_INTERNAL_BASE_PATH}/notifications/count`,
       validate: {
         query: getNotificationsCountQuerySchema,
       },

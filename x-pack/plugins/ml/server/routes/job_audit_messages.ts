@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
@@ -30,7 +31,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
    */
   router.get(
     {
-      path: '/api/ml/job_audit_messages/messages/{jobId}',
+      path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages/{jobId}`,
       validate: {
         params: jobAuditMessagesJobIdSchema,
         query: jobAuditMessagesQuerySchema,
@@ -73,7 +74,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
    */
   router.get(
     {
-      path: '/api/ml/job_audit_messages/messages',
+      path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages`,
       validate: {
         query: jobAuditMessagesQuerySchema,
       },
@@ -109,7 +110,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
    */
   router.put(
     {
-      path: '/api/ml/job_audit_messages/clear_messages',
+      path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/clear_messages`,
       validate: {
         body: clearJobAuditMessagesBodySchema,
       },

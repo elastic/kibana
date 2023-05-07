@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
@@ -37,7 +38,7 @@ export function savedObjectsRoutes(
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/status',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/status`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs', 'access:ml:canGetTrainedModels'],
@@ -70,7 +71,7 @@ export function savedObjectsRoutes(
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/sync',
+      path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       validate: {
         query: syncJobObjects,
       },
@@ -107,7 +108,7 @@ export function savedObjectsRoutes(
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/initialize',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/initialize`,
       validate: {
         query: syncJobObjects,
       },
@@ -144,7 +145,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/sync_check',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/sync_check`,
       validate: {
         body: syncCheckSchema,
       },
@@ -182,7 +183,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/update_jobs_spaces',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
       validate: {
         body: updateJobsSpaces,
       },
@@ -221,7 +222,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/update_trained_models_spaces',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       validate: {
         body: updateTrainedModelsSpaces,
       },
@@ -259,7 +260,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/remove_item_from_current_space',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/remove_item_from_current_space`,
       validate: {
         body: itemsAndCurrentSpace,
       },
@@ -322,7 +323,7 @@ export function savedObjectsRoutes(
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/jobs_spaces',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/jobs_spaces`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
@@ -352,7 +353,7 @@ export function savedObjectsRoutes(
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/trained_models_spaces',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/trained_models_spaces`,
       validate: false,
       options: {
         tags: ['access:ml:canGetTrainedModels'],
@@ -396,7 +397,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/can_delete_ml_space_aware_item/{jobType}',
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_delete_ml_space_aware_item/{jobType}`,
       validate: {
         params: itemTypeSchema,
         body: canDeleteMLSpaceAwareItemsSchema,

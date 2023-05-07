@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import { listTypeSchema } from './schemas/management_schema';
@@ -35,7 +36,7 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/management/list/{listType}',
+      path: `${ML_INTERNAL_BASE_PATH}/management/list/{listType}`,
       validate: {
         params: listTypeSchema,
       },

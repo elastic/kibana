@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
@@ -50,7 +51,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/force_start_datafeeds',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/force_start_datafeeds`,
       validate: {
         body: forceStartDatafeedSchema,
       },
@@ -84,7 +85,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/stop_datafeeds',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/stop_datafeeds`,
       validate: {
         body: datafeedIdsSchema,
       },
@@ -118,7 +119,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/delete_jobs',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/delete_jobs`,
       validate: {
         body: deleteJobsSchema,
       },
@@ -152,7 +153,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/close_jobs',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/close_jobs`,
       validate: {
         body: jobIdsSchema,
       },
@@ -186,7 +187,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/reset_jobs',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/reset_jobs`,
       validate: {
         body: deleteJobsSchema,
       },
@@ -220,7 +221,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/force_stop_and_close_job',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/force_stop_and_close_job`,
       validate: {
         body: jobIdSchema,
       },
@@ -257,31 +258,36 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
    *    which includes the full configuration and stats for the job.
    */
-  router.post(
-    {
-      path: '/api/ml/jobs/jobs_summary',
-      validate: {
-        body: optionalJobIdsSchema,
-      },
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_summary`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetJobs'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
-      try {
-        const alerting = await context.alerting;
-        const { jobsSummary } = jobServiceProvider(client, mlClient, alerting?.getRulesClient());
-        const { jobIds } = request.body;
-        const resp = await jobsSummary(jobIds);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: optionalJobIdsSchema },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
+        try {
+          const alerting = await context.alerting;
+          const { jobsSummary } = jobServiceProvider(client, mlClient, alerting?.getRulesClient());
+          const { jobIds } = request.body;
+          const resp = await jobsSummary(jobIds);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup JobService
@@ -294,7 +300,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/jobs/jobs_with_geo',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_with_geo`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -331,7 +337,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/jobs_with_time_range',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_with_time_range`,
       validate: {
         body: jobsWithTimerangeSchema,
       },
@@ -364,7 +370,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/job_for_cloning',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/job_for_cloning`,
       validate: {
         body: jobIdSchema,
       },
@@ -398,7 +404,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/jobs',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs`,
       validate: {
         body: optionalJobIdsSchema,
       },
@@ -435,7 +441,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/jobs/groups',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/groups`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -466,7 +472,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/update_groups',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/update_groups`,
       validate: {
         body: updateGroupsSchema,
       },
@@ -498,7 +504,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/jobs/blocking_jobs_tasks',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/blocking_jobs_tasks`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -530,7 +536,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/jobs_exist',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_exist`,
       validate: {
         body: jobsExistSchema,
       },
@@ -562,7 +568,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/jobs/new_job_caps/{indexPattern}',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_caps/{indexPattern}`,
       validate: {
         params: schema.object({ indexPattern: schema.string() }),
         query: schema.maybe(schema.object({ rollup: schema.maybe(schema.string()) })),
@@ -602,7 +608,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/new_job_line_chart',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
       validate: {
         body: schema.object(basicChartSchema),
       },
@@ -661,7 +667,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/new_job_population_chart',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
       validate: {
         body: schema.object(populationChartSchema),
       },
@@ -716,7 +722,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/jobs/all_jobs_and_group_ids',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/all_jobs_and_group_ids`,
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -747,7 +753,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/look_back_progress',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/look_back_progress`,
       validate: {
         body: schema.object(lookBackProgressSchema),
       },
@@ -781,7 +787,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/categorization_field_examples',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
       validate: {
         body: schema.object(categorizationFieldExamplesSchema),
       },
@@ -838,7 +844,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/top_categories',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/top_categories`,
       validate: {
         body: schema.object(topCategoriesSchema),
       },
@@ -872,7 +878,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/datafeed_preview',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/datafeed_preview`,
       validate: {
         body: datafeedPreviewSchema,
       },
@@ -920,7 +926,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/revert_model_snapshot',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/revert_model_snapshot`,
       validate: {
         body: revertModelSnapshotSchema,
       },
@@ -962,7 +968,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/jobs/bulk_create',
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_create`,
       validate: {
         body: bulkCreateSchema,
       },

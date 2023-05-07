@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
@@ -51,7 +52,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/calendars',
+      path: `${ML_INTERNAL_BASE_PATH}/calendars`,
       validate: false,
       options: {
         tags: ['access:ml:canGetCalendars'],
@@ -81,7 +82,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/calendars/{calendarIds}',
+      path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarIds}`,
       validate: {
         params: calendarIdsSchema,
       },
@@ -120,7 +121,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
    */
   router.put(
     {
-      path: '/api/ml/calendars',
+      path: `${ML_INTERNAL_BASE_PATH}/calendars`,
       validate: {
         body: calendarSchema,
       },
@@ -155,7 +156,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
    */
   router.put(
     {
-      path: '/api/ml/calendars/{calendarId}',
+      path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
       validate: {
         params: calendarIdSchema,
         body: calendarSchema,
@@ -191,7 +192,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
    */
   router.delete(
     {
-      path: '/api/ml/calendars/{calendarId}',
+      path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
       validate: {
         params: calendarIdSchema,
       },

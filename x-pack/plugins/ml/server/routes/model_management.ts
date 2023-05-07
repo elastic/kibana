@@ -13,6 +13,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 
@@ -29,7 +30,7 @@ export function modelManagementRoutes({ router, routeGuard }: RouteInitializatio
    */
   router.get(
     {
-      path: '/api/ml/model_management/nodes_overview',
+      path: `${ML_INTERNAL_BASE_PATH}/model_management/nodes_overview`,
       validate: {},
       options: {
         tags: [
@@ -62,7 +63,7 @@ export function modelManagementRoutes({ router, routeGuard }: RouteInitializatio
    */
   router.get(
     {
-      path: '/api/ml/model_management/memory_usage',
+      path: `${ML_INTERNAL_BASE_PATH}/model_management/memory_usage`,
       validate: {
         query: schema.object({
           type: schema.maybe(itemTypeLiterals),

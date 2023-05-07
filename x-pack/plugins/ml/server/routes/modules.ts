@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';
@@ -170,7 +171,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/modules/recognize/{indexPatternTitle}',
+      path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/{indexPatternTitle}`,
       validate: {
         params: modulesIndexPatternTitleSchema,
       },
@@ -320,7 +321,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/modules/get_module/{moduleId?}',
+      path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/{moduleId?}`,
       validate: {
         params: optionalModuleIdParamSchema,
       },
@@ -507,7 +508,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/modules/setup/{moduleId}',
+      path: `${ML_INTERNAL_BASE_PATH}/modules/setup/{moduleId}`,
       validate: {
         params: moduleIdParamSchema,
         body: setupModuleBodySchema,
@@ -630,7 +631,7 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/modules/jobs_exist/{moduleId}',
+      path: `${ML_INTERNAL_BASE_PATH}/modules/jobs_exist/{moduleId}`,
       validate: {
         params: moduleIdParamSchema,
       },

@@ -8,14 +8,15 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
-import { basePath } from './ml_api_service';
 import { HttpService } from './http_service';
+import { ML_INTERNAL_BASE_PATH } from '../../../common/constants/app';
 
 export class AnomalyDetectorService {
-  private readonly apiBasePath = basePath() + '/anomaly_detectors';
+  private readonly apiBasePath = ML_INTERNAL_BASE_PATH + '/anomaly_detectors';
 
   constructor(private httpService: HttpService) {}
-
+  // I DONT THINK THIS CLASS NEEDS TO EXIST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // MAKE THE SAME AS getAnomalyCharts$
   /**
    * Fetches a single job object
    * @param jobId

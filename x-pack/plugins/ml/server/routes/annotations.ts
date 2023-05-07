@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
@@ -51,7 +52,7 @@ export function annotationRoutes(
    */
   router.post(
     {
-      path: '/api/ml/annotations',
+      path: `${ML_INTERNAL_BASE_PATH}/annotations`,
       validate: {
         body: getAnnotationsSchema,
       },
@@ -84,7 +85,7 @@ export function annotationRoutes(
    */
   router.put(
     {
-      path: '/api/ml/annotations/index',
+      path: `${ML_INTERNAL_BASE_PATH}/annotations/index`,
       validate: {
         body: indexAnnotationSchema,
       },
@@ -127,7 +128,7 @@ export function annotationRoutes(
    */
   router.delete(
     {
-      path: '/api/ml/annotations/delete/{annotationId}',
+      path: `${ML_INTERNAL_BASE_PATH}/annotations/delete/{annotationId}`,
       validate: {
         params: deleteAnnotationSchema,
       },

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { getJsonSchemaQuerySchema } from '../../common/api_schemas/json_schema_schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -20,7 +21,7 @@ export function jsonSchemaRoutes({ router, routeGuard }: RouteInitialization) {
    */
   router.get(
     {
-      path: '/api/ml/json_schema',
+      path: `${ML_INTERNAL_BASE_PATH}/json_schema`,
       validate: {
         query: getJsonSchemaQuerySchema,
       },

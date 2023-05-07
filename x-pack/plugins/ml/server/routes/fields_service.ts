@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -43,7 +44,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/fields_service/field_cardinality',
+      path: `${ML_INTERNAL_BASE_PATH}/fields_service/field_cardinality`,
       validate: {
         body: getCardinalityOfFieldsSchema,
       },
@@ -78,7 +79,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
    */
   router.post(
     {
-      path: '/api/ml/fields_service/time_field_range',
+      path: `${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`,
       validate: {
         body: getTimeFieldRangeSchema,
       },

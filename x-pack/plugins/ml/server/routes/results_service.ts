@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -116,7 +117,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/anomalies_table_data',
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomalies_table_data`,
       validate: {
         body: anomaliesTableDataSchema,
       },
@@ -148,7 +149,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/category_definition',
+      path: `${ML_INTERNAL_BASE_PATH}/results/category_definition`,
       validate: {
         body: categoryDefinitionSchema,
       },
@@ -180,7 +181,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/max_anomaly_score',
+      path: `${ML_INTERNAL_BASE_PATH}/results/max_anomaly_score`,
       validate: {
         body: maxAnomalyScoreSchema,
       },
@@ -212,7 +213,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/category_examples',
+      path: `${ML_INTERNAL_BASE_PATH}/results/category_examples`,
       validate: {
         body: categoryExamplesSchema,
       },
@@ -244,7 +245,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/partition_fields_values',
+      path: `${ML_INTERNAL_BASE_PATH}/results/partition_fields_values`,
       validate: {
         body: partitionFieldValuesSchema,
       },
@@ -275,7 +276,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/anomaly_search',
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       validate: {
         body: anomalySearchSchema,
       },
@@ -307,7 +308,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.get(
     {
-      path: '/api/ml/results/{jobId}/categorizer_stats',
+      path: `${ML_INTERNAL_BASE_PATH}/results/{jobId}/categorizer_stats`,
       validate: {
         params: jobIdSchema,
         query: getCategorizerStatsSchema,
@@ -338,7 +339,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/category_stopped_partitions',
+      path: `${ML_INTERNAL_BASE_PATH}/results/category_stopped_partitions`,
       validate: {
         body: getCategorizerStoppedPartitionsSchema,
       },
@@ -369,7 +370,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/datafeed_results_chart',
+      path: `${ML_INTERNAL_BASE_PATH}/results/datafeed_results_chart`,
       validate: {
         body: getDatafeedResultsChartDataSchema,
       },
@@ -402,7 +403,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/anomaly_charts',
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_charts`,
       validate: {
         body: getAnomalyChartsSchema,
       },
@@ -435,7 +436,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
    */
   router.post(
     {
-      path: '/api/ml/results/anomaly_records',
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_records`,
       validate: {
         body: getAnomalyRecordsSchema,
       },
