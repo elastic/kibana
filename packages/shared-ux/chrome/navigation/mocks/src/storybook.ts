@@ -8,15 +8,18 @@
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
-import { NavigationProps, NavigationServices } from '../../types';
+import { ChromeNavigationViewModel, NavigationServices } from '../../types';
 
-type Arguments = NavigationProps & NavigationServices;
+type Arguments = ChromeNavigationViewModel & NavigationServices;
 export type Params = Pick<
   Arguments,
-  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'solutions'
+  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'navigationTree'
 >;
 
-export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
+export class StorybookMock extends AbstractStorybookMock<
+  ChromeNavigationViewModel,
+  NavigationServices
+> {
   propArguments = {};
 
   serviceArguments = {
@@ -49,7 +52,7 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     };
   }
 
-  getProps(params: Params): NavigationProps {
+  getProps(params: Params): ChromeNavigationViewModel {
     return {
       ...params,
       homeHref: '#',

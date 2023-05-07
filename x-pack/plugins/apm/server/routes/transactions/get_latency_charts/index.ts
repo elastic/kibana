@@ -30,10 +30,6 @@ import {
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 
-export type LatencyChartsSearchResponse = Awaited<
-  ReturnType<typeof searchLatency>
->;
-
 function searchLatency({
   environment,
   kuery,
@@ -49,6 +45,7 @@ function searchLatency({
   documentType,
   rollupInterval,
   bucketSizeInSeconds,
+  useDurationSummary,
 }: {
   environment: string;
   kuery: string;
@@ -64,6 +61,7 @@ function searchLatency({
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
+  useDurationSummary?: boolean;
 }) {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -71,8 +69,10 @@ function searchLatency({
     offset,
   });
 
-  const transactionDurationField =
-    getDurationFieldForTransactions(documentType);
+  const transactionDurationField = getDurationFieldForTransactions(
+    documentType,
+    useDurationSummary
+  );
 
   const params = {
     apm: {
@@ -130,6 +130,7 @@ export async function getLatencyTimeseries({
   documentType,
   rollupInterval,
   bucketSizeInSeconds,
+  useDurationSummary,
 }: {
   environment: string;
   kuery: string;
@@ -145,6 +146,7 @@ export async function getLatencyTimeseries({
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
+  useDurationSummary?: boolean; // TODO: Make this field mandatory before migrating this for other charts like serverless latency chart, latency history chart
 }) {
   const response = await searchLatency({
     environment,
@@ -161,6 +163,7 @@ export async function getLatencyTimeseries({
     documentType,
     rollupInterval,
     bucketSizeInSeconds,
+    useDurationSummary,
   });
 
   if (!response.aggregations) {
@@ -209,6 +212,7 @@ export async function getLatencyPeriods({
   documentType,
   rollupInterval,
   bucketSizeInSeconds,
+  useDurationSummary,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -223,6 +227,7 @@ export async function getLatencyPeriods({
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
+  useDurationSummary?: boolean;
 }): Promise<TransactionLatencyResponse> {
   const options = {
     serviceName,
@@ -234,6 +239,7 @@ export async function getLatencyPeriods({
     documentType,
     rollupInterval,
     bucketSizeInSeconds,
+    useDurationSummary,
   };
 
   const currentPeriodPromise = getLatencyTimeseries({
