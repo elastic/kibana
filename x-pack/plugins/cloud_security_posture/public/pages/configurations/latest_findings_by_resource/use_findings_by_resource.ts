@@ -37,7 +37,6 @@ const MAX_BUCKETS = 60 * 1000;
 
 export interface FindingsByResourceQuery {
   pageIndex: Pagination['pageIndex'];
-  sortDirection: Sort<unknown>['direction'];
   sort: Sort<CspFinding>;
 }
 

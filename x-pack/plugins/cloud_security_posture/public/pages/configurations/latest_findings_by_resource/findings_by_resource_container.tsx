@@ -37,8 +37,7 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  sortDirection: 'desc',
-  sort: { field: 'compliance_score' as keyof CspFinding, direction: 'desc' },
+  sort: { field: 'compliance_score' as keyof CspFinding, direction: 'asc' },
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
