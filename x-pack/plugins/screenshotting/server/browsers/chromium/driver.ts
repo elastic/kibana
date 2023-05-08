@@ -8,11 +8,12 @@
 import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
-  ScreenshotModePluginSetup,
+  ScreenshotModePluginSetup
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
+import * as puppeteer from 'puppeteer';
+import { ElementHandle, EvaluateFunc, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
