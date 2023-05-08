@@ -13531,6 +13531,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
@@ -18143,9 +18147,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; helpers: ",
-                  "default",
-                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
                   "SearchRequest",
@@ -18177,7 +18179,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                  "<TDocument, TAggregations>>; }; helpers: ",
+                  "default",
+                  "; name: string | symbol; security: ",
                   "default",
                   "; monitoring: ",
                   "default",
@@ -21130,6 +21134,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",

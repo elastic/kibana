@@ -115,10 +115,10 @@ window.elasticAnalytics.createTracker({
             {`window.elasticAnalytics.trackSearch({
   search: {
     query: "laptop",
-    filters: [
-      { field: "brand", value: ["apple"] },
-      { field: "price", value: ["1000-2000"] },
-    ],
+    filters: {
+      brand: ["apple"],
+      price: ["1000-2000"],
+    },
     page: {
       current: 1,
       size: 10,
