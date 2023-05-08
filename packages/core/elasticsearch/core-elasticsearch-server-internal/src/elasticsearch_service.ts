@@ -97,8 +97,7 @@ export class ElasticsearchService
     const esNodesCompatibility$ = pollEsNodesVersion({
       internalClient: this.client.asInternalUser,
       log: this.log,
-      ignoreVersionMismatch:
-        config.ignoreVersionMismatch || this.coreContext.env.cliArgs.serverless === true,
+      ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));

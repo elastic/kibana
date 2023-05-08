@@ -15,7 +15,7 @@ export const theCase: Case = {
   description: 'Test description',
   status: CaseStatuses.open,
   title: 'Test case',
-  totalComment: 1,
+  totalComments: 1,
   version: 'WzQ3LDFd',
   owner: 'cases',
 };

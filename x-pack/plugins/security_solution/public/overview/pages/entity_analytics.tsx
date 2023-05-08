@@ -24,6 +24,7 @@ import { EntityAnalyticsHeader } from '../components/entity_analytics/header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics/anomalies';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { FiltersGlobal } from '../../common/components/filters_global';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
@@ -33,17 +34,14 @@ const EntityAnalyticsComponent = () => {
     <>
       {indicesExist ? (
         <>
+          {isPlatinumOrTrialLicense && capabilitiesFetched && (
+            <FiltersGlobal>
+              <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            </FiltersGlobal>
+          )}
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage title={ENTITY_ANALYTICS}>
-              {isPlatinumOrTrialLicense && capabilitiesFetched && (
-                <SiemSearchBar
-                  id={InputsModelId.global}
-                  indexPattern={indexPattern}
-                  hideFilterBar
-                  hideQueryInput
-                />
-              )}
-            </HeaderPage>
+            <HeaderPage title={ENTITY_ANALYTICS} />
+
             {!isPlatinumOrTrialLicense && capabilitiesFetched ? (
               <Paywall heading={i18n.ENTITY_ANALYTICS_LICENSE_DESC} />
             ) : isSourcererLoading ? (

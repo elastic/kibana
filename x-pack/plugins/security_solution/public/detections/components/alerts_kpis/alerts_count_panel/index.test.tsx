@@ -272,14 +272,14 @@ describe('when the isChartEmbeddablesEnabled experimental feature flag is enable
     });
   });
 
-  it('renders LensEmbeddable with 100% height', async () => {
+  it('renders LensEmbeddable with provided height', async () => {
     await act(async () => {
       mount(
         <TestProviders>
           <AlertsCountPanel {...defaultProps} />
         </TestProviders>
       );
-      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
+      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(218);
     });
   });
 
