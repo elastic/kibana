@@ -5354,7 +5354,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "1900"
+            "limit": "3000"
           }
         },
         "number_of_replicas": "1",
