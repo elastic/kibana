@@ -16,6 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
+  noSearchSessionStorageCapabilityMessage,
   QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
@@ -381,6 +382,23 @@ export function getDiscoverStateContainer({
       });
       fetchData();
     });
+
+    services.data.search.session.enableStorage(
+      createSearchSessionRestorationDataProvider({
+        appStateContainer,
+        data: services.data,
+        getSavedSearch: () => savedSearchContainer.getState(),
+      }),
+      {
+        isDisabled: () =>
+          services.capabilities.discover.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
+    );
 
     return () => {
       unsubscribeData();

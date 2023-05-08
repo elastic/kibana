@@ -34,7 +34,7 @@ const startSync = (appState: DiscoverAppStateContainer) => {
   return stop;
 };
 
-async function getState(url: string, savedSearch?: SavedSearch) {
+async function getState(url: string = '/', savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
   const nextState = getDiscoverStateContainer({
@@ -234,6 +234,16 @@ describe('createSearchSessionRestorationDataProvider', () => {
         value: 0,
       });
     });
+  });
+});
+
+describe('searchSessionManager', () => {
+  test('getting the next session id', async () => {
+    const { state } = await getState();
+    const nextId = 'id';
+    discoverServiceMock.data.search.session.start = jest.fn(() => nextId);
+    state.actions.initializeAndSync();
+    expect(state.searchSessionManager.getNextSearchSessionId()).toBe(nextId);
   });
 });
 
