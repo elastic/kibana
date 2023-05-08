@@ -16,7 +16,6 @@ interface Props {
   http: HttpSetup;
   toastNotifications: IToasts;
   connector?: ActionConnector;
-  handleIssueType: (options: Array<{ value: string; text: string }>) => void;
 }
 
 export interface UseGetIssueTypes {
@@ -28,7 +27,6 @@ export const useGetIssueTypes = ({
   http,
   connector,
   toastNotifications,
-  handleIssueType,
 }: Props): UseGetIssueTypes => {
   const [isLoading, setIsLoading] = useState(true);
   const [issueTypes, setIssueTypes] = useState<IssueTypes>([]);
@@ -53,13 +51,7 @@ export const useGetIssueTypes = ({
         });
 
         if (!didCancel.current) {
-          const asOptions = (res.data ?? []).map((type) => ({
-            text: type.name ?? '',
-            value: type.id ?? '',
-          }));
-
           setIssueTypes(res.data ?? []);
-          handleIssueType(asOptions);
           setIsLoading(false);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
@@ -89,8 +81,6 @@ export const useGetIssueTypes = ({
       didCancel.current = true;
       abortCtrl.current.abort();
     };
-    // handleIssueType unmounts the component at init causing the request to be aborted
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [http, connector, toastNotifications]);
 
   return {
