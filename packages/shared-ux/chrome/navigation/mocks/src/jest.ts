@@ -6,16 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { NavigationServices, ChromeNavigationNodeViewModel } from '../../types';
 
 export const getServicesMock = (): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount = 0;
+  const loadingCount$ = new BehaviorSubject(0);
+  const recentlyAccessed$ = new BehaviorSubject([]);
 
   return {
     basePath,
-    loadingCount,
+    loadingCount$,
+    recentlyAccessed$,
     navIsOpen: true,
     navigateToUrl,
   };
