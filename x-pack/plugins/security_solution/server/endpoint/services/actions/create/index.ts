@@ -68,12 +68,19 @@ interface CreateActionMetadata {
   enableActionsWithErrors?: boolean;
 }
 
+export interface ActionCreateService {
+  createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
+  createAction: (
+    payload: CreateActionPayload,
+    metadata: CreateActionMetadata
+  ) => Promise<ActionDetails>;
+}
+
 export const actionCreateService = (
   esClient: ElasticsearchClient,
-  endpointContext: EndpointAppContext,
-  licenseService: LicenseService
-) => {
-  const createActionFromAlert = async (payload: CreateActionPayload) => {
+  endpointContext: EndpointAppContext
+): ActionCreateService => {
+  const createActionFromAlert = async (payload: CreateActionPayload): Promise<ActionDetails> => {
     return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
   };
 
@@ -85,6 +92,8 @@ export const actionCreateService = (
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
+
+    const licenseService = endpointContext.service.getLicenseService();
 
     const logger = endpointContext.logFactory.get('hostIsolation');
 
@@ -341,11 +350,12 @@ interface CheckForAlertsArgs {
   licenseService: LicenseService;
   minimumLicenseRequired: LicenseType;
 }
+
 const checkForAlertErrors = ({
   agents,
   licenseService,
   minimumLicenseRequired = 'basic',
-}: CheckForAlertsArgs) => {
+}: CheckForAlertsArgs): string | undefined => {
   const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
   const agentsError = validateAgents(agents);
 
