@@ -849,9 +849,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, {
-      isIndexModeTimeSeries: true,
-    });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -875,9 +873,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, {
-      isIndexModeTimeSeries: true,
-    });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -900,9 +896,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, {
-      isIndexModeTimeSeries: false,
-    });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -936,7 +930,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -969,7 +963,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: false });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -996,7 +990,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 

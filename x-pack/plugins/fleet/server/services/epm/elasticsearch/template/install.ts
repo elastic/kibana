@@ -519,7 +519,7 @@ export function prepareTemplate({
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
 
-  const mappings = generateMappings(validFields, { isIndexModeTimeSeries });
+  const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
