@@ -13,11 +13,14 @@ import type { MigratorContext } from '../context';
  * Create the initial state to be used for the ZDT migrator.
  */
 export const createInitialState = (context: MigratorContext): State => {
+  const runDocumentMigration =
+    context.nodeRoles.migrator || context.migrationConfig.zdt.runOnNonMigratorNodes;
   const initialState: InitState = {
     controlState: 'INIT',
     logs: [],
     retryCount: 0,
     retryDelay: 0,
+    skipDocumentMigration: !runDocumentMigration,
   };
   return initialState;
 };
