@@ -18,12 +18,15 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 import { capabilitiesProvider } from './capabilities_provider';
+import { VisualizationsStorage } from './content_management';
 
 import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType } from './saved_objects';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
@@ -39,6 +42,7 @@ export class VisualizationsPlugin
     plugins: {
       embeddable: EmbeddableSetup;
       data: DataPluginSetup;
+      contentManagement: ContentManagementServerSetup;
     }
   ) {
     this.logger.debug('visualizations: Setup');
@@ -66,6 +70,14 @@ export class VisualizationsPlugin
     plugins.embeddable.registerEmbeddableFactory(
       makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
     );
+
+    plugins.contentManagement.register({
+      id: CONTENT_ID,
+      storage: new VisualizationsStorage(),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
 
     return {};
   }

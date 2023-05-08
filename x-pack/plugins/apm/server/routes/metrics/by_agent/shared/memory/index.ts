@@ -47,9 +47,18 @@ const chartBase: ChartBase = {
   series,
 };
 
-export const percentSystemMemoryUsedScript = {
-  lang: 'painless',
-  source: `
+export const systemMemory = {
+  filter: {
+    bool: {
+      filter: [
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
     if(doc.containsKey('${METRIC_SYSTEM_FREE_MEMORY}') && doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}')){
       double freeMemoryValue =  doc['${METRIC_SYSTEM_FREE_MEMORY}'].value;
       double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
@@ -58,11 +67,23 @@ export const percentSystemMemoryUsedScript = {
     
     return null;
   `,
-} as const;
+  },
+};
 
-export const percentCgroupMemoryUsedScript = {
-  lang: 'painless',
-  source: `
+export const cgroupMemory = {
+  filter: {
+    bool: {
+      filter: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
+      should: [
+        { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+      minimum_should_match: 1,
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
     /*
       When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
@@ -80,7 +101,8 @@ export const percentCgroupMemoryUsedScript = {
 
     return used / total;
     `,
-} as const;
+  },
+};
 
 export async function getMemoryChartData({
   environment,
@@ -143,11 +165,11 @@ export async function getMemoryChartData({
         end,
         chartBase,
         aggs: {
-          memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
-          memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
+          memoryUsedAvg: { avg: { script: cgroupMemory.script } },
+          memoryUsedMax: { max: { script: cgroupMemory.script } },
         },
         additionalFilters: [
-          { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+          cgroupMemory.filter,
           ...termQuery(FAAS_ID, serverlessId),
         ],
         operationName: 'get_cgroup_memory_metrics_charts',
@@ -165,12 +187,11 @@ export async function getMemoryChartData({
           end,
           chartBase,
           aggs: {
-            memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
-            memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+            memoryUsedAvg: { avg: { script: systemMemory.script } },
+            memoryUsedMax: { max: { script: systemMemory.script } },
           },
           additionalFilters: [
-            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+            systemMemory.filter,
             ...termQuery(FAAS_ID, serverlessId),
           ],
           operationName: 'get_system_memory_metrics_charts',

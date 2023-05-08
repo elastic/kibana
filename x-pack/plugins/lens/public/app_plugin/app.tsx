@@ -8,6 +8,7 @@
 import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
@@ -52,6 +53,7 @@ export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'>
   onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
   newDescription?: string;
   newTags?: string[];
+  panelTimeRange?: TimeRange;
 };
 
 export function App({
@@ -70,6 +72,7 @@ export function App({
   initialContext,
   theme$,
   coreStart,
+  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 

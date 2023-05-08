@@ -8,6 +8,11 @@
 import type { SavedObject } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
+} from '../../../common/types/attachments';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -15,17 +20,12 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type {
-  AttachmentTotals,
-  AttributesTypeAlerts,
-  CommentAttributes as AttachmentAttributes,
-  CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
-  CommentAttributes,
-} from '../../../../common/api';
+import type { AttachmentTotals, AttributesTypeAlerts } from '../../../../common/api';
 import { CommentType } from '../../../../common/api';
 import type {
-  AttachedToCaseArgs,
+  AlertIdsAggsResult,
   BulkOptionalAttributes,
+  GetAllAlertsAttachToCaseArgs,
   GetAttachmentArgs,
   ServiceContext,
 } from '../types';
@@ -37,29 +37,19 @@ import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
 
-type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
-
-interface AlertIdsAggsResult {
-  alertIds: {
-    buckets: Array<{
-      key: string;
-    }>;
-  };
-}
-
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
 
   public async bulkGet(
     attachmentIds: string[]
-  ): Promise<BulkOptionalAttributes<CommentAttributes>> {
+  ): Promise<BulkOptionalAttributes<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
       );
 
       const response =
-        await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentAttributesWithoutRefs>(
+        await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentPersistedAttributes>(
           attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
         );
 
@@ -85,7 +75,9 @@ export class AttachmentGetter {
         `Attempting to retrieve attachments associated with cases: [${caseIds}]`
       );
 
-      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder({
+      // We are intentionally not adding the type here because we only want to interact with the id and this function
+      // should not use the attributes
+      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
         sortField: 'created_at',
@@ -133,18 +125,24 @@ export class AttachmentGetter {
       const combinedFilter = combineFilters([alertsFilter, filter]);
 
       const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttributesTypeAlerts>({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-          sortField: 'created_at',
-          sortOrder: 'asc',
-          filter: combinedFilter,
-          perPage: MAX_DOCS_PER_PAGE,
-        });
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
+          {
+            type: CASE_COMMENT_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            filter: combinedFilter,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
 
       let result: Array<SavedObject<AttributesTypeAlerts>> = [];
       for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(userActionSavedObject.saved_objects);
+        result = result.concat(
+          // We need a cast here because to limited attachment type conflicts with the expected result even though they
+          // should be the same
+          userActionSavedObject.saved_objects as unknown as Array<SavedObject<AttributesTypeAlerts>>
+        );
       }
 
       return result;
@@ -192,16 +190,13 @@ export class AttachmentGetter {
     }
   }
 
-  public async get({
-    attachmentId,
-  }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
+  public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      const res =
-        await this.context.unsecuredSavedObjectsClient.get<AttachmentAttributesWithoutRefs>(
-          CASE_COMMENT_SAVED_OBJECT,
-          attachmentId
-        );
+      const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
+        CASE_COMMENT_SAVED_OBJECT,
+        attachmentId
+      );
 
       return injectAttachmentSOAttributesFromRefs(
         res,
@@ -305,7 +300,7 @@ export class AttachmentGetter {
   }: {
     caseId: string;
     fileIds: string[];
-  }): Promise<Array<SavedObject<CommentAttributes>>> {
+  }): Promise<AttachmentSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
@@ -324,7 +319,7 @@ export class AttachmentGetter {
        * to retrieve them all.
        */
       const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentAttributesWithoutRefs>(
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
           {
             type: CASE_COMMENT_SAVED_OBJECT,
             hasReference: references,
@@ -334,7 +329,7 @@ export class AttachmentGetter {
           }
         );
 
-      const foundAttachments: Array<SavedObject<CommentAttributes>> = [];
+      const foundAttachments: AttachmentSavedObjectTransformed[] = [];
 
       for await (const attachmentSavedObjects of finder.find()) {
         foundAttachments.push(

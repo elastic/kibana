@@ -49,8 +49,9 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { registerDataHandler } from './data_handler';
 import {
@@ -192,9 +193,15 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    const locator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
 
-    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
+    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
+      new RuleDetailsLocatorDefinition()
+    );
+
+    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
+      new SloDetailsLocatorDefinition()
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -314,7 +321,9 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      rulesLocator: locator,
+      rulesLocator,
+      ruleDetailsLocator,
+      sloDetailsLocator,
     };
   }
 

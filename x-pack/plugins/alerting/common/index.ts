@@ -46,7 +46,11 @@ export * from './maintenance_window';
 export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 
-export { mappingFromFieldMap, getComponentTemplateFromFieldMap } from './alert_schema';
+export {
+  mappingFromFieldMap,
+  getComponentTemplateFromFieldMap,
+  contextToSchemaName,
+} from './alert_schema';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
@@ -66,4 +70,4 @@ export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
 
 export const ALERTS_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = false;
+export const ENABLE_MAINTENANCE_WINDOWS = true;
