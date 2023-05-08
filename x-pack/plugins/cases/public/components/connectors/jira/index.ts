@@ -17,7 +17,9 @@ export * from './types';
 export const getCaseConnector = (): CaseConnector<JiraFieldsType> => ({
   id: ConnectorTypes.jira,
   fieldsComponent: lazy(() => import('./case_fields')),
+  previewComponent: lazy(() => import('./case_fields_preview')),
 });
+
 export const fieldLabels = {
   issueType: i18n.ISSUE_TYPE,
   priority: i18n.PRIORITY,

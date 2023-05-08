@@ -13,20 +13,21 @@ import { getCaseConnectors } from '.';
 
 interface Props {
   connector: CaseActionConnector | null;
+  fields: unknown;
 }
 
-const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
+const ConnectorFieldsFormPreviewComponent: React.FC<Props> = ({ connector, fields }) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
   }
 
-  const { fieldsComponent: FieldsComponent } = caseConnectorsRegistry.get(connector.actionTypeId);
+  const { previewComponent: PreviewComponent } = caseConnectorsRegistry.get(connector.actionTypeId);
 
   return (
     <>
-      {FieldsComponent != null ? (
+      {PreviewComponent != null ? (
         <Suspense
           fallback={
             <EuiFlexGroup justifyContent="center">
@@ -36,14 +37,16 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
             </EuiFlexGroup>
           }
         >
-          <div data-test-subj={'connector-fields'}>
-            <FieldsComponent connector={connector} />
+          {' '}
+          <div data-test-subj={'connector-fields-preview'}>
+            <PreviewComponent connector={connector} fields={fields} />
           </div>
         </Suspense>
       ) : null}
     </>
   );
 };
-ConnectorFieldsFormComponent.displayName = 'ConnectorFieldsForm';
 
-export const ConnectorFieldsForm = memo(ConnectorFieldsFormComponent);
+ConnectorFieldsFormPreviewComponent.displayName = 'ConnectorFieldsFormPreview';
+
+export const ConnectorFieldsPreviewForm = memo(ConnectorFieldsFormPreviewComponent);

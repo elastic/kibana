@@ -13,9 +13,7 @@ import * as i18n from './translations';
 
 import type { ConnectorFieldsProps } from '../types';
 import type { ServiceNowITSMFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
 import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
@@ -30,18 +28,12 @@ const defaultFields: Fields = {
   subcategory: [],
 };
 
-const ServiceNowITSMFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<ServiceNowITSMFieldsType>
-> = ({ isEdit = true, connector }) => {
+const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
+  connector,
+}) => {
   const [{ fields }] = useFormData<{ fields: ServiceNowITSMFieldsType }>();
 
-  const {
-    severity = null,
-    urgency = null,
-    impact = null,
-    category = null,
-    subcategory = null,
-  } = fields ?? {};
+  const { category = null } = fields ?? {};
 
   const { http, notifications } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
@@ -86,64 +78,6 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
     [choicesFormatted.subcategory, category]
   );
 
-  const listItems = useMemo(
-    () => [
-      ...(urgency != null && urgency.length > 0
-        ? [
-            {
-              title: i18n.URGENCY,
-              description: urgencyOptions.find((option) => `${option.value}` === urgency)?.text,
-            },
-          ]
-        : []),
-      ...(severity != null && severity.length > 0
-        ? [
-            {
-              title: i18n.SEVERITY,
-              description: severityOptions.find((option) => `${option.value}` === severity)?.text,
-            },
-          ]
-        : []),
-      ...(impact != null && impact.length > 0
-        ? [
-            {
-              title: i18n.IMPACT,
-              description: impactOptions.find((option) => `${option.value}` === impact)?.text,
-            },
-          ]
-        : []),
-      ...(category != null && category.length > 0
-        ? [
-            {
-              title: i18n.CATEGORY,
-              description: categoryOptions.find((option) => `${option.value}` === category)?.text,
-            },
-          ]
-        : []),
-      ...(subcategory != null && subcategory.length > 0
-        ? [
-            {
-              title: i18n.SUBCATEGORY,
-              description: subcategoryOptions.find((option) => `${option.value}` === subcategory)
-                ?.text,
-            },
-          ]
-        : []),
-    ],
-    [
-      category,
-      categoryOptions,
-      impact,
-      impactOptions,
-      severity,
-      severityOptions,
-      subcategory,
-      subcategoryOptions,
-      urgency,
-      urgencyOptions,
-    ]
-  );
-
   return (
     <>
       {showConnectorWarning && (
@@ -153,124 +87,111 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {isEdit ? (
-        <EuiFlexGroup data-test-subj="connector-fields-sn-itsm" direction="column" gutterSize="s">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <UseField
-                path="fields.urgency"
-                component={SelectField}
-                config={{
-                  label: i18n.URGENCY,
-                }}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'urgencySelect',
-                    options: urgencyOptions,
-                    hasNoInitialSelection: true,
-                    fullWidth: true,
-                    disabled: isLoadingChoices,
-                    isLoading: isLoadingChoices,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <UseField
-                path="fields.severity"
-                component={SelectField}
-                config={{
-                  label: i18n.SEVERITY,
-                }}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'severitySelect',
-                    options: severityOptions,
-                    hasNoInitialSelection: true,
-                    fullWidth: true,
-                    disabled: isLoadingChoices,
-                    isLoading: isLoadingChoices,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseField
-                path="fields.impact"
-                component={SelectField}
-                config={{
-                  label: i18n.IMPACT,
-                }}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'impactSelect',
-                    options: impactOptions,
-                    hasNoInitialSelection: true,
-                    fullWidth: true,
-                    disabled: isLoadingChoices,
-                    isLoading: isLoadingChoices,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <UseField
-                path="fields.category"
-                component={SelectField}
-                config={{
-                  label: i18n.CATEGORY,
-                }}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'categorySelect',
-                    options: categoryOptions,
-                    hasNoInitialSelection: true,
-                    fullWidth: true,
-                    disabled: isLoadingChoices,
-                    isLoading: isLoadingChoices,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {subcategoryOptions?.length > 0 ? (
-                <UseField
-                  path="fields.subcategory"
-                  component={SelectField}
-                  config={{
-                    label: i18n.SUBCATEGORY,
-                  }}
-                  componentProps={{
-                    euiFieldProps: {
-                      'data-test-subj': 'subcategorySelect',
-                      options: subcategoryOptions,
-                      hasNoInitialSelection: true,
-                      fullWidth: true,
-                      disabled: isLoadingChoices,
-                      isLoading: isLoadingChoices,
-                    },
-                  }}
-                />
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexGroup>
-      ) : (
+      <EuiFlexGroup data-test-subj="connector-fields-sn-itsm" direction="column" gutterSize="s">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <ConnectorCard
-              connectorType={ConnectorTypes.serviceNowITSM}
-              title={connector.name}
-              listItems={listItems}
-              isLoading={false}
+            <UseField
+              path="fields.urgency"
+              component={SelectField}
+              config={{
+                label: i18n.URGENCY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'urgencySelect',
+                  options: urgencyOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.severity"
+              component={SelectField}
+              config={{
+                label: i18n.SEVERITY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'severitySelect',
+                  options: severityOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <UseField
+              path="fields.impact"
+              component={SelectField}
+              config={{
+                label: i18n.IMPACT,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'impactSelect',
+                  options: impactOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.category"
+              component={SelectField}
+              config={{
+                label: i18n.CATEGORY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'categorySelect',
+                  options: categoryOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {subcategoryOptions?.length > 0 ? (
+              <UseField
+                path="fields.subcategory"
+                component={SelectField}
+                config={{
+                  label: i18n.SUBCATEGORY,
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'subcategorySelect',
+                    options: subcategoryOptions,
+                    hasNoInitialSelection: true,
+                    fullWidth: true,
+                    disabled: isLoadingChoices,
+                    isLoading: isLoadingChoices,
+                  },
+                }}
+              />
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
     </>
   );
 };

@@ -38,6 +38,7 @@ import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { PushButton } from './push_button';
 import { PushCallouts } from './push_callouts';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
+import { ConnectorFieldsPreviewForm } from '../connectors/fields_previer_form';
 
 export interface EditConnectorProps {
   caseData: CaseUI;
@@ -214,7 +215,14 @@ export const EditConnector = React.memo(
                       <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
                     </EuiText>
                   )}
-                  <ConnectorFieldsForm connector={currentActionConnector} isEdit={isEdit} />
+                  {isEdit ? (
+                    <ConnectorFieldsForm connector={currentActionConnector} />
+                  ) : (
+                    <ConnectorFieldsPreviewForm
+                      connector={currentActionConnector}
+                      fields={currentConnectorFields}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </Form>

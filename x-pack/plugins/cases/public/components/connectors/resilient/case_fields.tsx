@@ -12,7 +12,6 @@ import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
-  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useKibana } from '../../../common/lib/kibana';
@@ -21,16 +20,8 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-import type { ResilientFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
-import { ConnectorCard } from '../card';
 
-const ResilientFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<ResilientFieldsType>
-> = ({ isEdit = true, connector }) => {
-  const [{ fields }] = useFormData<{ fields: ResilientFieldsType }>();
-  const { incidentTypes = null, severityCode = null } = fields ?? {};
-
+const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const { http, notifications } = useKibana().services;
 
   const { isLoading: isLoadingIncidentTypes, incidentTypes: allIncidentTypes } =
@@ -66,34 +57,7 @@ const ResilientFieldsComponent: React.FunctionComponent<
     [allIncidentTypes]
   );
 
-  const listItems = useMemo(
-    () => [
-      ...(incidentTypes != null && incidentTypes.length > 0
-        ? [
-            {
-              title: i18n.INCIDENT_TYPES_LABEL,
-              description: allIncidentTypes
-                .filter((type) => incidentTypes.includes(type.id.toString()))
-                .map((type) => type.name)
-                .join(', '),
-            },
-          ]
-        : []),
-      ...(severityCode != null && severityCode.length > 0
-        ? [
-            {
-              title: i18n.SEVERITY_LABEL,
-              description:
-                severity.find((severityObj) => severityObj.id.toString() === severityCode)?.name ??
-                '',
-            },
-          ]
-        : []),
-    ],
-    [incidentTypes, severityCode, allIncidentTypes, severity]
-  );
-
-  return isEdit ? (
+  return (
     <span data-test-subj={'connector-fields-resilient'}>
       <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
         {(field) => {
@@ -151,13 +115,6 @@ const ResilientFieldsComponent: React.FunctionComponent<
       />
       <EuiSpacer size="m" />
     </span>
-  ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.resilient}
-      isLoading={isLoadingIncidentTypes || isLoadingSeverity}
-      listItems={listItems}
-      title={connector.name}
-    />
   );
 };
 
