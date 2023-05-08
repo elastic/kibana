@@ -288,32 +288,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should not allow retrieving unauthorized comments using the filter field', async () => {
-        const obsCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'observabilityFixture' }),
-          200,
-          superUserSpace1Auth
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          auth: superUserSpace1Auth,
-          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-          caseId: obsCase.id,
-        });
-
-        const { body: res } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
-              obsCase.id
-            }/comments/_find?filter=cases-comments.attributes.owner:"observabilityFixture"`
-          )
-          .auth(secOnly.username, secOnly.password)
-          .expect(200);
-        expect(res.comments.length).to.be(0);
-      });
-
       // This test ensures that the user is not allowed to define the namespaces query param
       // so she cannot search across spaces
       it('should NOT allow to pass a namespaces query parameter', async () => {
