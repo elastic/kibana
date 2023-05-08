@@ -45,6 +45,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...original,
     useKibana: () => ({
       services: {
+        ...original.useKibana().services,
         uiSettings: {
           get: jest.fn().mockImplementation((key) => {
             const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
