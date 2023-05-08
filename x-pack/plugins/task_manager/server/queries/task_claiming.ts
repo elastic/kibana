@@ -12,23 +12,20 @@ import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { groupBy, pick, isPlainObject } from 'lodash';
+import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
-import { asOk, asErr, Result } from '../lib/result_type';
-import { ConcreteTaskInstance } from '../task';
+import { asOk, asErr, Result, isOk, isErr } from '../lib/result_type';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer, TaskTiming } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from './query_clauses';
 
 import {
-  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
-  tasksClaimedByOwner,
-  tasksOfType,
   EnabledTask,
 } from './mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -76,6 +73,12 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
 }
+
+export interface ClaimAvailableTasksImplResult {
+  docs: ConcreteTaskInstance[];
+  tasksConflicted: number;
+}
+
 export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershipResult =>
   isPlainObject((result as ClaimOwnershipResult).stats) &&
   Array.isArray((result as ClaimOwnershipResult).docs);
@@ -105,7 +108,6 @@ export class TaskClaiming {
   private getCapacity: (taskType?: string) => number;
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
-  private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
 
@@ -122,7 +124,6 @@ export class TaskClaiming {
     this.getCapacity = opts.getCapacity;
     this.logger = opts.logger;
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
-    this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
 
@@ -153,12 +154,6 @@ export class TaskClaiming {
         : []),
       ...(limitedConcurrency ? limitedConcurrency.map(({ type }) => asLimited(type)) : []),
     ];
-  }
-
-  private normalizeMaxAttempts(definitions: TaskTypeDictionary) {
-    return new Map(
-      [...definitions].map(([type, { maxAttempts }]) => [type, maxAttempts || this.maxAttempts])
-    );
   }
 
   private claimingBatchIndex = 0;
@@ -240,19 +235,16 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const { updated: tasksUpdated, version_conflicts: tasksConflicted } =
-      await this.markAvailableTasksAsClaimed({
-        claimOwnershipUntil,
-        size,
-        taskTypes,
-      });
-
-    const docs = tasksUpdated > 0 ? await this.sweepForClaimedTasks(taskTypes, size) : [];
+    const { docs, tasksConflicted } = await this.claimAvailableTasksImpl({
+      claimOwnershipUntil,
+      size,
+      taskTypes,
+    });
 
     this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
     const stats = {
-      tasksUpdated,
+      tasksUpdated: docs.length,
       tasksConflicted,
       tasksClaimed: docs.length,
     };
@@ -273,18 +265,15 @@ export class TaskClaiming {
     return false;
   }
 
-  private async markAvailableTasksAsClaimed({
+  private async claimAvailableTasksImpl({
     claimOwnershipUntil,
     size,
     taskTypes,
-  }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
-    const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
-      this.definitions.getAllTypes(),
-      (type) =>
-        taskTypes.has(type) && !this.isTaskTypeExcluded(type)
-          ? 'taskTypesToClaim'
-          : 'taskTypesToSkip'
-    );
+  }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksImplResult> {
+    const taskTypesToClaim = this.definitions
+      .getAllTypes()
+      .filter((type) => taskTypes.has(type) && !this.isTaskTypeExcluded(type));
+
     const queryForScheduledTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
@@ -295,16 +284,6 @@ export class TaskClaiming {
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
     const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
-    const script = updateFieldsAndMarkAsFailed({
-      fieldUpdates: {
-        ownerId: this.taskStore.taskManagerId,
-        retryAt: claimOwnershipUntil,
-      },
-      claimableTaskTypes: taskTypesToClaim,
-      skippedTaskTypes: taskTypesToSkip,
-      unusedTaskTypes: this.unusedTypes,
-      taskMaxAttempts: pick(this.taskMaxAttempts, taskTypesToClaim),
-    });
 
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,
@@ -312,43 +291,57 @@ export class TaskClaiming {
     );
 
     try {
-      const result = await this.taskStore.updateByQuery(
-        {
-          query,
-          script,
-          sort,
-        },
-        {
-          max_docs: size,
+      const searchResult = await this.taskStore.search({
+        query,
+        sort,
+        size,
+        seq_no_primary_term: true,
+      });
+
+      const docsToUpdate: ConcreteTaskInstance[] = [];
+
+      for (const doc of searchResult.docs) {
+        if (taskTypesToClaim.includes(doc.taskType)) {
+          const updates: Partial<ConcreteTaskInstance> = {};
+
+          if (doc.retryAt && doc.retryAt < new Date()) {
+            updates.scheduledAt = doc.retryAt || undefined;
+          } else {
+            updates.scheduledAt = doc.runAt;
+          }
+
+          updates.status = TaskStatus.Claiming;
+          updates.ownerId = this.taskStore.taskManagerId;
+          updates.retryAt = claimOwnershipUntil;
+          docsToUpdate.push({ ...doc, ...updates });
+        } else if (this.unusedTypes.includes(doc.taskType)) {
+          docsToUpdate.push({ ...doc, status: TaskStatus.Unrecognized });
         }
-      );
+      }
+
+      if (docsToUpdate.length === 0) {
+        return {
+          docs: [],
+          tasksConflicted: 0,
+        };
+      }
+
+      const bulkUpdateResults = await this.taskStore.bulkUpdate(docsToUpdate);
       apmTrans?.end('success');
-      return result;
+
+      const claimedDocs = bulkUpdateResults.filter(isOk).map((result) => result.value);
+      const versionConflicts = bulkUpdateResults
+        .filter(isErr)
+        .filter((result) => result.error.error.error === 'Conflict').length;
+
+      return {
+        docs: claimedDocs,
+        tasksConflicted: versionConflicts,
+      };
     } catch (err) {
       apmTrans?.end('failure');
       throw err;
     }
-  }
-
-  /**
-   * Fetches tasks from the index, which are owned by the current Kibana instance
-   */
-  private async sweepForClaimedTasks(
-    taskTypes: Set<string>,
-    size: number
-  ): Promise<ConcreteTaskInstance[]> {
-    const claimedTasksQuery = tasksClaimedByOwner(
-      this.taskStore.taskManagerId,
-      tasksOfType([...taskTypes])
-    );
-    const { docs } = await this.taskStore.fetch({
-      query: claimedTasksQuery,
-      size,
-      sort: SortByRunAtAndRetryAt,
-      seq_no_primary_term: true,
-    });
-
-    return docs;
   }
 }
 
