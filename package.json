@@ -65,7 +65,8 @@
     "test:ftr:runner": "node scripts/functional_test_runner",
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:jest": "node scripts/jest",
-    "test:jest_integration": "node scripts/jest_integration"
+    "test:jest_integration": "node scripts/jest_integration",
+    "test:std": "node --test packages/kbn-test/new_test_runner"
   },
   "repository": {
     "type": "git",
