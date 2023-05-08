@@ -120,10 +120,10 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   release: 'canUnIsolateHost',
   execute: 'canWriteFileOperations',
   'get-file': 'canWriteFileOperations',
+  upload: 'canWriteFileOperations',
   processes: 'canGetRunningProcesses',
   'kill-process': 'canKillProcess',
   'suspend-process': 'canSuspendProcess',
-  upload: 'canWriteExecuteOperations',
 });
 
 // 4 hrs in seconds
