@@ -15,19 +15,25 @@ import { CreateOptions } from '../actions_client';
 // The below zod declarations could be shared between endpoints
 const nonEmptyString = z.string().trim().nonempty();
 
-const configValue = z.union([
-  z.record(z.string(), nonEmptyString),
-  z.array(nonEmptyString),
-  z.boolean(),
-  nonEmptyString,
-]);
-const recordOfStringObjectOrArray = z.record(z.string(), configValue.default({}));
+const soAttribute = z.union([z.string(), z.boolean(), z.undefined(), z.number(), z.null()]);
+
+const soObject = z.record(
+  z.string(),
+  soAttribute
+    .or(
+      z.record(
+        z.string(),
+        z.any({ description: 'Allow any valid, primitive value or object here' })
+      )
+    )
+    .default({})
+);
 
 const response = z.object({
   actionTypeId: nonEmptyString,
   name: nonEmptyString,
-  config: recordOfStringObjectOrArray,
-  secrets: recordOfStringObjectOrArray,
+  config: soObject,
+  secrets: soObject,
 });
 
 const createConnectorParams = z
@@ -39,8 +45,8 @@ const createConnectorParams = z
 export const bodySchema = z.object({
   name: nonEmptyString,
   connector_type_id: nonEmptyString,
-  config: recordOfStringObjectOrArray,
-  secrets: recordOfStringObjectOrArray,
+  config: soObject,
+  secrets: soObject,
 });
 
 // We should be able to share this between all routes
