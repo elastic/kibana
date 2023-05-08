@@ -20,12 +20,12 @@ type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
 }
 
 export const getScheduleNotificationResponseActionsService =
   ({
-    osqueryCreateAction,
+    osqueryCreateActionService,
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
   ({ signals, responseActions }: ScheduleNotificationActions) => {
@@ -48,8 +48,11 @@ export const getScheduleNotificationResponseActionsService =
     );
 
     each(responseActions, (responseAction) => {
-      if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-        osqueryResponseAction(responseAction, osqueryCreateAction, {
+      if (
+        responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY &&
+        osqueryCreateActionService
+      ) {
+        osqueryResponseAction(responseAction, osqueryCreateActionService, {
           alerts,
           alertIds,
           agentIds,
