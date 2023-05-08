@@ -16,6 +16,8 @@ import type {
   SavedObjectsClientContract,
   Logger,
   RequestHandlerContext,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,6 +28,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
+
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -301,7 +305,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
     }
-  ): Promise<PackagePolicy[]> {
+  ): Promise<{
+    created: PackagePolicy[];
+    failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+  }> {
     for (const packagePolicy of packagePolicies) {
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
@@ -323,9 +330,24 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
 
     const isoDate = new Date().toISOString();
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      await pMap(packagePolicies, async (packagePolicy) => {
+
+    const policiesToCreate: Array<SavedObjectsBulkCreateObject<PackagePolicySOAttributes>> = [];
+    const failedPolicies: Array<{
+      packagePolicy: NewPackagePolicyWithId;
+      error: Error | SavedObjectError;
+    }> = [];
+
+    const logger = appContextService.getLogger();
+
+    const packagePoliciesWithIds = packagePolicies.map((p) => {
+      if (!p.id) {
+        p.id = SavedObjectsUtils.generateId();
+      }
+      return p;
+    });
+
+    await pMap(packagePoliciesWithIds, async (packagePolicy) => {
+      try {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyId = packagePolicy.policy_id;
 
@@ -348,7 +370,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           elasticsearch = pkgInfo?.elasticsearch;
         }
 
-        return {
+        policiesToCreate.push({
           type: SAVED_OBJECT_TYPE,
           id: packagePolicyId,
           attributes: {
@@ -365,12 +387,32 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             updated_at: isoDate,
             updated_by: options?.user?.username ?? 'system',
           },
-        };
-      })
+        });
+      } catch (error) {
+        failedPolicies.push({ packagePolicy, error });
+        logger.error(error);
+      }
+    });
+
+    const { saved_objects: createdObjects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
+      policiesToCreate
     );
 
     // Filter out invalid SOs
-    const newSos = saved_objects.filter((so) => !so.error && so.attributes);
+    const newSos = createdObjects.filter((so) => !so.error && so.attributes);
+
+    packagePoliciesWithIds.forEach((packagePolicy) => {
+      const hasCreatedSO = newSos.find((so) => so.id === packagePolicy.id);
+      const hasFailed = failedPolicies.some(
+        ({ packagePolicy: failedPackagePolicy }) => failedPackagePolicy.id === packagePolicy.id
+      );
+      if (hasCreatedSO?.error && !hasFailed) {
+        failedPolicies.push({
+          packagePolicy,
+          error: hasCreatedSO?.error ?? new Error('Failed to create package policy.'),
+        });
+      }
+    });
 
     // Assign it to the given agent policy
 
@@ -382,11 +424,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    return newSos.map((newSo) => ({
-      id: newSo.id,
-      version: newSo.version,
-      ...newSo.attributes,
-    }));
+    return {
+      created: newSos.map((newSo) => ({
+        id: newSo.id,
+        version: newSo.version,
+        ...newSo.attributes,
+      })),
+      failed: failedPolicies,
+    };
   }
 
   public async get(
@@ -730,7 +775,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
-  ): Promise<PackagePolicy[] | null> {
+  ): Promise<{
+    updatedPolicies: PackagePolicy[] | null;
+    failedPolicies: Array<{
+      packagePolicy: NewPackagePolicyWithId;
+      error: Error | SavedObjectError;
+    }>;
+  }> {
     for (const packagePolicy of packagePolicyUpdates) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
@@ -749,8 +800,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
 
-    const { saved_objects: newPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
-      await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
+    const policiesToUpdate: Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>> = [];
+    const failedPolicies: Array<{
+      packagePolicy: NewPackagePolicyWithId;
+      error: Error | SavedObjectError;
+    }> = [];
+
+    await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
+      try {
         const id = packagePolicyUpdate.id;
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
         const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
@@ -786,7 +843,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // Handle component template/mappings updates for experimental features, e.g. synthetic source
         await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
 
-        return {
+        policiesToUpdate.push({
           type: SAVED_OBJECT_TYPE,
           id,
           attributes: {
@@ -803,8 +860,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             updated_by: options?.user?.username ?? 'system',
           },
           version,
-        };
-      })
+        });
+      } catch (error) {
+        failedPolicies.push({ packagePolicy: packagePolicyUpdate, error });
+      }
+    });
+
+    const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
+      policiesToUpdate
     );
 
     const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
@@ -839,14 +902,32 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
 
-    return newPolicies.map(
-      (soPolicy) =>
-        ({
-          id: soPolicy.id,
-          version: soPolicy.version,
-          ...soPolicy.attributes,
-        } as PackagePolicy)
-    );
+    updatedPolicies.forEach((policy) => {
+      if (policy.error) {
+        const hasAlreadyFailed = failedPolicies.some(
+          (failedPolicy) => failedPolicy.packagePolicy.id === policy.id
+        );
+        if (!hasAlreadyFailed) {
+          failedPolicies.push({
+            packagePolicy: packagePolicyUpdates.find((p) => p.id === policy.id)!,
+            error: policy.error,
+          });
+        }
+      }
+    });
+
+    const updatedPoliciesSuccess = updatedPolicies
+      .filter((policy) => !policy.error && policy.attributes)
+      .map(
+        (soPolicy) =>
+          ({
+            id: soPolicy.id,
+            version: soPolicy.version,
+            ...soPolicy.attributes,
+          } as PackagePolicy)
+      );
+
+    return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
 
   public async delete(
@@ -1920,6 +2001,7 @@ function _enforceFrozenVars(
 export interface NewPackagePolicyWithId extends NewPackagePolicy {
   id?: string;
   policy_id: string;
+  version?: string;
 }
 
 export const packagePolicyService: PackagePolicyClient = new PackagePolicyClientImpl();
