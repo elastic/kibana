@@ -84,6 +84,7 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+*.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
@@ -97,4 +98,9 @@ report.asciidoc
 
 # Exclude renovate config file (we only need it on master)
 renovate.json5
-/packages/kbn-synthetic-package-map/synthetic-packages.json
+
+# Exclude auto generated files from tooling 
+/packages/*/synthetic-packages.json
+/packages/*/package-map.json
+/packages/*/config-paths.json
+/x-pack/plugins/screenshotting/chromium
