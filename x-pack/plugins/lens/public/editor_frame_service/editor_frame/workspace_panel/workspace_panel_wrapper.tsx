@@ -31,6 +31,7 @@ import {
   applyChanges,
   selectAutoApplyEnabled,
   undo,
+  selectCanUndo,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -64,6 +65,7 @@ export function WorkspacePanelWrapper({
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const canUndo = useLensSelector(selectCanUndo);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -144,6 +146,7 @@ export function WorkspacePanelWrapper({
 
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    disabled={canUndo}
                     fill
                     className={
                       'lnsWorkspacePanelWrapper__applyButton ' +
