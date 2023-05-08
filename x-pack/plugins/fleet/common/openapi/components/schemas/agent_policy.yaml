@@ -58,6 +58,8 @@ properties:
       required:
         - name
         - enabled
+  is_protected:
+    type: boolean
 required:
   - id
   - status

@@ -4206,6 +4206,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - id
         - status
@@ -4258,6 +4260,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace
@@ -4306,6 +4310,8 @@ components:
             required:
               - name
               - enabled
+        is_protected:
+          type: boolean
       required:
         - name
         - namespace

@@ -242,6 +242,7 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+        is_protected: agentPolicy.is_protected ?? false,
       } as AgentPolicy,
       options
     );

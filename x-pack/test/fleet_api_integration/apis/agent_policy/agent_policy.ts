@@ -61,6 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.is_managed).to.equal(false);
         expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
+        expect(body.item.is_protected).to.equal(false);
       });
 
       it('sets given is_managed value', async () => {
@@ -672,6 +673,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Updated name',
             description: 'Updated description',
             namespace: 'default',
+            is_protected: true,
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
@@ -689,6 +691,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
+          is_protected: true,
         });
       });
 

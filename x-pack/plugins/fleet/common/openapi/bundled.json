@@ -6599,6 +6599,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -6673,6 +6676,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -6742,6 +6748,9 @@
                 "enabled"
               ]
             }
+          },
+          "is_protected": {
+            "type": "boolean"
           }
         },
         "required": [
