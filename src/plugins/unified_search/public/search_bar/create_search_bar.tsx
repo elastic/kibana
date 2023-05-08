@@ -39,6 +39,7 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
     savedQueryId?: string;
     onSavedQueryIdChange?: (savedQueryId?: string) => void;
     onFiltersUpdated?: (filters: Filter[]) => void;
+    isAutoRefreshDisabled?: boolean;
   };
 
 // Respond to user changing the filters
@@ -56,7 +57,10 @@ const defaultFiltersUpdated = (
 };
 
 // Respond to user changing the refresh settings
-const defaultOnRefreshChange = (queryService: QueryStart) => {
+const defaultOnRefreshChange = (queryService: QueryStart, isAutoRefreshDisabled?: boolean) => {
+  if (isAutoRefreshDisabled) {
+    return;
+  }
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
@@ -218,7 +222,7 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query)}
+            onRefreshChange={defaultOnRefreshChange(data.query, props.isAutoRefreshDisabled)}
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
