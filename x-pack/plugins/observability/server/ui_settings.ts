@@ -365,7 +365,7 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.syntheticsThrottlingEnabledExperimentDescription',
       {
         defaultMessage:
-          'Enable Synthetics throttling UI configurations. Throttling is disabled by default. On Elastic managed infrastructure public location, throttling has some issues, {link}',
+          'Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. {link}',
         values: {
           link: throttlingDocsLink({
             href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
