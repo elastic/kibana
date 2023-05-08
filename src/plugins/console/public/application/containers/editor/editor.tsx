@@ -12,7 +12,8 @@ import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '..';
-import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
+import { EditorOutput } from './legacy/console_editor';
+import { Editor as EditorUI } from './editor_redesign';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
@@ -73,8 +74,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
             <EditorContentSpinner />
           ) : (
             <EditorUI
-              initialTextValue={currentTextObject.text}
-              setEditorInstance={setEditorInstance}
+              //initialTextValue={currentTextObject.text}
+              //setEditorInstance={setEditorInstance}
             />
           )}
         </Panel>

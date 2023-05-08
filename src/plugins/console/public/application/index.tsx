@@ -15,9 +15,11 @@ import {
   I18nStart,
   CoreTheme,
   DocLinksStart,
+  IUiSettingsClient,
 } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '../shared_imports';
 import {
   createStorage,
@@ -42,6 +44,7 @@ export interface BootDependencies {
   theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
+  uiSettings: IUiSettingsClient;
 }
 
 export function renderApp({
@@ -54,6 +57,7 @@ export function renderApp({
   theme$,
   docLinks,
   autocompleteInfo,
+  uiSettings,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -73,32 +77,38 @@ export function renderApp({
 
   render(
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <ServicesContextProvider
-          value={{
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            theme$,
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
-              <Main />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </KibanaThemeProvider>
+      <KibanaContextProvider
+        services={{
+          uiSettings,
+        }}
+      >
+        <KibanaThemeProvider theme$={theme$}>
+          <ServicesContextProvider
+            value={{
+              docLinkVersion,
+              docLinks,
+              services: {
+                esHostService,
+                storage,
+                history,
+                settings,
+                notifications,
+                trackUiMetric,
+                objectStorageClient,
+                http,
+                autocompleteInfo,
+              },
+              theme$,
+            }}
+          >
+            <RequestContextProvider>
+              <EditorContextProvider settings={settings.toJSON()}>
+                <Main />
+              </EditorContextProvider>
+            </RequestContextProvider>
+          </ServicesContextProvider>
+        </KibanaThemeProvider>
+      </KibanaContextProvider>
     </I18nContext>,
     element
   );
