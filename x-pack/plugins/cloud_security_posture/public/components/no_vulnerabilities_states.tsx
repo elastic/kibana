@@ -58,7 +58,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
   />
 );
 
-const VulnerabilitiesVulnerabilitiesInstalledEmptyPrompt = ({
+const CnvmIntegrationNotInstalledEmptyPrompt = ({
   vulnMgmtIntegrationLink,
 }: {
   vulnMgmtIntegrationLink?: string;
@@ -130,7 +130,7 @@ const IndexTimeout = () => (
           defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
           values={{
             docs: (
-              <EuiLink href="https://ela.st/Vulnerabilities" target="_blank">
+              <EuiLink href="https://ela.st/findings" target="_blank">
                 <FormattedMessage
                   id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
                   defaultMessage="Learn more"
@@ -258,9 +258,7 @@ export const NoVulnerabilitiesStates = () => {
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
     if (status === 'not-installed')
       return (
-        <VulnerabilitiesVulnerabilitiesInstalledEmptyPrompt
-          vulnMgmtIntegrationLink={vulnMgmtIntegrationLink}
-        />
+        <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />
       );
     if (status === 'not-deployed') return <AgentNotDeployedEmptyPrompt />;
     if (status === 'unprivileged')
