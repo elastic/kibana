@@ -28,6 +28,8 @@ import {
   SuperSelectField,
   ToggleField,
   JsonEditorField,
+  ButtonGroupField,
+  MultiButtonGroupField,
 } from './fields';
 
 const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
@@ -43,6 +45,8 @@ const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.SUPER_SELECT]: SuperSelectField,
   [FIELD_TYPES.TOGGLE]: ToggleField,
   [FIELD_TYPES.JSON]: JsonEditorField,
+  [FIELD_TYPES.BUTTON_GROUP]: ButtonGroupField,
+  [FIELD_TYPES.MULTI_BUTTON_GROUP]: MultiButtonGroupField,
 };
 
 export const Field = (props: Props) => {

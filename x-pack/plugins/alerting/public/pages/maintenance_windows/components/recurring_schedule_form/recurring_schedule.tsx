@@ -26,7 +26,6 @@ import {
   RECURRENCE_END_OPTIONS,
 } from '../../constants';
 import * as i18n from '../../translations';
-import { ButtonGroupField } from '../fields/button_group_field';
 import { DatePickerField } from '../fields/date_picker_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
@@ -105,11 +104,12 @@ export const RecurringSchedule: React.FC = React.memo(() => {
         ) : null}
         <UseField
           path="recurringSchedule.ends"
-          component={ButtonGroupField}
           componentProps={{
-            'data-test-subj': 'ends-field',
-            legend: 'Recurrence ends',
-            options: RECURRENCE_END_OPTIONS,
+            euiFieldProps: {
+              'data-test-subj': 'ends-field',
+              legend: 'Recurrence ends',
+              options: RECURRENCE_END_OPTIONS,
+            },
           }}
         />
         {recurringSchedule?.ends === EndsOptions.ON_DATE ? (

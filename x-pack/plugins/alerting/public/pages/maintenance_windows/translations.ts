@@ -312,6 +312,13 @@ export const CREATE_FORM_WEEKDAY_SHORT = (dayOfWeek: string) => [
   }),
 ];
 
+export const CREATE_FORM_BYWEEKDAY_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.byweekdayFieldRequiredError',
+  {
+    defaultMessage: 'A week day is required.',
+  }
+);
+
 export const CREATE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY = (startDate: Moment) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.repeatOnMonthlyDay', {
     defaultMessage: 'On day {dayNumber}',
