@@ -6,14 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import moment from 'moment';
-import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
   MaintenanceWindow,
   MaintenanceWindowSOAttributes,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-  parseDuration,
   MaintenanceWindowClientContext,
 } from '../../../common';
 
@@ -32,6 +30,7 @@ export interface ActiveParams {
   interval?: string;
 }
 
+// TODO: Clean up this API sinde we no longer use start or interval
 export async function getActiveMaintenanceWindows(
   context: MaintenanceWindowClientContext,
   params?: ActiveParams
@@ -40,17 +39,10 @@ export async function getActiveMaintenanceWindows(
   const { start, interval } = params || {};
 
   const startDate = start ? new Date(start) : new Date();
-  const duration = interval ? parseDuration(interval) : 0;
-  const endDate = moment.utc(startDate).add(duration, 'ms').toDate();
-
   const startDateISO = startDate.toISOString();
-  const endDateISO = endDate.toISOString();
-
+  
   const filter = nodeBuilder.and([
-    nodeBuilder.and([
-      fromKueryExpression(`maintenance-window.attributes.events >= "${startDateISO}"`),
-      fromKueryExpression(`maintenance-window.attributes.events <= "${endDateISO}"`),
-    ]),
+    nodeBuilder.is('maintenance-window.attributes.events', startDateISO),
     nodeBuilder.is('maintenance-window.attributes.enabled', 'true'),
   ]);
 

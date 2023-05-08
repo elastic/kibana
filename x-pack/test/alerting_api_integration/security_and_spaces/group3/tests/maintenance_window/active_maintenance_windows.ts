@@ -24,6 +24,7 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
       r_rule: {
         dtstart: new Date().toISOString(),
         tzid: 'UTC',
+        count: 10,
         freq: 2, // weekly
       },
     };
@@ -120,6 +121,52 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it.only('should return active maintenance windows', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          duration: 5 * 60 * 1000, // 5 mins
+          r_rule: {
+            ...createParams.r_rule,
+            dtstart: moment.utc().subtract(10, 'minutes').toISOString(),
+          },
+        })
+        .expect(200);
+
+      const { body: window2 } = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          duration: 5 * 60 * 1000, // 5 mins
+        })
+        .expect(200);
+
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          duration: 5 * 60 * 1000, // 5 mins
+          r_rule: {
+            ...createParams.r_rule,
+            dtstart: moment.utc().add(10, 'minutes').toISOString(),
+          },
+        })
+        .expect(200);
+
+      const { body: activeWindows } = await supertest
+        .get(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/_active`)
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(200);
+
+      expect(activeWindows.length).eql(1);
+      expect(activeWindows[0].id).eql(window2.id);
+    });
 
     it('should return an empty array if there are no active maintenance windows', async () => {
       const { body: createdMaintenanceWindow } = await supertest
