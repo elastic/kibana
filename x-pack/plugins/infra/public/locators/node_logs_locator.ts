@@ -10,7 +10,6 @@ import type { InventoryItemType } from '../../common/inventory_models/types';
 import type { InfraClientCoreSetup } from '../types';
 import type { LogsLocatorParams } from './logs_locator';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
-import { findInventoryFields } from '../../common/inventory_models';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 
@@ -33,6 +32,8 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
     const { parseSearchString, getLocationToDiscover } = await import('./helpers');
+    const { findInventoryFields } = await import('../../common/inventory_models');
+
     const { nodeType, nodeId, filter, timeRange } = params;
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
