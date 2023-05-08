@@ -34,8 +34,10 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
         const hasDifferentSearch = locationRef.current.search !== location.search;
         const hasDifferentId = currentMonitorId !== monitorId;
         locationRef.current = location;
-        if (hasDifferentSearch || hasDifferentId) {
+        if (hasDifferentId) {
           setHasPing(false);
+        }
+        if (hasDifferentSearch || hasDifferentId) {
           dispatch(resetMonitorLastRunAction());
           refreshApp();
         }
@@ -58,6 +60,8 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
     }
   }, [pingsLoaded, latestPing, dispatch, unlisten]);
 
+  const showLoading = !loaded || !hasPing;
+
   return (
     <>
       {!loaded ? (
@@ -67,7 +71,7 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
           body={<p>{LOADING_DESCRIPTION}</p>}
         />
       ) : null}
-      {!loaded && !hasPing ? (
+      {showLoading ? (
         <PageLoader
           icon={<EuiLoadingChart size="xl" mono />}
           title={<h3>{MONITOR_PENDING_HEADING}</h3>}
