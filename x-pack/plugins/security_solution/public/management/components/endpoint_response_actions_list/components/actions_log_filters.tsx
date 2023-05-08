@@ -78,9 +78,7 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {responseActionsEnabled && (
-            <ActionsLogWithRuleToggle dataTestSubj={dataTestSubj} isFlyout={isFlyout} />
-          )}
+          {responseActionsEnabled && <ActionsLogWithRuleToggle dataTestSubj={dataTestSubj} />}
         </>
       );
     }, [

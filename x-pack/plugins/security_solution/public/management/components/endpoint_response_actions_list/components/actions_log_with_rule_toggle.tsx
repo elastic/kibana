@@ -11,21 +11,18 @@ import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { FILTER_NAMES } from '../translations';
 
 interface ActionsLogWithRuleToggleProps {
-  isFlyout: boolean;
   dataTestSubj?: string;
 }
 
 export const ActionsLogWithRuleToggle = React.memo(
-  ({ isFlyout, dataTestSubj }: ActionsLogWithRuleToggleProps) => {
+  ({ dataTestSubj }: ActionsLogWithRuleToggleProps) => {
     const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
       useActionHistoryUrlParams();
 
     const onClick = useCallback(() => {
-      if (!isFlyout) {
-        // set and show `withAutomatedActions` URL param on history page
-        setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
-      }
-    }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
+      // set and show `withAutomatedActions` URL param on history page
+      setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
+    }, [setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
 
     return (
       <EuiFilterButton
