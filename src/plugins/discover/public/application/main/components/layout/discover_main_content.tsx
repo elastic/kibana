@@ -7,7 +7,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
 import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -39,9 +38,7 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  savedSearch: SavedSearch;
   isPlainRecord: boolean;
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
@@ -53,13 +50,11 @@ export interface DiscoverMainContentProps {
 export const DiscoverMainContent = ({
   dataView,
   isPlainRecord,
-  navigateTo,
   viewMode,
   onAddFilter,
   onFieldEdited,
   columns,
   stateContainer,
-  savedSearch,
   onDropFieldToTable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
@@ -121,15 +116,12 @@ export const DiscoverMainContent = ({
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               dataView={dataView}
-              navigateTo={navigateTo}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              savedSearch={savedSearch}
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
           ) : (
             <FieldStatisticsTab
-              savedSearch={savedSearch}
               dataView={dataView}
               columns={columns}
               stateContainer={stateContainer}
