@@ -1485,6 +1485,7 @@
     "supertest": "^3.1.0",
     "supports-color": "^7.0.0",
     "svgo": "^2.8.0",
+    "tap-junit": "^5.0.2",
     "tape": "^5.0.1",
     "tempy": "^0.3.0",
     "terser": "^5.16.5",

@@ -22,10 +22,17 @@ echo '--- Verify Install'
 node --version
 npm version
 
-echo '--- New NodeJS Std Test Runner with Custom Reporter [Transform Stream]'
-pushd packages/kbn-test/new_test_runner
-node --test-reporter=./lifecycle_stream.mjs --test
+# echo '--- New NodeJS Std Test Runner with Custom Reporter [Transform Stream]'
+# pushd packages/kbn-test/new_test_runner
+# node --test-reporter=./lifecycle_stream.mjs --test
+# popd
 
 echo '--- New NodeJS Std Test Runner with Custom Reporter [Generator Fn]'
 pushd packages/kbn-test/new_test_runner
 node --test-reporter=./lifecycle_gen.mjs --test
+popd
+
+echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
+pushd packages/kbn-test/new_test_runner
+node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output output/test
+popd
