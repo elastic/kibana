@@ -47,8 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/154182
-    describe.skip('with a valid policy id', () => {
+    describe('with a valid policy id', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
@@ -63,6 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should display policy view', async () => {
+        this.timeout(150_000);
         expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
           policyInfo.packagePolicy.name
         );
