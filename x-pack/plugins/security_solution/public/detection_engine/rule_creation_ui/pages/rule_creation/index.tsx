@@ -73,6 +73,7 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { CopyRuleConfigurationsPopover } from '../copy_configs';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -432,14 +433,9 @@ const CreateRulePageComponent: React.FC = () => {
                           onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
                           extraAction={
                             activeStep === RuleStep.defineRule ? (
-                              <EuiButtonEmpty
-                                data-test-subj="copy-configurations-define-rule"
-                                iconType="copy"
-                                size="xs"
-                                onClick={() => copyConfigurations()}
-                              >
-                                {i18n.COPY_CONFIGURATIONS}
-                              </EuiButtonEmpty>
+                              <CopyRuleConfigurationsPopover
+                                copyConfigurations={copyConfigurations}
+                              />
                             ) : (
                               stepsData.current[RuleStep.defineRule].isValid && (
                                 <EuiButtonEmpty
@@ -485,14 +481,9 @@ const CreateRulePageComponent: React.FC = () => {
                           onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
                           extraAction={
                             activeStep === RuleStep.aboutRule ? (
-                              <EuiButtonEmpty
-                                data-test-subj="copy-configurations-about-rule"
-                                iconType="copy"
-                                size="xs"
-                                onClick={() => copyConfigurations()}
-                              >
-                                {i18n.COPY_CONFIGURATIONS}
-                              </EuiButtonEmpty>
+                              <CopyRuleConfigurationsPopover
+                                copyConfigurations={copyConfigurations}
+                              />
                             ) : (
                               stepsData.current[RuleStep.aboutRule].isValid && (
                                 <EuiButtonEmpty
@@ -535,14 +526,9 @@ const CreateRulePageComponent: React.FC = () => {
                           onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
                           extraAction={
                             activeStep === RuleStep.scheduleRule ? (
-                              <EuiButtonEmpty
-                                data-test-subj="copy-configurations-schedule-rule"
-                                iconType="copy"
-                                size="xs"
-                                onClick={() => copyConfigurations()}
-                              >
-                                {i18n.COPY_CONFIGURATIONS}
-                              </EuiButtonEmpty>
+                              <CopyRuleConfigurationsPopover
+                                copyConfigurations={copyConfigurations}
+                              />
                             ) : (
                               stepsData.current[RuleStep.scheduleRule].isValid && (
                                 <EuiButtonEmpty
@@ -583,14 +569,9 @@ const CreateRulePageComponent: React.FC = () => {
                           onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
                           extraAction={
                             activeStep === RuleStep.ruleActions ? (
-                              <EuiButtonEmpty
-                                data-test-subj="copy-configurations-actions-rule"
-                                iconType="copy"
-                                size="xs"
-                                onClick={() => copyConfigurations()}
-                              >
-                                {i18n.COPY_CONFIGURATIONS}
-                              </EuiButtonEmpty>
+                              <CopyRuleConfigurationsPopover
+                                copyConfigurations={copyConfigurations}
+                              />
                             ) : (
                               stepsData.current[RuleStep.ruleActions].isValid && (
                                 <EuiButtonEmpty

@@ -42,13 +42,6 @@ export const EDIT_RULE = i18n.translate(
   }
 );
 
-export const COPY_CONFIGURATIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.copyRuleConfigurationsButton',
-  {
-    defaultMessage: 'Copy configurations',
-  }
-);
-
 export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.create.successfullyCreatedRuleTitle',
