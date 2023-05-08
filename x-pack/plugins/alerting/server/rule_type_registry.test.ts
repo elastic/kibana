@@ -652,6 +652,10 @@ describe('Create Lifecycle', () => {
         validate: {
           params: schema.any(),
         },
+        alerts: {
+          context: 'test',
+          mappings: { fieldMap: { foo: { type: 'keyword', required: false } } },
+        },
       });
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
@@ -671,6 +675,17 @@ describe('Create Lifecycle', () => {
               "context": Array [],
               "params": Array [],
               "state": Array [],
+            },
+            "alerts": Object {
+              "context": "test",
+              "mappings": Object {
+                "fieldMap": Object {
+                  "foo": Object {
+                    "required": false,
+                    "type": "keyword",
+                  },
+                },
+              },
             },
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,
