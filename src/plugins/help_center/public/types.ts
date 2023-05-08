@@ -8,6 +8,7 @@
 
 import { Duration, Moment } from 'moment';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { ChromeGlobalHelpExtensionMenuLink, ChromeHelpExtension } from '@kbn/core-chrome-browser';
 export interface HelpCenterPluginStartDependencies {
   screenshotMode: ScreenshotModePluginStart;
 }
@@ -20,6 +21,13 @@ export interface HelpCenterPluginBrowserConfig {
   };
   mainInterval: Duration; // how often to check last updated time
   fetchInterval: Duration; // how often to fetch remote service and set last updated
+}
+
+export interface HelpCenterLinks {
+  kibanaDocLink: string;
+  helpSupportLink?: string;
+  helpExtension?: ChromeHelpExtension;
+  globalHelpExtensionMenuLinks?: ChromeGlobalHelpExtensionMenuLink[];
 }
 
 export interface ApiItem {

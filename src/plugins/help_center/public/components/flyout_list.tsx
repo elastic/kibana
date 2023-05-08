@@ -20,6 +20,8 @@ import {
   EuiText,
   EuiPortal,
   EuiSpacer,
+  EuiIcon,
+  EuiCard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,23 +29,18 @@ import {
   KIBANA_FEEDBACK_LINK,
 } from '@kbn/core-chrome-browser-internal/src/constants';
 import { HelpCenterContext } from './help_center_header_nav_button';
+import { DocumentationCards } from './documentation_cards';
 
 export const HelpCenterFlyout = (
   props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }
 ) => {
-  const {
-    newsFetchResult,
-    setFlyoutVisible,
-    kibanaDocLink,
-    helpSupportLink,
-    helpExtension,
-    globalHelpExtensionMenuLinks,
-  } = useContext(HelpCenterContext);
+  const { newsFetchResult, setFlyoutVisible, helpLinks } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
   const { showPlainSpinner, ...rest } = props;
+  // console.log(helpLinks);
 
   const globalCustomContent = useMemo(() => {
-    return globalHelpExtensionMenuLinks
+    return helpLinks?.globalHelpExtensionMenuLinks
       ?.sort((a, b) => b.priority - a.priority)
       .map((link, index) => {
         const { linkType, content: text, href, external, ...restProps } = link;
@@ -60,54 +57,46 @@ export const HelpCenterFlyout = (
           </EuiButtonEmpty>
         );
       });
-  }, [globalHelpExtensionMenuLinks]);
+  }, [helpLinks?.globalHelpExtensionMenuLinks]);
 
   return (
     <EuiPortal>
       <EuiFlyout
         {...rest}
         onClose={closeFlyout}
-        size="s"
+        size="m"
         aria-labelledby="flyoutSmallTitle"
         className="kbnNews__flyout"
         data-test-subj="HelpCenterFlyout"
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h2 id="flyoutSmallTitle">
-              <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2 id="flyoutSmallTitle">
+                  <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {newsFetchResult ? (
+                <EuiText color="subdued" size="s">
+                  <p>
+                    <FormattedMessage
+                      id="HelpCenter.flyoutList.versionTextLabel"
+                      defaultMessage="{version}"
+                      values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
+                    />
+                  </p>
+                </EuiText>
+              ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
-          <EuiButtonEmpty
-            iconType={'documentation'}
-            href={kibanaDocLink}
-            target="_blank"
-            size="s"
-            flush="left"
-          >
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-              defaultMessage="Kibana documentation"
-            />
-          </EuiButtonEmpty>
-          <EuiSpacer size="xs" />
+          <DocumentationCards />
 
-          <EuiButtonEmpty
-            iconType={'discuss'}
-            href={KIBANA_FEEDBACK_LINK}
-            target="_blank"
-            size="s"
-            flush="left"
-          >
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
-              defaultMessage="Give feedback"
-            />
-          </EuiButtonEmpty>
-
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="l" />
 
           <EuiButtonEmpty
             href={GITHUB_CREATE_ISSUE_LINK}
@@ -126,7 +115,7 @@ export const HelpCenterFlyout = (
 
           <EuiButtonEmpty
             iconType={'questionInCircle'}
-            href={helpSupportLink}
+            href={helpLinks?.helpSupportLink}
             target="_blank"
             size="s"
             flush="left"
@@ -139,7 +128,7 @@ export const HelpCenterFlyout = (
 
           <EuiSpacer size="xs" />
 
-          {globalHelpExtensionMenuLinks && globalCustomContent}
+          {helpLinks?.globalHelpExtensionMenuLinks && globalCustomContent}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -152,17 +141,18 @@ export const HelpCenterFlyout = (
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {newsFetchResult ? (
-                <EuiText color="subdued" size="s">
-                  <p>
-                    <FormattedMessage
-                      id="HelpCenter.flyoutList.versionTextLabel"
-                      defaultMessage="{version}"
-                      values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
-                    />
-                  </p>
-                </EuiText>
-              ) : null}
+              <EuiButtonEmpty
+                iconType={'discuss'}
+                href={KIBANA_FEEDBACK_LINK}
+                target="_blank"
+                size="s"
+                flush="left"
+              >
+                <FormattedMessage
+                  id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
+                  defaultMessage="Give feedback"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

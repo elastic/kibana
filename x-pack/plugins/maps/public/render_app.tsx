@@ -50,6 +50,7 @@ function setAppChrome() {
       {
         linkType: 'documentation',
         href: `${mapUrl}`,
+        iconType: 'gisApp',
       },
       {
         linkType: 'github',

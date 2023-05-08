@@ -16,6 +16,7 @@ export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksSt
     }),
     links: [
       {
+        iconType: 'discoverApp',
         linkType: 'documentation',
         href: `${docLinks.links.discover.guide}`,
       },

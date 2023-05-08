@@ -14,6 +14,7 @@ export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksSt
       {
         linkType: 'documentation',
         href: docLinks.links.visualize.lensPanels,
+        iconType: 'lensApp',
       },
       {
         linkType: 'github',

@@ -10,20 +10,16 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { ChromeGlobalHelpExtensionMenuLink, ChromeHelpExtension } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, takeUntil } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { HelpCenterApi } from '../lib/api';
 import { HelpCenterFlyout } from './flyout_list';
-import { FetchResult } from '../types';
+import { FetchResult, HelpCenterLinks } from '../types';
 
 export interface IHelpCenterContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   newsFetchResult: FetchResult | void | null;
-
-  kibanaDocLink: string;
-  helpSupportLink?: string;
-  helpExtension?: ChromeHelpExtension;
-  globalHelpExtensionMenuLinks?: ChromeGlobalHelpExtensionMenuLink[];
+  helpLinks?: HelpCenterLinks;
 }
 
 export const HelpCenterContext = React.createContext({} as IHelpCenterContext);
@@ -31,23 +27,27 @@ export const HelpCenterContext = React.createContext({} as IHelpCenterContext);
 export interface Props {
   helpCenterApi: HelpCenterApi;
   hasCustomBranding$: Observable<boolean>;
-  kibanaDocLink: string;
-  helpSupportLink?: string;
-  helpExtension?: ChromeHelpExtension;
-  globalHelpExtensionMenuLinks?: ChromeGlobalHelpExtensionMenuLink[];
+  helpCenterLinksSubject: Observable<HelpCenterLinks>;
 }
 
 export const HelpCenterNavButton = ({
   helpCenterApi,
   hasCustomBranding$,
-  kibanaDocLink,
-  helpExtension,
-  helpSupportLink,
-  globalHelpExtensionMenuLinks,
+  helpCenterLinksSubject,
 }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
   const hasCustomBranding = useObservable(hasCustomBranding$, false);
+  const [helpLinks, setHelpLinks] = useState<HelpCenterLinks>();
+
+  useEffect(() => {
+    const helpLinksSubscription = helpCenterLinksSubject.subscribe((links) => {
+      setHelpLinks(links);
+    });
+    return () => {
+      helpLinksSubscription.unsubscribe();
+    };
+  }, [helpCenterLinksSubject]);
 
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const setButtonRef = (node: HTMLButtonElement | null) => (buttonRef.current = node);
@@ -71,10 +71,7 @@ export const HelpCenterNavButton = ({
       value={{
         setFlyoutVisible,
         newsFetchResult,
-        kibanaDocLink,
-        helpSupportLink,
-        helpExtension,
-        globalHelpExtensionMenuLinks,
+        helpLinks,
       }}
     >
       <>

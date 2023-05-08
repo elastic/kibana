@@ -10,9 +10,11 @@ import {
   BehaviorSubject,
   catchError,
   combineLatest,
+  map,
   Observable,
   of,
   ReplaySubject,
+  Subject,
   Subscription,
   takeUntil,
 } from 'rxjs';
@@ -30,7 +32,11 @@ import {
 } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KIBANA_ASK_ELASTIC_LINK } from '@kbn/core-chrome-browser-internal/src/constants';
-import { HelpCenterPluginBrowserConfig, HelpCenterPluginStartDependencies } from './types';
+import {
+  HelpCenterLinks,
+  HelpCenterPluginBrowserConfig,
+  HelpCenterPluginStartDependencies,
+} from './types';
 import { HelpCenterNavButton } from './components/help_center_header_nav_button';
 import { getApi, HelpCenterApi, HelpCenterApiEndpoint } from './lib/api';
 import { ChromeGlobalHelpExtensionMenuLink } from '@kbn/core-chrome-browser';
@@ -44,12 +50,8 @@ export class HelpCenterPublicPlugin
   private readonly kibanaVersion: string;
   private readonly config: HelpCenterPluginBrowserConfig;
   private readonly stop$ = new ReplaySubject<void>(1);
-  private kibanaDocLink: string = '';
-  private helpLinksSubscription?: Subscription;
-
-  private helpExtension?: ChromeHelpExtension;
-  private helpSupportLink?: string;
-  private globalHelpExtensionMenuLinks?: ChromeGlobalHelpExtensionMenuLink[];
+  // private kibanaDocLink: string = '';
+  private helpCenterLinksSubject?: Observable<HelpCenterLinks>;
 
   constructor(initializerContext: PluginInitializerContext<HelpCenterPluginBrowserConfig>) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -68,20 +70,28 @@ export class HelpCenterPublicPlugin
 
   public start(core: CoreStart, { screenshotMode }: HelpCenterPluginStartDependencies) {
     const isScreenshotMode = screenshotMode.isScreenshotMode();
-    this.kibanaDocLink = core.docLinks.links.kibana.guide;
 
-    this.helpLinksSubscription = combineLatest([
+    this.helpCenterLinksSubject = combineLatest([
       core.chrome.getHelpExtension$(),
       core.chrome.getHelpSupportUrl$(),
       core.chrome.getGlobalHelpExtensionMenuLinks$(),
-    ])
-      .pipe(takeUntil(this.stop$))
-      .subscribe(([helpExtension, helpSupportLink, globalHelpExtensionMenuLinks]) => {
-        console.log(helpExtension, helpSupportLink, globalHelpExtensionMenuLinks);
-        this.helpExtension = helpExtension;
-        this.helpSupportLink = helpSupportLink;
-        this.globalHelpExtensionMenuLinks = globalHelpExtensionMenuLinks;
-      });
+    ]).pipe(
+      takeUntil(this.stop$),
+      map(([helpExtension, helpSupportLink, globalHelpExtensionMenuLinks]) => {
+        return {
+          kibanaDocLink: core.docLinks.links.kibana.guide,
+          helpExtension,
+          helpSupportLink,
+          globalHelpExtensionMenuLinks,
+        };
+      })
+    );
+    // .subscribe(([helpExtension, helpSupportLink, globalHelpExtensionMenuLinks]) => {
+    //   console.log('subscription', helpExtension, helpSupportLink, globalHelpExtensionMenuLinks);
+    //   this.helpExtension = helpExtension;
+    //   this.helpSupportLink = helpSupportLink;
+    //   this.globalHelpExtensionMenuLinks = globalHelpExtensionMenuLinks;
+    // });
 
     const api = this.createHelpCenterApi(
       this.config,
@@ -135,16 +145,18 @@ export class HelpCenterPublicPlugin
     theme$: Observable<CoreTheme>,
     hasCustomBranding$: Observable<boolean>
   ) {
+    console.log('mount', this.helpExtension);
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
           <HelpCenterNavButton
             helpCenterApi={api}
             hasCustomBranding$={hasCustomBranding$}
-            kibanaDocLink={this.kibanaDocLink}
-            helpExtension={this.helpExtension}
-            helpSupportLink={this.helpSupportLink}
-            globalHelpExtensionMenuLinks={this.globalHelpExtensionMenuLinks}
+            // kibanaDocLink={this.kibanaDocLink}
+            helpCenterLinksSubject={this.helpCenterLinksSubject}
+            // helpExtension={this.helpExtension}
+            // helpSupportLink={this.helpSupportLink}
+            // globalHelpExtensionMenuLinks={this.globalHelpExtensionMenuLinks}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

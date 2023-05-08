@@ -145,6 +145,7 @@ export const initializeCanvas = async (
     }),
     links: [
       {
+        iconType: 'canvasApp',
         linkType: 'documentation',
         href: docLinks.links.canvas.guide,
       },
