@@ -28,7 +28,6 @@ import {
   ensureSavedObjectIsAuthorized,
   getSpaceUrlPrefix,
   createCase,
-  superUserSpace1Auth,
   findAttachments,
 } from '../../../../common/lib/api';
 
