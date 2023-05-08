@@ -275,7 +275,7 @@ export function TransactionDurationRuleType(props: Props) {
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
-      // chartPreview={chartPreview}
+      // chartPreview={chartPreview} // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
       defaultParams={params}
       fields={fields}
       groupAlertsBy={groupAlertsBy}

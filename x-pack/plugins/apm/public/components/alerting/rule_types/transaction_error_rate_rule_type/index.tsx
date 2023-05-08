@@ -222,7 +222,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       defaultParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
-      // chartPreview={chartPreview}
+      // chartPreview={chartPreview} // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
     />
   );
 }
