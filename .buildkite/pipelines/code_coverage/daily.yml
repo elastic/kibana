@@ -27,11 +27,11 @@ steps:
 #    timeout_in_minutes: 30
 #    key: ingest
 
-  - command: .buildkite/scripts/steps/nodejs_std_test_runner/node_test.sh
-    label: 'Playing with new NodeJS Test Runner'
-    agents:
-      queue: n2-4-spot
-    timeout_in_minutes: 30
+  # - command: .buildkite/scripts/steps/nodejs_std_test_runner/node_test.sh
+  #   label: 'Playing with new NodeJS Test Runner'
+  #   agents:
+  #     queue: n2-4-spot
+  #   timeout_in_minutes: 30
 
   # - command: node --test packages/kbn-test/new_test_runner --test-reporter tap
   #   label: 'Use TAP Reporter'
