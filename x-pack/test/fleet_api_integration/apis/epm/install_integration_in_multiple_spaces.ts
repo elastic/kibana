@@ -97,6 +97,14 @@ export default function (providerContext: FtrProviderContext) {
       expect(resIndexPatternMetrics.id).equal('metrics-*');
     });
 
+    it('should correctly set installed_kibana_space_id on the SO', async function () {
+      const resEPMPackages = await kibanaServer.savedObjects.get({
+        type: 'epm-packages',
+        id: pkgName,
+      });
+      expect(resEPMPackages.attributes.installed_kibana_space_id).to.eql('fleet_test_space');
+    });
+
     it('should create managed tag saved objects', async () => {
       const defaultTag = await getTag('fleet-managed-default');
       expect(defaultTag).not.equal(undefined);
