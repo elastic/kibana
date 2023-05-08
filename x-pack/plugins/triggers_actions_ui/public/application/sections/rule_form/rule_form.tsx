@@ -101,6 +101,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   hideInterval?: boolean;
   connectorFeatureId?: string;
   onChangeMetaData: (metadata: MetaData) => void;
+  onSelectRuleType?: (type: RuleTypeModel | null) => void;
 }
 
 export const RuleForm = ({
@@ -119,6 +120,7 @@ export const RuleForm = ({
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   onChangeMetaData,
+  onSelectRuleType,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -431,6 +433,9 @@ export const RuleForm = ({
                   onClick={() => {
                     setRuleProperty('ruleTypeId', item.id);
                     setRuleTypeModel(item.ruleTypeItem);
+                    if (onSelectRuleType) {
+                      onSelectRuleType(item.ruleTypeItem);
+                    }
                     setActions([]);
                     setRuleProperty('params', {});
                     if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
@@ -524,6 +529,9 @@ export const RuleForm = ({
               onClick={() => {
                 setRuleProperty('ruleTypeId', null);
                 setRuleTypeModel(null);
+                if (onSelectRuleType) {
+                  onSelectRuleType(null);
+                }
                 setRuleProperty('params', {});
               }}
             />

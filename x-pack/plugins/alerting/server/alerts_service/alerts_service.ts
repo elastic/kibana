@@ -15,6 +15,10 @@ import {
   DEFAULT_ALERTS_ILM_POLICY,
 } from './default_lifecycle_policy';
 import {
+  PREVIEW_ALERTS_ILM_POLICY_NAME,
+  PREVIEW_ALERTS_ILM_POLICY,
+} from './preview_lifecycle_policy';
+import {
   getComponentTemplate,
   getComponentTemplateName,
   getIndexTemplateAndPattern,
@@ -37,6 +41,7 @@ import {
 } from './lib';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
+const PREVIEW_CONTEXT = 'preview';
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
 export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
@@ -83,6 +88,7 @@ export type PublicFrameworkAlertsService = PublicAlertsService & {
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private resourceInitializationHelper: ResourceInstallationHelper;
+  private previewInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
 
@@ -97,6 +103,13 @@ export class AlertsService implements IAlertsService {
       this.options.logger,
       this.commonInitPromise,
       this.initializeContext.bind(this)
+    );
+
+    // Create helper for initializing preview resources
+    this.previewInitializationHelper = createResourceInstallationHelper(
+      this.options.logger,
+      this.commonInitPromise,
+      this.initializePreview.bind(this)
     );
   }
 
@@ -133,6 +146,29 @@ export class AlertsService implements IAlertsService {
       this.resourceInitializationHelper.add(registeredOpts, namespace);
 
       return this.resourceInitializationHelper.getInitializedContext(context, namespace);
+    }
+
+    return result;
+  }
+
+  public async getPreviewInitializationPromise(): Promise<InitializationPromise> {
+    const result = await this.previewInitializationHelper.getInitializedContext(
+      PREVIEW_CONTEXT,
+      DEFAULT_NAMESPACE_STRING
+    );
+
+    // If we get an unrecognized error, we need to kick off preview resource
+    // installation and return the promise
+    if (result.error && result.error.includes(`Unrecognized context`)) {
+      this.previewInitializationHelper.add(
+        { context: PREVIEW_CONTEXT, mappings: { fieldMap: {} } },
+        DEFAULT_NAMESPACE_STRING
+      );
+
+      return this.previewInitializationHelper.getInitializedContext(
+        PREVIEW_CONTEXT,
+        DEFAULT_NAMESPACE_STRING
+      );
     }
 
     return result;
@@ -175,6 +211,13 @@ export class AlertsService implements IAlertsService {
             esClient,
             name: DEFAULT_ALERTS_ILM_POLICY_NAME,
             policy: DEFAULT_ALERTS_ILM_POLICY,
+          }),
+        () =>
+          createOrUpdateIlmPolicy({
+            logger: this.options.logger,
+            esClient,
+            name: PREVIEW_ALERTS_ILM_POLICY_NAME,
+            policy: PREVIEW_ALERTS_ILM_POLICY,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -294,6 +337,71 @@ export class AlertsService implements IAlertsService {
           template: getIndexTemplate({
             componentTemplateRefs,
             ilmPolicyName: DEFAULT_ALERTS_ILM_POLICY_NAME,
+            indexPatterns: indexTemplateAndPattern,
+            kibanaVersion: this.options.kibanaVersion,
+            namespace,
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          }),
+        }),
+      async () =>
+        await createConcreteWriteIndex({
+          logger: this.options.logger,
+          esClient,
+          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          indexPatterns: indexTemplateAndPattern,
+        }),
+    ]);
+
+    // We want to install these in sequence and not in parallel because
+    // the concrete index depends on the index template which depends on
+    // the component template.
+    for (const fn of initFns) {
+      await installWithTimeout({
+        installFn: async () => await fn(),
+        pluginStop$: this.options.pluginStop$,
+        logger: this.options.logger,
+        timeoutMs,
+      });
+    }
+  }
+
+  private async initializePreview(
+    opts: IRuleTypeAlerts,
+    namespace: string = DEFAULT_NAMESPACE_STRING,
+    timeoutMs?: number
+  ) {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const indexTemplateAndPattern = getIndexTemplateAndPattern({ context: PREVIEW_CONTEXT });
+
+    let initFns: Array<() => Promise<void>> = [];
+
+    // List of component templates to reference
+    // Order matters in this list - templates specified last take precedence over those specified first
+    // 1. ECS component template, if using
+    // 2. All context specific component templates that were defined during registration
+    // 3. Legacy alert component template, if using
+    // 4. Framework common component template, always included
+    const componentTemplateRefs: string[] = [];
+
+    componentTemplateRefs.push(getComponentTemplateName({ name: ECS_CONTEXT }));
+
+    [...this.registeredContexts.keys()].forEach((context: string) => {
+      componentTemplateRefs.push(getComponentTemplateName({ context }));
+    });
+
+    componentTemplateRefs.push(getComponentTemplateName({ name: LEGACY_ALERT_CONTEXT }));
+    componentTemplateRefs.push(getComponentTemplateName());
+
+    // Context specific initialization installs index template and write index
+    initFns = initFns.concat([
+      async () =>
+        await createOrUpdateIndexTemplate({
+          logger: this.options.logger,
+          esClient,
+          template: getIndexTemplate({
+            componentTemplateRefs,
+            ilmPolicyName: PREVIEW_ALERTS_ILM_POLICY_NAME,
             indexPatterns: indexTemplateAndPattern,
             kibanaVersion: this.options.kibanaVersion,
             namespace,
