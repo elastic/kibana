@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -24,7 +23,6 @@ import { LEARN_MORE_LABEL } from '../../../../common/i18n_string';
 import { GithubLink } from '../shared/github_link';
 
 export const IntegrationsPanel: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
@@ -42,7 +40,7 @@ export const IntegrationsPanel: React.FC = () => {
             </EuiTitle>
 
             <EuiSpacer size="xs" />
-            <EuiText size="s" color={euiTheme.colors.lightestShade}>
+            <EuiText size="s" color="default">
               <p>
                 {i18n.translate('xpack.serverlessSearch.ingestData.logstashDescription', {
                   defaultMessage:
@@ -84,7 +82,7 @@ export const IntegrationsPanel: React.FC = () => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s" color={euiTheme.colors.lightestShade}>
+            <EuiText size="s" color="default">
               {i18n.translate('xpack.serverlessSearch.ingestData.beatsDescription', {
                 defaultMessage:
                   'Lightweight, single-purpose data shippers for Elasticsearch. Use Beats to send operational data from your servers.',
@@ -124,7 +122,7 @@ export const IntegrationsPanel: React.FC = () => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s" color={euiTheme.colors.lightestShade}>
+            <EuiText size="s" color="default">
               {i18n.translate('xpack.serverlessSearch.ingestData.connectorsDescription', {
                 defaultMessage:
                   'Specialized integrations for syncing data from third-party sources to Elasticsearch. Use Elastic Connectors to sync content from a range of databases and object stores.',

@@ -50,7 +50,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           ? [
               {
                 href: selectedLanguage.apiReference,
-                label: i18n.translate('xpack.serverlessSearch.installClient.clientDocLink', {
+                label: i18n.translate('xpack.serverlessSearch.ingestData.clientDocLink', {
                   defaultMessage: '{languageName} API reference',
                   values: { languageName: selectedLanguage.name },
                 }),
@@ -69,9 +69,12 @@ export const IngestData: React.FC<IngestDataProps> = ({
       })}
     >
       <EuiFormFieldset
-        legend={i18n.translate('xpack.serverlessSearch.ingestData.ingestLegendLabel', {
-          defaultMessage: 'Select an ingestion method',
-        })}
+        legend={{
+          children: i18n.translate('xpack.serverlessSearch.ingestData.ingestLegendLabel', {
+            defaultMessage: 'Select an ingestion method',
+          }),
+          display: 'hidden',
+        }}
       >
         <EuiCheckableCard
           hasShadow
@@ -103,7 +106,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           label={
             <EuiTitle size="xs">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.ingestData.ingestApiLabel', {
+                {i18n.translate('xpack.serverlessSearch.ingestData.ingestIntegrationLabel', {
                   defaultMessage: 'Ingest via integration',
                 })}
               </h3>
@@ -114,7 +117,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           onChange={() => setSelectedIngestMethod('ingestViaIntegration')}
         >
           <EuiText>
-            {i18n.translate('xpack.serverlessSearch.ingestData.ingestApiDescription', {
+            {i18n.translate('xpack.serverlessSearch.ingestData.ingestIntegrationDescription', {
               defaultMessage:
                 'Specialized ingestion tools optimized for transforming data and shipping it to Elasticsearch.',
             })}
