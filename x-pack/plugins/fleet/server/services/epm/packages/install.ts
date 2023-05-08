@@ -50,7 +50,12 @@ import type {
   RegistryDataStream,
 } from '../../../types';
 import { AUTO_UPGRADE_POLICIES_PACKAGES, DATASET_VAR_NAME } from '../../../../common/constants';
-import { FleetError, PackageOutdatedError, PackagePolicyValidationError } from '../../../errors';
+import {
+  type FleetError,
+  PackageOutdatedError,
+  PackagePolicyValidationError,
+  ConcurrentInstallOperationError,
+} from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
@@ -204,7 +209,7 @@ export async function handleInstallPackageFailure({
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }) {
-  if (error instanceof FleetError) {
+  if (error instanceof ConcurrentInstallOperationError) {
     return;
   }
   const logger = appContextService.getLogger();
@@ -220,8 +225,6 @@ export async function handleInstallPackageFailure({
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
     }
-
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' });
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -243,6 +246,13 @@ export async function handleInstallPackageFailure({
       });
     }
   } catch (e) {
+    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
+      (err) => {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          logger.error(`failed to update package status to: install_failed  ${err}`);
+        }
+      }
+    );
     logger.error(`failed to uninstall or rollback package after installation error ${e}`);
   }
 }
