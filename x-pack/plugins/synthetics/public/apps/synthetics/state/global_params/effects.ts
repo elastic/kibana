@@ -14,9 +14,19 @@ import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } 
 export function* getGlobalParamEffect() {
   yield takeLeading(
     getGlobalParamAction.get,
-    fetchEffectFactory(getGlobalParams, getGlobalParamAction.success, getGlobalParamAction.fail)
+    fetchEffectFactory(
+      getGlobalParams,
+      getGlobalParamAction.success,
+      getGlobalParamAction.fail,
+      undefined,
+      getFailMessage
+    )
   );
 }
+
+const getFailMessage = i18n.translate('xpack.synthetics.settings.getParams.failed', {
+  defaultMessage: 'Failed to get global parameters.',
+});
 
 export function* addGlobalParamEffect() {
   yield takeLeading(
