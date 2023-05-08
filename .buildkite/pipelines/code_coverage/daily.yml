@@ -32,3 +32,9 @@ steps:
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 30
+
+  - run: node --test packages/kbn-test/new_test_runner --test-reporter tap
+    label: 'Use TAP Reporter'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 30
