@@ -109,6 +109,24 @@ describe('PipelineEditor component', () => {
     expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe(12);
   });
 
+  it('updates pipeline ecs_compatibility', () => {
+    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
+    wrapper.find(`[data-test-subj="inputECSCompatibility"]`).simulate('change', { target: { value: 'disabled' } });
+    expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe('disabled');
+
+    wrapper.find(`[data-test-subj="inputECSCompatibility"]`).simulate('change', { target: { value: '' } });
+    expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe(null);
+
+    wrapper.find(`[data-test-subj="inputECSCompatibility"]`).simulate('change', { target: { value: 'v8' } });
+    expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe('v8');
+
+    wrapper.find(`[data-test-subj="inputECSCompatibility"]`).simulate('change', { target: { value: 'v1' } });
+    expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe('v1');
+
+    wrapper.find(`[data-test-subj="inputECSCompatibility"]`).simulate('change', { target: { value: null } });
+    expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe(null);
+  });
+
   it('updates pipeline batch size', () => {
     const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
     wrapper
@@ -135,6 +153,7 @@ describe('PipelineEditor component', () => {
     expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe(10);
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.size']).toBe(11);
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.delay']).toBe(12);
+    expect(wrapper.instance().state.pipeline.settings['queue.max_bytes']).toBe("13gb");
     expect(wrapper.instance().state.pipeline.settings['queue.checkpoint.writes']).toBe(14);
   });
 

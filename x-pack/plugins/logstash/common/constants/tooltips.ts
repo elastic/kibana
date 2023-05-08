@@ -18,6 +18,17 @@ export const TOOLTIPS = {
         'Default value: Number of the host’s CPU cores',
     }),
 
+    'pipeline.ecs_compatibility': i18n.translate('xpack.logstash.ecsCompatibilityTooltip', {
+      defaultMessage:
+        'Plugins running in an ECS-compatibility mode will avoid implicitly clashing with the Elastic ' +
+        'Common Schema and will enrich events with ECS-related fields like `event.original`. ' +
+        'This flag sets the default behavior for all plugins in the pipeline, which can be overridden ' +
+        'by individual plugins. ' +
+        'Disabling ECS will cause plugins to operate in a mode that is structurally-compatible with ' +
+        'legacy Logstash 7.x but may clash with the ECS schema.\n\n' +
+        'Default value: inherit (`v8` on Logstash 8.x, `disabled` on Logstash 7.x)',
+    }),
+
     'pipeline.batch.size': i18n.translate('xpack.logstash.pipelineBatchSizeTooltip', {
       defaultMessage:
         'The maximum number of events an individual worker thread will collect ' +

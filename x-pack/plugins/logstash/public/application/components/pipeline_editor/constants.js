@@ -18,6 +18,36 @@ export const PIPELINE_EDITOR = {
     defaultMessage:
       'Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers',
   }),
+  ECS_COMPATIBILITIES: [
+    {
+      'data-test-subj': 'selectECS-inherit',
+      text: i18n.translate('xpack.logstash.ecsCompatibilities.unspecifiedLabel', {
+        defaultMessage: 'inherit',
+      }),
+      value: null,
+    },
+    {
+      'data-test-subj': 'selectECS-disabled',
+      text: i18n.translate('xpack.logstash.ecsCompatibilities.disabledLabel', {
+        defaultMessage: 'disabled (no ECS-related operations)',
+      }),
+      value: 'disabled',
+    },
+    {
+      'data-test-subj': 'selectECS-v1',
+      text: i18n.translate('xpack.logstash.ecsCompatibilities.v1Label', {
+        defaultMessage: 'ECS 1.x (aligns with Elastic Stack 7.x)',
+      }),
+      value: 'v1',
+    },
+    {
+      'data-test-subj': 'selectECS-v8',
+      text: i18n.translate('xpack.logstash.ecsCompatibilities.v8Label', {
+        defaultMessage: 'ECS 8.x (aligns with Elastic Stack 8.x)',
+      }),
+      value: 'v8',
+    }
+  ],
   QUEUE_TYPES: [
     {
       'data-test-subj': 'selectQueueType-memory',

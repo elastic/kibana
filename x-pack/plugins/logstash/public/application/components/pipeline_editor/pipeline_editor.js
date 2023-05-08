@@ -56,6 +56,7 @@ class PipelineEditorUi extends React.Component {
           'pipeline.batch.delay': settings['pipeline.batch.delay'],
           'pipeline.batch.size': settings['pipeline.batch.size'],
           'pipeline.workers': pipelineWorkers,
+          'pipeline.ecs_compatibility': settings['pipeline.ecs_compatibility'],
           'queue.checkpoint.writes': settings['queue.checkpoint.writes'],
           'queue.max_bytes': settings['queue.max_bytes.number'] + settings['queue.max_bytes.units'],
           'queue.type': settings['queue.type'],
@@ -180,6 +181,10 @@ class PipelineEditorUi extends React.Component {
   handleMaxByteUnitChange = (value) => {
     this.setState({ maxBytesUnit: value });
     this.handleSettingChange('queue.max_bytes', this.state.maxBytesNumber + value);
+  };
+
+  handleEcsChange = (value) => {
+    this.handleSettingChange('pipeline.ecs_compatibility', (isEmpty(value) ? null : value));
   };
 
   handleSettingChange = (settingName, value) => {
@@ -356,6 +361,24 @@ class PipelineEditorUi extends React.Component {
               value={this.state.pipeline.settings['pipeline.workers']}
             />
           </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormLabelWithIconTip
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.pipelineECSCompatibilityFormRowLabel',
+                  defaultMessage: 'ECS Compatibility Mode',
+                })}
+                formRowTooltipText={TOOLTIPS.settings['pipeline.ecs_compatibility']}
+              />
+            }
+          >
+            <EuiSelect
+              data-test-subj="inputECSCompatibility"
+              onChange={ (e) => this.handleEcsChange(e.target.value) }
+              options={PIPELINE_EDITOR.ECS_COMPATIBILITIES}
+              value={this.state.pipeline.settings['pipeline.ecs_compatibility']}
+            />
+          </EuiFormRow>
           <EuiSpacer />
           <EuiFlexGroup>
             <FlexItemSetting
@@ -505,6 +528,7 @@ PipelineEditorUi.propTypes = {
       'pipeline.batch.delay': PropTypes.number.isRequired,
       'pipeline.batch.size': PropTypes.number.isRequired,
       'pipeline.workers': PropTypes.number,
+      'pipeline.ecs_compatibility': PropTypes.string,
       'queue.checkpoint.writes': PropTypes.number.isRequired,
       'queue.max_bytes': PropTypes.number,
       'queue.type': PropTypes.string.isRequired,
