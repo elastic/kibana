@@ -21,10 +21,6 @@ export const buildModelVersionTransformFn = (
   modelChanges.forEach((change) => {
     if (change.type === 'data_backfill') {
       transformFns.push(change.transform);
-    } else if (change.type === 'test_bidirectional_migration') {
-      if (change.transformation) {
-        transformFns.push(change.transformation.up);
-      }
     }
   });
   return mergeTransformFunctions(transformFns);

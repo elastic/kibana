@@ -78,9 +78,5 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
 };
 
 const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
-  return changes.some(
-    (change) =>
-      change.type === 'data_backfill' ||
-      (change.type === 'test_bidirectional_migration' && !!change.transformation)
-  );
+  return changes.some((change) => change.type === 'data_backfill');
 };

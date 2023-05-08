@@ -7,10 +7,7 @@
  */
 
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
-import type {
-  SavedObjectModelBidirectionalTransformation,
-  SavedObjectModelDataBackfillFn,
-} from './transformations';
+import type { SavedObjectModelDataBackfillFn } from './transformations';
 
 /**
  * Represents a change of model associated with a given {@link SavedObjectsModelVersion}.
@@ -25,8 +22,7 @@ import type {
 export type SavedObjectsModelChange =
   | SavedObjectsModelMappingsAdditionChange
   | SavedObjectsModelMappingsDeprecationChange
-  | SavedObjectsModelDataBackfillChange
-  | SavedObjectsModelExpansionChange;
+  | SavedObjectsModelDataBackfillChange;
 
 /**
  * A {@link SavedObjectsModelChange | model change} adding new mappings.
@@ -73,23 +69,4 @@ export interface SavedObjectsModelDataBackfillChange<
    * The backfill function to run.
    */
   transform: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
-}
-
-/**
- * {@link SavedObjectsModelChange | model change} representing an expansion.
- *
- * @public
- * @deprecated Only used for Core's internal testing - should not be used by production code.
- */
-export interface SavedObjectsModelExpansionChange<PreviousAttributes = any, NewAttributes = any> {
-  /** @deprecated (to surface in inline definition) */
-  type: 'test_bidirectional_migration';
-  /**
-   * (optional) A bidirectional transformation to migrate the document from and/or to the previous model version.
-   */
-  transformation?: SavedObjectModelBidirectionalTransformation<PreviousAttributes, NewAttributes>;
-  /**
-   * (optional) The new mappings introduced in this version.
-   */
-  addedMappings?: SavedObjectsMappingProperties;
 }

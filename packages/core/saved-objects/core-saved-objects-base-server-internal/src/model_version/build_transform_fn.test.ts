@@ -124,28 +124,4 @@ describe('buildModelVersionTransformFn', () => {
     // test that it returns the source doc unmodified
     expect(output.document).toEqual(createDoc());
   });
-
-  it('merges bidirectional migrations', () => {
-    const transform1 = stubTransform();
-    const transform2 = stubTransform();
-    const changes: SavedObjectsModelChange[] = [
-      { type: 'data_backfill', transform: transform1 },
-      { type: 'test_bidirectional_migration', transformation: { up: transform2, down: jest.fn() } },
-    ];
-
-    const mergedTransform = buildModelVersionTransformFn(changes);
-
-    const context = createContext();
-    const document = createDoc();
-
-    mergedTransform(document, context);
-
-    expect(transform1).toHaveBeenCalledTimes(1);
-    expect(transform1).toHaveBeenCalledWith(document, context);
-    expect(transform2).toHaveBeenCalledTimes(1);
-    expect(transform2).toHaveBeenCalledWith(document, context);
-    expect(transform1.mock.invocationCallOrder[0]).toBeLessThan(
-      transform2.mock.invocationCallOrder[0]
-    );
-  });
 });

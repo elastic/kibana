@@ -126,7 +126,6 @@ export type {
   SavedObjectsModelMappingsAdditionChange,
   SavedObjectsModelMappingsDeprecationChange,
   SavedObjectsModelDataBackfillChange,
-  SavedObjectsModelExpansionChange,
   SavedObjectModelTransformationDoc,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationFn,

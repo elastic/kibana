@@ -17,7 +17,6 @@ export type {
   SavedObjectsModelMappingsAdditionChange,
   SavedObjectsModelMappingsDeprecationChange,
   SavedObjectsModelDataBackfillChange,
-  SavedObjectsModelExpansionChange,
 } from './model_change';
 
 export type {
