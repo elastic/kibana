@@ -42,6 +42,7 @@ export const storybookAliases = {
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
   observability: 'x-pack/plugins/observability/.storybook',
+  observability_logs: 'x-pack/plugins/observability_logs/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'packages/security-solution/storybook/config',
