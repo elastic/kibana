@@ -8,7 +8,7 @@
 import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
-  ScreenshotModePluginSetup
+  ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
