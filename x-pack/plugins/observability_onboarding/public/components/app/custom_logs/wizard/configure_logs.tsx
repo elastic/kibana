@@ -71,18 +71,13 @@ export function ConfigureLogs() {
     index: number,
     event: React.FormEvent<HTMLInputElement>
   ) {
+    const filepath = event.currentTarget?.value;
     setLogFilePaths((prev) =>
-      prev.map((filepath, i) => {
-        if (i === index) {
-          filepath = event.currentTarget?.value;
-        }
-
-        return filepath;
-      })
+      prev.map((path, i) => (i === index ? filepath : path))
     );
 
     if (index === 0) {
-      setDatasetName(getFilename(event.currentTarget?.value));
+      setDatasetName(getFilename(filepath));
     }
   }
 
@@ -106,7 +101,7 @@ export function ConfigureLogs() {
               color="primary"
               fill
               onClick={onContinue}
-              isDisabled={!!logFilePaths[0] || !datasetName || !namespace}
+              isDisabled={!logFilePaths?.[0] || !datasetName || !namespace}
             >
               {i18n.translate('xpack.observability_onboarding.steps.continue', {
                 defaultMessage: 'Continue',
@@ -146,7 +141,7 @@ export function ConfigureLogs() {
           >
             <>
               {logFilePaths.map((filepath, index) => (
-                <>
+                <div key={index}>
                   {index > 0 && <EuiSpacer size="s" />}
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
@@ -171,7 +166,7 @@ export function ConfigureLogs() {
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
-                </>
+                </div>
               ))}
             </>
           </EuiFormRow>
