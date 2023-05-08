@@ -39,7 +39,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       handleOnEventClosed();
     }, [closePopover, handleOnEventClosed]);
 
-    const getGlobalQuerySelector = inputsSelectors.globalQuery();
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
 
     const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
 
