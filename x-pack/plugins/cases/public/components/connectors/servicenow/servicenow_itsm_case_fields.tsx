@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from './translations';
@@ -153,7 +153,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
         </EuiFlexGroup>
       )}
       {isEdit ? (
-        <div data-test-subj="connector-fields-sn-itsm">
+        <EuiFlexGroup data-test-subj="connector-fields-sn-itsm" direction="column" gutterSize="s">
           <EuiFlexGroup>
             <EuiFlexItem>
               <UseField
@@ -175,7 +175,6 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
               <UseField
@@ -258,7 +257,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
               ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
+        </EuiFlexGroup>
       ) : (
         <EuiFlexGroup>
           <EuiFlexItem>

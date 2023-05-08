@@ -107,6 +107,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
             fullWidth: true,
             disabled: isLoadingIssueTypes || isLoadingFields,
             isLoading: isLoadingIssueTypes,
+            hasNoInitialSelection: false,
           },
         }}
       />

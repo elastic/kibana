@@ -162,7 +162,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
         </EuiFlexGroup>
       )}
       {isEdit ? (
-        <div data-test-subj="connector-fields-sn-sir">
+        <EuiFlexGroup data-test-subj="connector-fields-sn-sir" direction="column" gutterSize="s">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>
@@ -171,13 +171,13 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                     <EuiFlexItem>
                       <UseField
                         path="fields.destIp"
+                        config={{ defaultValue: true }}
                         component={CheckBoxField}
                         componentProps={{
                           euiFieldProps: {
                             'data-test-subj': 'destIpCheckbox',
                             label: i18n.DEST_IP,
                             compressed: true,
-                            checked: destIp ?? false,
                           },
                         }}
                       />
@@ -185,13 +185,13 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                     <EuiFlexItem>
                       <UseField
                         path="fields.sourceIp"
+                        config={{ defaultValue: true }}
                         component={CheckBoxField}
                         componentProps={{
                           euiFieldProps: {
                             'data-test-subj': 'sourceIpCheckbox',
                             label: i18n.SOURCE_IP,
                             compressed: true,
-                            checked: sourceIp ?? false,
                           },
                         }}
                       />
@@ -201,13 +201,13 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                     <EuiFlexItem>
                       <UseField
                         path="fields.malwareUrl"
+                        config={{ defaultValue: true }}
                         component={CheckBoxField}
                         componentProps={{
                           euiFieldProps: {
                             'data-test-subj': 'malwareUrlCheckbox',
                             label: i18n.MALWARE_URL,
                             compressed: true,
-                            checked: malwareUrl ?? false,
                           },
                         }}
                       />
@@ -215,13 +215,13 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                     <EuiFlexItem>
                       <UseField
                         path="fields.malwareHash"
+                        config={{ defaultValue: true }}
                         component={CheckBoxField}
                         componentProps={{
                           euiFieldProps: {
                             'data-test-subj': 'malwareHashCheckbox',
                             label: i18n.MALWARE_HASH,
                             compressed: true,
-                            checked: malwareHash ?? false,
                           },
                         }}
                       />
@@ -294,7 +294,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
               ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
+        </EuiFlexGroup>
       ) : (
         <EuiFlexGroup>
           <EuiFlexItem>

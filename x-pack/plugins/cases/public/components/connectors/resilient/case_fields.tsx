@@ -93,31 +93,20 @@ const ResilientFieldsComponent: React.FunctionComponent<
     [incidentTypes, severityCode, allIncidentTypes, severity]
   );
 
-  const selectedIncidentTypesComboBoxOptionsMemo = useMemo(() => {
-    const allIncidentTypesAsObject = allIncidentTypes.reduce(
-      (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
-      {} as Record<string, string>
-    );
-
-    return incidentTypes
-      ? incidentTypes
-          .map((type) => ({
-            label: allIncidentTypesAsObject[type.toString()],
-            value: type.toString(),
-          }))
-          .filter((type) => type.label != null)
-      : [];
-  }, [allIncidentTypes, incidentTypes]);
-
   return isEdit ? (
     <span data-test-subj={'connector-fields-resilient'}>
-      <UseField path="fields.incidentTypes">
+      <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
           const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-            field.setValue(changedOptions);
+            field.setValue(changedOptions.map((option) => option.value as string));
           };
+
+          const selectedOptions = (field.value ?? []).map((incidentType) => ({
+            value: incidentType,
+            label: allIncidentTypes.find((type) => incidentType === type.id.toString())?.name ?? '',
+          }));
 
           return (
             <EuiFormRow
@@ -136,7 +125,7 @@ const ResilientFieldsComponent: React.FunctionComponent<
                 onChange={onChangeComboBox}
                 options={incidentTypesComboBoxOptions}
                 placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
-                selectedOptions={selectedIncidentTypesComboBoxOptionsMemo}
+                selectedOptions={selectedOptions}
               />
             </EuiFormRow>
           );

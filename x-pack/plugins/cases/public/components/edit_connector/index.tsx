@@ -146,18 +146,6 @@ export const EditConnector = React.memo(
       [currentConnector, caseConnectors, supportedActionConnectors]
     );
 
-    const onFieldsChange = useCallback(
-      (newFields) => {
-        if (!deepEqual(newFields, fields)) {
-          dispatch({
-            type: 'SET_FIELDS',
-            payload: newFields,
-          });
-        }
-      },
-      [fields, dispatch]
-    );
-
     const resetConnector = useCallback(() => {
       setFieldValue('connectorId', selectedConnector);
 
@@ -310,12 +298,7 @@ export const EditConnector = React.memo(
                   <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
                 </EuiText>
               )}
-              <ConnectorFieldsForm
-                connector={currentConnector}
-                fields={fields}
-                isEdit={editConnector}
-                onChange={onFieldsChange}
-              />
+              <ConnectorFieldsForm connector={currentConnector} isEdit={editConnector} />
             </EuiFlexItem>
             {editConnector && (
               <EuiFlexItem>
