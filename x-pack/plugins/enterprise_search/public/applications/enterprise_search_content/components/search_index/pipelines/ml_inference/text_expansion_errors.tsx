@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../../../shared/http';
 
+import { SendEnterpriseSearchTelemetry } from '../../../../../shared/telemetry';
 import { ML_NOTIFICATIONS_PATH } from '../../../../routes';
 
 export const TextExpansionErrors = ({ error }: { error: { title: string; message: string } }) => {
@@ -22,6 +23,7 @@ export const TextExpansionErrors = ({ error }: { error: { title: string; message
 
   return (
     <>
+      <SendEnterpriseSearchTelemetry action="error" metric="textExpansionModel-error" />
       <EuiCallOut color="danger" iconType="error" title={error.title}>
         <p>{error.message}</p>
         <EuiLink href={http.basePath.prepend(ML_NOTIFICATIONS_PATH)} target="_blank">
