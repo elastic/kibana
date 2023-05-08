@@ -55,8 +55,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
   const hasFilters = activeFilters.length > 0;
 
   const { series, domain, metadata, totalHighlightedRequests } = useMemo(() => {
-    return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
-  }, [networkData, query, activeFilters, onlyHighlighted]);
+    return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters, markerItems);
+  }, [networkData, query, activeFilters, onlyHighlighted, markerItems]);
 
   const sidebarItems = useMemo(() => {
     return getSidebarItems(networkData, onlyHighlighted ?? false, query, activeFilters);
