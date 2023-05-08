@@ -82,10 +82,11 @@ const GroupPanelComponent = <T,>({
     }
   }, [onGroupClose, forceState, selectedGroup]);
   const groupFieldValue = useMemo(() => {
-    // console.log({
-    //   oldGroup: groupBucket.selectedGroup,
-    //   newGroup: selectedGroup,
-    // });
+    console.log({
+      oldGroup: groupBucket.selectedGroup,
+      newGroup: selectedGroup,
+      value: firstNonNullValue(groupBucket.key),
+    });
     return groupBucket.selectedGroup === selectedGroup ? firstNonNullValue(groupBucket.key) : null;
   }, [groupBucket, selectedGroup]);
 

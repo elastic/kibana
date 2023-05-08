@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, within, act, waitFor } from '@testing-library/react';
+import { fireEvent, render, within, act } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -304,25 +304,22 @@ describe('GroupedAlertsTable', () => {
       .mockImplementationOnce(() => mockQueryResponse)
       // wait for queriedGroup ref update before return data
       .mockImplementation((i) => {
-        console.log('field', i.query?.aggs?.groupsCount?.cardinality?.field);
         if (i.skip) {
           return mockQueryResponse;
         }
+        // return different result for host.name in order to trigger update to parseGroupingQuery
         if (i.query?.aggs?.groupsCount?.cardinality?.field === 'host.name') {
-          setTimeout(function () {
-            // HERE IS YOUR CODE DO WHAT YOU WANT
-            return {
-              ...mockQueryResponse,
-              data: {
-                ...groupingSearchResponse,
-                aggregations: {
-                  groupsCount: {
-                    value: 3000,
-                  },
+          return {
+            ...mockQueryResponse,
+            data: {
+              ...groupingSearchResponse,
+              aggregations: {
+                groupsCount: {
+                  value: 3000,
                 },
               },
-            };
-          }, 50);
+            },
+          };
         }
         return {
           ...mockQueryResponse,
@@ -339,10 +336,19 @@ describe('GroupedAlertsTable', () => {
 
     const level0 = getAllByTestId('grouping-accordion-content')[0];
     expect(within(level0).queryByTestId('alerts-table')).not.toBeInTheDocument();
-    await waitFor(() => {
-      expect(within(level0).getAllByTestId('group-panel-toggle')[0]).toBeInTheDocument();
-      fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
-    });
+    fireEvent.click(getAllByTestId('group-panel-toggle')[1]);
+    // console.log('first debug');
+    // debug(getAllByTestId('group-panel-toggle')[1]);
+    // console.log('about to debug', within(getAllByTestId('grouping-accordion-content')[0]));
+    // debug(getAllByTestId('grouping-accordion'));
+    // await waitFor(() => {
+    expect(
+      within(getAllByTestId('grouping-accordion-content')[0]).getAllByTestId(
+        'group-panel-toggle'
+      )[0]
+    ).toBeInTheDocument();
+    // });
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
     const level1 = within(getAllByTestId('grouping-accordion-content')[1]);
     expect(level1.getByTestId('alerts-table')).toBeInTheDocument();
   });

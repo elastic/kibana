@@ -198,8 +198,11 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const aggs = useMemo(
     // queriedGroup because `selectedGroup` updates before the query response
     () => {
-      console.log('update aggs and groupsCount', queriedGroup.current);
-      console.log('total htis', alertsGroupsData?.aggregations?.groupsCount?.value);
+      console.log(
+        'Step 2: update queriedGroup and groupsCount',
+        queriedGroup.current,
+        alertsGroupsData?.aggregations?.groupsCount?.value
+      );
       return parseGroupingQuery(queriedGroup.current, alertsGroupsData?.aggregations);
     },
     [alertsGroupsData?.aggregations]
@@ -209,7 +212,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     if (!isNoneGroup([selectedGroup])) {
       queriedGroup.current = queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '';
       console.log(
-        'set queriedGroup.current to',
+        'Step 1: set queriedGroup.current to',
         queryGroups?.aggs?.groupsCount?.cardinality?.field ?? ''
       );
       setAlertsQuery(queryGroups);
