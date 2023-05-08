@@ -7,9 +7,10 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { mapValues, uniq } from 'lodash';
+import { cloneDeep, mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
+import { Delta, patch, reverse } from 'jsondiffpatch';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -50,6 +51,7 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
   },
+  undoableOperationHistory: [],
 };
 
 export const getPreloadedState = ({
@@ -238,6 +240,10 @@ export const removeDimension = createAction<{
   columnId: string;
   datasourceId?: string;
 }>('lens/removeDimension');
+export const recordUndoableStateChange = createAction<{
+  change: Delta;
+}>('lens/recordUndoableStateChange');
+export const undo = createAction('lens/undo');
 
 export const lensActions = {
   setState,
@@ -271,6 +277,8 @@ export const lensActions = {
   changeIndexPattern,
   removeDimension,
   syncLinkedDimensions,
+  recordUndoableStateChange,
+  undo,
 };
 export const undoRedoActions = [
   updateDatasourceState,
@@ -1212,6 +1220,32 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           linkedDimension.columnId && // if there's no columnId, there's no dimension to remove
           remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
       );
+    },
+    [recordUndoableStateChange.type]: (
+      state,
+      {
+        payload: { change },
+      }: {
+        payload: {
+          change: Delta;
+        };
+      }
+    ) => {
+      state.undoableOperationHistory.push(change);
+    },
+    [undo.type]: (_state) => {
+      const currentState = cloneDeep(current(_state));
+      const changeToReverse =
+        currentState.undoableOperationHistory[currentState.undoableOperationHistory.length - 1];
+      const reverseDelta = changeToReverse && reverse(changeToReverse);
+      if (reverseDelta) {
+        try {
+          patch(currentState, reverseDelta);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      return currentState;
     },
   });
 };

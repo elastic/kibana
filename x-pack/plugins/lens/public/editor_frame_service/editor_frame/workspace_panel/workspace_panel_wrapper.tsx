@@ -30,6 +30,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  undo,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -140,6 +141,24 @@ export function WorkspacePanelWrapper({
                     <MessageList messages={userMessages} />
                   </EuiFlexItem>
                 ) : null}
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    className={
+                      'lnsWorkspacePanelWrapper__applyButton ' +
+                      DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS
+                    }
+                    onClick={() => dispatchLens(undo())}
+                    size="m"
+                    minWidth="auto"
+                  >
+                    <FormattedMessage
+                      id="xpack.lens.editorFrame.applyChangesLabel"
+                      defaultMessage="Undo"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
 
                 {!autoApplyEnabled && (
                   <EuiFlexItem grow={false}>

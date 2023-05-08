@@ -6,8 +6,8 @@
  */
 
 import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
-import { compare } from 'fast-json-patch';
-import { undoRedoActions } from './lens_slice';
+import { diff } from 'jsondiffpatch';
+import { recordUndoableStateChange, undoRedoActions } from './lens_slice';
 
 export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: Action) => {
@@ -15,7 +15,13 @@ export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => {
       console.log(action.type);
       const prevState = store.getState();
       next(action);
-      console.log(compare(prevState, store.getState()));
+
+      const change = diff(prevState, store.getState());
+      console.log(change);
+
+      if (change) {
+        next(recordUndoableStateChange({ change }));
+      }
     } else {
       next(action);
     }
