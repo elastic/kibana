@@ -93,6 +93,7 @@ export async function onSaveSearch({
   onSaveCb?: () => void;
 }) {
   const { uiSettings, savedObjectsTagging } = services;
+  const dataView = state.internalState.getState().dataView;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -161,7 +162,7 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
-      isTimeBased={dataView.isTimeBased()}
+      isTimeBased={dataView?.isTimeBased() ?? false}
       services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
