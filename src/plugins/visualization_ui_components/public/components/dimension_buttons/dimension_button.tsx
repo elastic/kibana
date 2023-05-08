@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionButtonIcon } from './dimension_button_icon';
 import { PaletteIndicator } from './palette_indicator';
-import { AccessorConfig, Message } from './types';
+import type { AccessorConfig, Message } from './types';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('visualizationUiComponents.dimensionButton.editConfig', {

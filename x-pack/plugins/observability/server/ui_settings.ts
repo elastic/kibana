@@ -259,16 +259,15 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Agent explorer',
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      defaultMessage: '{betaLabel} Enables Agent explorer view.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
-    showInLabs: true,
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],

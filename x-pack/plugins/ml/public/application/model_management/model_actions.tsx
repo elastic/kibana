@@ -16,7 +16,7 @@ import {
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import {
-  CURATED_MODEL_TAG,
+  ELASTIC_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
@@ -42,7 +42,7 @@ export function useModelActions({
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (modelsIds: string[]) => void;
   onLoading: (isLoading: boolean) => void;
-  fetchModels: () => void;
+  fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
 }): Array<Action<ModelItem>> {
   const {
@@ -236,9 +236,13 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.updateModelDeployment(deploymentParams.deploymentId!, {
-              number_of_allocations: deploymentParams.numOfAllocations,
-            });
+            await trainedModelsApiService.updateModelDeployment(
+              item.model_id,
+              deploymentParams.deploymentId!,
+              {
+                number_of_allocations: deploymentParams.numOfAllocations,
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
                 defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
@@ -294,19 +298,38 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.stopModelAllocation(deploymentIds, {
-              force: requireForceStop,
-            });
+            const results = await trainedModelsApiService.stopModelAllocation(
+              item.model_id,
+              deploymentIds,
+              {
+                force: requireForceStop,
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-                defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
+                defaultMessage:
+                  '{numberOfDeployments, plural, one {Deployment} other {Deployments}}  for "{modelId}" has been stopped successfully.',
                 values: {
                   modelId: item.model_id,
+                  numberOfDeployments: deploymentIds.length,
                 },
               })
             );
-            // Need to fetch model state updates
-            await fetchModels();
+            if (Object.values(results).some((r) => r.error !== undefined)) {
+              Object.entries(results).forEach(([id, r]) => {
+                if (r.error !== undefined) {
+                  displayErrorToast(
+                    r.error,
+                    i18n.translate('xpack.ml.trainedModels.modelsList.stopDeploymentWarning', {
+                      defaultMessage: 'Failed to stop "{deploymentId}"',
+                      values: {
+                        deploymentId: id,
+                      },
+                    })
+                  );
+                }
+              });
+            }
           } catch (e) {
             displayErrorToast(
               e,
@@ -319,6 +342,8 @@ export function useModelActions({
             );
             onLoading(false);
           }
+          // Need to fetch model state updates
+          await fetchModels();
         },
       },
       {
@@ -332,7 +357,7 @@ export function useModelActions({
         icon: 'download',
         type: 'icon',
         isPrimary: true,
-        available: (item) => item.tags.includes(CURATED_MODEL_TAG),
+        available: (item) => item.tags.includes(ELASTIC_MODEL_TAG),
         enabled: (item) => !item.state && !isLoading,
         onClick: async (item) => {
           try {

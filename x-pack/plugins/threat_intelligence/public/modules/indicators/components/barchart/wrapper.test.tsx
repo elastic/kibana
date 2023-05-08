@@ -29,6 +29,7 @@ const mockIndexPattern: DataView = {
 } as DataView;
 
 const mockTimeRange: TimeRange = { from: '', to: '' };
+const mockField = { label: 'host.name', value: 'string' };
 
 describe('<IndicatorsBarChartWrapper />', () => {
   describe('when not loading or refetching', () => {
@@ -38,7 +39,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
           <IndicatorsBarChartWrapper
             dateRange={{ max: moment(), min: moment() }}
             series={[]}
-            field=""
+            field={mockField}
             onFieldChange={jest.fn()}
             indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
@@ -59,7 +60,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
           <IndicatorsBarChartWrapper
             dateRange={{ max: moment(), min: moment() }}
             series={[]}
-            field=""
+            field={mockField}
             onFieldChange={jest.fn()}
             indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
@@ -80,7 +81,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
           <IndicatorsBarChartWrapper
             dateRange={{ max: moment(), min: moment() }}
             series={[]}
-            field=""
+            field={mockField}
             onFieldChange={jest.fn()}
             indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}

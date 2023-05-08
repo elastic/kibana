@@ -19,6 +19,6 @@
     "@kbn/config-schema",
     "@kbn/enterprise-search-plugin",
     "@kbn/management-plugin",
-    "@kbn/serverless",
+    "@kbn/shared-ux-chrome-navigation",
   ]
 }

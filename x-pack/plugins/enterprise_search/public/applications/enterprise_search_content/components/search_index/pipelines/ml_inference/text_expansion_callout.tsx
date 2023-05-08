@@ -28,11 +28,16 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { TextExpansionErrors } from './text_expansion_errors';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
+  ingestionMethod: string;
+  isCompact: boolean;
   isCreateButtonDisabled: boolean;
   isDismissable: boolean;
   isStartButtonDisabled: boolean;
@@ -40,6 +45,7 @@ export interface TextExpansionCallOutState {
 }
 
 export interface TextExpansionCallOutProps {
+  isCompact?: boolean;
   isDismissable?: boolean;
 }
 
@@ -60,9 +66,13 @@ export const TextExpansionDismissButton = ({
 
 export const DeployModel = ({
   dismiss,
+  ingestionMethod,
   isCreateButtonDisabled,
   isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isCreateButtonDisabled' | 'isDismissable'>) => {
+}: Pick<
+  TextExpansionCallOutState,
+  'dismiss' | 'ingestionMethod' | 'isCreateButtonDisabled' | 'isDismissable'
+>) => {
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
@@ -116,6 +126,7 @@ export const DeployModel = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color="success"
+                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-deployModel`}
                     disabled={isCreateButtonDisabled}
                     iconType="launch"
                     onClick={() => createTextExpansionModel(undefined)}
@@ -192,9 +203,13 @@ export const ModelDeploymentInProgress = ({
 
 export const ModelDeployed = ({
   dismiss,
+  ingestionMethod,
   isDismissable,
   isStartButtonDisabled,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable' | 'isStartButtonDisabled'>) => {
+}: Pick<
+  TextExpansionCallOutState,
+  'dismiss' | 'ingestionMethod' | 'isDismissable' | 'isStartButtonDisabled'
+>) => {
   const { startTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
@@ -248,6 +263,7 @@ export const ModelDeployed = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 color="success"
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
                 disabled={isStartButtonDisabled}
                 iconType="playFilled"
                 onClick={() => startTextExpansionModel(undefined)}
@@ -284,8 +300,9 @@ export const ModelDeployed = ({
 
 export const ModelStarted = ({
   dismiss,
+  isCompact,
   isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isCompact' | 'isDismissable'>) => (
   <EuiCallOut color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
@@ -296,10 +313,15 @@ export const ModelStarted = ({
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">
               <h3>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
-                  { defaultMessage: 'Your ELSER model has started.' }
-                )}
+                {isCompact
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
+                      { defaultMessage: 'Your ELSER model is running.' }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
+                      { defaultMessage: 'Your ELSER model has started.' }
+                    )}
               </h3>
             </EuiText>
           </EuiFlexItem>
@@ -310,29 +332,43 @@ export const ModelStarted = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiText size="s">
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
-              { defaultMessage: 'Enjoy the power of ELSER in your custom Inference pipeline.' }
-            )}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
+      {!isCompact && (
+        <EuiFlexItem grow>
+          <EuiText size="s">
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
+                { defaultMessage: 'Enjoy the power of ELSER in your custom Inference pipeline.' }
+              )}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   </EuiCallOut>
 );
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
-  const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
+  const { dismiss, isCompact, isDismissable, show } = useTextExpansionCallOutData(props);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const {
+    createTextExpansionModelError,
+    fetchTextExpansionModelError,
     isCreateButtonDisabled,
     isModelDownloadInProgress,
     isModelDownloaded,
     isModelStarted,
     isStartButtonDisabled,
+    startTextExpansionModelError,
   } = useValues(TextExpansionCalloutLogic);
+
+  // In case of an error, show the error callout only
+  const error = getTextExpansionError(
+    createTextExpansionModelError,
+    fetchTextExpansionModelError,
+    startTextExpansionModelError
+  );
+  if (error) return <TextExpansionErrors error={error} />;
 
   if (!show) return null;
 
@@ -342,17 +378,19 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
     return (
       <ModelDeployed
         dismiss={dismiss}
+        ingestionMethod={ingestionMethod}
         isDismissable={isDismissable}
         isStartButtonDisabled={isStartButtonDisabled}
       />
     );
   } else if (isModelStarted) {
-    return <ModelStarted dismiss={dismiss} isDismissable={isDismissable} />;
+    return <ModelStarted dismiss={dismiss} isCompact={isCompact} isDismissable={isDismissable} />;
   }
 
   return (
     <DeployModel
       dismiss={dismiss}
+      ingestionMethod={ingestionMethod}
       isDismissable={isDismissable}
       isCreateButtonDisabled={isCreateButtonDisabled}
     />
