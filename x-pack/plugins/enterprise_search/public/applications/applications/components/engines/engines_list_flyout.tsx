@@ -66,7 +66,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
       render: (indexName: string) => (
         <EuiLinkTo
           data-test-subj="engine-index-link"
-          data-telemetry-id="entSearchContent-engines-list-viewIndex"
+          data-telemetry-id="entSearchApplications-list-viewIndex"
           to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/${generateEncodedPath(SEARCH_INDEX_PATH, {
             indexName,
           })}`}
