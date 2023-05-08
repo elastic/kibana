@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import type {
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  PackagePolicy,
+  UpdatePackagePolicy,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { POLICIES_URL } from '../../../../cypress/urls/navigation';
 import { request } from '../tasks/common';
+import { expectAndCloseSuccessToast } from '../tasks/toasts';
 
 export const visitPolicyDetailsPage = () => {
   cy.visit(POLICIES_URL);
@@ -18,12 +26,15 @@ export const visitPolicyDetailsPage = () => {
   cy.get('#settings').should('exist'); // waiting for Policy Settings tab
 };
 
-export const checkMalwareUserNotificationInOpenedPolicy = ({
-  isEnabled,
-}: {
-  isEnabled: boolean;
-}) => {
-  cy.url()
+export const savePolicyForm = () => {
+  cy.getByTestSubj('policyDetailsSaveButton').click();
+  cy.getByTestSubj('confirmModalConfirmButton').click();
+  expectAndCloseSuccessToast();
+};
+
+export const yieldPolicyConfig = (): Cypress.Chainable<PolicyConfig> => {
+  return cy
+    .url()
     .then((url) => {
       const policyId = url.match(/security\/administration\/policy\/([a-z0-9-]+)/)?.[1];
       expect(policyId).to.not.equal(undefined);
@@ -31,16 +42,47 @@ export const checkMalwareUserNotificationInOpenedPolicy = ({
       return policyId;
     })
     .then((policyId: string) => {
-      request<GetOnePackagePolicyResponse>({
+      return request<GetOnePackagePolicyResponse>({
         url: `/api/fleet/package_policies/${policyId}`,
-      }).then((res) => {
-        const firstPackagePolicyConfig = res.body.item.inputs[0].config;
-        expect(firstPackagePolicyConfig).to.not.equal(undefined);
-
-        const policyConfig: PolicyConfig = firstPackagePolicyConfig?.policy.value;
-        expect(policyConfig.mac.popup.malware.enabled).to.equal(isEnabled);
-        expect(policyConfig.windows.popup.malware.enabled).to.equal(isEnabled);
-        expect(policyConfig.linux.popup.malware.enabled).to.equal(isEnabled);
       });
+    })
+    .then((res) => {
+      const firstPackagePolicyConfig = res.body.item.inputs[0].config;
+      expect(firstPackagePolicyConfig).to.not.equal(undefined);
+
+      const policyConfig: PolicyConfig = firstPackagePolicyConfig?.policy.value;
+
+      return policyConfig;
     });
 };
+
+export class PackagePolicyBackupHelper {
+  originalPackagePolicy!: PackagePolicy;
+
+  backup() {
+    request<GetPackagePoliciesResponse>({
+      url: packagePolicyRouteService.getListPath(),
+      qs: {
+        kuery: 'ingest-package-policies.package.name: endpoint',
+      },
+    }).then((res) => {
+      this.originalPackagePolicy = res.body.items[0];
+    });
+  }
+
+  restore() {
+    const body: UpdatePackagePolicy = {
+      name: this.originalPackagePolicy.name,
+      namespace: this.originalPackagePolicy.namespace,
+      enabled: this.originalPackagePolicy.enabled,
+      inputs: this.originalPackagePolicy.inputs,
+      policy_id: this.originalPackagePolicy.policy_id,
+    };
+
+    request<UpdatePackagePolicyResponse>({
+      method: 'PUT',
+      url: packagePolicyRouteService.getUpdatePath(this.originalPackagePolicy.id),
+      body,
+    });
+  }
+}

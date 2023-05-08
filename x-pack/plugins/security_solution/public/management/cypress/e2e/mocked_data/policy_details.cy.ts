@@ -5,23 +5,40 @@
  * 2.0.
  */
 
+import { ProtectionModes } from '../../../../../common/endpoint/types';
 import {
-  checkMalwareUserNotificationInOpenedPolicy,
+  PackagePolicyBackupHelper,
+  savePolicyForm,
   visitPolicyDetailsPage,
+  yieldPolicyConfig,
 } from '../../screens/policy_details';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
+import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
-import { expectAndCloseSuccessToast } from '../../tasks/toasts';
 
 describe('Policy Details', () => {
+  const packagePolicyBackupHelper = new PackagePolicyBackupHelper();
+  let indexedHostsData: CyIndexEndpointHosts;
+
   before(() => {
     login();
-    loadEndpointDataForEventFiltersIfNeeded();
+    indexEndpointHosts().then((results) => {
+      indexedHostsData = results;
+    });
+    packagePolicyBackupHelper.backup();
   });
 
   beforeEach(() => {
     login();
     visitPolicyDetailsPage();
+  });
+
+  afterEach(() => {
+    packagePolicyBackupHelper.restore();
+  });
+
+  after(() => {
+    indexedHostsData.cleanup();
   });
 
   describe('Malware Protection card', () => {
@@ -48,24 +65,49 @@ describe('Policy Details', () => {
       cy.getByTestSubj('malwareUserNotificationCheckbox').should('be.checked');
     });
 
-    it('disabling protection should disable notification in yaml', () => {
+    it('disabling protection should disable notification in yaml for every OS', () => {
       // Enable malware protection and user notification
       cy.getByTestSubj('malwareProtectionSwitch').click();
       cy.getByTestSubj('malwareProtectionSwitch').should('have.attr', 'aria-checked', 'true');
-      cy.getByTestSubj('policyDetailsSaveButton').click();
-      cy.getByTestSubj('confirmModalConfirmButton').click();
-      expectAndCloseSuccessToast();
+      savePolicyForm();
 
-      checkMalwareUserNotificationInOpenedPolicy({ isEnabled: true });
+      yieldPolicyConfig().then((policyConfig) => {
+        expect(policyConfig.mac.popup.malware.enabled).to.equal(true);
+        expect(policyConfig.windows.popup.malware.enabled).to.equal(true);
+        expect(policyConfig.linux.popup.malware.enabled).to.equal(true);
+      });
 
       // disable malware protection
       cy.getByTestSubj('malwareProtectionSwitch').click();
       cy.getByTestSubj('malwareProtectionSwitch').should('have.attr', 'aria-checked', 'false');
-      cy.getByTestSubj('policyDetailsSaveButton').click();
-      cy.getByTestSubj('confirmModalConfirmButton').click();
-      expectAndCloseSuccessToast();
+      savePolicyForm();
 
-      checkMalwareUserNotificationInOpenedPolicy({ isEnabled: false });
+      yieldPolicyConfig().then((policyConfig) => {
+        expect(policyConfig.mac.popup.malware.enabled).to.equal(false);
+        expect(policyConfig.windows.popup.malware.enabled).to.equal(false);
+        expect(policyConfig.linux.popup.malware.enabled).to.equal(false);
+      });
+    });
+
+    it('user should be able to enable Malware protection for every OS in yaml', () => {
+      yieldPolicyConfig().then((policyConfig) => {
+        expect(policyConfig.linux.malware.mode).to.equal(ProtectionModes.off);
+        expect(policyConfig.mac.malware.mode).to.equal(ProtectionModes.off);
+        expect(policyConfig.windows.malware.mode).to.equal(ProtectionModes.off);
+      });
+
+      cy.getByTestSubj('malwareProtectionsForm').should('contain.text', 'Linux');
+      cy.getByTestSubj('malwareProtectionsForm').should('contain.text', 'Windows');
+      cy.getByTestSubj('malwareProtectionsForm').should('contain.text', 'Mac');
+
+      cy.getByTestSubj('malwareProtectionSwitch').click();
+      savePolicyForm();
+
+      yieldPolicyConfig().then((policyConfig) => {
+        expect(policyConfig.linux.malware.mode).to.equal(ProtectionModes.prevent);
+        expect(policyConfig.mac.malware.mode).to.equal(ProtectionModes.prevent);
+        expect(policyConfig.windows.malware.mode).to.equal(ProtectionModes.prevent);
+      });
     });
   });
 
