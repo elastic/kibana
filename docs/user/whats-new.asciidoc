@@ -5,12 +5,122 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.7/whats-new.html[8.7] |{kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2]
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
 
-// tag::notable-highlights[]
 
-// end::notable-highlights[]
+[discrete]
+=== Discover
+
+[discrete]
+==== Machine learning pattern analysis (technical preview)
+
+You can now run a pattern analysis directly from *Discover*,
+making it easy to explore your machine learning log pattern data.
+In *Discover*, hover over a field to run and load the pattern analysis,
+then select one or more patterns to filter for or filter out,
+displaying only the logs you’re interested in.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt00d70d606a672ff5/64593a2a6c8b04303c3005ba/highlights-discover-ml.gif[How to run pattern analysis directly from Discover]
+
+
+[discrete]
+==== Add columns to document table with drag & drop
+
+*Discover* now provides you with a simple drag-and-drop experience
+that helps you explore your data in just a few clicks.
+From the *Available fields* list, drag the fields you want to explore to the
+document table, then watch as *Discover* automatically creates columns for each of your fields.
+
+[role="screenshot"]
+image::images/highlights-discover-document-table.png[Drag fields from Available fields list to the document table]
+
+
+[discrete]
+=== Lens
+
+[discrete]
+==== Better visualization loading time
+
+Get notifications using the new Visualization modifiers icon popover on your dashboards.
+
+[role="screenshot"]
+image::images/highlights-lens-visualization-loading.png[New visualization modifiers in Lens]
+[role="screenshot"]
+image::images/highlights-lens-tooltip.png[Icon popover on icon in dashboard]
+
+[discrete]
+==== Metric chart improvments
+
+This release adds the following updates to the metric chart.
+
+* Improved support for bytes and bits format,
+with prefix format support up to yottabyte and yottabit
+* Improved text weight and size
+* Ability to render strings instead of only numbers
+* Ability to customize metrics with icons
+
+[role="screenshot"]
+image::images/highlights-lens-metric-chart.png[Improvements to Lens metric chart]
+
+
+
+[discrete]
+=== Dashboard has new settings
+
+*Dashboard* now includes a flyout for easily editing titles, descriptions, tags,
+the time filter, and dashboard options.
+
+
+[discrete]
+=== Maps has metric filtering
+
+Use metric filtering to hide aggregation buckets to reduce clutter and highlight areas of interest.
+
+For example, this map shows web traffic clusters. Areas with more traffic are obscured by areas with little traffic.
+
+[role="screenshot"]
+image::images/highlights-map-with-web-traffic.png[Metric filtering in maps]
+
+Configure metric filtering to hide clusters with little web traffic.
+
+[role="screenshot"]
+image::images/highlights-maps-metric-filtering.png[How to configure metric filtering, width="50%"]
+
+Now, the map has less visual clutter and it’s easy to visualize areas with high web traffic,
+allowing the marketing team to better target high value areas.
+
+[role="screenshot"]
+image::images/highlights-maps-less-clutter.png[Same map, but with less less visual clustter]
+
+[discrete]
+=== Per-user dark mode
+
+Continuing our user-first effort for personalization and collaboration,
+you can now customize the theme by setting dark mode individually.
+Choose between dark mode, light mode, or the default theme in the space.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt2ed2dc9d48d9f74f/645948420de513a368974770/highlights-security-dark-mode.gif[Per user dark mode]
+
+
+[discrete]
+=== Custom Branding
+A frequently requested feature, *Custom* Branding enables you
+to embed Elastic in a corporate portal environment with your
+own branding.  No need for messy CSS hacks to accomplish this task.
+
+[role="screenshot"]
+image::images/highlights-custom-branding.png[UI for creating custom branding, width=50%]
+
+You can customize your logo, organization name, page title, and browser icon. Open *Stack Management*,
+select *Advanced Settings*, and then select the *Global Settings* tab.
+
+To create a custom brand, you must have {kib} admin access.  Custom branding is a
+https://www.elastic.co/subscriptions[subscription feature] and
+and applies to all spaces.
+
+[role="screenshot"]
+image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]
