@@ -19,19 +19,13 @@ import type { ESBoolQuery } from '../../../common/typed_json';
 interface GlobalFilterQueryProps {
   extraFilter?: Filter;
   dataView?: DataViewBase;
-  queryId?: string;
 }
 
 /**
  * It builds a global filterQuery from KQL search bar and global filters.
  * It also validates the query and shows a warning if it's invalid.
- *
  */
-export const useGlobalFilterQuery = ({
-  extraFilter,
-  dataView,
-  queryId = 'GlobalFilterQuery',
-}: GlobalFilterQueryProps = {}) => {
+export const useGlobalFilterQuery = ({ extraFilter, dataView }: GlobalFilterQueryProps = {}) => {
   const { from, to } = useGlobalTime();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -59,7 +53,7 @@ export const useGlobalFilterQuery = ({
   );
 
   useInvalidFilterQuery({
-    id: queryId,
+    id: 'GlobalFilterQuery', // It prevents displaying multiple times the same error popup
     filterQuery: filterQueryStringified,
     kqlError,
     query,
