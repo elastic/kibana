@@ -39,7 +39,6 @@ import { DEFAULT_RULE_INTERVAL } from '../../../constants';
 import { RuleForm } from '../../rule_form/rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from '../../rule_form/rule_errors';
 import { createRule } from '../../../lib/rule_api/create';
-import { previewRule } from '../../../lib/rule_api/preview';
 import { getInitialInterval } from '../../rule_form/get_initial_interval';
 import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import { getRuleWithInvalidatedFields } from '../../../lib/value_validators';
