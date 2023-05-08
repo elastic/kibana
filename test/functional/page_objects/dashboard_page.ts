@@ -664,6 +664,7 @@ export class DashboardPageObject extends FtrService {
 
   public async addVisualizations(visualizations: string[]) {
     await this.dashboardAddPanel.addVisualizations(visualizations);
+    await this.waitForRenderComplete();
   }
 
   public async setSaveAsNewCheckBox(checked: boolean) {
