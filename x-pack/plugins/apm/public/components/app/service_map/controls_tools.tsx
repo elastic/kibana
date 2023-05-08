@@ -12,6 +12,7 @@ import { CytoscapeContext } from '../../../context/cytoscape_context';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IEsSearchRequest } from '../../../../../../../src/plugins/data/public';
+import cytoscape from 'cytoscape';
 
 const ControlsContainer = euiStyled('div')`
   right: ${({ theme }) => theme.eui.euiSize};
@@ -30,153 +31,273 @@ const Panel = euiStyled(EuiPanel)`
 `;
 
 export function ControlsTools() {
-  const { dataView } = useApmDataView();
-  const { data } = useApmPluginContext();
+  //  const { dataView } = useApmDataView();
+  const { core } = useApmPluginContext();
   const cy = useContext(CytoscapeContext);
   const selectedNode = cy.$('node:selected');
   const isNodeSelected = selectedNode.length === 1;
-
-  function explore() {
-    const response = {
-      took: 3001,
-      timed_out: false,
+  async function explore() {
+    const cyTemp = cytoscape();
+    cyTemp.add(selectedNode);
+    const index = 'remote_cluster:metrics-*';
+    const query = {
+      controls: {
+        use_significance: false,
+        sample_size: 2000,
+        timeout: 5000,
+      },
       vertices: [
         {
-          field: 'kubernetes.node.name',
-          term: 'gke-edge-oblt-edge-oblt-pool-095c801b-vcg6',
-          weight: 0.17389830508474577,
-          depth: 2,
-        },
-        {
-          field: 'container.id',
-          term: 'c0585cf4d4b4c86225f42a784ee6901c34e66f2d261b05225a0051258974c2c5',
-          weight: 0.4283050847457627,
-          depth: 2,
-        },
-        {
-          field: 'kubernetes.pod.name',
-          term: 'opbeans-ruby-64f9d69865-dkg9f',
-          weight: 0.95,
-          depth: 1,
-        },
-        {
           field: 'service.name',
-          term: 'opbeans-ruby',
-          weight: 1,
-          depth: 0,
-        },
-        {
-          field: 'orchestrator.cluster.name',
-          term: 'edge-oblt',
-          weight: 0.17389830508474577,
-          depth: 2,
-        },
-        {
-          field: 'kubernetes.namespace',
-          term: 'default',
-          weight: 0.17389830508474577,
-          depth: 2,
+          include: [
+            {
+              term: selectedNode.id(),
+              boost: 0.7718299164768414,
+            },
+          ],
+          min_doc_count: 1,
         },
       ],
-      connections: [
-        {
-          source: 3,
-          target: 2,
-          weight: 0.95,
-          doc_count: 575,
+      connections: {
+        query: {
+          bool: {
+            must: [],
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'strict_date_optional_time',
+                    gte: 'now-15m',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
         },
-        {
-          source: 2,
-          target: 1,
-          weight: 0.4283050847457627,
-          doc_count: 665,
+        vertices: [
+          {
+            field: 'kubernetes.pod.name',
+            size: 50,
+            min_doc_count: 1,
+          },
+        ],
+        connections: {
+          query: {
+            bool: {
+              must: [],
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      format: 'strict_date_optional_time',
+                      gte: 'now-15m',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+              should: [],
+              must_not: [],
+            },
+          },
+          vertices: [
+            {
+              field: 'orchestrator.cluster.name',
+              size: 50,
+              min_doc_count: 1,
+            },
+            {
+              field: 'kubernetes.namespace',
+              size: 50,
+              min_doc_count: 1,
+            },
+            {
+              field: 'kubernetes.node.name',
+              size: 50,
+              min_doc_count: 1,
+            },
+          ],
         },
-        {
-          source: 2,
-          target: 4,
-          weight: 0.17389830508474577,
-          doc_count: 270,
-        },
-        {
-          source: 2,
-          target: 0,
-          weight: 0.17389830508474577,
-          doc_count: 270,
-        },
-        {
-          source: 2,
-          target: 5,
-          weight: 0.17389830508474577,
-          doc_count: 270,
-        },
-      ],
+      },
     };
+    // const response = {
+    //   took: 3001,
+    //   timed_out: false,
+    //   vertices: [
+    //     {
+    //       field: 'kubernetes.node.name',
+    //       term: 'gke-edge-oblt-edge-oblt-pool-095c801b-vcg6',
+    //       weight: 0.17389830508474577,
+    //       depth: 2,
+    //     },
+    //     {
+    //       field: 'kubernetes.pod.name',
+    //       term: 'opbeans-ruby-64f9d69865-dkg9f',
+    //       weight: 0.95,
+    //       depth: 1,
+    //     },
+    //     {
+    //       field: 'service.name',
+    //       term: 'opbeans-ruby',
+    //       weight: 1,
+    //       depth: 0,
+    //     },
+    //     {
+    //       field: 'orchestrator.cluster.name',
+    //       term: 'edge-oblt',
+    //       weight: 0.17389830508474577,
+    //       depth: 2,
+    //     },
+    //     {
+    //       field: 'kubernetes.namespace',
+    //       term: 'default',
+    //       weight: 0.17389830508474577,
+    //       depth: 2,
+    //     },
+    //   ],
+    //   connections: [
+    //     {
+    //       source: 3,
+    //       target: 2,
+    //       weight: 0.95,
+    //       doc_count: 575,
+    //     },
+    //     {
+    //       source: 2,
+    //       target: 1,
+    //       weight: 0.4283050847457627,
+    //       doc_count: 665,
+    //     },
+    //     {
+    //       source: 2,
+    //       target: 4,
+    //       weight: 0.17389830508474577,
+    //       doc_count: 270,
+    //     },
+    //     {
+    //       source: 2,
+    //       target: 0,
+    //       weight: 0.17389830508474577,
+    //       doc_count: 270,
+    //     },
+    //     {
+    //       source: 2,
+    //       target: 5,
+    //       weight: 0.17389830508474577,
+    //       doc_count: 270,
+    //     },
+    //   ],
+    // };
 
-    const addedNodes = [];
-    response.vertices.forEach((v) => {
-      switch (v.field) {
-        case 'kubernetes.namespace':
-          addedNodes.push(
-            cy.add([
-              {
-                data: {
-                  id: v.term,
-                  label: v.term,
-                  'asset.type': 'kubernetes.namespace',
-                },
-              },
-              {
-                data: {
-                  id: `${v.term}->${selectedNode.id()}`,
-                  source: v.term,
-                  target: selectedNode.id(),
-                },
-              },
-            ])
-          );
+    const { resp } = await core.http.post('/api/graph/graphExplore', {
+      body: JSON.stringify({ index, query }),
+    });
+    // Go through the vertices first
+    resp.vertices.forEach((v) => {
+      if (v.field !== 'service.name') {
+        cyTemp.add({
+          data: {
+            id: `${v.field}:${v.term}`,
+            label: v.term,
+            'asset.type': v.field,
+          },
+        });
+      }
+    });
+
+    // Now go through the added nodes and infer connections
+    cyTemp.nodes().forEach((node) => {
+      switch (node.data('asset.type')) {
         case 'kubernetes.node.name':
-          addedNodes.push(
-            cy.add([
-              {
-                data: {
-                  id: v.term,
-                  label: v.term,
-                  'asset.type': 'kubernetes.node',
-                },
+          // Nodes are children of clusters and the parents of pods
+          const clusterNode = cyTemp.$(
+            '[asset\\.type = "orchestrator.cluster.name"]'
+          )[0];
+          const source = clusterNode ?? selectedNode;
+
+          cyTemp.add({
+            data: {
+              id: `${source.id()}~>${node.id()}`,
+              label: `${source.id()} to ${node.id()}`,
+              source: source.id(),
+              target: node.id(),
+            },
+          });
+          break;
+        case 'kubernetes.pod.name':
+          // pod runs on a node and connects to a service
+          const kNode = cyTemp.$('[ asset\\.type = "kubernetes.node.name"]');
+
+          if (kNode.length > 0) {
+            cyTemp.add({
+              data: {
+                id: `${kNode.id()}~>${node.id()}`,
+                label: `${kNode.id()} to ${node.id()}`,
+                source: kNode.id(),
+                target: node.id(),
               },
-              {
-                data: {
-                  id: `${selectedNode.id()}->${v.term}`,
-                  source: selectedNode.id(),
-                  target: v.term,
-                },
-              },
-            ])
-          );
+            });
+          }
+
+          cyTemp.add({
+            data: {
+              id: `${selectedNode.id()}~>${node.id()}`,
+              label: `${selectedNode.id()} to ${node.id()}`,
+              source: selectedNode.id(),
+              target: node.id(),
+            },
+          });
+          break;
+        case 'kubernetes.namespace':
+          // Namespace should point to the service
+
+          cyTemp.add({
+            data: {
+              id: `${node.id()}~>${selectedNode.id()}`,
+              label: `${node.id()} to ${selectedNode.id()}`,
+              source: node.id(),
+              target: selectedNode.id(),
+            },
+          });
+          break;
         case 'orchestrator.cluster.name':
-          addedNodes.push(
-            cy.add([
-              {
-                data: {
-                  id: v.term,
-                  label: v.term,
-                  'asset.type': 'orchestrator.cluster.name',
-                },
+          const nsNode = cyTemp.$('[asset\\.type = "kubernetes.namespace"]')[0];
+          // If we have a namespace, point to that, otherwise use the service
+          if (nsNode) {
+            cyTemp.add({
+              data: {
+                id: `${node.id()}~>${nsNode.id()}`,
+                label: `${node.id()} to ${nsNode.id()}`,
+                source: node.id(),
+                target: nsNode.id(),
               },
-              {
-                data: {
-                  id: `${selectedNode.id()}->${v.term}`,
-                  source: selectedNode.id(),
-                  target: v.term,
-                },
+            });
+          } else {
+            cyTemp.add({
+              data: {
+                id: `${node.id()}~>${selectedNode.id()}`,
+                label: `${node.id()} to ${selectedNode.id()}`,
+                source: node.id(),
+                target: selectedNode.id(),
               },
-            ])
-          );
+            });
+          }
+          break;
         default:
           break;
       }
     });
-    cy.trigger('custom:data', addedNodes);
+
+    cyTemp.elements().forEach((el) => {
+      if (cy.$id(el.id()).length === 0) {
+        cy.add(el);
+      }
+    });
+    cy.trigger('custom:data', [cyTemp.nodes()]);
+    cyTemp.destroy();
   }
 
   return (
