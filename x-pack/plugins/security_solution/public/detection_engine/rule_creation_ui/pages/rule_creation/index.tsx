@@ -116,7 +116,7 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { addSuccess } = useAppToasts();
+  const { addSuccess, addWarning } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const {
     data: { dataViews },
@@ -323,6 +323,10 @@ const CreateRulePageComponent: React.FC = () => {
     [updateCurrentDataState, goToStep, createRule, navigateToApp, startMlJobs, addSuccess]
   );
 
+  const copyConfigurations = useCallback(() => {
+    addWarning(`Copy "${activeStep}" configurations"`);
+  }, [activeStep, addWarning]);
+
   const getAccordionType = useCallback(
     (step: RuleStep) => {
       if (step === activeStep) {
@@ -427,15 +431,26 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={defineRuleRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
                           extraAction={
-                            stepsData.current[RuleStep.defineRule].isValid && (
+                            activeStep === RuleStep.defineRule ? (
                               <EuiButtonEmpty
-                                data-test-subj="edit-define-rule"
-                                iconType="pencil"
+                                data-test-subj="copy-configurations-define-rule"
+                                iconType="copy"
                                 size="xs"
-                                onClick={() => editStep(RuleStep.defineRule)}
+                                onClick={() => copyConfigurations()}
                               >
-                                {i18n.EDIT_RULE}
+                                {i18n.COPY_CONFIGURATIONS}
                               </EuiButtonEmpty>
+                            ) : (
+                              stepsData.current[RuleStep.defineRule].isValid && (
+                                <EuiButtonEmpty
+                                  data-test-subj="edit-define-rule"
+                                  iconType="pencil"
+                                  size="xs"
+                                  onClick={() => editStep(RuleStep.defineRule)}
+                                >
+                                  {i18n.EDIT_RULE}
+                                </EuiButtonEmpty>
+                              )
                             )
                           }
                         >
@@ -469,15 +484,26 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={aboutRuleRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
                           extraAction={
-                            stepsData.current[RuleStep.aboutRule].isValid && (
+                            activeStep === RuleStep.aboutRule ? (
                               <EuiButtonEmpty
-                                data-test-subj="edit-about-rule"
-                                iconType="pencil"
+                                data-test-subj="copy-configurations-about-rule"
+                                iconType="copy"
                                 size="xs"
-                                onClick={() => editStep(RuleStep.aboutRule)}
+                                onClick={() => copyConfigurations()}
                               >
-                                {i18n.EDIT_RULE}
+                                {i18n.COPY_CONFIGURATIONS}
                               </EuiButtonEmpty>
+                            ) : (
+                              stepsData.current[RuleStep.aboutRule].isValid && (
+                                <EuiButtonEmpty
+                                  data-test-subj="edit-about-rule"
+                                  iconType="pencil"
+                                  size="xs"
+                                  onClick={() => editStep(RuleStep.aboutRule)}
+                                >
+                                  {i18n.EDIT_RULE}
+                                </EuiButtonEmpty>
+                              )
                             )
                           }
                         >
@@ -508,14 +534,25 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={scheduleRuleRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
                           extraAction={
-                            stepsData.current[RuleStep.scheduleRule].isValid && (
+                            activeStep === RuleStep.scheduleRule ? (
                               <EuiButtonEmpty
-                                iconType="pencil"
+                                data-test-subj="copy-configurations-schedule-rule"
+                                iconType="copy"
                                 size="xs"
-                                onClick={() => editStep(RuleStep.scheduleRule)}
+                                onClick={() => copyConfigurations()}
                               >
-                                {i18n.EDIT_RULE}
+                                {i18n.COPY_CONFIGURATIONS}
                               </EuiButtonEmpty>
+                            ) : (
+                              stepsData.current[RuleStep.scheduleRule].isValid && (
+                                <EuiButtonEmpty
+                                  iconType="pencil"
+                                  size="xs"
+                                  onClick={() => editStep(RuleStep.scheduleRule)}
+                                >
+                                  {i18n.EDIT_RULE}
+                                </EuiButtonEmpty>
+                              )
                             )
                           }
                         >
@@ -545,14 +582,25 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={ruleActionsRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
                           extraAction={
-                            stepsData.current[RuleStep.ruleActions].isValid && (
+                            activeStep === RuleStep.ruleActions ? (
                               <EuiButtonEmpty
-                                iconType="pencil"
+                                data-test-subj="copy-configurations-actions-rule"
+                                iconType="copy"
                                 size="xs"
-                                onClick={() => editStep(RuleStep.ruleActions)}
+                                onClick={() => copyConfigurations()}
                               >
-                                {i18n.EDIT_RULE}
+                                {i18n.COPY_CONFIGURATIONS}
                               </EuiButtonEmpty>
+                            ) : (
+                              stepsData.current[RuleStep.ruleActions].isValid && (
+                                <EuiButtonEmpty
+                                  iconType="pencil"
+                                  size="xs"
+                                  onClick={() => editStep(RuleStep.ruleActions)}
+                                >
+                                  {i18n.EDIT_RULE}
+                                </EuiButtonEmpty>
+                              )
                             )
                           }
                         >
