@@ -14373,10 +14373,10 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.44.1:
-  version "3.44.1"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.44.1.tgz#8a6e88fa9f3401455dddb87f9d5559f6d894964d"
-  integrity sha512-hSf+S6GtQ+Ff5ueyQ1n2BAgAdiDOZ+XmHKFurzpB5/rvRFz6JbXLq+pcI11HMlK3ImiMVG9LQxHWMN6gqkqzYQ==
+elastic-apm-node@^3.45.0:
+  version "3.45.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.45.0.tgz#d4d0a6481d3c9a099e06aa5399cf3e241422c36f"
+  integrity sha512-AfCMvfAHy5VhOzqM7GXXao3dEGhEok1+XNNvjlOEAGic1Y3biKY4ZQYI+QktYShC2E7b/TaLo8L/Twu16Ah2hA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.4.1"
@@ -14386,7 +14386,6 @@ elastic-apm-node@^3.44.1:
     basic-auth "^2.0.1"
     cookie "^0.5.0"
     core-util-is "^1.0.2"
-    debug "^4.1.1"
     elastic-apm-http-client "11.3.1"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
@@ -14404,7 +14403,7 @@ elastic-apm-node@^3.44.1:
     original-url "^1.2.3"
     pino "^6.11.2"
     relative-microtime "^2.0.0"
-    resolve "^1.22.1"
+    require-in-the-middle "^7.0.1"
     semver "^6.3.0"
     set-cookie-serde "^1.0.0"
     shallow-clone-shim "^2.0.0"
@@ -25173,6 +25172,15 @@ require-in-the-middle@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-6.0.0.tgz#01cc6416286fb5e672d0fe031d996f8bc202509d"
   integrity sha512-+dtWQ7l2lqQDxheaG3jjyN1QI37gEwvzACSgjYi4/C2y+ZTUMeRW8BIOm+9NBKvwaMBUSZfPXVOt1skB0vBkRw==
+  dependencies:
+    debug "^4.1.1"
+    module-details-from-path "^1.0.3"
+    resolve "^1.22.1"
+
+require-in-the-middle@^7.0.1:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-7.1.0.tgz#8ab4089383e7b7879ed134d8e9d1887bd48195ec"
+  integrity sha512-6f86Mh0vWCxqKKatRPwgY6VzYmcVay3WUTIpJ1ILBCNh+dTWabMR1swKGKz3XcEZ5mgjndzRu7fQ+44G2H9Gew==
   dependencies:
     debug "^4.1.1"
     module-details-from-path "^1.0.3"

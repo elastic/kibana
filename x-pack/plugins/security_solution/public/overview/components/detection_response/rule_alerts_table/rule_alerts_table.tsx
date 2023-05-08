@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
@@ -153,8 +153,12 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   const navigateToAlerts = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.alerts });
-  }, [navigateTo]);
+    openAlertsPageWithFilter({
+      title: i18n.OPEN_IN_ALERTS_TITLE_STATUS,
+      selectedOptions: ['open'],
+      fieldName: ALERT_WORKFLOW_STATUS,
+    });
+  }, [openAlertsPageWithFilter]);
 
   const columns = useMemo(
     () => getTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage }),

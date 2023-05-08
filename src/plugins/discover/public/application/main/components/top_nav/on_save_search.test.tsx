@@ -8,6 +8,9 @@
 
 import * as savedObjectsPlugin from '@kbn/saved-objects-plugin/public';
 jest.mock('@kbn/saved-objects-plugin/public');
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { onSaveSearch } from './on_save_search';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { getDiscoverStateContainer } from '../../services/discover_state';
@@ -16,7 +19,7 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
 
-function getStateContainer() {
+function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const savedSearch = savedSearchMock;
   const history = createBrowserHistory();
   const stateContainer = getDiscoverStateContainer({
@@ -27,6 +30,9 @@ function getStateContainer() {
   stateContainer.appState.getState = jest.fn(() => ({
     rowsPerPage: 250,
   }));
+  if (dataView) {
+    stateContainer.internalState.transitions.setDataView(dataView);
+  }
   return stateContainer;
 }
 
@@ -40,6 +46,31 @@ describe('onSaveSearch', () => {
     });
 
     expect(savedObjectsPlugin.showSaveModal).toHaveBeenCalled();
+  });
+
+  it('should consider whether a data view is time based', async () => {
+    let saveModal: ReactElement | undefined;
+    jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementation((modal) => {
+      saveModal = modal;
+    });
+
+    await onSaveSearch({
+      navigateTo: jest.fn(),
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+      state: getStateContainer({ dataView: dataViewMock }),
+    });
+
+    expect(saveModal?.props.isTimeBased).toBe(false);
+
+    await onSaveSearch({
+      navigateTo: jest.fn(),
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+      state: getStateContainer({ dataView: dataViewWithTimefieldMock }),
+    });
+
+    expect(saveModal?.props.isTimeBased).toBe(true);
   });
 
   it('should pass tags to the save modal', async () => {
