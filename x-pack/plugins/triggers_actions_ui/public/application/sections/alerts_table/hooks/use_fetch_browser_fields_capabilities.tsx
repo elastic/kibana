@@ -8,7 +8,6 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import memoizeOne from 'memoize-one';
 import { useQuery } from '@tanstack/react-query';
 import { loadAlertDataView } from '../../../hooks/use_alert_data_view';
 import type { Alerts } from '../../../../types';
@@ -33,35 +32,30 @@ const INVALID_FEATURE_ID = 'siem';
  * HOT Code path where the fields can be 16087 in length or larger. This is
  * VERY mutatious on purpose to improve the performance of the transform.
  */
-export const getDataViewStateFromIndexFields = memoizeOne(
-  (
-    _title: string,
-    fields: DataViewFieldBase[],
-    _includeUnmapped: boolean = false
-  ): BrowserFields => {
-    // Adds two dangerous casts to allow for mutations within this function
-    type DangerCastForMutation = Record<string, {}>;
+const getDataViewStateFromIndexFields = (
+  _title: string,
+  fields: DataViewFieldBase[],
+  _includeUnmapped: boolean = false
+): BrowserFields => {
+  // Adds two dangerous casts to allow for mutations within this function
+  type DangerCastForMutation = Record<string, {}>;
 
-    return fields.reduce<BrowserFields>((browserFields, field) => {
-      // mutate browserFields
-      const category = getCategory(field.name);
-      if (browserFields[category] == null) {
-        (browserFields as DangerCastForMutation)[category] = {};
-      }
-      if (browserFields[category].fields == null) {
-        browserFields[category].fields = {};
-      }
-      (browserFields[category].fields as Record<string, BrowserField>)[field.name] =
-        field as unknown as BrowserField;
+  return fields.reduce<BrowserFields>((browserFields, field) => {
+    // mutate browserFields
+    const category = getCategory(field.name);
+    if (browserFields[category] == null) {
+      (browserFields as DangerCastForMutation)[category] = {};
+    }
+    if (browserFields[category].fields == null) {
+      browserFields[category].fields = {};
+    }
+    (browserFields[category].fields as Record<string, BrowserField>)[field.name] =
+      field as unknown as BrowserField;
 
-      return browserFields;
-    }, {});
-  },
-  (newArgs, lastArgs) =>
-    newArgs[0] === lastArgs[0] &&
-    newArgs[1].length === lastArgs[1].length &&
-    newArgs[2] === lastArgs[2]
-);
+    return browserFields;
+  }, {});
+};
+
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
   initialBrowserFields,
