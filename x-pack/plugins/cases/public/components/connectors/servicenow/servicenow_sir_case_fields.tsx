@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ServiceNowSIRFieldsType } from '../../../../common/api';
 import { ConnectorTypes } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
-import type { Choice, Fields } from './types';
+import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
 import { DeprecatedCallout } from '../deprecated_callout';
 
-const useGetChoicesFields = ['category', 'subcategory', 'priority'];
+const choicesToGet = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
   category: [],
   subcategory: [],
@@ -29,8 +31,8 @@ const defaultFields: Fields = {
 
 const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowSIRFieldsType>
-> = ({ isEdit = true, fields, connector, onChange }) => {
-  const init = useRef(true);
+> = ({ isEdit = true, connector }) => {
+  const [{ fields }] = useFormData<{ fields: ServiceNowSIRFieldsType }>();
   const {
     category = null,
     destIp = true,
@@ -42,48 +44,38 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   } = fields ?? {};
 
   const { http, notifications } = useKibana().services;
-  const [choices, setChoices] = useState<Fields>(defaultFields);
   const showConnectorWarning = connector.isDeprecated;
 
-  const onChangeCb = useCallback(
-    (
-      key: keyof ServiceNowSIRFieldsType,
-      value: ServiceNowSIRFieldsType[keyof ServiceNowSIRFieldsType]
-    ) => {
-      onChange({ ...fields, [key]: value });
-    },
-    [fields, onChange]
-  );
-
-  const onChoicesSuccess = (values: Choice[]) => {
-    setChoices(
-      values.reduce(
-        (acc, value) => ({
-          ...acc,
-          [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
-        }),
-        defaultFields
-      )
-    );
-  };
-
-  const { isLoading: isLoadingChoices } = useGetChoices({
+  const { isLoading: isLoadingChoices, choices } = useGetChoices({
     http,
     toastNotifications: notifications.toasts,
     connector,
-    fields: useGetChoicesFields,
-    onSuccess: onChoicesSuccess,
+    fields: choicesToGet,
   });
 
-  const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
-  const priorityOptions = useMemo(() => choicesToEuiOptions(choices.priority), [choices.priority]);
+  const choicesFormatted = choices.reduce(
+    (acc, value) => ({
+      ...acc,
+      [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
+    }),
+    defaultFields
+  );
+
+  const categoryOptions = useMemo(
+    () => choicesToEuiOptions(choicesFormatted.category),
+    [choicesFormatted.category]
+  );
+  const priorityOptions = useMemo(
+    () => choicesToEuiOptions(choicesFormatted.priority),
+    [choicesFormatted.priority]
+  );
 
   const subcategoryOptions = useMemo(
     () =>
       choicesToEuiOptions(
-        choices.subcategory.filter((choice) => choice.dependent_value === category)
+        choicesFormatted.subcategory.filter((choice) => choice.dependent_value === category)
       ),
-    [choices.subcategory, category]
+    [choicesFormatted.subcategory, category]
   );
 
   const listItems = useMemo(
@@ -160,14 +152,6 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
     ]
   );
 
-  // Set field at initialization
-  useEffect(() => {
-    if (init.current) {
-      init.current = false;
-      onChange({ category, destIp, malwareHash, malwareUrl, priority, sourceIp, subcategory });
-    }
-  }, [category, destIp, malwareHash, malwareUrl, onChange, priority, sourceIp, subcategory]);
-
   return (
     <>
       {showConnectorWarning && (
@@ -185,45 +169,61 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                 <>
                   <EuiFlexGroup>
                     <EuiFlexItem>
-                      <EuiCheckbox
-                        id="destIpCheckbox"
-                        data-test-subj="destIpCheckbox"
-                        label={i18n.DEST_IP}
-                        checked={destIp ?? false}
-                        compressed
-                        onChange={(e) => onChangeCb('destIp', e.target.checked)}
+                      <UseField
+                        path="fields.destIp"
+                        component={CheckBoxField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': 'destIpCheckbox',
+                            label: i18n.DEST_IP,
+                            compressed: true,
+                            checked: destIp ?? false,
+                          },
+                        }}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiCheckbox
-                        id="sourceIpCheckbox"
-                        data-test-subj="sourceIpCheckbox"
-                        label={i18n.SOURCE_IP}
-                        checked={sourceIp ?? false}
-                        compressed
-                        onChange={(e) => onChangeCb('sourceIp', e.target.checked)}
+                      <UseField
+                        path="fields.sourceIp"
+                        component={CheckBoxField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': 'sourceIpCheckbox',
+                            label: i18n.SOURCE_IP,
+                            compressed: true,
+                            checked: sourceIp ?? false,
+                          },
+                        }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiFlexGroup>
                     <EuiFlexItem>
-                      <EuiCheckbox
-                        id="malwareUrlCheckbox"
-                        data-test-subj="malwareUrlCheckbox"
-                        label={i18n.MALWARE_URL}
-                        checked={malwareUrl ?? false}
-                        compressed
-                        onChange={(e) => onChangeCb('malwareUrl', e.target.checked)}
+                      <UseField
+                        path="fields.malwareUrl"
+                        component={CheckBoxField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': 'malwareUrlCheckbox',
+                            label: i18n.MALWARE_URL,
+                            compressed: true,
+                            checked: malwareUrl ?? false,
+                          },
+                        }}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiCheckbox
-                        id="malwareHashCheckbox"
-                        data-test-subj="malwareHashCheckbox"
-                        label={i18n.MALWARE_HASH}
-                        checked={malwareHash ?? false}
-                        compressed
-                        onChange={(e) => onChangeCb('malwareHash', e.target.checked)}
+                      <UseField
+                        path="fields.malwareHash"
+                        component={CheckBoxField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': 'malwareHashCheckbox',
+                            label: i18n.MALWARE_HASH,
+                            compressed: true,
+                            checked: malwareHash ?? false,
+                          },
+                        }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -233,52 +233,64 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.PRIORITY}>
-                <EuiSelect
-                  fullWidth
-                  data-test-subj="prioritySelect"
-                  hasNoInitialSelection
-                  isLoading={isLoadingChoices}
-                  disabled={isLoadingChoices}
-                  options={priorityOptions}
-                  value={priority ?? undefined}
-                  onChange={(e) => onChangeCb('priority', e.target.value)}
-                />
-              </EuiFormRow>
+              <UseField
+                path="fields.priority"
+                component={SelectField}
+                config={{
+                  label: i18n.PRIORITY,
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'prioritySelect',
+                    options: priorityOptions,
+                    hasNoInitialSelection: true,
+                    fullWidth: true,
+                    disabled: isLoadingChoices,
+                    isLoading: isLoadingChoices,
+                  },
+                }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.CATEGORY}>
-                <EuiSelect
-                  fullWidth
-                  data-test-subj="categorySelect"
-                  options={categoryOptions}
-                  value={category ?? undefined}
-                  isLoading={isLoadingChoices}
-                  disabled={isLoadingChoices}
-                  hasNoInitialSelection
-                  onChange={(e) =>
-                    onChange({ ...fields, category: e.target.value, subcategory: null })
-                  }
-                />
-              </EuiFormRow>
+              <UseField
+                path="fields.category"
+                component={SelectField}
+                config={{
+                  label: i18n.CATEGORY,
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'categorySelect',
+                    options: categoryOptions,
+                    hasNoInitialSelection: true,
+                    fullWidth: true,
+                    disabled: isLoadingChoices,
+                    isLoading: isLoadingChoices,
+                  },
+                }}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               {subcategoryOptions?.length > 0 ? (
-                <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
-                  <EuiSelect
-                    fullWidth
-                    data-test-subj="subcategorySelect"
-                    options={subcategoryOptions}
-                    // Needs an empty string instead of undefined to select the blank option when changing categories
-                    value={subcategory ?? ''}
-                    isLoading={isLoadingChoices}
-                    disabled={isLoadingChoices}
-                    hasNoInitialSelection
-                    onChange={(e) => onChangeCb('subcategory', e.target.value)}
-                  />
-                </EuiFormRow>
+                <UseField
+                  path="fields.subcategory"
+                  component={SelectField}
+                  config={{
+                    label: i18n.SUBCATEGORY,
+                  }}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': 'subcategorySelect',
+                      options: subcategoryOptions,
+                      hasNoInitialSelection: true,
+                      fullWidth: true,
+                      disabled: isLoadingChoices,
+                      isLoading: isLoadingChoices,
+                    },
+                  }}
+                />
               ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
