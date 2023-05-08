@@ -9,15 +9,14 @@ import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { CaseActionConnector } from '../types';
-import type { ConnectorFieldsProps } from './types';
 import { getCaseConnectors } from '.';
-import type { ConnectorTypeFields } from '../../../common/api';
 
-interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
+interface Props {
   connector: CaseActionConnector | null;
+  isEdit: boolean;
 }
 
-const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
+const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit }) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
@@ -39,12 +38,7 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onCh
           }
         >
           <div data-test-subj={'connector-fields'}>
-            <FieldsComponent
-              isEdit={isEdit}
-              fields={fields}
-              connector={connector}
-              onChange={onChange}
-            />
+            <FieldsComponent isEdit={isEdit} connector={connector} />
           </div>
         </Suspense>
       ) : null}

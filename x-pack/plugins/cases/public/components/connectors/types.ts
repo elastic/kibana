@@ -48,6 +48,4 @@ export interface CaseConnectorsRegistry {
 export interface ConnectorFieldsProps<TFields> {
   isEdit?: boolean;
   connector: CaseActionConnector;
-  fields: TFields;
-  onChange: (fields: TFields) => void;
 }
