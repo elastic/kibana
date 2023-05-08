@@ -12,6 +12,7 @@ import {
   CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   DATA_COLLECTION_SETUP_STEP,
+  DATE_PICKER_ABSOLUTE_TAB_SEL,
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
 } from '../screens/integrations';
@@ -89,6 +90,14 @@ export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
       cy.getBySel(CONFIRM_MODAL_BTN).click();
+    }
+  });
+}
+
+export function closeDateTabIfVisible() {
+  cy.get('body').then(($body) => {
+    if ($body.find(DATE_PICKER_ABSOLUTE_TAB_SEL).length) {
+      cy.getBySel(DATE_PICKER_ABSOLUTE_TAB_SEL).clickOutside();
     }
   });
 }
