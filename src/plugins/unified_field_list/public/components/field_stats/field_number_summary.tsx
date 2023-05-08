@@ -7,8 +7,13 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiBasicTable, HorizontalAlignment, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiBasicTable,
+  HorizontalAlignment,
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+  euiScreenReaderOnly,
+} from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -42,29 +47,23 @@ export const FieldNumberSummary: React.FC<FieldNumberSummaryProps> = ({
   const summaryTableItems: SummaryTableItem[] = [
     {
       key: 'min',
-      label: (
-        <FormattedMessage
-          id="unifiedFieldList.fieldStats.numberSummary.minLabel"
-          defaultMessage="min"
-        />
-      ),
+      label: i18n.translate('unifiedFieldList.fieldStats.numberSummary.minLabel', {
+        defaultMessage: 'min',
+      }),
       value: formatter.convert(numberSummary.minValue, 'text'),
     },
     {
       key: 'max',
-      label: (
-        <FormattedMessage
-          id="unifiedFieldList.fieldStats.numberSummary.maxLabel"
-          defaultMessage="max"
-        />
-      ),
+      label: i18n.translate('unifiedFieldList.fieldStats.numberSummary.maxLabel', {
+        defaultMessage: 'max',
+      }),
       value: formatter.convert(numberSummary.maxValue, 'text'),
     },
   ];
   const summaryTableColumns = [
     {
+      field: 'label',
       name: '',
-      render: (summaryItem: { label: ReactNode }) => summaryItem.label,
       align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
@@ -92,9 +91,8 @@ export const FieldNumberSummary: React.FC<FieldNumberSummaryProps> = ({
       responsive={false}
       css={css`
         & .euiTableHeaderCell {
-          display: none;
+          ${euiScreenReaderOnly()}
         }
-
         & .euiTableRowCell {
           border-top: none;
         }
