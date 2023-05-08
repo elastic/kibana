@@ -275,7 +275,7 @@ export function TransactionDurationRuleType(props: Props) {
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
-      chartPreview={chartPreview}
+      // chartPreview={chartPreview}
       defaultParams={params}
       fields={fields}
       groupAlertsBy={groupAlertsBy}

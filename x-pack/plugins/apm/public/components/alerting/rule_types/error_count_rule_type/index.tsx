@@ -209,7 +209,7 @@ export function ErrorCountRuleType(props: Props) {
       groupAlertsBy={groupAlertsBy}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
-      chartPreview={chartPreview}
+      // chartPreview={chartPreview}
     />
   );
 }
