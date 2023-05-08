@@ -38,7 +38,7 @@ const mockStyle = {
     return {
       getLabel: () => {
         return 'bytes';
-      }
+      },
     } as unknown as IField;
   },
   getOptions: () => {
@@ -57,108 +57,118 @@ const mockStyle = {
 } as unknown as DynamicSizeProperty;
 
 test('Should render legend', () => {
-  const component = shallow(
-    <MarkerSizeLegend style={mockStyle} />
-  );
+  const component = shallow(<MarkerSizeLegend style={mockStyle} />);
   expect(component).toMatchSnapshot();
 });
 
 test('Should render legend with 3 markers when size difference does not provide enough vertical space for more labels', () => {
   const component = shallow(
-    <MarkerSizeLegend style={{
-      ...mockStyle,
-      getOptions: () => {
-        return {
-          ...dynamicSizeOptions,
-          maxSize: 24,
-        };
-      },
-    }} />
+    <MarkerSizeLegend
+      style={{
+        ...mockStyle,
+        getOptions: () => {
+          return {
+            ...dynamicSizeOptions,
+            maxSize: 24,
+          };
+        },
+      }}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should render legend with 2 markers when size difference does not provide enough vertical space for more labels', () => {
   const component = shallow(
-    <MarkerSizeLegend style={{
-      ...mockStyle,
-      getOptions: () => {
-        return {
-          ...dynamicSizeOptions,
-          maxSize: 15,
-        };
-      },
-    }} />
+    <MarkerSizeLegend
+      style={{
+        ...mockStyle,
+        getOptions: () => {
+          return {
+            ...dynamicSizeOptions,
+            maxSize: 15,
+          };
+        },
+      }}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should render legend with only max marker when size difference does not provide enough vertical space for more labels', () => {
   const component = shallow(
-    <MarkerSizeLegend style={{
-      ...mockStyle,
-      getOptions: () => {
-        return {
-          ...dynamicSizeOptions,
-          maxSize: 11,
-        };
-      },
-    }} />
+    <MarkerSizeLegend
+      style={{
+        ...mockStyle,
+        getOptions: () => {
+          return {
+            ...dynamicSizeOptions,
+            maxSize: 11,
+          };
+        },
+      }}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should render legend without label cutoff when min size is 1', () => {
   const component = shallow(
-    <MarkerSizeLegend style={{
-      ...mockStyle,
-      getOptions: () => {
-        return {
-          ...dynamicSizeOptions,
-          minSize: 1,
-          maxSize: 7,
-        };
-      },
-    }} />
+    <MarkerSizeLegend
+      style={{
+        ...mockStyle,
+        getOptions: () => {
+          return {
+            ...dynamicSizeOptions,
+            minSize: 1,
+            maxSize: 7,
+          };
+        },
+      }}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should render max label with std clamp notification', () => {
   const component = shallow(
-    <MarkerSizeLegend style={{
-      ...mockStyle,
-      getOptions: () => {
-        return {
-          ...dynamicSizeOptions,
-          maxSize: 11,
-        };
-      },
-      getRangeFieldMeta: () => {
-        return {
-          min: 0,
-          max: 16000,
-          delta: 16000,
-          isMaxOutsideStdRange: true,
-        };
-      },
-    }} />
+    <MarkerSizeLegend
+      style={{
+        ...mockStyle,
+        getOptions: () => {
+          return {
+            ...dynamicSizeOptions,
+            maxSize: 11,
+          };
+        },
+        getRangeFieldMeta: () => {
+          return {
+            min: 0,
+            max: 16000,
+            delta: 16000,
+            isMaxOutsideStdRange: true,
+          };
+        },
+      }}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
 test('Should invert legend', () => {
   const component = shallow(
-    <MarkerSizeLegend style={{
-      ...mockStyle,
-      getOptions: () => {
-        return {
-          ...dynamicSizeOptions,
-          maxSize: 24,
-          invert: true,
-        };
-      },
-    }} />
+    <MarkerSizeLegend
+      style={{
+        ...mockStyle,
+        getOptions: () => {
+          return {
+            ...dynamicSizeOptions,
+            maxSize: 24,
+            invert: true,
+          };
+        },
+      }}
+    />
   );
   expect(component).toMatchSnapshot();
 });
