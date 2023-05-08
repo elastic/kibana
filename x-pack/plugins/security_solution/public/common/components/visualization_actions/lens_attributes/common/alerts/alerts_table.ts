@@ -5,39 +5,76 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
-import type { GetLensAttributes } from '../../../types';
+
+import { isEmpty } from 'lodash';
+import type { GetLensAttributes, LensEmbeddableDataTableColumn } from '../../../types';
 
 const layerId = uuidv4();
 const topValuesOfStackByFieldColumnId = uuidv4();
-const countOfBreakdownFieldColumnId = uuidv4();
+const countColumnId = uuidv4();
 const topValuesOfBreakdownFieldColumnId = uuidv4();
-const defaultColumn = {
-  columnId: topValuesOfStackByFieldColumnId,
-  isTransposed: false,
-  width: 362,
-};
-const breakdownFieldColumns = [
+const defaultColumns = [
   {
-    columnId: countOfBreakdownFieldColumnId,
+    columnId: topValuesOfStackByFieldColumnId,
+    isTransposed: false,
+    width: 362,
+  },
+  {
+    columnId: countColumnId,
     isTransposed: false,
   },
+];
+const breakdownFieldColumns = [
   {
     columnId: topValuesOfBreakdownFieldColumnId,
     isTransposed: false,
   },
 ];
 const defaultColumnOrder = [topValuesOfStackByFieldColumnId];
+const getTopValuesOfBreakdownFieldColumnSettings = (
+  breakdownField: string
+): Record<string, LensEmbeddableDataTableColumn> => ({
+  [topValuesOfBreakdownFieldColumnId]: {
+    label: `Top values of ${breakdownField}`,
+    dataType: 'string',
+    operationType: 'terms',
+    scale: 'ordinal',
+    sourceField: breakdownField,
+    isBucketed: true,
+    params: {
+      size: 1000,
+      orderBy: {
+        type: 'column',
+        columnId: countColumnId,
+      },
+      orderDirection: 'desc',
+      otherBucket: true,
+      missingBucket: false,
+      parentFormat: {
+        id: 'terms',
+      },
+      include: [],
+      exclude: [],
+      includeIsRegex: false,
+      excludeIsRegex: false,
+    },
+  },
+});
 
 export const getAlertsTableLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
   extraOptions
 ) => {
-  const columnOrder = extraOptions?.breakdownField
-    ? [...defaultColumnOrder, topValuesOfBreakdownFieldColumnId, countOfBreakdownFieldColumnId]
-    : defaultColumnOrder;
+  const breakdownFieldProvided = !isEmpty(extraOptions?.breakdownField);
+  const countField =
+    extraOptions?.breakdownField && breakdownFieldProvided
+      ? extraOptions?.breakdownField
+      : stackByField;
+  const columnOrder = breakdownFieldProvided
+    ? [...defaultColumnOrder, topValuesOfBreakdownFieldColumnId, countColumnId]
+    : [...defaultColumnOrder, countColumnId];
 
-  const columnSettings = {
+  const columnSettings: Record<string, LensEmbeddableDataTableColumn> = {
     [topValuesOfStackByFieldColumnId]: {
       label: `Top values of ${stackByField}`,
       dataType: 'string',
@@ -49,7 +86,7 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
         size: 1000,
         orderBy: {
           type: 'column',
-          columnId: countOfBreakdownFieldColumnId,
+          columnId: countColumnId,
         },
         orderDirection: 'desc',
         otherBucket: true,
@@ -63,42 +100,20 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
         excludeIsRegex: false,
       },
     },
-    [countOfBreakdownFieldColumnId]: {
-      label: `Count of ${extraOptions?.breakdownField}`,
+    [countColumnId]: {
+      label: `Count of ${countField}`,
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
       scale: 'ratio',
-      sourceField: extraOptions?.breakdownField,
+      sourceField: countField,
       params: {
         emptyAsNull: true,
       },
     },
-    [topValuesOfBreakdownFieldColumnId]: {
-      label: `Top values of ${extraOptions?.breakdownField}`,
-      dataType: 'string',
-      operationType: 'terms',
-      scale: 'ordinal',
-      sourceField: extraOptions?.breakdownField,
-      isBucketed: true,
-      params: {
-        size: 1000,
-        orderBy: {
-          type: 'column',
-          columnId: countOfBreakdownFieldColumnId,
-        },
-        orderDirection: 'desc',
-        otherBucket: true,
-        missingBucket: false,
-        parentFormat: {
-          id: 'terms',
-        },
-        include: [],
-        exclude: [],
-        includeIsRegex: false,
-        excludeIsRegex: false,
-      },
-    },
+    ...(extraOptions?.breakdownField && breakdownFieldProvided
+      ? getTopValuesOfBreakdownFieldColumnSettings(extraOptions?.breakdownField)
+      : {}),
   };
 
   return {
@@ -107,7 +122,9 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
     visualizationType: 'lnsDatatable',
     state: {
       visualization: {
-        columns: [defaultColumn, ...breakdownFieldColumns],
+        columns: breakdownFieldProvided
+          ? [...defaultColumns, ...breakdownFieldColumns]
+          : defaultColumns,
         layerId,
         layerType: 'data',
       },
@@ -120,7 +137,7 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
         formBased: {
           layers: {
             [layerId]: {
-              columns: columnOrder.reduce<Record<string, GenericIndexPatternColumn>>(
+              columns: columnOrder.reduce<Record<string, LensEmbeddableDataTableColumn>>(
                 (acc, colId) => {
                   if (colId && columnSettings[colId]) {
                     acc[colId] = columnSettings[colId];
