@@ -209,7 +209,13 @@ function getOperationId(name: string): string {
 }
 
 function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
-  const routes = appRouter.getRoutes().filter((route) => route.options.access === 'public');
+  const routes = appRouter
+    .getRoutes()
+    .filter((route) => route.options.access === 'public')
+    .map((route) => ({
+      ...route,
+      path: route.path.replace('?', ''),
+    }));
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);

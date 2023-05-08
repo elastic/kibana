@@ -160,21 +160,21 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
  * teams to decide when or if they would like to opt into OAS spec generation for their
  * public routes via zod.
  */
-export type VersionedSpecValidation = z.ZodTypeAny | RouteValidationFunction<unknown> | Type<any>;
+export type VersionedSpecValidation<V> = z.ZodType<V> | RouteValidationFunction<V> | Type<V>;
 
 /** @experimental */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<
   RouteValidatorFullConfig<P, Q, B>,
   'params' | 'query' | 'body'
 > & {
-  params?: VersionedSpecValidation;
-  query?: VersionedSpecValidation;
-  body?: VersionedSpecValidation;
+  params?: VersionedSpecValidation<P>;
+  query?: VersionedSpecValidation<Q>;
+  body?: VersionedSpecValidation<B>;
 };
 
 /** @experimental */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: VersionedSpecValidation };
+  [statusCode: number]: { body: VersionedSpecValidation<any> };
   unsafe?: { body?: boolean };
 }
 
