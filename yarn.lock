@@ -4330,6 +4330,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/help-center-plugin@link:src/plugins/help_center":
+  version "0.0.0"
+  uid ""
+
 "@kbn/home-plugin@link:src/plugins/home":
   version "0.0.0"
   uid ""
