@@ -891,7 +891,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         datasourceStates: newState.datasourceStates,
         visualizationMap,
         visualizeTriggerFieldContext: payload.initialContext,
-        dataViews: newState.dataViews,
+        dataViews: selectDataViews({ lens: newState }),
       });
       if (suggestion) {
         return {

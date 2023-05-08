@@ -15,15 +15,16 @@ import {
   navigateAway,
   applyChanges,
   selectAutoApplyEnabled,
+  selectDataViews,
 } from '..';
-import { LensAppState, LensState } from '../types';
+import type { DataViewsState, LensAppState, LensState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 import { onActiveDataChange } from '../lens_slice';
 import { DatasourceMap } from '../../types';
 
-function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
-  const { activeDatasourceId, datasourceStates, dataViews } = state.lens;
+function isTimeBased(state: LensState, dataViews: DataViewsState, datasourceMap: DatasourceMap) {
+  const { activeDatasourceId, datasourceStates } = state.lens;
   return Boolean(
     activeDatasourceId &&
       datasourceStates[activeDatasourceId] &&
@@ -37,11 +38,12 @@ function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
 export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   let unsubscribeFromExternalContext: (() => void) | undefined;
   return (next: Dispatch) => (action: PayloadAction<unknown>) => {
+    const dataViews = selectDataViews(store.getState());
     if (
       !(action.payload as Partial<LensAppState>)?.searchSessionId &&
       !onActiveDataChange.match(action) &&
       (selectAutoApplyEnabled(store.getState()) || applyChanges.match(action)) &&
-      isTimeBased(store.getState(), storeDeps.datasourceMap)
+      isTimeBased(store.getState(), dataViews, storeDeps.datasourceMap)
     ) {
       updateTimeRange(storeDeps.lensServices.data, store.dispatch);
     }

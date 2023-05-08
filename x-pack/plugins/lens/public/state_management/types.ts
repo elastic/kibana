@@ -23,6 +23,7 @@ import type {
   VisualizeEditorContext,
   IndexPattern,
   IndexPatternRef,
+  IndexPatternInStateStore,
 } from '../types';
 export interface VisualizationState {
   activeId: string | null;
@@ -32,6 +33,12 @@ export interface VisualizationState {
 export interface DataViewsState {
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
+}
+
+// TODO - reconsider the naming of this interface
+export interface DataViewsStateInStateStore {
+  indexPatternRefs: IndexPatternRef[];
+  indexPatterns: Record<string, IndexPatternInStateStore>;
 }
 
 export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;
@@ -63,7 +70,7 @@ export interface LensAppState extends EditorFrameState {
   resolvedDateRange: DateRange;
   sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
   // Dataview/Indexpattern management has moved in here from datasource
-  dataViews: DataViewsState;
+  dataViews: DataViewsStateInStateStore;
 
   undoableOperationHistory: Delta[];
 }

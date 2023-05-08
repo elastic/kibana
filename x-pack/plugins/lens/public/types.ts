@@ -91,6 +91,8 @@ export interface IndexPattern {
   isPersisted: boolean;
 }
 
+export type IndexPatternInStateStore = Omit<IndexPattern, 'getFieldByName'>;
+
 export type IndexPatternField = FieldSpec & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;

@@ -9,9 +9,10 @@ import { createSelector } from '@reduxjs/toolkit';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { LensState } from './types';
+import { DataViewsState, LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from './utils';
+import { getFieldByNameFactory } from '../data_views_service/loader';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;
@@ -35,7 +36,20 @@ export const selectDatasourceStates = (state: LensState) => state.lens.datasourc
 export const selectVisualizationState = (state: LensState) => state.lens.visualization;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
-export const selectDataViews = (state: LensState) => state.lens.dataViews;
+export const selectDataViews = (state: LensState): DataViewsState => ({
+  ...state.lens.dataViews,
+  indexPatterns: {
+    ...Object.fromEntries(
+      Object.entries(state.lens.dataViews.indexPatterns).map(([id, indexPatternFromStore]) => [
+        id,
+        {
+          ...indexPatternFromStore,
+          getFieldByName: getFieldByNameFactory(indexPatternFromStore.fields),
+        },
+      ])
+    ),
+  },
+});
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
@@ -228,7 +242,7 @@ export const selectFramePublicAPI = createSelector(
       datasourceLayers: getDatasourceLayers(
         datasourceStates,
         datasourceMap,
-        dataViews.indexPatterns
+        dataViews.indexPatterns // REPLACE WITH SELECTOR
       ),
       activeData,
       dateRange,

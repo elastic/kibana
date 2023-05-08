@@ -27,6 +27,7 @@ import {
   LensAppState,
   DispatchSetState,
   switchAndCleanDatasource,
+  selectDataViews,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
@@ -310,8 +311,9 @@ export const LensTopNavMenu = ({
     datasourceStates,
     visualization,
     filters,
-    dataViews,
   } = useLensSelector((state) => state.lens);
+
+  const dataViews = useLensSelector(selectDataViews);
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = React.useCallback(
