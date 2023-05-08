@@ -54,6 +54,7 @@ export const ProjectNavigation: React.FC = ({ children }) => {
       isDocked={true}
       size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
       hideCloseButton={false}
+      ownFocus={false}
       button={
         <span css={buttonCSS}>
           <EuiButtonIcon
