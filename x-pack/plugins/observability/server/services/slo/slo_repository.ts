@@ -67,8 +67,19 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
   async save(slo: SLO): Promise<SLO> {
+    let existingSavedObjectId;
+    const findResponse = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${slo.id})`,
+    });
+    if (findResponse.total === 1) {
+      existingSavedObjectId = findResponse.saved_objects[0].id;
+    }
+
     const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
-      id: slo.id,
+      id: existingSavedObjectId,
       overwrite: true,
     });
 
@@ -76,26 +87,33 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 
   async findById(id: string): Promise<SLO> {
-    try {
-      const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
-      return toSLO(slo.attributes);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new SLONotFound(`SLO [${id}] not found`);
-      }
-      throw err;
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new SLONotFound(`SLO [${id}] not found`);
     }
+
+    return toSLO(response.saved_objects[0].attributes);
   }
 
   async deleteById(id: string): Promise<void> {
-    try {
-      await this.soClient.delete(SO_SLO_TYPE, id);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new SLONotFound(`SLO [${id}] not found`);
-      }
-      throw err;
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new SLONotFound(`SLO [${id}] not found`);
     }
+
+    await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
   async find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>> {
