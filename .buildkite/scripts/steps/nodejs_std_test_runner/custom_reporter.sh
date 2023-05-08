@@ -34,5 +34,7 @@ popd
 
 echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
 pushd packages/kbn-test/new_test_runner
-node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output output/test
+node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output ../../../target/junit/
 popd
+
+#target/junit
