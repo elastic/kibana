@@ -30,7 +30,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { ReportingExportTypesCore } from '@kbn/reporting-export-types/server/core';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
 import type { ReportTaskParams } from './lib/tasks';
@@ -76,12 +75,12 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
 ) => Promise<TaskRunResult>;
 
 export type CreateJobFnFactory<CreateJobFnType> = (
-  reporting: ReportingCore | ReportingExportTypesCore,
+  reporting: ReportingCore,
   logger: Logger
 ) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
-  reporting: ReportingCore | ReportingExportTypesCore,
+  reporting: ReportingCore,
   logger: Logger
 ) => RunTaskFnType;
 
@@ -120,10 +119,7 @@ export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'ti
 
 export type { BaseParams, BasePayload };
 
-export interface ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
-> {
+export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
   id: string;
   name: string;
   jobType: string;

@@ -14,12 +14,12 @@ import {
   LICENSE_TYPE_BASIC,
   CSV_JOB_TYPE as jobType,
 } from '@kbn/reporting-plugin/common/constants';
-import type { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
 import { JobParamsCSV } from '../../../common';
 import { TaskPayloadCSV } from '../../../common/csv_searchsource';
-import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
+import { createJobFnFactory } from './create_job';
+import { ExportTypeDefinition } from '../common/types';
 
 export const getExportType = (): ExportTypeDefinition<
   CreateJobFn<JobParamsCSV>,

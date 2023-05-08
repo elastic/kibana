@@ -17,14 +17,23 @@ import {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-plugin/common/constants';
 import { ReportingConfig } from '@kbn/reporting-plugin/server';
 import { ReportingConfigType } from '@kbn/reporting-plugin/server/config/schema';
 import { checkLicense, ExportTypesRegistry } from '@kbn/reporting-plugin/server/lib';
 import { reportingEventLoggerFactory } from '@kbn/reporting-plugin/server/lib/event_logger/logger';
 import { IReport, ReportingStore } from '@kbn/reporting-plugin/server/lib/store';
 import { ReportTaskParams } from '@kbn/reporting-plugin/server/lib/tasks';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import {
+  PdfScreenshotOptions,
+  PdfScreenshotResult,
+  PngScreenshotOptions,
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
+} from '@kbn/screenshotting-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -52,6 +61,7 @@ export interface ReportingExportTypesStartDeps {
   security?: SecurityPluginStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
+  discover: DiscoverServerPluginStart;
 }
 
 export class ReportingExportTypesCore {
@@ -198,6 +208,25 @@ export class ReportingExportTypesCore {
 
     return await Rx.firstValueFrom(
       license$.pipe(map((license: any) => checkLicense(registry, license)))
+    );
+  }
+
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  public getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      Rx.switchMap(({ screenshotting }) => {
+        return screenshotting.getScreenshots({
+          ...options,
+          urls: options.urls!.map((url) =>
+            typeof url === 'string'
+              ? url
+              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+          ),
+        } as ScreenshotOptions);
+      })
     );
   }
 }

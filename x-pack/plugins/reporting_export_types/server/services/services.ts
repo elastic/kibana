@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/server';
 
 export const [getFieldFormats, setFieldFormats] =
-  createGetterSetter<FieldFormatsSetup>('FieldFormats');
+  createGetterSetter<FieldFormatsStart>('FieldFormats');

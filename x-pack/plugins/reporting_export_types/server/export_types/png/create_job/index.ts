@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
+import type { CreateJobFn } from '@kbn/reporting-plugin/server/types';
 import { JobParamsPNGDeprecated } from '../../../../common';
 import { TaskPayloadPNG } from '../../../../common/png';
 import { validateUrls } from '../../common';
+import { CreateJobFnFactory } from '../../common/types';
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPNGDeprecated, TaskPayloadPNG>

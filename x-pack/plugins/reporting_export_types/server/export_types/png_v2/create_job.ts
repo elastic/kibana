@@ -6,8 +6,9 @@
  */
 
 import { JobParamsPNGV2 } from '@kbn/reporting-plugin/common/types';
-import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
+import type { CreateJobFn } from '@kbn/reporting-plugin/server/types';
 import { TaskPayloadPNGV2 } from '../../../common/png_v2';
+import { CreateJobFnFactory } from '../common/types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPNGV2, TaskPayloadPNGV2>> =
   function createJobFactoryFn() {
