@@ -35,5 +35,6 @@
     "@kbn/find-used-node-modules",
     "@kbn/ts-projects",
     "@kbn/repo-packages",
+    "@kbn/config-schema",
   ]
 }
