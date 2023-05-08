@@ -152,7 +152,7 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
-        maxConcurrency: -1,
+        workerCost: 0.01,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });

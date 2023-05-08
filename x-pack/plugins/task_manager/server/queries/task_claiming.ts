@@ -91,10 +91,11 @@ export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershi
   Array.isArray((result as ClaimOwnershipResult).docs);
 
 interface TaskClaimingBatches {
-  singleConcurrency: string[];
-  limitedConcurrency: string[];
-  unlimitedConcurrency: string[];
   skipped: string[];
+  singleConcurrency: string[];
+  byCost: {
+    [cost: number]: string[];
+  };
 }
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
@@ -134,9 +135,8 @@ export class TaskClaiming {
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
     const result: TaskClaimingBatches = {
       singleConcurrency: [],
-      limitedConcurrency: [],
-      unlimitedConcurrency: [],
       skipped: [],
+      byCost: {},
     };
 
     for (const taskTypeDef of definitions.getAllDefinitions()) {
@@ -145,9 +145,9 @@ export class TaskClaiming {
       } else if (taskTypeDef.maxConcurrency === 0) {
         result.skipped.push(taskTypeDef.type);
       } else if (!taskTypeDef.maxConcurrency || taskTypeDef.maxConcurrency > 1) {
-        result.limitedConcurrency.push(taskTypeDef.type);
-      } else if (taskTypeDef.maxConcurrency === -1) {
-        result.unlimitedConcurrency.push(taskTypeDef.type);
+        result.byCost[taskTypeDef.workerCost] = result.byCost[taskTypeDef.workerCost]
+          ? result.byCost[taskTypeDef.workerCost].concat(taskTypeDef.type)
+          : [taskTypeDef.type];
       }
     }
 
@@ -195,46 +195,49 @@ export class TaskClaiming {
       TASK_MANAGER_TRANSACTION_TYPE
     );
 
+    const taskCostGroups = Object.keys(this.taskClaimingBatchesByType.byCost)
+      .map((cost) => parseFloat(cost))
+      .sort();
     // TODO: Missing code about unrecognized tasks
     try {
-      const [resultForSingle, resultForLimited, resultForUnlimited] = await Promise.all([
-        // TODO: Optimize query to support one per task type instead of 1 for all these types
-        this.searchForTasks({
-          size: 1,
-          taskTypes: this.taskClaimingBatchesByType.singleConcurrency,
-        }),
-        this.searchForTasks({
-          // adding single concurrency number in case we don't find any singleConcurrency task types
-          size: initialCapacity + this.taskClaimingBatchesByType.singleConcurrency.length,
-          taskTypes: this.taskClaimingBatchesByType.limitedConcurrency,
-        }),
-        this.searchForTasks({
-          size: 1000,
-          taskTypes: this.taskClaimingBatchesByType.unlimitedConcurrency,
-        }),
+      const results = await Promise.all([
+        ...this.taskClaimingBatchesByType.singleConcurrency.map((type) =>
+          this.searchForTasks({ size: 1, taskTypes: [type] })
+        ),
+        ...taskCostGroups.map((cost) =>
+          this.searchForTasks({
+            size: initialCapacity / cost,
+            taskTypes: this.taskClaimingBatchesByType.byCost[cost],
+          })
+        ),
       ]);
 
+      // Calculate capacity again in case more capacity opened up since the search queries
+      let availableCapacity = this.getCapacity();
       const docsToUpdate: ConcreteTaskInstance[] = [];
-      for (const doc of resultForSingle.concat(
-        resultForLimited.splice(0, initialCapacity - resultForSingle.length),
-        resultForUnlimited
-      )) {
-        const updates: Partial<ConcreteTaskInstance> = {};
+      for (const result of results) {
+        for (const doc of result) {
+          if (availableCapacity - this.definitions.get(doc.taskType).workerCost >= 0) {
+            const updates: Partial<ConcreteTaskInstance> = {};
 
-        if (this.unusedTypes.includes(doc.taskType)) {
-          updates.status = TaskStatus.Unrecognized;
-        } else {
-          if (doc.retryAt && doc.retryAt < new Date()) {
-            updates.scheduledAt = doc.retryAt || undefined;
-          } else {
-            updates.scheduledAt = doc.runAt;
+            if (this.unusedTypes.includes(doc.taskType)) {
+              updates.status = TaskStatus.Unrecognized;
+            } else {
+              if (doc.retryAt && doc.retryAt < new Date()) {
+                updates.scheduledAt = doc.retryAt || undefined;
+              } else {
+                updates.scheduledAt = doc.runAt;
+              }
+
+              updates.status = TaskStatus.Claiming;
+              updates.ownerId = this.taskStore.taskManagerId;
+              updates.retryAt = claimOwnershipUntil;
+            }
+            docsToUpdate.push({ ...doc, ...updates });
+
+            availableCapacity -= this.definitions.get(doc.taskType).workerCost;
           }
-
-          updates.status = TaskStatus.Claiming;
-          updates.ownerId = this.taskStore.taskManagerId;
-          updates.retryAt = claimOwnershipUntil;
         }
-        docsToUpdate.push({ ...doc, ...updates });
       }
 
       if (docsToUpdate.length === 0) {
