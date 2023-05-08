@@ -22,7 +22,7 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -152,12 +152,13 @@ export interface GetSummarizedAlertsFnOpts {
   alertsFilter?: AlertsFilter | null;
 }
 
-// TODO - add type for these alerts when we determine which alerts-as-data
-// fields will be made available in https://github.com/elastic/kibana/issues/143741
-
-interface SummarizedAlertsChunk {
+export type AlertHit = Alert & {
+  _id: string;
+  _index: string;
+};
+export interface SummarizedAlertsChunk {
   count: number;
-  data: unknown[];
+  data: AlertHit[];
 }
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
