@@ -190,7 +190,7 @@ describe('Detection response view', () => {
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
-              cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', `User name`);
+              cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', `Username`);
               cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${userName}1`);
             });
         });
@@ -215,7 +215,7 @@ describe('Detection response view', () => {
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
-              cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', 'User name');
+              cy.get(OPTION_LIST_LABELS).eq(1).should('have.text', 'Username');
               cy.get(OPTION_LIST_VALUES(1)).should('have.text', `${userName}1`);
               cy.get(OPTION_LIST_LABELS).eq(2).should('have.text', 'Severity');
               cy.get(OPTION_LIST_VALUES(2)).should('have.text', `${severityVal}1`);

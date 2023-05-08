@@ -203,7 +203,7 @@ export const HOST_ALERTS_HOSTNAME_COLUMN = i18n.translate(
 export const USER_ALERTS_USERNAME_COLUMN = i18n.translate(
   'xpack.securitySolution.detectionResponse.userAlertsUserName',
   {
-    defaultMessage: 'User name',
+    defaultMessage: 'Username',
   }
 );
 

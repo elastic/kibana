@@ -94,7 +94,7 @@ describe('UserAlertsTable', () => {
     const { getAllByRole } = renderComponent();
 
     const columnHeaders = getAllByRole('columnheader');
-    expect(columnHeaders.at(0)).toHaveTextContent('User name');
+    expect(columnHeaders.at(0)).toHaveTextContent('Username');
     expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
     expect(columnHeaders.at(2)).toHaveTextContent('Critical');
     expect(columnHeaders.at(3)).toHaveTextContent('High');
@@ -140,7 +140,7 @@ describe('UserAlertsTable', () => {
     fireEvent.click(getByTestId('userSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'User name' },
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
     ]);
   });
 
@@ -151,7 +151,7 @@ describe('UserAlertsTable', () => {
     fireEvent.click(getByTestId('userSeverityAlertsTable-criticalLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'User name' },
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
       {
         fieldName: 'kibana.alert.severity',
         selectedOptions: ['critical'],
