@@ -61,7 +61,7 @@ export class CloudDataMigrationPlugin
         image: PrettyPicture,
         description: i18n.translate('xpack.cloudDataMigration.drescription', {
           defaultMessage:
-            'Get instant access to the latest features that optimize performance, streamline your migration process with no downtime, and take advantage of built-in security best practices all within the cloud.',
+            'Get instant access to the latest features that optimize performance, streamline your migration process with no downtime, and take advantage of built-in security best practices.',
         }),
       });
     }

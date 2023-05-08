@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import Draggable from 'react-draggable';
+// import { Resizable } from 'react-resizable';
 import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
 import {
   EuiFlyout,
@@ -27,6 +29,9 @@ import {
   EuiButton,
   EuiSearchBar,
   EuiSplitPanel,
+  EuiPanel,
+  EuiOverlayMask,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -183,25 +188,38 @@ export const HelpCenterFlyout = (
 
   return (
     <EuiPortal>
-      <EuiFlyout
-        {...rest}
-        onClose={closeFlyout}
-        size="m"
-        aria-labelledby="flyoutSmallTitle"
-        className="kbnNews__flyout"
-        data-test-subj="HelpCenterFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
+      {/* <EuiFocusTrap onClickOutside={closeFlyout}> */}
+      <Draggable>
+        <EuiPanel
+          paddingSize="l"
+          // {...rest}
+          // onClose={closeFlyout}
+          // size="m"
+          css={css`
+            min-width: 50vw;
+            height: 90vh;
+            position: fixed;
+            max-height: 76vh;
+            max-inline-size: 480px;
+            max-block-size: auto;
+            inset-inline-end: 46px;
+            inset-block-start: 128px;
+          `}
+          aria-labelledby="flyoutSmallTitle"
+          className="eui-yScroll"
+          data-test-subj="HelpCenterFlyout"
+        >
           <EuiTitle size="s">
             <h2 id="flyoutSmallTitle">
               <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
             </h2>
           </EuiTitle>
 
-          <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs()}</EuiTabs>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>{selectedTabContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
+          <EuiTabs>{renderTabs()}</EuiTabs>
+          <EuiSpacer size="l" />
+
+          {selectedTabContent}
+
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
@@ -226,8 +244,9 @@ export const HelpCenterFlyout = (
               ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+          {/* </div> */}
+        </EuiPanel>
+      </Draggable>
     </EuiPortal>
   );
 };
