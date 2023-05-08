@@ -11,7 +11,6 @@ import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -39,7 +38,6 @@ const mountComponent = ({
   isPlainRecord = false,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
   storage,
-  savedSearch = savedSearchMock,
 }: {
   hideChart?: boolean;
   isPlainRecord?: boolean;
@@ -99,8 +97,6 @@ const mountComponent = ({
   const props: DiscoverMainContentProps = {
     isPlainRecord,
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
-    savedSearch,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
