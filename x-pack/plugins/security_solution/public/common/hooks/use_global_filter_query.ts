@@ -17,7 +17,7 @@ import { useInvalidFilterQuery } from './use_invalid_filter_query';
 import type { ESBoolQuery } from '../../../common/typed_json';
 
 interface GlobalFilterQueryProps {
-  extraFilters?: Filter[];
+  extraFilter?: Filter;
   dataView?: DataViewBase;
   queryId?: string;
 }
@@ -28,7 +28,7 @@ interface GlobalFilterQueryProps {
  *
  */
 export const useGlobalFilterQuery = ({
-  extraFilters,
+  extraFilter,
   dataView,
   queryId = 'GlobalFilterQuery',
 }: GlobalFilterQueryProps = {}) => {
@@ -45,8 +45,8 @@ export const useGlobalFilterQuery = ({
   const filters = useMemo(() => {
     const enabledFilters = globalFilters.filter((f) => f.meta.disabled === false);
 
-    return extraFilters ? [...enabledFilters, ...extraFilters] : enabledFilters;
-  }, [extraFilters, globalFilters]);
+    return extraFilter ? [...enabledFilters, extraFilter] : enabledFilters;
+  }, [extraFilter, globalFilters]);
 
   const { filterQuery, kqlError } = useMemo(
     () => buildQueryOrError(query, filters, getEsQueryConfig(uiSettings), dataView),

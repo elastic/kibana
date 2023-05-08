@@ -74,7 +74,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   }, [riskEntity, selectedSeverity]);
 
   const { filterQuery } = useGlobalFilterQuery({
-    extraFilters: severityFilter ? [severityFilter] : undefined,
+    extraFilter: severityFilter,
   });
 
   const timerange = useMemo(
