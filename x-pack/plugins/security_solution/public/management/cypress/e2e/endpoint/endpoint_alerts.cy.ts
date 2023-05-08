@@ -25,7 +25,7 @@ describe('Endpoint generated alerts', () => {
 
   before(() => {
     getEndpointIntegrationVersion().then((version) => {
-      createAgentPolicyTask('alerts test', version).then((data) => {
+      createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
         policy = indexedPolicy.integrationPolicies[0];
 

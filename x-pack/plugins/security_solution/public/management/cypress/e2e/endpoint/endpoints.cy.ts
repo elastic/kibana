@@ -49,7 +49,7 @@ describe('Endpoints page', () => {
         initialAgentData = agentData;
       });
       getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask('Reassign ', version).then((data) => {
+        createAgentPolicyTask(version).then((data) => {
           response = data;
         });
       });

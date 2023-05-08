@@ -8,12 +8,13 @@
 import type { Agent } from '@kbn/fleet-plugin/common';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/close_all_toasts';
-import { createAgentPolicyTask, toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
+import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
+  createAgentPolicyTask,
   getAgentByHostName,
   getEndpointIntegrationVersion,
   reassignAgentPolicy,

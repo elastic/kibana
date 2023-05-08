@@ -59,10 +59,10 @@ export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
   });
 
 export const createAgentPolicyTask = (
-  policyPrefix: string,
-  version: string
+  version: string,
+  policyPrefix?: string
 ): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
-  const policyName = `${policyPrefix} ${Math.random().toString(36).substring(2, 7)}`;
+  const policyName = `${policyPrefix || 'Reassign'} ${Math.random().toString(36).substring(2, 7)}`;
 
   return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
     policyName,
