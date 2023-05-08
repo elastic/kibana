@@ -81,7 +81,6 @@ describe('ALL - Add Integration', () => {
     it('should add the old integration and be able to upgrade it', () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
-      cy.contains(integrationName);
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
