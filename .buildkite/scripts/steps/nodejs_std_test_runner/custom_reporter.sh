@@ -22,6 +22,10 @@ echo '--- Verify Install'
 node --version
 npm version
 
-echo '--- New NodeJS Std Test Runner with Custom Reporter'
+echo '--- New NodeJS Std Test Runner with Custom Reporter [Transform Stream]'
 pushd packages/kbn-test/new_test_runner
 node --test-reporter=./lifecycle_stream.mjs --test
+
+echo '--- New NodeJS Std Test Runner with Custom Reporter [Generator Fn]'
+pushd packages/kbn-test/new_test_runner
+node --test-reporter=./lifecycle_gen.mjs --test
