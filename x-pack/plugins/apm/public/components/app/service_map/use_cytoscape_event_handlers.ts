@@ -68,21 +68,22 @@ function getLayoutOptions({
   //   ranker: 'network-simplex',
   // };
   return {
-    randomize: true,
     animationDuration: animationOptions.duration,
     animationEasing: animationOptions.easing,
-    name: 'fcose',
     padding: nodeHeight,
-    idealEdgeLength: (edge) => 100,
-    //    nodeSeparation: 200,
-    tilingPaddingVertical: 75,
+    name: 'dagre',
+    nodeSeparation: 200,
     // Represents the amount of the horizontal space to put between the zero degree members during the tiling operation(can also be a function)
-    tilingPaddingHorizontal: 75,
-    // spacingFactor: 1.2,
-    // edgeSep: 32,
-    // rankSep: 128,
-    // rankDir: 'LR',
-    // ranker: 'network-simplex',
+    spacingFactor: 1.2,
+    edgeSep: 32,
+    rankSep: 128,
+    rankDir: 'LR',
+    ranker: 'network-simplex',
+    // name: 'fcose',
+    // randomize: true,
+    // tilingPaddingVertical: 75,
+    // tilingPaddingHorizontal: 75,
+    // idealEdgeLength: (edge) => 100,
   };
 }
 function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
