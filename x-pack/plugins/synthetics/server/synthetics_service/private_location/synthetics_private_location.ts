@@ -9,6 +9,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { stringifyString } from '../../../common/formatters/formatting_utils';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import {
   ConfigKey,
@@ -86,9 +87,9 @@ export class SyntheticsPrivateLocation {
         {
           ...(config as Partial<MonitorFields>),
           config_id: config.fields?.config_id,
-          location_name: privateLocation.label,
-          'monitor.project.id': config.fields?.['monitor.project.name'],
-          'monitor.project.name': config.fields?.['monitor.project.name'],
+          location_name: stringifyString(privateLocation.label),
+          'monitor.project.id': stringifyString(config.fields?.['monitor.project.name']),
+          'monitor.project.name': stringifyString(config.fields?.['monitor.project.name']),
         },
         globalParams
       );
