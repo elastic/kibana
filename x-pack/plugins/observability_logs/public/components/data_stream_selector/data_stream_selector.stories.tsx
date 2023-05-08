@@ -23,8 +23,48 @@ const DataStreamSelectorTemplate: Story<DataStreamSelectorProps> = (args) => (
 export const Basic = DataStreamSelectorTemplate.bind({});
 Basic.args = {
   title: 'Current stream name',
-  integrations: [],
+  integrations: [
+    {
+      name: 'atlassian_jira',
+      version: '1.8.0',
+      status: 'installed',
+      dataStreams: [
+        {
+          name: 'Atlassian metrics stream',
+          title: 'metrics-*',
+        },
+        {
+          name: 'Atlassian secondary',
+          title: 'metrics-*',
+        },
+      ],
+    },
+    {
+      name: 'docker',
+      version: '2.4.3',
+      status: 'installed',
+      dataStreams: [
+        {
+          name: 'Docker stream',
+          title: 'metrics-*',
+        },
+      ],
+    },
+    {
+      name: 'system',
+      version: '1.27.1',
+      status: 'installed',
+      dataStreams: [
+        {
+          name: 'System metrics logs',
+          title: 'metrics-*',
+        },
+      ],
+    },
+  ],
   uncategorizedStreams: [],
+  // eslint-disable-next-line no-console
+  onStreamSelected: async (stream) => console.log('Create ad hoc view for stream: ', stream),
   // eslint-disable-next-line no-console
   onUncategorizedClick: () => console.log('Load uncategorized streams...'),
 };

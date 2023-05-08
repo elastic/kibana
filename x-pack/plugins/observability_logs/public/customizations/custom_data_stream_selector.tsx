@@ -15,14 +15,60 @@ interface Props {
 }
 
 export function CustomDataStreamSelector({ stateContainer }: Props) {
+  // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
+
+  const handleStreamSelection = async (dataStream) => {
+    return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream.title);
+  };
 
   return (
     <DataStreamSelector
       title={dataView.getName()}
-      integrations={[]}
+      integrations={mockIntegrations}
       uncategorizedStreams={[]}
+      onStreamSelected={handleStreamSelection}
       onUncategorizedClick={() => console.log('fetch uncategorized streams')}
     />
   );
 }
+
+const mockIntegrations = [
+  {
+    name: 'atlassian_jira',
+    version: '1.8.0',
+    status: 'installed',
+    dataStreams: [
+      {
+        name: 'Atlassian metrics stream',
+        title: 'metrics-*',
+      },
+      {
+        name: 'Atlassian secondary',
+        title: 'metrics-*',
+      },
+    ],
+  },
+  {
+    name: 'docker',
+    version: '2.4.3',
+    status: 'installed',
+    dataStreams: [
+      {
+        name: 'Docker stream',
+        title: 'metrics-*',
+      },
+    ],
+  },
+  {
+    name: 'system',
+    version: '1.27.1',
+    status: 'installed',
+    dataStreams: [
+      {
+        name: 'System metrics logs',
+        title: 'metrics-*',
+      },
+    ],
+  },
+];
