@@ -19,8 +19,9 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { AnalyticsClient } from '@kbn/analytics-client';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
   ChromeBadge,
@@ -34,6 +35,7 @@ import type {
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { AnalyticsClient } from '@kbn/analytics-client';
 import { LoadingIndicator } from '../loading_indicator';
 import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
@@ -74,6 +76,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
+  context$: AnalyticsClient['registerContextProvider'];
 }
 
 export function Header({
@@ -92,6 +95,9 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
+  const context$ = new BehaviorSubject({
+    page_title: 'null',
+  });
 
   if (!isVisible) {
     return (
@@ -113,6 +119,7 @@ export function Header({
         breadcrumbs$={observables.breadcrumbs$}
         customBranding$={customBranding$}
         appId$={application.currentAppId$}
+        context$={context$}
       />
       <SkipToMainContent />
 
