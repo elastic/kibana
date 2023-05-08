@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonProps,
@@ -16,9 +17,10 @@ import {
   EuiPopover,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import React from 'react';
+import { PackageIcon } from '@kbn/fleet-plugin/public';
+
 import { useBoolean } from '../../hooks/use_boolean';
-import { useInternalStateSelector } from '../../utils/internal_state_container_context';
+
 import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
@@ -32,6 +34,7 @@ export interface DataStreamSelectorProps {
   title: string;
   integrations: any[];
   uncategorizedStreams: any[];
+  onStreamSelected: (dataStream: any) => Promise<void>;
   onUncategorizedClick: () => void;
 }
 
@@ -39,10 +42,35 @@ export function DataStreamSelector({
   title,
   integrations,
   uncategorizedStreams,
+  onStreamSelected,
   onUncategorizedClick,
 }: DataStreamSelectorProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+
+  const handleStreamSelection = (dataStream) => {
+    onStreamSelected(dataStream).then(closePopover);
+  };
+
+  const { items: integrationItems, panels: integrationPanels } = useMemo(
+    () =>
+      buildItemsTree({
+        type: 'integration',
+        list: integrations,
+        onStreamSelected: handleStreamSelection,
+      }),
+    [integrations]
+  );
+
+  const { items: uncategorizedStreamsItems, panels: uncategorizedStreamsPanels } = useMemo(
+    () =>
+      buildItemsTree({
+        type: 'uncategorizedStreams',
+        list: uncategorizedStreams,
+        onStreamSelected: handleStreamSelection,
+      }),
+    [uncategorizedStreams]
+  );
 
   const panels = [
     {
@@ -64,29 +92,16 @@ export function DataStreamSelector({
       id: 1,
       title: integrationsLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: [
-        {
-          name: 'PDF reports',
-          icon: 'user',
-          onClick: () => {
-            closePopover();
-          },
-        },
-        {
-          name: 'Permalinks',
-          icon: 'user',
-          onClick: () => {
-            closePopover();
-          },
-        },
-      ],
+      items: integrationItems,
     },
     {
       id: 2,
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      content: <div style={{ padding: 16 }} />,
+      items: uncategorizedStreamsItems,
     },
+    ...integrationPanels,
+    ...uncategorizedStreamsPanels,
   ];
 
   const contextPanelItems = [
@@ -162,4 +177,23 @@ const SearchControls = () => {
   //     </EuiFlexItem>
   //   </EuiFlexGroup>
   // );
+};
+
+const buildItemsTree = ({ type, list, onStreamSelected }) => {
+  const items = list.map((entry) => ({
+    name: entry.name,
+    icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" />,
+    panel: `${type}-${entry.name}`,
+  }));
+
+  const panels = list.map((entry) => ({
+    id: `${type}-${entry.name}`,
+    title: entry.name,
+    items: entry.dataStreams.map((stream) => ({
+      name: stream.name,
+      onClick: () => onStreamSelected(stream),
+    })),
+  }));
+
+  return { items, panels };
 };
