@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { CLOSE_ALERT_BTN, MARK_ALERT_ACKNOWLEDGED_BTN, OPEN_ALERT_BTN } from '../screens/alerts';
 import {
   ALERT_FLYOUT,
   ENRICHMENT_COUNT_NOTIFICATION,
   JSON_VIEW_TAB,
   TABLE_TAB,
   FILTER_INPUT,
+  OVERVIEW_STATUS,
+  EVENT_DETAILS_ALERT_STATUS_POPOVER,
 } from '../screens/alerts_details';
 import { TIMELINE_TITLE, QUERY_TAB_BUTTON } from '../screens/timeline';
 
@@ -60,4 +63,21 @@ export const verifyInsightCount = ({
       // The alert count in this timeline should match the count shown on the alert flyout
       cy.get(QUERY_TAB_BUTTON).should('contain.text', actualCount);
     });
+};
+
+export const changeAlertStatusTo = (status: 'open' | 'closed' | 'acknowledged') => {
+  cy.get(OVERVIEW_STATUS).trigger('click');
+  cy.get(EVENT_DETAILS_ALERT_STATUS_POPOVER).should('be.visible');
+
+  if (status === 'acknowledged') {
+    cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible').trigger('click');
+    return;
+  }
+  if (status === 'open') {
+    cy.get(OPEN_ALERT_BTN).should('be.visible').trigger('click');
+  }
+
+  if (status === 'closed') {
+    cy.get(CLOSE_ALERT_BTN).should('be.visible').trigger('click');
+  }
 };
