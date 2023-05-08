@@ -9,13 +9,8 @@ import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import {
-  CaseResponse,
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -243,7 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
         // all fields that contain the UserRt definition must be included here (aka created_by, closed_by, and updated_by)
         // see https://github.com/elastic/kibana/issues/139503
-        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+        const queryFields: Array<keyof Case | Array<keyof Case>> = [
           ['title', 'created_by', 'closed_by', 'updated_by'],
           ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
         ];
@@ -501,7 +496,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      const createCasesWithTitleAsNumber = async (total: number): Promise<CaseResponse[]> => {
+      const createCasesWithTitleAsNumber = async (total: number): Promise<Case[]> => {
         const responsePromises = [];
         for (let i = 0; i < total; i++) {
           // this doesn't guarantee that the cases will be created in order that the for-loop executes,

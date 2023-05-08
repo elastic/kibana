@@ -24,14 +24,6 @@ interface GetSavedSearchDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
-const getEmptySavedSearch = ({
-  search,
-}: {
-  search: DataPublicPluginStart['search'];
-}): SavedSearch => ({
-  searchSource: search.searchSource.createEmpty(),
-});
-
 const findSavedSearch = async (
   savedSearchId: string,
   { search, savedObjectsClient, spaces, savedObjectsTagging }: GetSavedSearchDependencies
@@ -82,11 +74,29 @@ const findSavedSearch = async (
 };
 
 /** @public **/
+
+/**
+ * Returns a new saved search
+ * Used when e.g. Discover is opened without a saved search id
+ * @param search
+ */
+export const getNewSavedSearch = ({
+  search,
+}: {
+  search: DataPublicPluginStart['search'];
+}): SavedSearch => ({
+  searchSource: search.searchSource.createEmpty(),
+});
+/**
+ * Returns a persisted or a new saved search
+ * @param savedSearchId - when undefined a new saved search is returned
+ * @param dependencies
+ */
 export const getSavedSearch = async (
   savedSearchId: string | undefined,
   dependencies: GetSavedSearchDependencies
 ) => {
   return savedSearchId
     ? findSavedSearch(savedSearchId, dependencies)
-    : getEmptySavedSearch(dependencies);
+    : getNewSavedSearch(dependencies);
 };

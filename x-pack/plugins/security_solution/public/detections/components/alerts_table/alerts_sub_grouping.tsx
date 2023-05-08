@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -193,13 +193,17 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
-  const buckets = useMemo(
-    () => parseGroupingQuery(alertsGroupsData?.aggregations?.groupByFields?.buckets ?? []),
-    [alertsGroupsData]
+  const [queriedGroup, setQueriedGroup] = useState('');
+
+  const aggs = useMemo(
+    // queriedGroup because `selectedGroup` updates before the query response
+    () => parseGroupingQuery(queriedGroup, alertsGroupsData?.aggregations),
+    [alertsGroupsData?.aggregations, queriedGroup]
   );
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
+      setQueriedGroup(queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '');
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
@@ -248,10 +252,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: {
           ...alertsGroupsData?.aggregations,
-          groupByFields: {
-            ...alertsGroupsData?.aggregations?.groupByFields,
-            buckets,
-          },
+          ...aggs,
         },
         groupingLevel,
         inspectButton: inspect,
@@ -268,7 +269,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       getGrouping,
       pageIndex,
       alertsGroupsData,
-      buckets,
+      aggs,
       groupingLevel,
       inspect,
       loading,

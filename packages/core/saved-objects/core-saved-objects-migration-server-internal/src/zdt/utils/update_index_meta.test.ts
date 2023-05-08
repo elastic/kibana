@@ -8,7 +8,7 @@
 
 import type {
   IndexMappingMeta,
-  ModelVersionMap,
+  VirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   setMetaDocMigrationStarted,
@@ -18,12 +18,12 @@ import {
 
 const getDefaultMeta = (): IndexMappingMeta => ({
   mappingVersions: {
-    foo: 1,
-    bar: 1,
+    foo: '10.1.0',
+    bar: '10.1.0',
   },
   docVersions: {
-    foo: 1,
-    bar: 1,
+    foo: '10.1.0',
+    bar: '10.1.0',
   },
   migrationState: {
     convertingDocuments: false,
@@ -33,7 +33,7 @@ const getDefaultMeta = (): IndexMappingMeta => ({
 describe('setMetaMappingMigrationComplete', () => {
   it('updates the meta to set the mappingVersions', () => {
     const meta: IndexMappingMeta = getDefaultMeta();
-    const versions: ModelVersionMap = { foo: 3, bar: 2 };
+    const versions: VirtualVersionMap = { foo: '10.3.0', bar: '10.2.0' };
 
     const updated = setMetaMappingMigrationComplete({ meta, versions });
 
@@ -67,7 +67,7 @@ describe('setMetaDocMigrationComplete', () => {
         convertingDocuments: true,
       },
     };
-    const versions: ModelVersionMap = { foo: 3, bar: 2 };
+    const versions: VirtualVersionMap = { foo: '10.3.0', bar: '10.2.0' };
 
     const updated = setMetaDocMigrationComplete({ meta, versions });
 
