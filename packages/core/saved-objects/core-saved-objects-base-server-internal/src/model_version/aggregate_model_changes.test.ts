@@ -21,6 +21,7 @@ describe('aggregateMappingAdditions', () => {
       bar: { type: 'keyword' },
     });
   });
+
   it('merges nested properties', () => {
     const changes: SavedObjectsModelChange[] = [
       {
@@ -42,6 +43,7 @@ describe('aggregateMappingAdditions', () => {
       },
     });
   });
+
   it('accepts other types of changes', () => {
     const changes: SavedObjectsModelChange[] = [
       { type: 'mappings_addition', addedMappings: { foo: { type: 'text' } } },
@@ -53,6 +55,7 @@ describe('aggregateMappingAdditions', () => {
       foo: { type: 'text' },
     });
   });
+
   it('override in order in case of definition conflict', () => {
     const changes: SavedObjectsModelChange[] = [
       { type: 'mappings_addition', addedMappings: { foo: { type: 'text' } } },
