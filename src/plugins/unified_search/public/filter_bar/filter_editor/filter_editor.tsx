@@ -107,7 +107,7 @@ export const strings = {
     }),
   getQueryDslDocsLinkLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslDocsLinkLabel', {
-      defaultMessage: 'Learn about query DSL syntax',
+      defaultMessage: 'Learn about Query DSL syntax',
     }),
   getQueryDslAriaLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
