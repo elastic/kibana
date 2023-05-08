@@ -260,7 +260,7 @@ export function ConfigureLogs() {
                             external
                             target="_blank"
                             href={
-                              'https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html'
+                              'https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme'
                             }
                           >
                             {i18n.translate(
