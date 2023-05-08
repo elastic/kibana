@@ -826,7 +826,7 @@ describe('AlertsHistogramPanel', () => {
             <AlertsHistogramPanel {...defaultProps} />
           </TestProviders>
         );
-        expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
+        expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(155);
       });
     });
 
