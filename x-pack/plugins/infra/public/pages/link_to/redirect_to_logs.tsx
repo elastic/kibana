@@ -8,7 +8,7 @@
 import { useLocation, useParams } from 'react-router-dom';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { DEFAULT_LOG_VIEW_ID } from '../../observability_logs/log_view_state';
+import { DEFAULT_LOG_VIEW } from '../../observability_logs/log_view_state';
 
 export const RedirectToLogs = () => {
   const { logViewId } = useParams<{ logViewId?: string }>();
@@ -21,7 +21,11 @@ export const RedirectToLogs = () => {
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
-  locators.logsLocator.navigate({ time, filter, logViewId: logViewId || DEFAULT_LOG_VIEW_ID });
+  locators.logsLocator.navigate({
+    time,
+    filter,
+    logView: { ...DEFAULT_LOG_VIEW, logViewId: logViewId || DEFAULT_LOG_VIEW.logViewId },
+  });
 
   return null;
 };

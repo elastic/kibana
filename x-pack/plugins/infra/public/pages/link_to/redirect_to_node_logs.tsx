@@ -61,7 +61,7 @@ export const RedirectToNodeLogs = ({
     nodeType,
     time,
     filter,
-    logViewId,
+    logView: { type: 'log-view-reference', logViewId },
   });
 
   return null;
