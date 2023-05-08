@@ -141,6 +141,10 @@ export const mockState: SyntheticsAppState = {
     status: null,
     error: null,
   },
+  globalParams: {
+    addError: null,
+    editError: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
