@@ -1011,6 +1011,7 @@ export class DataViewsService {
       body,
       {
         id: dataView.id,
+        initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
       }
     )) as SavedObject<DataViewAttributes>;
 

@@ -86,11 +86,7 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * @internal
    */
   getRoutes: () => RouterRoute[];
-}
 
-export interface IRouterWithVersion<
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase
-> extends IRouter<Context> {
   /**
    * An instance very similar to {@link IRouter} that can be used for versioning HTTP routes
    * following the Elastic versioning specification.

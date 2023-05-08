@@ -38,13 +38,16 @@ export {
 } from './api';
 
 export type {
-  CaseResponse,
+  Case,
+  Cases,
   CasesBulkGetRequestCertainFields,
   CasesBulkGetResponseCertainFields,
 } from './api';
 
 export type {
-  Case,
+  CaseUI,
+  CasesUI,
+  CasesFindResponseUI,
   Ecs,
   CasesFeatures,
   CaseViewRefreshPropInterface,

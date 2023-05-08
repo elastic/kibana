@@ -155,15 +155,9 @@ describe('GroupedAlertsTable', () => {
       if (i.skip) {
         return mockQueryResponse;
       }
-      if (i.query.aggs.groupByFields.multi_terms != null) {
-        return {
-          ...mockQueryResponse,
-          data: groupingSearchResponse.ruleName,
-        };
-      }
       return {
         ...mockQueryResponse,
-        data: i.query.aggs.groupByFields.terms.field != null ? groupingSearchResponse.hostName : {},
+        data: groupingSearchResponse,
       };
     });
   });
@@ -212,6 +206,78 @@ describe('GroupedAlertsTable', () => {
 
     const level0 = getAllByTestId('grouping-accordion-content')[0];
     expect(within(level0).getByTestId('alerts-table')).toBeInTheDocument();
+  });
+
+  it('Query gets passed correctly', () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+
+    render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+    expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
+      indexName: 'test',
+      query: {
+        _source: false,
+        aggs: {
+          groupByFields: {
+            aggs: {
+              bucket_truncate: {
+                bucket_sort: { from: 0, size: 25, sort: [{ unitsCount: { order: 'desc' } }] },
+              },
+              countSeveritySubAggregation: { cardinality: { field: 'kibana.alert.severity' } },
+              hostsCountAggregation: { cardinality: { field: 'host.name' } },
+              description: { terms: { field: 'kibana.alert.rule.description', size: 1 } },
+              ruleTags: { terms: { field: 'kibana.alert.rule.tags' } },
+              severitiesSubAggregation: { terms: { field: 'kibana.alert.severity' } },
+              unitsCount: { cardinality: { field: 'kibana.alert.uuid' } },
+              usersCountAggregation: { cardinality: { field: 'user.name' } },
+            },
+            multi_terms: {
+              size: 10000,
+              terms: [
+                { field: 'kibana.alert.rule.name', missing: '-' },
+                { field: 'kibana.alert.rule.name', missing: '--' },
+              ],
+            },
+          },
+          groupsCount: { cardinality: { field: 'kibana.alert.rule.name' } },
+          unitsCount: {
+            value_count: {
+              field: 'kibana.alert.rule.name',
+              missing: '-',
+            },
+          },
+          unitsCountWithoutNull: {
+            value_count: {
+              field: 'kibana.alert.rule.name',
+            },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              { bool: { filter: [], must: [], must_not: [], should: [] } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-07-07T08:20:18.966Z',
+                    lte: '2020-07-08T08:20:18.966Z',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        runtime_mappings: {},
+        size: 0,
+      },
+      queryName: 'securitySolutionUI fetchAlerts grouping',
+      skip: false,
+    });
   });
 
   it('renders grouping table in second accordion level when 2 groups are selected', async () => {
