@@ -11,7 +11,6 @@ import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiMarkdownFormat,
-  EuiLink,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -109,40 +108,6 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
     />
   );
 };
-
-const IndexTimeout = () => (
-  <EuiEmptyPrompt
-    data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
-    color="plain"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutTitle"
-          defaultMessage="Vulnerabilities Delayed"
-        />
-      </h2>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
-          values={{
-            docs: (
-              <EuiLink href="https://ela.st/findings" target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
-                  defaultMessage="Learn more"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-    }
-  />
-);
 
 const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }) => (
   <EuiEmptyPrompt
@@ -253,9 +218,8 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'indexing' || status === 'waiting_for_results')
-      return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added
-    if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
+    if (status === 'indexing' || status === 'waiting_for_results' || status === 'index-timeout')
+      return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added// agent added, index timeout has passed
     if (status === 'not-installed')
       return (
         <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />

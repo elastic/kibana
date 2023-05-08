@@ -37,6 +37,7 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ActionCreateService } from './services';
 import { doesArtifactHaveData } from './services';
 import type { actionCreateService } from './services/actions';
 
@@ -237,7 +238,7 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
-  public getActionCreateService(): ReturnType<typeof actionCreateService> {
+  public getActionCreateService(): ActionCreateService {
     if (!this.startDependencies?.actionCreateService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
