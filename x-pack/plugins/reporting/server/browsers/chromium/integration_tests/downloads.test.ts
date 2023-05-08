@@ -5,27 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import assert from 'assert';
 import axios from 'axios';
 import path from 'path';
-import { PackageInfo } from '..';
-import { paths as chromiumArchivePaths } from '../../../utils';
-import { download } from '../../download';
-import { install } from '../../install';
-
-/* eslint-disable no-console */
-
-const mockLogger = loggingSystemMock.create().get();
-mockLogger.warn = jest.fn((message: string | Error) => {
-  console.warn(message);
-});
-mockLogger.debug = jest.fn((message: string | Error) => {
-  console.log(message);
-});
-mockLogger.error = jest.fn((message: string | Error) => {
-  console.error(message);
-});
+import { createMockLevelLogger } from '../../../test_helpers';
+import { download } from '../../download/download';
+import { extract } from '../../extract';
+import { ChromiumArchivePaths, PackageInfo } from '../paths';
 
 /**
  * NOTE: these test cases download actual browsers. Running the suite could take
@@ -33,10 +19,13 @@ mockLogger.error = jest.fn((message: string | Error) => {
  */
 
 // test case tuples
+const chromiumArchivePaths = new ChromiumArchivePaths();
 const packageInfos = chromiumArchivePaths.packages.map(({ platform, architecture }) => [
   architecture,
   platform,
 ]);
+
+const mockLogger = createMockLevelLogger();
 
 describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) => {
   // For testing, suffix the unzip folder by cpu + platform so the extracted folders do not overwrite each other in the cache
@@ -52,9 +41,7 @@ describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) 
   });
 
   // Allow package definition to be altered to check error handling
-  const originalPkg = chromiumArchivePaths.packages.find(
-    (packageInfo) => packageInfo.platform === platform && packageInfo.architecture === architecture
-  );
+  const originalPkg = chromiumArchivePaths.find(platform, architecture);
   assert(originalPkg);
 
   let pkg: PackageInfo = originalPkg;
@@ -62,11 +49,14 @@ describe.each(packageInfos)('Chromium archive: %s/%s', (architecture, platform) 
     pkg = { ...originalPkg };
   });
 
+  const downloadUrl = chromiumArchivePaths.getDownloadUrl(pkg);
+  const downloadPath = chromiumArchivePaths.resolvePath(pkg);
+
   it('references the correct checksums and binary path', async () => {
-    const downloadedChecksum = await download(chromiumArchivePaths, pkg, mockLogger);
+    const downloadedChecksum = await download(downloadUrl, downloadPath, mockLogger);
     expect(downloadedChecksum).toBe(pkg.archiveChecksum);
 
-    const binaryPath = await install(chromiumArchivePaths, mockLogger, pkg, chromiumPath);
+    const binaryPath = await extract(downloadPath, downloadPath);
     expect(binaryPath).toBe(path.join(chromiumPath, pkg.binaryRelativePath));
   });
 });

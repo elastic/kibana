@@ -13,16 +13,14 @@ import chalk from 'chalk';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-import {
-  type ChromeVersion,
-  type ChromiumCommit,
-  type ChromiumDashVersionType,
-  ChromiumDashVersionSchema,
-  forkCompatibilityMap,
-  PuppeteerPackageSchema,
-  type PuppeteerPackageType,
-  type PuppeteerRelease,
+import type {
+  ChromeVersion,
+  ChromiumCommit,
+  ChromiumDashVersionType,
+  PuppeteerPackageType,
+  PuppeteerRelease,
 } from './util';
+import { ChromiumDashVersionSchema, forkCompatibilityMap, PuppeteerPackageSchema } from './util';
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json

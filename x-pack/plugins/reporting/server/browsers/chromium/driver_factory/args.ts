@@ -6,20 +6,20 @@
  */
 
 import os from 'os';
-import type { ConfigType } from '../../../config';
+import { CaptureConfig } from '../../../../server/types';
+
+type BrowserConfig = CaptureConfig['browser']['chromium'];
 
 interface WindowSize {
   height: number;
   width: number;
 }
 
-type Proxy = ConfigType['browser']['chromium']['proxy'];
-
 interface LaunchArgs {
   userDataDir: string;
   windowSize?: WindowSize;
   disableSandbox?: boolean;
-  proxy: Proxy;
+  proxy: BrowserConfig['proxy'];
 }
 
 export const args = ({
