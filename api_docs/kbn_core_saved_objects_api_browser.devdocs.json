@@ -3616,10 +3616,6 @@
             "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
           },
@@ -4181,9 +4177,9 @@
           "\nBrowser options for finding saved objects\n"
         ],
         "signature": [
-          "{ type: string | string[]; page?: number | undefined; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
