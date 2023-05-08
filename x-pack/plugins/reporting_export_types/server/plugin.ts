@@ -25,7 +25,6 @@ import {
   getTypePrintablePdfV2,
 } from '.';
 import { ReportingExportTypesCore } from './core';
-import { registerRoutes } from './routes';
 import { setFieldFormats } from './services/services';
 
 export interface ExportTypesPluginSetupDependencies {
