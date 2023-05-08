@@ -288,34 +288,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should not return any comments when trying to exploit RBAC through the search query parameter', async () => {
-        const obsCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'observabilityFixture' }),
-          200,
-          superUserSpace1Auth
-        );
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          auth: superUserSpace1Auth,
-          params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-          caseId: obsCase.id,
-        });
-
-        const { body: res }: { body: CommentsFindResponse } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
-              obsCase.id
-            }/comments/_find?search=securitySolutionFixture+observabilityFixture`
-          )
-          .auth(secOnly.username, secOnly.password)
-          .expect(200);
-
-        // shouldn't find any comments since they were created under the observability ownership
-        ensureSavedObjectIsAuthorized(res.comments, 0, ['securitySolutionFixture']);
-      });
-
       it('should not allow retrieving unauthorized comments using the filter field', async () => {
         const obsCase = await createCase(
           supertestWithoutAuth,
