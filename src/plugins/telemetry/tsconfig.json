@@ -32,6 +32,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/std",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
