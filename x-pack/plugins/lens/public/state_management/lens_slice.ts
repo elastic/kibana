@@ -7,10 +7,10 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { cloneDeep, mapValues, uniq } from 'lodash';
+import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
-import { Delta, patch, reverse } from 'jsondiffpatch';
+import { applyPatch, type Operation as JsonPatchOperation } from 'fast-json-patch';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -241,7 +241,7 @@ export const removeDimension = createAction<{
   datasourceId?: string;
 }>('lens/removeDimension');
 export const recordUndoableStateChange = createAction<{
-  change: Delta;
+  patch: JsonPatchOperation[];
 }>('lens/recordUndoableStateChange');
 export const undo = createAction('lens/undo');
 
@@ -1224,28 +1224,25 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [recordUndoableStateChange.type]: (
       state,
       {
-        payload: { change },
+        payload: { patch },
       }: {
         payload: {
-          change: Delta;
+          patch: JsonPatchOperation[];
         };
       }
     ) => {
-      state.undoableOperationHistory.push(change);
+      state.undoableOperationHistory.push(patch);
     },
     [undo.type]: (_state) => {
-      const currentState = cloneDeep(current(_state));
-      const changeToReverse =
-        currentState.undoableOperationHistory[currentState.undoableOperationHistory.length - 1];
-      const reverseDelta = changeToReverse && reverse(changeToReverse);
-      if (reverseDelta) {
-        try {
-          patch(currentState, reverseDelta);
-        } catch (err) {
-          console.log(err);
-        }
-      }
-      return currentState;
+      const currentState = current(_state);
+      const history = currentState.undoableOperationHistory;
+      const patch = history[history.length - 1];
+      return patch
+        ? {
+            ...applyPatch(currentState, patch, false, false).newDocument,
+            undoableOperationHistory: history.slice(0, history.length - 1),
+          }
+        : currentState;
     },
   });
 };
