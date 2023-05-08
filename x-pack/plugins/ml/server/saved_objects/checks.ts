@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from '@kbn/core/server';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+
 import type {
   MLSavedObjectService,
   TrainedModelJob,
