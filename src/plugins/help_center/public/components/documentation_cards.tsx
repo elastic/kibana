@@ -28,7 +28,6 @@ export const DocumentationCards = () => {
             return (
               <EuiFlexItem key={'kibana_docs'}>
                 <EuiCard
-                  // layout="horizontal"
                   icon={iconType ? <EuiIcon size="xl" type={iconType} /> : undefined}
                   title={appName}
                   description="Example of a card's description. Stick to one or two sentences."
@@ -46,29 +45,22 @@ export const DocumentationCards = () => {
   }
 
   return (
-    <>
-      <EuiTitle size="s">
-        <h2 id={'documentationLinks'}>Documentation</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l">
-        {customLinks}
-        <EuiFlexItem key={'kibana_docs'}>
-          <EuiCard
-            // layout="horizontal"
-            icon={<EuiIcon size="xl" type={`logoKibana`} />}
-            title={
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-                defaultMessage="Kibana"
-              />
-            }
-            description="Example of a card's description. Stick to one or two sentences."
-            target="_blank"
-            href={helpLinks?.kibanaDocLink}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup gutterSize="l">
+      {customLinks}
+      <EuiFlexItem key={'kibana_docs'}>
+        <EuiCard
+          icon={<EuiIcon size="xl" type={`logoKibana`} />}
+          title={
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
+              defaultMessage="Kibana"
+            />
+          }
+          description="Example of a card's description. Stick to one or two sentences."
+          target="_blank"
+          href={helpLinks?.kibanaDocLink}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

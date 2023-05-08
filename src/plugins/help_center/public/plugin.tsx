@@ -145,7 +145,6 @@ export class HelpCenterPublicPlugin
     theme$: Observable<CoreTheme>,
     hasCustomBranding$: Observable<boolean>
   ) {
-    console.log('mount', this.helpExtension);
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>

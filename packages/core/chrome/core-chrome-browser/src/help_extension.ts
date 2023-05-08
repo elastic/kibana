@@ -104,6 +104,8 @@ export interface ChromeGlobalHelpExtensionMenuLink extends ChromeHelpExtensionMe
    * Highest priority items are listed at the top of the list of links.
    */
   priority: number;
+  image: string;
+  description: string;
 }
 
 /** @public */
