@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { EcsError } from '@kbn/ecs';
 import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
@@ -91,14 +92,6 @@ export const ActivityLogItemTypes = {
   FLEET_ACTION: 'fleetAction' as const,
   FLEET_RESPONSE: 'fleetResponse' as const,
 };
-
-interface EcsError {
-  code?: string;
-  id?: string;
-  message: string;
-  stack_trace?: string;
-  type?: string;
-}
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,

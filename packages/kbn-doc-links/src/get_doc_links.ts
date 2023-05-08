@@ -126,6 +126,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
       behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
       behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
+      buildConnector: `${ENTERPRISE_SEARCH_DOCS}build-connector.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
@@ -398,6 +399,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         value_lists: `${SECURITY_SOLUTION_DOCS}value-lists-exceptions.html`,
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
+      manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -726,7 +728,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       troubleshooting: `${SECURITY_SOLUTION_DOCS}ts-management.html#ts-endpoints`,
     },
     legal: {
-      privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+      privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,

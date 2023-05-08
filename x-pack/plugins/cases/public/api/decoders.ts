@@ -15,14 +15,12 @@ import type {
   CasesFindResponse,
   CasesStatusResponse,
   CasesMetricsResponse,
-  CasesBulkGetResponseCertainFields,
-  CaseResponse,
+  CasesBulkGetResponse,
 } from '../../common/api';
 import {
+  CasesBulkGetResponseRt,
   CasesFindResponseRt,
   CasesStatusResponseRt,
-  CasesResponseRt,
-  getTypeForCertainFieldsFromArray,
   CasesMetricsResponseRt,
 } from '../../common/api';
 
@@ -41,12 +39,8 @@ export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCasesBulkGetResponse = <Field extends keyof CaseResponse = keyof CaseResponse>(
-  res: CasesBulkGetResponseCertainFields<Field>,
-  fields?: string[]
-) => {
-  const typeToDecode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);
-  pipe(typeToDecode.decode(res.cases), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
+  pipe(CasesBulkGetResponseRt.decode(res), fold(throwErrors(createToasterPlainError), identity));
 
   return res;
 };

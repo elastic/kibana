@@ -233,9 +233,13 @@ export const useColumns = ({
     [columns]
   );
 
+  const visibleColumns = useMemo(() => {
+    return getColumnIds(columns);
+  }, [columns]);
+
   return {
     columns,
-    visibleColumns: getColumnIds(columns),
+    visibleColumns,
     isBrowserFieldDataLoading,
     browserFields,
     onColumnsChange: setColumnsAndSave,

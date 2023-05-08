@@ -27,6 +27,7 @@ describe('getFileType', () => {
       icon: 'document',
       displayName: 'File Attachment Type',
       getAttachmentViewObject: expect.any(Function),
+      getAttachmentRemovalObject: expect.any(Function),
     });
   });
 
@@ -77,7 +78,7 @@ describe('getFileType', () => {
       expect(actions[0]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Download File',
+        label: 'Download file',
         render: expect.any(Function),
       });
 
@@ -101,7 +102,7 @@ describe('getFileType', () => {
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete File',
+        label: 'Delete file',
         render: expect.any(Function),
       });
 
@@ -125,7 +126,7 @@ describe('getFileType', () => {
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete File',
+        label: 'Delete file',
         render: expect.any(Function),
       });
 
@@ -182,6 +183,13 @@ describe('getFileType', () => {
           hideDefaultActions: true,
         })
       );
+    });
+  });
+
+  describe('getFileAttachmentRemovalObject', () => {
+    it('event renders the right message', async () => {
+      // @ts-ignore
+      expect(fileType.getAttachmentRemovalObject().event).toBe('removed file');
     });
   });
 });

@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
 
-  describe('Reporting error codes', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/156902
+  describe.skip('Reporting error codes', () => {
     it('places error_code in report output', async () => {
       await reportingAPI.initEcommerce();
 
