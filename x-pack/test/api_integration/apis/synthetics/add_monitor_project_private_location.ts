@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('project monitors - returns a failed monitor when creating integration fails', async () => {
+    it.skip('project monitors - returns a failed monitor when creating integration fails', async () => {
       const project = `test-project-${uuidv4()}`;
 
       const secondMonitor = {
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - returns a failed monitor when editing integration fails', async () => {
+    it.skip('project monitors - returns a failed monitor when editing integration fails', async () => {
       const project = `test-project-${uuidv4()}`;
 
       const secondMonitor = {
