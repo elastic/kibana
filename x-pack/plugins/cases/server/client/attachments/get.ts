@@ -14,7 +14,7 @@ import type {
   Comment,
   CommentsFindResponse,
 } from '../../../common/api';
-import { CommentsRt, CommentRt, CommentsFindResponseRt } from '../../../common/api';
+import { CommentType, CommentsRt, CommentRt, CommentsFindResponseRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -113,7 +113,7 @@ export async function find(
 
     const filter = combineFilters([
       buildFilter({
-        filters: ['user'],
+        filters: [CommentType.user],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,

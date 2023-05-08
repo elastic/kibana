@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
           createComment({
             supertest: supertestWithoutAuth,
             caseId: obsCase.id,
-            params: { ...postCommentAlertReq, owner: 'observabilityFixture' },
+            params: { ...postCommentUserReq, owner: 'observabilityFixture' },
             auth: { user: obsOnly, space: space1 },
           }),
         ]);
