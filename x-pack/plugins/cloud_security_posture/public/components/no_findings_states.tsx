@@ -125,7 +125,7 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          defaultMessage="Collecting findings is taking longer than expected. {docs}."
           values={{
             docs: (
               <EuiLink href="https://ela.st/findings" target="_blank">
