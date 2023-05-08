@@ -20,8 +20,8 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import { AlertsFilterTimeframe, IsoWeekday } from '@kbn/alerting-plugin/common';
-import { I18N_WEEKDAY_OPTIONS_DDD, ISO_WEEKDAYS } from '../../../common/constants';
+import { AlertsFilterTimeframe, ISO_WEEKDAYS, IsoWeekday } from '@kbn/alerting-plugin/common';
+import { I18N_WEEKDAY_OPTIONS_DDD } from '../../../common/constants';
 
 interface ActionAlertsFilterTimeframeProps {
   state?: AlertsFilterTimeframe;

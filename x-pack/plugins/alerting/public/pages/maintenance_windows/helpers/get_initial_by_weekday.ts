@@ -6,7 +6,8 @@
  */
 
 import { Moment } from 'moment';
-import { ISO_WEEKDAYS, ISO_WEEKDAYS_TO_RRULE } from '../constants';
+import { ISO_WEEKDAYS } from '../../../../common';
+import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 
 export const getInitialByWeekday = (initialStateByweekday: string[], date: Moment | null) => {
   const dayOfWeek = date ? date.isoWeekday() : 1;
