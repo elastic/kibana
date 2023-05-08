@@ -224,7 +224,16 @@ export async function handleInstallPackageFailure({
     if (installType === 'install' || installType === 'reinstall') {
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
+      return;
     }
+
+    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
+      (err) => {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          logger.error(`failed to update package status to: install_failed  ${err}`);
+        }
+      }
+    );
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -246,6 +255,7 @@ export async function handleInstallPackageFailure({
       });
     }
   } catch (e) {
+    // If an error happens while removing the integration or while doing a rollback update the status to failed
     await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
       (err) => {
         if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
