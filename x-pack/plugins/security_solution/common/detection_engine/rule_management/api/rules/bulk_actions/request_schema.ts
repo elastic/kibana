@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 
 import { NonEmptyArray, TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import {
+  RuleActionAlertsFilter,
   RuleActionFrequency,
   RuleActionGroup,
   RuleActionId,
@@ -95,8 +96,8 @@ const BulkActionEditPayloadTimeline = t.type({
  * per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts)
  * normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
  */
-type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
-const NormalizedRuleAction = t.exact(
+export type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
+export const NormalizedRuleAction = t.exact(
   t.intersection([
     t.type({
       group: RuleActionGroup,
@@ -104,6 +105,7 @@ const NormalizedRuleAction = t.exact(
       params: RuleActionParams,
     }),
     t.partial({ frequency: RuleActionFrequency }),
+    t.partial({ alerts_filter: RuleActionAlertsFilter }),
   ])
 );
 
