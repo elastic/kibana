@@ -61,6 +61,15 @@ export const stringToJsonFormatter: FormatterFn = (fields, key) => {
   return value ? JSON.stringify(value) : null;
 };
 
+export const stringifyString = (value?: string) => {
+  if (!value) return value;
+  try {
+    return JSON.stringify(value);
+  } catch (e) {
+    return value;
+  }
+};
+
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
   params: Record<string, string>,
