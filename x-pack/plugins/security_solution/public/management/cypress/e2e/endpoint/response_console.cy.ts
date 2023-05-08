@@ -23,8 +23,9 @@ import {
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
-  createAgentPolicyTask,
 } from '../../tasks/isolate';
+
+import { createAgentPolicyTask } from '../../tasks/fleet';
 import { login } from '../../tasks/login';
 import { ENDPOINT_VM_NAME } from '../../tasks/common';
 
