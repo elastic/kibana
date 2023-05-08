@@ -325,4 +325,4 @@ export interface BrowserField {
   runtimeField?: RuntimeField;
 }
 
-export type BrowserFields = Record<string, BrowserField>;
+export type BrowserFields = Record<string, Partial<BrowserField>>;
