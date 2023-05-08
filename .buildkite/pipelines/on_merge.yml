@@ -2,7 +2,7 @@ env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
 steps:
-  - command: 'ts-node .buildkite/scripts/steps/gh_labels.ts BUILDKITE_MESSAGE true'
+  - command: 'ts-node .buildkite/scripts/steps/add_gh_labels_to_bk_metadata.ts BUILDKITE_MESSAGE true'
     label: Grab GH Labels by parsing a pre-existing env var
     agents:
       queue: kibana-default
