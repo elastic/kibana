@@ -16,7 +16,7 @@ properties:
     type: string
     description: The identifier for the connector.
   is_deprecated:
-   $ref: 'is_deprecated.yaml'
+    $ref: 'is_deprecated.yaml'
   is_missing_secrets:
     $ref: 'is_missing_secrets.yaml'
   is_preconfigured:

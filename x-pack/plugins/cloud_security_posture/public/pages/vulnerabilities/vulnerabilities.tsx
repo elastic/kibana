@@ -41,6 +41,11 @@ import {
 import { defaultLoadingRenderer, defaultNoDataRenderer } from '../../components/cloud_posture_page';
 import { getFilters } from './utils/get_filters';
 import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from './translations';
+import {
+  severitySchemaConfig,
+  severitySortScript,
+  VULNERABILITY_SEVERITY_FIELD,
+} from './utils/custom_sort_script';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -90,9 +95,15 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   const { euiTheme } = useEuiTheme();
 
   const multiFieldsSort = useMemo(() => {
-    return sort.map(({ id, direction }: { id: string; direction: string }) => ({
-      [id]: direction,
-    }));
+    return sort.map(({ id, direction }: { id: string; direction: string }) => {
+      if (VULNERABILITY_SEVERITY_FIELD === id) {
+        return severitySortScript(direction);
+      }
+
+      return {
+        [id]: direction,
+      };
+    });
   }, [sort]);
 
   const { data, isLoading, isFetching } = useLatestVulnerabilities({
@@ -357,6 +368,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               visibleColumns: columns.map(({ id }) => id),
               setVisibleColumns: () => {},
             }}
+            schemaDetectors={[severitySchemaConfig]}
             rowCount={limitedTotalItemCount}
             toolbarVisibility={{
               showColumnSelector: false,
