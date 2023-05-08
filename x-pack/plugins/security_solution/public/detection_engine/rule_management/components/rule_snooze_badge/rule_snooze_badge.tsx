@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -31,20 +31,6 @@ export function RuleSnoozeBadge({
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
-  const isLoading = !snoozeSettings;
-  const rule = useMemo(
-    () => ({
-      id: snoozeSettings?.id ?? '',
-      muteAll: snoozeSettings?.muteAll ?? false,
-      activeSnoozes: snoozeSettings?.activeSnoozes ?? [],
-      isSnoozedUntil: snoozeSettings?.isSnoozedUntil
-        ? new Date(snoozeSettings.isSnoozedUntil)
-        : undefined,
-      snoozeSchedule: snoozeSettings?.snoozeSchedule,
-      isEditable: hasCRUDPermissions,
-    }),
-    [snoozeSettings, hasCRUDPermissions]
-  );
 
   if (error) {
     return (
@@ -56,8 +42,10 @@ export function RuleSnoozeBadge({
 
   return (
     <RulesListNotifyBadge
-      rule={rule}
-      isLoading={isLoading}
+      ruleId={ruleId}
+      snoozeSettings={snoozeSettings}
+      loading={!snoozeSettings}
+      disabled={!hasCRUDPermissions}
       showTooltipInline={showTooltipInline}
       onRuleChanged={invalidateFetchRuleSnoozeSettings}
     />
