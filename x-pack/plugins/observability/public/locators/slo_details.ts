@@ -16,8 +16,8 @@ export type SloDetailsParams = {
 
 export interface SloDetailsLocatorParams extends SloDetailsParams, SerializableRecord {}
 
-export const getSloDetailsPath = (ruleId: string) => {
-  return `/slos/${encodeURI(ruleId)}`;
+export const getSloDetailsPath = (sloId: string) => {
+  return `/slos/${encodeURI(sloId)}`;
 };
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
