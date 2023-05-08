@@ -17,7 +17,6 @@ export interface UseGetChoicesProps {
   toastNotifications: IToasts;
   connector?: ActionConnector;
   fields: string[];
-  onSuccess?: (choices: Choice[]) => void;
 }
 
 export interface UseGetChoices {
@@ -30,7 +29,6 @@ export const useGetChoices = ({
   connector,
   toastNotifications,
   fields,
-  onSuccess,
 }: UseGetChoicesProps): UseGetChoices => {
   const [isLoading, setIsLoading] = useState(false);
   const [choices, setChoices] = useState<Choice[]>([]);
@@ -58,13 +56,12 @@ export const useGetChoices = ({
         if (!didCancel.current) {
           setIsLoading(false);
           setChoices(res.data ?? []);
+
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
               title: i18n.CHOICES_API_ERROR,
               text: `${res.serviceMessage ?? res.message}`,
             });
-          } else if (onSuccess) {
-            onSuccess(res.data ?? []);
           }
         }
       } catch (error) {
@@ -88,7 +85,6 @@ export const useGetChoices = ({
       didCancel.current = true;
       abortCtrl.current.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [http, connector, toastNotifications, fields]);
 
   return {
