@@ -111,7 +111,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('hostsView-metricChart');
     },
 
-    // MetricsTtab
+    // Metrics Tab
     async getMetricsTab() {
       return testSubjects.find('hostsView-tabs-metrics');
     },
