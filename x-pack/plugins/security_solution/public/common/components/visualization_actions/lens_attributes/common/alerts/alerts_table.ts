@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { isEmpty } from 'lodash';
 import type { GetLensAttributes, LensEmbeddableDataTableColumn } from '../../../types';
+import { COUNT_OF, TOP_VALUE } from '../../../translations';
 
 const layerId = uuidv4();
 const topValuesOfStackByFieldColumnId = uuidv4();
@@ -35,7 +36,7 @@ const getTopValuesOfBreakdownFieldColumnSettings = (
   breakdownField: string
 ): Record<string, LensEmbeddableDataTableColumn> => ({
   [topValuesOfBreakdownFieldColumnId]: {
-    label: `Top values of ${breakdownField}`,
+    label: TOP_VALUE(breakdownField),
     dataType: 'string',
     operationType: 'terms',
     scale: 'ordinal',
@@ -76,7 +77,7 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
 
   const columnSettings: Record<string, LensEmbeddableDataTableColumn> = {
     [topValuesOfStackByFieldColumnId]: {
-      label: `Top values of ${stackByField}`,
+      label: TOP_VALUE(stackByField),
       dataType: 'string',
       operationType: 'terms',
       scale: 'ordinal',
@@ -101,7 +102,7 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
       },
     },
     [countColumnId]: {
-      label: `Count of ${countField}`,
+      label: COUNT_OF(countField),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
