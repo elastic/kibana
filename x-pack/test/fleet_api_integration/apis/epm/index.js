@@ -38,5 +38,6 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./final_pipeline'));
     loadTestFile(require.resolve('./custom_ingest_pipeline'));
     loadTestFile(require.resolve('./verification_key_id'));
+    loadTestFile(require.resolve('./install_integration_in_multiple_spaces.ts'));
   });
 }

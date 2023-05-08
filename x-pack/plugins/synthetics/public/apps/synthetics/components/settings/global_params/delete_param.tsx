@@ -12,6 +12,7 @@ import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useDispatch } from 'react-redux';
+import { getGlobalParamAction } from '../../../state/global_params';
 import { syncGlobalParamsAction } from '../../../state/settings';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { syntheticsParamType } from '../../../../../../common/types/saved_objects';
@@ -19,11 +20,9 @@ import { NO_LABEL, YES_LABEL } from '../../monitors_page/management/monitor_list
 import { ListParamItem } from './params_list';
 
 export const DeleteParam = ({
-  setRefreshList,
   items,
   setIsDeleteModalVisible,
 }: {
-  setRefreshList: React.Dispatch<React.SetStateAction<number>>;
   items: ListParamItem[];
   setIsDeleteModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -89,9 +88,10 @@ export const DeleteParam = ({
     if (status === FETCH_STATUS.SUCCESS || status === FETCH_STATUS.FAILURE) {
       setIsDeleting(false);
       setIsDeleteModalVisible(false);
-      setRefreshList(Date.now());
+      dispatch(getGlobalParamAction.get());
+      dispatch(syncGlobalParamsAction.get());
     }
-  }, [setIsDeleting, isDeleting, status, setIsDeleteModalVisible, name, setRefreshList, dispatch]);
+  }, [setIsDeleting, isDeleting, status, setIsDeleteModalVisible, name, dispatch]);
 
   return (
     <EuiConfirmModal
