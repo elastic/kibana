@@ -26,7 +26,6 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
-import { ChartPreview } from '../../ui_components/chart_preview';
 import {
   EnvironmentField,
   IsAboveField,
@@ -147,14 +146,15 @@ export function TransactionDurationRuleType(props: Props) {
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
 
-  const chartPreview = (
-    <ChartPreview
-      series={latencyChartPreview}
-      threshold={thresholdMs}
-      yTickFormat={yTickFormat}
-      uiSettings={services.uiSettings}
-    />
-  );
+  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
+  // const chartPreview = (
+  //   <ChartPreview
+  //     series={latencyChartPreview}
+  //     threshold={thresholdMs}
+  //     yTickFormat={yTickFormat}
+  //     uiSettings={services.uiSettings}
+  //   />
+  // );
 
   const onGroupByChange = useCallback(
     (group: string[] | null) => {

@@ -17,10 +17,8 @@ import {
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { asInteger } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { ChartPreview } from '../../ui_components/chart_preview';
 import {
   EnvironmentField,
   ErrorGroupingKeyField,
@@ -162,14 +160,15 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  const chartPreview = (
-    <ChartPreview
-      series={[{ data: data?.errorCountChartPreview ?? [] }]}
-      threshold={params.threshold}
-      yTickFormat={asInteger}
-      uiSettings={services.uiSettings}
-    />
-  );
+  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
+  // const chartPreview = (
+  //   <ChartPreview
+  //     series={[{ data: data?.errorCountChartPreview ?? [] }]}
+  //     threshold={params.threshold}
+  //     yTickFormat={asInteger}
+  //     uiSettings={services.uiSettings}
+  //   />
+  // );
 
   const groupAlertsBy = (
     <>
