@@ -22,8 +22,7 @@ import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
   GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE,
 } from '../../screens/search_bar';
-import { TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../screens/timeline';
-import { closeTimelineUsingCloseButton } from '../../tasks/security_main';
+import { TOASTER } from '../../screens/alerts_detection_rules';
 
 describe('Histogram legend hover actions', { testIsolation: false }, () => {
   const ruleConfigs = getNewRule();
@@ -60,8 +59,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
   it('Add To Timeline', function () {
     clickAlertsHistogramLegend();
     clickAlertsHistogramLegendAddToTimeline(ruleConfigs.name);
-    cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
-    cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('contain.text', getNewRule().name);
-    closeTimelineUsingCloseButton();
+
+    cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to timeline`);
   });
 });

@@ -77,22 +77,31 @@ describe('FleetMessageSigningServiceHandler', () => {
     });
   });
 
-  it('POST /message_signing_service/rotate_key_pair?acknowledge=true throws errors`', async () => {
-    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockRejectedValue(
-      Error('foo')
-    );
+  it.each([
+    'foo',
+    Error('do not show this').message,
+    Error(JSON.stringify({ not: 'even this' })).message,
+  ])(
+    'POST /message_signing_service/rotate_key_pair?acknowledge=true throws only a generic 500 error if rotate fails with error `%s`',
+    async (error) => {
+      // specific error
+      (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockRejectedValue(
+        Error(error)
+      );
 
-    await rotateKeyPairHandler(
-      coreMock.createCustomRequestHandlerContext(context),
-      request,
-      response
-    );
+      await rotateKeyPairHandler(
+        coreMock.createCustomRequestHandlerContext(context),
+        request,
+        response
+      );
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: {
-        message: 'foo',
-      },
-    });
-  });
+      // API shows generic error
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: 'Failed to rotate key pair!',
+        },
+      });
+    }
+  );
 });

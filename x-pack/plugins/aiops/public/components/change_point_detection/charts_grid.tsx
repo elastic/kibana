@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState } from 'react';
+import React, { type FC, useMemo, useState, useEffect, useRef } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -21,7 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SelectedChangePoint } from './change_point_detection_context';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { type RefreshInterval } from '@kbn/data-plugin/common';
+import { type SelectedChangePoint } from './change_point_detection_context';
 import { ChartComponent } from './chart_component';
 
 const CHARTS_PER_PAGE = 6;
@@ -31,6 +33,28 @@ interface ChartsGridProps {
 }
 
 export const ChartsGrid: FC<ChartsGridProps> = ({ changePoints: changePointsDict }) => {
+  const timefilter = useTimefilter();
+
+  const initialRefreshSetting = useRef<RefreshInterval>();
+
+  useEffect(
+    function pauseRefreshOnMount() {
+      initialRefreshSetting.current = timefilter.getRefreshInterval();
+
+      timefilter.setRefreshInterval({
+        ...initialRefreshSetting.current,
+        pause: true,
+      });
+      return () => {
+        if (initialRefreshSetting.current) {
+          // reset initial settings
+          timefilter.setRefreshInterval(initialRefreshSetting.current);
+        }
+      };
+    },
+    [timefilter]
+  );
+
   const changePoints = useMemo(() => {
     return Object.values(changePointsDict).flat();
   }, [changePointsDict]);

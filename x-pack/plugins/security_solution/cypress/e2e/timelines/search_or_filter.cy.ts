@@ -60,6 +60,7 @@ describe('Timeline search and filters', () => {
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get(TIMELINE_SEARCH_OR_FILTER)
         .pipe(($el) => $el.trigger('click'))
         .should('exist');
