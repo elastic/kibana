@@ -127,12 +127,6 @@ export interface ExecutionTimeRange {
   lte: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type QueryTimeRange = {
-  from: number;
-  to: number;
-};
-
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
 type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
   ? FirstArgument

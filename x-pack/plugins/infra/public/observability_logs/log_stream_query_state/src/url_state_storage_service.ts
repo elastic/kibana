@@ -15,8 +15,7 @@ import * as rt from 'io-ts';
 import { InvokeCreator } from 'xstate';
 import { DurationInputObject } from 'moment';
 import moment from 'moment';
-import type { QueryTimeRange } from '../../../types';
-import { minimalTimeKeyRT } from '../../../../common/time';
+import { minimalTimeKeyRT, TimeRange } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { replaceStateKeyInQueryString } from '../../../utils/url_state';
@@ -291,23 +290,19 @@ const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return legacyPositionStateInUrlRT.decode(queryValueFromUrl);
 };
 
-export const replaceLogFilterInQueryString = (
-  query: Query,
-  time?: number,
-  timeRange?: QueryTimeRange
-) =>
+export const replaceLogFilterInQueryString = (query: Query, time?: number, timeRange?: TimeRange) =>
   replaceStateKeyInQueryString<FilterStateInUrl>(defaultFilterStateKey, {
     query,
     ...getTimeRange(time, timeRange),
     refreshInterval: DEFAULT_REFRESH_INTERVAL,
   });
 
-const getTimeRange = (time?: number, timeRange?: QueryTimeRange) => {
+const getTimeRange = (time?: number, timeRange?: TimeRange) => {
   if (timeRange) {
     return {
       timeRange: {
-        from: new Date(timeRange.from).toISOString(),
-        to: new Date(timeRange.to).toISOString(),
+        from: new Date(timeRange.startTime).toISOString(),
+        to: new Date(timeRange.endTime).toISOString(),
       },
     };
   } else if (time) {

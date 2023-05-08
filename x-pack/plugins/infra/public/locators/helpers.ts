@@ -16,19 +16,19 @@ import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../common/constants';
 import {
   createLogViewStateMachine,
   DEFAULT_LOG_VIEW,
-  DEFAULT_LOG_VIEW_ID,
   initializeFromUrl,
   replaceLogViewInQueryString,
 } from '../observability_logs/log_view_state';
 import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
 import { replaceLogPositionInQueryString } from '../observability_logs/log_stream_position_state/src/url_state_storage_service';
+import type { TimeRange } from '../../common/time';
 import type { LogsLocatorParams } from './logs_locator';
-import type { InfraClientCoreSetup, QueryTimeRange } from '../types';
+import type { InfraClientCoreSetup } from '../types';
 import type { LogViewColumnConfiguration, ResolvedLogView } from '../../common/log_views';
 
 interface LocationToDiscoverParams {
   core: InfraClientCoreSetup;
-  timeRange?: QueryTimeRange;
+  timeRange?: TimeRange;
   filter?: string;
 }
 
@@ -36,12 +36,12 @@ export const parseSearchString = ({
   time,
   timeRange,
   filter = '',
-  logViewId = DEFAULT_LOG_VIEW_ID,
+  logView = DEFAULT_LOG_VIEW,
 }: LogsLocatorParams) => {
   return flowRight(
     replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time, timeRange),
     replaceLogPositionInQueryString(time),
-    replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
+    replaceLogViewInQueryString(logView)
   )('');
 };
 
@@ -61,7 +61,7 @@ export const getLocationToDiscover = async ({
   });
 
   const discoverParams: DiscoverAppLocatorParams = {
-    ...(timeRange ? { from: timeRange.from, to: timeRange.to } : {}),
+    ...(timeRange ? { from: timeRange.startTime, to: timeRange.endTime } : {}),
     ...(filter
       ? {
           query: {

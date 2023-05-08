@@ -7,7 +7,9 @@
 
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { InfraClientCoreSetup, QueryTimeRange } from '../types';
+import type { LogViewReference } from '../../common/log_views';
+import type { TimeRange } from '../../common/time';
+import type { InfraClientCoreSetup } from '../types';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
@@ -18,9 +20,9 @@ export interface LogsLocatorParams extends SerializableRecord {
   /**
    * Optionally set the time range in the time picker.
    */
-  timeRange?: QueryTimeRange;
+  timeRange?: TimeRange;
   filter?: string;
-  logViewId?: string;
+  logView?: LogViewReference;
 }
 
 export type LogsLocator = LocatorPublic<LogsLocatorParams>;

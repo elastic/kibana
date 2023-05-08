@@ -11,16 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface LogsLinkToStreamProps {
-  startTimestamp: number;
-  endTimestamp: number;
+  startTime: number;
+  endTime: number;
   query: string;
 }
 
-export const LogsLinkToStream = ({
-  startTimestamp,
-  endTimestamp,
-  query,
-}: LogsLinkToStreamProps) => {
+export const LogsLinkToStream = ({ startTime, endTime, query }: LogsLinkToStreamProps) => {
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
 
@@ -29,10 +25,10 @@ export const LogsLinkToStream = ({
       <EuiButtonEmpty
         onClick={() =>
           locators.logsLocator?.navigate({
-            time: endTimestamp,
+            time: endTime,
             timeRange: {
-              from: startTimestamp,
-              to: endTimestamp,
+              startTime,
+              endTime,
             },
             filter: query,
           })

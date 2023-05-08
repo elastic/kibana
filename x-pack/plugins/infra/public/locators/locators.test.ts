@@ -14,7 +14,7 @@ import { LOGS_APP_TARGET } from '../../common/constants';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '../../common/inventory_models';
 import moment from 'moment';
-import { DEFAULT_LOG_VIEW_ID } from '../observability_logs/log_view_state';
+import { DEFAULT_LOG_VIEW } from '../observability_logs/log_view_state';
 
 const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
   const deps: LogsLocatorDependencies = {
@@ -33,7 +33,6 @@ const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
 describe('Infra Locators', () => {
   const APP_ID = 'logs';
   const nodeType = 'host';
-  const LOG_VIEW_ID = 'testView';
   const FILTER_QUERY = 'trace.id:1234';
   const nodeId = uuidv4();
   const time = 1550671089404;
@@ -80,7 +79,7 @@ describe('Infra Locators', () => {
     it('should allow specifying specific view id', async () => {
       const params: LogsLocatorParams = {
         time,
-        logViewId: LOG_VIEW_ID,
+        logView: DEFAULT_LOG_VIEW,
       };
       const { logsLocator } = await setupLogsLocator();
       const { path } = await logsLocator.getLocation(params);
@@ -104,7 +103,7 @@ describe('Infra Locators', () => {
 
     it('should return correct structured url', async () => {
       const params: LogsLocatorParams = {
-        logViewId: LOG_VIEW_ID,
+        logView: DEFAULT_LOG_VIEW,
         filter: FILTER_QUERY,
         time,
       };
@@ -168,7 +167,7 @@ describe('Infra Locators', () => {
         nodeId,
         nodeType,
         time,
-        logViewId: LOG_VIEW_ID,
+        logView: DEFAULT_LOG_VIEW,
       };
       const { nodeLogsLocator } = await setupLogsLocator();
       const { path } = await nodeLogsLocator.getLocation(params);
@@ -184,7 +183,7 @@ describe('Infra Locators', () => {
         time,
         from,
         to,
-        logViewId: LOG_VIEW_ID,
+        logView: DEFAULT_LOG_VIEW,
       };
       const { nodeLogsLocator } = await setupLogsLocator();
       const { path } = await nodeLogsLocator.getLocation(params);
@@ -198,7 +197,7 @@ describe('Infra Locators', () => {
         nodeId,
         nodeType,
         time,
-        logViewId: LOG_VIEW_ID,
+        logView: DEFAULT_LOG_VIEW,
         filter: FILTER_QUERY,
       };
       const { nodeLogsLocator } = await setupLogsLocator();
@@ -218,15 +217,15 @@ describe('Infra Locators', () => {
  */
 
 export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
-  const { time = 1550671089404, logViewId } = params;
+  const { time = 1550671089404 } = params;
 
-  return `/stream?logView=${constructLogView(logViewId)}&logPosition=${constructLogPosition(
+  return `/stream?logView=${constructLogView()}&logPosition=${constructLogPosition(
     time
   )}&logFilter=${constructLogFilter(params)}`;
 };
 
-const constructLogView = (logViewId: string = DEFAULT_LOG_VIEW_ID) => {
-  return `(logViewId:${logViewId},type:log-view-reference)`;
+const constructLogView = () => {
+  return `(logViewId:default,type:log-view-reference)`;
 };
 
 const constructLogPosition = (time: number = 1550671089404) => {
@@ -253,12 +252,12 @@ const constructLogFilter = ({
 
   if (!time) return `${query})`;
 
-  const fromDate = timeRange?.from
-    ? addHoursToTimestamp(timeRange.from, 0)
+  const fromDate = timeRange?.startTime
+    ? addHoursToTimestamp(timeRange.startTime, 0)
     : addHoursToTimestamp(time, -1);
 
-  const toDate = timeRange?.to
-    ? addHoursToTimestamp(timeRange.to, 0)
+  const toDate = timeRange?.endTime
+    ? addHoursToTimestamp(timeRange.endTime, 0)
     : addHoursToTimestamp(time, 1);
 
   return `${query},timeRange:(from:'${fromDate}',to:'${toDate}'))`;
