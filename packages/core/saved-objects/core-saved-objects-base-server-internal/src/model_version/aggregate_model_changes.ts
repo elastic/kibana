@@ -16,7 +16,7 @@ import type {
  * Merge the added mappings from the given list of model changes.
  * Note: only changes of the `mappings_addition` type have mapping addition.
  */
-export const aggregateAddedMapping = (
+export const aggregateMappingAdditions = (
   changes: SavedObjectsModelChange[]
 ): SavedObjectsMappingProperties => {
   let mappings: SavedObjectsMappingProperties = {};

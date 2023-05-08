@@ -63,5 +63,5 @@ export {
   getVirtualVersionsFromMappingMeta,
   getModelVersionDelta,
   buildModelVersionTransformFn,
-  aggregateAddedMapping,
+  aggregateMappingAdditions,
 } from './src/model_version';

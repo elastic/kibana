@@ -10,7 +10,7 @@ import { compare as semverCompare } from 'semver';
 import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { aggregateAddedMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 
 export interface SavedObjectTypeMigrationInfo {
@@ -59,7 +59,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
       version,
       changeTypes: entry.changes.map((change) => change.type),
       hasTransformation: hasTransformation(entry.changes),
-      newMappings: Object.keys(getFlattenedObject(aggregateAddedMapping(entry.changes))),
+      newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(entry.changes))),
     };
   });
 
