@@ -8,6 +8,7 @@
 
 import { Configuration, OpenAIApi } from 'openai';
 import type { CoreSetup } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { OpenAiConfig } from '../config';
 
 export function defineRoutes({
@@ -29,24 +30,76 @@ export function defineRoutes({
     .addVersion(
       {
         version: '2023-05-07',
-        validate: false,
+        // validate: false,
+        validate: {
+          request: {
+            query: schema.object({
+              query: schema.string(),
+            }),
+          },
+        },
       },
       async (context, request, response) => {
         debugger;
-        const completion = await openAi.createChatCompletion({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'user',
-              content:
-                'Create a simple react button component that says "Hello World" when clicked. Format the output with HTML tags.',
+        const queryText = request.query.query;
+        // const completion = await openAi.createChatCompletion({
+        //   model: 'gpt-3.5-turbo',
+        //   messages: [
+        //     {
+        //       role: 'user',
+        //       content: queryText,
+        //     },
+        //   ],
+        // });
+
+        const coreContext = await context.core;
+        const resp = await coreContext.elasticsearch.client.asCurrentUser.search({
+          index: 'search-kibana-docs',
+          fields: ['title', 'body_content', 'url'],
+          size: 1,
+          _source: false,
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    title: {
+                      query: queryText,
+                      boost: 1,
+                    },
+                  },
+                },
+              ],
+              filter: [
+                {
+                  exists: {
+                    field: 'title-vector',
+                  },
+                },
+              ],
             },
-          ],
+          },
+          knn: {
+            field: 'title-vector',
+            k: 1,
+            num_candidates: 20,
+            // @ts-ignore
+            query_vector_builder: {
+              text_embedding: {
+                model_id: 'sentence-transformers__all-mpnet-base-v2',
+                model_text: queryText,
+              },
+            },
+            boost: 24,
+          },
         });
+
+        // const body = resp.hits.hits[0].fields?.body_content[0];
+        // const url = resp.hits.hits[0].fields?.url[0];
 
         return response.ok({
           body: {
-            response: completion.data.choices[0].message?.content,
+            // response: completion.data.choices[0].message?.content,
           },
         });
       }
