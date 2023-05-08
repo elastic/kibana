@@ -202,7 +202,7 @@ export const config = {
     plansForWorldPeace: schema.conditional(
       schema.contextRef('serverless'),
       true,
-      schema.string({ defaultValue: 'Kill all humans' }),
+      schema.string({ defaultValue: 'Free hugs' }),
       schema.never()
     ),
   }),
