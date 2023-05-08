@@ -2,7 +2,7 @@ env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
 steps:
-  - command: 'ts-node .buildkite/scripts/steps/gh_labels.ts BUILDKITE_MESSAGE'
+  - command: 'ts-node .buildkite/scripts/steps/gh_labels.ts BUILDKITE_MESSAGE true'
     label: Grab GH Labels by parsing a pre-existing env var
     agents:
       queue: kibana-default
@@ -11,7 +11,7 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-          
+
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
     timeout_in_minutes: 10
