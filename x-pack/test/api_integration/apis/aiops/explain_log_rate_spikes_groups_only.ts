@@ -25,7 +25,8 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   const esArchiver = getService('esArchiver');
 
-  describe('POST /internal/aiops/explain_log_rate_spikes - groups only', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/155737
+  describe.skip('POST /internal/aiops/explain_log_rate_spikes - groups only', () => {
     explainLogRateSpikesTestData.forEach((testData) => {
       const overrides = {
         loaded: 0,

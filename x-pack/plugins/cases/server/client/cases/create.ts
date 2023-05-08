@@ -12,10 +12,10 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CaseResponse, CasePostRequest } from '../../../common/api';
+import type { Case, CasePostRequest } from '../../../common/api';
 import {
   throwErrors,
-  CaseResponseRt,
+  CaseRt,
   ActionTypes,
   CasePostRequestRt,
   excess,
@@ -35,10 +35,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
  *
  * @ignore
  */
-export const create = async (
-  data: CasePostRequest,
-  clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -129,7 +126,7 @@ export const create = async (
       });
     }
 
-    return CaseResponseRt.encode(flattenedCase);
+    return CaseRt.encode(flattenedCase);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }
