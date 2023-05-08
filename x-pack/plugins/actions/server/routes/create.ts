@@ -18,6 +18,7 @@ const nonEmptyString = z.string().trim().nonempty();
 const configValue = z.union([
   z.record(z.string(), nonEmptyString),
   z.array(nonEmptyString),
+  z.boolean(),
   nonEmptyString,
 ]);
 const recordOfStringObjectOrArray = z.record(z.string(), configValue.default({}));
