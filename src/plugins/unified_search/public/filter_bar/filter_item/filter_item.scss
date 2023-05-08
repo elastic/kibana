@@ -4,7 +4,7 @@
  * 1.  Allow wrapping of long filter items
  */
 
-.globalFilterItem {
+.euiBadge.globalFilterItem {
   line-height: $euiSize;
   border: none;
   color: $euiTextColor;
@@ -18,15 +18,14 @@
   }
 }
 
-.globalFilterItem-isDisabled {
+.euiBadge.globalFilterItem-isDisabled {
   color: $euiColorDarkShade;
   background-color: transparentize($euiColorLightShade, .5);
   text-decoration: line-through;
   font-weight: $euiFontWeightRegular;
-  font-style: italic;
 }
 
-.globalFilterItem-isError, .globalFilterItem-isWarning {
+.euiBadge.globalFilterItem-isError, .globalFilterItem-isWarning {
   .globalFilterLabel__value {
     font-weight: $euiFontWeightBold;
   }

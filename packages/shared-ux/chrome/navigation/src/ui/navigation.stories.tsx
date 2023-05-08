@@ -18,7 +18,7 @@ import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { getSolutionPropertiesMock, NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
-import { NavigationProps, NavigationServices } from '../../types';
+import { ChromeNavigationViewModel, NavigationServices } from '../../types';
 import { Platform } from '../model';
 import { NavigationProvider } from '../services';
 import { Navigation as Component } from './navigation';
@@ -28,7 +28,7 @@ const storybookMock = new NavigationStorybookMock();
 const SIZE_OPEN = 248;
 const SIZE_CLOSED = 40;
 
-const Template = (args: NavigationProps & NavigationServices) => {
+const Template = (args: ChromeNavigationViewModel & NavigationServices) => {
   const services = storybookMock.getServices(args);
   const props = storybookMock.getProps(args);
 
@@ -97,7 +97,7 @@ export default {
 export const SingleExpanded: ComponentStory<typeof Template> = Template.bind({});
 SingleExpanded.args = {
   activeNavItemId: 'example_project.root.get_started',
-  solutions: [getSolutionPropertiesMock()],
+  navigationTree: [getSolutionPropertiesMock()],
 };
 SingleExpanded.argTypes = storybookMock.getArgumentTypes();
 
@@ -125,7 +125,7 @@ ReducedPlatformLinks.args = {
       },
     },
   },
-  solutions: [getSolutionPropertiesMock()],
+  navigationTree: [getSolutionPropertiesMock()],
 };
 ReducedPlatformLinks.argTypes = storybookMock.getArgumentTypes();
 
@@ -133,19 +133,19 @@ export const WithRequestsLoading: ComponentStory<typeof Template> = Template.bin
 WithRequestsLoading.args = {
   activeNavItemId: 'example_project.root.get_started',
   loadingCount: 1,
-  solutions: [getSolutionPropertiesMock()],
+  navigationTree: [getSolutionPropertiesMock()],
 };
 WithRequestsLoading.argTypes = storybookMock.getArgumentTypes();
 
 export const CustomElements: ComponentStory<typeof Template> = Template.bind({});
 CustomElements.args = {
   activeNavItemId: 'example_project.custom',
-  solutions: [
+  navigationTree: [
     {
       ...getSolutionPropertiesMock(),
       items: [
         {
-          name: (
+          title: (
             <EuiPopover
               button={
                 <EuiButtonEmpty iconType="spaces" iconSide="right">
