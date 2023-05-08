@@ -205,6 +205,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab trainedModels',
           },
+          {
+            id: 'data_drift',
+            pathId: ML_PAGES.DATA_DRIFT,
+            name: i18n.translate('xpack.ml.navMenu.trainedModelsText', {
+              defaultMessage: 'Data drift',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataDrift',
+          },
         ],
       },
       {
