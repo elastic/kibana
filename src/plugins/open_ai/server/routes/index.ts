@@ -11,6 +11,12 @@ import type { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { OpenAiConfig } from '../config';
 
+const maxTokens = 4000;
+const systemPrompt =
+  'You are a helpful assistant that answers questions about Kibana using the Kibana documentation.';
+const notFoundPrompt =
+  "I'm unable to answer the question based on the information I found in the Kibana documentation.";
+
 export function defineRoutes({
   core,
   config: { apiKey },
@@ -25,38 +31,36 @@ export function defineRoutes({
   router.versioned
     .get({
       access: 'internal',
-      path: '/internal/open_ai/example',
+      path: '/internal/open_ai/kibana_docs',
     })
     .addVersion(
       {
         version: '2023-05-07',
-        // validate: false,
         validate: {
           request: {
             query: schema.object({
-              query: schema.string(),
+              query: schema.maybe(schema.string()),
             }),
           },
         },
       },
       async (context, request, response) => {
-        debugger;
-        const queryText = request.query.query;
-        // const completion = await openAi.createChatCompletion({
-        //   model: 'gpt-3.5-turbo',
-        //   messages: [
-        //     {
-        //       role: 'user',
-        //       content: queryText,
-        //     },
-        //   ],
-        // });
+        const query = request.query.query?.trim();
+
+        if (!query) {
+          return response.ok({
+            body: {
+              answer: notFoundPrompt,
+              references: [],
+            },
+          });
+        }
 
         const coreContext = await context.core;
-        const resp = await coreContext.elasticsearch.client.asCurrentUser.search({
+        const esResponse = await coreContext.elasticsearch.client.asCurrentUser.search({
           index: 'search-kibana-docs',
           fields: ['title', 'body_content', 'url'],
-          size: 1,
+          size: 5,
           _source: false,
           query: {
             bool: {
@@ -64,7 +68,7 @@ export function defineRoutes({
                 {
                   match: {
                     title: {
-                      query: queryText,
+                      query,
                       boost: 1,
                     },
                   },
@@ -87,19 +91,81 @@ export function defineRoutes({
             query_vector_builder: {
               text_embedding: {
                 model_id: 'sentence-transformers__all-mpnet-base-v2',
-                model_text: queryText,
+                model_text: query,
               },
             },
             boost: 24,
           },
         });
 
-        // const body = resp.hits.hits[0].fields?.body_content[0];
-        // const url = resp.hits.hits[0].fields?.url[0];
+        const esResults = esResponse.hits.hits.map((hit) => ({
+          title: hit.fields?.title[0],
+          body: hit.fields?.body_content[0],
+          url: hit.fields?.url[0],
+        }));
+
+        if (!esResults.length) {
+          return response.ok({
+            body: {
+              answer: notFoundPrompt,
+              references: [],
+            },
+          });
+        }
+
+        const question = `Answer this question: ${query}`;
+        const fallback = `If the answer is not contained in the supplied documentation, reply with this and nothing else: "${notFoundPrompt}"`;
+        const docContent = esResults.map((result) => result.body).join(' ');
+        const doc = `Using only the information from this Kibana documentation: ${docContent}`;
+        const prompt = [
+          query,
+          doc.substring(0, maxTokens - question.length - fallback.length),
+          fallback,
+        ].join('\n');
+
+        const gptResponse = await openAi.createChatCompletion({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt,
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+        });
+
+        const answer = gptResponse.data.choices[0]?.message?.content;
+
+        if (!answer) {
+          return response.ok({
+            body: {
+              answer: notFoundPrompt,
+              references: [],
+            },
+          });
+        }
+
+        const isNotFound = answer
+          .trim()
+          .toLowerCase()
+          .includes(notFoundPrompt.trim().toLowerCase());
+
+        if (isNotFound) {
+          return response.ok({
+            body: {
+              answer: notFoundPrompt,
+              references: [],
+            },
+          });
+        }
 
         return response.ok({
           body: {
-            // response: completion.data.choices[0].message?.content,
+            answer,
+            references: esResults.map(({ title, url }) => ({ title, url })),
           },
         });
       }
