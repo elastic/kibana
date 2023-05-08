@@ -107,7 +107,7 @@ export const LastTestRunComponent = ({
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.id!,
+                configId: monitor?.[ConfigKey.CONFIG_ID]!,
                 locationId: selectedLocation!.id,
                 stateId: latestPing.state?.id!,
               })}
