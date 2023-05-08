@@ -9,6 +9,7 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo, useRef } from 'react';
 import { loadAlertDataView } from '../../../hooks/use_alert_data_view';
 import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -82,20 +83,22 @@ export const useFetchBrowserFieldCapabilities = ({
     refetchOnWindowFocus: false,
   });
 
-  const loading = isFetching;
+  const loading = useRef<boolean | undefined>(isFetching);
 
-  if (!enabled && initialBrowserFields) {
-    return [undefined, initialBrowserFields];
-  }
+  const browserFields = useMemo(() => {
+    if (!enabled && initialBrowserFields) {
+      loading.current = undefined;
+      return initialBrowserFields;
+    }
+    if (!dataView) {
+      loading.current = undefined;
+      return {};
+    }
+    return getDataViewStateFromIndexFields(
+      dataView.id ?? '',
+      dataView.fields != null ? dataView.fields : []
+    );
+  }, [enabled, initialBrowserFields, dataView]);
 
-  if (!dataView) {
-    return [undefined, {}];
-  }
-
-  const browserFields = getDataViewStateFromIndexFields(
-    dataView.id ?? '',
-    dataView.fields != null ? dataView.fields : []
-  );
-
-  return [loading, browserFields];
+  return [loading.current, browserFields];
 };
