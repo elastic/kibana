@@ -17,7 +17,6 @@ import { type Marker, MarkerList } from './marker_list';
 
 const FONT_SIZE = 10;
 const HALF_FONT_SIZE = FONT_SIZE / 2;
-const MIN_MARKER_DISTANCE = (FONT_SIZE + 4) / 2;
 
 const EMPTY_VALUE = '';
 
