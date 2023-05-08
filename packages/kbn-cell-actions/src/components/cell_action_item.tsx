@@ -15,19 +15,24 @@ export const ActionItem = ({
   action,
   actionContext,
   showTooltip,
+  onClick,
 }: {
   action: CellAction;
   actionContext: CellActionExecutionContext;
   showTooltip: boolean;
+  onClick?: () => void;
 }) => {
   const actionProps = useMemo(
     () => ({
       iconType: action.getIconType(actionContext) as IconType,
-      onClick: () => action.execute(actionContext),
+      onClick: () => {
+        action.execute(actionContext);
+        if (onClick) onClick();
+      },
       'data-test-subj': `actionItem-${action.id}`,
       'aria-label': action.getDisplayName(actionContext),
     }),
-    [action, actionContext]
+    [action, actionContext, onClick]
   );
 
   if (!actionProps.iconType) return null;
