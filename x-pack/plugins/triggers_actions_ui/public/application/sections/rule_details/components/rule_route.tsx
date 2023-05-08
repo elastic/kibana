@@ -16,13 +16,14 @@ import {
 import { RuleWithApi as Rules } from './rule';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RefreshToken } from './types';
 
 type WithRuleSummaryProps = {
   rule: Rule;
   ruleType: RuleType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
 } & Pick<RuleApis, 'loadRuleSummary'>;
 
 export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
