@@ -8,17 +8,12 @@
 
 import * as savedObjectsPlugin from '@kbn/saved-objects-plugin/public';
 jest.mock('@kbn/saved-objects-plugin/public');
-jest.mock('../../utils/persist_saved_search', () => ({
-  persistSavedSearch: jest.fn(() => ({ id: 'the-saved-search-id' })),
-}));
-import { onSaveSearch } from './on_save_search';
-import { dataViewMock } from '../../../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { onSaveSearch } from './on_save_search';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { getDiscoverStateContainer } from '../../services/discover_state';
 import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import * as persistSavedSearchUtils from '../../utils/persist_saved_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
 
@@ -26,10 +21,10 @@ function getStateContainer() {
   const savedSearch = savedSearchMock;
   const history = createBrowserHistory();
   const stateContainer = getDiscoverStateContainer({
-    savedSearch,
     services: discoverServiceMock,
     history,
   });
+  stateContainer.savedSearchState.set(savedSearch);
   stateContainer.appState.getState = jest.fn(() => ({
     rowsPerPage: 250,
   }));
@@ -39,12 +34,10 @@ function getStateContainer() {
 describe('onSaveSearch', () => {
   it('should call showSaveModal', async () => {
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       state: getStateContainer(),
-      updateAdHocDataViewId: jest.fn(),
     });
 
     expect(savedObjectsPlugin.showSaveModal).toHaveBeenCalled();
@@ -85,7 +78,6 @@ describe('onSaveSearch', () => {
       saveModal = modal;
     });
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch: {
         ...savedSearchMock,
@@ -93,7 +85,6 @@ describe('onSaveSearch', () => {
       },
       services: discoverServiceMock,
       state: getStateContainer(),
-      updateAdHocDataViewId: jest.fn(),
     });
     expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
   });
@@ -107,21 +98,19 @@ describe('onSaveSearch', () => {
       ...savedSearchMock,
       tags: ['tag1', 'tag2'],
     };
+    const state = getStateContainer();
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch,
       services: discoverServiceMock,
-      state: getStateContainer(),
-      updateAdHocDataViewId: jest.fn(),
+      state,
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
-    jest
-      .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
-      .mockImplementationOnce((newSavedSearch, _) => {
-        savedSearch = newSavedSearch;
-        return Promise.resolve({ id: newSavedSearch.id });
-      });
+
+    state.savedSearchState.persist = jest.fn().mockImplementationOnce((newSavedSearch, _) => {
+      savedSearch = newSavedSearch;
+      return Promise.resolve(newSavedSearch.id);
+    });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,
       newCopyOnSave: false,
@@ -143,24 +132,21 @@ describe('onSaveSearch', () => {
       ...savedSearchMock,
       tags: ['tag1', 'tag2'],
     };
+    const state = getStateContainer();
     await onSaveSearch({
-      dataView: dataViewMock,
       navigateTo: jest.fn(),
       savedSearch,
       services: {
         ...serviceMock,
         savedObjectsTagging: undefined,
       },
-      state: getStateContainer(),
-      updateAdHocDataViewId: jest.fn(),
+      state,
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
-    jest
-      .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
-      .mockImplementationOnce((newSavedSearch, _) => {
-        savedSearch = newSavedSearch;
-        return Promise.resolve({ id: newSavedSearch.id });
-      });
+    state.savedSearchState.persist = jest.fn().mockImplementationOnce((newSavedSearch, _) => {
+      savedSearch = newSavedSearch;
+      return Promise.resolve(newSavedSearch.id);
+    });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,
       newCopyOnSave: false,
