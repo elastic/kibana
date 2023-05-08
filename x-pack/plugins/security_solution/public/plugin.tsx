@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith } from 'rxjs/operators';
 import type * as H from 'history';
 import type {
@@ -45,6 +45,7 @@ import {
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
 import type { LinksPermissions } from './common/links';
 import { updateAppLinks } from './common/links';
+import { navLinks$ } from './common/links/nav_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -86,6 +87,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  private isSidebarEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -93,7 +95,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-
+    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -168,6 +170,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
+        isSidebarEnabled$: this.isSidebarEnabled$,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -245,7 +248,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     KibanaServices.init({
       ...core,
       ...plugins,
@@ -306,7 +309,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {};
+    return {
+      getNavLinks$: () => navLinks$,
+      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
+        this.isSidebarEnabled$.next(isSidebarEnabled),
+    };
   }
 
   public stop() {

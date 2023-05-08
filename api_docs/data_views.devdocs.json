@@ -101,6 +101,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
@@ -8330,6 +8334,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
@@ -14369,9 +14377,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
-                ">; }; helpers: ",
-                "default",
-                "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
                 "SearchRequest",
@@ -14403,7 +14409,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                "<TDocument, TAggregations>>; }; helpers: ",
+                "default",
+                "; name: string | symbol; security: ",
                 "default",
                 "; monitoring: ",
                 "default",
@@ -15613,6 +15621,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -26250,22 +26262,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -26400,18 +26396,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",

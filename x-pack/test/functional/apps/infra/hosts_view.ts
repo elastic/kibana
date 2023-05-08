@@ -149,9 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const enableHostView = () => pageObjects.infraHostsView.clickEnableHostViewButton();
 
   // Tests
-
-  // Failing: See https://github.com/elastic/kibana/issues/155429
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -328,6 +326,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           START_DATE.format(timepickerFormat),
           END_DATE.format(timepickerFormat)
         );
+
+        await retry.waitFor(
+          'wait for table and KPI charts to load',
+          async () =>
+            (await pageObjects.infraHostsView.isHostTableLoading()) &&
+            (await pageObjects.infraHostsView.isKPIChartsLoaded())
+        );
       });
 
       after(async () => {
@@ -361,7 +366,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
-          const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();
+          const hosts = await pageObjects.infraHostsView.getAllKPITiles();
           expect(hosts.length).to.equal(5);
         });
 
@@ -373,15 +378,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'rx', value: 'N/A' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
-            const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
-            expect(tileValue).to.eql(value);
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+              expect(tileValue).to.eql(value);
+            });
           });
         });
       });
 
       describe('Metrics Tab', () => {
         before(async () => {
-          browser.scrollTop();
+          await browser.scrollTop();
           await pageObjects.infraHostsView.visitMetricsTab();
         });
 
@@ -391,18 +398,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should have an option to open the chart in lens', async () => {
-          await pageObjects.infraHostsView.getOpenInLensOption();
+          await pageObjects.infraHostsView.clickAndValidateMetriChartActionOptions();
         });
       });
 
       describe('Logs Tab', () => {
         before(async () => {
-          browser.scrollTop();
+          await browser.scrollTop();
           await pageObjects.infraHostsView.visitLogsTab();
         });
 
         it('should load the Logs tab section when clicking on it', async () => {
-          testSubjects.existOrFail('hostsView-logs');
+          await testSubjects.existOrFail('hostsView-logs');
         });
       });
 
@@ -413,7 +420,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const COLUMNS = 5;
 
         before(async () => {
-          browser.scrollTop();
+          await browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
         });
 
@@ -474,7 +481,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const query = filtererEntries.map((entry) => `host.name :"${entry.title}"`).join(' or ');
 
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.infraHostsView.submitQuery(query);
+          await retry.waitFor(
+            'wait for table and KPI charts to load',
+            async () =>
+              (await pageObjects.infraHostsView.isHostTableLoading()) &&
+              (await pageObjects.infraHostsView.isKPIChartsLoaded())
+          );
         });
 
         after(async () => {
@@ -502,8 +516,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'tx', value: 'N/A' },
               { metric: 'rx', value: 'N/A' },
             ].map(async ({ metric, value }) => {
-              const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
-              expect(tileValue).to.eql(value);
+              await retry.try(async () => {
+                const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+                expect(tileValue).to.eql(value);
+              });
             })
           );
         });
@@ -531,6 +547,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Pagination and Sorting', () => {
+        before(async () => {
+          await browser.scrollTop();
+        });
+
         beforeEach(async () => {
           await pageObjects.infraHostsView.changePageSize(5);
         });
