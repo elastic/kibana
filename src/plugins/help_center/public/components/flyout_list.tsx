@@ -21,15 +21,12 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiIcon,
-  EuiCard,
-  EuiNotificationBadge,
   EuiTab,
   EuiTabs,
-  EuiEmptyPrompt,
   EuiImage,
   EuiButton,
-  EuiLink,
   EuiSearchBar,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -54,18 +51,26 @@ export const HelpCenterFlyout = (
       .map((link, index) => {
         const { content: text, href, image, description } = link;
         return (
-          <EuiEmptyPrompt
-            icon={<EuiImage size="fullWidth" src={image} alt="" />}
-            title={<h2>{text}</h2>}
-            layout="horizontal"
-            color="plain"
-            body={<p>{description}</p>}
-            actions={
-              <EuiButton target="_blank" color="primary" fill href={href}>
-                Get started!
-              </EuiButton>
-            }
-          />
+          <EuiSplitPanel.Outer
+            direction="row"
+            css={css`
+              padding-top: 16px;
+              padding-bottom: 16px;
+            `}
+          >
+            <EuiSplitPanel.Inner paddingSize="l">
+              <EuiText>
+                <h2>{text}</h2>
+                <p>{description}</p>
+                <EuiButton target="_blank" color="primary" fill href={href}>
+                  Get started!
+                </EuiButton>
+              </EuiText>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner>
+              <EuiImage size="fullWidth" src={image} alt="" />
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
         );
       });
   }, [helpLinks?.globalHelpExtensionMenuLinks]);
@@ -78,7 +83,6 @@ export const HelpCenterFlyout = (
         prepend: <EuiIcon type="documentation" />,
         content: (
           <>
-            {' '}
             <EuiSearchBar
             // defaultQuery={initialQuery}
             // box={{
