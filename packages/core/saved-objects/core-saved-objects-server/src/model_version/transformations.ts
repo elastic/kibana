@@ -81,7 +81,11 @@ export interface SavedObjectModelBidirectionalTransformation<
 }
 
 /**
- * @TODO DOC
+ * A data backfill function associated with a {@link SavedObjectsModelDataBackfillChange | data backfill} change.
+ *
+ * @remark Such transformation functions should only be used to backfill newly introduced fields.
+ *         Even if no check is performed to ensure that, using such transformations to mutate
+ *         existing data of the document can lead to data corruption or inconsistency.
  */
 export type SavedObjectModelDataBackfillFn<
   InputAttributes = unknown,
