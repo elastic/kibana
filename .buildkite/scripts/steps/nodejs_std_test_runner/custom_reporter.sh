@@ -23,6 +23,5 @@ node --version
 npm version
 
 echo '--- New NodeJS Std Test Runner with Custom Reporter'
-node --test \
-  packages/kbn-test/new_test_runner \
-  --test-reporter=packages/kbn-test/new_test_runner/lifecycle_stream.mjs
+pushd packages/kbn-test/new_test_runner
+node --test-reporter=./lifecycle_stream.mjs --test
