@@ -43,6 +43,7 @@ export const storybookAliases = {
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
   observability: 'x-pack/plugins/observability/.storybook',
+  observability_logs: 'x-pack/plugins/observability_logs/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   text_based_editor: 'packages/kbn-text-based-editor/.storybook',

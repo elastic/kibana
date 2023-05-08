@@ -28,7 +28,7 @@ import {
 } from './constants';
 import { getPopoverButtonStyles } from './data_stream_selector.utils';
 
-interface DataStreamSelectorProps {
+export interface DataStreamSelectorProps {
   title: string;
   integrations: any[];
   uncategorizedStreams: any[];
@@ -41,6 +41,7 @@ export function DataStreamSelector({
   uncategorizedStreams,
   onUncategorizedClick,
 }: DataStreamSelectorProps) {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const panels = [
@@ -95,7 +96,7 @@ export function DataStreamSelector({
   ];
 
   const button = (
-    <DataStreamButton isAdHocSelected onClick={togglePopover}>
+    <DataStreamButton isAdHocSelected onClick={togglePopover} fullWidth={isMobile}>
       {title}
     </DataStreamButton>
   );
@@ -107,7 +108,7 @@ export function DataStreamSelector({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      display="block"
+      {...(isMobile && { display: 'block' })}
       buffer={8}
     >
       <EuiContextMenuPanel title={selectViewLabel} items={contextPanelItems} />
@@ -130,13 +131,7 @@ const DataStreamButton = ({
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
 
   return (
-    <EuiButton
-      css={buttonStyles}
-      iconType="arrowDown"
-      iconSide="right"
-      fullWidth={isMobile}
-      {...props}
-    >
+    <EuiButton css={buttonStyles} iconType="arrowDown" iconSide="right" {...props}>
       {isAdHocSelected && <EuiIcon type="indexTemporary" />}
       <span className="eui-textTruncate">{children}</span>
     </EuiButton>
