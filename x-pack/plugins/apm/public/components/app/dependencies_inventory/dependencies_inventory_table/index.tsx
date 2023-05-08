@@ -69,12 +69,13 @@ export function DependenciesInventoryTable() {
         },
       };
     } else if (dep.location.dependencyName) {
+      console.log({ dep });
       return {
         data: {
           id: `>${dep.location.dependencyName}`,
           label: dep.location.dependencyName,
           'span.destination.service.resource': dep.location.dependencyName,
-          'span.subtype': dep.location.spanSubType,
+          'span.subtype': dep.location.spanSubtype,
           'span.type': dep.location.spanType,
         },
       };

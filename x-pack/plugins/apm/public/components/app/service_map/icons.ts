@@ -13,13 +13,19 @@ import {
 } from '../../../../common/es_fields/apm';
 import { getAgentIcon } from '../../shared/agent_icon/get_agent_icon';
 import { getSpanIcon } from '../../shared/span_icon/get_span_icon';
+import { getAssetIcon } from '../../shared/asset_icon/get_asset_icon';
 
 export function iconForNode(node: cytoscape.NodeSingular) {
   const agentName = node.data(AGENT_NAME);
-  const subtype = node.data(SPAN_SUBTYPE);
-  const type = node.data(SPAN_TYPE);
+  const spanSubType = node.data(SPAN_SUBTYPE);
+  const spanType = node.data(SPAN_TYPE);
+  const assetType = node.data('asset.type');
 
-  return agentName
-    ? getAgentIcon(agentName, false)
-    : getSpanIcon(type, subtype);
+  if (agentName) {
+    return getAgentIcon(agentName, false);
+  } else if (spanType) {
+    return getSpanIcon(spanType, spanSubType);
+  } else if (assetType) {
+    return getAssetIcon(assetType);
+  }
 }

@@ -45,6 +45,9 @@ function getBorderColorFn(
     if (el.hasClass('primary') || el.selected()) {
       return theme.eui.euiColorPrimary;
     }
+    if (el.data('asset.type')) {
+      return 'white';
+    }
     return theme.eui.euiColorMediumShade;
   };
 }
@@ -118,14 +121,33 @@ const getStyle = (
     {
       selector: 'node',
       style: {
-        'background-color': theme.eui.euiColorGhost,
+        'background-color': (el: cytoscape.NodeSingular) =>
+          el.data('asset.type') ? 'rgb(64,107,222)' : theme.eui.euiColorGhost,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-        'background-height': (el: cytoscape.NodeSingular) =>
-          isService(el) ? '60%' : '40%',
-        'background-width': (el: cytoscape.NodeSingular) =>
-          isService(el) ? '60%' : '40%',
+        'background-height': (el: cytoscape.NodeSingular) => {
+          if (isService(el)) {
+            return '60%';
+          } else if (el.data(SPAN_DESTINATION_SERVICE_RESOURCE)) {
+            return '40%';
+          } else if (el.data('asset.type') === 'orchestrator.cluster.name') {
+            return '90%';
+          } else {
+            return '125%';
+          }
+        },
+        'background-width': (el: cytoscape.NodeSingular) => {
+          if (isService(el)) {
+            return '60%';
+          } else if (el.data(SPAN_DESTINATION_SERVICE_RESOURCE)) {
+            return '40%';
+          } else if (el.data('asset.type') === 'orchestrator.cluster.name') {
+            return '90%';
+          } else {
+            return '125%';
+          }
+        },
         'border-color': getBorderColorFn(theme),
         'border-style': getBorderStyle,
         'border-width': getBorderWidth,
@@ -148,8 +170,15 @@ const getStyle = (
             : el.data('label') || el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
         'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
         'overlay-opacity': 0,
-        shape: (el: cytoscape.NodeSingular) =>
-          isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
+        shape: (el: cytoscape.NodeSingular) => {
+          if (isService(el)) {
+            return 'ellipse';
+          } else if (el.data(SPAN_DESTINATION_SERVICE_RESOURCE)) {
+            return 'diamond';
+          } else {
+            return 'heptagon';
+          }
+        },
         'text-background-color': theme.eui.euiColorPrimary,
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected() ? 0.1 : 0,

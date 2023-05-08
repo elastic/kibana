@@ -39,6 +39,7 @@ import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { CytoscapeContext } from '../../../context/cytoscape_context';
+import { ControlsTools } from './controls_tools';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -215,6 +216,7 @@ export function ServiceMap({
       />
       <Controls />
       <ControlsBottom mapSize={mapSize} setMapSize={setMapSize} />
+      <ControlsTools />
     </EuiPanel>
   );
 }

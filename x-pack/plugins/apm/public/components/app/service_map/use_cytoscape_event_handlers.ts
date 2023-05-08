@@ -120,14 +120,14 @@ export function useCytoscapeEventHandlers({
     const nodeHeight = getNodeHeight(theme);
 
     const expandHandler: cytoscape.EventHandler = (event, mapSize) => {
-      const eles = serviceName
-        ? event.cy.$(`#${serviceName}`)
-        : event.cy.elements();
-      event.cy.animate({
-        ...getAnimationOptions(theme),
-        center: { eles },
-        fit: { eles, padding: getNodeHeight(theme) },
-      });
+      // const eles = serviceName
+      //   ? event.cy.$(`#${serviceName}`)
+      //   : event.cy.elements();
+      // event.cy.animate({
+      //   ...getAnimationOptions(theme),
+      //   center: { eles },
+      //   fit: { eles, padding: getNodeHeight(theme) },
+      // });
     };
 
     const dataHandler: cytoscape.EventHandler = (event, addedElements) => {
