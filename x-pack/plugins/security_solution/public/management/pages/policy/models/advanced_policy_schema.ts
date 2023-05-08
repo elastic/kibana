@@ -1281,8 +1281,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
       {
-        defaultMessage:
-          'Description. Default: true',
+        defaultMessage: 'Description. Default: true',
       }
     ),
   },
