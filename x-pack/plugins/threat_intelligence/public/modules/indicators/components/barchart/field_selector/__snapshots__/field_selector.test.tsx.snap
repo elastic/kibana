@@ -28,6 +28,7 @@ Object {
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                value="string"
               >
                 threat.feed.name
               </span>
@@ -52,7 +53,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Open list of options"
@@ -97,6 +98,7 @@ Object {
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              value="string"
             >
               threat.feed.name
             </span>
@@ -121,7 +123,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Open list of options"
@@ -247,7 +249,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Open list of options"
@@ -316,7 +318,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Open list of options"

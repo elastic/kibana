@@ -36,6 +36,7 @@ export const getFindingsQuery = ({ query, sort }: VulnerabilitiesQuery) => ({
         ...(query?.bool?.filter || []),
         { exists: { field: 'vulnerability.score.base' } },
         { exists: { field: 'vulnerability.score.version' } },
+        { exists: { field: 'vulnerability.severity' } },
         { exists: { field: 'resource.name' } },
         { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
       ],
