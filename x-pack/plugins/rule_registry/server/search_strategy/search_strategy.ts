@@ -136,6 +136,7 @@ export const ruleRegistrySearchStrategyProvider = (
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,
               query,
+              ...(request.runtimeMappings ? { runtime_mappings: request.runtimeMappings } : {}),
             },
           };
           return (siemRequest ? requestUserEs : internalUserEs).search(
