@@ -11,13 +11,14 @@ import { execSync } from 'child_process';
 const parseTarget = process.argv[2] ?? 'BUILDKITE_MESSAGE';
 const alsoAnnotate = process.argv[3] ?? false;
 
+const prNumWithinMsgRe = /\(\#(\d+)\)/;
 // @ts-expect-error
 const firstMatch = (x: string) => x[0].match(prNumWithinMsgRe)[1];
-const prNumWithinMsgRe = /\(\#(\d+)\)/;
 const head = (x: string): string[] => x.split('\n');
+const parseInt10 = (x: string) => parseInt(x, 10);
 export type PrNumber = string | number;
 const fetchLabels = (prNumber: PrNumber) =>
-  execSync(` gh pr view '${prNumber}' --json labels | jq '.labels[].name'`)
+  execSync(`gh pr view '${prNumber}' --json labels | jq '.labels[].name'`)
     .toString()
     .trim()
     .split('\n')
@@ -25,14 +26,16 @@ const fetchLabels = (prNumber: PrNumber) =>
     .join(' ');
 
 try {
-  const labels = pipe(head, firstMatch, parseInt, fetchLabels)(`${process.env[parseTarget]}`);
+  const labels = pipe(head, firstMatch, parseInt10, fetchLabels)(`${process.env[parseTarget]}`);
   execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
   if (alsoAnnotate)
     execSync(
       `buildkite-agent annotate --context 'default' --style 'info' "Github Labels: ${labels}"`
     );
 } catch (e) {
-  console.error(`\n!!! Error (stringified): \n${JSON.stringify(e, null, 2)}`);
+  console.error(
+    `\n!!! Error fetching Github Labels (stringified): \n${JSON.stringify(e, null, 2)}`
+  );
 }
 
 export {};
