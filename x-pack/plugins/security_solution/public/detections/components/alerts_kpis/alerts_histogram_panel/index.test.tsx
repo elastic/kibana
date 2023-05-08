@@ -819,7 +819,7 @@ describe('AlertsHistogramPanel', () => {
       });
     });
 
-    it('renders LensEmbeddable with 100% height', async () => {
+    it('renders LensEmbeddable with provided height', async () => {
       await act(async () => {
         mount(
           <TestProviders>
