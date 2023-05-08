@@ -94,7 +94,7 @@ describe('UserAlertsTable', () => {
     const { getAllByRole } = renderComponent();
 
     const columnHeaders = getAllByRole('columnheader');
-    expect(columnHeaders.at(0)).toHaveTextContent('Username');
+    expect(columnHeaders.at(0)).toHaveTextContent('User name');
     expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
     expect(columnHeaders.at(2)).toHaveTextContent('Critical');
     expect(columnHeaders.at(3)).toHaveTextContent('High');
