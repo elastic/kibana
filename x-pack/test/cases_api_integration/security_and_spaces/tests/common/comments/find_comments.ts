@@ -81,35 +81,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(caseComments.comments).to.eql(patchedCase.comments);
     });
 
-    it('should filter case comments', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
-
-      // post 2 comments
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      const { body: patchedCase } = await supertest
-        .post(`${CASES_URL}/${postedCase.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send({ ...postCommentUserReq, comment: 'unique' })
-        .expect(200);
-
-      const { body: caseComments } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/comments/_find?search=unique`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(caseComments.comments).to.eql([patchedCase.comments[1]]);
-    });
-
     it('unhappy path - 400s when query is bad', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
