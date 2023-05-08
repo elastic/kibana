@@ -41,10 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { skipBrowserRefresh: true }
       );
 
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
-      await visualBuilder.setTime();
+      await visualBuilder.resetPage();
     });
 
     describe('metric', () => {

@@ -26,7 +26,7 @@ export interface VersionedRouterRoute {
   /** @experimental */
   handlers: Array<{
     fn: RequestHandler;
-    options: AddVersionOpts<unknown, unknown, unknown, unknown>;
+    options: AddVersionOpts<unknown, unknown, unknown>;
   }>;
 }
 
