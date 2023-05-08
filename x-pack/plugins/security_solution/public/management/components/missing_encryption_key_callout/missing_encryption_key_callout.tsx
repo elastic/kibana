@@ -46,10 +46,7 @@ export const MissingEncryptionKeyCallout = memo(() => {
             defaultMessage="We recommend encryption keys be configured to protect sensitive information and make your environment more secure. Without encryption keys configured, some features may not perform as intended. {viewMore}."
             values={{
               viewMore: (
-                <EuiLink
-                  href={docLinks.links.kibana.secureSavedObject}
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank">
                   <FormattedMessage
                     id="xpack.securitySolution.responder.missingEncryptionKey.docsLink"
                     defaultMessage="View more information"
