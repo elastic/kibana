@@ -16,6 +16,7 @@
     { "path": "../../../src/setup_node_env/tsconfig.json" },
     { "path": "../../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
+    { "path": "../../../packages/core/logging/core-logging-server-mocks/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
   ]
 }

@@ -16,5 +16,6 @@
     { "path": "../core/tsconfig.json" },
     { "path": "../../tsconfig.json" },
     { "path": "../../x-pack/plugins/screenshotting/tsconfig.json" },
+    { "path": "../../packages/kbn-kibana-manifest-schema/tsconfig.json" },
   ]
 }
