@@ -68,7 +68,11 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   public get occupiedWorkers() {
-    return this.tasksInPool.size;
+    let count = 0;
+    for (const [, runner] of Array.from(this.tasksInPool)) {
+      count += runner.definition.workerCost;
+    }
+    return count;
   }
 
   /**

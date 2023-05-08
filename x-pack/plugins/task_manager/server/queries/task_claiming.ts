@@ -173,7 +173,7 @@ export class TaskClaiming {
   public claimAvailableTasksIfCapacityIsAvailable(
     claimingOptions: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>
   ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
-    if (this.getCapacity()) {
+    if (this.getCapacity() > 0) {
       return from(this.claimAvailableTasks(claimingOptions)).pipe(
         map((claimResult) => asOk(claimResult))
       );
@@ -201,18 +201,19 @@ export class TaskClaiming {
     // TODO: Missing code about unrecognized tasks
     try {
       const results = await Promise.all([
+        // TODO: Skip ones that are still running
         ...this.taskClaimingBatchesByType.singleConcurrency.map((type) =>
           this.searchForTasks({ size: 1, taskTypes: [type] })
         ),
         ...taskCostGroups.map((cost) =>
           this.searchForTasks({
-            size: initialCapacity / cost,
+            size: Math.floor(initialCapacity / cost),
             taskTypes: this.taskClaimingBatchesByType.byCost[cost],
           })
         ),
       ]);
 
-      // Calculate capacity again in case more capacity opened up since the search queries
+      // Calculate capacity again in case more capacity opened up since the search queries started
       let availableCapacity = this.getCapacity();
       const docsToUpdate: ConcreteTaskInstance[] = [];
       for (const result of results) {
