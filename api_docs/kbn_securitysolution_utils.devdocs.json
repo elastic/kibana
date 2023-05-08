@@ -121,7 +121,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"match_any\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -250,7 +250,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"match_any\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -510,7 +510,7 @@
         "label": "EntryTypes",
         "description": [],
         "signature": [
-          "\"wildcard\" | \"match\" | \"match_any\""
+          "\"match\" | \"wildcard\" | \"match_any\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -570,7 +570,7 @@
         "label": "TrustedAppEntryTypes",
         "description": [],
         "signature": [
-          "\"wildcard\" | \"match\""
+          "\"match\" | \"wildcard\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
