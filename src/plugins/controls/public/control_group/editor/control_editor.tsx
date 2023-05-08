@@ -98,9 +98,7 @@ export const ControlEditor = ({
 
   const controlGroup = useControlGroupContainer();
   const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
-  const customFilterPredicate = controlGroup.select(
-    (state) => state.componentState.fieldFilterPredicate
-  );
+  const customFilterPredicate = controlGroup.getFieldFilterPredicate();
 
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title ?? '');

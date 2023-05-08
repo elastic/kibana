@@ -35,7 +35,6 @@ export interface ControlGroupSettings {
     hideWidthSettings?: boolean;
     hideAdditionalSettings?: boolean;
   };
-  fieldFilterPredicate?: (field: DataViewField) => boolean;
 }
 
 export {
@@ -44,3 +43,5 @@ export {
   type ControlPanelState,
   CONTROL_GROUP_TYPE,
 } from '../../common/control_group/types';
+
+export type FieldFilterPredicate = (f: DataViewField) => boolean;
