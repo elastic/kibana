@@ -23,7 +23,7 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
     fullName: theCase.created_by.full_name ?? undefined,
   },
   status: theCase.status,
-  totalComments: theCase.totalComment,
+  totalComments: theCase.totalComments,
 });
 
 const CasesCellComponent: React.FC<CellComponentProps> = (props) => {

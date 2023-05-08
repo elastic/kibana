@@ -9,6 +9,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { triggerLoadData } from '../../tasks/inventory';
 
 describe('ALL - Inventory', () => {
   let savedQueryName: string;
@@ -34,7 +35,7 @@ describe('ALL - Inventory', () => {
     cy.getBySel('toggleNavButton').click();
     cy.contains('Infrastructure').click();
 
-    cy.getBySel('nodeContainer').first().click();
+    triggerLoadData();
     cy.contains('Osquery').click();
     inputQuery('select * from uptime;');
 
@@ -46,8 +47,7 @@ describe('ALL - Inventory', () => {
     cy.getBySel('toggleNavButton').click();
     cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 
-    cy.wait(500);
-    cy.getBySel('nodeContainer').first().click();
+    triggerLoadData();
     cy.contains('Osquery').click();
 
     cy.getBySel('comboBoxInput').first().click();
