@@ -7,6 +7,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/discover-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/fleet-plugin",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": ["target/**/*"]
 }
