@@ -6,7 +6,7 @@
  */
 import type { SavedObject } from '@kbn/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   AlertResponse,
   Comments,
@@ -102,8 +102,7 @@ export async function find(
   clientArgs: CasesClientArgs
 ): Promise<CommentsFindResponse> {
   const {
-    unsecuredSavedObjectsClient,
-    services: { caseService },
+    services: { attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -122,23 +121,16 @@ export async function find(
       authorizationFilter,
     ]);
 
-    const args = {
-      caseService,
-      unsecuredSavedObjectsClient,
-      id: caseID,
+    const theComments = await attachmentService.find({
       options: {
-        // We need this because the default behavior of getAllCaseComments is to return all the comments
-        // unless the page and/or perPage is specified. Since we're spreading the query after the request can
-        // still override this behavior.
         page: DEFAULT_PAGE,
         perPage: DEFAULT_PER_PAGE,
         sortField: 'created_at',
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
         filter,
         ...queryParams,
       },
-    };
-
-    const theComments = await caseService.getAllCaseComments(args);
+    });
 
     ensureSavedObjectsAreAuthorized(
       theComments.saved_objects.map((comment) => ({
