@@ -142,14 +142,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
 
-    usePolicyTemplateInitialName({
-      isEditPage,
-      isLoading,
-      integration,
-      newPolicy,
-      updatePolicy,
-    });
-
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
     useCloudFormationTemplate({
@@ -235,35 +227,6 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
-
-const usePolicyTemplateInitialName = ({
-  isEditPage,
-  isLoading,
-  integration,
-  newPolicy,
-  updatePolicy,
-}: {
-  isEditPage: boolean;
-  isLoading: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-}) => {
-  useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
-    if (isLoading) return;
-
-    if (newPolicy.name === integration) {
-      return;
-    }
-    updatePolicy({
-      ...newPolicy,
-      name: integration,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage]);
-};
 
 const useEnsureDefaultNamespace = ({
   newPolicy,
