@@ -280,6 +280,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            syncTooltips={false}
+            syncCursor={false}
           />
         </LensComponentWrapper>
       )}

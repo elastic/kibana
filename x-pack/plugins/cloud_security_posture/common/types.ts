@@ -107,3 +107,10 @@ export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
+
+export interface BenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
