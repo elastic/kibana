@@ -85,7 +85,9 @@ enabled:
   - test/functional/apps/bundles/config.ts
   - test/functional/apps/console/config.ts
   - test/functional/apps/context/config.ts
-  - test/functional/apps/dashboard_elements/config.ts
+  - test/functional/apps/dashboard_elements/group1/config.ts
+  - test/functional/apps/dashboard_elements/group2/config.ts
+  - test/functional/apps/dashboard_elements/group3/config.ts
   - test/functional/apps/dashboard/group1/config.ts
   - test/functional/apps/dashboard/group2/config.ts
   - test/functional/apps/dashboard/group3/config.ts
