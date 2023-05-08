@@ -70,7 +70,7 @@ export interface LensEmbeddableComponentProps {
   height?: string;
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   lensAttributes?: LensAttributes;
   onLoad?: OnEmbeddableLoaded;
   scopeId?: SourcererScopeName;
