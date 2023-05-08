@@ -28,6 +28,8 @@
     "@kbn/rison",
     "@kbn/licensing-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
