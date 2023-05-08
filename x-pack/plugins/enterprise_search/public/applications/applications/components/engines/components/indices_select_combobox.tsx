@@ -35,9 +35,10 @@ export type IndicesSelectComboBoxProps = Omit<
   'onCreateOption' | 'onSearchChange' | 'noSuggestions' | 'async'
 > & {
   'data-telemetry-id'?: string;
+  ignoredOptions?: string[];
 };
 
-export const IndicesSelectComboBox = (props: IndicesSelectComboBoxProps) => {
+export const IndicesSelectComboBox = ({ ignoredOptions, ...props }: IndicesSelectComboBoxProps) => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const { makeRequest } = useActions(FetchIndicesForEnginesAPILogic);
   const { status, data } = useValues(FetchIndicesForEnginesAPILogic);
@@ -47,7 +48,11 @@ export const IndicesSelectComboBox = (props: IndicesSelectComboBoxProps) => {
   }, [searchQuery]);
 
   const options: Array<EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>> =
-    data?.indices?.map((index) => indexToOption(index.name, index)) ?? [];
+    (ignoredOptions && ignoredOptions.length > 0
+      ? data?.indices
+          ?.filter((index) => !ignoredOptions.includes(index.name))
+          ?.map((index) => indexToOption(index.name, index))
+      : data?.indices?.map((index) => indexToOption(index.name, index))) ?? [];
 
   const renderOption = (option: EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>) => (
     <EuiFlexGroup>

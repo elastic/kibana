@@ -36,14 +36,18 @@ import {
 } from '../engines/components/indices_select_combobox';
 
 import { AddIndicesLogic } from './add_indices_logic';
+import { EngineViewLogic } from './engine_view_logic';
 
 export interface AddIndicesFlyoutProps {
   onClose: () => void;
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+  const { engineData } = useValues(EngineViewLogic);
   const { selectedIndices, updateEngineStatus, updateEngineError } = useValues(AddIndicesLogic);
   const { setSelectedIndices, submitSelectedIndices } = useActions(AddIndicesLogic);
+
+  const existingIndices = engineData?.indices?.map((index) => index.name);
 
   const selectedOptions = useMemo(
     () => selectedIndices.map((index) => indexToOption(index)),
@@ -96,6 +100,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
             fullWidth
             onChange={onIndicesChange}
             selectedOptions={selectedOptions}
+            ignoredOptions={existingIndices}
           />
         </EuiFormRow>
       </EuiFlyoutBody>
