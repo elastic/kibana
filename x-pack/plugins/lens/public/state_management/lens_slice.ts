@@ -272,6 +272,22 @@ export const lensActions = {
   removeDimension,
   syncLinkedDimensions,
 };
+export const undoRedoActions = [
+  updateDatasourceState,
+  updateVisualizationState,
+  insertLayer,
+  switchVisualization,
+  rollbackSuggestion,
+  submitSuggestion,
+  switchDatasource,
+  switchAndCleanDatasource,
+  removeLayers,
+  removeOrClearLayer,
+  addLayer,
+  cloneLayer,
+  setLayerDefaultDimension,
+  removeDimension,
+];
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;

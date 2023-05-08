@@ -14,6 +14,7 @@ import { initMiddleware } from './init_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
+import { stateHistoryMiddleware } from './state_history';
 export * from './types';
 export * from './selectors';
 
@@ -59,6 +60,7 @@ export const makeConfigureStore = (
     optimizingMiddleware(),
     contextMiddleware(storeDeps),
     fullscreenMiddleware(storeDeps),
+    stateHistoryMiddleware(),
   ];
   if (process.env.NODE_ENV === 'development') {
     middleware.push(
