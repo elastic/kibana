@@ -19,13 +19,13 @@ export const MissingEncryptionKeyCallout = memo(() => {
 
   const onClickDismissButton = useCallback(() => setCalloutDismiss(true), []);
 
-  // if (!encryptionKeyState) {
-  //   return null;
-  // }
+  if (!encryptionKeyState) {
+    return null;
+  }
 
-  // if (calloutDismiss || encryptionKeyState.data.canEncrypt === true) {
-  //   return null;
-  // }
+  if (calloutDismiss || encryptionKeyState.data.canEncrypt === true) {
+    return null;
+  }
 
   return (
     <>
@@ -43,7 +43,7 @@ export const MissingEncryptionKeyCallout = memo(() => {
         <div>
           <FormattedMessage
             id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
-            defaultMessage="We recommend encryption keys be configured to protect sensitive information and make your environment more secure. Without encryption keys configured, some features may not perform as intended. {viewMore}"
+            defaultMessage="We recommend encryption keys be configured to protect sensitive information and make your environment more secure. Without encryption keys configured, some features may not perform as intended. {viewMore}."
             values={{
               viewMore: (
                 <EuiLink
