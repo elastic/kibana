@@ -8,13 +8,16 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CommentsFindResponse } from '@kbn/cases-plugin/common/api';
+import { CommentsFindResponse, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
+  persistableStateAttachment,
   postCaseReq,
+  postCommentActionsReq,
   postCommentAlertReq,
   postCommentUserReq,
+  postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
 import {
   createComment,
@@ -79,6 +82,54 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(caseComments.comments).to.eql(patchedCase.comments);
+    });
+
+    it('should find only case comments of the correct type', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      // post 5 comments of all possible types
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentUserReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentAlertReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentActionsReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postExternalReferenceESReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(persistableStateAttachment)
+        .expect(200);
+
+      const { body: caseComments } = await supertest
+        .get(`${CASES_URL}/${postedCase.id}/comments/_find`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      expect(caseComments.comments.length).to.eql(1);
+      expect(caseComments.comments[0].type).to.eql(CommentType.user);
     });
 
     it('unhappy path - 400s when query is bad', async () => {
