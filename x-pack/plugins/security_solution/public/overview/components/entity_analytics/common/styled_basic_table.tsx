@@ -24,7 +24,7 @@ export const StyledBasicTable = styled(EuiBasicTable)`
       opacity: 1;
     }
 
-    &:hover {
+    .inline-actions-table-cell:hover {
       .inlineActions {
         opacity: 1;
       }

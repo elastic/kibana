@@ -320,9 +320,7 @@ export class TaskRunner<
 
     let activeMaintenanceWindows: MaintenanceWindow[] = [];
     try {
-      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
-        interval: rule.schedule.interval,
-      });
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
     } catch (err) {
       this.logger.error(
         `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
@@ -339,7 +337,11 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
+        this.legacyAlertsClient.initialize(
+          alertRawInstances,
+          alertRecoveredRawInstances,
+          maintenanceWindowIds
+        );
 
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
@@ -483,6 +485,7 @@ export class TaskRunner<
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      maintenanceWindowIds,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
@@ -492,10 +495,6 @@ export class TaskRunner<
 
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-      } else if (maintenanceWindowIds.length) {
-        this.logger.debug(
-          `no scheduling of actions for rule ${ruleLabel}: has active maintenance windows ${maintenanceWindowIds}.`
-        );
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`

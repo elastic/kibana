@@ -627,7 +627,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={dateFieldNames.map((text: string) => ({ text, value: text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
