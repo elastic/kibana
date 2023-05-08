@@ -179,7 +179,7 @@ export const bulkDuplicateRuleActions = {
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.tooltip',
     {
       defaultMessage:
-        ' If you choose to duplicate exceptions, the shared exceptions list will be duplicated by reference and the rule exceptions will be copied and created anew',
+        'Exception items associated with individual rules are duplicated. Exception items linked to shared exception lists are not. Instead, the duplicated rules will reference the shared exception lists that contain the exception items.',
     }
   ),
 };
