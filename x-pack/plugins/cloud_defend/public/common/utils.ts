@@ -74,6 +74,15 @@ export function getTotalsByType(selectors: Selector[], responses: Response[]) {
   return totalsByType;
 }
 
+function selectorUsesFIM(selector?: Selector) {
+  return (
+    selector &&
+    (!selector.operation ||
+      selector.operation.length === 0 ||
+      selector.operation.some((r) => FIM_OPERATIONS.indexOf(r) >= 0))
+  );
+}
+
 function selectorsIncludeConditionsForFIMOperations(
   selectors: Selector[],
   conditions: SelectorCondition[],
@@ -82,9 +91,9 @@ function selectorsIncludeConditionsForFIMOperations(
 ) {
   const result =
     selectorNames &&
-    selectorNames.reduce((prev, cur, index) => {
+    selectorNames.reduce((prev, cur) => {
       const selector = selectors.find((s) => s.name === cur);
-      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const usesFIM = selectorUsesFIM(selector);
       const hasAllConditions =
         !usesFIM ||
         !!(
@@ -95,15 +104,11 @@ function selectorsIncludeConditionsForFIMOperations(
         );
 
       if (requireForAll) {
-        if (index === 0) {
-          return hasAllConditions;
-        }
-
         return prev && hasAllConditions;
       } else {
         return prev || hasAllConditions;
       }
-    }, false);
+    }, requireForAll);
 
   return !!result;
 }
@@ -116,7 +121,7 @@ export function selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar(
     selectorNames &&
     selectorNames.reduce((prev, cur) => {
       const selector = selectors.find((s) => s.name === cur);
-      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const usesFIM = selectorUsesFIM(selector);
       return prev || !!(usesFIM && selector?.targetFilePath?.includes('/**'));
     }, false);
 
