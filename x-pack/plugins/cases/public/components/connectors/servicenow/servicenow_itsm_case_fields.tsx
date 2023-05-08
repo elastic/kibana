@@ -42,6 +42,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
     category = null,
     subcategory = null,
   } = fields ?? {};
+
   const { http, notifications } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
 
