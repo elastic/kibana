@@ -368,7 +368,7 @@ export const uiSettings: Record<string, UiSettings> = {
           'Enable Synthetics throttling UI configurations. Throttling is disabled by default. On Elastic managed infrastructure public location, throttling has some issues, {link}',
         values: {
           link: throttlingDocsLink({
-            href: 'https://github.com/elastic/synthetics/blob/main/THROTTLING.md',
+            href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
           }),
         },
       }
