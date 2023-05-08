@@ -20,7 +20,7 @@ nvm install 20.0.0
 
 echo '--- Verify Install'
 node --version
-npm version
+npm --version
 
 # echo '--- New NodeJS Std Test Runner with Custom Reporter [Transform Stream]'
 # pushd packages/kbn-test/new_test_runner
