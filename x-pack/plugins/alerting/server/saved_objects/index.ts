@@ -14,6 +14,8 @@ import type {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ALERTING_AUDIT_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import { auditMappings } from './audit_mapping';
 import { alertMappings } from './mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
@@ -27,6 +29,7 @@ export { partiallyUpdateAlert } from './partially_update_alert';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  ALERTING_AUDIT_SAVED_OBJECT_TYPE,
 } from '../../common';
 
 // Use caution when removing items from this array! Any field which has
@@ -139,6 +142,14 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'multiple-isolated',
     mappings: maintenanceWindowMappings,
+  });
+
+  savedObjects.registerType({
+    name: ALERTING_AUDIT_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_AUDIT_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: auditMappings,
   });
 
   // Encrypted attributes
