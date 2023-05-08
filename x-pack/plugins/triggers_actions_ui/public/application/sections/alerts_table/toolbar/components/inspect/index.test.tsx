@@ -27,7 +27,13 @@ describe('Inspect Button', () => {
   });
 
   test('open Inspect Modal', async () => {
-    render(<InspectButton showInspectButton getInspectQuery={getInspectQuery} />);
+    render(
+      <InspectButton
+        inspectTitle={'Inspect Title'}
+        showInspectButton
+        getInspectQuery={getInspectQuery}
+      />
+    );
     fireEvent.click(await screen.findByTestId('inspect-icon-button'));
 
     expect(await screen.findByTestId('mocker-modal')).toBeInTheDocument();

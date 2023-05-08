@@ -36,6 +36,7 @@
       "eventAnnotation",
       "unifiedSearch",
       "unifiedFieldList",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",

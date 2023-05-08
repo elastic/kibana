@@ -13,23 +13,43 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 
-import { ServerlessPluginSetup, ServerlessPluginStart } from './types';
+import {
+  ServerlessPluginSetup,
+  ServerlessPluginStart,
+  ServerlessPluginSetupDependencies,
+  ServerlessPluginStartDependencies,
+} from './types';
 import { ServerlessConfig } from './config';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 
-export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, ServerlessPluginStart> {
+export class ServerlessPlugin
+  implements
+    Plugin<
+      ServerlessPluginSetup,
+      ServerlessPluginStart,
+      ServerlessPluginSetupDependencies,
+      ServerlessPluginStartDependencies
+    >
+{
   private readonly config: ServerlessConfig;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessConfig>();
   }
 
-  public setup(_core: CoreSetup): ServerlessPluginSetup {
+  public setup(
+    _core: CoreSetup,
+    _dependencies: ServerlessPluginSetupDependencies
+  ): ServerlessPluginSetup {
     return {};
   }
 
-  public start(core: CoreStart): ServerlessPluginStart {
+  public start(
+    core: CoreStart,
+    dependencies: ServerlessPluginStartDependencies
+  ): ServerlessPluginStart {
     const { developer } = this.config;
+    const { management } = dependencies;
 
     if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
       const { currentType } = developer.projectSwitcher;
@@ -40,8 +60,12 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
     }
 
     core.chrome.setChromeStyle('project');
+    management.setIsSidebarEnabled(false);
 
-    return {};
+    return {
+      setSideNavComponent: (sideNavigationComponent) =>
+        core.chrome.project.setSideNavComponent(sideNavigationComponent),
+    };
   }
 
   public stop() {}

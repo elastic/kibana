@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BehaviorSubject, Observable } from 'rxjs';
+
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -46,6 +48,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -62,6 +65,8 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
+import type { NavigationLink } from './common/links';
+
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 
@@ -127,14 +132,18 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
+    isSidebarEnabled$: BehaviorSubject<boolean>;
     telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+
+export interface PluginStart {
+  getNavLinks$: () => Observable<NavigationLink[]>;
+  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+}
 
 export interface AppObservableLibs {
   kibana: CoreStart;
