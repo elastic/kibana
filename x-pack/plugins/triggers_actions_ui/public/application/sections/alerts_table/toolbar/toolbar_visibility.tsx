@@ -17,6 +17,7 @@ import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 import { FieldBrowserOptions } from '../../field_browser/types';
 import { InspectButton } from './components/inspect';
+import { ALERTS_TABLE_TITLE } from '../translations';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
@@ -33,7 +34,9 @@ const rightControl = ({
 }) => {
   return (
     <>
-      {showInspectButton && <InspectButton getInspectQuery={getInspectQuery} />}
+      {showInspectButton && (
+        <InspectButton inspectTitle={ALERTS_TABLE_TITLE} getInspectQuery={getInspectQuery} />
+      )}
       <LastUpdatedAt updatedAt={updatedAt} />
       {controls?.right}
     </>
