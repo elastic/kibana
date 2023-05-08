@@ -36,9 +36,9 @@ export function StepFieldTrend({
   field: string;
   step: JourneyStep;
 }) {
-  const { observability } = useSyntheticsStartPlugins();
+  const { exploratoryView } = useSyntheticsStartPlugins();
 
-  const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
+  const EmbeddableExpView = exploratoryView!.ExploratoryViewEmbeddable;
 
   const basePath = useKibana().services.http?.basePath?.get();
 

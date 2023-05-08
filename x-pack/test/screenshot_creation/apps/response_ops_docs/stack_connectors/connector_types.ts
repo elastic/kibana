@@ -12,8 +12,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const screenshotDirectories = ['response_ops_docs', 'stack_connectors'];
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
-  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const comboBox = getService('comboBox');
+  const find = getService('find');
+  const testSubjects = getService('testSubjects');
   const testIndex = `test-index`;
   const indexDocument =
     `{\n` +
@@ -21,11 +23,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `"rule_name": "{{rule.name}}",\n` +
     `"alert_id": "{{alert.id}}",\n` +
     `"context_message": "{{context.message}}"\n`;
+  const emailConnectorName = 'my-email-connector';
 
   describe('connector types', function () {
+    let emailConnectorId: string;
+    before(async () => {
+      ({ id: emailConnectorId } = await actions.api.createConnector({
+        name: emailConnectorName,
+        config: {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'some.non.existent.com',
+          port: 25,
+        },
+        secrets: {
+          user: 'bob',
+          password: 'supersecret',
+        },
+        connectorTypeId: '.email',
+      }));
+    });
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await actions.api.deleteConnector(emailConnectorId);
     });
 
     it('server log connector screenshots', async () => {
@@ -56,6 +81,75 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('index-params-test', screenshotDirectories);
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
+    });
+
+    it('slack api connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('slack');
+      await testSubjects.click('.slack_apiButton');
+      await testSubjects.setValue('nameInput', 'Slack api test connector');
+      await testSubjects.setValue('secrets.token-input', 'xoxb-XXXX-XXXX-XXXX');
+      await commonScreenshots.takeScreenshot('slack-api-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await pageObjects.common.closeToast();
+      await commonScreenshots.takeScreenshot('slack-api-params', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('slack webhook connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('slack');
+      await testSubjects.setValue('nameInput', 'Slack webhook test connector');
+      await testSubjects.setValue(
+        'slackWebhookUrlInput',
+        'https://hooks.slack.com/services/abcd/ljklmnopqrstuvwxz'
+      );
+      await commonScreenshots.takeScreenshot('slack-webhook-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('slack-webhook-params', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('email connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('email');
+      await testSubjects.setValue('nameInput', 'Gmail connector');
+      await testSubjects.setValue('emailFromInput', 'test@gmail.com');
+      await testSubjects.setValue('emailServiceSelectInput', 'gmail');
+      await commonScreenshots.takeScreenshot('email-connector', screenshotDirectories);
+      const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
+      await flyOutCancelButton.click();
+    });
+
+    it('test email connector screenshots', async () => {
+      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
+      await searchBox.click();
+      await searchBox.clearValue();
+      await searchBox.type('my actionTypeId:(.email)');
+      await searchBox.pressKeys(browser.keys.ENTER);
+      const connectorList = await testSubjects.find('actionsTable');
+      const emailConnector = await connectorList.findByCssSelector(
+        `[title="${emailConnectorName}"]`
+      );
+      await emailConnector.click();
+      const testButton = await testSubjects.find('testConnectorTab');
+      await testButton.click();
+      await testSubjects.setValue('comboBoxSearchInput', 'elastic@gmail.com');
+      await testSubjects.setValue('subjectInput', 'Test subject');
+      await testSubjects.setValue('messageTextArea', 'Enter message text');
+      /* timing issue sometimes happens with the combobox so we just try to set the subjectInput again */
+      await testSubjects.setValue('subjectInput', 'Test subject');
+      await commonScreenshots.takeScreenshot(
+        'email-params-test',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 }

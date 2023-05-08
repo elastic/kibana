@@ -44,6 +44,26 @@ export class GisPageObject extends FtrService {
     this.basePath = basePath;
   }
 
+  async expectEmsToBeAvailable() {
+    this.log.debug(`expectEmsToBeAvailable`);
+    await this.openNewMap();
+    await this.clickAddLayer();
+    await this.testSubjects.click('emsBoundaries');
+    try {
+      const emsFileElement = await this.testSubjects.find('emsFileSelect', 120000); // large timeout for EMS request
+      if (!emsFileElement) {
+        throw new Error('Unable to find EMS file select');
+      }
+      const isDisabled = await this.comboBox.isDisabled(emsFileElement);
+      if (isDisabled) {
+        throw new Error('EMS file select is disabled');
+      }
+    } catch (e) {
+      this.log.debug(`EMS is not available, error: ${e.message}`);
+      throw new Error('Test requires access to Elastic Maps Service (EMS). EMS is not available');
+    }
+  }
+
   async setAbsoluteRange(start: string, end: string) {
     await this.timePicker.setAbsoluteRange(start, end);
     await this.waitForLayersToLoad();
@@ -262,9 +282,9 @@ export class GisPageObject extends FtrService {
       `Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`
     );
     await this.setViewPopoverToggle.open();
-    await this.testSubjects.setValue('latitudeInput', lat.toString());
-    await this.testSubjects.setValue('longitudeInput', lon.toString());
-    await this.testSubjects.setValue('zoomInput', zoom.toString());
+    await this.testSubjects.setValue('latitudeInput', lat.toString(), { clearWithKeyboard: true });
+    await this.testSubjects.setValue('longitudeInput', lon.toString(), { clearWithKeyboard: true });
+    await this.testSubjects.setValue('zoomInput', zoom.toString(), { clearWithKeyboard: true });
     await this.testSubjects.click('submitViewButton');
     await this.waitForMapPanAndZoom();
   }

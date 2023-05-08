@@ -35,7 +35,11 @@ import { injectStorybookDataView } from '../services/data_views/data_views.story
 import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
-import { OptionsListResponse, OptionsListRequest } from '../../common/options_list/types';
+import {
+  OptionsListResponse,
+  OptionsListRequest,
+  OptionsListSuggestions,
+} from '../../common/options_list/types';
 
 export default {
   title: 'Controls',
@@ -56,9 +60,9 @@ const storybookStubOptionsListRequest = async (
         r({
           suggestions: getFlightSearchOptions(request.field.name, request.searchString).reduce(
             (o, current, index) => {
-              return { ...o, [current]: { doc_count: index } };
+              return [...o, { value: current, docCount: index }];
             },
-            {}
+            [] as OptionsListSuggestions
           ),
           totalCardinality: 100,
         }),

@@ -35,26 +35,26 @@ describe('getMissingSignificantTerms', () => {
 
     expect(missingSignificantTerms).toEqual([
       {
-        bg_count: 632,
-        doc_count: 1738,
-        fieldName: 'url',
-        fieldValue: 'login.php',
-        normalizedScore: 0.10333028878375965,
-        pValue: 0.010770456205312423,
-        score: 4.53094842981472,
-        total_bg_count: 1975,
-        total_doc_count: 4671,
-      },
-      {
         bg_count: 553,
         doc_count: 1981,
         fieldName: 'user',
         fieldValue: 'Peter',
-        normalizedScore: 0.8327337555873047,
-        pValue: 2.7454255728359757e-21,
-        score: 47.34435085428873,
+        normalizedScore: 0.8328439168064725,
+        pValue: 2.62555579103777e-21,
+        score: 47.38899434932384,
         total_bg_count: 1975,
-        total_doc_count: 4671,
+        total_doc_count: 4669,
+      },
+      {
+        bg_count: 632,
+        doc_count: 1738,
+        fieldName: 'url',
+        fieldValue: 'login.php',
+        normalizedScore: 0.07472703283204607,
+        pValue: 0.012783309213417932,
+        score: 4.359614926663956,
+        total_bg_count: 1975,
+        total_doc_count: 4669,
       },
     ]);
   });

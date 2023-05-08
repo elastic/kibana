@@ -15,6 +15,7 @@ interface SuggestionsApi {
   dataView: DataView;
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
+  excludedVisualizations?: string[];
 }
 
 export const suggestionsApi = ({
@@ -22,6 +23,7 @@ export const suggestionsApi = ({
   dataView,
   datasourceMap,
   visualizationMap,
+  excludedVisualizations,
 }: SuggestionsApi) => {
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
@@ -63,7 +65,13 @@ export const suggestionsApi = ({
   });
   if (!suggestions.length) return [];
   const activeVisualization = suggestions[0];
-  // compute the rest suggestions depending on the active one
+  if (
+    activeVisualization.incomplete ||
+    excludedVisualizations?.includes(activeVisualization.visualizationId)
+  ) {
+    return [];
+  }
+  // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
   const newSuggestions = getSuggestions({
     datasourceMap,
     datasourceStates: {
@@ -76,7 +84,7 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
-  });
+  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
 
   return [activeVisualization, ...newSuggestions];
 };

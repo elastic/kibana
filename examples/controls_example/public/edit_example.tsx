@@ -14,29 +14,31 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import {
-  LazyControlGroupRenderer,
-  ControlGroupContainer,
-  ControlGroupInput,
+  type ControlGroupInput,
+  ControlGroupRenderer,
+  AwaitingControlGroupAPI,
+  ACTION_EDIT_CONTROL,
+  ACTION_DELETE_CONTROL,
 } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL } from '@kbn/controls-plugin/public';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
+import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
+
+const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>(null);
   const [toggleIconIdToSelectedMapIcon, setToggleIconIdToSelectedMapIcon] = useState<{
     [id: string]: boolean;
   }>({});
@@ -49,20 +51,21 @@ export const EditExample = () => {
       },
     };
 
-    if (controlGroup) {
+    if (controlGroupAPI) {
       const disabledActions: string[] = Object.keys(
         pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
       );
-      controlGroup.updateInput({ disabledActions });
+      controlGroupAPI.updateInput({ disabledActions });
     }
 
     setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
   }
 
   async function onSave() {
-    setIsSaving(true);
+    if (!controlGroupAPI) return;
 
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup!.getInput()));
+    setIsSaving(true);
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.getInput()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -74,7 +77,7 @@ export const EditExample = () => {
     setIsLoading(true);
 
     // simulated async load await
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 6000));
 
     let input: Partial<ControlGroupInput> = {};
     const inputAsString = localStorage.getItem(INPUT_KEY);
@@ -85,6 +88,7 @@ export const EditExample = () => {
         setToggleIconIdToSelectedMapIcon({
           [ACTION_EDIT_CONTROL]: disabledActions.includes(ACTION_EDIT_CONTROL),
           [ACTION_DELETE_CONTROL]: disabledActions.includes(ACTION_DELETE_CONTROL),
+          [WITH_CUSTOM_PLACEHOLDER]: false,
         });
       } catch (e) {
         // ignore parse errors
@@ -93,6 +97,24 @@ export const EditExample = () => {
     setIsLoading(false);
     return input;
   }
+
+  const controlInputTransform: ControlInputTransform = (newState, type) => {
+    if (type === OPTIONS_LIST_CONTROL && toggleIconIdToSelectedMapIcon[WITH_CUSTOM_PLACEHOLDER]) {
+      return {
+        ...newState,
+        placeholder: 'Custom Placeholder',
+      };
+    }
+
+    if (type === RANGE_SLIDER_CONTROL) {
+      return {
+        ...newState,
+        value: ['0', '4'],
+      };
+    }
+
+    return newState;
+  };
 
   return (
     <>
@@ -109,9 +131,9 @@ export const EditExample = () => {
             <EuiButtonEmpty
               color="primary"
               iconType="plusInCircle"
-              isDisabled={controlGroup === undefined}
+              isDisabled={controlGroupAPI === undefined}
               onClick={() => {
-                controlGroup!.openAddDataControlFlyout();
+                controlGroupAPI!.openAddDataControlFlyout({ controlInputTransform });
               }}
             >
               Add control
@@ -132,6 +154,11 @@ export const EditExample = () => {
                   label: 'Disable delete action',
                   value: ACTION_DELETE_CONTROL,
                 },
+                {
+                  id: WITH_CUSTOM_PLACEHOLDER,
+                  label: WITH_CUSTOM_PLACEHOLDER,
+                  value: WITH_CUSTOM_PLACEHOLDER,
+                },
               ]}
               idToSelectedMap={toggleIconIdToSelectedMapIcon}
               type="multi"
@@ -142,7 +169,7 @@ export const EditExample = () => {
             <EuiButton
               fill
               color="primary"
-              isDisabled={controlGroup === undefined || isSaving}
+              isDisabled={controlGroupAPI === undefined || isSaving}
               onClick={onSave}
               isLoading={isSaving}
             >
@@ -153,10 +180,11 @@ export const EditExample = () => {
         {isLoading ? (
           <>
             <EuiSpacer />
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonRectangle width="100%" height="2em" />
           </>
         ) : null}
         <ControlGroupRenderer
+          ref={setControlGroupAPI}
           getCreationOptions={async (initialInput, builder) => {
             const persistedInput = await onLoad();
             return {
@@ -166,9 +194,6 @@ export const EditExample = () => {
                 viewMode: ViewMode.EDIT,
               },
             };
-          }}
-          onLoadComplete={async (newControlGroup) => {
-            setControlGroup(newControlGroup);
           }}
         />
       </EuiPanel>

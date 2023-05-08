@@ -53,6 +53,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -357,6 +359,9 @@ beforeEach(() => {
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -371,6 +376,9 @@ beforeEach(() => {
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   });
 
   rulesClient = new RulesClient(rulesClientParams);

@@ -61,7 +61,44 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
 describe('AlertsTable.BulkActions', () => {
+  beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  });
+
   const alerts = [
     {
       [AlertsField.name]: ['one'],
@@ -266,6 +303,78 @@ describe('AlertsTable.BulkActions', () => {
 
       const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
       expect(queryByTestId('bulk-actions-header')).toBeNull();
+    });
+
+    it('should pass the case ids when selecting alerts', async () => {
+      const mockedFn = jest.fn();
+      const newAlertsData = {
+        ...alertsData,
+        alerts: [
+          {
+            [AlertsField.name]: ['one'],
+            [AlertsField.reason]: ['two'],
+            [AlertsField.uuid]: ['uuidone'],
+            [AlertsField.case_ids]: ['test-case'],
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        ] as unknown as Alerts,
+      };
+
+      const props = {
+        ...tablePropsWithBulkActions,
+        useFetchAlertsData: () => newAlertsData,
+        initialBulkActionsState: {
+          ...defaultBulkActionsState,
+          isAllSelected: true,
+          rowCount: 1,
+          rowSelection: new Map([[0, { isLoading: false }]]),
+        },
+        alertsTableConfiguration: {
+          ...alertsTableConfiguration,
+          useBulkActions: () => [
+            {
+              label: 'Fake Bulk Action',
+              key: 'fakeBulkAction',
+              'data-test-subj': 'fake-bulk-action',
+              disableOnQuery: false,
+              onClick: mockedFn,
+            },
+          ],
+        },
+      };
+
+      render(<AlertsTableWithBulkActionsContext {...props} />);
+
+      fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      fireEvent.click(await screen.findByText('Fake Bulk Action'));
+
+      expect(mockedFn.mock.calls[0][0]).toEqual([
+        {
+          _id: 'alert0',
+          _index: 'idx0',
+          data: [
+            {
+              field: 'kibana.alert.rule.name',
+              value: ['one'],
+            },
+            {
+              field: 'kibana.alert.rule.uuid',
+              value: ['uuidone'],
+            },
+            {
+              field: 'kibana.alert.case_ids',
+              value: ['test-case'],
+            },
+          ],
+          ecs: {
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        },
+      ]);
     });
   });
 
@@ -493,6 +602,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.rule.uuid',
                   value: ['uuidtwo'],
                 },
+                {
+                  field: 'kibana.alert.case_ids',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -654,8 +767,7 @@ describe('AlertsTable.BulkActions', () => {
           });
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/152176
-        describe.skip('and executing a bulk action', () => {
+        describe('and executing a bulk action', () => {
           it('should return the are all selected flag set to true', async () => {
             const mockedFn = jest.fn();
             const props = {
@@ -704,6 +816,10 @@ describe('AlertsTable.BulkActions', () => {
                     field: 'kibana.alert.rule.uuid',
                     value: ['uuidone'],
                   },
+                  {
+                    field: 'kibana.alert.case_ids',
+                    value: [],
+                  },
                 ],
                 ecs: {
                   _id: 'alert0',
@@ -721,6 +837,10 @@ describe('AlertsTable.BulkActions', () => {
                   {
                     field: 'kibana.alert.rule.uuid',
                     value: ['uuidtwo'],
+                  },
+                  {
+                    field: 'kibana.alert.case_ids',
+                    value: [],
                   },
                 ],
                 ecs: {

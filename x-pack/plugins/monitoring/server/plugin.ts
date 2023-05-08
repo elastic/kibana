@@ -104,7 +104,7 @@ export class MonitoringPlugin
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
         name: serverInfo.name,
-        index: coreSetup.savedObjects.getKibanaIndex(),
+        index: coreSetup.savedObjects.getDefaultIndex(),
         host: serverInfo.hostname,
         locale: i18n.getLocale(),
         port: serverInfo.port.toString(),

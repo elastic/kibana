@@ -103,6 +103,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  // Avoid hover actions button overlaps with its chart
   const addHoverActionsPadding =
     attributes?.visualizationType !== 'lnsLegacyMetric' &&
     attributes?.visualizationType !== 'lnsPie';
@@ -181,6 +182,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
         return;
       }
+      // Update timerange when clicking on a dot in an area chart
       const [{ query }] = await createFiltersFromValueClickAction({
         data: e.data,
         negate: e.negate,
@@ -269,6 +271,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            syncTooltips={false}
+            syncCursor={false}
           />
         </LensComponentWrapper>
       )}

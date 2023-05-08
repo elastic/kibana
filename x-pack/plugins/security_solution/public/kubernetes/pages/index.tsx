@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { ResponseActionButtonProps } from '@kbn/kubernetes-security-plugin/public/types';
-import { TableId } from '../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';

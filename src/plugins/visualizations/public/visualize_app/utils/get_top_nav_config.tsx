@@ -117,8 +117,6 @@ export const getTopNavConfig = (
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
-    savedObjects,
-    theme,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -145,7 +143,6 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: savedObjects.client,
         overlays,
         savedObjectsTagging,
       });
@@ -312,6 +309,11 @@ export const getTopNavConfig = (
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
+                title: visInstance?.panelTitle || vis.title,
+                visTypeTitle: vis.type.title,
+                description: visInstance?.panelDescription || vis.description,
+                panelTimeRange: visInstance?.panelTimeRange,
+                isEmbeddable: Boolean(originatingApp),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();

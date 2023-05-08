@@ -47,7 +47,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.indices.delete({ index: alertAsDataIndex });
+      await es.deleteByQuery({ index: alertAsDataIndex, query: { match_all: {} } });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -1244,8 +1244,7 @@ instanceStateValue: true
             throttle: null,
             summary: true,
             alertsFilter: {
-              timeframe: null,
-              query: { kql: 'kibana.alert.rule.name:abc' },
+              query: { kql: 'kibana.alert.rule.name:abc', filters: [] },
             },
           });
 
@@ -1307,8 +1306,7 @@ instanceStateValue: true
             throttle: null,
             summary: true,
             alertsFilter: {
-              timeframe: null,
-              query: { kql: 'kibana.alert.instance.id:1' },
+              query: { kql: 'kibana.alert.instance.id:1', filters: [] },
             },
           });
 
@@ -1383,7 +1381,6 @@ instanceStateValue: true
                 timezone: 'UTC',
                 hours: { start, end },
               },
-              query: null,
             },
           });
 

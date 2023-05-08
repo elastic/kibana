@@ -100,7 +100,10 @@ describe('useAggregatedIndicators()', () => {
           "loading": false,
           "refetch": [Function],
         },
-        "selectedField": "threat.feed.name",
+        "selectedField": Object {
+          "label": "threat.feed.name",
+          "value": "string",
+        },
         "series": Array [],
       }
     `);

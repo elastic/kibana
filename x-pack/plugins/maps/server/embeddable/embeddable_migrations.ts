@@ -6,7 +6,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapAttributes } from '../../common/content_management';
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { migrateOtherCategoryColor } from '../../common/migrations/migrate_other_category_color';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
@@ -25,7 +25,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: moveAttribution(state as { attributes: MapSavedObjectAttributes }),
+        attributes: moveAttribution(state as { attributes: MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration
@@ -37,7 +37,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: setEmsTmsDefaultModes(state as { attributes: MapSavedObjectAttributes }),
+        attributes: setEmsTmsDefaultModes(state as { attributes: MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration
@@ -47,7 +47,7 @@ export const embeddableMigrations = {
   },
   '8.0.1': (state: SerializableRecord) => {
     try {
-      const { attributes } = extractReferences(state as { attributes: MapSavedObjectAttributes });
+      const { attributes } = extractReferences(state as { attributes: MapAttributes });
       return {
         ...state,
         attributes,
@@ -62,7 +62,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: renameLayerTypes(state as { attributes: MapSavedObjectAttributes }),
+        attributes: renameLayerTypes(state as { attributes: MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration
@@ -74,7 +74,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: migrateOtherCategoryColor(state as { attributes: MapSavedObjectAttributes }),
+        attributes: migrateOtherCategoryColor(state as { attributes: MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration

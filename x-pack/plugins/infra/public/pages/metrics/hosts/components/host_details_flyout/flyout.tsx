@@ -6,13 +6,26 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTab,
+  EuiSpacer,
+  EuiTabs,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { LinkToUptime } from './links/link_to_uptime';
+import { LinkToApmServices } from './links/link_to_apm_services';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import { metadataTab } from './metadata';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { processesTab } from './processes';
 import { Metadata } from './metadata/metadata';
 import { Processes } from './processes/processes';
@@ -28,6 +41,7 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { euiTheme } = useEuiTheme();
 
   const currentTimeRange = {
     ...getDateRangeAsTimestamp(),
@@ -57,9 +71,24 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          <h2>{node.name}</h2>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h2>{node.name}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LinkToApmServices hostName={node.name} apmField={'host.hostname'} />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              margin-right: ${euiTheme.size.l};
+            `}
+          >
+            <LinkToUptime nodeType={NODE_TYPE} node={node} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiTabs style={{ marginBottom: '-25px' }} size="s">
           {tabEntries}

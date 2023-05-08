@@ -25,7 +25,7 @@ import { extractContainerType, extractVisualizationType } from '@kbn/chart-expre
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { CellValueAction, GetCompatibleCellValueActions } from '../types';
-import { ChartTypes, PartitionVisParams, RenderValue } from '../../common/types';
+import { ChartTypes, type PartitionVisParams, type PartitionChartProps } from '../../common/types';
 
 export const strings = {
   getDisplayName: () =>
@@ -73,14 +73,14 @@ export const getColumnCellValueActions = async (
 
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
-) => ExpressionRenderDefinition<RenderValue> = ({ getStartDeps }) => ({
+) => ExpressionRenderDefinition<PartitionChartProps> = ({ getStartDeps }) => ({
   name: PARTITION_VIS_RENDERER_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode,
-    { visConfig, visData, visType, syncColors, canNavigateToLens },
+    { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
     handlers
   ) => {
     const { core, plugins } = getStartDeps();
@@ -127,6 +127,7 @@ export const getPartitionVisRenderer: (
               services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
               syncColors={syncColors}
               columnCellValueActions={columnCellValueActions}
+              overrides={overrides}
             />
           </div>
         </KibanaThemeProvider>

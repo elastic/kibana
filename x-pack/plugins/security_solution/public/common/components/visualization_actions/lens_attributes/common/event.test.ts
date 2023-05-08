@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { useRouteSpy } from '../../../../utils/route/use_route_spy';
 import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
@@ -35,7 +36,75 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getEventsHistogramLensAttributes', () => {
-  it('should render', () => {
+  it('should render query and filters for hosts events histogram', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: 'hosts',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+    expect(result?.current?.state.query).toEqual(
+      expect.objectContaining({
+        language: 'kql',
+        query: 'host.name: *',
+      })
+    );
+
+    expect(result?.current?.state.filters[0]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                exists: {
+                  field: 'host.name',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[1]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  _index: 'auditbeat-mytest-*',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[2]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'host.id': '123',
+          },
+        },
+      })
+    );
+  });
+
+  it('should render query and filters for host details events histogram', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -45,6 +114,385 @@ describe('getEventsHistogramLensAttributes', () => {
       { wrapper }
     );
 
-    expect(result?.current).toMatchSnapshot();
+    expect(result?.current?.state.query).toEqual(
+      expect.objectContaining({
+        language: 'kql',
+        query: 'host.name: *',
+      })
+    );
+
+    expect(result?.current?.state.filters[0]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                exists: {
+                  field: 'host.name',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[1]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  _index: 'auditbeat-mytest-*',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[2]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'host.id': '123',
+          },
+        },
+      })
+    );
+  });
+
+  it('should render attributes for network events histogram', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: 'network',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+    expect(result?.current?.state.query).toEqual(
+      expect.objectContaining({
+        language: 'kql',
+        query: 'host.name: *',
+      })
+    );
+
+    expect(result?.current?.state.filters[0]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                exists: {
+                  field: 'source.ip',
+                },
+              },
+              {
+                exists: {
+                  field: 'destination.ip',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[1]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  _index: 'auditbeat-mytest-*',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[2]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'host.id': '123',
+          },
+        },
+      })
+    );
+  });
+
+  it('should render attributes for network details events histogram', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'mockIp',
+        pageName: 'network',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query).toEqual(
+      expect.objectContaining({
+        language: 'kql',
+        query: 'host.name: *',
+      })
+    );
+
+    expect(result?.current?.state.filters[0]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  'source.ip': 'mockIp',
+                },
+              },
+              {
+                match_phrase: {
+                  'destination.ip': 'mockIp',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[1]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                exists: {
+                  field: 'source.ip',
+                },
+              },
+              {
+                exists: {
+                  field: 'destination.ip',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[2]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  _index: 'auditbeat-mytest-*',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[3]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'host.id': '123',
+          },
+        },
+      })
+    );
+  });
+
+  it('should render attributes for users events histogram', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: 'users',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+    expect(result?.current?.state.query).toEqual(
+      expect.objectContaining({
+        language: 'kql',
+        query: 'host.name: *',
+      })
+    );
+
+    expect(result?.current?.state.filters[0]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                exists: {
+                  field: 'user.name',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[1]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  _index: 'auditbeat-mytest-*',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[2]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'host.id': '123',
+          },
+        },
+      })
+    );
+  });
+  it('should render attributes for user details events histogram', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'mockUser',
+        pageName: 'users',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query).toEqual(
+      expect.objectContaining({
+        language: 'kql',
+        query: 'host.name: *',
+      })
+    );
+
+    expect(result?.current?.state.filters[0]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'user.name': 'mockUser',
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[1]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                exists: {
+                  field: 'user.name',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[2]).toEqual(
+      expect.objectContaining({
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  _index: 'auditbeat-mytest-*',
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result?.current?.state.filters[3]).toEqual(
+      expect.objectContaining({
+        query: {
+          match_phrase: {
+            'host.id': '123',
+          },
+        },
+      })
+    );
+  });
+
+  it('should render values in legend', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({ valuesInLegend: true })
+    );
   });
 });

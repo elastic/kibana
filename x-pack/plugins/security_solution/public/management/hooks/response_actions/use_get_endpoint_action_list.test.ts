@@ -51,6 +51,7 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         endDate: 'now',
+        withAutomatedActions: true,
       })
     );
 
@@ -65,6 +66,7 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         userIds: ['*elastic*', '*citsale*'],
+        withAutomatedActions: true,
       },
     });
   });
@@ -73,7 +75,7 @@ describe('useGetEndpointActionList hook', () => {
     await renderReactQueryHook(
       () =>
         useGetEndpointActionList(
-          {},
+          { withAutomatedActions: true },
           {
             queryKey: ['1', '2'],
             enabled: false,

@@ -31,7 +31,7 @@ export function usePackagePolicyEditorPageUrl(dataStreamId?: string) {
 
 export function useIndexTemplateExists(
   templateName: string,
-  enabled: boolean
+  enabled: boolean = true
 ): {
   exists?: boolean;
   isLoading: boolean;
@@ -43,7 +43,7 @@ export function useIndexTemplateExists(
         path: `/api/index_management/index_templates/${templateName}`,
         method: 'get',
       }),
-    { enabled: enabled || !!templateName }
+    { enabled }
   );
 
   if (isLoading) {

@@ -8,6 +8,8 @@
 import type { AnyAction, Reducer } from 'redux';
 import { combineReducers } from 'redux';
 
+import type { DataTableState } from '@kbn/securitysolution-data-table';
+import { dataTableReducer } from '@kbn/securitysolution-data-table';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
@@ -27,8 +29,6 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
-import type { DataTableState } from './data_table/types';
-import { dataTableReducer } from './data_table/reducer';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 

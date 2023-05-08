@@ -11,6 +11,7 @@ import type {
   AggregationsCardinalityAggregate,
   SearchResponseBody,
 } from '@elastic/elasticsearch/lib/api/types';
+import usePrevious from 'react-use/lib/usePrevious';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
 
@@ -23,6 +24,8 @@ export function useSplitFieldCardinality(
   splitField: string | undefined,
   query: QueryDslQueryContainer
 ) {
+  const prevSplitField = usePrevious(splitField);
+
   const [cardinality, setCardinality] = useState<number | null>(null);
   const { dataView } = useDataSource();
 
@@ -49,6 +52,7 @@ export function useSplitFieldCardinality(
 
   useEffect(
     function performCardinalityCheck() {
+      setCardinality(null);
       if (splitField === undefined) {
         return;
       }
@@ -72,5 +76,5 @@ export function useSplitFieldCardinality(
     [getSplitFieldCardinality, requestPayload, cancelRequest, splitField]
   );
 
-  return cardinality;
+  return prevSplitField !== splitField ? null : cardinality;
 }

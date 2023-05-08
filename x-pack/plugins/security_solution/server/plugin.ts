@@ -28,6 +28,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
@@ -56,7 +57,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
-import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import { actionCreateService, EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
@@ -68,7 +69,6 @@ import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
@@ -101,7 +101,6 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { ActionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
@@ -127,7 +126,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
-  private kibanaIndex?: string;
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
@@ -158,18 +156,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
-    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
 
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
-
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
-    };
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -214,6 +206,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
+      licensing: plugins.licensing,
     };
 
     const ruleDataServiceOptions = {
@@ -244,9 +237,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       lists: plugins.lists,
       logger: this.logger,
       config: this.config,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+    };
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      }),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -305,7 +306,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, this.endpointContext);
-    registerActionRoutes(router, this.endpointContext);
+    registerActionRoutes(
+      router,
+      this.endpointContext,
+      plugins.encryptedSavedObjects?.canEncrypt === true
+    );
 
     const ruleTypes = [
       LEGACY_NOTIFICATIONS_ID,
@@ -444,17 +449,15 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
-          logger.info('Dependent plugin setup complete - Starting ManifestTask');
+        logger.info('Dependent plugin setup complete - Starting ManifestTask');
 
-          if (this.manifestTask) {
-            this.manifestTask.start({
-              taskManager,
-            });
-          } else {
-            logger.error(new Error('User artifacts task not available.'));
-          }
-        });
+        if (this.manifestTask) {
+          this.manifestTask.start({
+            taskManager,
+          });
+        } else {
+          logger.error(new Error('User artifacts task not available.'));
+        }
       });
 
       // License related start
@@ -494,21 +497,22 @@ export class Plugin implements ISecuritySolutionPlugin {
       manifestManager,
       registerIngestCallback,
       licenseService,
+      cloud: plugins.cloud,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      actionCreateService: new ActionCreateService(
+      actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
-        this.endpointContext
+        this.endpointContext,
+        licenseService
       ),
     });
 
     this.telemetryReceiver.start(
       core,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.kibanaIndex!,
+      (type: string) => core.savedObjects.getIndexForType(type),
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient,

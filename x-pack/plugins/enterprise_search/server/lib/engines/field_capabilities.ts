@@ -14,6 +14,8 @@ import {
   SchemaField,
 } from '../../../common/types/engines';
 
+import { availableIndices } from './available_indices';
+
 export const fetchEngineFieldCapabilities = async (
   client: IScopedClusterClient,
   engine: EnterpriseSearchEngine
@@ -21,12 +23,12 @@ export const fetchEngineFieldCapabilities = async (
   const { name, updated_at_millis, indices } = engine;
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
+    filters: '-metadata',
     include_unmapped: true,
-    index: indices,
+    index: await availableIndices(client, indices),
   });
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {
-    field_capabilities: fieldCapabilities,
     fields,
     name,
     updated_at_millis,
@@ -72,10 +74,17 @@ export const parseFieldsCapabilities = (fieldCapsResponse: FieldCapsResponse): S
               type,
             }));
 
+      const searchable = Object.values(typesObject).some((t) => t.searchable);
+      const aggregatable = Object.values(typesObject).some((t) => t.aggregatable);
+      const metadataField = Object.values(typesObject).every((t) => t.metadata_field);
+
       return {
+        aggregatable,
         indices: fieldIndices,
         name: fieldName,
+        searchable,
         type,
+        ...(metadataField === undefined ? {} : { metadata_field: metadataField }),
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name)) as SchemaField[];

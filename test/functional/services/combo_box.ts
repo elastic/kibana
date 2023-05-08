@@ -323,4 +323,12 @@ export class ComboBoxService extends FtrService {
     const input = await comboBoxElement.findByTagName('input');
     await input.clearValueWithKeyboard();
   }
+
+  public async isDisabled(comboBoxElement: WebElementWrapper): Promise<boolean> {
+    this.log.debug(`comboBox.isDisabled`);
+    const toggleListButton = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
+    const isDisabled = await toggleListButton.getAttribute('disabled');
+    this.log.debug(`isDisabled:${isDisabled}`);
+    return isDisabled?.toLowerCase() === 'true';
+  }
 }

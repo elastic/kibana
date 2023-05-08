@@ -8,18 +8,15 @@ import { useQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { extractErrorMessage } from '../../../../common/utils/helpers';
-import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../types';
+import type { Sort, FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import { showErrorToast } from '../../../common/utils/show_error_toast';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: Sort<CspFinding>;
@@ -39,19 +36,6 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
-
-const SEARCH_FAILED_TEXT = i18n.translate(
-  'xpack.csp.findings.findingsErrorToast.searchFailedTitle',
-  { defaultMessage: 'Search failed' }
-);
-
-export const showErrorToast = (
-  toasts: CoreStart['notifications']['toasts'],
-  error: unknown
-): void => {
-  if (error instanceof Error) toasts.addError(error, { title: SEARCH_FAILED_TEXT });
-  else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
-};
 
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,

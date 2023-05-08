@@ -11,6 +11,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
+import { JOURNEY_APM_CONFIG } from '@kbn/journeys';
 
 const JOURNEY_BASE_PATH = 'x-pack/performance/journeys';
 
@@ -103,7 +104,25 @@ run(
       process.stdout.write(`--- Starting ES\n`);
       await procRunner.run('es', {
         cmd: 'node',
-        args: ['scripts/es', 'snapshot', '--license=trial'],
+        args: [
+          'scripts/es',
+          'snapshot',
+          '--license=trial',
+          ...(JOURNEY_APM_CONFIG.active
+            ? [
+                '-E',
+                'tracing.apm.enabled=true',
+                '-E',
+                'tracing.apm.agent.transaction_sample_rate=1.0',
+                '-E',
+                `tracing.apm.agent.server_url=${JOURNEY_APM_CONFIG.serverUrl}`,
+                '-E',
+                `tracing.apm.agent.secret_token=${JOURNEY_APM_CONFIG.secretToken}`,
+                '-E',
+                `tracing.apm.agent.environment=${JOURNEY_APM_CONFIG.environment}`,
+              ]
+            : []),
+        ],
         cwd: REPO_ROOT,
         wait: /kbn\/es setup complete/,
       });

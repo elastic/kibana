@@ -18,7 +18,7 @@ export const CaseFileMetadataForDeletionRt = rt.type({
   caseIds: rt.array(rt.string),
 });
 
-export type CaseFileMetadata = rt.TypeOf<typeof CaseFileMetadataForDeletionRt>;
+export type CaseFileMetadataForDeletion = rt.TypeOf<typeof CaseFileMetadataForDeletionRt>;
 
 const FILE_KIND_DELIMITER = 'FilesCases';
 

@@ -14,6 +14,7 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
+// TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
 const LOG_INTEGRATION_VERSION = '1.1.2';
 
 const FINAL_PIPELINE_VERSION = 1;
@@ -33,14 +34,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(201);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/154220
-  // FLAKY: https://github.com/elastic/kibana/issues/154221
-  // FLAKY: https://github.com/elastic/kibana/issues/154222
-  // FLAKY: https://github.com/elastic/kibana/issues/154223
-  // FLAKY: https://github.com/elastic/kibana/issues/154224
-  // FLAKY: https://github.com/elastic/kibana/issues/154225
-  // FLAKY: https://github.com/elastic/kibana/issues/154226
-  describe.skip('fleet_final_pipeline', () => {
+  describe('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

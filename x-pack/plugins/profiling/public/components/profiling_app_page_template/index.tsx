@@ -19,7 +19,7 @@ import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 
-const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
+export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -39,10 +39,10 @@ export function ProfilingAppPageTemplate({
   pageTitle?: React.ReactNode;
 }) {
   const {
-    start: { observability },
+    start: { observabilityShared },
   } = useProfilingDependencies();
 
-  const { PageTemplate: ObservabilityPageTemplate } = observability.navigation;
+  const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
   const history = useHistory();
 

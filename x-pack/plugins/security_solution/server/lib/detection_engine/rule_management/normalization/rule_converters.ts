@@ -39,6 +39,7 @@ import {
 } from '../../../../../common/detection_engine/rule_schema';
 
 import {
+  transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
@@ -51,8 +52,6 @@ import {
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -74,12 +73,7 @@ import type {
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
-import {
-  transformActions,
-  transformFromAlertThrottle,
-  transformToAlertThrottle,
-  transformToNotifyWhen,
-} from './rule_actions';
+import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 
@@ -401,6 +395,11 @@ export const convertPatchAPIToInternalSchema = (
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
+
+  const alertActions = nextParams.actions?.map(transformRuleToAlertAction) ?? existingRule.actions;
+  const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
+  const actions = transformToActionFrequency(alertActions, throttle);
+
   return {
     name: nextParams.name ?? existingRule.name,
     tags: nextParams.tags ?? existingRule.tags,
@@ -440,15 +439,7 @@ export const convertPatchAPIToInternalSchema = (
       ...typeSpecificParams,
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
-    actions: nextParams.actions
-      ? nextParams.actions.map(transformRuleToAlertAction)
-      : existingRule.actions,
-    throttle: nextParams.throttle
-      ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle ?? null,
-    notifyWhen: nextParams.throttle
-      ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen ?? null,
+    actions,
   };
 };
 
@@ -464,6 +455,10 @@ export const convertCreateAPIToInternalSchema = (
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
+
+  const alertActions = input.actions?.map(transformRuleToAlertAction) ?? [];
+  const actions = transformToActionFrequency(alertActions, input.throttle);
+
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -504,9 +499,7 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
-    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    throttle: transformToAlertThrottle(input.throttle),
-    notifyWhen: transformToNotifyWhen(input.throttle),
+    actions,
   };
 };
 
@@ -646,13 +639,16 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  legacyRuleActions?: LegacyRuleActions | null
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
+
+  const alertActions = rule.actions.map(transformAlertToRuleAction);
+  const throttle = transformFromAlertThrottle(rule);
+  const actions = transformToActionFrequency(alertActions, throttle);
 
   return {
     // saved object properties
@@ -675,8 +671,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
-    actions: transformActions(rule.actions, legacyRuleActions),
+    throttle: undefined,
+    actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };

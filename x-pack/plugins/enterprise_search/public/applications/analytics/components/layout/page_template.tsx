@@ -17,7 +17,7 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 import {
   COLLECTION_EXPLORER_PATH,
   COLLECTION_INTEGRATE_PATH,
-  COLLECTION_VIEW_PATH,
+  COLLECTION_OVERVIEW_PATH,
 } from '../../routes';
 
 interface EnterpriseSearchAnalyticsPageTemplateProps extends PageTemplateProps {
@@ -41,7 +41,7 @@ export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
                 integration: generateEncodedPath(COLLECTION_INTEGRATE_PATH, {
                   name: analyticsName,
                 }),
-                overview: generateEncodedPath(COLLECTION_VIEW_PATH, {
+                overview: generateEncodedPath(COLLECTION_OVERVIEW_PATH, {
                   name: analyticsName,
                 }),
               }

@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { buildFilter } from '../../../client/utils';
-import { CommentType, FILE_ATTACHMENT_TYPE } from '../../../../common/api';
+import type { FileServiceStart } from '@kbn/files-plugin/server';
+import { CommentType } from '../../../../common/api';
 import type { CommentRequest } from '../../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, MAX_FILES_PER_CASE } from '../../../../common/constants';
+import { MAX_FILES_PER_CASE } from '../../../../common/constants';
 import { isFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
 export class FileLimiter extends BaseLimiter {
-  constructor() {
+  constructor(private readonly fileService: FileServiceStart) {
     super({
       limit: MAX_FILES_PER_CASE,
       attachmentType: CommentType.externalReference,
       field: 'externalReferenceAttachmentTypeId',
-      filter: createFileFilter(),
       attachmentNoun: 'files',
     });
+  }
+
+  public async countOfItemsWithinCase(caseId: string): Promise<number> {
+    const files = await this.fileService.find({
+      perPage: 1,
+      meta: {
+        caseIds: [caseId],
+      },
+    });
+
+    return files.total;
   }
 
   public countOfItemsInRequest(requests: CommentRequest[]): number {
@@ -35,11 +45,3 @@ export class FileLimiter extends BaseLimiter {
     return fileRequests;
   }
 }
-
-const createFileFilter = () =>
-  buildFilter({
-    filters: FILE_ATTACHMENT_TYPE,
-    field: 'externalReferenceAttachmentTypeId',
-    operator: 'or',
-    type: CASE_COMMENT_SAVED_OBJECT,
-  });

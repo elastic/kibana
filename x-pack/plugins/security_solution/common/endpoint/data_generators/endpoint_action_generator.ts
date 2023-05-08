@@ -58,6 +58,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         user: {
           id: this.randomUser(),
         },
+        rule: undefined,
       },
       overrides
     );
@@ -154,38 +155,37 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     TOutputType extends object = object,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
-    overrides: Partial<ActionDetails<TOutputType, TParameters>> = {}
+    overrides: DeepPartial<ActionDetails<TOutputType, TParameters>> = {}
   ): ActionDetails<TOutputType, TParameters> {
-    const details: ActionDetails = merge(
-      {
-        agents: ['agent-a'],
-        command: 'isolate',
-        completedAt: '2022-04-30T16:08:47.449Z',
-        hosts: { 'agent-a': { name: 'Host-agent-a' } },
-        id: '123',
-        isCompleted: true,
-        isExpired: false,
-        wasSuccessful: true,
-        errors: undefined,
-        startedAt: '2022-04-27T16:08:47.449Z',
-        status: 'successful',
-        comment: 'thisisacomment',
-        createdBy: 'auserid',
-        parameters: undefined,
-        outputs: {},
-        agentState: {
-          'agent-a': {
-            errors: undefined,
-            isCompleted: true,
-            completedAt: '2022-04-30T16:08:47.449Z',
-            wasSuccessful: true,
-          },
+    const details: ActionDetails = {
+      agents: ['agent-a'],
+      command: 'isolate',
+      completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: { 'agent-a': { name: 'Host-agent-a' } },
+      id: '123',
+      isCompleted: true,
+      isExpired: false,
+      wasSuccessful: true,
+      errors: undefined,
+      startedAt: '2022-04-27T16:08:47.449Z',
+      status: 'successful',
+      comment: 'thisisacomment',
+      createdBy: 'auserid',
+      parameters: undefined,
+      outputs: {},
+      agentState: {
+        'agent-a': {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
         },
       },
-      overrides
-    );
+    };
 
-    if (details.command === 'get-file') {
+    const command = overrides.command ?? details.command;
+
+    if (command === 'get-file') {
       if (!details.parameters) {
         (
           details as ActionDetails<
@@ -212,7 +212,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
-    if (details.command === 'execute') {
+    if (command === 'execute') {
       if (!details.parameters) {
         (
           details as ActionDetails<
@@ -232,14 +232,17 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           [details.agents[0]]: this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
-              ...overrides.outputs?.[details.agents[0]].content,
+              ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
             },
           }),
         };
       }
     }
 
-    return details as unknown as ActionDetails<TOutputType, TParameters>;
+    return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
+      TOutputType,
+      TParameters
+    >;
   }
 
   randomGetFileFailureCode(): string {
@@ -309,6 +312,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       {
         type: 'json',
         content: {
+          code: 'ra_execute_success_done',
           stdout: this.randomChoice([
             this.randomString(1280),
             this.randomString(3580),
@@ -327,7 +331,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           stderr_truncated: true,
           shell_code: 0,
           shell: 'bash',
-          cwd: '/some/path',
+          cwd: this.randomChoice(['/some/path', '/a-very/long/path'.repeat(30)]),
           output_file_id: 'some-output-file-id',
           output_file_stdout_truncated: this.randomChoice([true, false]),
           output_file_stderr_truncated: this.randomChoice([true, false]),

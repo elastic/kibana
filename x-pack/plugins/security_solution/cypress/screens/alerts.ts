@@ -176,3 +176,9 @@ export const LEGEND_ACTIONS = {
 };
 
 export const TREND_CHART_LEGEND = '[data-test-subj="draggable-legend"]';
+
+export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+
+export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+
+export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';

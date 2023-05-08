@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import {
   ActionTypes,
-  CaseResponse,
+  Case,
   CaseSeverity,
   CaseStatuses,
   CommentUserAction,
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('pagination', () => {
-      let theCase: CaseResponse;
+      let theCase: Case;
 
       beforeEach(async () => {
         theCase = await createCase(supertest, getPostCaseRequest());
@@ -793,9 +793,9 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('rbac', () => {
         const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-        let secCase: CaseResponse;
-        let obsCase: CaseResponse;
-        let secCaseSpace2: CaseResponse;
+        let secCase: Case;
+        let obsCase: Case;
+        let secCaseSpace2: Case;
 
         beforeEach(async () => {
           [secCase, obsCase, secCaseSpace2] = await Promise.all([

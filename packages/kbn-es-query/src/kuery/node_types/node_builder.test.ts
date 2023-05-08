@@ -55,6 +55,25 @@ describe('nodeBuilder', () => {
   });
 
   describe('and method', () => {
+    test('no clauses', () => {
+      const node = nodeBuilder.and([]);
+      const query = toElasticsearchQuery(node);
+      expect(node).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [],
+          },
+        }
+      `);
+    });
+
     test('single clause', () => {
       const nodes = [nodeBuilder.is('foo', 'bar')];
       const query = toElasticsearchQuery(nodeBuilder.and(nodes));
@@ -166,6 +185,26 @@ describe('nodeBuilder', () => {
   });
 
   describe('or method', () => {
+    test('no clauses', () => {
+      const node = nodeBuilder.or([]);
+      const query = toElasticsearchQuery(node);
+      expect(node).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [],
+          },
+        }
+      `);
+    });
+
     test('single clause', () => {
       const nodes = [nodeBuilder.is('foo', 'bar')];
       const query = toElasticsearchQuery(nodeBuilder.or(nodes));
@@ -275,6 +314,35 @@ describe('nodeBuilder', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('range method', () => {
+    const date = new Date(1679741259769);
+    const dateString = date.toISOString();
+
+    test('formats all range operators', () => {
+      const operators: Array<'gt' | 'gte' | 'lt' | 'lte'> = ['gt', 'gte', 'lt', 'lte'];
+
+      for (const operator of operators) {
+        const nodes = nodeBuilder.range('foo', operator, dateString);
+        const query = toElasticsearchQuery(nodes);
+
+        expect(query).toMatchObject({
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                range: {
+                  foo: {
+                    [operator]: dateString,
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }
     });
   });
 });

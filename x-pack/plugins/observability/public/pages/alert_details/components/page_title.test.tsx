@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
 import { PageTitle, PageTitleProps } from './page_title';
 import { alert } from '../mock/alert';
 
@@ -24,9 +25,44 @@ describe('Page Title', () => {
     );
   };
 
-  it('should display a title when it is passed', () => {
-    const { getByText } = renderComp(defaultProps);
-    expect(getByText(defaultProps.alert.reason)).toBeTruthy();
+  it('should display Log threshold title', () => {
+    const { getByTestId } = renderComp(defaultProps);
+
+    expect(getByTestId('page-title-container').textContent).toContain('Log threshold breached');
+  });
+
+  it('should display Anomaly title', () => {
+    const props: PageTitleProps = {
+      alert: {
+        ...defaultProps.alert,
+        fields: {
+          ...defaultProps.alert.fields,
+          [ALERT_RULE_CATEGORY]: 'Anomaly',
+        },
+      },
+    };
+
+    const { getByTestId } = renderComp(props);
+
+    expect(getByTestId('page-title-container').textContent).toContain('Anomaly detected');
+  });
+
+  it('should display Inventory title', () => {
+    const props: PageTitleProps = {
+      alert: {
+        ...defaultProps.alert,
+        fields: {
+          ...defaultProps.alert.fields,
+          [ALERT_RULE_CATEGORY]: 'Inventory',
+        },
+      },
+    };
+
+    const { getByTestId } = renderComp(props);
+
+    expect(getByTestId('page-title-container').textContent).toContain(
+      'Inventory threshold breached'
+    );
   });
 
   it('should display an active badge when active is true', async () => {

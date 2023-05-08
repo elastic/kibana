@@ -98,6 +98,7 @@ export interface WorkspacePanelProps {
 interface WorkspaceState {
   expandError: boolean;
   expressionToRender: string | null | undefined;
+  errors: UserMessage[];
 }
 
 const dropProps = {
@@ -165,6 +166,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const [localState, setLocalState] = useState<WorkspaceState>({
     expandError: false,
     expressionToRender: undefined,
+    errors: [],
   });
 
   const initialRenderComplete = useRef<boolean>();
@@ -278,15 +280,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = getUserMessages(['visualization', 'visualizationInEditor'], {
-    severity: 'error',
-  });
+  const workspaceErrors = useCallback(() => {
+    return getUserMessages(['visualization', 'visualizationInEditor'], {
+      severity: 'error',
+    });
+  }, [getUserMessages]);
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     // shouldn't build expression if there is any type of error other than an expression build error
     // (in which case we try again every time because the config might have changed)
-    if (workspaceErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+    if (workspaceErrors().every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -361,9 +365,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
+        errors: workspaceErrors(),
       }));
     }
-  }, [unappliedExpression, shouldApplyExpression]);
+  }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
 
   const expressionExists = Boolean(localState.expressionToRender);
 
@@ -555,7 +560,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState }}
-        errors={workspaceErrors}
+        errors={localState.errors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
@@ -624,6 +629,26 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
+function useReportingState(errors: UserMessage[]): {
+  isRenderComplete: boolean;
+  hasDynamicError: boolean;
+  setIsRenderComplete: (state: boolean) => void;
+  setDynamicError: (state: boolean) => void;
+  nodeRef: React.RefObject<HTMLDivElement>;
+} {
+  const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
+  const [hasDynamicError, setDynamicError] = useState(false);
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isRenderComplete && nodeRef.current) {
+      nodeRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+    }
+  }, [isRenderComplete, errors]);
+
+  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+}
+
 export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
@@ -654,6 +679,9 @@ export const VisualizationWrapper = ({
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
+  // Used for reporting
+  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+    useReportingState(errors);
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -668,7 +696,7 @@ export const VisualizationWrapper = ({
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
-  if (errors?.length) {
+  if (errors.length) {
     const showExtraErrorsAction =
       !localState.expandError && errors.length > 1 ? (
         <EuiButtonEmpty
@@ -690,7 +718,14 @@ export const VisualizationWrapper = ({
     const [firstMessage, ...rest] = errors;
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup
+        data-shared-items-container
+        data-render-complete={true}
+        data-shared-item=""
+        data-render-error={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
+          defaultMessage: `A configuration error occurred`,
+        })}
+      >
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={showExtraErrorsAction}
@@ -719,7 +754,20 @@ export const VisualizationWrapper = ({
   }
 
   return (
-    <div className="lnsExpressionRenderer">
+    <div
+      className="lnsExpressionRenderer"
+      data-shared-items-container
+      data-render-complete={isRenderComplete}
+      data-shared-item=""
+      data-render-error={
+        hasDynamicError
+          ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
+              defaultMessage: `An error occurred when loading data.`,
+            })
+          : undefined
+      }
+      ref={nodeRef}
+    >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding="m"
@@ -729,7 +777,10 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
-        onRender$={onRender$}
+        onRender$={() => {
+          setIsRenderComplete(true);
+          onRender$();
+        }}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
         renderMode="edit"
@@ -740,6 +791,10 @@ export const VisualizationWrapper = ({
             : errorMessage
             ? [errorMessage]
             : [];
+
+          if (!hasDynamicError) {
+            setDynamicError(true);
+          }
 
           return (
             <EuiFlexGroup>

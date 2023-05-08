@@ -34,7 +34,8 @@ export interface StaleDownConfig extends OverviewStatusMetaData {
   isLocationRemoved?: boolean;
 }
 
-export interface AlertOverviewStatus extends Omit<OverviewStatus, 'disabledCount'> {
+export interface AlertOverviewStatus
+  extends Omit<OverviewStatus, 'disabledCount' | 'disabledMonitorQueryIds'> {
   staleDownConfigs: Record<string, StaleDownConfig>;
 }
 
@@ -194,7 +195,10 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        if (!locations.some((l) => l.label === downConfig.location)) {
+        const isLocationRemoved = !locations.some(
+          (l) => l.id === this.getLocationId(downConfig.location)
+        );
+        if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];
         }

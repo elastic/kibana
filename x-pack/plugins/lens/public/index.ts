@@ -44,6 +44,7 @@ export type {
 export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
 export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
+export type { MetricVisualizationState } from './visualizations/metric/types';
 export type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,

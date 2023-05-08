@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../synthetics_service';
@@ -17,6 +18,25 @@ import {
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { mockEncryptedSO } from '../utils/mocks';
+
+const mockCoreStart = coreMock.createStart() as CoreStart;
+
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  license: {
+    status: 'active',
+    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+    type: 'platinum',
+    issue_date: '2022-11-29T00:00:00.000Z',
+    issue_date_in_millis: 1669680000000,
+    expiry_date: '2024-12-31T23:59:59.999Z',
+    expiry_date_in_millis: 1735689599999,
+    max_nodes: 100,
+    max_resource_units: null,
+    issued_to: 'Elastic - INTERNAL (development environments)',
+    issuer: 'API',
+    start_date_in_millis: 1669680000000,
+  },
+});
 
 describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
@@ -49,7 +69,7 @@ describe('SyntheticsMonitorClient', () => {
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfig = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
 
@@ -109,7 +129,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.createMonitors = jest.fn();
+    client.privateLocationAPI.createPackagePolicies = jest.fn();
 
     await client.addMonitors(
       [{ monitor, id }],
@@ -119,8 +139,8 @@ describe('SyntheticsMonitorClient', () => {
       'test-space'
     );
 
-    expect(syntheticsService.addConfig).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.createMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.addConfigs).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('should edit a monitor', async () => {
@@ -128,7 +148,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     await client.editMonitors(
       [
@@ -139,8 +159,10 @@ describe('SyntheticsMonitorClient', () => {
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );
@@ -155,7 +177,7 @@ describe('SyntheticsMonitorClient', () => {
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     syntheticsService.editConfig = jest.fn();
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     monitor.locations = previousMonitor.attributes.locations.filter(
       (loc: any) => loc.id !== locations[0].id
@@ -170,8 +192,10 @@ describe('SyntheticsMonitorClient', () => {
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );

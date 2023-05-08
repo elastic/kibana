@@ -75,7 +75,8 @@ export class LegacyAlertsClient<
 
   public initialize(
     activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>
+    recoveredAlertsFromState: Record<string, RawAlertInstance>,
+    maintenanceWindowIds: string[]
   ) {
     for (const id in activeAlertsFromState) {
       if (activeAlertsFromState.hasOwnProperty(id)) {
@@ -107,6 +108,7 @@ export class LegacyAlertsClient<
       maxAlerts: this.options.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
+      maintenanceWindowIds,
     });
   }
 
@@ -117,6 +119,7 @@ export class LegacyAlertsClient<
     shouldLogAndScheduleActionsForAlerts,
     flappingSettings,
     notifyWhen,
+    maintenanceWindowIds,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
@@ -124,6 +127,7 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore: RuleRunMetricsStore;
     flappingSettings: RulesSettingsFlappingProperties;
     notifyWhen: RuleNotifyWhenType | null;
+    maintenanceWindowIds: string[];
   }) {
     const {
       newAlerts: processedAlertsNew,
@@ -141,6 +145,7 @@ export class LegacyAlertsClient<
           ? this.options.ruleType.autoRecoverAlerts
           : true,
       flappingSettings,
+      maintenanceWindowIds,
     });
 
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
