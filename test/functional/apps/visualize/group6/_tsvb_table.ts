@@ -26,10 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('table', () => {
       beforeEach(async () => {
-        await visualize.navigateToNewVisualization();
-        await visualize.clickVisualBuilder();
-        await visualBuilder.checkVisualBuilderIsPresent();
-        await visualBuilder.setTime('Sep 22, 2015 @ 06:00:00.000', 'Sep 22, 2015 @ 11:00:00.000');
+        await visualBuilder.resetPage('Sep 22, 2015 @ 06:00:00.000', 'Sep 22, 2015 @ 11:00:00.000');
         await visualBuilder.clickTable();
 
         await visualBuilder.checkTableTabIsPresent();
