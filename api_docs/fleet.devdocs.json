@@ -6685,7 +6685,7 @@
               },
               " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; authorizationHeader?: ",
               "HTTPAuthorizationHeader",
-              " | null | undefined; } | undefined) => Promise<",
+              " | null | undefined; } | undefined) => Promise<{ created: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6693,7 +6693,23 @@
                 "section": "def-common.PackagePolicy",
                 "text": "PackagePolicy"
               },
-              "[]>"
+              "[]; failed: { packagePolicy: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.NewPackagePolicy",
+                "text": "NewPackagePolicy"
+              },
+              "; error?: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined; }[]; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -6861,15 +6877,15 @@
                 "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              ", packagePolicyUpdates: (",
+              ", packagePolicyUpdates: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
+                "section": "def-common.UpdatePackagePolicy",
+                "text": "UpdatePackagePolicy"
               },
-              " & { version?: string | undefined; id: string; })[], options?: { user?: ",
+              "[], options?: { user?: ",
               {
                 "pluginId": "security",
                 "scope": "common",
@@ -6877,7 +6893,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
+              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<{ updatedPolicies: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6885,7 +6901,17 @@
                 "section": "def-common.PackagePolicy",
                 "text": "PackagePolicy"
               },
-              "[] | null>"
+              "[] | null; failedPolicies: { packagePolicy: ",
+              "NewPackagePolicyWithId",
+              "; error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              "; }[]; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -6941,15 +6967,14 @@
                 "label": "packagePolicyUpdates",
                 "description": [],
                 "signature": [
-                  "(",
                   {
                     "pluginId": "fleet",
                     "scope": "common",
                     "docId": "kibFleetPluginApi",
-                    "section": "def-common.NewPackagePolicy",
-                    "text": "NewPackagePolicy"
+                    "section": "def-common.UpdatePackagePolicy",
+                    "text": "UpdatePackagePolicy"
                   },
-                  " & { version?: string | undefined; id: string; })[]"
+                  "[]"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -9381,9 +9406,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -9415,7 +9438,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -10716,9 +10741,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -10750,7 +10773,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -12064,9 +12089,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -12098,7 +12121,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -13409,9 +13434,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -13443,7 +13466,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -14757,9 +14782,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -14791,7 +14814,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
