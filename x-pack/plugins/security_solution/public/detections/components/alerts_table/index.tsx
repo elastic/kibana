@@ -122,7 +122,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
+  const {
+    browserFields,
+    indexPattern: indexPatterns,
+    runtimeMappings,
+  } = useSourcererDataView(sourcererScope);
   const license = useLicense();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -265,23 +269,25 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       columns: finalColumns,
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
+      runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
     }),
     [
-      finalBoolQuery,
-      configId,
       triggersActionsUi.alertsTableConfigurationRegistry,
+      configId,
+      tableView,
       flyoutSize,
+      finalBoolQuery,
       gridStyle,
       rowHeightsOptions,
       finalColumns,
       finalBrowserFields,
       onAlertTableUpdate,
+      runtimeMappings,
       isEventRenderedView,
-      tableView,
     ]
   );
 
