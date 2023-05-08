@@ -67,7 +67,7 @@ export interface LensEmbeddableComponentProps {
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
-  height?: string;
+  height?: number; // px
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: React.ReactNode;
@@ -76,7 +76,7 @@ export interface LensEmbeddableComponentProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
-  width?: string;
+  width?: string | number;
   withActions?: boolean;
 }
 
