@@ -37,7 +37,7 @@ interface WizardState {
 
 const initialState: WizardState = {
   datasetName: '',
-  logFilePaths: [],
+  logFilePaths: [''],
   namespace: 'default',
   customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',

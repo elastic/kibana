@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const getFilename = (path: string) => {
+export const getFilename = (path?: string) => {
+  if (!path) {
+    return '';
+  }
+
   const filenameWithExt = path
     .replace(/^.*[\\\/](?!\d*$)/, '')
     .replace(/[\\\/]/, '');

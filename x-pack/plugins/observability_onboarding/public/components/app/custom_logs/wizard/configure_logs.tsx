@@ -9,6 +9,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,17 +22,17 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useState } from 'react';
 import { useWizard } from '.';
+import { OptionalFormRow } from '../../../shared/optional_form_row';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { getFilename, replaceSpecialChars } from './get_filename';
-import { OptionalFormRow } from '../../../shared/optional_form_row';
 
 export function ConfigureLogs() {
   const { goToStep, goBack, getState, setState } = useWizard();
@@ -42,15 +43,6 @@ export function ConfigureLogs() {
   const [customConfigurations, setCustomConfigurations] = useState(
     wizardState.customConfigurations
   );
-
-  useEffect(() => {
-    if (logFilePaths.length > 0) {
-      setDatasetName(getFilename(logFilePaths[0]));
-      return;
-    }
-
-    setDatasetName('');
-  }, [logFilePaths]);
 
   function onBack() {
     goBack();
@@ -67,10 +59,31 @@ export function ConfigureLogs() {
     goToStep('installElasticAgent');
   }
 
-  function onLogFilePathChanges(event: React.FormEvent<HTMLInputElement>) {
-    const paths = event.currentTarget.value?.split(',');
+  function addLogFilePath() {
+    setLogFilePaths((prev) => [...prev, '']);
+  }
 
-    setLogFilePaths(paths);
+  function removeLogFilePath(index: number) {
+    setLogFilePaths((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function onLogFilePathChanges(
+    index: number,
+    event: React.FormEvent<HTMLInputElement>
+  ) {
+    setLogFilePaths((prev) =>
+      prev.map((filepath, i) => {
+        if (i === index) {
+          filepath = event.currentTarget?.value;
+        }
+
+        return filepath;
+      })
+    );
+
+    if (index === 0) {
+      setDatasetName(getFilename(event.currentTarget?.value));
+    }
   }
 
   return (
@@ -93,9 +106,7 @@ export function ConfigureLogs() {
               color="primary"
               fill
               onClick={onContinue}
-              isDisabled={
-                logFilePaths.length === 0 || !datasetName || !namespace
-              }
+              isDisabled={!!logFilePaths[0] || !datasetName || !namespace}
             >
               {i18n.translate('xpack.observability_onboarding.steps.continue', {
                 defaultMessage: 'Continue',
@@ -133,16 +144,36 @@ export function ConfigureLogs() {
               }
             )}
           >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'xpack.observability_onboarding.configureLogs.logFile.placeholder',
-                {
-                  defaultMessage: 'Example: /var/log/application.*',
-                }
-              )}
-              value={logFilePaths?.[0]}
-              onChange={onLogFilePathChanges}
-            />
+            <>
+              {logFilePaths.map((filepath, index) => (
+                <>
+                  {index > 0 && <EuiSpacer size="s" />}
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiFieldText
+                        placeholder={i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.logFile.placeholder',
+                          {
+                            defaultMessage: 'Example: /var/log/application.*',
+                          }
+                        )}
+                        value={filepath}
+                        onChange={(ev) => onLogFilePathChanges(index, ev)}
+                      />
+                    </EuiFlexItem>
+                    {index > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="trash"
+                          aria-label="Delete"
+                          onClick={() => removeLogFilePath(index)}
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </>
+              ))}
+            </>
           </EuiFormRow>
           <EuiSpacer size="s" />
           <EuiFlexGroup
@@ -151,7 +182,7 @@ export function ConfigureLogs() {
             gutterSize="xs"
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="plusInCircle">
+              <EuiButtonEmpty iconType="plusInCircle" onClick={addLogFilePath}>
                 {i18n.translate(
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
                   {
