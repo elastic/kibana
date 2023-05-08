@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
@@ -21,9 +23,25 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useLeftPanelContext } from '../../context';
 
-export const useThreatIntelligenceDetails = () => {
-  const isAlert = true;
+export interface ThreatIntelligenceDetailsValue {
+  enrichments: CtiEnrichment[];
+  eventFields: EventFields;
+  isEnrichmentsLoading: boolean;
+  isEventDataLoading: boolean;
+  isLoading: boolean;
+  range: {
+    from: string;
+    to: string;
+  };
+  setRange: (range: { from: string; to: string }) => void;
+}
 
+/**
+ * A hook that returns data necessary strictly to render Threat Intel Insights.
+ * Reusing a bunch of hooks scattered across kibana, it makes it easier to mock the data layer
+ * for component testing.
+ */
+export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsValue => {
   const { indexName, eventId } = useLeftPanelContext();
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
@@ -38,6 +56,8 @@ export const useThreatIntelligenceDetails = () => {
     runtimeMappings: sourcererDataView.runtimeMappings,
     skip: !eventId,
   });
+
+  const { isAlert } = useBasicDataFromDetailsData(eventData);
 
   const data = useMemo(() => eventData || [], [eventData]);
   const eventFields = useMemo(() => getEnrichmentFields(data || []), [data]);

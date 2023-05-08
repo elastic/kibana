@@ -359,6 +359,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             ),
             content: (
               <ThreatDetailsView
+                before={<EuiSpacer size="m" />}
                 loading={isEnrichmentsLoading}
                 enrichments={allEnrichments}
                 showInvestigationTimeEnrichments={!isEmpty(eventFields)}

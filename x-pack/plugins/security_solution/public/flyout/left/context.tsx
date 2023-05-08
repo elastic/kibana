@@ -31,8 +31,6 @@ export interface LeftPanelContext {
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: (field: string) => unknown | unknown[];
-
-  data?: unknown;
 }
 
 export const LeftFlyoutContext = createContext<LeftPanelContext | undefined>(undefined);
