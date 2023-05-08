@@ -11,7 +11,6 @@ import { map, catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { FetchResult, HelpCenterPluginBrowserConfig } from '../types';
 import { HelpCenterApiDriver } from './driver';
-import { NeverFetchHelpCenterApiDriver } from './never_fetch_driver';
 import { HelpCenterStorage } from './storage';
 
 export enum HelpCenterApiEndpoint {
@@ -41,17 +40,13 @@ export interface HelpCenterApi {
 export function getApi(
   config: HelpCenterPluginBrowserConfig,
   kibanaVersion: string,
-  HelpCenterId: string,
+  helpCenterId: string,
   isScreenshotMode: boolean
 ): HelpCenterApi {
-  const storage = new HelpCenterStorage(HelpCenterId);
+  const storage = new HelpCenterStorage(helpCenterId);
   const mainInterval = config.mainInterval.asMilliseconds();
 
   const createHelpCenterApiDriver = () => {
-    if (isScreenshotMode) {
-      return new NeverFetchHelpCenterApiDriver();
-    }
-
     const userLanguage = i18n.getLocale();
     const fetchInterval = config.fetchInterval.asMilliseconds();
     return new HelpCenterApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);

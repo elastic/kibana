@@ -178,6 +178,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       {
         linkType: 'documentation',
         href: `${dashboardDocLink}`,
+        iconType: 'dashboardApp',
       },
     ],
   });

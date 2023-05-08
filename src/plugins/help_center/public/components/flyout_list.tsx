@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -19,16 +19,49 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiPortal,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  GITHUB_CREATE_ISSUE_LINK,
+  KIBANA_FEEDBACK_LINK,
+} from '@kbn/core-chrome-browser-internal/src/constants';
 import { HelpCenterContext } from './help_center_header_nav_button';
 
 export const HelpCenterFlyout = (
   props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }
 ) => {
-  const { newsFetchResult, setFlyoutVisible } = useContext(HelpCenterContext);
+  const {
+    newsFetchResult,
+    setFlyoutVisible,
+    kibanaDocLink,
+    helpSupportLink,
+    helpExtension,
+    globalHelpExtensionMenuLinks,
+  } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
   const { showPlainSpinner, ...rest } = props;
+
+  const globalCustomContent = useMemo(() => {
+    return globalHelpExtensionMenuLinks
+      ?.sort((a, b) => b.priority - a.priority)
+      .map((link, index) => {
+        const { linkType, content: text, href, external, ...restProps } = link;
+        return (
+          <EuiButtonEmpty
+            key={`customLink_${index}`}
+            href={href}
+            target="_blank"
+            size="s"
+            flush="left"
+            {...restProps}
+          >
+            {text}
+          </EuiButtonEmpty>
+        );
+      });
+  }, [globalHelpExtensionMenuLinks]);
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -42,14 +75,72 @@ export const HelpCenterFlyout = (
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutSmallTitle">
-              <FormattedMessage
-                id="HelpCenter.flyoutList.whatsNewTitle"
-                defaultMessage="What's new at Elastic"
-              />
+              <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>here</EuiFlyoutBody>
+        <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
+          <EuiButtonEmpty
+            iconType={'documentation'}
+            href={kibanaDocLink}
+            target="_blank"
+            size="s"
+            flush="left"
+          >
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
+              defaultMessage="Kibana documentation"
+            />
+          </EuiButtonEmpty>
+          <EuiSpacer size="xs" />
+
+          <EuiButtonEmpty
+            iconType={'discuss'}
+            href={KIBANA_FEEDBACK_LINK}
+            target="_blank"
+            size="s"
+            flush="left"
+          >
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
+              defaultMessage="Give feedback"
+            />
+          </EuiButtonEmpty>
+
+          <EuiSpacer size="xs" />
+
+          <EuiButtonEmpty
+            href={GITHUB_CREATE_ISSUE_LINK}
+            target="_blank"
+            size="s"
+            iconType="logoGithub"
+            flush="left"
+          >
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
+              defaultMessage="Open an issue in GitHub"
+            />
+          </EuiButtonEmpty>
+
+          <EuiSpacer size="xs" />
+
+          <EuiButtonEmpty
+            iconType={'questionInCircle'}
+            href={helpSupportLink}
+            target="_blank"
+            size="s"
+            flush="left"
+          >
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
+              defaultMessage="Ask Elastic"
+            />
+          </EuiButtonEmpty>
+
+          <EuiSpacer size="xs" />
+
+          {globalHelpExtensionMenuLinks && globalCustomContent}
+        </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
