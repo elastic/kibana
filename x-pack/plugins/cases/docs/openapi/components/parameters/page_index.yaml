@@ -1,0 +1,6 @@
+in: query
+name: page
+required: false
+schema:
+  type: integer
+  default: 1
