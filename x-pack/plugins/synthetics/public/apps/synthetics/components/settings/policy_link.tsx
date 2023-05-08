@@ -16,7 +16,7 @@ import { ClientPluginsStart } from '../../../../plugin';
 
 export const PolicyLink = ({ name }: { name: string }) => {
   const { share, application } = useKibana<ClientPluginsStart>().services;
-  const canManageILM = application.capabilities.indexLifecycleManagement?.manageIlm;
+  const canManageILM = application.capabilities.management?.data?.index_lifecycle_management;
 
   const ilmLocator = share.url.locators.get(ILM_LOCATOR_ID);
 
@@ -56,7 +56,7 @@ export const PolicyLink = ({ name }: { name: string }) => {
 export const PolicyNameLabel = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
 
-  const canManageILM = application.capabilities.indexLifecycleManagement?.manageIlm;
+  const canManageILM = application.capabilities.management?.data?.index_lifecycle_management;
 
   if (canManageILM) {
     return <>{POLICY_LABEL}</>;
