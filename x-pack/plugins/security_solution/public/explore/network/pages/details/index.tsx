@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
-import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
+import { AlertsByStatus } from '../../../components/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

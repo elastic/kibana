@@ -20,7 +20,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
-import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
+import { AlertsByStatus } from '../../../components/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { InputsModelId } from '../../../../common/store/inputs/constants';

@@ -11,15 +11,15 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import type { ESBoolQuery } from '../../../../common/typed_json';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
-import { SecurityPageName } from '../../../../common/constants';
-import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
-import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
+import { CellActionsMode, SecurityCellActions, SecurityCellActionsTrigger } from '../cell_actions';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
+import { SecurityPageName } from '../../../../common/constants';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { FormattedCount } from '../formatted_number';
 import { HeaderSection } from '../header_section';
@@ -32,6 +32,8 @@ import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
+import { useNavigateToAlertsPageWithFilters } from '../../hooks/use_navigate_to_alerts_page_with_filters';
+import { OPEN_IN_ALERTS_TITLE_RULENAME } from '../../../overview/components/detection_response/translations';
 
 interface EntityFilter {
   field: string;
@@ -48,7 +50,9 @@ interface StatusSelection {
 }
 
 type GetTableColumns = (
-  openRuleInTimelineWithAdditionalFields: (ruleName: string) => void
+  openRuleInTimelineWithAdditionalFields: (ruleName: string) => void,
+  statuses: Status[],
+  entityFilter: EntityFilter
 ) => Array<EuiBasicTableColumn<AlertCountByRuleByStatusItem>>;
 
 const STATUSES = ['open', 'acknowledged', 'closed'] as const;
@@ -70,7 +74,17 @@ export const AlertCountByRuleByStatus = React.memo(
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
-    const { openTimelineWithFilters } = useNavigateToTimeline();
+    const openAlertsPageWithFilter = useNavigateToAlertsPageWithFilters();
+
+    const openRuleInAlertsPage = useCallback(
+      (ruleName: string) =>
+        openAlertsPageWithFilter({
+          title: OPEN_IN_ALERTS_TITLE_RULENAME,
+          selectedOptions: [ruleName],
+          fieldName: ALERT_RULE_NAME,
+        }),
+      [openAlertsPageWithFilter]
+    );
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
@@ -83,22 +97,26 @@ export const AlertCountByRuleByStatus = React.memo(
     });
 
     const columns = useMemo(() => {
-      return getTableColumns((ruleName: string) => {
-        const timelineFilters: Filter[][] = [];
+      return getTableColumns(openRuleInAlertsPage, selectedStatusesByField[field], entityFilter);
+    }, [entityFilter, field, openRuleInAlertsPage, selectedStatusesByField]);
 
-        for (const status of selectedStatusesByField[field]) {
-          timelineFilters.push([
-            entityFilter,
-            { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
-            {
-              field: SIGNAL_STATUS_FIELD_NAME,
-              value: status,
-            },
-          ]);
-        }
-        openTimelineWithFilters(timelineFilters);
-      });
-    }, [entityFilter, field, openTimelineWithFilters, selectedStatusesByField]);
+    // const columns = useMemo(() => {
+    //   return getTableColumns((ruleName: string) => {
+    //     const timelineFilters: Filter[][] = [];
+    //
+    //     for (const status of selectedStatusesByField[field]) {
+    //       timelineFilters.push([
+    //         entityFilter,
+    //         { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
+    //         {
+    //           field: SIGNAL_STATUS_FIELD_NAME,
+    //           value: status,
+    //         },
+    //       ]);
+    //     }
+    //     // openTimelineWithFilters(timelineFilters);
+    //   });
+    // }, [entityFilter, field, selectedStatusesByField]);
 
     const updateSelection = useCallback(
       (selection: Status[]) => {
@@ -165,7 +183,7 @@ export const AlertCountByRuleByStatus = React.memo(
 
 AlertCountByRuleByStatus.displayName = 'AlertCountByStatus';
 
-export const getTableColumns: GetTableColumns = (openRuleInTimelineWithAdditionalFields) => [
+export const getTableColumns: GetTableColumns = (openRuleInAlertsPage, statuses, entityFilter) => [
   {
     field: 'ruleName',
     name: i18n.COLUMN_HEADER_RULE_NAME,
@@ -198,12 +216,38 @@ export const getTableColumns: GetTableColumns = (openRuleInTimelineWithAdditiona
     sortable: true,
     align: 'right',
     render: (count: number, { ruleName }) => (
-      <EuiLink
-        disabled={count === 0}
-        onClick={() => openRuleInTimelineWithAdditionalFields(ruleName)}
+      <SecurityCellActions
+        field={{
+          name: ALERT_RULE_NAME,
+          value: ruleName,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_DOWN}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: Object.values(statuses).map((status) => [
+            entityFilter,
+            { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
+            { field: SIGNAL_STATUS_FIELD_NAME, value: status },
+          ]),
+        }}
       >
-        <FormattedCount count={count} />
-      </EuiLink>
+        <EuiLink
+          data-test-subj="severityRuleAlertsTable-alertCountLink"
+          disabled={count === 0}
+          onClick={() => openRuleInAlertsPage(ruleName)}
+        >
+          <FormattedCount count={count} />
+        </EuiLink>
+      </SecurityCellActions>
+
+      // <EuiLink
+      //   disabled={count === 0}
+      //   onClick={() => openRuleInTimelineWithAdditionalFields(ruleName)}
+      // >
+      //   <FormattedCount count={count} />
+      // </EuiLink>
     ),
   },
 ];

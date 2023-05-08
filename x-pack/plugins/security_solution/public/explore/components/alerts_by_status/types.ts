@@ -6,8 +6,8 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { ESQuery } from '../../../../../common/typed_json';
-import type { VisualizationResponse } from '../../../../common/components/visualization_actions/types';
+import type { ESQuery } from '../../../../common/typed_json';
+import type { VisualizationResponse } from '../../../common/components/visualization_actions/types';
 
 interface StatusBySeverity {
   doc_count_error_upper_bound: number;

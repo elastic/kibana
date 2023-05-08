@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { FormattedCount } from '../../../../common/components/formatted_number';
+import { FormattedCount } from '../../../common/components/formatted_number';
 
 interface ChartLabelProps {
   count: number | null | undefined;

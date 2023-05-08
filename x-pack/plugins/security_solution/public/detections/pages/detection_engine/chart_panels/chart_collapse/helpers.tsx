@@ -12,7 +12,7 @@ import type {
   SummaryChartsData,
   SummaryChartsAgg,
 } from '../../../../components/alerts_kpis/alerts_summary_charts_panel/types';
-import { severityLabels } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { severityLabels } from '../../../../../explore/components/alerts_by_status/use_alerts_by_status';
 import { UNKNOWN_SEVERITY } from '../../../../components/alerts_kpis/severity_level_panel/translations';
 
 export const parseChartCollapseData = (

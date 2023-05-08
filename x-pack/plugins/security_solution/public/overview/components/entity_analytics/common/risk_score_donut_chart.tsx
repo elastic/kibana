@@ -15,7 +15,7 @@ import { emptyDonutColor } from '../../../../common/components/charts/donutchart
 import { RISK_SEVERITY_COLOUR } from '../../../../explore/components/risk_score/severity/common';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { Legend } from '../../../../common/components/charts/legend';
-import { ChartLabel } from '../../detection_response/alerts_by_status/chart_label';
+import { ChartLabel } from '../../../../explore/components/alerts_by_status/chart_label';
 import * as i18n from './translations';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 

@@ -21,7 +21,7 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 
 import { LandingPageComponent } from '../../common/components/landing_page';
-import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
+import { AlertsByStatus } from '../../explore/components/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
 import { UserAlertsTable } from '../components/detection_response/user_alerts_table';
