@@ -206,7 +206,7 @@ You can run the tests with the following commands:
 node scripts/jest_integration.js x-pack/plugins/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
-You could also use node debbuger to inspect ES indices (add the `debbuger` directive in your test)
+You could also use node debugger to inspect ES indices (add the `debugger` directive in your test)
 
 ```bash
 node --inspect scripts/jest_integration.js x-pack/plugins/fleet/server/integration_tests/<YOUR_TEST_FILE>
