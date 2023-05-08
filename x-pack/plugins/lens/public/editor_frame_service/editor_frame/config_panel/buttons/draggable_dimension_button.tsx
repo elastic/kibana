@@ -6,23 +6,23 @@
  */
 
 import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
+import {
+  DragDrop,
+  DragDropIdentifier,
+  DragContext,
+  DropType,
+  DropTargetSwapDuplicateCombine,
+} from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
   isOperation,
-  DropType,
   DatasourceLayers,
   IndexPatternMap,
   DragDropOperation,
   Visualization,
 } from '../../../../types';
-import {
-  getCustomDropTarget,
-  getAdditionalClassesOnDroppable,
-  getAdditionalClassesOnEnter,
-} from './drop_targets_utils';
 
 export function DraggableDimensionButton({
   order,
@@ -139,9 +139,11 @@ export function DraggableDimensionButton({
       data-test-subj={group.dataTestSubj}
     >
       <DragDrop
-        getCustomDropTarget={getCustomDropTarget}
-        getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
-        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
+        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+        getAdditionalClassesOnEnter={DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter}
+        getAdditionalClassesOnDroppable={
+          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+        }
         order={order}
         draggable
         dragType={isOperation(dragging) ? 'move' : 'copy'}

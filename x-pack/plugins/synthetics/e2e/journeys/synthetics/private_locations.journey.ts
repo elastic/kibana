@@ -6,9 +6,9 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanPrivateLocations,
@@ -148,5 +148,21 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('[aria-label="Delete location"]');
     await page.click('button:has-text("Delete location")');
     await page.click('text=Create your first private location');
+  });
+
+  step('login with non super user', async () => {
+    await page.click('[data-test-subj="userMenuAvatar"]');
+    await page.click('text="Log out"');
+    await syntheticsApp.loginToKibana('viewer', 'changeme');
+  });
+
+  step('viewer user cannot add locations', async () => {
+    await syntheticsApp.navigateToSettings(false);
+    await page.click('text=Private Locations');
+    await page.waitForSelector(
+      `text="You're missing some Kibana privileges to manage private locations"`
+    );
+    const createLocationBtn = await page.getByRole('button', { name: 'Create location' });
+    expect(await createLocationBtn.getAttribute('disabled')).toEqual('');
   });
 });

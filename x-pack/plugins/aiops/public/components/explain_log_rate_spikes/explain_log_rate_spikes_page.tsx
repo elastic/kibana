@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -19,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
@@ -28,6 +29,10 @@ import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
+import {
+  getDefaultAiOpsListState,
+  type AiOpsPageUrlState,
+} from '../../application/utils/url_state';
 
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { SearchPanel } from '../search_panel';
@@ -35,12 +40,14 @@ import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 import { PageHeader } from '../page_header';
 
-import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
-function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
-  if (changePoint) {
-    return `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
+function getDocumentCountStatsSplitLabel(
+  significantTerm?: SignificantTerm,
+  group?: GroupTableItem
+) {
+  if (significantTerm) {
+    return `${significantTerm?.fieldName}:${significantTerm?.fieldValue}`;
   } else if (group) {
     return i18n.translate('xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel', {
       defaultMessage: 'Selected group',
@@ -53,17 +60,17 @@ export const ExplainLogRateSpikesPage: FC = () => {
   const { dataView, savedSearch } = useDataSource();
 
   const {
-    currentSelectedChangePoint,
+    currentSelectedSignificantTerm,
     currentSelectedGroup,
-    setPinnedChangePoint,
+    setPinnedSignificantTerm,
     setPinnedGroup,
-    setSelectedChangePoint,
+    setSelectedSignificantTerm,
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
-    restorableDefaults
+    getDefaultAiOpsListState()
   );
   const [globalState, setGlobalState] = useUrlState('_g');
 
@@ -77,7 +84,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: Query['query'];
+      searchQuery: estypes.QueryDslQueryContainer;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -109,13 +116,15 @@ export const ExplainLogRateSpikesPage: FC = () => {
     searchQuery,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
+    'explain_log_rage_spikes',
     aiopsListState,
     setGlobalState,
-    currentSelectedChangePoint,
+    currentSelectedSignificantTerm,
     currentSelectedGroup
   );
 
-  const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
+  const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
+    documentStats;
 
   useEffect(
     // TODO: Consolidate this hook/function with with Data visualizer's
@@ -161,9 +170,9 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   function clearSelection() {
     setWindowParameters(undefined);
-    setPinnedChangePoint(null);
+    setPinnedSignificantTerm(null);
     setPinnedGroup(null);
-    setSelectedChangePoint(null);
+    setSelectedSignificantTerm(null);
     setSelectedGroup(null);
   }
 
@@ -191,10 +200,11 @@ export const ExplainLogRateSpikesPage: FC = () => {
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={documentCountStatsCompare}
                   documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-                    currentSelectedChangePoint,
+                    currentSelectedSignificantTerm,
                     currentSelectedGroup
                   )}
                   totalCount={totalCount}
+                  sampleProbability={sampleProbability}
                   windowParameters={windowParameters}
                 />
               </EuiPanel>
@@ -209,6 +219,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
                   latest={latest}
                   windowParameters={windowParameters}
                   searchQuery={searchQuery}
+                  sampleProbability={sampleProbability}
                 />
               )}
               {windowParameters === undefined && (

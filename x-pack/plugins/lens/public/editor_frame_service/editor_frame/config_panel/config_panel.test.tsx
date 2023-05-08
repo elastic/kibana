@@ -25,7 +25,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerType } from '../../../../common';
+import type { LayerType } from '../../../../common/types';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
 import { AddLayerButton } from './add_layer';

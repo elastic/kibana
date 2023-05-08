@@ -25,6 +25,7 @@ jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 jest.mock('../../../common/components/visualization_actions/actions');
+jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 const mockNavigateToApp = jest.fn();
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');

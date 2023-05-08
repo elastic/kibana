@@ -16,12 +16,13 @@ import {
   generateAlertMessage,
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { TlsTranslations } from '../../../../common/translations';
+import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { UptimeEsClient } from '../lib';
@@ -227,4 +228,5 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     return { state: updateState(state, foundCerts) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

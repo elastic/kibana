@@ -104,7 +104,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
                 />
               }
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage

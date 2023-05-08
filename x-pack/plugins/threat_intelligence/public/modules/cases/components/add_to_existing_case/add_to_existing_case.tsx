@@ -48,7 +48,7 @@ export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const { cases } = useKibana().services;
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);
@@ -59,7 +59,7 @@ export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
   );
   const menuItemClicked = () => {
     onClick();
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   };
 
   const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);

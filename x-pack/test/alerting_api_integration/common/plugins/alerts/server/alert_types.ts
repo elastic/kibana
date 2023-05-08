@@ -47,6 +47,7 @@ export const DeepContextVariables = {
   arrayI: [44, 45],
   nullJ: null,
   undefinedK: undefined,
+  dateL: '2023-04-20T04:13:17.858Z',
 };
 
 function getAlwaysFiringAlertType() {
@@ -94,22 +95,24 @@ function getAlwaysFiringAlertType() {
     executor: curry(alwaysFiringExecutor)(),
     alerts: {
       context: 'test.always-firing',
-      fieldMap: {
-        instance_state_value: {
-          required: false,
-          type: 'boolean',
-        },
-        instance_params_value: {
-          required: false,
-          type: 'boolean',
-        },
-        instance_context_value: {
-          required: false,
-          type: 'boolean',
-        },
-        group_in_series_index: {
-          required: false,
-          type: 'long',
+      mappings: {
+        fieldMap: {
+          instance_state_value: {
+            required: false,
+            type: 'boolean',
+          },
+          instance_params_value: {
+            required: false,
+            type: 'boolean',
+          },
+          instance_context_value: {
+            required: false,
+            type: 'boolean',
+          },
+          group_in_series_index: {
+            required: false,
+            type: 'long',
+          },
         },
       },
     },
@@ -192,6 +195,9 @@ function getCumulativeFiringAlertType() {
           runCount,
         },
       };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   return result;
@@ -529,6 +535,9 @@ function getPatternFiringAlertType() {
         },
       };
     },
+    validate: {
+      params: paramsSchema,
+    },
   };
   return result;
 }
@@ -569,6 +578,9 @@ function getPatternSuccessOrFailureAlertType() {
           patternIndex: patternIndex + 1,
         },
       };
+    },
+    validate: {
+      params: paramsSchema,
     },
   };
   return result;
@@ -644,6 +656,9 @@ function getPatternFiringAutoRecoverFalseAlertType() {
         },
       };
     },
+    validate: {
+      params: paramsSchema,
+    },
   };
   return result;
 }
@@ -689,6 +704,9 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
       return { state: {} };
+    },
+    validate: {
+      params: paramsSchema,
     },
   };
   return result;
@@ -749,6 +767,9 @@ function getCancellableRuleType() {
       }
 
       return { state: {} };
+    },
+    validate: {
+      params: paramsSchema,
     },
   };
   return result;
@@ -823,6 +844,13 @@ function getAlwaysFiringAlertAsDataRuleType(
 
       return { state: {} };
     },
+    alerts: {
+      context: 'observability.test.alerts',
+      mappings: {
+        fieldMap: {},
+      },
+      useLegacyAlerts: true,
+    },
   });
 }
 
@@ -842,6 +870,9 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: schema.any(),
+    },
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
@@ -853,6 +884,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -869,6 +903,9 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: schema.any(),
+    },
   };
   const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
@@ -883,6 +920,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -900,6 +940,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       throw new Error('this alert is intended to fail');
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   function getLongRunningRuleType() {
@@ -926,6 +969,9 @@ export function defineAlertTypes(
         await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
         return { state: {} };
       },
+      validate: {
+        params: schema.any(),
+      },
     };
     return result;
   }
@@ -944,7 +990,11 @@ export function defineAlertTypes(
       return { state: {} };
     },
     producer: 'alertsFixture',
+    validate: {
+      params: schema.any(),
+    },
   };
+
   const multipleSearchesRuleType: RuleType<
     { numSearches: number; delay: string },
     {},
@@ -996,6 +1046,9 @@ export function defineAlertTypes(
       }
 
       return { state: {} };
+    },
+    validate: {
+      params: schema.object({ numSearches: schema.number(), delay: schema.string() }),
     },
   };
 

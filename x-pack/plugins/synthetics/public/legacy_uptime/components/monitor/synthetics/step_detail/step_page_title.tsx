@@ -33,6 +33,7 @@ export const StepPageTitleContent = ({
         <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="syntheticsStepPageTitleContentButton"
               onClick={handlePreviousStep}
               disabled={!hasPreviousStep}
               iconType="arrowLeft"
@@ -52,6 +53,7 @@ export const StepPageTitleContent = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="syntheticsStepPageTitleContentButton"
               onClick={handleNextStep}
               disabled={!hasNextStep}
               iconType="arrowRight"

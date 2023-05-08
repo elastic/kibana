@@ -15,6 +15,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { EsHitRecord } from '../../types';
+import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 describe('Doc table component', () => {
   const mountComponent = (customProps?: Partial<DocTableWrapperProps>) => {
@@ -47,6 +48,7 @@ describe('Doc table component', () => {
       render: () => {
         return <div data-test-subj="docTable">mock</div>;
       },
+      DocViewer,
       ...(customProps || {}),
     };
 

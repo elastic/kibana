@@ -15,6 +15,7 @@ import { ListFilters } from '../common/monitor_filters/list_filters';
 import { MonitorList } from './monitor_list_table/monitor_list';
 import { MonitorStats } from './monitor_stats/monitor_stats';
 import { selectOverviewStatus } from '../../../state/overview_status';
+import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 
 export const MonitorListContainer = ({
   isEnabled,
@@ -51,6 +52,7 @@ export const MonitorListContainer = ({
 
   return (
     <>
+      <AlertingCallout />
       <MonitorAsyncError />
       <ListFilters handleFilterChange={handleFilterChange} />
       <EuiSpacer />

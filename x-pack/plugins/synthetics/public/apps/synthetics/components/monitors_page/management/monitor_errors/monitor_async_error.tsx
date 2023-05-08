@@ -24,16 +24,16 @@ export const MonitorAsyncError = () => {
         title={
           <FormattedMessage
             id="xpack.synthetics.monitorManagement.monitorSync.failure.title"
-            defaultMessage="Monitors failed to sync with the Synthetics service"
+            defaultMessage="Some monitors are not running correctly"
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
             id="xpack.synthetics.monitorManagement.monitorSync.failure.content"
-            defaultMessage="There was a problem syncing your monitors for one or more locations:"
+            defaultMessage="There was a problem running your monitors for one or more locations:"
           />
         </p>
         <ul>
@@ -49,7 +49,11 @@ export const MonitorAsyncError = () => {
             );
           })}
         </ul>
-        <EuiButton onClick={() => setIsDismissed(true)} color="warning">
+        <EuiButton
+          data-test-subj="syntheticsMonitorAsyncErrorButton"
+          onClick={() => setIsDismissed(true)}
+          color="warning"
+        >
           {DISMISS_LABEL}
         </EuiButton>
       </EuiCallOut>

@@ -36,7 +36,7 @@ const actionsClient = actionsClientMock.create();
 actionsClient.getAll.mockResolvedValue([]);
 const core = coreMock.createRequestHandlerContext();
 
-describe('checkRuleExceptionReferences', () => {
+describe('importRuleActionConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -55,7 +55,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter2() as never,
+      actionsImporter: actionsImporter2(),
       rules,
       overwrite: false,
     });
@@ -82,7 +82,6 @@ describe('checkRuleExceptionReferences', () => {
       import: jest.fn().mockResolvedValue({
         success: true,
         successCount: 1,
-        successResults: [],
         errors: [],
         warnings: [],
       }),
@@ -92,7 +91,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: false,
     });
@@ -100,7 +99,6 @@ describe('checkRuleExceptionReferences', () => {
     expect(res).toEqual({
       success: true,
       successCount: 1,
-      successResults: [],
       errors: [],
       warnings: [],
     });
@@ -110,7 +108,6 @@ describe('checkRuleExceptionReferences', () => {
       import: jest.fn().mockResolvedValue({
         success: true,
         successCount: 1,
-        successResults: [],
         errors: [],
         warnings: [],
       }),
@@ -143,7 +140,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: ruleWith2Connectors,
       overwrite: false,
     });
@@ -151,7 +148,6 @@ describe('checkRuleExceptionReferences', () => {
     expect(res).toEqual({
       success: true,
       successCount: 1,
-      successResults: [],
       errors: [],
       warnings: [],
     });
@@ -163,7 +159,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: [],
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: false,
     });
@@ -178,6 +174,7 @@ describe('checkRuleExceptionReferences', () => {
               '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aaf1',
             status_code: 404,
           },
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
           rule_id: 'rule-1',
         },
       ],
@@ -190,7 +187,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: [],
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: [
         {
           ...getImportRulesSchemaMock(),
@@ -224,6 +221,7 @@ describe('checkRuleExceptionReferences', () => {
             status_code: 404,
           },
           rule_id: 'rule-1',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1,cabc78e0-9031-11ed-b076-53cc4d57aaf2',
         },
       ],
       warnings: [],
@@ -235,7 +233,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: [],
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: [
         {
           ...getImportRulesSchemaMock(),
@@ -274,6 +272,7 @@ describe('checkRuleExceptionReferences', () => {
             status_code: 404,
           },
           rule_id: 'rule-1,rule-2',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1,cabc78e0-9031-11ed-b076-53cc4d57aaf2',
         },
       ],
       warnings: [],
@@ -285,18 +284,17 @@ describe('checkRuleExceptionReferences', () => {
       import: jest.fn().mockResolvedValue({
         success: true,
         successCount: 2,
-        successResults: [],
         errors: [],
         warnings: [],
       }),
     });
     const actionsImporter2 = core.savedObjects.getImporter;
-    const actionsImporter2Import = actionsImporter2().import;
+    const actionsImporter2Importer = actionsImporter2();
 
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter2Import as never,
+      actionsImporter: actionsImporter2Importer,
       rules: rulesWithoutActions,
       overwrite: false,
     });
@@ -307,7 +305,7 @@ describe('checkRuleExceptionReferences', () => {
       errors: [],
       warnings: [],
     });
-    expect(actionsImporter2Import).not.toBeCalled();
+    expect(actionsImporter2Importer.import).not.toBeCalled();
   });
 
   it('should skip importing the action-connectors if all connectors have been imported/created before', async () => {
@@ -322,12 +320,12 @@ describe('checkRuleExceptionReferences', () => {
       },
     ]);
     const actionsImporter2 = core.savedObjects.getImporter;
-    const actionsImporter2Import = actionsImporter2().import;
+    const actionsImporter2Importer = actionsImporter2();
 
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter2Import as never,
+      actionsImporter: actionsImporter2Importer,
       rules,
       overwrite: false,
     });
@@ -338,7 +336,7 @@ describe('checkRuleExceptionReferences', () => {
       errors: [],
       warnings: [],
     });
-    expect(actionsImporter2Import).not.toBeCalled();
+    expect(actionsImporter2Importer.import).not.toBeCalled();
   });
 
   it('should not skip importing the action-connectors if all connectors have been imported/created before when overwrite is true', async () => {
@@ -346,7 +344,6 @@ describe('checkRuleExceptionReferences', () => {
       import: jest.fn().mockResolvedValue({
         success: true,
         successCount: 1,
-        successResults: [],
         errors: [],
         warnings: [],
       }),
@@ -367,7 +364,7 @@ describe('checkRuleExceptionReferences', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: true,
     });
@@ -377,7 +374,194 @@ describe('checkRuleExceptionReferences', () => {
       successCount: 1,
       errors: [],
       warnings: [],
-      successResults: [],
+    });
+  });
+
+  it('should import one rule with connector successfully even if it was exported from different namespaces by generating destinationId and replace the old actionId with it', async () => {
+    const successResults = [
+      {
+        destinationId: '72cab9bb-535f-45dd-b9c2-5bc1bc0db96b',
+        id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+        meta: { title: 'Connector: [anotherSpaceSlack]', icon: undefined },
+        type: 'action',
+      },
+    ];
+    core.savedObjects.getImporter = jest.fn().mockReturnValueOnce({
+      import: jest.fn().mockResolvedValue({
+        success: true,
+        successCount: 1,
+        successResults,
+        errors: [],
+        warnings: [],
+      }),
+    });
+    const actionsImporter = core.savedObjects.getImporter;
+
+    actionsClient.getAll.mockResolvedValue([]);
+
+    const res = await importRuleActionConnectors({
+      actionConnectors,
+      actionsClient,
+      actionsImporter: actionsImporter(),
+      rules,
+      overwrite: false,
+    });
+    const rulesWithMigratedActions = [
+      {
+        actions: [
+          {
+            action_type_id: '.webhook',
+            group: 'default',
+            id: '72cab9bb-535f-45dd-b9c2-5bc1bc0db96b',
+            params: {},
+          },
+        ],
+        description: 'some description',
+        language: 'kuery',
+        name: 'Query with a rule id',
+        query: 'user.name: root or user.name: admin',
+        risk_score: 55,
+        rule_id: 'rule-1',
+        severity: 'high',
+        type: 'query',
+      },
+    ];
+
+    expect(res).toEqual({
+      success: true,
+      successCount: 1,
+      errors: [],
+      warnings: [],
+      rulesWithMigratedActions,
+    });
+  });
+
+  it('should import multiple rules with connectors successfully even if they were exported from different namespaces by generating destinationIds and replace the old actionIds with them', async () => {
+    const multipleRules = [
+      {
+        ...getImportRulesSchemaMock(),
+        actions: [
+          {
+            group: 'default',
+            id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+            action_type_id: '.webhook',
+            params: {},
+          },
+        ],
+      },
+      {
+        ...getImportRulesSchemaMock(),
+        rule_id: 'rule_2',
+        id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',
+        actions: [
+          {
+            group: 'default',
+            id: '11abc78e0-9031-11ed-b076-53cc4d57aaw',
+            action_type_id: '.index',
+            params: {},
+          },
+        ],
+      },
+    ];
+    const successResults = [
+      {
+        destinationId: '72cab9bb-535f-45dd-b9c2-5bc1bc0db96b',
+        id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+        meta: { title: 'Connector: [anotherSpaceSlack]', icon: undefined },
+        type: 'action',
+      },
+      {
+        destinationId: '892cab9bb-535f-45dd-b9c2-5bc1bc0db96',
+        id: '11abc78e0-9031-11ed-b076-53cc4d57aaw',
+        meta: { title: 'Connector: [anotherSpaceSlack]', icon: undefined },
+        type: 'action',
+      },
+    ];
+    core.savedObjects.getImporter = jest.fn().mockReturnValueOnce({
+      import: jest.fn().mockResolvedValue({
+        success: true,
+        successCount: 1,
+        successResults,
+        errors: [],
+        warnings: [],
+      }),
+    });
+    const actionsImporter = core.savedObjects.getImporter;
+    const actionConnectorsWithIndex = [
+      ...actionConnectors,
+      {
+        id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',
+        type: 'action',
+        updated_at: '2023-01-25T14:35:52.852Z',
+        created_at: '2023-01-25T14:35:52.852Z',
+        version: 'WzUxNTksMV0=',
+        attributes: {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          isMissingSecrets: false,
+          config: {},
+          secrets: {},
+        },
+        references: [],
+        migrationVersion: { action: '8.3.0' },
+        coreMigrationVersion: '8.7.0',
+      },
+    ];
+    actionsClient.getAll.mockResolvedValue([]);
+
+    const res = await importRuleActionConnectors({
+      actionConnectors: actionConnectorsWithIndex,
+      actionsClient,
+      actionsImporter: actionsImporter(),
+      rules: multipleRules,
+      overwrite: false,
+    });
+    const rulesWithMigratedActions = [
+      {
+        actions: [
+          {
+            action_type_id: '.webhook',
+            group: 'default',
+            id: '72cab9bb-535f-45dd-b9c2-5bc1bc0db96b',
+            params: {},
+          },
+        ],
+        description: 'some description',
+        language: 'kuery',
+        name: 'Query with a rule id',
+        query: 'user.name: root or user.name: admin',
+        risk_score: 55,
+        rule_id: 'rule-1',
+        severity: 'high',
+        type: 'query',
+      },
+      {
+        actions: [
+          {
+            action_type_id: '.index',
+            group: 'default',
+            id: '892cab9bb-535f-45dd-b9c2-5bc1bc0db96',
+            params: {},
+          },
+        ],
+        description: 'some description',
+        language: 'kuery',
+        name: 'Query with a rule id',
+        id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',
+        rule_id: 'rule_2',
+        query: 'user.name: root or user.name: admin',
+        risk_score: 55,
+        severity: 'high',
+        type: 'query',
+      },
+    ];
+
+    expect(res).toEqual({
+      success: true,
+      successCount: 1,
+      errors: [],
+      warnings: [],
+      rulesWithMigratedActions,
     });
   });
 });

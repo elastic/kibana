@@ -24,21 +24,19 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, CaseSavedObject } from './types';
+import type { AlertInfo, FileAttachmentRequest } from './types';
 
 import type {
-  CaseAttributes,
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
   CommentAttributes,
   CommentRequest,
   CommentRequestActionsType,
   CommentRequestAlertType,
-  CommentRequestExternalReferenceSOType,
   CommentRequestUserType,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  CommentsFindResponse,
   User,
 } from '../../common/api';
 import {
@@ -46,7 +44,8 @@ import {
   CaseStatuses,
   CommentType,
   ConnectorTypes,
-  ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  FileAttachmentMetadataRt,
 } from '../../common/api';
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
@@ -54,6 +53,7 @@ import {
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
+import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 
 /**
  * Default sort field for querying saved objects.
@@ -71,7 +71,7 @@ export const transformNewCase = ({
 }: {
   user: User;
   newCase: CasePostRequest;
-}): CaseAttributes => ({
+}): CaseTransformedAttributes => ({
   ...newCase,
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
@@ -95,7 +95,7 @@ export const transformCases = ({
   perPage,
   total,
 }: {
-  casesMap: Map<string, CaseResponse>;
+  casesMap: Map<string, Case>;
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
@@ -118,11 +118,11 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
 }: {
-  savedObject: CaseSavedObject;
+  savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-}): CaseResponse => ({
+}): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
@@ -133,7 +133,7 @@ export const flattenCaseSavedObject = ({
 
 export const transformComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
-): CommentsResponse => ({
+): CommentsFindResponse => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
@@ -142,14 +142,14 @@ export const transformComments = (
 
 export const flattenCommentSavedObjects = (
   savedObjects: Array<SavedObject<CommentAttributes>>
-): CommentResponse[] =>
-  savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
+): Comment[] =>
+  savedObjects.reduce((acc: Comment[], savedObject: SavedObject<CommentAttributes>) => {
     return [...acc, flattenCommentSavedObject(savedObject)];
   }, []);
 
 export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
-): CommentResponse => ({
+): Comment => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
@@ -253,14 +253,14 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
- * A type narrowing function for external reference so attachments.
+ * A type narrowing function for file attachments.
  */
-export const isCommentRequestTypeExternalReferenceSO = (
+export const isFileAttachmentRequest = (
   context: Partial<CommentRequest>
-): context is CommentRequestExternalReferenceSOType => {
+): context is FileAttachmentRequest => {
   return (
-    context.type === CommentType.externalReference &&
-    context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
+    ExternalReferenceSORt.is(context) &&
+    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
   );
 };
 

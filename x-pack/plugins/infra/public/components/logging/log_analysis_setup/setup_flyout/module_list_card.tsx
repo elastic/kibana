@@ -77,7 +77,10 @@ export const LogAnalysisModuleListCard: React.FC<{
         {viewInMlLink ? (
           <>
             <EuiSpacer size="xs" />
-            <EuiButtonEmpty onClick={navigateToMlApp}>
+            <EuiButtonEmpty
+              data-test-subj="infraLogAnalysisModuleListCardViewInMachineLearningButton"
+              onClick={navigateToMlApp}
+            >
               <FormattedMessage
                 id="xpack.infra.logs.analysis.viewInMlButtonLabel"
                 defaultMessage="View in Machine Learning"

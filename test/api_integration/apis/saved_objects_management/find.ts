@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 200 with individual responses', async () =>
         await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization&fields=title')
+          .get('/api/kibana/management/saved_objects/_find?type=visualization')
           .expect(200)
           .then((resp: Response) => {
             expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([

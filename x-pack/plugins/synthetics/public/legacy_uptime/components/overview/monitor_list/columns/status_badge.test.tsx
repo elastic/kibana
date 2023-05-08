@@ -12,36 +12,20 @@ import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('<StatusBadge />', () => {
   it('render no error for up status', () => {
-    render(<StatusBadge status="up" monitorType="browser" />);
+    render(<StatusBadge status="up" />);
 
     expect(screen.getByText('Up')).toBeInTheDocument();
   });
 
   it('renders errors for downs state', () => {
-    render(
-      <StatusBadge
-        status="down"
-        monitorType="browser"
-        summaryError={{ message: 'journey did not run' }}
-      />
-    );
+    render(<StatusBadge status="down" summaryError={{ message: 'journey did not run' }} />);
 
     expect(screen.getByText('Down')).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('journey did not run. Click for more details.')
-    ).toBeInTheDocument();
   });
 
   it('renders errors for downs state for http monitor', () => {
-    render(
-      <StatusBadge
-        status="down"
-        monitorType="http"
-        summaryError={{ message: 'journey did not run' }}
-      />
-    );
+    render(<StatusBadge status="down" summaryError={{ message: 'journey did not run' }} />);
 
     expect(screen.getByText('Down')).toBeInTheDocument();
-    expect(screen.getByLabelText('journey did not run')).toBeInTheDocument();
   });
 });

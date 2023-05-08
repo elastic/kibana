@@ -26,3 +26,22 @@ export const DESTINATION_DOMAIN = `[data-test-subj="more-container"] [data-test-
 
 export const OVERFLOW_ITEM =
   '[data-test-subj="more-container"] [data-test-subj="cellActions-renderContent-destination.domain"]';
+
+export const NETWORK_FLOW_TAB = '[data-test-subj="navigation-flows"]';
+
+export const NETWORK_EVENTS_VISUALIZATION = '[data-test-subj="stat-networkEvents"]';
+
+export const NETWORK_DNS_VISUALIZATION = '[data-test-subj="stat-dnsQueries"]';
+
+export const NETWORK_UNIQUE_FLOW_VISUALIZATION = '[data-test-subj="stat-uniqueFlowId"]';
+
+export const NETWORK_TLS_HANDSHAKE_VISUALIZATION = '[data-test-subj="stat-tlsHandshakes"]';
+
+export const NETWORK_DESTINATION_IPS_TABLE =
+  '[data-test-subj="table-topNFlowDestination-loading-false"]';
+
+export const NETWORK_SOURCE_COUNTRIES_TABLE =
+  '[data-test-subj="table-topCountriesSource-loading-false"]';
+
+export const NETWORK_DESTINATION_COUNTRIES_TABLE =
+  '[data-test-subj="table-topCountriesDestination-loading-false"]';

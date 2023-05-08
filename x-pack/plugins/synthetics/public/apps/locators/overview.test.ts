@@ -21,7 +21,9 @@ describe('uptimeOverviewNavigatorParams', () => {
 
   it('creates a path with expected search when ip is specified', async () => {
     const location = await uptimeOverviewNavigatorParams.getLocation({ ip: '127.0.0.1' });
-    expect(location.path).toEqual(`${OVERVIEW_ROUTE}?search=monitor.ip: "127.0.0.1"`);
+    expect(location.path).toEqual(
+      `${OVERVIEW_ROUTE}?search=host.ip: "127.0.0.1" OR monitor.ip: "127.0.0.1"`
+    );
   });
 
   it('creates a path with expected search when hostname is specified', async () => {
@@ -35,7 +37,7 @@ describe('uptimeOverviewNavigatorParams', () => {
       ip: '127.0.0.1',
     });
     expect(location.path).toEqual(
-      `${OVERVIEW_ROUTE}?search=host.name: "elastic.co" OR host.ip: "127.0.0.1"`
+      `${OVERVIEW_ROUTE}?search=host.name: "elastic.co" OR host.ip: "127.0.0.1" OR monitor.ip: "127.0.0.1"`
     );
   });
 
@@ -45,7 +47,7 @@ describe('uptimeOverviewNavigatorParams', () => {
       ip: '10.0.0.1',
     });
     expect(location.path).toEqual(
-      `${OVERVIEW_ROUTE}?search=kubernetes.pod.uid: "foo" OR monitor.ip: "10.0.0.1"`
+      `${OVERVIEW_ROUTE}?search=kubernetes.pod.uid: "foo" OR host.ip: "10.0.0.1" OR monitor.ip: "10.0.0.1"`
     );
   });
 

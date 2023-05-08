@@ -59,8 +59,7 @@ const getWrapper: (name?: WorkpadNames) => ReactWrapper = (name = 'hello') => {
   return mount(<App {...{ stage, workpad }} />);
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/95899
-describe.skip('<App />', () => {
+describe('<App />', () => {
   test('App renders properly', () => {
     expect(getWrapper().html()).toMatchSnapshot();
   });

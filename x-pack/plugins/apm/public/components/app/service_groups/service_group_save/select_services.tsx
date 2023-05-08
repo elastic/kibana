@@ -168,6 +168,7 @@ export function SelectServices({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="apmSelectServicesButton"
                 onClick={() => {
                   setKuery(stagedKuery);
                 }}
@@ -244,6 +245,7 @@ export function SelectServices({
           <EuiFlexItem>
             <div>
               <EuiButton
+                data-test-subj="apmSelectServicesEditGroupDetailsButton"
                 color="text"
                 onClick={onEditGroupDetailsClick}
                 iconType="sortLeft"
@@ -257,7 +259,11 @@ export function SelectServices({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCloseModal} isDisabled={isLoading}>
+            <EuiButtonEmpty
+              data-test-subj="apmSelectServicesCancelButton"
+              onClick={onCloseModal}
+              isDisabled={isLoading}
+            >
               {i18n.translate(
                 'xpack.apm.serviceGroups.selectServicesForm.cancel',
                 {
@@ -268,6 +274,7 @@ export function SelectServices({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="apmSelectServicesSaveGroupButton"
               fill
               onClick={() => {
                 onSaveClick({ ...serviceGroup, kuery });

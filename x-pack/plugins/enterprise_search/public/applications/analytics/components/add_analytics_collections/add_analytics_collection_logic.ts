@@ -24,9 +24,10 @@ import {
   AddAnalyticsCollectionApiLogicArgs,
   AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
-import { COLLECTION_VIEW_PATH } from '../../routes';
+import { COLLECTION_OVERVIEW_PATH } from '../../routes';
 
 const SERVER_ERROR_CODE = 500;
+const NAME_VALIDATION = new RegExp(/^[a-z0-9\-]+$/);
 
 export interface AddAnalyticsCollectionsActions {
   apiError: Actions<
@@ -92,7 +93,7 @@ export const AddAnalyticsCollectionLogic = kea<
         actions.setInputError(error?.body?.message || null);
       }
     },
-    apiSuccess: async ({ name, id }) => {
+    apiSuccess: async ({ name }) => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
           defaultMessage: "Successfully added collection '{name}'",
@@ -102,15 +103,24 @@ export const AddAnalyticsCollectionLogic = kea<
         })
       );
       KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(COLLECTION_VIEW_PATH, {
-          id,
-          section: 'events',
+        generateEncodedPath(COLLECTION_OVERVIEW_PATH, {
+          name,
         })
       );
     },
     createAnalyticsCollection: () => {
       const { name } = values;
       actions.makeRequest({ name });
+    },
+    setNameValue: ({ name }) => {
+      if (!NAME_VALIDATION.test(name)) {
+        actions.setInputError(
+          i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.invalidName', {
+            defaultMessage:
+              'Collection name can only contain lowercase letters, numbers, and hyphens',
+          })
+        );
+      }
     },
   }),
   path: ['enterprise_search', 'analytics', 'add_analytics_collection'],
@@ -131,8 +141,8 @@ export const AddAnalyticsCollectionLogic = kea<
   },
   selectors: ({ selectors }) => ({
     canSubmit: [
-      () => [selectors.isLoading, selectors.name],
-      (isLoading, name) => !isLoading && name.length > 0,
+      () => [selectors.isLoading, selectors.name, selectors.inputError],
+      (isLoading, name, inputError) => !isLoading && name.length > 0 && !inputError,
     ],
     isLoading: [() => [selectors.status], (status: Status) => status === Status.LOADING],
     isSuccess: [() => [selectors.status], (status: Status) => status === Status.SUCCESS],

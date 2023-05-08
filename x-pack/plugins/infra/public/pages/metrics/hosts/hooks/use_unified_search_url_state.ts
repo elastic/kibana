@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer } from 'react';
-import DateMath from '@kbn/datemath';
+import { useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -14,88 +13,71 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import {
+  useKibanaTimefilterTime,
+  useSyncKibanaTimeFilterTime,
+} from '../../../../hooks/use_kibana_timefilter_time';
+import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
   query: '',
 };
+
 const DEFAULT_FROM_MINUTES_VALUE = 15;
-const DEFAULT_FROM_IN_MILLISECONDS = DEFAULT_FROM_MINUTES_VALUE * 60000;
-
-export const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
-
-const getDefaultFromTimestamp = () => Date.now() - DEFAULT_FROM_IN_MILLISECONDS;
-const getDefaultToTimestamp = () => Date.now();
+const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
 
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
   panelFilters: [],
-  // for unified search
   dateRange: INITIAL_DATE_RANGE,
+  limit: DEFAULT_HOST_LIMIT,
 };
 
-type Action =
-  | {
-      type: 'setQuery';
-      payload: rt.TypeOf<typeof SetQueryType>;
-    }
-  | { type: 'setFilter'; payload: rt.TypeOf<typeof HostsFiltersRT> };
+const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
+  const payload = Object.fromEntries(Object.entries(params).filter(([_, v]) => !!v));
 
-const reducer = (state: HostsState, action: Action): HostsState => {
-  switch (action.type) {
-    case 'setFilter':
-      return { ...state, filters: [...action.payload] };
-    case 'setQuery':
-      const { filters, query, panelFilters, ...payload } = action.payload;
-      const newFilters = !filters ? state.filters : filters;
-      const newControlPanelFilters = !panelFilters ? state.panelFilters : panelFilters;
-      const newQuery = !query ? state.query : query;
-      return {
-        ...state,
-        ...payload,
-        filters: [...newFilters],
-        query: { ...newQuery },
-        panelFilters: [...newControlPanelFilters],
-      };
-    default:
-      throw new Error();
-  }
+  return {
+    ...prevState,
+    ...payload,
+  };
 };
 
-export const useHostsUrlState = () => {
+export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
   const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
+  const [localStorageHostLimit, setLocalStorageHostLimit] = useLocalStorage<number>(
+    LOCAL_STORAGE_HOST_LIMIT_KEY,
+    INITIAL_HOSTS_STATE.limit
+  );
+
   const [urlState, setUrlState] = useUrlState<HostsState>({
-    defaultState: { ...INITIAL_HOSTS_STATE, dateRange: getTime() },
+    defaultState: {
+      ...INITIAL_HOSTS_STATE,
+      dateRange: getTime(),
+      limit: localStorageHostLimit ?? INITIAL_HOSTS_STATE.limit,
+    },
     decodeUrlState,
     encodeUrlState,
     urlStateKey: '_a',
     writeDefaultState: true,
   });
 
-  const [state, dispatch] = useReducer(reducer, urlState);
-
-  const getDateRangeAsTimestamp = useCallback(() => {
-    const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
-    const to = DateMath.parse(state.dateRange.to)?.valueOf() ?? getDefaultToTimestamp();
-
-    return { from, to };
-  }, [state.dateRange]);
-
-  useEffect(() => {
-    if (!deepEqual(state, urlState)) {
-      setUrlState(state);
+  const [search, setSearch] = useReducer(reducer, urlState);
+  if (!deepEqual(search, urlState)) {
+    setUrlState(search);
+    if (localStorageHostLimit !== search.limit) {
+      setLocalStorageHostLimit(search.limit);
     }
-  }, [setUrlState, state, urlState]);
+  }
 
-  return {
-    dispatch,
-    getDateRangeAsTimestamp,
-    getTime,
-    state,
-  };
+  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>
+    setSearch({ dateRange })
+  );
+
+  return [search, setSearch];
 };
 
 const HostsFilterRT = rt.intersection([
@@ -126,29 +108,36 @@ const HostsFiltersRT = rt.array(HostsFilterRT);
 
 const HostsQueryStateRT = rt.type({
   language: rt.string,
-  query: rt.any,
+  query: rt.union([rt.string, rt.record(rt.string, rt.any)]),
 });
 
-const StringDateRangeRT = rt.type({
-  from: rt.string,
-  to: rt.string,
-});
+const StringDateRangeRT = rt.intersection([
+  rt.type({
+    from: rt.string,
+    to: rt.string,
+  }),
+  rt.partial({ mode: rt.union([rt.literal('absolute'), rt.literal('relative')]) }),
+]);
 
 const HostsStateRT = rt.type({
   filters: HostsFiltersRT,
   panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
+  limit: rt.number,
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
+export type HostsSearchPayload = Partial<HostsState>;
+
+export type HostsStateUpdater = (params: HostsSearchPayload) => void;
+
+export type StringDateRange = rt.TypeOf<typeof StringDateRangeRT>;
 export interface StringDateRangeTimestamp {
   from: number;
   to: number;
 }
-
-const SetQueryType = rt.partial(HostsStateRT.props);
 
 const encodeUrlState = HostsStateRT.encode;
 const decodeUrlState = (value: unknown) => {

@@ -19,6 +19,7 @@ import type { Headers } from './headers';
  */
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
+  access: 'internal' | 'public';
 }
 
 /**

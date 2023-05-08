@@ -136,10 +136,10 @@
 // EDITING MODE
 
 .embPanel--editing {
-  border-style: dashed !important;
-  border-color: $euiColorMediumShade !important;
+  outline-style: dashed !important;
+  outline-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-  border-width: $euiBorderWidthThin;
+  outline-width: $euiBorderWidthThin;
 
   &:hover,
   &:focus {

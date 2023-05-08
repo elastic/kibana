@@ -27,21 +27,19 @@ import type {
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
   createMockPackageService,
+  createMessageSigningServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
-// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
-// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
-// file and not bundled with the application, adding a eslint disable below and using import from
-// a restricted path.
-import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -115,7 +113,6 @@ export const createMockEndpointAppContextServiceStartContract =
     const config = createMockConfig();
 
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
-    const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
     const security = securityMock.createStart();
     const agentService = createMockAgentService();
@@ -156,6 +153,8 @@ export const createMockEndpointAppContextServiceStartContract =
       jest.fn(() => ({ privileges: { kibana: [] } }))
     );
 
+    const casesMock = casesPluginMock.createStartContract();
+
     return {
       endpointMetadataService,
       endpointFleetServicesFactory,
@@ -171,11 +170,12 @@ export const createMockEndpointAppContextServiceStartContract =
         Parameters<FleetStartContract['registerExternalCallback']>
       >(),
       exceptionListsClient: listMock.getExceptionListClient(),
-      cases: {
-        getCasesClientWithRequest: jest.fn(async () => casesClientMock),
-      },
+      cases: casesMock,
+      cloud: cloudMock.createSetup(),
       featureUsageService: createFeatureUsageServiceMock(),
       experimentalFeatures: createMockConfig().experimentalFeatures,
+      messageSigningService: createMessageSigningServiceMock(),
+      actionCreateService: undefined,
     };
   };
 

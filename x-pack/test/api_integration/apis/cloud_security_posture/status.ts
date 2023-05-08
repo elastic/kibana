@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
+
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
@@ -51,9 +52,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.status).to.be('not-deployed');
-      expect(res.installedPolicyTemplates).length(1).contain('kspm');
-      expect(res.healthyAgents).to.be(0);
+      expect(res.kspm.status).to.be('not-deployed');
+      expect(res.cspm.status).to.be('not-installed');
+      expect(res.kspm.healthyAgents).to.be(0);
+      expect(res.kspm.installedPackagePolicies).to.be(1);
     });
 
     it(`Should return not-deployed when installed cspm`, async () => {
@@ -71,14 +73,38 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.status).to.be('not-deployed');
-      expect(res.installedPolicyTemplates).length(1).contain('cspm');
-      expect(res.healthyAgents).to.be(0);
+      expect(res.cspm.status).to.be('not-deployed');
+      expect(res.kspm.status).to.be('not-installed');
+      expect(res.vuln_mgmt.status).to.be('not-installed');
+      expect(res.cspm.healthyAgents).to.be(0);
+      expect(res.cspm.installedPackagePolicies).to.be(1);
+    });
+
+    it(`Should return not-deployed when vuln_mgmt is not installed`, async () => {
+      await createPackagePolicy(
+        supertest,
+        agentPolicyId,
+        'vuln_mgmt',
+        'cloudbeat/vuln_mgmt_aws',
+        'aws',
+        'vuln_mgmt'
+      );
+
+      const { body: res }: { body: CspSetupStatus } = await supertest
+        .get(`/internal/cloud_security_posture/status`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(res.cspm.status).to.be('not-installed');
+      expect(res.kspm.status).to.be('not-installed');
+      expect(res.vuln_mgmt.status).to.be('not-deployed');
+      expect(res.vuln_mgmt.healthyAgents).to.be(0);
+      expect(res.vuln_mgmt.installedPackagePolicies).to.be(1);
     });
   });
 }
 
-async function createPackagePolicy(
+export async function createPackagePolicy(
   supertest: SuperTest<Test>,
   agentPolicyId: string,
   policyTemplate: string,
@@ -86,6 +112,26 @@ async function createPackagePolicy(
   deployment: string,
   posture: string
 ) {
+  const version = posture === 'kspm' || posture === 'cspm' ? '1.2.8' : '1.3.0-preview2';
+  const title = 'Security Posture Management';
+  const streams = [
+    {
+      enabled: false,
+      data_stream: {
+        type: 'logs',
+        dataset: 'cloud_security_posture.vulnerabilities',
+      },
+    },
+  ];
+
+  const inputTemplate = {
+    enabled: true,
+    type: input,
+    policy_template: policyTemplate,
+  };
+
+  const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
+
   const { body: postPackageResponse } = await supertest
     .post(`/api/fleet/package_policies`)
     .set('kbn-xsrf', 'xxxx')
@@ -96,17 +142,11 @@ async function createPackagePolicy(
       namespace: 'default',
       policy_id: agentPolicyId,
       enabled: true,
-      inputs: [
-        {
-          enabled: true,
-          type: input,
-          policy_template: policyTemplate,
-        },
-      ],
+      inputs: [inputs],
       package: {
         name: 'cloud_security_posture',
-        title: 'Kubernetes Security Posture Management',
-        version: '1.2.8',
+        title,
+        version,
       },
       vars: {
         deployment: {

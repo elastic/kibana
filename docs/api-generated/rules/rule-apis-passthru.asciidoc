@@ -589,21 +589,6 @@ Any modifications made to this file will be overwritten.
       "timestamp" : "2023-01-13T01:28:00.28Z"
     }
   },
-  "alerting_framework_heath" : {
-    "_deprecated" : "This state property has a typo, use \"alerting_framework_health\" instead.",
-    "execution_health" : {
-      "status" : "ok",
-      "timestamp" : "2023-01-13T01:28:00.28Z"
-    },
-    "read_health" : {
-      "status" : "ok",
-      "timestamp" : "2023-01-13T01:28:00.28Z"
-    },
-    "decryption_health" : {
-      "status" : "ok",
-      "timestamp" : "2023-01-13T01:28:00.28Z"
-    }
-  },
   "has_permanent_encryption_key" : true,
   "is_sufficiently_secure" : true
 }</code></pre>
@@ -2127,8 +2112,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getAlertingHealth_200_response_alerting_framework_health_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_health_decryption_health</code> - </a></li>
     <li><a href="#getAlertingHealth_200_response_alerting_framework_health_execution_health"><code>getAlertingHealth_200_response_alerting_framework_health_execution_health</code> - </a></li>
     <li><a href="#getAlertingHealth_200_response_alerting_framework_health_read_health"><code>getAlertingHealth_200_response_alerting_framework_health_read_health</code> - </a></li>
-    <li><a href="#getAlertingHealth_200_response_alerting_framework_heath"><code>getAlertingHealth_200_response_alerting_framework_heath</code> - </a></li>
-    <li><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_heath_decryption_health</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner"><code>getRuleTypes_200_response_inner</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_action_groups_inner"><code>getRuleTypes_200_response_inner_action_groups_inner</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_action_variables"><code>getRuleTypes_200_response_inner_action_variables</code> - </a></li>
@@ -2343,8 +2326,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="getAlertingHealth_200_response"><code>getAlertingHealth_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">alerting_framework_heath (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath">getAlertingHealth_200_response_alerting_framework_heath</a></span>  </div>
-<div class="param">alerting_framework_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health">getAlertingHealth_200_response_alerting_framework_health</a></span>  </div>
+      <div class="param">alerting_framework_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_health">getAlertingHealth_200_response_alerting_framework_health</a></span>  </div>
 <div class="param">has_permanent_encryption_key (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, the encrypted saved object plugin does not have a permanent encryption key. </div>
 <div class="param">is_sufficiently_secure (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, security is enabled but TLS is not. </div>
     </div>  <!-- field-items -->
@@ -2385,24 +2367,6 @@ Any modifications made to this file will be overwritten.
       <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
-<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="getAlertingHealth_200_response_alerting_framework_heath"><code>getAlertingHealth_200_response_alerting_framework_heath</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>This property has a typo. Use <code>alerting_framework_health</code> instead.</div>
-    <div class="field-items">
-      <div class="param">_deprecated (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">decryption_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
-<div class="param">execution_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
-<div class="param">read_health (optional)</div><div class="param-desc"><span class="param-type"><a href="#getAlertingHealth_200_response_alerting_framework_heath_decryption_health">getAlertingHealth_200_response_alerting_framework_heath_decryption_health</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="getAlertingHealth_200_response_alerting_framework_heath_decryption_health"><code>getAlertingHealth_200_response_alerting_framework_heath_decryption_health</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
     </div>  <!-- field-items -->
   </div>

@@ -8,9 +8,9 @@ However, the information detailed above can be extended, with the combination of
 
 | Query Parameter | Default value | Description |
 |:----------------|:-------------:|:------------|
-|`extended`|`false`|When `true`, it adds `clusterUuid` and `usage`. The latter contains the information reported by all the Usage Collectors registered in the Kibana server. It may throw `503 Stats not ready` if any of the collectors is not fully initialized yet.|
-|`legacy`|`false`|By default, when `extended=true`, the key names of the data in `usage` are transformed into API-friendlier `snake_case` format (i.e.: `clusterUuid` is transformed to `cluster_uuid`). When this parameter is `true`, the data is returned as-is.|
-|`exclude_usage`|`false`|When `true`, and `extended=true`, it will report `clusterUuid` but no `usage`.|
+|`extended`|`false`|When `true`, it adds `clusterUuid`.|
+|`legacy`|`false`|By default, when `extended=true`, the key names are transformed into API-friendlier `snake_case` format (i.e.: `clusterUuid` is transformed to `cluster_uuid`). When this parameter is `true`, the data is returned as-is.|
+|`exclude_usage`|`true`| Deprecated. Only kept for backward-compatibility. Setting this to `false` has no effect. Usage is always excluded. | 
 
 ## Known use cases
 

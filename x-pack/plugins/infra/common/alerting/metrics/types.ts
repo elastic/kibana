@@ -6,8 +6,8 @@
  */
 import * as rt from 'io-ts';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { SnapshotCustomMetricInput } from '../../http_api';
-import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
@@ -61,7 +61,7 @@ export interface MetricAnomalyParams {
   alertInterval?: string;
   sourceId?: string;
   spaceId?: string;
-  threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
+  threshold: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
 }
 
@@ -99,19 +99,12 @@ interface BaseMetricExpressionParams {
 }
 
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Exclude<Aggregators, Aggregators.COUNT>;
+  aggType: Exclude<Aggregators, [Aggregators.COUNT, Aggregators.CUSTOM]>;
   metric: string;
-  customMetrics: never;
-  equation: never;
-  label: never;
 }
 
 export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
-  metric: never;
-  customMetrics: never;
-  equation: never;
-  label: never;
 }
 
 export type CustomMetricAggTypes = Exclude<
@@ -128,7 +121,6 @@ export interface MetricExpressionCustomMetric {
 
 export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.CUSTOM;
-  metric: never;
   customMetrics: MetricExpressionCustomMetric[];
   equation?: string;
   label?: string;

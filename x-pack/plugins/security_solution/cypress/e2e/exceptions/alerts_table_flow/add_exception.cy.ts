@@ -9,13 +9,13 @@ import { ROLES } from '../../../../common/test';
 import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
-  deleteExceptionListWithRuleReference,
-  deleteExceptionListWithoutRuleReference,
+  deleteExceptionListWithRuleReferenceByListId,
+  deleteExceptionListWithoutRuleReferenceByListId,
   exportExceptionList,
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
@@ -48,17 +48,18 @@ describe('Exceptions Table', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-      createCustomRule({
-        ...getNewRule(),
-        exceptionLists: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList2().list_id,
-            type: getExceptionList2().type,
-            namespace_type: getExceptionList2().namespace_type,
-          },
-        ],
-      })
+      createRule(
+        getNewRule({
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList2().list_id,
+              type: getExceptionList2().type,
+              namespace_type: getExceptionList2().namespace_type,
+            },
+          ],
+        })
+      )
     );
 
     // Create exception list not used by any rules
@@ -78,7 +79,7 @@ describe('Exceptions Table', () => {
 
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
-    exportExceptionList();
+    exportExceptionList(getExceptionList1().list_id);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.body).should(
@@ -86,7 +87,10 @@ describe('Exceptions Table', () => {
         expectedExportedExceptionList(this.exceptionListResponse)
       );
 
-      cy.get(TOASTER).should('have.text', 'Exception list export success');
+      cy.get(TOASTER).should(
+        'have.text',
+        `Exception list "${getExceptionList1().name}" exported successfully`
+      );
     });
   });
 
@@ -149,7 +153,7 @@ describe('Exceptions Table', () => {
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
-    deleteExceptionListWithoutRuleReference();
+    deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
@@ -164,7 +168,7 @@ describe('Exceptions Table', () => {
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
 
-    deleteExceptionListWithRuleReference();
+    deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

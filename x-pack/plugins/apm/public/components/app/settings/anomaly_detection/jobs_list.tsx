@@ -231,7 +231,11 @@ export function JobsList({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton href={mlManageJobsHref} color="primary">
+          <EuiButton
+            data-test-subj="apmJobsListManageJobsButton"
+            href={mlManageJobsHref}
+            color="primary"
+          >
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
               {
@@ -241,7 +245,12 @@ export function JobsList({
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="plusInCircle" onClick={onAddEnvironments}>
+          <EuiButton
+            data-test-subj="apmJobsListCreateJobButton"
+            fill
+            iconType="plusInCircle"
+            onClick={onAddEnvironments}
+          >
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {

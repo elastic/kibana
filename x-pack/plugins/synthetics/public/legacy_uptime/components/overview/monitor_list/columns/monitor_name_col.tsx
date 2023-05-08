@@ -67,6 +67,7 @@ export const MonitorNameColumn = ({ summary }: Props) => {
       </MonitorPageLink>
       <div>
         <EuiButtonEmpty
+          data-test-subj="syntheticsMonitorNameColumnButton"
           color="text"
           title={filterLabel}
           onClick={() => {

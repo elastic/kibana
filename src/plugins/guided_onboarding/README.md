@@ -2,9 +2,11 @@
 
 This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages. 
 
-The guided onboarding plugin includes a client-side code for the UI and the server-side code for the internal API. The server-side code is not intended for external use. 
+The guided onboarding plugin includes a client-side code for the UI and the server-side code for the internal API.  
 
-The client-side code registers a button in the Kibana header that controls the guided onboarding panel (checklist) depending on the current state. There is also an API service exposed from the client-side start contract. The API service is intended for external use by other plugins.
+The client-side code registers a button in the Kibana header that controls the guided onboarding panel (checklist) depending on the current state. There is also an API service exposed from the client-side start contract. The API service is intended for external use by other plugins that need to react to the guided onboarding state, for example hide or display UI elements if a guide step is active.
+
+Besides the internal API routes, the server-side code also exposes a function to register guide configs from the server-side setup start contract. This function is intended for external use by any plugin that need to add a new guide or modify an existing one. 
 
 ---
 ## Current functionality
@@ -43,18 +45,18 @@ When starting Kibana with `yarn start --run-examples` the `guided_onboarding_exa
 The guided onboarding plugin exposes an API service from its start contract that is intended to be used by other plugins. The API service allows consumers to access the current state of the guided onboarding process and manipulate it. 
 
 To use the API service in your plugin, declare the guided onboarding plugin as a dependency in the file `kibana.json` of your plugin. Add the API service to your plugin's start dependencies to rely on the provided TypeScript interface:
-```
+```js
 export interface AppPluginStartDependencies {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 ```
 The API service is now available to your plugin in the setup lifecycle function of your plugin
-```
+```js
 // startDependencies is of type AppPluginStartDependencies
 const [coreStart, startDependencies] = await core.getStartServices();
 ```
 or in the start lifecycle function of your plugin.
-```
+```js
 public start(core: CoreStart, startDependencies: AppPluginStartDependencies) {
   ...
 }
@@ -65,7 +67,7 @@ public start(core: CoreStart, startDependencies: AppPluginStartDependencies) {
 
 The API service exposes an Observable that contains a boolean value for the state of a specific guide step. For example, if your plugin needs to check if the "Add data" step of the SIEM guide is currently active, you could use the following code snippet. 
 
-```
+```js
 const { guidedOnboardingApi } = guidedOnboarding;
 const isDataStepActive = useObservable(guidedOnboardingApi!.isGuideStepActive$('siem', 'add_data'));
 useEffect(() => {
@@ -74,7 +76,7 @@ useEffect(() => {
 ```
 
 Alternatively, you can subscribe to the Observable directly. 
-```
+```js
 useEffect(() => {
     const subscription = guidedOnboardingApi?.isGuideStepActive$('siem', 'add_data').subscribe((isDataStepACtive) => {
       // do some logic depending on the step state 
@@ -87,7 +89,7 @@ useEffect(() => {
 Similar to `isGuideStepActive$`, the observable `isGuideStepReadyToComplete$` can be used to track the state of a step that is configured for manual completion. The observable broadcasts `true` when the manual completion popover is displayed and the user can mark the step "done". In this state the step is not in progress anymore but is not yet fully completed. 
 
 
-### completeGuideStep(guideId: GuideId, stepId: GuideStepIds): Promise\<{ pluginState: PluginState } | undefined\>
+### completeGuideStep(guideId: GuideId, stepId: GuideStepIds, params?: GuideParams): Promise\<{ pluginState: PluginState } | undefined\>
 The API service exposes an async function to mark a guide step as completed. 
 If the specified guide step is not currently active, the function is a noop. In that case the return value is `undefined`, 
 otherwise an updated `PluginState` is returned.
@@ -96,8 +98,20 @@ otherwise an updated `PluginState` is returned.
 await guidedOnboardingApi?.completeGuideStep('siem', 'add_data');
 ```
 
+The function also accepts an optional argument `params` that will be saved in the state and later used for step URLs with dynamic parameters. For example, step 2 of the guide has a dynamic parameter `indexID` in its location path:
+```js
+const step2Config = {
+    id: 'step2',
+    description: 'Step with dynamic url',
+    location: {
+        appID: 'test', path: 'testPath/{indexID}'
+    }
+};
+```
+The value of the parameter `indexID` needs to be passed to the API service when completing step 1: `completeGuideStep('testGuide', 'step1', { indexID: 'testIndex' })` 
+
 ## Guides config
-To use the API service, you need to know a guide ID (currently one of `search`, `kubernetes`, `siem`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). The consumers of guided onboarding register their guide configs themselves and have therefore full control over the guide ID and step IDs used for their guide. For more details on registering a guide config, see below. 
+To use the API service, you need to know a guide ID (currently one of `appSearch`, `websiteSearch`, `databaseSearch`, `kubernetes`, `siem`) and a step ID (for example, `add_data`, `search_experience`, `rules` etc). The consumers of guided onboarding register their guide configs themselves and have therefore full control over the guide ID and step IDs used for their guide. For more details on registering a guide config, see below. 
 
 ## Server side: register a guide config
 The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, guideConfig: GuideConfig)` function in its setup contract. This function allows consumers to register a guide config for a specified guide ID. The function throws an error if a config already exists for the guide ID. See code examples in following plugins: 
@@ -106,3 +120,13 @@ The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, 
 - observability: `x-pack/plugins/observability/server/plugin.ts`
 - security solution: `x-pack/plugins/security_solution/server/plugin.ts`
 
+
+## Adding a new guide
+Follow these simple steps to add a new guide to the guided onboarding framework. For more detailed information about framework functionality and architecture and about API services exposed by the plugin, please read the full readme.
+
+1.  Declare the `guidedOnboarding` plugin as a dependency in your plugin's `kibana.json` file. Add the guided onboarding plugin's client-side start contract to your plugin's client-side start dependencies and the guided onboarding plugin's server-side setup contract to your plugin's server-side dependencies.
+2.  Define the configuration for your guide. At a high level, this includes a title, description, and list of steps. See this [example config](https://github.com/elastic/kibana/blob/main/packages/kbn-guided-onboarding/src/common/test_guide_config.ts) or consult the `GuideConfig` interface.
+3. Register your guide during your plugin's server-side setup by calling a function exposed by the guided onboarding plugin: `registerGuideConfig(guideId: GuideId, guideConfig: GuideConfig)`. For an example, see this [example plugin](https://github.com/elastic/kibana/blob/main/examples/guided_onboarding_example/server/plugin.ts).
+4. Update the cards on the landing page to include your guide in the use case selection. Make sure that the card doesn't have the property `navigateTo` because that is only used for cards that redirect to Kibana pages and don't start a guide. Also add the same value to the property `guideId` as used in the guide config. Landing page cards are configured in this [kbn-guided-onboarding package](https://github.com/elastic/kibana/blob/main/packages/kbn-guided-onboarding/src/components/landing_page/guide_cards.constants.tsx).
+5. Integrate the new guide into your Kibana pages by using the guided onboarding client-side API service. Make sure your Kibana pages correctly display UI elements depending on the active guide step and the UI flow is straight forward to complete the guide. See existing guides for an example and read more about the API service in this file, the section "Client-side: API service".
+6. Optionally, update the example plugin's [form](https://github.com/elastic/kibana/blob/main/examples/guided_onboarding_example/public/components/main.tsx#L38) to be able to start your guide from that page and activate any step in your guide (useful to test your guide steps). 

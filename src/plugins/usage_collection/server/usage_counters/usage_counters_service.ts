@@ -16,7 +16,8 @@ import {
 import type { Logger, LogMeta } from '@kbn/core/server';
 
 import moment from 'moment';
-import { CounterMetric, UsageCounter } from './usage_counter';
+import { UsageCounter } from './usage_counter';
+import { UsageCounters } from '../../common/types';
 import {
   registerUsageCountersSavedObjectType,
   storeCounter,
@@ -54,7 +55,7 @@ export class UsageCountersService {
   private readonly bufferDurationMs: number;
 
   private readonly counterSets = new Map<string, UsageCounter>();
-  private readonly source$ = new Rx.Subject<CounterMetric>();
+  private readonly source$ = new Rx.Subject<UsageCounters.v1.CounterMetric>();
   private readonly counter$ = this.source$.pipe(rxOp.multicast(new Rx.Subject()), rxOp.refCount());
   private readonly flushCache$ = new Rx.Subject<void>();
 
@@ -69,7 +70,7 @@ export class UsageCountersService {
   }
 
   public setup = (core: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
-    const cache$ = new Rx.ReplaySubject<CounterMetric>();
+    const cache$ = new Rx.ReplaySubject<UsageCounters.v1.CounterMetric>();
     const storingCache$ = new Rx.BehaviorSubject<boolean>(false);
     // flush cache data from cache -> source
     this.flushCache$
@@ -135,7 +136,7 @@ export class UsageCountersService {
   };
 
   private storeDate$(
-    counters: CounterMetric[],
+    counters: UsageCounters.v1.CounterMetric[],
     internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
   ) {
     return Rx.forkJoin(
@@ -170,7 +171,9 @@ export class UsageCountersService {
     return this.counterSets.get(type);
   };
 
-  private mergeCounters = (counters: CounterMetric[]): Record<string, CounterMetric> => {
+  private mergeCounters = (
+    counters: UsageCounters.v1.CounterMetric[]
+  ): Record<string, UsageCounters.v1.CounterMetric> => {
     const date = moment.now();
     return counters.reduce((acc, counter) => {
       const { counterName, domainId, counterType } = counter;
@@ -188,6 +191,6 @@ export class UsageCountersService {
           incrementBy: existingCounter.incrementBy + counter.incrementBy,
         },
       };
-    }, {} as Record<string, CounterMetric>);
+    }, {} as Record<string, UsageCounters.v1.CounterMetric>);
   };
 }

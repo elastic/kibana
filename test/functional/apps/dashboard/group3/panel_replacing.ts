@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardPanelActions.replacePanelByTitle(AREA_CHART_VIS_NAME);
-      await dashboardReplacePanel.replaceEmbeddable(replacedSearch, 'search');
+      await dashboardReplacePanel.replaceEmbeddable(replacedSearch, 'Saved search');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();

@@ -44,7 +44,9 @@ export type AgentActionType =
   | 'CANCEL'
   | 'FORCE_UNENROLL'
   | 'UPDATE_TAGS'
-  | 'REQUEST_DIAGNOSTICS';
+  | 'REQUEST_DIAGNOSTICS'
+  | 'POLICY_CHANGE'
+  | 'INPUT_ACTION';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -135,6 +137,13 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
+export interface ActionErrorResult {
+  agentId: string;
+  error: string;
+  timestamp: string;
+  hostname?: string;
+}
+
 export interface ActionStatus {
   actionId: string;
   // how many agents are successfully included in action documents
@@ -145,7 +154,7 @@ export interface ActionStatus {
   nbAgentsFailed: number;
   version?: string;
   startTime?: string;
-  type?: string;
+  type: AgentActionType;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
   status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
@@ -155,6 +164,9 @@ export interface ActionStatus {
   newPolicyId?: string;
   creationTime: string;
   hasRolloutPeriod?: boolean;
+  latestErrors?: ActionErrorResult[];
+  revision?: number;
+  policyId?: string;
 }
 
 export interface AgentDiagnostics {
@@ -168,6 +180,9 @@ export interface AgentDiagnostics {
 }
 
 // Generated from FleetServer schema.json
+/**
+ * Fleet Server agent component unit
+ */
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -178,7 +193,10 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
-interface FleetServerAgentComponent {
+/**
+ * Fleet server agent component
+ */
+export interface FleetServerAgentComponent {
   id: string;
   type: string;
   status: FleetServerAgentComponentStatus;
@@ -377,7 +395,10 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
-
   total?: number;
+
+  /** Trace id */
+  traceparent?: string | null;
+
   [k: string]: unknown;
 }

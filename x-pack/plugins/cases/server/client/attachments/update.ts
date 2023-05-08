@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
@@ -25,11 +25,12 @@ import type { UpdateArgs } from './types';
 export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<CaseResponse> {
+): Promise<Case> {
   const {
     services: { attachmentService },
     logger,
     authorization,
+    externalReferenceAttachmentTypeRegistry,
   } = clientArgs;
 
   try {
@@ -39,7 +40,7 @@ export async function update(
       ...queryRestAttributes
     } = queryParams;
 
-    decodeCommentRequest(queryRestAttributes);
+    decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
 
     const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,

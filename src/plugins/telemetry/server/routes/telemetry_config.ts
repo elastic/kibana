@@ -9,7 +9,8 @@
 import { type Observable, firstValueFrom } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { TelemetryConfigType } from '../config';
-import { FetchTelemetryConfigResponse, FetchTelemetryConfigRoute } from '../../common/routes';
+import { v2 } from '../../common/types';
+import { FetchTelemetryConfigRoute } from '../../common/routes';
 import { getTelemetrySavedObject } from '../saved_objects';
 import {
   getNotifyUserAboutOptInDefault,
@@ -64,7 +65,7 @@ export function registerTelemetryConfigRoutes({
         telemetryOptedIn: optIn,
       });
 
-      const body: FetchTelemetryConfigResponse = {
+      const body: v2.FetchTelemetryConfigResponse = {
         allowChangingOptInStatus,
         optIn,
         sendUsageFrom,

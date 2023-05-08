@@ -169,7 +169,7 @@ export const guideCards: GuideCardConstants[] = [
     ),
     navigateTo: {
       appId: 'integrations',
-      path: '/detail/cloud_security_posture/overview',
+      path: '/detail/cloud_security_posture/overview?integration=cspm',
     },
     telemetryId: 'onboarding--security--cloud',
     order: 9,

@@ -1,23 +1,16 @@
 {
   "description": "Security: Packetbeat - Looks for unusual web browsing URL activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
-  "groups": [
-    "security",
-    "packetbeat",
-    "web"
-  ],
+  "groups": ["security", "packetbeat"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"url.full\"",
+        "detector_description": "Detects rare URLs.",
         "function": "rare",
         "by_field_name": "url.full"
       }
     ],
-    "influencers": [
-      "host.name",
-      "destination.ip"
-    ]
+    "influencers": ["host.name", "destination.ip"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -28,12 +21,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-packetbeat",
-    "custom_urls": [
-      {
-        "url_name": "Host Details",
-        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      }
-    ],
-    "security_app_display_name": "Unusual Web Request"
+    "security_app_display_name": "Unusual Web Request",
+    "managed": true,
+    "job_revision": 4
   }
 }

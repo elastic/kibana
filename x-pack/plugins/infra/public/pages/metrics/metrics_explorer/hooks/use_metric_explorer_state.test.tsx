@@ -21,6 +21,14 @@ jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
   useSyncKibanaTimeFilterTime: () => [() => {}],
 }));
 
+jest.mock('../../../../alerting/use_alert_prefill', () => ({
+  useAlertPrefillContext: () => ({
+    metricThresholdPrefill: {
+      setPrefillOptions: jest.fn(),
+    },
+  }),
+}));
+
 const renderUseMetricsExplorerStateHook = () =>
   renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
     initialProps: { source, derivedIndexPattern },
@@ -65,7 +73,7 @@ Object.defineProperty(window, 'localStorage', {
 describe('useMetricsExplorerState', () => {
   beforeEach(() => {
     mockedUseMetricsExplorerData.mockReturnValue({
-      loading: false,
+      isLoading: false,
       error: null,
       data: null,
     });
@@ -75,25 +83,27 @@ describe('useMetricsExplorerState', () => {
 
   it('should just work', async () => {
     mockedUseMetricsExplorerData.mockReturnValue({
-      loading: true,
+      isLoading: false,
       error: null,
-      data: resp,
+      data: {
+        pages: [resp],
+      },
     });
     const { result } = renderUseMetricsExplorerStateHook();
-    expect(result.current.data).toEqual(resp);
+    expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.error).toBe(null);
-    expect(result.current.loading).toBe(true);
+    expect(result.current.isLoading).toBe(false);
   });
 
   describe('handleRefresh', () => {
     it('should trigger an addition request when handleRefresh is called', async () => {
       const { result } = renderUseMetricsExplorerStateHook();
-      expect(result.current.refreshSignal).toBe(0);
+      expect(result.all.length).toBe(2);
+      const numberOfHookCalls = result.all.length;
       act(() => {
-        result.current.handleRefresh();
+        result.current.refresh();
       });
-      expect(result.current.afterKey).toBe(null);
-      expect(result.current.refreshSignal).toBe(1);
+      expect(result.all.length).toBe(numberOfHookCalls + 1);
     });
   });
 
@@ -129,7 +139,7 @@ describe('useMetricsExplorerState', () => {
       act(() => {
         handleTimeChange('now-10m', 'now');
       });
-      expect(result.current.currentTimerange).toEqual({
+      expect(result.current.timeRange).toEqual({
         from: 'now-10m',
         to: 'now',
         interval: '>=10s',
@@ -190,30 +200,34 @@ describe('useMetricsExplorerState', () => {
     it('should load more based on the afterKey', async () => {
       const { result, rerender } = renderUseMetricsExplorerStateHook();
       expect(result.current.data).toBe(null);
-      expect(result.current.loading).toBe(false);
+      expect(result.current.isLoading).toBe(false);
       mockedUseMetricsExplorerData.mockReturnValue({
-        loading: false,
+        isLoading: false,
         error: null,
-        data: resp,
+        data: {
+          pages: [resp],
+        },
       });
       await rerender();
-      const { series, pageInfo } = result.current.data!;
+      const { series } = result.current.data!.pages[0];
       expect(series).toBeDefined();
       expect(series.length).toBe(3);
+      const fetchNextPage = jest.fn();
       mockedUseMetricsExplorerData.mockReturnValue({
-        loading: false,
+        isLoading: false,
         error: null,
         data: {
           pageInfo: { total: 10, afterKey: 'host-06' },
           series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
         } as any,
+        fetchNextPage,
       });
       await rerender();
       const { handleLoadMore } = result.current;
       act(() => {
-        handleLoadMore(pageInfo.afterKey!);
+        handleLoadMore();
       });
-      expect(result.current.afterKey).toBe(pageInfo.afterKey);
+      expect(fetchNextPage).toBeCalledTimes(1);
     });
   });
 });

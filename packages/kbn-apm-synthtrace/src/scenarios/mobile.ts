@@ -20,6 +20,16 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 type DeviceMetadata = DeviceInfo & OSInfo;
 
+const modelIdentifiersWithCrashes = [
+  'SM-G930F',
+  'HUAWEI P2-0000',
+  'Pixel 3a',
+  'LG K10',
+  'iPhone11,8',
+  'Watch6,8',
+  'iPad12,2',
+];
+
 const ANDROID_DEVICES: DeviceMetadata[] = [
   {
     manufacturer: 'Samsung',
@@ -309,6 +319,11 @@ function randomInt(max: number) {
   return Math.floor(Math.random() * max);
 }
 
+function randomRange(min: number, max: number) {
+  const cal = Math.random() * (max - min) + min;
+  return cal.toPrecision(2);
+}
+
 const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
   const { numDevices = 10 } = scenarioOpts || {};
 
@@ -318,8 +333,12 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
         return apm
-          .mobileApp({ name: 'synth-android', environment: ENVIRONMENT, agentName: 'android/java' })
-          .mobileDevice()
+          .mobileApp({
+            name: 'synth-android',
+            environment: ENVIRONMENT,
+            agentName: 'android/java',
+          })
+          .mobileDevice({ serviceVersion: randomRange(1, 2) })
           .deviceInfo(deviceMetadata)
           .osInfo(deviceMetadata)
           .setGeoInfo(geoNetwork)
@@ -331,7 +350,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
         return apm
           .mobileApp({ name: 'synth-ios', environment: ENVIRONMENT, agentName: 'iOS/swift' })
-          .mobileDevice()
+          .mobileDevice({ serviceVersion: randomRange(1, 1.5) })
           .deviceInfo(deviceMetadata)
           .osInfo(deviceMetadata)
           .setGeoInfo(geoNetwork)
@@ -345,34 +364,40 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
           device.startNewSession();
           const framework =
             device.fields['device.manufacturer'] === 'Apple' ? 'iOS' : 'Android Activity';
+          const couldCrash = modelIdentifiersWithCrashes.includes(
+            device.fields['device.model.identifier'] ?? ''
+          );
+          const startTx = device
+            .transaction('Start View - View Appearing', framework)
+            .timestamp(timestamp)
+            .duration(500)
+            .success()
+            .children(
+              device
+                .span({
+                  spanName: 'onCreate',
+                  spanType: 'app',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
+                })
+                .duration(50)
+                .success()
+                .timestamp(timestamp + 20),
+              device
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .failure()
+                .timestamp(timestamp + 400)
+            );
           return [
-            device
-              .transaction('Start View - View Appearing', framework)
-              .timestamp(timestamp)
-              .duration(500)
-              .success()
-              .children(
-                device
-                  .span({
-                    spanName: 'onCreate',
-                    spanType: 'app',
-                    spanSubtype: 'external',
-                    'service.target.type': 'http',
-                    'span.destination.service.resource': 'external',
-                  })
-                  .duration(50)
-                  .success()
-                  .timestamp(timestamp + 20),
-                device
-                  .httpSpan({
-                    spanName: 'GET backend:1234',
-                    httpMethod: 'GET',
-                    httpUrl: 'https://backend:1234/api/start',
-                  })
-                  .duration(800)
-                  .failure()
-                  .timestamp(timestamp + 400)
-              ),
+            couldCrash && index % 2 === 0
+              ? startTx.errors(device.crash({ message: 'error' }).timestamp(timestamp))
+              : startTx,
             device
               .transaction('Second View - View Appearing', framework)
               .timestamp(10000 + timestamp)
@@ -409,7 +434,23 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
         });
       };
 
-      return [...androidDevices, ...iOSDevices].map((device) => sessionTransactions(device));
+      const appLaunchMetrics = (device: MobileDevice) => {
+        return clickRate.generator((timestamp, index) =>
+          device
+            .appMetrics({
+              'application.launch.time': 100 * (index + 1),
+            })
+            .timestamp(timestamp)
+        );
+      };
+
+      return [
+        ...androidDevices.flatMap((device) => [
+          sessionTransactions(device),
+          appLaunchMetrics(device),
+        ]),
+        ...iOSDevices.map((device) => sessionTransactions(device)),
+      ];
     },
   };
 };

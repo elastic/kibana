@@ -18,7 +18,7 @@ export const getGeneralErrorToast = (
 ): ToastInput => ({
   text: toMountPoint(
     <>
-      <EuiCallOut title={errorText} color="danger" iconType="alert">
+      <EuiCallOut title={errorText} color="danger" iconType="warning">
         {err.toString()}
       </EuiCallOut>
 

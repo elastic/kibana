@@ -13,6 +13,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -31,12 +32,11 @@ import {
   getStats,
   getThresholdRuleForSignalTesting,
   installMockPrebuiltRules,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   updateRule,
   deleteAllEventLogExecutionEvents,
 } from '../../../../utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
         const rule = getRuleForSignalTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
         const hookAction = await createNewAction(supertest, log);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -254,7 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createNewAction(supertest, log);
         await createLegacyRuleAction(supertest, id, hookAction.id);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -289,7 +289,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"eql" rule type', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156088
+    describe.skip('"eql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);
@@ -327,7 +328,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -406,7 +407,7 @@ export default ({ getService }: FtrProviderContext) => {
         const hookAction = await createNewAction(supertest, log);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -476,7 +477,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createNewAction(supertest, log);
         await createLegacyRuleAction(supertest, id, hookAction.id);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -561,7 +562,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -652,7 +653,7 @@ export default ({ getService }: FtrProviderContext) => {
         const hookAction = await createNewAction(supertest, log);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -738,7 +739,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createNewAction(supertest, log);
         await createLegacyRuleAction(supertest, id, hookAction.id);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -1047,7 +1048,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1141,7 +1142,7 @@ export default ({ getService }: FtrProviderContext) => {
         const hookAction = await createNewAction(supertest, log);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {
@@ -1230,7 +1231,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { id } = await createRule(supertest, log, rule);
         const hookAction = await createNewAction(supertest, log);
         await createLegacyRuleAction(supertest, id, hookAction.id);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
 
         await retry.try(async () => {

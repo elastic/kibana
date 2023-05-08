@@ -15,6 +15,7 @@ import {
   selectRangeTrigger,
   valueClickTrigger,
   cellValueTrigger,
+  panelHoverTrigger,
 } from './lib';
 
 /**
@@ -23,6 +24,7 @@ import {
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
+  uiActions.registerTrigger(panelHoverTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(panelNotificationTrigger);
   uiActions.registerTrigger(selectRangeTrigger);

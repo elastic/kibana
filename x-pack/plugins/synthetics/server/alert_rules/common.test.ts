@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { updateState } from './common';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { IBasePath } from '@kbn/core/server';
+import { updateState, setRecoveredAlertsContext } from './common';
 import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
+import { StaleDownConfig } from './status_rule/status_rule_executor';
 
 describe('updateState', () => {
   let spy: jest.SpyInstance<string, []>;
@@ -178,5 +180,155 @@ describe('updateState', () => {
         "meta": undefined,
       }
     `);
+  });
+});
+
+describe('setRecoveredAlertsContext', () => {
+  const { alertFactory } = alertsMock.createRuleExecutorServices();
+  const { getRecoveredAlerts } = alertFactory.done();
+  const alertUuid = 'alert-id';
+  const location = 'US Central';
+  const configId = '12345';
+  const idWithLocation = `${configId}-${location}`;
+  const basePath = {
+    publicBaseUrl: 'https://localhost:5601',
+  } as IBasePath;
+  const getAlertUuid = () => alertUuid;
+
+  const upConfigs = {
+    [idWithLocation]: {
+      configId,
+      monitorQueryId: 'stale-config',
+      status: 'up',
+      location: '',
+      ping: {
+        '@timestamp': new Date().toISOString(),
+      } as StaleDownConfig['ping'],
+      timestamp: new Date().toISOString(),
+    },
+  };
+
+  it('sets context correctly when monitor is deleted', () => {
+    const setContext = jest.fn();
+    getRecoveredAlerts.mockReturnValue([
+      {
+        getId: () => alertUuid,
+        getState: () => ({
+          idWithLocation,
+          monitorName: 'test-monitor',
+        }),
+        setContext,
+      },
+    ]);
+    const staleDownConfigs = {
+      [idWithLocation]: {
+        configId,
+        monitorQueryId: 'stale-config',
+        status: 'down',
+        location: 'location',
+        ping: {
+          '@timestamp': new Date().toISOString(),
+        } as StaleDownConfig['ping'],
+        timestamp: new Date().toISOString(),
+        isDeleted: true,
+      },
+    };
+    setRecoveredAlertsContext({
+      alertFactory,
+      basePath,
+      getAlertUuid,
+      spaceId: 'default',
+      staleDownConfigs,
+      upConfigs: {},
+    });
+    expect(setContext).toBeCalledWith({
+      idWithLocation,
+      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+      monitorName: 'test-monitor',
+      recoveryReason: 'Monitor has been deleted',
+    });
+  });
+
+  it('sets context correctly when location is removed', () => {
+    const setContext = jest.fn();
+    getRecoveredAlerts.mockReturnValue([
+      {
+        getId: () => alertUuid,
+        getState: () => ({
+          idWithLocation,
+          monitorName: 'test-monitor',
+        }),
+        setContext,
+      },
+    ]);
+    const staleDownConfigs = {
+      [idWithLocation]: {
+        configId,
+        monitorQueryId: 'stale-config',
+        status: 'down',
+        location: 'location',
+        ping: {
+          '@timestamp': new Date().toISOString(),
+        } as StaleDownConfig['ping'],
+        timestamp: new Date().toISOString(),
+        isLocationRemoved: true,
+      },
+    };
+    setRecoveredAlertsContext({
+      alertFactory,
+      basePath,
+      getAlertUuid,
+      spaceId: 'default',
+      staleDownConfigs,
+      upConfigs: {},
+    });
+    expect(setContext).toBeCalledWith({
+      idWithLocation,
+      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+      monitorName: 'test-monitor',
+      recoveryReason: 'Location has been removed from the monitor',
+    });
+  });
+
+  it('sets context correctly when monitor is up', () => {
+    const setContext = jest.fn();
+    getRecoveredAlerts.mockReturnValue([
+      {
+        getId: () => alertUuid,
+        getState: () => ({
+          idWithLocation,
+          monitorName: 'test-monitor',
+        }),
+        setContext,
+      },
+    ]);
+    const staleDownConfigs = {
+      [idWithLocation]: {
+        configId,
+        monitorQueryId: 'stale-config',
+        status: 'down',
+        location: 'location',
+        ping: {
+          '@timestamp': new Date().toISOString(),
+        } as StaleDownConfig['ping'],
+        timestamp: new Date().toISOString(),
+        isLocationRemoved: true,
+      },
+    };
+    setRecoveredAlertsContext({
+      alertFactory,
+      basePath,
+      getAlertUuid,
+      spaceId: 'default',
+      staleDownConfigs,
+      upConfigs,
+    });
+    expect(setContext).toBeCalledWith({
+      idWithLocation,
+      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+      monitorName: 'test-monitor',
+      status: 'up',
+      recoveryReason: 'Monitor has recovered with status Up',
+    });
   });
 });

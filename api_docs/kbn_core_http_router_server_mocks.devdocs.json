@@ -18,7 +18,33 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-common.createVersionedRouterMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createVersionedRouterMock",
+        "description": [],
+        "signature": [
+          "() => jest.Mocked<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<any>>"
+        ],
+        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -222,7 +248,15 @@
             "section": "def-common.RouterRoute",
             "text": "RouterRoute"
           },
-          "[], []>; } & ",
+          "[], []>; versioned: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<any>; } & ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",

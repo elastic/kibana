@@ -29,7 +29,6 @@ describe('test useDiscoverState', () => {
           services: discoverServiceMock,
           history,
           savedSearch: savedSearchMock,
-          setExpandedDoc: jest.fn(),
         });
       },
       {

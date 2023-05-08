@@ -7,6 +7,7 @@
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
+import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
@@ -15,12 +16,16 @@ export const transformRuleToAlertAction = ({
   action_type_id: actionTypeId,
   params,
   uuid,
+  frequency,
+  alerts_filter: alertsFilter,
 }: RuleAlertAction): RuleAction => ({
   group,
   id,
   params,
   actionTypeId,
+  ...(alertsFilter && { alertsFilter }),
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -29,32 +34,42 @@ export const transformAlertToRuleAction = ({
   actionTypeId,
   params,
   uuid,
+  frequency,
+  alertsFilter,
 }: RuleAction): RuleAlertAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
+  ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
 });
 
 export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,
   params,
 }: ResponseAction): RuleResponseAction => {
-  const {
-    saved_query_id: savedQueryId,
-    ecs_mapping: ecsMapping,
-    pack_id: packId,
-    ...rest
-  } = params;
+  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+    const {
+      saved_query_id: savedQueryId,
+      ecs_mapping: ecsMapping,
+      pack_id: packId,
+      ...rest
+    } = params;
 
+    return {
+      params: {
+        ...rest,
+        savedQueryId,
+        ecsMapping,
+        packId,
+      },
+      actionTypeId,
+    };
+  }
   return {
-    params: {
-      ...rest,
-      savedQueryId,
-      ecsMapping,
-      packId,
-    },
+    params,
     actionTypeId,
   };
 };
@@ -63,14 +78,20 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): ResponseAction => {
-  const { savedQueryId, ecsMapping, packId, ...rest } = params;
+  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+    const { savedQueryId, ecsMapping, packId, ...rest } = params;
+    return {
+      params: {
+        ...rest,
+        saved_query_id: savedQueryId,
+        ecs_mapping: ecsMapping,
+        pack_id: packId,
+      },
+      action_type_id: actionTypeId,
+    };
+  }
   return {
-    params: {
-      ...rest,
-      saved_query_id: savedQueryId,
-      ecs_mapping: ecsMapping,
-      pack_id: packId,
-    },
+    params,
     action_type_id: actionTypeId,
   };
 };

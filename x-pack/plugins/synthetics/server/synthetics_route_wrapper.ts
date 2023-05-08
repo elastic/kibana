@@ -5,6 +5,9 @@
  * 2.0.
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsRouteWrapper, SyntheticsStreamingRouteHandler } from './legacy_uptime/routes';
@@ -29,15 +32,15 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = new UptimeEsClient(
-      savedObjectsClient,
-      esClient.asCurrentUser,
-      false,
-      coreContext.uiSettings,
-      request
-    );
+    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
+      request,
+      isDev: false,
+      uiSettings: coreContext.uiSettings,
+    });
 
     server.uptimeEsClient = uptimeEsClient;
+
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const res = await (uptimeRoute.handler as SyntheticsStreamingRouteHandler)({
       uptimeEsClient,
@@ -47,6 +50,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       server,
       syntheticsMonitorClient,
       subject,
+      spaceId,
     });
 
     return res;
@@ -62,35 +66,51 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = new UptimeEsClient(
-      savedObjectsClient,
-      esClient.asCurrentUser,
-      Boolean(server.isDev) && !isTestUser(server),
+    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
+      request,
       uiSettings,
-      request
-    );
+      isDev: Boolean(server.isDev) && !isTestUser(server),
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+    });
 
     server.uptimeEsClient = uptimeEsClient;
 
-    const res = await uptimeRoute.handler({
-      uptimeEsClient,
-      savedObjectsClient,
-      context,
-      request,
-      response,
-      server,
-      syntheticsMonitorClient,
-    });
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    if (res instanceof KibanaResponse) {
-      return res;
+    try {
+      const res = await uptimeRoute.handler({
+        uptimeEsClient,
+        savedObjectsClient,
+        context,
+        request,
+        response,
+        server,
+        spaceId,
+        syntheticsMonitorClient,
+      });
+      if (res instanceof KibanaResponse) {
+        return res;
+      }
+
+      return response.ok({
+        body: {
+          ...res,
+          ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
+        },
+      });
+    } catch (e) {
+      if (e.statusCode === 403) {
+        const privileges = await checkIndicesReadPrivileges(uptimeEsClient);
+        if (!privileges.has_all_requested) {
+          return response.forbidden({
+            body: {
+              message:
+                'MissingIndicesPrivileges: You do not have permission to read from the synthetics-* indices. Please contact your administrator.',
+            },
+          });
+        }
+      }
+      throw e;
     }
-
-    return response.ok({
-      body: {
-        ...res,
-        ...uptimeEsClient.getInspectData(uptimeRoute.path),
-      },
-    });
   },
 });

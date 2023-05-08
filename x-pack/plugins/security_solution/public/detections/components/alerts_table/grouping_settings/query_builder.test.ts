@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_QUERY_SIZE } from '../../../../common/components/grouping';
 import { getAlertsGroupingQuery } from '.';
 
 describe('getAlertsGroupingQuery', () => {
@@ -16,6 +15,7 @@ describe('getAlertsGroupingQuery', () => {
       pageIndex: 0,
       pageSize: 25,
       runtimeMappings: {},
+      selectedGroupEsTypes: ['keyword'],
       selectedGroup: 'kibana.alert.rule.name',
       additionalFilters: [
         {
@@ -44,28 +44,46 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
+        unitsCount: {
+          value_count: {
+            field: 'kibana.alert.rule.name',
+            missing: '-',
+          },
+        },
+        unitsCountWithoutNull: {
           value_count: {
             field: 'kibana.alert.rule.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'kibana.alert.rule.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
+              },
+            },
+            description: {
+              terms: {
+                field: 'kibana.alert.rule.description',
+                size: 1,
               },
             },
             bucket_truncate: {
               bucket_sort: {
                 from: 0,
                 size: 25,
-                sort: undefined,
+                sort: [
+                  {
+                    unitsCount: {
+                      order: 'desc',
+                    },
+                  },
+                ],
               },
             },
             countSeveritySubAggregation: {
@@ -95,13 +113,15 @@ describe('getAlertsGroupingQuery', () => {
             },
           },
           multi_terms: {
-            size: MAX_QUERY_SIZE,
+            size: 10000,
             terms: [
               {
                 field: 'kibana.alert.rule.name',
+                missing: '-',
               },
               {
-                field: 'kibana.alert.rule.description',
+                field: 'kibana.alert.rule.name',
+                missing: '--',
               },
             ],
           },
@@ -153,6 +173,7 @@ describe('getAlertsGroupingQuery', () => {
       pageIndex: 0,
       pageSize: 25,
       runtimeMappings: {},
+      selectedGroupEsTypes: ['keyword'],
       selectedGroup: 'process.name',
       additionalFilters: [
         {
@@ -181,19 +202,25 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
+        unitsCount: {
+          value_count: {
+            field: 'process.name',
+            missing: '-',
+          },
+        },
+        unitsCountWithoutNull: {
           value_count: {
             field: 'process.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'process.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },
@@ -202,7 +229,13 @@ describe('getAlertsGroupingQuery', () => {
               bucket_sort: {
                 from: 0,
                 size: 25,
-                sort: undefined,
+                sort: [
+                  {
+                    unitsCount: {
+                      order: 'desc',
+                    },
+                  },
+                ],
               },
             },
             rulesCountAggregation: {
@@ -211,9 +244,18 @@ describe('getAlertsGroupingQuery', () => {
               },
             },
           },
-          terms: {
-            field: 'process.name',
+          multi_terms: {
             size: 10000,
+            terms: [
+              {
+                field: 'process.name',
+                missing: '-',
+              },
+              {
+                field: 'process.name',
+                missing: '--',
+              },
+            ],
           },
         },
       },

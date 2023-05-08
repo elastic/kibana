@@ -185,7 +185,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
           iconType="visArea"
           title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
           actions={
-            <EuiButton color="primary" fill onClick={reload}>
+            <EuiButton data-test-subj="infraTimelineButton" color="primary" fill onClick={reload}>
               {error ? retryButtonLabel : checkNewDataButtonLabel}
             </EuiButton>
           }

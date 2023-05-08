@@ -34,6 +34,24 @@ export default {
   },
 } as Meta;
 
+const fakeDataView = {
+  title: 'metricbeat-*',
+  fields: [
+    {
+      name: 'system.cpu.user.pct',
+      type: 'number',
+    },
+    {
+      name: 'system.cpu.system.pct',
+      type: 'number',
+    },
+    {
+      name: 'system.cpu.cores',
+      type: 'number',
+    },
+  ],
+};
+
 const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => {
   const [expression, setExpression] = useState<MetricExpression>(args.expression);
   const [errors, setErrors] = useState<IErrorObject>(args.errors);
@@ -60,6 +78,7 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
       errors={errors}
       expression={expression}
       onChange={handleExpressionChange}
+      dataView={fakeDataView}
     />
   );
 };

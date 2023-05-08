@@ -113,7 +113,7 @@ describe('migration v2', () => {
   });
 
   it('rewrites id deterministically for SO with namespaceType: "multiple" and "multiple-isolated"', async () => {
-    const migratedIndex = `.kibana_${pkg.version}_001`;
+    const migratedIndexAlias = `.kibana_${pkg.version}`;
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -172,7 +172,7 @@ describe('migration v2', () => {
     const coreStart = await root.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     // each newly converted multi-namespace object in a non-default space has its ID deterministically regenerated, and a legacy-url-alias
     // object is created which links the old ID to the new ID
@@ -187,8 +187,9 @@ describe('migration v2', () => {
           foo: { name: 'Foo 1 default' },
           references: [],
           namespaces: ['default'],
-          migrationVersion: { foo: '8.0.0' },
-          coreMigrationVersion: '8.0.0',
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           id: `foo:${newFooId}`,
@@ -197,8 +198,9 @@ describe('migration v2', () => {
           references: [],
           namespaces: ['spacex'],
           originId: '1',
-          migrationVersion: { foo: '8.0.0' },
-          coreMigrationVersion: '8.0.0',
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           // new object for spacex:foo:1
@@ -211,9 +213,9 @@ describe('migration v2', () => {
             targetType: 'foo',
             purpose: 'savedObjectConversion',
           },
-          migrationVersion: { 'legacy-url-alias': '8.2.0' },
           references: [],
-          coreMigrationVersion: '8.0.0',
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '8.2.0',
         },
         {
           id: 'bar:1',
@@ -221,8 +223,9 @@ describe('migration v2', () => {
           bar: { nomnom: 1 },
           references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
           namespaces: ['default'],
-          migrationVersion: { bar: '8.0.0' },
-          coreMigrationVersion: '8.0.0',
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           id: `bar:${newBarId}`,
@@ -231,8 +234,9 @@ describe('migration v2', () => {
           references: [{ type: 'foo', id: newFooId, name: 'Foo 1 spacex' }],
           namespaces: ['spacex'],
           originId: '1',
-          migrationVersion: { bar: '8.0.0' },
-          coreMigrationVersion: '8.0.0',
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           // new object for spacex:bar:1
@@ -245,9 +249,9 @@ describe('migration v2', () => {
             targetType: 'bar',
             purpose: 'savedObjectConversion',
           },
-          migrationVersion: { 'legacy-url-alias': '8.2.0' },
           references: [],
-          coreMigrationVersion: '8.0.0',
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '8.2.0',
         },
       ].sort(sortByTypeAndId)
     );

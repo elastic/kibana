@@ -52,7 +52,11 @@ export const HostsTableEntryTitle = ({ onClick, time, title }: HostsTableEntryTi
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>
         <EuiToolTip delay="long" content={name}>
-          <EuiLink className="eui-displayBlock eui-textTruncate" {...link}>
+          <EuiLink
+            data-test-subj="infraHostsTableEntryTitleLink"
+            className="eui-displayBlock eui-textTruncate"
+            {...link}
+          >
             {name}
           </EuiLink>
         </EuiToolTip>

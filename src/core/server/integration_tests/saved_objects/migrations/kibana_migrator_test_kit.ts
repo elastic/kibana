@@ -7,6 +7,9 @@
  */
 
 import Path from 'path';
+import fs from 'fs/promises';
+import { SemVer } from 'semver';
+
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { ConfigService, Env } from '@kbn/config';
@@ -19,8 +22,8 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
-  IKibanaMigrator,
-  MigrationResult,
+  type IKibanaMigrator,
+  type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -32,20 +35,26 @@ import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-
 
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { LoggerFactory } from '@kbn/logging';
+import type { LoggerFactory } from '@kbn/logging';
+import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
-import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { NodeRoles } from '@kbn/core-node-server';
+import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
+import { delay } from './test_utils';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 // Extract current stack version from Env, to use as a default
-const currentVersion = env.packageInfo.version;
-const currentBranch = env.packageInfo.branch;
+export const currentVersion = env.packageInfo.version;
+export const nextMinor = new SemVer(currentVersion).inc('minor').format();
+export const currentBranch = env.packageInfo.branch;
+export const defaultKibanaIndex = '.kibana_migrator_tests';
+export const defaultNodeRoles: NodeRoles = { migrator: true, ui: true, backgroundTasks: true };
 
 export interface GetEsClientParams {
   settings?: Record<string, any>;
@@ -57,6 +66,7 @@ export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
   kibanaVersion?: string;
   kibanaBranch?: string;
+  nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   logFilePath?: string;
@@ -65,7 +75,7 @@ export interface KibanaMigratorTestKitParams {
 export interface KibanaMigratorTestKit {
   client: ElasticsearchClient;
   migrator: IKibanaMigrator;
-  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  runMigrations: () => Promise<MigrationResult[]>;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
@@ -76,7 +86,7 @@ export const startElasticsearch = async ({
 }: {
   basePath?: string;
   dataArchive?: string;
-}) => {
+} = {}) => {
   const { startES } = createTestServers({
     adjustTimeout: (t: number) => jest.setTimeout(t),
     settings: {
@@ -109,12 +119,14 @@ export const getEsClient = async ({
 
 export const getKibanaMigratorTestKit = async ({
   settings = {},
-  kibanaIndex = '.kibana',
+  kibanaIndex = defaultKibanaIndex,
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
   logFilePath = defaultLogFilePath,
+  nodeRoles = defaultNodeRoles,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
+  let hasRun = false;
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -138,12 +150,19 @@ export const getKibanaMigratorTestKit = async ({
     loggerFactory,
     kibanaIndex,
     kibanaVersion,
-    kibanaBranch
+    kibanaBranch,
+    nodeRoles
   );
 
-  const runMigrations = async (rerun?: boolean) => {
+  const runMigrations = async () => {
+    if (hasRun) {
+      throw new Error('The test kit migrator can only be run once. Please instantiate it again.');
+    }
+    hasRun = true;
     migrator.prepareMigrations();
-    return await migrator.runMigrations({ rerun });
+    const migrationResults = await migrator.runMigrations();
+    await loggingSystem.stop();
+    return migrationResults;
   };
 
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
@@ -227,7 +246,9 @@ const getElasticsearchClient = async (
   return configureClient(esClientConfig, {
     logger: loggerFactory.get('elasticsearch'),
     type: 'data',
-    agentFactoryProvider: new AgentManager(),
+    agentFactoryProvider: new AgentManager(
+      loggerFactory.get('elasticsearch-service', 'agent-manager')
+    ),
     kibanaVersion,
   });
 };
@@ -239,7 +260,8 @@ const getMigrator = async (
   loggerFactory: LoggerFactory,
   kibanaIndex: string,
   kibanaVersion: string,
-  kibanaBranch: string
+  kibanaBranch: string,
+  nodeRoles: NodeRoles
 ) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -263,7 +285,44 @@ const getMigrator = async (
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
+    nodeRoles,
   });
+};
+
+export const getAggregatedTypesCount = async (client: ElasticsearchClient, index: string) => {
+  await client.indices.refresh();
+  const response = await client.search<unknown, { typesAggregation: { buckets: any[] } }>({
+    index,
+    _source: false,
+    aggs: {
+      typesAggregation: {
+        terms: {
+          // assign type __UNKNOWN__ to those documents that don't define one
+          missing: '__UNKNOWN__',
+          field: 'type',
+          size: 100,
+        },
+        aggs: {
+          docs: {
+            top_hits: {
+              size: 10,
+              _source: {
+                excludes: ['*'],
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return (response.aggregations!.typesAggregation.buckets as unknown as any).reduce(
+    (acc: any, current: any) => {
+      acc[current.key] = current.doc_count;
+      return acc;
+    },
+    {}
+  );
 };
 
 const registerTypes = (
@@ -271,4 +330,138 @@ const registerTypes = (
   types?: Array<SavedObjectsType<any>>
 ) => {
   (types || []).forEach((type) => typeRegistry.registerType(type));
+};
+
+export const createBaseline = async () => {
+  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
+    kibanaIndex: defaultKibanaIndex,
+    types: baselineTypes,
+  });
+
+  await runMigrations();
+
+  await savedObjectsRepository.bulkCreate(baselineDocuments, {
+    refresh: 'wait_for',
+  });
+
+  return client;
+};
+
+interface GetMutatedMigratorParams {
+  kibanaVersion?: string;
+  settings?: Record<string, any>;
+}
+
+export const getIdenticalMappingsMigrator = async ({
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  return await getKibanaMigratorTestKit({
+    types: baselineTypes,
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getNonDeprecatedMappingsMigrator = async ({
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  return await getKibanaMigratorTestKit({
+    types: baselineTypes.filter((type) => type.name !== 'deprecated'),
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getCompatibleMappingsMigrator = async ({
+  filterDeprecated = false,
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams & {
+  filterDeprecated?: boolean;
+} = {}) => {
+  const types = baselineTypes
+    .filter((type) => !filterDeprecated || type.name !== 'deprecated')
+    .map<SavedObjectsType>((type) => {
+      if (type.name === 'complex') {
+        return {
+          ...type,
+          mappings: {
+            properties: {
+              name: { type: 'text' },
+              value: { type: 'integer' },
+              createdAt: { type: 'date' },
+            },
+          },
+        };
+      } else {
+        return type;
+      }
+    });
+
+  return await getKibanaMigratorTestKit({
+    types,
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getIncompatibleMappingsMigrator = async ({
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  const types = baselineTypes.map<SavedObjectsType>((type) => {
+    if (type.name === 'complex') {
+      return {
+        ...type,
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+            value: { type: 'long' },
+            createdAt: { type: 'date' },
+          },
+        },
+      };
+    } else {
+      return type;
+    }
+  });
+
+  return await getKibanaMigratorTestKit({
+    types,
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getCurrentVersionTypeRegistry = async ({
+  oss,
+}: {
+  oss: boolean;
+}): Promise<ISavedObjectTypeRegistry> => {
+  const root = createRootWithCorePlugins({}, { oss });
+  await root.preboot();
+  const coreSetup = await root.setup();
+  const typeRegistry = coreSetup.savedObjects.getTypeRegistry();
+  root.shutdown(); // do not await for it, or we might block the tests
+  return typeRegistry;
+};
+
+export const overrideTypeRegistry = (
+  typeRegistry: ISavedObjectTypeRegistry,
+  transform: (type: SavedObjectsType<any>) => SavedObjectsType<any>
+): ISavedObjectTypeRegistry => {
+  const updatedTypeRegistry = new SavedObjectTypeRegistry();
+  typeRegistry.getAllTypes().forEach((type) => updatedTypeRegistry.registerType(transform(type)));
+  return updatedTypeRegistry;
+};
+
+export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
+  await delay(0.1);
+  return await fs.readFile(logFilePath, 'utf-8');
+};
+
+export const clearLog = async (logFilePath: string = defaultLogFilePath): Promise<void> => {
+  await fs.truncate(logFilePath).catch(() => {});
 };

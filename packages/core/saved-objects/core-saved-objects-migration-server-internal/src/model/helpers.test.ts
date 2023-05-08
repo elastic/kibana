@@ -12,8 +12,12 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  getMigrationType,
   buildRemoveAliasActions,
   versionMigrationCompleted,
+  MigrationType,
+  getTempIndexName,
+  createBulkIndexOperationTuple,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -285,5 +289,68 @@ describe('buildRemoveAliasActions', () => {
       { remove: { index: '.kibana_test_123', alias: 'a', must_exist: true } },
       { remove: { index: '.kibana_test_123', alias: 'c', must_exist: true } },
     ]);
+  });
+});
+
+describe('createBulkIndexOperationTuple', () => {
+  it('creates the proper request body to bulk index a document', () => {
+    const document = { _id: '', _source: { type: 'cases', title: 'a case' } };
+    const typeIndexMap = {
+      cases: '.kibana_cases_8.8.0_reindex_temp',
+    };
+    expect(createBulkIndexOperationTuple(document, typeIndexMap)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "index": Object {
+            "_id": "",
+            "_index": ".kibana_cases_8.8.0_reindex_temp",
+          },
+        },
+        Object {
+          "title": "a case",
+          "type": "cases",
+        },
+      ]
+    `);
+  });
+
+  it('does not include the index property if it is not specified in the typeIndexMap', () => {
+    const document = { _id: '', _source: { type: 'cases', title: 'a case' } };
+    expect(createBulkIndexOperationTuple(document)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "index": Object {
+            "_id": "",
+          },
+        },
+        Object {
+          "title": "a case",
+          "type": "cases",
+        },
+      ]
+    `);
+  });
+});
+
+describe('getMigrationType', () => {
+  it.each`
+    isMappingsCompatible | isVersionMigrationCompleted | expected
+    ${true}              | ${true}                     | ${MigrationType.Unnecessary}
+    ${true}              | ${false}                    | ${MigrationType.Compatible}
+    ${false}             | ${false}                    | ${MigrationType.Incompatible}
+    ${false}             | ${true}                     | ${MigrationType.Invalid}
+  `(
+    "returns '$expected' migration type",
+    ({ isMappingsCompatible, isVersionMigrationCompleted, expected }) => {
+      expect(getMigrationType({ isMappingsCompatible, isVersionMigrationCompleted })).toBe(
+        expected
+      );
+    }
+  );
+});
+
+describe('getTempIndexName', () => {
+  it('composes a temporary index name for reindexing', () => {
+    expect(getTempIndexName('.kibana_cases', '8.8.0')).toEqual('.kibana_cases_8.8.0_reindex_temp');
   });
 });

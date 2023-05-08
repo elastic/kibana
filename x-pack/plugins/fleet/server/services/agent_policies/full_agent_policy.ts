@@ -186,11 +186,11 @@ export async function getFullAgentPolicy(
 
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
-  if (messageSigningService?.isEncryptionAvailable && fullAgentPolicy.agent) {
+  if (messageSigningService && fullAgentPolicy.agent) {
     const publicKey = await messageSigningService.getPublicKey();
 
     fullAgentPolicy.agent.protection = {
-      enabled: true,
+      enabled: false,
       uninstall_token_hash: '',
       signing_key: publicKey,
     };

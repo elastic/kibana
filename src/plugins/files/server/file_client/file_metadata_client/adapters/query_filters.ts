@@ -24,6 +24,7 @@ export function filterArgsToKuery({
   extension,
   mimeType,
   kind,
+  kindToExclude,
   meta,
   name,
   status,
@@ -50,12 +51,27 @@ export function filterArgsToKuery({
     }
   };
 
+  const addExcludeFilters = (fieldName: keyof FileMetadata | string, values: string[] = []) => {
+    if (values.length) {
+      const andExpressions = values
+        .filter(Boolean)
+        .map((value) =>
+          nodeTypes.function.buildNode(
+            'not',
+            nodeBuilder.is(`${attrPrefix}.${fieldName}`, escapeKuery(value))
+          )
+        );
+      kueryExpressions.push(nodeBuilder.and(andExpressions));
+    }
+  };
+
   addFilters('name', name, true);
   addFilters('FileKind', kind);
   addFilters('Status', status);
   addFilters('extension', extension);
   addFilters('mime_type', mimeType);
   addFilters('user.id', user);
+  addExcludeFilters('FileKind', kindToExclude);
 
   if (meta) {
     const addMetaFilters = pipe(

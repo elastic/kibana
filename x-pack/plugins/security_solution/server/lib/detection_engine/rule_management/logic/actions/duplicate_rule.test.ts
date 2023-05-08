@@ -76,6 +76,7 @@ describe('duplicateRule', () => {
     mutedInstanceIds: [],
     updatedAt: new Date(2021, 0),
     createdAt: new Date(2021, 0),
+    revision: 0,
     scheduledTaskId: undefined,
     executionStatus: {
       lastExecutionDate: new Date(2021, 0),
@@ -108,8 +109,6 @@ describe('duplicateRule', () => {
       consumer: rule.consumer,
       schedule: rule.schedule,
       actions: rule.actions,
-      throttle: null, // TODO: fix?
-      notifyWhen: null, // TODO: fix?
       enabled: false, // covered in a separate test
     });
   });

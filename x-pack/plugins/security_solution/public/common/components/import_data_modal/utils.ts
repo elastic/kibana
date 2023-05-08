@@ -33,8 +33,14 @@ export const formatError = (
 const mapErrorMessageToUserMessage = (
   actionConnectorsErrors: Array<ImportRulesResponseError | ImportResponseError>
 ) => {
-  return actionConnectorsErrors.map((connectorError) => {
-    const { error } = connectorError;
+  let concatenatedActionIds: string = '';
+  const mappedErrors = actionConnectorsErrors.map((connectorError) => {
+    // Using "as ImportResponseError" because the "id" field belongs only to
+    // "ImportResponseError" and if the connectorError has the id we use it to get the
+    // number of failing connectors by spliting the unique the connectors ids.
+    const { id, error } = connectorError as ImportResponseError;
+    concatenatedActionIds =
+      concatenatedActionIds && concatenatedActionIds !== id ? `${concatenatedActionIds},${id}` : id;
     const { status_code: statusCode, message: originalMessage } = error || {};
     let message;
     switch (statusCode) {
@@ -47,9 +53,12 @@ const mapErrorMessageToUserMessage = (
 
         break;
     }
-
     return { ...connectorError, error: { ...error, message } };
   });
+  const actionIds: Set<string> = new Set(
+    concatenatedActionIds && [...concatenatedActionIds.split(',')]
+  );
+  return { mappedErrors, numberOfActions: actionIds.size };
 };
 
 export const showToasterMessage = ({
@@ -100,13 +109,13 @@ export const showToasterMessage = ({
       importResponse.action_connectors_errors != null &&
       importResponse.action_connectors_errors.length > 0
     ) {
-      const userErrorMessages = mapErrorMessageToUserMessage(
+      const { mappedErrors: userErrorMessages, numberOfActions } = mapErrorMessageToUserMessage(
         importResponse.action_connectors_errors
       );
       const connectorError = formatError(errorMessageDetailed, importResponse, userErrorMessages);
 
       return addError(connectorError, {
-        title: i18n.IMPORT_CONNECTORS_FAILED(userErrorMessages.length),
+        title: i18n.IMPORT_CONNECTORS_FAILED(numberOfActions || userErrorMessages.length),
       });
     }
     const ruleError = formatError(errorMessageDetailed, importResponse, importResponse.errors);

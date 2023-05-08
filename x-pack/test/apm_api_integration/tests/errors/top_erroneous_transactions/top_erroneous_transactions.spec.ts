@@ -26,6 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const groupId = '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03';
 
   async function callApi(
     overrides?: RecursivePartial<
@@ -82,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const response = await callApi({
-            path: { groupId: '0000000000000000000000Error test' },
+            path: { groupId },
           });
           erroneousTransactions = response.body;
         });
@@ -132,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           before(async () => {
             const fiveMinutes = 5 * 60 * 1000;
             const response = await callApi({
-              path: { groupId: '0000000000000000000000Error test' },
+              path: { groupId },
               query: {
                 start: new Date(end - fiveMinutes).toISOString(),
                 end: new Date(end).toISOString(),
@@ -182,7 +183,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('when there are no data for the time period', () => {
           it('returns an empty array', async () => {
             const response = await callApi({
-              path: { groupId: '0000000000000000000000Error test' },
+              path: { groupId },
               query: {
                 start: '2021-01-03T00:00:00.000Z',
                 end: '2021-01-03T00:15:00.000Z',

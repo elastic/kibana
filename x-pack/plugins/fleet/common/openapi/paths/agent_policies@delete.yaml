@@ -1,5 +1,7 @@
 post:
-  summary: Agent policy - Delete
+  summary: Delete agent policy by ID
+  tags:
+    - Agent policies
   operationId: delete-agent-policy
   responses:
     '200':

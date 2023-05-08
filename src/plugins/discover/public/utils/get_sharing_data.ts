@@ -16,7 +16,7 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
-  AppState,
+  DiscoverAppState,
   isEqualFilters,
 } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
@@ -31,8 +31,9 @@ import {
  */
 export async function getSharingData(
   currentSearchSource: ISearchSource,
-  state: AppState | SavedSearch,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
+  state: DiscoverAppState | SavedSearch,
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  isPlainRecord?: boolean
 ) {
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -57,7 +58,7 @@ export async function getSharingData(
     // conditionally add the time field column:
     let timeFieldName: string | undefined;
     const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
-    if (!hideTimeColumn && index && index.timeFieldName) {
+    if (!hideTimeColumn && index && index.timeFieldName && !isPlainRecord) {
       timeFieldName = index.timeFieldName;
     }
     if (timeFieldName && !columns.includes(timeFieldName)) {

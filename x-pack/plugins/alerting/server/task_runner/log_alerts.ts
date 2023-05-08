@@ -91,44 +91,59 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
     for (const id of recoveredAlertIds) {
-      const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
+      const alert = recoveredAlerts[id];
+      const { group: actionGroup } = alert.getLastScheduledActions() ?? {};
+      const uuid = alert.getUuid();
       const state = recoveredAlerts[id].getState();
+      const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
+        uuid,
         group: actionGroup,
         message,
         state,
         flapping: recoveredAlerts[id].getFlapping(),
+        ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
 
     for (const id of newAlertIds) {
-      const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const alert = activeAlerts[id];
+      const { actionGroup } = alert.getScheduledActionOptions() ?? {};
+      const state = alert.getState();
+      const uuid = alert.getUuid();
+      const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} created new alert: '${id}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.newInstance,
         id,
+        uuid,
         group: actionGroup,
         message,
         state,
         flapping: activeAlerts[id].getFlapping(),
+        ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
 
     for (const id of activeAlertIds) {
-      const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const alert = activeAlerts[id];
+      const { actionGroup } = alert.getScheduledActionOptions() ?? {};
+      const state = alert.getState();
+      const uuid = alert.getUuid();
+      const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,
+        uuid,
         group: actionGroup,
         message,
         state,
         flapping: activeAlerts[id].getFlapping(),
+        ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
   }

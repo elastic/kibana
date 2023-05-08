@@ -71,7 +71,12 @@ export function ServiceGroupsTour({
       title={title}
       anchorPosition={anchorPosition}
       footerAction={
-        <EuiButtonEmpty color="text" size="xs" onClick={dismissTour}>
+        <EuiButtonEmpty
+          data-test-subj="apmServiceGroupsTourDismissButton"
+          color="text"
+          size="xs"
+          onClick={dismissTour}
+        >
           {i18n.translate('xpack.apm.serviceGroups.tour.dismiss', {
             defaultMessage: 'Dismiss',
           })}

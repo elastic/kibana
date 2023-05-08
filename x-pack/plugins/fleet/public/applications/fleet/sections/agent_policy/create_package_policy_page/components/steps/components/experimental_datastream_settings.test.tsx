@@ -14,19 +14,6 @@ import type { RegistryDataStream } from '../../../../../../../../../common/types
 
 import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 
-jest.mock('../../../../../../../../hooks', () => {
-  return {
-    ...jest.requireActual('../../../../../../../../hooks'),
-    FleetStatusProvider: (props: any) => {
-      return props.children;
-    },
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
-    sendGetStatus: jest
-      .fn()
-      .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
-  };
-});
-
 describe('ExperimentDatastreamSettings', () => {
   describe('Synthetic source', () => {
     it('should be enabled an not checked by default', () => {
@@ -198,7 +185,7 @@ describe('ExperimentDatastreamSettings', () => {
       expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
     });
 
-    it('should be enabled and checked if registry data streams includes "elasticsearch.index_mode: time_series"', () => {
+    it('should be disabled and checked with a tooltip if registry data streams includes "elasticsearch.index_mode: time_series"', () => {
       const mockSetNewExperimentalDataFeatures = jest.fn();
       const res = createFleetTestRendererMock().render(
         <ExperimentDatastreamSettings
@@ -216,9 +203,11 @@ describe('ExperimentDatastreamSettings', () => {
         />
       );
 
-      const tsdbSwitch = res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switch');
+      const tsdbSwitch = res.getByTestId(
+        'packagePolicyEditor.tsdbExperimentalFeature.switchTooltip'
+      );
 
-      expect(tsdbSwitch).toBeEnabled();
+      expect(tsdbSwitch).toBeDisabled();
       expect(tsdbSwitch).toBeChecked();
       expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
     });

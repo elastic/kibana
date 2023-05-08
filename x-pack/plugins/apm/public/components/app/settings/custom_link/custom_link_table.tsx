@@ -99,6 +99,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
     <>
       <EuiSpacer size="m" />
       <EuiFieldSearch
+        data-test-subj="apmCustomLinkTableFieldSearch"
         fullWidth
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={i18n.translate(

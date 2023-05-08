@@ -37,6 +37,9 @@ interface OptionalFilterParams {
   unExpiredOnly?: boolean;
   /** list of action Ids that should have outputs */
   withOutputs?: string[];
+  /** Include automated response actions */
+  withAutomatedActions?: boolean;
+  alertId?: string[];
 }
 
 /**
@@ -57,6 +60,7 @@ export const getActionListByStatus = async ({
   statuses,
   userIds,
   unExpiredOnly = false,
+  withAutomatedActions,
   withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
@@ -79,6 +83,7 @@ export const getActionListByStatus = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    withAutomatedActions,
     withOutputs,
   });
 
@@ -118,6 +123,8 @@ export const getActionList = async ({
   userIds,
   unExpiredOnly = false,
   withOutputs,
+  withAutomatedActions,
+  alertId,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -141,6 +148,8 @@ export const getActionList = async ({
     userIds,
     unExpiredOnly,
     withOutputs,
+    withAutomatedActions,
+    alertId,
   });
 
   return {
@@ -176,6 +185,8 @@ const getActionDetailsList = async ({
   userIds,
   unExpiredOnly,
   withOutputs,
+  withAutomatedActions,
+  alertId,
 }: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -197,6 +208,8 @@ const getActionDetailsList = async ({
       size,
       userIds,
       unExpiredOnly,
+      withAutomatedActions,
+      alertId,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
@@ -288,7 +301,7 @@ const getActionDetailsList = async ({
       isCompleted,
       completedAt,
       wasSuccessful,
-      errors,
+      errors: action.error?.message ? [action.error.message] : errors,
       agentState,
       isExpired,
       status,
@@ -297,6 +310,9 @@ const getActionDetailsList = async ({
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,
+      alertIds: action.alertIds,
+      ruleId: action.ruleId,
+      ruleName: action.ruleName,
     };
 
     return actionRecord;

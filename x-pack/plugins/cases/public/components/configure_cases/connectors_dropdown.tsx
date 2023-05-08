@@ -96,7 +96,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                     <StyledEuiIconTip
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
-                      type="alert"
+                      type="warning"
                       color="warning"
                       content={i18n.DEPRECATED_TOOLTIP_CONTENT}
                     />

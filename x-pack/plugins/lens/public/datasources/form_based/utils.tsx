@@ -25,8 +25,15 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
+import { isQueryValid } from '@kbn/visualization-ui-components/public';
 import type { DateRange } from '../../../common/types';
-import type { FramePublicAPI, IndexPattern, StateSetter, UserMessage } from '../../types';
+import type {
+  FramePublicAPI,
+  IndexPattern,
+  StateSetter,
+  UserMessage,
+  VisualizationInfo,
+} from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -41,6 +48,8 @@ import {
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MinIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -50,7 +59,43 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import { isQueryValid } from '../../shared_components';
+import { ReducedSamplingSectionEntries } from './info_badges';
+
+function isMinOrMaxColumn(
+  column?: GenericIndexPatternColumn
+): column is MaxIndexPatternColumn | MinIndexPatternColumn {
+  if (!column) {
+    return false;
+  }
+  return (
+    isColumnOfType<MaxIndexPatternColumn>('max', column) ||
+    isColumnOfType<MinIndexPatternColumn>('min', column)
+  );
+}
+
+function isReferenceColumn(
+  column: GenericIndexPatternColumn
+): column is ReferenceBasedIndexPatternColumn {
+  return 'references' in column;
+}
+
+export function isSamplingValueEnabled(layer: FormBasedLayer) {
+  // Do not use columnOrder here as it needs to check also inside formulas columns
+  return !Object.values(layer.columns).some(
+    (column) =>
+      isMinOrMaxColumn(column) ||
+      (isReferenceColumn(column) && isMinOrMaxColumn(layer.columns[column.references[0]]))
+  );
+}
+
+/**
+ * Centralized logic to get the actual random sampling value for a layer
+ * @param layer
+ * @returns
+ */
+export function getSamplingValue(layer: FormBasedLayer) {
+  return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
+}
 
 export function isColumnInvalid(
   layer: FormBasedLayer,
@@ -447,6 +492,40 @@ export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
     },
     {}
   );
+}
+
+export function getNotifiableFeatures(
+  state: FormBasedPrivateState,
+  frame: FramePublicAPI,
+  visualizationInfo?: VisualizationInfo
+): UserMessage[] {
+  if (!visualizationInfo) {
+    return [];
+  }
+  const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
+    ([, layer]) => getSamplingValue(layer) !== 1
+  );
+  if (!layersWithCustomSamplingValues.length) {
+    return [];
+  }
+  return [
+    {
+      uniqueId: 'random_sampling_info',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
+        defaultMessage: 'Sampling probability by layer',
+      }),
+      longMessage: (
+        <ReducedSamplingSectionEntries
+          layers={layersWithCustomSamplingValues}
+          dataViews={frame.dataViews}
+          visualizationInfo={visualizationInfo}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    },
+  ];
 }
 
 /**

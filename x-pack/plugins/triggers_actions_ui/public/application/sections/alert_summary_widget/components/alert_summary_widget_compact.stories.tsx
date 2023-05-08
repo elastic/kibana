@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import { AlertSummaryWidgetCompact as Component } from './alert_summary_widget_compact';
-import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
+import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 
 export default {
   component: Component,
@@ -17,7 +17,7 @@ export default {
 export const Compact = {
   args: {
     ...mockedAlertSummaryResponse,
-    chartThemes: mockedChartThemes,
+    chartProps: mockedChartProps,
     timeRangeTitle: 'Last 30 days',
     onClick: action('clicked'),
   },

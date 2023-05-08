@@ -8,4 +8,4 @@
 
 export const PLUGIN_ID = 'contentManagement';
 
-export const API_ENDPOINT = '/api/content_management';
+export const API_ENDPOINT = '/api/content_management/rpc';

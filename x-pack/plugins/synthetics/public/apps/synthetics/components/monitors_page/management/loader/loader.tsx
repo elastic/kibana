@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { PageLoader } from '../../../common/components/page_loader';
 
 interface Props {
   loading: boolean;
@@ -32,7 +33,7 @@ export const Loader = ({
         <>
           <EuiSpacer size="xxl" />
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             color="danger"
             title={<h2>{errorTitle}</h2>}
             body={<p>{errorBody}</p>}
@@ -40,12 +41,7 @@ export const Loader = ({
         </>
       ) : null}
       {loading ? (
-        <EuiEmptyPrompt
-          color="subdued"
-          icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-          title={<h2>{loadingTitle}</h2>}
-          data-test-subj="uptimeLoader"
-        />
+        <PageLoader icon={<EuiLoadingSpinner size="xxl" />} title={<h3>{loadingTitle}</h3>} />
       ) : null}
     </>
   );

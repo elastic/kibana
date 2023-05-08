@@ -27,6 +27,8 @@ export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
 export const SETTINGS_ROUTE = '/settings';
 
+export const PRIVATE_LOCATIOSN_ROUTE = '/settings/private-locations';
+
 export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
 
 export const CERTIFICATES_ROUTE = '/certificates';
@@ -103,3 +105,7 @@ export const FILTER_FIELDS = {
 };
 
 export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
+
+export const LICENSE_NOT_ACTIVE_ERROR = 'License not active';
+export const LICENSE_MISSING_ERROR = 'Missing license information';
+export const LICENSE_NOT_SUPPORTED_ERROR = 'License not supported';

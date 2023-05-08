@@ -38,9 +38,18 @@ export const LocationStatusBadges = ({
   const locationsToDisplay = locations.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 450, overflow: 'hidden' }}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      css={{ maxWidth: 450, overflow: 'hidden' }}
+      wrap
+      responsive={false}
+    >
       {locationsToDisplay.map((loc) => (
-        <EuiFlexItem key={loc.id} grow={false} css={{ overflow: 'hidden' }}>
+        <EuiFlexItem
+          key={loc.id}
+          grow={false}
+          css={{ overflow: 'hidden', flexBasis: 'fit-content' }}
+        >
           <MonitorDetailLinkForLocation
             configId={configId}
             locationId={loc.id}
@@ -109,7 +118,7 @@ const MonitorDetailLinkForLocation = ({
 
   return (
     <EuiBadge
-      iconType={() => <EuiIcon size="s" type="dot" color={color} />}
+      iconType={() => <EuiIcon size="m" type="dot" color={color} />}
       color="hollow"
       iconOnClickAriaLabel={CLICK_LOCATION_LABEL}
       iconOnClick={() => {

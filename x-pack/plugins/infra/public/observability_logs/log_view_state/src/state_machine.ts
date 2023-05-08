@@ -13,15 +13,20 @@ import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './n
 import {
   LogViewContext,
   LogViewContextWithError,
-  LogViewContextWithId,
   LogViewContextWithLogView,
+  LogViewContextWithReference,
   LogViewContextWithResolvedLogView,
   LogViewContextWithStatus,
   LogViewEvent,
   LogViewTypestate,
 } from './types';
+import {
+  InitializeFromUrl,
+  UpdateContextInUrl,
+  ListenForUrlChanges,
+} from './url_state_storage_service';
 
-export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
+export const createPureLogViewStateMachine = (initialContext: LogViewContextWithReference) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxMgPIDiA+hgJICiA6mZQCJkDCAEgIIByJ1jA2gAYAuolAAHVLCwAXLKgB2YkAA9EAFkEBmAHQAmAGwB2dQYAcAVkGmAjGYMAaEAE9EAWi3qjO9WcGCLIzMbLWMLAE4AX0inNEwcAgBVAAVGDgAVaiFRJBBJaTlFZTUEG20DfUEDLUtwg3CbdXUtJ1cEDz11HSMLTzMagwtjAOjY9Gw8HQBXBSxZuQBDABssAC9IfGzlfNl5JVySz3CdGwMwrRsbCK0a1sQyiqNDCMEjcK09QT8LUZA4idwOiWqAWEDmUEIRA4jEoPDIAGVEiwWNQ+HwtrkdoV9qASkZPDoLnpwmZniTgmY7ghSTorP5fFo6lorHobL9-gkgSCwQoIcRobDyAAxDiUZDokTbKS7IoHRBWMzdT4vCxDPQ3PRUvTqnThcL+OoWVmdU7qdnjTkAJzgqCWADdwfgAErUeFEZCJdKUIhcMgisUSnISaXY4qIcm0y6XJ5mdR6Iw2IxanV6g2DY3qRPm+KTa2wW0O3nO13uz3e32I5GoxiBqUFPZh0ra7z9S6CBo9G4tFyIGl06z9JlWOzZgE6ADGAAswOOANbg+EyBYyKawfDsagsADSgoR6QyiXhftF4oEksxIYbctKFhCOksxjsF3CQSTPYQ2t0qfb6ZsJqMo6clOM7zryi7Lqu65sJuO5wvC+7pIeCJIiiaJnkGeSXrKuL3K+3RnJ8eqGPGgRUm8PjEvq5jBKE6oATEfwWrmNr2hsLr8swxDkFQdAYsG9bYao9x6BYXSkjcBrqp8RiOO+Hg6NUAzhEM6gkvUNRmgxHKTMCoLgkKCxYEsbHUOkToAJp8ZhAk4kJCCMl0MlPKqoS+O2b5tJ0jynGc+KCHowR1HogHMfmSxTNiBlGSZZmWee-EyrZJT6jYCkfARVxaDJsZaqY3Q+cYWj+YFBghYCwFzguS4rrAUXGRAxaxVZWJXjhpSZt4ng2O84Qie2njdp5eUJmchXFd1BjBVpTGAlM4gQMujopGkXpwv6p7NVhSXCV43SqfU2qqYYWVUm42rHAOcb1L12gsmV0zzYtRbLRku6VqhNboXWiWNi+3j6spfSDB84TqKdZjHAY-kRE05hfMSbLTTms2PXIvJ1SZHFkFxFA0LQm02Y2xiKsyJJNPqNxQ5Scl-hYOgBEVt6fsYqn0QxCioBAcDKNpuDfaG14hIq9T2FcjSWEEgync0XQkv4k1ZQYjQRD8SNjjMcy7MsayQPzrV2XYFQi0rt6+IE9gWFSZR09qZzNN1fRDFEaucrpPJQHrgklF4ej0yJInKRDpIeYg5hKoMZhvGUbxFfRYzIzoeYFuCnvbQgcs+Gb+oib4x1UsE4e9PYZzWLe90VaBUDgTVqeNmLF1GlU9S+FDRpkcLKkhO8Vwkqr8djknrEQLX16spcCl0poRoGE0NztxP1QvmLARPM7-eu9y+mGfVI9tV4RuXOqgSJsSIlUrRJyr8fdT+FUfeMQng8RXsGPDxehPXkvlTVAmQy9Le59JqX2JPiF8gxMyR3LtOSqYFqqrlfrvA2jcfAWH6IYGePtwjnwiCcYqHxbCqk0Jpdekw5oLTRh7d+P1P5nAUp8Dq6hRJeFVKdTovtSR2CaD+TMTQzD3TIU9KACCqECzauLOmYtiZZRqAOVhxJ7ysljCEGSTQ4xs0iEAA */
   createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
     {
@@ -33,11 +38,22 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
       states: {
         uninitialized: {
           always: {
-            target: 'loading',
+            target: 'initializingFromUrl',
+          },
+        },
+        initializingFromUrl: {
+          on: {
+            INITIALIZED_FROM_URL: {
+              target: 'loading',
+              actions: ['storeLogViewReference'],
+            },
+          },
+          invoke: {
+            src: 'initializeFromUrl',
           },
         },
         loading: {
-          entry: 'notifyLoadingStarted',
+          entry: ['notifyLoadingStarted', 'updateContextInUrl'],
           invoke: {
             src: 'loadLogView',
           },
@@ -76,17 +92,68 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
               target: 'checkingStatusFailed',
               actions: 'storeError',
             },
-            CHECKING_STATUS_SUCCEEDED: {
-              target: 'resolved',
-              actions: 'storeStatus',
+            CHECKING_STATUS_SUCCEEDED: [
+              {
+                target: 'resolvedPersistedLogView',
+                actions: 'storeStatus',
+                cond: 'isPersistedLogView',
+              },
+              {
+                target: 'resolvedInlineLogView',
+                actions: 'storeStatus',
+              },
+            ],
+          },
+        },
+        resolvedPersistedLogView: {
+          invoke: {
+            src: 'listenForUrlChanges',
+          },
+          entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
+          on: {
+            PERSIST_INLINE_LOG_VIEW: undefined,
+            RELOAD_LOG_VIEW: {
+              target: 'loading',
+            },
+            LOG_VIEW_URL_KEY_REMOVED: {
+              actions: 'updateContextInUrl',
             },
           },
         },
-        resolved: {
-          entry: 'notifyLoadingSucceeded',
+        resolvedInlineLogView: {
+          invoke: {
+            src: 'listenForUrlChanges',
+          },
+          entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
           on: {
-            RELOAD_LOG_VIEW: {
-              target: 'loading',
+            PERSIST_INLINE_LOG_VIEW: {
+              target: 'persistingInlineLogView',
+            },
+            LOG_VIEW_URL_KEY_REMOVED: {
+              actions: 'updateContextInUrl',
+            },
+          },
+        },
+        persistingInlineLogView: {
+          invoke: {
+            src: 'persistInlineLogView',
+          },
+          on: {
+            PERSISTING_INLINE_LOG_VIEW_FAILED: {
+              target: 'persistingInlineLogViewFailed',
+              actions: 'storeError',
+            },
+            PERSISTING_INLINE_LOG_VIEW_SUCCEEDED: {
+              target: 'resolving',
+              actions: ['convertInlineLogViewReferenceToPersistedLogViewReference', 'storeLogView'],
+            },
+          },
+        },
+        persistingInlineLogViewFailed: {
+          entry: 'notifyPersistingInlineLogViewFailed',
+          on: {
+            RETRY_PERSISTING_INLINE_LOG_VIEW: {
+              target: 'persistingInlineLogView',
             },
           },
         },
@@ -126,7 +193,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             },
             UPDATING_SUCCEEDED: {
               target: 'resolving',
-              actions: 'storeLogView',
+              actions: ['updateLogViewReference', 'storeLogView'],
             },
           },
         },
@@ -140,10 +207,9 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         },
       },
       on: {
-        LOG_VIEW_ID_CHANGED: {
+        LOG_VIEW_REFERENCE_CHANGED: {
           target: '.loading',
-          actions: 'storeLogViewId',
-          cond: 'isLogViewIdDifferent',
+          actions: 'storeLogViewReference',
         },
         UPDATE: {
           target: '.updating',
@@ -155,11 +221,12 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         notifyLoadingStarted: actions.pure(() => undefined),
         notifyLoadingSucceeded: actions.pure(() => undefined),
         notifyLoadingFailed: actions.pure(() => undefined),
-        storeLogViewId: assign((context, event) =>
-          'logViewId' in event
+        updateContextInUrl: actions.pure(() => undefined),
+        storeLogViewReference: assign((context, event) =>
+          'logViewReference' in event && event.logViewReference !== null
             ? ({
-                logViewId: event.logViewId,
-              } as LogViewContextWithId)
+                logViewReference: event.logViewReference,
+              } as LogViewContextWithReference)
             : {}
         ),
         storeLogView: assign((context, event) =>
@@ -190,28 +257,62 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
               } as LogViewContextWithError)
             : {}
         ),
+        convertInlineLogViewReferenceToPersistedLogViewReference: assign((context, event) =>
+          'logView' in event && context.logViewReference.type === 'log-view-inline'
+            ? ({
+                logViewReference: {
+                  type: 'log-view-reference',
+                  logViewId: context.logViewReference.id,
+                },
+              } as LogViewContextWithReference)
+            : {}
+        ),
+        updateLogViewReference: assign((context, event) =>
+          'attributes' in event && context.logViewReference.type === 'log-view-inline'
+            ? ({
+                logViewReference: {
+                  ...context.logViewReference,
+                  attributes: {
+                    ...context.logViewReference.attributes,
+                    ...event.attributes,
+                  },
+                },
+              } as LogViewContextWithReference)
+            : {}
+        ),
+      },
+      services: {
+        initializeFromUrl: (_context, _event) => (send) =>
+          send({ type: 'INITIALIZED_FROM_URL', logViewReference: null }),
+        listenForUrlChanges: (_context, _event) => (send) => {},
       },
       guards: {
-        isLogViewIdDifferent: (context, event) =>
-          'logViewId' in event ? event.logViewId !== context.logViewId : false,
+        isPersistedLogView: (context, event) =>
+          context.logViewReference.type === 'log-view-reference',
       },
     }
   );
 
 export interface LogViewStateMachineDependencies {
-  initialContext: LogViewContextWithId;
+  initialContext: LogViewContextWithReference;
   logViews: ILogViewsClient;
   notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
+  initializeFromUrl?: InitializeFromUrl;
+  updateContextInUrl?: UpdateContextInUrl;
+  listenForUrlChanges?: ListenForUrlChanges;
 }
 
 export const createLogViewStateMachine = ({
   initialContext,
   logViews,
   notificationChannel,
+  initializeFromUrl,
+  updateContextInUrl,
+  listenForUrlChanges,
 }: LogViewStateMachineDependencies) =>
   createPureLogViewStateMachine(initialContext).withConfig({
-    actions:
-      notificationChannel != null
+    actions: {
+      ...(notificationChannel != null
         ? {
             notifyLoadingStarted: notificationChannel.notify(
               logViewNotificationEventSelectors.loadingLogViewStarted
@@ -223,13 +324,17 @@ export const createLogViewStateMachine = ({
               logViewNotificationEventSelectors.loadingLogViewFailed
             ),
           }
-        : {},
+        : {}),
+      ...(updateContextInUrl ? { updateContextInUrl } : {}),
+    },
     services: {
+      ...(initializeFromUrl ? { initializeFromUrl } : {}),
+      ...(listenForUrlChanges ? { listenForUrlChanges } : {}),
       loadLogView: (context) =>
         from(
-          'logViewId' in context
-            ? logViews.getLogView(context.logViewId)
-            : throwError(() => new Error('Failed to load log view: No id found in context.'))
+          'logViewReference' in context
+            ? logViews.getLogView(context.logViewReference)
+            : throwError(() => new Error('Failed to load log view'))
         ).pipe(
           map(
             (logView): LogViewEvent => ({
@@ -246,8 +351,8 @@ export const createLogViewStateMachine = ({
         ),
       updateLogView: (context, event) =>
         from(
-          'logViewId' in context && event.type === 'UPDATE'
-            ? logViews.putLogView(context.logViewId, event.attributes)
+          'logViewReference' in context && event.type === 'UPDATE'
+            ? logViews.putLogView(context.logViewReference, event.attributes)
             : throwError(
                 () =>
                   new Error(
@@ -264,6 +369,30 @@ export const createLogViewStateMachine = ({
           catchError((error) =>
             of<LogViewEvent>({
               type: 'UPDATING_FAILED',
+              error,
+            })
+          )
+        ),
+      persistInlineLogView: (context, event) =>
+        from(
+          'logViewReference' in context &&
+            event.type === 'PERSIST_INLINE_LOG_VIEW' &&
+            context.logViewReference.type === 'log-view-inline'
+            ? logViews.putLogView(
+                { type: 'log-view-reference', logViewId: context.logViewReference.id },
+                context.logViewReference.attributes
+              )
+            : throwError(() => new Error('Failed to persist inline Log View.'))
+        ).pipe(
+          map(
+            (logView): LogViewEvent => ({
+              type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED',
+              logView,
+            })
+          ),
+          catchError((error) =>
+            of<LogViewEvent>({
+              type: 'PERSISTING_INLINE_LOG_VIEW_FAILED',
               error,
             })
           )

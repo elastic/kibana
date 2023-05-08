@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { CustomAnnotationTooltip, SettingsProps } from '@elastic/charts';
+import type { CustomAnnotationTooltip } from '@elastic/charts';
+import type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
 } from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
-import { XYProps } from './expression_functions';
+import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
@@ -20,7 +21,7 @@ export interface XYChartProps {
   syncCursor: boolean;
   syncColors: boolean;
   canNavigateToLens?: boolean;
-  overrides: Partial<Record<'settings', SettingsProps>> | undefined;
+  overrides: AllowedXYOverrides & AllowedSettingsOverrides;
 }
 
 export interface XYRender {

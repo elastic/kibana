@@ -13,14 +13,17 @@ export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
 
 export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 
-export const ACTIONS_THROTTLE_INPUT =
-  '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
-
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
+
+export const ALERT_SUPPRESSION_FIELDS =
+  '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxInput"]';
+
+export const ALERT_SUPPRESSION_DURATION_OPTIONS =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
@@ -88,6 +91,8 @@ export const PREVIEW_HISTOGRAM = '[data-test-subj="preview-histogram-panel"]';
 export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
+
+export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';

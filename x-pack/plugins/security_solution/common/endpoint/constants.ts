@@ -40,7 +40,9 @@ export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
 // united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
+export const POLICY_RESPONSE_INDEX = 'metrics-endpoint.policy-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
+
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
@@ -71,6 +73,7 @@ export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
 /** Base Actions route. Used to get a list of all actions and is root to other action related routes */
 export const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
+export const BASE_ENDPOINT_ACTION_ALERTS_ROUTE = `${BASE_ENDPOINT_ROUTE}/alerts`;
 
 export const ISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/isolate`;
 export const UNISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/unisolate`;
@@ -86,6 +89,7 @@ export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
 export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
+export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 
 export const failedFleetActionErrorCode = '424';
 

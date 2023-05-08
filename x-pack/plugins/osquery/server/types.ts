@@ -23,6 +23,7 @@ import type {
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { CasesSetup } from '@kbn/cases-plugin/server';
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
 export interface OsqueryPluginSetup {
@@ -38,6 +39,7 @@ export interface OsqueryPluginStart {}
 export interface SetupPlugins {
   usageCollection?: UsageCollectionSetup;
   actions: ActionsPlugin['setup'];
+  cases: CasesSetup;
   data: DataPluginSetup;
   features: PluginSetupContract;
   security: SecurityPluginStart;

@@ -1,6 +1,7 @@
 get:
-  summary: Packages - Get file from registry
-  tags: []
+  summary: Get package file
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

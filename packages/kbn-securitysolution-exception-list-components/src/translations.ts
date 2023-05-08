@@ -67,10 +67,16 @@ export const EXCEPTION_LIST_HEADER_DELETE_ACTION = i18n.translate(
     defaultMessage: 'Delete exception list',
   }
 );
-export const EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON = i18n.translate(
-  'exceptionList-components.exception_list_header_manage_rules_button',
+export const EXCEPTION_LIST_HEADER_DUPLICATE_ACTION = i18n.translate(
+  'exceptionList-components.exception_list_header_duplicate_action',
   {
-    defaultMessage: 'Manage rules',
+    defaultMessage: 'Duplicate exception list',
+  }
+);
+export const EXCEPTION_LIST_HEADER_LINK_RULES_BUTTON = i18n.translate(
+  'exceptionList-components.exception_list_header_link_rules_button',
+  {
+    defaultMessage: 'Link rules',
   }
 );
 
@@ -83,7 +89,7 @@ export const EXCEPTION_LIST_HEADER_LINKED_RULES = (noOfRules: number) =>
 export const EXCEPTION_LIST_HEADER_BREADCRUMB = i18n.translate(
   'exceptionList-components.exception_list_header_breadcrumb',
   {
-    defaultMessage: 'Rule exceptions',
+    defaultMessage: 'Shared Exception Lists',
   }
 );
 

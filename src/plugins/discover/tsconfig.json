@@ -49,10 +49,10 @@
     "@kbn/react-field",
     "@kbn/monaco",
     "@kbn/core-notifications-browser",
-    "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
+    "@kbn/dom-drag-drop",
   ],
   "exclude": [
     "target/**/*",

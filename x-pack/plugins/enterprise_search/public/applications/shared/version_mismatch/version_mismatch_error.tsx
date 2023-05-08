@@ -21,7 +21,7 @@ export const VersionMismatchError: React.FC<Props> = ({
 }) => {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       iconColor="danger"
       title={
         <h2>

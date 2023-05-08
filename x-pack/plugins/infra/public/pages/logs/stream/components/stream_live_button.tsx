@@ -15,14 +15,26 @@ export const StreamLiveButton: React.FC<{
   onStopStreaming: () => void;
 }> = ({ isStreaming, onStartStreaming, onStopStreaming }) =>
   isStreaming ? (
-    <EuiButtonEmpty color="warning" iconSide="left" iconType="pause" onClick={onStopStreaming}>
+    <EuiButtonEmpty
+      data-test-subj="infraStreamLiveButtonStopStreamingButton"
+      color="warning"
+      iconSide="left"
+      iconType="pause"
+      onClick={onStopStreaming}
+    >
       <FormattedMessage
         id="xpack.infra.logs.stopStreamingButtonLabel"
         defaultMessage="Stop streaming"
       />
     </EuiButtonEmpty>
   ) : (
-    <EuiButtonEmpty color="primary" iconSide="left" iconType="play" onClick={onStartStreaming}>
+    <EuiButtonEmpty
+      data-test-subj="infraStreamLiveButtonStreamLiveButton"
+      color="primary"
+      iconSide="left"
+      iconType="play"
+      onClick={onStartStreaming}
+    >
       <FormattedMessage
         id="xpack.infra.logs.startStreamingButtonLabel"
         defaultMessage="Stream live"

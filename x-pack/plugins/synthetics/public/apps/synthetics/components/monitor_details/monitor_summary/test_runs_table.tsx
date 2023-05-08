@@ -9,9 +9,20 @@ import React, { MouseEvent, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiBasicTableColumn, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  useIsWithinMinBreakpoint,
+} from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { THUMBNAIL_SCREENSHOT_SIZE_MOBILE } from '../../common/screenshot/screenshot_size';
+import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 
 import { TestRunsTableHeader } from './test_runs_table_header';
 import { MONITOR_TYPES } from '../../../../../../common/constants';
@@ -29,7 +40,7 @@ import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
-import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -47,6 +58,7 @@ export const TestRunsTable = ({
   showViewHistoryButton = true,
 }: TestRunsTableProps) => {
   const history = useHistory();
+  const { basePath } = useSyntheticsSettingsContext();
   const { monitorId } = useParams<{ monitorId: string }>();
   const [page, setPage] = useState({ index: 0, size: 10 });
 
@@ -71,6 +83,7 @@ export const TestRunsTable = ({
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
@@ -98,9 +111,25 @@ export const TestRunsTable = ({
             align: 'left',
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
-            render: (_timestamp: string, item) => (
-              <JourneyLastScreenshot checkGroupId={item.monitor.check_group} size={[100, 64]} />
+            render: (timestamp: string, item) => (
+              <JourneyLastScreenshot
+                checkGroupId={item.monitor.check_group}
+                size={[100, 64]}
+                timestamp={timestamp}
+              />
             ),
+            mobileOptions: {
+              header: false,
+              render: (item) => (
+                <EuiFlexGroup css={{ width: '100%', height: '100%' }} alignItems="center">
+                  <JourneyLastScreenshot
+                    checkGroupId={item.monitor.check_group}
+                    size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
+                    timestamp={item.timestamp}
+                  />
+                </EuiFlexGroup>
+              ),
+            },
           },
         ]
       : []) as Array<EuiBasicTableColumn<Ping>>),
@@ -113,6 +142,17 @@ export const TestRunsTable = ({
       render: (timestamp: string, ping: Ping) => (
         <TestDetailsLink isBrowserMonitor={isBrowserMonitor} timestamp={timestamp} ping={ping} />
       ),
+      mobileOptions: {
+        header: false,
+        render: (item) => (
+          <MobileRowDetails
+            ping={item}
+            isBrowserMonitor={isBrowserMonitor}
+            basePath={basePath}
+            locationId={selectedLocation?.id}
+          />
+        ),
+      },
     },
     {
       align: 'left',
@@ -121,6 +161,9 @@ export const TestRunsTable = ({
       name: RESULT_LABEL,
       sortable: true,
       render: (status: string) => <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />,
+      mobileOptions: {
+        show: false,
+      },
     },
     {
       align: 'left',
@@ -130,6 +173,9 @@ export const TestRunsTable = ({
       render: (errorMessage: string) => (
         <EuiText size="s">{errorMessage?.length > 0 ? errorMessage : '-'}</EuiText>
       ),
+      mobileOptions: {
+        show: false,
+      },
     },
     {
       align: 'right',
@@ -138,6 +184,9 @@ export const TestRunsTable = ({
       name: DURATION_LABEL,
       sortable: true,
       render: (durationUs: number) => <EuiText size="s">{formatTestDuration(durationUs)}</EuiText>,
+      mobileOptions: {
+        show: false,
+      },
     },
   ];
 
@@ -146,7 +195,6 @@ export const TestRunsTable = ({
       return {};
     }
     return {
-      height: '85px',
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
@@ -176,6 +224,7 @@ export const TestRunsTable = ({
         pings={pings}
       />
       <EuiBasicTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         compressed={false}
         loading={pingsLoading}
         columns={columns}
@@ -206,6 +255,77 @@ export const TestRunsTable = ({
         }
       />
     </EuiPanel>
+  );
+};
+
+export const MobileRowDetails = ({
+  ping,
+  isBrowserMonitor,
+  basePath,
+  locationId,
+}: {
+  ping: Ping;
+  isBrowserMonitor: boolean;
+  basePath: string;
+  locationId?: string;
+}) => {
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <TestDetailsLink isBrowserMonitor={isBrowserMonitor} timestamp={ping.timestamp} ping={ping} />
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        wrap={false}
+        responsive={false}
+      >
+        <EuiFlexItem css={{ flexBasis: 'fit-content' }}>
+          <StatusBadge status={parseBadgeStatus(ping?.monitor?.status ?? 'skipped')} />
+        </EuiFlexItem>
+        <EuiFlexItem css={{ textAlign: 'right' }}>
+          {ping?.state?.id! &&
+          ping.config_id &&
+          locationId &&
+          parseBadgeStatus(ping?.monitor?.status ?? 'skipped') === 'failed' ? (
+            <EuiButtonEmpty
+              data-test-subj="monitorTestRunsListViewErrorDetails"
+              color="danger"
+              href={getErrorDetailsUrl({
+                basePath,
+                configId: ping.config_id,
+                locationId,
+                stateId: ping?.state?.id!,
+              })}
+            >
+              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
+                defaultMessage: 'View error details',
+              })}
+            </EuiButtonEmpty>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {[
+          {
+            title: DURATION_LABEL,
+            description: formatTestDuration(ping?.monitor?.duration?.us),
+          },
+        ].map(({ title, description }) => (
+          <EuiFlexGroup
+            key={title}
+            css={{ maxWidth: 'fit-content' }}
+            direction="row"
+            alignItems="baseline"
+            gutterSize="xs"
+            responsive={false}
+            wrap={true}
+          >
+            <EuiText size="xs">{title}</EuiText>
+            {description}
+          </EuiFlexGroup>
+        ))}
+      </EuiFlexGroup>
+    </EuiFlexGroup>
   );
 };
 

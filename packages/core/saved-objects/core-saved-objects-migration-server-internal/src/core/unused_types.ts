@@ -45,6 +45,10 @@ export const REMOVED_TYPES: string[] = [
   'maps-telemetry',
   // Deprecated, no longer used since 8.7 https://github.com/elastic/kibana/pull/148530
   'csp_rule',
+  // Removed in 8.8 https://github.com/elastic/kibana/pull/151116
+  'upgrade-assistant-telemetry',
+  // Removed in 8.8 https://github.com/elastic/kibana/pull/155204
+  'endpoint:user-artifact',
 ].sort();
 
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {

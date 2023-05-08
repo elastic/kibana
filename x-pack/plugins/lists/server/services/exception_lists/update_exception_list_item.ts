@@ -32,7 +32,7 @@ import {
 } from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
 
-interface UpdateExceptionListItemOptions {
+export interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
   comments: UpdateCommentsArrayOrUndefined;
   _version: _VersionOrUndefined;

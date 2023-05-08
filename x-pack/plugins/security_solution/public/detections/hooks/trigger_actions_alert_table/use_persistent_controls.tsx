@@ -7,37 +7,27 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
-import { defaultGroup } from '../../../common/store/grouping/defaults';
-import { isNoneGroup } from '../../../common/components/grouping';
+import {
+  dataTableSelectors,
+  tableDefaults,
+  dataTableActions,
+} from '@kbn/securitysolution-data-table';
+import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
 import type { State } from '../../../common/store';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import { changeViewMode } from '../../../common/store/data_table/actions';
-import type { ViewSelection, TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { groupSelectors } from '../../../common/store/grouping';
+
+const { changeViewMode } = dataTableActions;
 
 export const getPersistentControlsHook = (tableId: TableId) => {
   const usePersistentControls = () => {
     const dispatch = useDispatch();
-    const getGroupbyIdSelector = groupSelectors.getGroupByIdSelector();
+    const getGroupSelector = groupSelectors.getGroupSelector();
 
-    const { activeGroup: selectedGroup } =
-      useSelector((state: State) => getGroupbyIdSelector(state, tableId)) ?? defaultGroup;
-
-    const { indexPattern: indexPatterns } = useSourcererDataView(SourcererScopeName.detections);
-
-    const groupsSelector = useGetGroupingSelector({
-      fields: indexPatterns.fields,
-      groupingId: tableId,
-      tableId,
-    });
+    const groupSelector = useSelector((state: State) => getGroupSelector(state));
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -94,10 +84,10 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           hasRightOffset={false}
           additionalFilters={additionalFiltersComponent}
           showInspect={false}
-          additionalMenuOptions={isNoneGroup(selectedGroup) ? [groupsSelector] : []}
+          additionalMenuOptions={groupSelector != null ? [groupSelector] : []}
         />
       ),
-      [tableView, handleChangeTableView, additionalFiltersComponent, groupsSelector, selectedGroup]
+      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector]
     );
 
     return {

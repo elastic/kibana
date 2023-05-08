@@ -9,7 +9,7 @@ import {
   SyntheticsNetworkEventsApiResponse,
   SyntheticsNetworkEventsApiResponseType,
 } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 import { FetchNetworkEventsParams } from './actions';
 
@@ -17,7 +17,7 @@ export async function fetchNetworkEvents(
   params: FetchNetworkEventsParams
 ): Promise<SyntheticsNetworkEventsApiResponse> {
   return (await apiService.get(
-    API_URLS.NETWORK_EVENTS,
+    SYNTHETICS_API_URLS.NETWORK_EVENTS,
     {
       checkGroup: params.checkGroup,
       stepIndex: params.stepIndex,

@@ -93,7 +93,7 @@ export const SharedLists = React.memo(() => {
       application: { navigateToApp },
     },
   } = useKibana();
-  const { exportExceptionList, deleteExceptionList } = useApi(http);
+  const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
@@ -183,9 +183,9 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleExportSuccess = useCallback(
-    (listId: string) =>
+    (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_EXPORT_SUCCESS);
+        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -202,11 +202,13 @@ export const SharedLists = React.memo(() => {
     ({
         id,
         listId,
+        name,
         namespaceType,
         includeExpiredExceptions,
       }: {
         id: string;
         listId: string;
+        name: string;
         namespaceType: NamespaceType;
         includeExpiredExceptions: boolean;
       }) =>
@@ -217,7 +219,7 @@ export const SharedLists = React.memo(() => {
           listId,
           namespaceType,
           onError: handleExportError,
-          onSuccess: handleExportSuccess(listId),
+          onSuccess: handleExportSuccess(listId, name),
         });
       },
     [exportExceptionList, handleExportError, handleExportSuccess]
@@ -258,6 +260,45 @@ export const SharedLists = React.memo(() => {
       setFilters(searchTerms);
     },
     []
+  );
+
+  const handleDuplicationError = useCallback(
+    (err: Error) => {
+      addError(err, { title: i18n.EXCEPTION_DUPLICATE_ERROR });
+    },
+    [addError]
+  );
+
+  const handleDuplicateSuccess = useCallback(
+    (name: string) => (): void => {
+      addSuccess(i18n.EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY(name));
+      handleRefresh();
+    },
+    [addSuccess, handleRefresh]
+  );
+
+  const handleDuplicate = useCallback(
+    ({
+        listId,
+        name,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        listId: string;
+        name: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
+      async () => {
+        await duplicateExceptionList({
+          includeExpiredExceptions,
+          listId,
+          namespaceType,
+          onError: handleDuplicationError,
+          onSuccess: handleDuplicateSuccess(name),
+        });
+      },
+    [duplicateExceptionList, handleDuplicateSuccess, handleDuplicationError]
   );
 
   const handleCloseReferenceErrorModal = useCallback((): void => {
@@ -450,6 +491,7 @@ export const SharedLists = React.memo(() => {
               items={[
                 <EuiContextMenuItem
                   key={'createList'}
+                  data-test-subj="manageExceptionListCreateExceptionListButton"
                   onClick={() => {
                     onCloseCreatePopover();
                     onCreateExceptionListOpenClick();
@@ -497,7 +539,6 @@ export const SharedLists = React.memo(() => {
             setDisplayAddExceptionItemFlyout(false);
             if (didRuleChange) handleRefresh();
           }}
-          isNonTimeline={true}
         />
       )}
 
@@ -543,6 +584,7 @@ export const SharedLists = React.memo(() => {
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}
+                    handleDuplicate={handleDuplicate}
                   />
                 ))}
               </div>

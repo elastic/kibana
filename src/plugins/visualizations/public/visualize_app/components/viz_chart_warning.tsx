@@ -98,23 +98,6 @@ const GaugeWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   );
 };
 
-const HeatmapWarningFormatMessage: FC<WarningMessageProps> = (props) => {
-  return (
-    <FormattedMessage
-      id="visualizations.newHeatmapChart.notificationMessage"
-      defaultMessage="The new heatmap charts library does not yet support split chart aggregation. {conditionalMessage}"
-      values={{
-        conditionalMessage: (
-          <>
-            <SwitchToOldLibraryMessage {...props} />
-            <ContactAdminMessage {...props} />
-          </>
-        ),
-      }}
-    />
-  );
-};
-
 const PieWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   return (
     <FormattedMessage
@@ -142,7 +125,6 @@ const ControlsWarningFormatMessage: FC<WarningMessageProps> = (props) => {
 };
 
 const warningMessages = {
-  [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: HeatmapWarningFormatMessage,
   [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: GaugeWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.pie]: PieWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,
@@ -166,7 +148,7 @@ export const VizChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }
           mode={mode}
         />
       }
-      iconType="alert"
+      iconType="warning"
       color="warning"
       size="s"
     />

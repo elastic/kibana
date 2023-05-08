@@ -28,7 +28,7 @@ export const AlertFlyout = ({ metric, nodeType, visible, setVisible }: Props) =>
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
-      triggersActionsUI.getAddAlertFlyout({
+      triggersActionsUI.getAddRuleFlyout({
         consumer: 'infrastructure',
         onClose: onCloseFlyout,
         canChangeTrigger: false,

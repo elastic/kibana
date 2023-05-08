@@ -7,9 +7,16 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
-import { ConnectorDocument } from '../../../common/types/connectors';
+import {
+  ConnectorSyncConfiguration,
+  ConnectorDocument,
+  ConnectorSyncJobDocument,
+  SyncStatus,
+  TriggerMethod,
+} from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 export const startConnectorSync = async (
@@ -23,21 +30,58 @@ export const startConnectorSync = async (
   });
   const connector = connectorResult._source;
   if (connector) {
-    if (nextSyncConfig) {
-      connector.configuration.nextSyncConfig = { label: 'nextSyncConfig', value: nextSyncConfig };
+    const configuration: ConnectorSyncConfiguration = nextSyncConfig
+      ? {
+          ...connector.configuration,
+          nextSyncConfig: { label: 'nextSyncConfig', value: nextSyncConfig },
+        }
+      : connector.configuration;
+    const { filtering, index_name, language, pipeline, service_type } = connector;
+
+    const now = new Date().toISOString();
+
+    if (connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
+      return await client.asCurrentUser.update({
+        doc: {
+          configuration,
+          sync_now: true,
+        },
+        id: connectorId,
+        if_primary_term: connectorResult._primary_term,
+        if_seq_no: connectorResult._seq_no,
+        index: CONNECTORS_INDEX,
+      });
     }
 
-    const result = await client.asCurrentUser.index<ConnectorDocument>({
+    return await client.asCurrentUser.index<ConnectorSyncJobDocument>({
       document: {
-        ...connector,
-        sync_now: true,
+        cancelation_requested_at: null,
+        canceled_at: null,
+        completed_at: null,
+        connector: {
+          configuration,
+          filtering: filtering ? filtering[0]?.active ?? null : null,
+          id: connectorId,
+          index_name,
+          language,
+          pipeline: pipeline ?? null,
+          service_type,
+        },
+        created_at: now,
+        deleted_document_count: 0,
+        error: null,
+        indexed_document_count: 0,
+        indexed_document_volume: 0,
+        last_seen: null,
+        metadata: {},
+        started_at: null,
+        status: SyncStatus.PENDING,
+        total_document_count: null,
+        trigger_method: TriggerMethod.ON_DEMAND,
+        worker_hostname: null,
       },
-      id: connectorId,
-      index: CONNECTORS_INDEX,
+      index: CONNECTORS_JOBS_INDEX,
     });
-
-    await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-    return result;
   } else {
     throw new Error(ErrorCode.RESOURCE_NOT_FOUND);
   }

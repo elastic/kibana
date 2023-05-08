@@ -66,7 +66,7 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    this.agentManager = new AgentManager();
+    this.agentManager = new AgentManager(this.log.get('agent-manager'));
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -97,7 +97,8 @@ export class ElasticsearchService
     const esNodesCompatibility$ = pollEsNodesVersion({
       internalClient: this.client.asInternalUser,
       log: this.log,
-      ignoreVersionMismatch: config.ignoreVersionMismatch,
+      ignoreVersionMismatch:
+        config.ignoreVersionMismatch || this.coreContext.env.cliArgs.serverless === true,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
@@ -120,7 +121,9 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
-      agentStore: this.agentManager,
+      agentStatsProvider: {
+        getAgentsStats: this.agentManager.getAgentsStats.bind(this.agentManager),
+      },
     };
   }
 

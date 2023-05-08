@@ -39,12 +39,29 @@ function setup({
   const KibanaReactContext = createKibanaReactContext({
     usageCollection: { reportUiCounter: () => {} },
     dataViews: { get: async () => {} },
+    data: {
+      query: {
+        queryString: {
+          setQuery: () => {},
+          getQuery: () => {},
+          clearQuery: () => {},
+        },
+        timefilter: {
+          timefilter: {
+            setTime: () => {},
+          },
+        },
+      },
+    },
   } as Partial<CoreStart>);
 
   // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
-    .mockReturnValue(serviceTransactionTypes);
+    .mockReturnValue({
+      transactionTypes: serviceTransactionTypes,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   // mock transaction types
   jest

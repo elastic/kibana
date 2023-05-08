@@ -31,16 +31,18 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "meta": Object {
-          "flappingHistory": Array [],
-        },
-        "state": Object {},
-      }
-    `);
+    expect(result).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '1',
+    });
     // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
@@ -48,7 +50,7 @@ describe('createAlertFactory()', () => {
   test('reuses existing alerts', () => {
     const alert = new Alert('1', {
       state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() }, uuid: 'uuid-previous' },
     });
     const alertFactory = createAlertFactory({
       alerts: {
@@ -57,22 +59,22 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "meta": Object {
-          "flappingHistory": Array [],
-          "lastScheduledActions": Object {
-            "date": "1970-01-01T00:00:00.000Z",
-            "group": "default",
-          },
+    expect(result).toMatchObject({
+      meta: {
+        uuid: 'uuid-previous',
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: expect.any(Date),
+          group: 'default',
         },
-        "state": Object {
-          "foo": true,
-        },
-      }
-    `);
+      },
+      state: { foo: true },
+      context: {},
+      id: '1',
+    });
   });
 
   test('mutates given alerts', () => {
@@ -82,18 +84,20 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     alertFactory.create('1');
-    expect(alerts).toMatchInlineSnapshot(`
-      Object {
-        "1": Object {
-          "meta": Object {
-            "flappingHistory": Array [],
-          },
-          "state": Object {},
+    expect(alerts).toMatchObject({
+      1: {
+        meta: {
+          uuid: expect.any(String),
+          flappingHistory: [],
         },
-      }
-    `);
+        state: {},
+        context: {},
+        id: '1',
+      },
+    });
   });
 
   test('throws error and sets flag when more alerts are created than allowed', () => {
@@ -102,6 +106,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 3,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     expect(alertFactory.hasReachedAlertLimit()).toBe(false);
@@ -122,11 +127,13 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -164,11 +171,13 @@ describe('createAlertFactory()', () => {
       canSetRecoveryContext: true,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: ['test-id-1'],
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -181,6 +190,11 @@ describe('createAlertFactory()', () => {
     const recoveredAlerts = getRecoveredAlertsFn!();
     expect(Array.isArray(recoveredAlerts)).toBe(true);
     expect(recoveredAlerts.length).toEqual(2);
+    expect(processAlerts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        maintenanceWindowIds: ['test-id-1'],
+      })
+    );
   });
 
   test('returns empty array if no recovered alerts', () => {
@@ -191,11 +205,13 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -217,11 +233,13 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -242,11 +260,13 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -269,6 +289,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -287,6 +308,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -302,6 +324,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -318,11 +341,14 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: false,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
@@ -347,6 +373,7 @@ describe('getPublicAlertFactory', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     expect(alertFactory.create).toBeDefined();

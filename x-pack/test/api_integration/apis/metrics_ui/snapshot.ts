@@ -248,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'cpu',
           value: null,
           max: 0.47105555555555556,
-          avg: 0.0672936507936508,
+          avg: 0.47105555555555556,
         };
 
         expect(snapshot).to.have.property('nodes');

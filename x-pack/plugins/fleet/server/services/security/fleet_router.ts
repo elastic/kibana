@@ -89,6 +89,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
     getRoutes: () => router.getRoutes(),
     routerPath: router.routerPath,
+    versioned: router.versioned,
   };
 
   return fleetAuthzRouter;

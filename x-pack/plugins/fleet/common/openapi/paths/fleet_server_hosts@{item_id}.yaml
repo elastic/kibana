@@ -1,6 +1,7 @@
 get:
-  summary: Fleet Server Hosts - Info
-  tags: []
+  summary: Get Fleet Server host by ID
+  tags:
+    - Fleet Server hosts
   responses:
     '200':
       description: OK
@@ -23,7 +24,9 @@ parameters:
     in: path
     required: true
 delete:
-  summary: Fleet Server Hosts - Delete
+  summary: Delete Fleet Server host by ID
+  tags:
+    - Fleet Server hosts
   operationId: delete-fleet-server-hosts
   responses:
     '200':
@@ -42,7 +45,9 @@ delete:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
-  summary: Fleet Server Hosts - Update
+  summary: Update Fleet Server host by ID
+  tags:
+    - Fleet Server hosts
   operationId: update-fleet-server-hosts
   requestBody:
     content:

@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { CaseStatuses, StatusAll } from '../../../../common';
 import type { AppMockRenderer } from '../../../common/mock';
 import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
@@ -20,6 +20,7 @@ import { useCreateAttachments } from '../../../containers/use_create_attachments
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
+import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
@@ -32,16 +33,19 @@ jest.mock('./all_cases_selector_modal', () => {
   };
 });
 
+const onSuccess = jest.fn();
+const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
-
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
-const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal();
+const TestComponent: React.FC<AddToExistingCaseModalProps> = (
+  props: AddToExistingCaseModalProps = {}
+) => {
+  const hook = useCasesAddToExistingCaseModal({ onSuccess, ...props });
 
   const onClick = () => {
-    hook.open({ attachments: [alertComment] });
+    hook.open({ getAttachments });
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
@@ -81,13 +85,14 @@ describe('use cases add to existing case modal hook', () => {
   };
 
   const defaultParams = () => {
-    return { onRowClick: jest.fn() };
+    return { onSuccess };
   };
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
+    onSuccess.mockReset();
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -137,6 +142,65 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
+  it('should call getAttachments with the case info', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as CaseUI);
+      return null;
+    });
+
+    const result = appMockRender.render(<TestComponent />);
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(getAttachments).toHaveBeenCalledTimes(1);
+      expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test' } });
+    });
+  });
+
+  it('should show a toaster info when no attachments are defined and noAttachmentsToaster is defined', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as CaseUI);
+      return null;
+    });
+
+    getAttachments.mockReturnValueOnce([]);
+
+    const mockedToastInfo = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showInfoToast: mockedToastInfo,
+    });
+
+    const result = appMockRender.render(
+      <TestComponent noAttachmentsToaster={{ title: 'My title', content: 'My content' }} />
+    );
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(mockedToastInfo).toHaveBeenCalledWith('My title', 'My content');
+    });
+  });
+
+  it('should show a toaster info when no attachments are defined and noAttachmentsToaster is not defined', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as CaseUI);
+      return null;
+    });
+
+    getAttachments.mockReturnValueOnce([]);
+
+    const mockedToastInfo = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showInfoToast: mockedToastInfo,
+    });
+
+    const result = appMockRender.render(<TestComponent />);
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(mockedToastInfo).toHaveBeenCalledWith('No attachments added to the case', undefined);
+    });
+  });
+
   it('should call createAttachments when a case is selected and show a toast message', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
@@ -149,7 +213,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
@@ -165,6 +229,31 @@ describe('use cases add to existing case modal hook', () => {
       });
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
+  });
+
+  it('should call onSuccess when defined', async () => {
+    const mockBulkCreateAttachments = jest.fn();
+
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
+    });
+
+    const mockedToastSuccess = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: mockedToastSuccess,
+    });
+
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as CaseUI);
+      return null;
+    });
+
+    const result = appMockRender.render(<TestComponent />);
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+    });
   });
 
   it('should not call createAttachments nor show toast success when a case is not selected', async () => {
@@ -206,7 +295,7 @@ describe('use cases add to existing case modal hook', () => {
 
     // simulate a case selected
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 

@@ -83,6 +83,7 @@ describe('CollapsedItemActions', () => {
       ruleType: 'Test Rule Type',
       isEditable: true,
       enabledInLicense: true,
+      revision: 0,
       ...overrides,
     };
 

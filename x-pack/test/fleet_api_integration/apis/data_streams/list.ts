@@ -106,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing ES Promotion: https://github.com/elastic/kibana/issues/151756
-  describe.skip('data_streams_list', async () => {
+  describe('data_streams_list', async () => {
     skipIfNoDockerRegistry(providerContext);
 
     beforeEach(async () => {
@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(body).to.eql({ data_streams: [] });
     });
 
-    it('should return correct basic data stream information', async function () {
+    it('TESTME should return correct basic data stream information', async function () {
       await seedDataStreams();
       // we can't compare the array directly as the order is unpredictable
       const expectedStreamsByDataset = keyBy(

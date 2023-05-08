@@ -6,16 +6,8 @@
  */
 
 import { createSelector } from 'reselect';
-import type { GroupModel, GroupsById, GroupState } from './types';
+import type { GroupState } from './types';
 
-const selectGroupByEntityId = (state: GroupState): GroupsById => state.groups.groupById;
+const groupSelector = (state: GroupState) => state.groups.groupSelector;
 
-export const groupByIdSelector = createSelector(
-  selectGroupByEntityId,
-  (groupsByEntityId) => groupsByEntityId
-);
-
-export const selectGroup = (state: GroupState, entityId: string): GroupModel =>
-  state.groups.groupById[entityId];
-
-export const getGroupByIdSelector = () => createSelector(selectGroup, (group) => group);
+export const getGroupSelector = () => createSelector(groupSelector, (selector) => selector);

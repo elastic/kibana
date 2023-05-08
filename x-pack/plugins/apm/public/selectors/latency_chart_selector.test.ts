@@ -37,6 +37,7 @@ describe('getLatencyChartSelector', () => {
     it('returns default values when data is undefined', () => {
       const latencyChart = getLatencyChartSelector({
         previousPeriodLabel: 'Day before',
+        latencyAggregationType: LatencyAggregationType.avg,
       });
       expect(latencyChart).toEqual({
         currentPeriod: undefined,

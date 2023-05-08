@@ -14,7 +14,9 @@ export {
   getTypes,
   type IndexMapping,
   type IndexMappingMeta,
+  type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
+  type IndexMappingMigrationStateMeta,
 } from './src/mappings';
 export { SavedObjectsSerializer } from './src/serialization';
 export { SavedObjectsTypeValidator } from './src/validation';
@@ -45,4 +47,19 @@ export {
   isVirtualModelVersion,
   virtualVersionToModelVersion,
   modelVersionToVirtualVersion,
+  getModelVersionMapForTypes,
+  getLatestModelVersion,
+  getCurrentVirtualVersion,
+  getLatestMigrationVersion,
+  getVirtualVersionMap,
+  type ModelVersionMap,
+  type VirtualVersionMap,
+  compareVirtualVersions,
+  type CompareModelVersionMapParams,
+  type CompareModelVersionStatus,
+  type CompareModelVersionDetails,
+  type CompareModelVersionResult,
+  getVirtualVersionsFromMappings,
+  getVirtualVersionsFromMappingMeta,
+  getModelVersionDelta,
 } from './src/model_version';

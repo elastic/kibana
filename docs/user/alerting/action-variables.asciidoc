@@ -100,6 +100,7 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
 `alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
 `alert.id`:: The ID of the alert that scheduled the action.
+`alert.uuid`:: A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs.  preview:[]
 
 [float]
 [[defining-rules-actions-variable-context]]

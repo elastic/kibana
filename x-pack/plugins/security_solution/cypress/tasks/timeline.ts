@@ -248,8 +248,11 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE)
+    .should('be.visible')
+    .then((el) => {
+      cy.wrap(el).trigger('click');
+    });
 };
 
 export const addNewCase = () => {
@@ -317,7 +320,7 @@ export const createNewTimelineTemplate = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear().type(`${query} {enter}`);
 };
 
 export const executeTimelineSearch = (query: string) => {

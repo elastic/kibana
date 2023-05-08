@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -30,14 +31,8 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       maxBytes: MAX_PAYLOAD_SIZE,
     },
   },
-  handler: async ({
-    context,
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, server } = routeContext;
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
@@ -51,18 +46,18 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
-      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+      const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
+        id: DEFAULT_SPACE_ID,
+      };
+
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatter({
+        routeContext,
         projectId: decodedProjectName,
         spaceId,
         encryptedSavedObjectsClient,
-        savedObjectsClient,
         monitors,
-        server,
-        syntheticsMonitorClient,
-        request,
       });
 
       await pushMonitorFormatter.configureAllProjectMonitors();
@@ -74,8 +69,8 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       };
     } catch (error) {
       server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
-      if (error.output.statusCode === 404) {
-        const spaceId = server.spaces.spacesService.getSpaceId(request);
+      if (error.output?.statusCode === 404) {
+        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
         return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
       }
 

@@ -12,9 +12,10 @@ import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert
 import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { getAlertsForNotification, processAlerts, setFlapping } from '../lib';
+import { getAlertsForNotification, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { schema } from '@kbn/config-schema';
 
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
@@ -86,6 +87,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  validate: {
+    params: schema.any(),
+  },
 };
 
 const testAlert1 = {
@@ -120,7 +124,8 @@ describe('Legacy Alerts Client', () => {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
+      {},
+      ['test-id-1']
     );
 
     expect(createAlertFactory).toHaveBeenCalledWith({
@@ -132,6 +137,7 @@ describe('Legacy Alerts Client', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: ['test-id-1'],
     });
   });
 
@@ -147,7 +153,8 @@ describe('Legacy Alerts Client', () => {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
+      {},
+      []
     );
 
     alertsClient.getExecutorServices();
@@ -166,7 +173,8 @@ describe('Legacy Alerts Client', () => {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
+      {},
+      []
     );
 
     alertsClient.checkLimitUsage();
@@ -185,7 +193,8 @@ describe('Legacy Alerts Client', () => {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
+      {},
+      []
     );
 
     alertsClient.hasReachedAlertLimit();
@@ -226,7 +235,8 @@ describe('Legacy Alerts Client', () => {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
+      {},
+      []
     );
 
     alertsClient.processAndLogAlerts({
@@ -236,6 +246,7 @@ describe('Legacy Alerts Client', () => {
       shouldLogAndScheduleActionsForAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       notifyWhen: RuleNotifyWhen.CHANGE,
+      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -252,20 +263,8 @@ describe('Legacy Alerts Client', () => {
       alertLimit: 1000,
       autoRecoverAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
-
-    expect(setFlapping).toHaveBeenCalledWith(
-      {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {}
-    );
 
     expect(getAlertsForNotification).toHaveBeenCalledWith(
       {

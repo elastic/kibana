@@ -18,9 +18,9 @@ import {
   SavedDashboardPanel,
   SharedDashboardState,
   convertSavedPanelsToPanelMap,
-  DashboardContainerByValueInput,
+  DashboardContainerInput,
 } from '../../../common';
-import { DashboardContainer } from '../../dashboard_container';
+import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
@@ -37,35 +37,42 @@ export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
   return false;
 };
 
+function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | undefined {
+  if (!appStateInUrl.panels) {
+    return undefined;
+  }
+
+  if (appStateInUrl.panels.length === 0) {
+    return {};
+  }
+
+  if (isPanelVersionTooOld(appStateInUrl.panels)) {
+    pluginServices.getServices().notifications.toasts.addWarning(getPanelTooOldErrorString());
+    return undefined;
+  }
+
+  return convertSavedPanelsToPanelMap(appStateInUrl.panels);
+}
+
 /**
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
 export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage: IKbnUrlStateStorage
-): Partial<DashboardContainerByValueInput> => {
-  const {
-    notifications: { toasts },
-  } = pluginServices.getServices();
+): Partial<DashboardContainerInput> => {
   const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
     DASHBOARD_STATE_STORAGE_KEY
   );
   if (!rawAppStateInUrl) return {};
 
-  let panelsMap: DashboardPanelMap | undefined;
-  if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-    if (isPanelVersionTooOld(rawAppStateInUrl.panels)) {
-      toasts.addWarning(getPanelTooOldErrorString());
-    } else {
-      panelsMap = convertSavedPanelsToPanelMap(rawAppStateInUrl.panels);
-    }
-  }
+  const panelsMap = getPanelsMap(rawAppStateInUrl);
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
     return hashQuery;
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
-  const partialState: Partial<DashboardContainerByValueInput> = {
+  const partialState: Partial<DashboardContainerInput> = {
     ..._.omit(rawAppStateInUrl, ['panels', 'query']),
     ...(panelsMap ? { panels: panelsMap } : {}),
     ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
@@ -76,10 +83,10 @@ export const loadAndRemoveDashboardState = (
 
 export const startSyncingDashboardUrlState = ({
   kbnUrlStateStorage,
-  dashboardContainer,
+  dashboardAPI,
 }: {
   kbnUrlStateStorage: IKbnUrlStateStorage;
-  dashboardContainer: DashboardContainer;
+  dashboardAPI: DashboardAPI;
 }) => {
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
@@ -87,7 +94,7 @@ export const startSyncingDashboardUrlState = ({
     .subscribe(() => {
       const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
       if (Object.keys(stateFromUrl).length === 0) return;
-      dashboardContainer.updateInput(stateFromUrl);
+      dashboardAPI.updateInput(stateFromUrl);
     });
 
   const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();

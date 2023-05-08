@@ -185,7 +185,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             icon = (
               <span data-test-subj="spaceTablePrivilegeSupersededWarning">
                 <EuiIconTip
-                  type="alert"
+                  type="warning"
                   size="s"
                   content={
                     <FormattedMessage

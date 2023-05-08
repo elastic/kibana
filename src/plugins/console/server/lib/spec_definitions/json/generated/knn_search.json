@@ -1,0 +1,15 @@
+{
+  "knn_search": {
+    "url_params": {
+      "routing": []
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_knn_search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html"
+  }
+}

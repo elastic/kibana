@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { EditorFrameSetup } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
-import type { FormatFactory } from '../../../common';
+import type { FormatFactory } from '../../../common/types';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;

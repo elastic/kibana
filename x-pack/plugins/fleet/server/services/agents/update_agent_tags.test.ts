@@ -24,6 +24,7 @@ jest.mock('../app_context', () => {
     },
   };
 });
+jest.mock('../audit_logging');
 
 jest.mock('../agent_policy', () => {
   return {

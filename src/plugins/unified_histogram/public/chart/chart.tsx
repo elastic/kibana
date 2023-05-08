@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -36,6 +37,7 @@ import type {
   UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { SuggestionSelector } from './suggestion_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
@@ -50,7 +52,11 @@ export interface ChartProps {
   dataView: DataView;
   query?: Query | AggregateQuery;
   filters?: Filter[];
+  isPlainRecord?: boolean;
+  currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
+  relativeTimeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -61,11 +67,11 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  getRelativeTimeRange?: () => TimeRange;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -81,20 +87,24 @@ export function Chart({
   query: originalQuery,
   filters: originalFilters,
   timeRange: originalTimeRange,
+  relativeTimeRange: originalRelativeTimeRange,
   request,
   hits,
   chart,
   breakdown,
+  currentSuggestion,
+  allSuggestions,
+  isPlainRecord,
   appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  getRelativeTimeRange: originalGetRelativeTimeRange,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onSuggestionChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
@@ -118,6 +128,7 @@ export function Chart({
     onTimeIntervalChange,
     closePopover: closeChartOptions,
     onResetChartHeight,
+    isPlainRecord,
   });
 
   const chartVisible = !!(
@@ -150,6 +161,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    currentSuggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -166,6 +178,7 @@ export function Chart({
     getTimeRange,
     refetch$,
     onTotalHitsChange,
+    isPlainRecord,
   });
 
   const {
@@ -179,7 +192,7 @@ export function Chart({
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
 
-  const lensAttributes = useMemo(
+  const lensAttributesContext = useMemo(
     () =>
       getLensAttributes({
         title: chart?.title,
@@ -188,20 +201,24 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
+        suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
-  );
-
-  const getRelativeTimeRange = useMemo(
-    () => originalGetRelativeTimeRange ?? (() => relativeTimeRange),
-    [originalGetRelativeTimeRange, relativeTimeRange]
+    [
+      breakdown?.field,
+      chart?.timeInterval,
+      chart?.title,
+      currentSuggestion,
+      dataView,
+      filters,
+      query,
+    ]
   );
 
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
-    getRelativeTimeRange,
-    lensAttributes,
+    relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
+    lensAttributes: lensAttributesContext.attributes,
   });
 
   return (
@@ -241,6 +258,15 @@ export function Chart({
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
+                    />
+                  </EuiFlexItem>
+                )}
+                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+                    <SuggestionSelector
+                      suggestions={allSuggestions}
+                      activeSuggestion={currentSuggestion}
+                      onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
                 )}
@@ -314,7 +340,8 @@ export function Chart({
               chart={chart}
               getTimeRange={getTimeRange}
               refetch$={refetch$}
-              lensAttributes={lensAttributes}
+              lensAttributesContext={lensAttributesContext}
+              isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}

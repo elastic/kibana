@@ -36,7 +36,7 @@ interface Options {
   offset?: string;
 }
 
-export function getServiceMapDependencyNodeInfo({
+function getServiceMapDependencyNodeInfoForTimeRange({
   environment,
   dependencyName,
   apmEventClient,
@@ -166,4 +166,35 @@ export function getServiceMapDependencyNodeInfo({
       },
     };
   });
+}
+
+export interface ServiceMapServiceDependencyInfoResponse {
+  currentPeriod: NodeStats;
+  previousPeriod: NodeStats | undefined;
+}
+
+export async function getServiceMapDependencyNodeInfo({
+  apmEventClient,
+  dependencyName,
+  start,
+  end,
+  environment,
+  offset,
+}: Options): Promise<ServiceMapServiceDependencyInfoResponse> {
+  const commonProps = {
+    environment,
+    apmEventClient,
+    dependencyName,
+    start,
+    end,
+  };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    getServiceMapDependencyNodeInfoForTimeRange(commonProps),
+    offset
+      ? getServiceMapDependencyNodeInfoForTimeRange({ ...commonProps, offset })
+      : undefined,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }

@@ -5698,59 +5698,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.AggFunctionsMapping.aggGeoHash",
-            "type": "Object",
-            "tags": [],
-            "label": "aggGeoHash",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionDefinition",
-                "text": "ExpressionFunctionDefinition"
-              },
-              "<\"aggGeoHash\", any, Arguments, ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggExpressionType",
-                "text": "AggExpressionType"
-              },
-              ", ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data/common/search/aggs/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.AggFunctionsMapping.aggHistogram",
             "type": "Object",
             "tags": [],
@@ -7408,6 +7355,59 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggTopMetrics\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.AggFunctionsMapping.aggRate",
+            "type": "Object",
+            "tags": [],
+            "label": "aggRate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggRate\", any, AggArgs, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -9326,7 +9326,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10104,9 +10104,7 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>>; history: ",
-          "SearchRequest",
-          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          ">>>; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10130,7 +10128,9 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; removeField: <K extends keyof ",
+          "; history: ",
+          "SearchRequest",
+          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10546,8 +10546,12 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
@@ -10560,6 +10564,18 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-server",
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -10834,22 +10850,6 @@
             "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/use_security_dashboards_table.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/use_security_dashboards_table.tsx"
-          },
-          {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/overview/overview/monitor_detail_flyout.tsx"
           },
@@ -10938,10 +10938,6 @@
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/server/routes/settings/apm_indices/route.ts"
-          },
-          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
@@ -10968,22 +10964,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
           },
           {
             "plugin": "lists",
@@ -11092,18 +11072,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",
@@ -13047,7 +13015,7 @@
               "section": "def-common.FieldFormatsRegistry",
               "text": "FieldFormatsRegistry"
             },
-            ", \"register\" | \"init\"> & { deserialize: ",
+            ", \"init\" | \"register\"> & { deserialize: ",
             {
               "pluginId": "fieldFormats",
               "scope": "common",
@@ -13087,35 +13055,35 @@
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             }
           ]
         },
@@ -13530,6 +13498,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -13547,7 +13519,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13556,6 +13528,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13730,6 +13706,14 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -13740,26 +13724,6 @@
               {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -13794,8 +13758,24 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "ml",
@@ -13834,20 +13814,20 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -13994,6 +13974,14 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -14118,40 +14106,44 @@
                 "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -15005,10 +14997,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/register_index_pattern_usage_collection.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -16559,7 +16547,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", options?: ",
+              ", options?: Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16567,7 +16555,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<",
+              ", \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16620,6 +16608,7 @@
                   "options for getting field list"
                 ],
                 "signature": [
+                  "Omit<",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -16627,7 +16616,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  " | undefined"
+                  ", \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -16646,7 +16635,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -17661,44 +17650,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.IndexPatternsFetcher.validatePatternListActive",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "validatePatternListActive",
-            "description": [
-              "\n Returns an index pattern list of only those index pattern strings in the given list that return indices\n"
-            ],
-            "signature": [
-              "(patternList: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsFetcher.validatePatternListActive.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "patternList",
-                "description": [
-                  "string[]"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -18196,9 +18147,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; helpers: ",
-                  "default",
-                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
                   "SearchRequest",
@@ -18230,7 +18179,11 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+                  "<TDocument, TAggregations>>; }; helpers: ",
+                  "default",
+                  "; name: string | symbol; security: ",
+                  "default",
+                  "; monitoring: ",
                   "default",
                   "; count: { (this: That, params?: ",
                   "CountRequest",
@@ -18258,53 +18211,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "CountResponse",
-                  ">; }; exists: { (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; security: ",
-                  "default",
-                  "; ping: { (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; nodes: ",
-                  "default",
-                  "; indices: ",
-                  "default",
-                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -18482,7 +18389,27 @@
                   "default",
                   "; eql: ",
                   "default",
-                  "; existsSource: { (this: That, params: ",
+                  "; exists: { (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
                   "ExistsSourceRequest",
                   " | ",
                   "ExistsSourceRequest",
@@ -18686,7 +18613,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; info: { (this: That, params?: ",
+                  ">; }; indices: ",
+                  "default",
+                  "; info: { (this: That, params?: ",
                   "InfoRequest",
                   " | ",
                   "InfoRequest",
@@ -18864,7 +18793,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "MtermvectorsResponse",
-                  ">; }; openPointInTime: { (this: That, params: ",
+                  ">; }; nodes: ",
+                  "default",
+                  "; openPointInTime: { (this: That, params: ",
                   "OpenPointInTimeRequest",
                   " | ",
                   "OpenPointInTimeRequest",
@@ -18890,7 +18821,27 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "OpenPointInTimeResponse",
-                  ">; }; putScript: { (this: That, params: ",
+                  ">; }; ping: { (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   " | ",
                   "PutScriptRequest",
@@ -21153,6 +21104,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -21170,7 +21125,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21179,6 +21134,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21353,6 +21312,14 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -21363,26 +21330,6 @@
               {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -21417,8 +21364,24 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "ml",
@@ -21457,20 +21420,20 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -21617,6 +21580,14 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -21741,40 +21712,44 @@
                 "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
+                "plugin": "exploratoryView",
+                "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -22628,10 +22603,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/register_index_pattern_usage_collection.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -25050,7 +25021,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", options?: ",
+              ", options?: Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25058,7 +25029,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<",
+              ", \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25111,6 +25082,7 @@
                   "options for getting field list"
                 ],
                 "signature": [
+                  "Omit<",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -25118,7 +25090,7 @@
                     "section": "def-common.GetFieldsOptions",
                     "text": "GetFieldsOptions"
                   },
-                  " | undefined"
+                  ", \"allowNoIndex\"> | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -25137,7 +25109,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -26160,7 +26132,7 @@
           "\nCreate a function that will escape CSV values like \"=\", \"@\" and \"+\" with a\n\"'\". This will also place CSV values in \"\" if contain non-alphanumeric chars.\n\nFor example:\n\nGiven: =1+1\nReturns: \"'=1+1\"\n\nSee OWASP: https://www.owasp.org/index.php/CSV_Injection."
         ],
         "signature": [
-          "(quoteValues: boolean, escapeFormulas: boolean) => (val: RawValue) => string"
+          "({\n  separator,\n  quoteValues,\n  escapeFormulaValues,\n}: { separator: string; quoteValues: boolean; escapeFormulaValues: boolean; }) => (val: RawValue) => string"
         ],
         "path": "src/plugins/data/common/exports/escape_value.ts",
         "deprecated": false,
@@ -26169,32 +26141,48 @@
           {
             "parentPluginId": "data",
             "id": "def-common.createEscapeValue.$1",
-            "type": "boolean",
+            "type": "Object",
             "tags": [],
-            "label": "quoteValues",
+            "label": "{\n  separator,\n  quoteValues,\n  escapeFormulaValues,\n}",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
             "path": "src/plugins/data/common/exports/escape_value.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.createEscapeValue.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "escapeFormulas",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "src/plugins/data/common/exports/escape_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.separator",
+                "type": "string",
+                "tags": [],
+                "label": "separator",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.quoteValues",
+                "type": "boolean",
+                "tags": [],
+                "label": "quoteValues",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.escapeFormulaValues",
+                "type": "boolean",
+                "tags": [],
+                "label": "escapeFormulaValues",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -27777,7 +27765,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", options?: ",
+          ", options?: Omit<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -27785,7 +27773,7 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<",
+          ", \"allowNoIndex\"> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28323,8 +28311,12 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
@@ -28337,6 +28329,18 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-server",
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -28611,22 +28615,6 @@
             "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/use_security_dashboards_table.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/use_security_dashboards_table.tsx"
-          },
-          {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/overview/overview/monitor_detail_flyout.tsx"
           },
@@ -28715,10 +28703,6 @@
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/server/routes/settings/apm_indices/route.ts"
-          },
-          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
@@ -28745,22 +28729,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
           },
           {
             "plugin": "lists",
@@ -28869,18 +28837,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",

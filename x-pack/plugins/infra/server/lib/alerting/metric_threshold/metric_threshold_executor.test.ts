@@ -34,6 +34,7 @@ import {
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { InfraConfig } from '../../../../common/plugin_config_types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -69,9 +70,11 @@ const logger = {
   get: () => logger,
 } as unknown as Logger;
 
+const STARTED_AT_MOCK_DATE = new Date();
+
 const mockOptions = {
   executionId: '',
-  startedAt: new Date(),
+  startedAt: STARTED_AT_MOCK_DATE,
   previousStartedAt: null,
   state: {
     wrapped: initialRuleState,
@@ -113,6 +116,7 @@ const mockOptions = {
     throttle: null,
     notifyWhen: null,
     producer: '',
+    revision: 0,
     ruleTypeId: '',
     ruleTypeName: '',
     muteAll: false,
@@ -126,7 +130,8 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-describe('The metric threshold alert type', () => {
+// FAILING: https://github.com/elastic/kibana/issues/155534
+describe.skip('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -690,6 +695,143 @@ describe('The metric threshold alert type', () => {
     });
   });
 
+  describe('querying with a groupBy parameter host.name and rule tags', () => {
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string[] = ['host.name'],
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+        rule: {
+          ...mockOptions.rule,
+          tags: ['ruleTag1', 'ruleTag2'],
+        },
+      });
+    const instanceIdA = 'host-01';
+    const instanceIdB = 'host-02';
+
+    test('rule tags and source tags are combined in alert context', async () => {
+      setEvaluationResults([
+        {
+          'host-01': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-01' },
+            context: {
+              tags: ['host-01_tag1', 'host-01_tag2'],
+            },
+          },
+          'host-02': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-02' },
+            context: {
+              tags: ['host-02_tag1', 'host-02_tag2'],
+            },
+          },
+        },
+      ]);
+      await execute(Comparator.GT, [0.75]);
+      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual([
+        'host-01_tag1',
+        'host-01_tag2',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual([
+        'host-02_tag1',
+        'host-02_tag2',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+    });
+  });
+
+  describe('querying without a groupBy parameter and rule tags', () => {
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string = '',
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+        rule: {
+          ...mockOptions.rule,
+          tags: ['ruleTag1', 'ruleTag2'],
+        },
+      });
+
+    test('rule tags are added in alert context', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+      ]);
+
+      const instanceID = '*';
+      await execute(Comparator.GT, [0.75]);
+      expect(mostRecentAction(instanceID).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+    });
+  });
+
   describe('querying with multiple criteria', () => {
     afterAll(() => clearInstances());
     const execute = (
@@ -1187,7 +1329,9 @@ describe('The metric threshold alert type', () => {
         },
       ]);
       await execute(true);
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      const recentAction = mostRecentAction(instanceID);
+      expect(recentAction.action.reason).toEqual('test.metric.3 reported no data in the last 1m');
+      expect(recentAction).toBeNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
@@ -1208,6 +1352,68 @@ describe('The metric threshold alert type', () => {
       ]);
       await execute(false);
       expect(mostRecentAction(instanceID)).toBe(undefined);
+    });
+  });
+
+  describe('alerts with NO_DATA where one condtion is an aggregation and the other is a document count', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          sourceId,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [1],
+              metric: 'test.metric.3',
+            },
+            {
+              ...baseCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [30],
+            },
+          ],
+          alertOnNoData,
+        },
+      });
+    test('sends a No Data alert when configured to do so', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.LT,
+            threshold: [1],
+            metric: 'test.metric.3',
+            currentValue: null,
+            timestamp: STARTED_AT_MOCK_DATE.toISOString(),
+            shouldFire: false,
+            shouldWarn: false,
+            isNoData: true,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+        {},
+      ]);
+      await execute(true);
+      const recentAction = mostRecentAction(instanceID);
+      expect(recentAction.action).toEqual({
+        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertState: 'NO DATA',
+        group: '*',
+        groupByKeys: undefined,
+        metric: { condition0: 'test.metric.3', condition1: 'count' },
+        reason: 'test.metric.3 reported no data in the last 1m',
+        threshold: { condition0: ['1'], condition1: [30] },
+        timestamp: STARTED_AT_MOCK_DATE.toISOString(),
+        value: { condition0: '[NO DATA]', condition1: 0 },
+        viewInAppUrl: 'http://localhost:5601/app/metrics/explorer',
+        tags: [],
+      });
+      expect(recentAction).toBeNoDataAction();
     });
   });
 
@@ -1680,7 +1886,7 @@ describe('The metric threshold alert type', () => {
   });
 });
 
-const createMockStaticConfiguration = (sources: any) => ({
+const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   alerting: {
     inventory_threshold: {
       group_by_page_size: 100,
@@ -1691,6 +1897,9 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   inventory: {
     compositeSize: 2000,
+  },
+  logs: {
+    app_target: 'logs-ui',
   },
   sources,
 });

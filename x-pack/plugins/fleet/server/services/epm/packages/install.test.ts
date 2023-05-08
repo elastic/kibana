@@ -6,21 +6,23 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import type { InstallablePackage } from '../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+
+import { sendTelemetryEvents } from '../../upgrade_sender';
+import { licenseService } from '../../license';
+import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
-import { sendTelemetryEvents } from '../../upgrade_sender';
-
-import { licenseService } from '../../license';
-
-import { installPackage } from './install';
+import { createInstallation, installPackage } from './install';
 import * as install from './_install_package';
-import * as obj from '.';
 import { getBundledPackages } from './bundled_packages';
+
+import * as obj from '.';
 
 jest.mock('../../app_context', () => {
   return {
@@ -66,8 +68,59 @@ jest.mock('../archive', () => {
     deleteVerificationResult: jest.fn(),
   };
 });
+jest.mock('../../audit_logging');
 
 const mockGetBundledPackages = getBundledPackages as jest.MockedFunction<typeof getBundledPackages>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+
+describe('createInstallation', () => {
+  const soClient = savedObjectsClientMock.create();
+
+  const packageInfo: InstallablePackage = {
+    name: 'test-package',
+    version: '1.0.0',
+    format_version: '1.0.0',
+    title: 'Test Package',
+    description: 'A package for testing',
+    owner: {
+      github: 'elastic',
+    },
+  };
+
+  describe('installSource: registry', () => {
+    it('should call audit logger', async () => {
+      await createInstallation({
+        savedObjectsClient: soClient,
+        packageInfo,
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'create',
+        id: 'test-package',
+        savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('installSource: upload', () => {
+    it('should call audit logger', async () => {
+      await createInstallation({
+        savedObjectsClient: soClient,
+        packageInfo,
+        installSource: 'upload',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'create',
+        id: 'test-package',
+        savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+});
 
 describe('install', () => {
   beforeEach(() => {
@@ -83,9 +136,11 @@ describe('install', () => {
     jest
       .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
       .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
-    jest
-      .spyOn(Registry, 'getPackage')
-      .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
+    jest.spyOn(Registry, 'getPackage').mockImplementation(() =>
+      Promise.resolve({
+        packageInfo: { license: 'basic', conditions: { elastic: { subscription: 'basic' } } },
+      } as any)
+    );
 
     mockGetBundledPackages.mockReset();
     (install._installPackage as jest.Mock).mockClear();

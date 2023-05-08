@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/public';
-import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 import { AgentPoliciesList } from '.';
-import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
-} from '../../../../../common/saved_objects/private_locations';
 
 const FLEET_URLS = {
   AGENT_POLICIES: '/api/fleet/agent_policies',
@@ -33,26 +29,18 @@ export const fetchAgentPolicies = async (): Promise<AgentPoliciesList> => {
   );
 };
 
-export const setSyntheticsPrivateLocations = async (
-  client: SavedObjectsClientContract,
-  privateLocations: SyntheticsPrivateLocations
-) => {
-  const result = await client.create(privateLocationsSavedObjectName, privateLocations, {
-    id: privateLocationsSavedObjectId,
-    overwrite: true,
-  });
-
-  return result.attributes;
+export const addSyntheticsPrivateLocations = async (
+  newLocation: PrivateLocation
+): Promise<SyntheticsPrivateLocations> => {
+  return await apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation);
 };
 
-export const getSyntheticsPrivateLocations = async (client: SavedObjectsClientContract) => {
-  try {
-    const obj = await client.get<SyntheticsPrivateLocations>(
-      privateLocationsSavedObjectName,
-      privateLocationsSavedObjectId
-    );
-    return obj?.attributes.locations ?? [];
-  } catch (getErr) {
-    return [];
-  }
+export const getSyntheticsPrivateLocations = async (): Promise<SyntheticsPrivateLocations> => {
+  return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS);
+};
+
+export const deleteSyntheticsPrivateLocations = async (
+  locationId: string
+): Promise<SyntheticsPrivateLocations> => {
+  return await apiService.delete(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + `/${locationId}`);
 };

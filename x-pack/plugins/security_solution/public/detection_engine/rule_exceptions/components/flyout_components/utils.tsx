@@ -13,11 +13,13 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import type { Moment } from 'moment';
 import {
   HeaderMenu,
   generateLinkedRulesMenuItems,
 } from '@kbn/securitysolution-exception-list-components';
+import { PopoverItems } from '../../../../common/components/popover_items';
 import { SecurityPageName } from '../../../../../common/constants';
 import { ListDetailsLinkAnchor } from '../../../../exceptions/components';
 import {
@@ -66,11 +68,8 @@ export const enrichItemWithName =
  */
 export const enrichItemWithExpireTime =
   (expireTimeToAdd: Moment | undefined) =>
-  (items: ExceptionsBuilderReturnExceptionItem[]): ExceptionsBuilderReturnExceptionItem[] => {
-    return expireTimeToAdd != null
-      ? enrichNewExceptionItemsWithExpireTime(items, expireTimeToAdd)
-      : items;
-  };
+  (items: ExceptionsBuilderReturnExceptionItem[]): ExceptionsBuilderReturnExceptionItem[] =>
+    enrichNewExceptionItemsWithExpireTime(items, expireTimeToAdd);
 
 /**
  * Modifies item entries to be in correct format and adds os selection to items
@@ -207,7 +206,7 @@ export const enrichExceptionItemsForUpdate = ({
 export const getSharedListsTableColumns = () => [
   {
     field: 'name',
-    name: 'Name',
+    name: i18n.NAME_COLUMN,
     sortable: true,
     'data-test-subj': 'exceptionListNameCell',
   },
@@ -233,7 +232,7 @@ export const getSharedListsTableColumns = () => [
     ),
   },
   {
-    name: 'Action',
+    name: i18n.ACTION_COLUMN,
 
     'data-test-subj': 'exceptionListRulesActionCell',
     render: (list: ExceptionListRuleReferencesSchema) => {
@@ -258,13 +257,40 @@ export const getRulesTableColumn = () => [
   {
     field: 'name',
     align: 'left' as HorizontalAlignment,
-    name: 'Name',
+    name: i18n.NAME_COLUMN,
     sortable: true,
     'data-test-subj': 'ruleNameCell',
     truncateText: false,
   },
   {
-    name: 'Action',
+    field: 'tags',
+    align: 'left' as HorizontalAlignment,
+    name: i18n.TAGS_COLUMN,
+    'data-test-subj': 'ruleNameCell',
+    render: (tags: Rule['tags']) => {
+      if (tags.length === 0) {
+        return null;
+      }
+
+      const renderItem = (tag: string, i: number) => (
+        <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
+          {tag}
+        </EuiBadge>
+      );
+      return (
+        <PopoverItems
+          items={tags}
+          popoverTitle={i18n.TAGS_COLUMN}
+          popoverButtonTitle={tags.length.toString()}
+          popoverButtonIcon="tag"
+          dataTestPrefix="tags"
+          renderItem={renderItem}
+        />
+      );
+    },
+  },
+  {
+    name: i18n.ACTION_COLUMN,
     'data-test-subj': 'ruleAction-view',
     render: (rule: Rule) => {
       return (

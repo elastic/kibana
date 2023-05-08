@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { State } from '../state';
+import type { MigrationLog } from '../types';
 
-export const delayRetryState = <S extends State>(
+export interface RetryableState {
+  controlState: string;
+  retryCount: number;
+  retryDelay: number;
+  logs: MigrationLog[];
+}
+
+export const delayRetryState = <S extends RetryableState>(
   state: S,
   errorMessage: string,
   /** How many times to retry a step that fails */
@@ -39,7 +46,7 @@ export const delayRetryState = <S extends State>(
     };
   }
 };
-export const resetRetryState = <S extends State>(state: S): S => {
+export const resetRetryState = <S extends RetryableState>(state: S): S => {
   return {
     ...state,
     retryCount: 0,

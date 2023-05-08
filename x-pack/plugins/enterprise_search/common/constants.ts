@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
@@ -117,10 +118,17 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
 };
 
-export const ENGINES_PLUGIN = {
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
-    defaultMessage: 'Engines',
+export const APPLICATIONS_PLUGIN = {
+  ID: 'enterpriseSearchApplications',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
+    defaultMessage: 'Applications',
   }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Search Applications',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/applications',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -153,4 +161,17 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
   run_ml_inference: false,
+};
+
+export enum INGESTION_METHOD_IDS {
+  API = 'api',
+  CONNECTOR = 'connector',
+  CRAWLER = 'crawler',
+}
+
+export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasNativeConnectors: true,
+  hasWebCrawler: true,
 };

@@ -143,7 +143,7 @@ export const updateTimeContextFromRefreshIntervalUpdate = actions.assign(
           ? {
               timestamps: {
                 startTimestamp: datemathToEpochMillis(DEFAULT_REFRESH_TIME_RANGE.from, 'down') ?? 0,
-                endTimestamp: datemathToEpochMillis(DEFAULT_REFRESH_TIME_RANGE.to, 'down') ?? 0,
+                endTimestamp: datemathToEpochMillis(DEFAULT_REFRESH_TIME_RANGE.to, 'up') ?? 0,
                 lastChangedTimestamp: nowTimestamp,
               },
             }
@@ -170,7 +170,7 @@ const getTimeFromEvent = (context: LogStreamQueryContext, event: LogStreamQueryE
     ? datemathToEpochMillis(from, 'down')
     : context.timestamps.startTimestamp;
   const toTimestamp = event.timeRange?.to
-    ? datemathToEpochMillis(to, 'down')
+    ? datemathToEpochMillis(to, 'up')
     : context.timestamps.endTimestamp;
 
   return {

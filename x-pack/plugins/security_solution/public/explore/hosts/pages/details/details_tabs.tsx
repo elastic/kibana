@@ -8,6 +8,7 @@
 import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskDetailsTabBody } from '../../../components/risk_score/risk_details_tab_body';
 import { HostsTableType } from '../../store/model';
@@ -24,7 +25,6 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from '../navigation';
-import { TableId } from '../../../../../common/types';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({

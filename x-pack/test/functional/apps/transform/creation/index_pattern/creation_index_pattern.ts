@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await transform.api.cleanTransformIndices();
       await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.securityUI.logout();
     });
 
     const fieldStatsEntries = [

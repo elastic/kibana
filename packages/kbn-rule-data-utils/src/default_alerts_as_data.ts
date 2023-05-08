@@ -8,6 +8,9 @@
 
 import { ValuesType } from 'utility-types';
 
+const TIMESTAMP = '@timestamp' as const;
+
+// namespaces
 const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
@@ -21,6 +24,9 @@ const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 // kibana.alert.action_group - framework action group ID for this alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 
+// kibana.alert.case_ids - array of cases associated with the alert
+const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
+
 // kibana.alert.duration.us - alert duration in nanoseconds - updated each execution
 // that the alert is active
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
@@ -31,8 +37,14 @@ const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 // kibana.alert.flapping - whether the alert is currently in a flapping state
 const ALERT_FLAPPING = `${ALERT_NAMESPACE}.flapping` as const;
 
-// kibana.alert.id - alert ID, also known as alert instance ID
-const ALERT_ID = `${ALERT_NAMESPACE}.id` as const;
+// kibana.alert.flapping_history - whether the alert is currently in a flapping state
+const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
+
+// kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
+const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
+
+// kibana.alert.instance.id - alert ID, also known as alert instance ID
+const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 
 // kibana.alert.last_detected - timestamp when the alert was last seen
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
@@ -73,11 +85,17 @@ const ALERT_RULE_PARAMETERS = `${ALERT_RULE_NAMESPACE}.parameters` as const;
 // kibana.alert.rule.producer - rule type producer for rule that generated this alert
 const ALERT_RULE_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 
+// kibana.alert.rule.revision - current revision of the rule that generated this alert
+const ALERT_RULE_REVISION = `${ALERT_RULE_NAMESPACE}.revision` as const;
+
 // kibana.alert.rule.tags - rule tags for rule that generated this alert
 const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 
 // kibana.alert.rule_type_id - rule type id for rule that generated this alert
 const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
+
+// kibana.alert.url - url which will redirect users to a page related to the given alert
+const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
@@ -90,10 +108,13 @@ const namespaces = {
 
 const fields = {
   ALERT_ACTION_GROUP,
+  ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
-  ALERT_ID,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -102,24 +123,36 @@ const fields = {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
   VERSION,
 };
 
 export {
+  // namespaces
+  ALERT_NAMESPACE,
+  ALERT_RULE_NAMESPACE,
+  KIBANA_NAMESPACE,
+
+  // fields
   ALERT_ACTION_GROUP,
+  ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
-  ALERT_ID,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -128,19 +161,19 @@ export {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  TIMESTAMP,
   VERSION,
-  ALERT_NAMESPACE,
-  ALERT_RULE_NAMESPACE,
-  KIBANA_NAMESPACE,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

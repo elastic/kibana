@@ -95,7 +95,8 @@ export function FieldValueSelection({
 
   useEffect(() => {
     setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
-  }, [values, selectedValue, showCount, excludedValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(values), JSON.stringify(selectedValue), showCount, excludedValue]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -238,6 +239,7 @@ export function FieldValueSelection({
                 )}
 
                 <EuiButton
+                  data-test-subj="o11yFieldValueSelectionApplyButton"
                   aria-label={i18n.translate(
                     'xpack.observability.fieldValueSelection.apply.label',
                     {

@@ -49,7 +49,7 @@ export const AuthenticationPanelActions: React.FC = () => {
       <EuiFlexItem>
         <EuiButtonEmpty
           data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-cancel"
-          iconType="crossInACircleFilled"
+          iconType="cross"
           size="s"
           color="danger"
           onClick={() => disableEditing()}

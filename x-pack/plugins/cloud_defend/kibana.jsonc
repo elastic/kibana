@@ -2,14 +2,31 @@
   "type": "plugin",
   "id": "@kbn/cloud-defend-plugin",
   "owner": "@elastic/sec-cloudnative-integrations",
-  "description": "Defend for Containers",
+  "description": "Defend for containers (D4C)",
   "plugin": {
     "id": "cloudDefend",
-    "server": false,
+    "server": true,
     "browser": true,
+    "configPath": [
+      "xpack",
+      "cloudDefend"
+    ],
     "requiredPlugins": [
+      "navigation",
+      "data",
       "fleet",
-      "kibanaReact"
+      "unifiedSearch",
+      "kibanaReact",
+      "cloud",
+      "security",
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "usageCollection"
     ]
   }
 }

@@ -28,6 +28,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/react-field",
     "@kbn/field-types",
+    "@kbn/expressions-plugin",
   ],
   "exclude": [
     "target/**/*",

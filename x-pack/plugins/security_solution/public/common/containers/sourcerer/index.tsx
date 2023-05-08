@@ -33,7 +33,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { createSourcererDataView } from './create_sourcerer_data_view';
-import { useDataView } from '../source/use_data_view';
+import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
@@ -259,14 +259,18 @@ export const useInitSourcerer = (
           }
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         } catch (err) {
-          addError(err, {
-            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-              defaultMessage: 'Error updating Security Data View',
-            }),
-            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-              defaultMessage: 'Refresh the page',
-            }),
-          });
+          if (err.name === 'AbortError') {
+            // the fetch was canceled, we don't need to do anything about it
+          } else {
+            addError(err, {
+              title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+                defaultMessage: 'Error updating Security Data View',
+              }),
+              toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+                defaultMessage: 'Refresh the page',
+              }),
+            });
+          }
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         }
       };
@@ -390,15 +394,17 @@ export const useSourcererDataView = (
   const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
     () => ({
       ...fetchIndexReturn,
-      runtimeMappings: {},
-      title: '',
-      id: selectedDataView?.id ?? null,
+      dataView: fetchIndexReturn.dataView,
+      runtimeMappings: fetchIndexReturn.dataView?.getRuntimeMappings() ?? {},
+      title: fetchIndexReturn.dataView?.getIndexPattern() ?? '',
+      id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
+      fields: fetchIndexReturn.indexPatterns.fields,
     }),
-    [fetchIndexReturn, indexPatternsLoading, selectedDataView]
+    [fetchIndexReturn, indexPatternsLoading]
   );
 
   useEffect(() => {
@@ -428,9 +434,18 @@ export const useSourcererDataView = (
     [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
+  const browserFields = useCallback(() => {
+    const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
+      sourcererDataView.patternList.join(','),
+      sourcererDataView.fields,
+      false
+    );
+    return dataViewBrowserFields;
+  }, [sourcererDataView.fields, sourcererDataView.patternList]);
+
   return useMemo(
     () => ({
-      browserFields: sourcererDataView.browserFields,
+      browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
       indexPattern: {
         fields: sourcererDataView.indexFields,
@@ -446,9 +461,16 @@ export const useSourcererDataView = (
       selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
-      sourcererDataView,
+      sourcererDataView: sourcererDataView.dataView,
     }),
-    [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
+    [
+      browserFields,
+      sourcererDataView,
+      selectedPatterns,
+      indicesExist,
+      loading,
+      legacyPatterns.length,
+    ]
   );
 };
 

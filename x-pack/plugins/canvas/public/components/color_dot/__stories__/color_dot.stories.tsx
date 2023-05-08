@@ -43,7 +43,7 @@ storiesOf('components/Color/ColorDot', module)
         <EuiIcon type="minusInCircle" color="#fff" />
       </ColorDot>
       <ColorDot key="3" value="rgba(100, 150, 250, .5)">
-        <EuiIcon type="alert" color="#fff" />
+        <EuiIcon type="warning" color="#fff" />
       </ColorDot>
       <ColorDot key="4" value="#000">
         <EuiIcon type="check" color="#fff" />

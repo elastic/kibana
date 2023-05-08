@@ -11,6 +11,7 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
+  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
@@ -38,6 +39,7 @@ import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summ
 import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
+import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -104,18 +106,25 @@ const deleteSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({
+    request,
+    context,
+    params,
+    logger,
+    dependencies: { getRulesClientWithRequest },
+  }) => {
     if (!isLicenseAtLeastPlatinum(context)) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
+    const rulesClient = getRulesClientWithRequest(request);
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
 
-    const deleteSLO = new DeleteSLO(repository, transformManager, esClient);
+    const deleteSLO = new DeleteSLO(repository, transformManager, esClient, rulesClient);
 
     await deleteSLO.execute(params.path.id);
   },
@@ -238,6 +247,34 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
 });
 
+const getDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: undefined,
+  handler: async ({ context }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const licensing = await context.licensing;
+
+    return getGlobalDiagnosis(esClient, licensing);
+  },
+});
+
+const getSloDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: getSLODiagnosisParamsSchema,
+  handler: async ({ context, params }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+
+    return getSloDiagnosis(params.path.id, { esClient, soClient });
+  },
+});
+
 export const slosRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
@@ -247,4 +284,6 @@ export const slosRouteRepository = {
   ...findSLORoute,
   ...getSLORoute,
   ...updateSLORoute,
+  ...getDiagnosisRoute,
+  ...getSloDiagnosisRoute,
 };

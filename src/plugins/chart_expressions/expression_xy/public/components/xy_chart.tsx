@@ -36,7 +36,7 @@ import {
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { datatable, Datatable, RenderMode } from '@kbn/expressions-plugin/common';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -52,6 +52,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -207,8 +208,6 @@ function createSplitPoint(
 
 export const XYChartReportable = React.memo(XYChart);
 
-type OverrideSettingsKeys = keyof SettingsProps;
-
 export function XYChart({
   args,
   data,
@@ -230,7 +229,7 @@ export function XYChart({
   renderComplete,
   uiState,
   timeFormat,
-  overrides = {},
+  overrides,
   children,
 }: XYChartRenderProps) {
   const {
@@ -316,16 +315,6 @@ export function XYChart({
     },
     [renderComplete]
   );
-
-  const hasOverride = <T extends OverrideSettingsKeys>(setting: T): boolean => {
-    return overrides.settings ? setting in overrides.settings : false;
-  };
-
-  const getOverride = <T extends OverrideSettingsKeys>(
-    setting: T
-  ): SettingsProps[T] | undefined => {
-    return hasOverride(setting) ? overrides.settings?.[setting] : undefined;
-  };
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
   const formattedDatatables = useMemo(
@@ -808,6 +797,11 @@ export function XYChart({
   // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
   const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors) && interactive;
 
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
   return (
     <div css={chartContainerStyle}>
       {showLegend !== undefined && uiState && (
@@ -833,7 +827,7 @@ export function XYChart({
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
-              !args.detailedTooltip
+              !args.detailedTooltip && xAxisColumn
                 ? ({ value }) => (
                     <TooltipHeader
                       value={value}
@@ -902,31 +896,36 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-            theme={{
-              ...chartTheme,
-              barSeriesStyle: {
-                ...chartTheme.barSeriesStyle,
-                ...valueLabelsStyling,
+            theme={[
+              {
+                ...chartTheme,
+                barSeriesStyle: {
+                  ...chartTheme.barSeriesStyle,
+                  ...valueLabelsStyling,
+                },
+                background: {
+                  color: undefined, // removes background for embeddables
+                },
+                legend: {
+                  labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                },
+                // if not title or labels are shown for axes, add some padding if required by reference line markers
+                chartMargins: {
+                  ...chartTheme.chartPaddings,
+                  ...computeChartMargins(
+                    linesPaddings,
+                    { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
+                    { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
+                    yAxesMap,
+                    shouldRotate
+                  ),
+                },
+                markSizeRatio: args.markSizeRatio,
               },
-              background: {
-                color: undefined, // removes background for embeddables
-              },
-              legend: {
-                labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
-              },
-              // if not title or labels are shown for axes, add some padding if required by reference line markers
-              chartMargins: {
-                ...chartTheme.chartPaddings,
-                ...computeChartMargins(
-                  linesPaddings,
-                  { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
-                  { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
-                  yAxesMap,
-                  shouldRotate
-                ),
-              },
-              markSizeRatio: args.markSizeRatio,
-            }}
+              ...(Array.isArray(settingsThemeOverrides)
+                ? settingsThemeOverrides
+                : [settingsThemeOverrides]),
+            ]}
             baseTheme={chartBaseTheme}
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
@@ -934,9 +933,7 @@ export function XYChart({
             onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
             onElementClick={interactive ? clickHandler : undefined}
             legendAction={
-              hasOverride('legendAction' as const)
-                ? getOverride('legendAction')
-                : interactive
+              interactive
                 ? getLegendAction(
                     dataLayers,
                     onClickValue,
@@ -958,6 +955,7 @@ export function XYChart({
                   }
                 : undefined
             }
+            {...settingsOverrides}
           />
           <XYCurrentTime
             enabled={Boolean(args.addTimeMarker && isTimeViz)}
@@ -986,6 +984,7 @@ export function XYChart({
             showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
             showDuplicatedTicks={xAxisConfig?.showDuplicates}
             timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
+            {...getOverridesFor(overrides, 'axisX')}
           />
           {isSplitChart && splitTable && (
             <SplitChart
@@ -1017,6 +1016,10 @@ export function XYChart({
                 domain={getYAxisDomain(axis)}
                 showOverlappingLabels={axis.showOverlappingLabels}
                 showDuplicatedTicks={axis.showDuplicates}
+                {...getOverridesFor(
+                  overrides,
+                  /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'
+                )}
               />
             );
           })}

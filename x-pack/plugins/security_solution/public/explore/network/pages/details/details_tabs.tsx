@@ -11,7 +11,7 @@ import { Switch } from 'react-router-dom';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { Route } from '@kbn/kibana-react-plugin/public';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { EventsQueryTabBody } from '../../../../common/components/events_tab/events_query_tab_body';

@@ -16,7 +16,6 @@ import {
   SavedObjectDecoratorRegistry,
   SavedObjectDecoratorConfig,
 } from './saved_object';
-import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
 import { setStartServices } from './kibana_services';
 
@@ -30,22 +29,6 @@ export interface SavedObjectsStart {
    * @removeBy 8.8.0
    */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
-  /**
-   * @deprecated
-   * @removeBy 8.8.0
-   */
-  settings: {
-    /**
-     * @deprecated
-     * @removeBy 8.8.0
-     */
-    getPerPage: () => number;
-    /**
-     * @deprecated
-     * @removeBy 8.8.0
-     */
-    getListingLimit: () => number;
-  };
 }
 
 export interface SavedObjectsStartDeps {
@@ -76,10 +59,6 @@ export class SavedObjectsPublicPlugin
         },
         this.decoratorRegistry
       ),
-      settings: {
-        getPerPage: () => core.uiSettings.get(PER_PAGE_SETTING),
-        getListingLimit: () => core.uiSettings.get(LISTING_LIMIT_SETTING),
-      },
     };
   }
 }

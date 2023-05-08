@@ -10,13 +10,11 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
@@ -26,16 +24,18 @@ import {
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
-import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { monitorAttributes } from '../../../common/types/saved_objects';
+import { AlertConfigKey } from '../../../common/constants/monitor_management';
 
 export interface StaleDownConfig extends OverviewStatusMetaData {
   isDeleted?: boolean;
   isLocationRemoved?: boolean;
 }
 
-export interface AlertOverviewStatus extends Omit<OverviewStatus, 'disabledCount'> {
+export interface AlertOverviewStatus
+  extends Omit<OverviewStatus, 'disabledCount' | 'disabledMonitorQueryIds'> {
   staleDownConfigs: Record<string, StaleDownConfig>;
 }
 
@@ -90,7 +90,7 @@ export class StatusRuleExecutor {
     await this.getAllLocationNames();
     this.monitors = await getAllMonitors({
       soClient: this.soClient,
-      search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
+      filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
     const {
@@ -195,7 +195,10 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        if (!locations.some((l) => l.label === downConfig.location)) {
+        const isLocationRemoved = !locations.some(
+          (l) => l.id === this.getLocationId(downConfig.location)
+        );
+        if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];
         }
@@ -203,17 +206,5 @@ export class StatusRuleExecutor {
     });
 
     return staleDownConfigs;
-  }
-
-  async getStatusMessage(downMonParams?: GetMonitorDownStatusMessageParams) {
-    let statusMessage = '';
-    if (downMonParams?.info) {
-      statusMessage = statusCheckTranslations.downMonitorsLabel(
-        downMonParams.count!,
-        downMonParams.interval!,
-        downMonParams.numTimes
-      );
-    }
-    return statusMessage;
   }
 }

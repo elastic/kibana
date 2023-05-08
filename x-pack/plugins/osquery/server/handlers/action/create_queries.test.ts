@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createDynamicQueries, createQueries } from './create_queries';
+import { createDynamicQueries, PARAMETER_NOT_FOUND } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
@@ -18,6 +18,8 @@ describe('create queries', () => {
     removed: false,
     snapshot: true,
   };
+  const TEST_AGENT = 'test-agent';
+
   const mockedQueriesParams = {
     queries: [
       {
@@ -49,69 +51,74 @@ describe('create queries', () => {
   // Info: getting queries by index (eg. [1], [0]) because can't compare whole query object due to unique action_id generated.
   describe('dynamic', () => {
     const pid = 123;
-    it('if queries length it should return replaced list of queries', async () => {
-      const queries = await createDynamicQueries(
-        mockedQueriesParams,
-        {
+    it('alertData, multi queries, should replace queries and show errors', async () => {
+      const queries = await createDynamicQueries({
+        params: mockedQueriesParams,
+        agents: [TEST_AGENT],
+        alertData: {
           process: {
             pid,
           },
         } as unknown as ParsedTechnicalFields,
-        {} as OsqueryAppContext
-      );
+        osqueryContext: {} as OsqueryAppContext,
+      });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
+      expect(queries[0].error).toBe(undefined);
+      expect(queries[1].query).toBe('SELECT * FROM processes where pid={{process.not-existing}};');
       expect(queries[1].error).toBe(
         "This query hasn't been called due to parameter used and its value not found in the alert."
       );
-      expect(queries[1].query).toBe('SELECT * FROM processes where pid={{process.not-existing}};');
       expect(queries[2].query).toBe('SELECT * FROM processes;');
-    });
-    it('if single query it should return one replaced query ', async () => {
-      const queries = await createDynamicQueries(
-        mockedSingleQueryParams,
-        {
-          process: {
-            pid,
-          },
-        } as unknown as ParsedTechnicalFields,
-        {} as OsqueryAppContext
-      );
-      expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
-    });
-    it('if single query with not existing parameter it should return query as it is', async () => {
-      const queries = await createDynamicQueries(
-        mockedSingleQueryParams,
-        {
-          process: {},
-        } as unknown as ParsedTechnicalFields,
-        {} as OsqueryAppContext
-      );
-      expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
-      expect(queries[0].error).toBe(undefined);
-    });
-  });
-  describe('normal', () => {
-    const TEST_AGENT = 'test-agent';
-    it('if queries length it should return not replaced list of queries with agents', async () => {
-      const queries = await createQueries(
-        mockedQueriesParams,
-        [TEST_AGENT],
-        {} as OsqueryAppContext
-      );
-      expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
-      expect(queries[0].agents).toContain(TEST_AGENT);
-      expect(queries[2].query).toBe('SELECT * FROM processes;');
-      expect(queries[2].agents).toContain(TEST_AGENT);
+      expect(queries[2].error).toBe(undefined);
     });
 
-    it('if single query should return not replaced query with agents', async () => {
-      const queries = await createQueries(
-        mockedSingleQueryParams,
-        [TEST_AGENT],
-        {} as OsqueryAppContext
-      );
+    it('alertData, single query, existing param should return changed query', async () => {
+      const queries = await createDynamicQueries({
+        params: mockedSingleQueryParams,
+        agents: [TEST_AGENT],
+        alertData: {
+          process: { pid },
+        } as unknown as ParsedTechnicalFields,
+        osqueryContext: {} as OsqueryAppContext,
+      });
+      expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
+      expect(queries[0].error).toBe(undefined);
+    });
+    it('alertData, single query, not existing param should return error', async () => {
+      const queries = await createDynamicQueries({
+        params: mockedSingleQueryParams,
+        agents: [TEST_AGENT],
+        alertData: {
+          process: {},
+        } as unknown as ParsedTechnicalFields,
+        osqueryContext: {} as OsqueryAppContext,
+      });
+      expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
+      expect(queries[0].error).toBe(PARAMETER_NOT_FOUND);
+    });
+    it('no alert data, multi query, return unchanged queries no error', async () => {
+      const queries = await createDynamicQueries({
+        params: mockedQueriesParams,
+        agents: [TEST_AGENT],
+        osqueryContext: {} as OsqueryAppContext,
+      });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
       expect(queries[0].agents).toContain(TEST_AGENT);
+      expect(queries[0].error).toBe(undefined);
+      expect(queries[2].query).toBe('SELECT * FROM processes;');
+      expect(queries[2].agents).toContain(TEST_AGENT);
+      expect(queries[2].error).toBe(undefined);
+    });
+
+    it('no alert data, single query, return unchanged query and no error', async () => {
+      const queries = await createDynamicQueries({
+        params: mockedSingleQueryParams,
+        agents: [TEST_AGENT],
+        osqueryContext: {} as OsqueryAppContext,
+      });
+      expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
+      expect(queries[0].agents).toContain(TEST_AGENT);
+      expect(queries[0].error).toBe(undefined);
     });
   });
 });

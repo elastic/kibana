@@ -23,6 +23,7 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { expect } from 'expect';
 import {
   createListsIndex,
@@ -64,7 +65,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145776
+  describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -155,6 +157,22 @@ export default ({ getService }: FtrProviderContext) => {
           ]),
         })
       );
+    });
+
+    it('generates max signals warning when circuit breaker is exceeded', async () => {
+      const { logs } = await previewRule({
+        supertest,
+        rule: { ...rule, anomaly_threshold: 1, max_signals: 5 }, // This threshold generates 10 alerts with the current esArchive
+      });
+      expect(logs[0].warnings).toContain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met, but not exceeded", async () => {
+      const { logs } = await previewRule({
+        supertest,
+        rule: { ...rule, anomaly_threshold: 1, max_signals: 10 },
+      });
+      expect(logs[0].warnings).not.toContain(getMaxSignalsWarning());
     });
 
     it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {

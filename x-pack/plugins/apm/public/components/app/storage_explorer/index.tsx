@@ -123,7 +123,10 @@ export function StorageExplorer() {
               defaultMessage="Enable progressive loading of data and optimized sorting for services list in {kibanaAdvancedSettingsLink}."
               values={{
                 kibanaAdvancedSettingsLink: (
-                  <EuiLink href={getKibanaAdvancedSettingsHref(core)}>
+                  <EuiLink
+                    data-test-subj="apmStorageExplorerKibanaAdvancedSettingsLink"
+                    href={getKibanaAdvancedSettingsHref(core)}
+                  >
                     {i18n.translate(
                       'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
                       {
@@ -136,6 +139,7 @@ export function StorageExplorer() {
             />
           </p>
           <EuiButton
+            data-test-subj="apmStorageExplorerButton"
             onClick={() =>
               setCalloutDismissed({
                 ...calloutDismissed,
@@ -171,6 +175,7 @@ export function StorageExplorer() {
                 )}
               </p>
               <EuiButton
+                data-test-subj="apmStorageExplorerButton"
                 onClick={() =>
                   setCalloutDismissed({
                     ...calloutDismissed,

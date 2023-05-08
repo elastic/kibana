@@ -8,6 +8,7 @@
 import React, { useContext } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
+import { getScreenshotUrl } from './journey_screenshot_dialog';
 import { SyntheticsSettingsContext } from '../../../contexts';
 
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
@@ -15,22 +16,26 @@ import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screens
 import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
 interface Props {
+  timestamp?: string;
   checkGroup?: string;
   stepStatus?: string;
   initialStepNumber?: number;
   allStepsLoaded?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` for "Run Once" / "Test Now" modes
   size?: ScreenshotImageSize;
+  testNowMode?: boolean;
   unavailableMessage?: string;
   borderRadius?: number | string;
 }
 
 export const JourneyStepScreenshotContainer = ({
+  allStepsLoaded,
+  timestamp,
   checkGroup,
   stepStatus,
-  allStepsLoaded,
   initialStepNumber = 1,
   retryFetchOnRevisit = false,
+  testNowMode,
   size = THUMBNAIL_SCREENSHOT_SIZE,
   unavailableMessage,
   borderRadius,
@@ -40,7 +45,7 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = checkGroup
-    ? `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${initialStepNumber}`
+    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber })
     : '';
 
   const intersection = useIntersection(intersectionRef, {
@@ -55,6 +60,8 @@ export const JourneyStepScreenshotContainer = ({
     imgPath,
     retryFetchOnRevisit,
     checkGroup,
+    testNowMode,
+    timestamp,
   });
 
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
@@ -72,6 +79,7 @@ export const JourneyStepScreenshotContainer = ({
         size={size}
         unavailableMessage={unavailableMessage}
         borderRadius={borderRadius}
+        timestamp={timestamp}
       />
     </div>
   );

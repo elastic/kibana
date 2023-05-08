@@ -14,7 +14,7 @@ import { LinkIcon } from '.';
 describe('LinkIcon', () => {
   test('it renders', () => {
     const wrapper = shallow(
-      <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="alert">
+      <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
@@ -25,7 +25,7 @@ describe('LinkIcon', () => {
   test('it renders an action button when onClick is provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconType="alert" onClick={() => alert('Test alert')}>
+        <LinkIcon iconType="warning" onClick={() => alert('Test alert')}>
           {'Test link'}
         </LinkIcon>
       </TestProviders>
@@ -37,7 +37,7 @@ describe('LinkIcon', () => {
   test('it renders an action link when href is provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon href="#" iconType="alert">
+        <LinkIcon href="#" iconType="warning">
           {'Test link'}
         </LinkIcon>
       </TestProviders>
@@ -49,7 +49,7 @@ describe('LinkIcon', () => {
   test('it renders an icon', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconType="alert">{'Test link'}</LinkIcon>
+        <LinkIcon iconType="warning">{'Test link'}</LinkIcon>
       </TestProviders>
     );
 
@@ -59,7 +59,7 @@ describe('LinkIcon', () => {
   test('it positions the icon to the right when iconSide is right', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconSide="right" iconType="alert">
+        <LinkIcon iconSide="right" iconType="warning">
           {'Test link'}
         </LinkIcon>
       </TestProviders>
@@ -71,7 +71,7 @@ describe('LinkIcon', () => {
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconSide="left" iconType="alert">
+        <LinkIcon iconSide="left" iconType="warning">
           {'Test link'}
         </LinkIcon>
       </TestProviders>
@@ -86,7 +86,7 @@ describe('LinkIcon', () => {
   test('it renders a label', () => {
     const wrapper = mount(
       <TestProviders>
-        <LinkIcon iconType="alert">{'Test link'}</LinkIcon>
+        <LinkIcon iconType="warning">{'Test link'}</LinkIcon>
       </TestProviders>
     );
 

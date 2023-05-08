@@ -20,7 +20,11 @@ export const LogEntryExampleMessagesEmptyIndicator: React.FunctionComponent<{
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButton onClick={onReload} size="s">
+      <EuiButton
+        data-test-subj="infraLogEntryExampleMessagesEmptyIndicatorReloadButton"
+        onClick={onReload}
+        size="s"
+      >
         <FormattedMessage
           id="xpack.infra.logs.logEntryExamples.exampleEmptyReloadButtonLabel"
           defaultMessage="Reload"

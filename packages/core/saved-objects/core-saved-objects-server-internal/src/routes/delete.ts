@@ -11,7 +11,11 @@ import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal'
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -38,7 +42,12 @@ export const registerDeleteRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn("The delete saved object API '/api/saved_objects/{type}/{id}' is deprecated.");
+      logWarnOnExternalRequest({
+        method: 'delete',
+        path: '/api/saved_objects/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { force } = req.query;
       const { getClient, typeRegistry } = (await context.core).savedObjects;

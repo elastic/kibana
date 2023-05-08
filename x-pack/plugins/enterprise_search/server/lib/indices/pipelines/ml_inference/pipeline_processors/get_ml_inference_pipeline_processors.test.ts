@@ -160,7 +160,7 @@ const mockGetTrainedModelsData = {
     {
       inference_config: { ner: {} },
       model_id: 'trained-model-id-1',
-      model_type: 'lang_ident',
+      model_type: 'pytorch',
       tags: [],
     },
     {
@@ -250,7 +250,7 @@ const trainedModelDataObject: Record<string, InferencePipeline> = {
     modelState: TrainedModelState.NotDeployed,
     pipelineName: 'ml-inference-pipeline-1',
     pipelineReferences: ['my-index@ml-inference'],
-    types: ['lang_ident', 'ner'],
+    types: ['pytorch', 'ner'],
   },
   'trained-model-id-2': {
     modelId: 'trained-model-id-2',
@@ -264,7 +264,7 @@ const trainedModelDataObject: Record<string, InferencePipeline> = {
     modelState: TrainedModelState.NotDeployed,
     pipelineName: 'ml-inference-pipeline-3',
     pipelineReferences: ['my-index@ml-inference'],
-    types: ['lang_ident', 'ner'],
+    types: ['pytorch', 'ner'],
   },
 };
 
@@ -571,7 +571,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
         pipelineName: 'ml-inference-pipeline-1',
         pipelineReferences: [],
         trainedModelName: 'trained-model-id-1',
-        types: ['lang_ident', 'ner'],
+        types: ['pytorch', 'ner'],
       },
       {
         modelId: 'trained-model-id-2',

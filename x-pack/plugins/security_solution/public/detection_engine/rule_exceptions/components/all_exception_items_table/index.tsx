@@ -229,7 +229,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const exceptionListFilter = useMemo(() => {
-    if (exceptionsToShow.active && exceptionsToShow.expired) {
+    if (isEndpointSpecified || (exceptionsToShow.active && exceptionsToShow.expired)) {
       return undefined;
     }
     const savedObjectPrefixes = getSavedObjectTypes({
@@ -241,7 +241,7 @@ const ExceptionsViewerComponent = ({
     if (exceptionsToShow.expired) {
       return buildShowExpiredExceptionsFilter(savedObjectPrefixes);
     }
-  }, [exceptionsToShow, namespaceTypes]);
+  }, [exceptionsToShow, namespaceTypes, isEndpointSpecified]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -499,7 +499,6 @@ const ExceptionsViewerComponent = ({
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyout"
           showAlertCloseOptions
-          isNonTimeline={true}
         />
       )}
 
@@ -516,6 +515,7 @@ const ExceptionsViewerComponent = ({
                 exceptionsToShow={exceptionsToShow}
                 onChangeExceptionsToShow={handleExceptionsToShow}
                 lastUpdated={lastUpdated}
+                isEndpoint={isEndpointSpecified}
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar

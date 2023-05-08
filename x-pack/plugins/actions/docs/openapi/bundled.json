@@ -130,14 +130,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -185,14 +178,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           },
           "404": {
             "description": "Object is not found.",
@@ -248,14 +234,7 @@
             "description": "Indicates a successful call."
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           },
           "404": {
             "description": "Object is not found.",
@@ -339,6 +318,9 @@
                     "$ref": "#/components/schemas/update_connector_request_servicenow_itom"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_slack"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_swimlane"
                   }
                 ]
@@ -387,24 +369,10 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           },
           "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/404"
           }
         },
         "servers": [
@@ -498,14 +466,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -605,14 +566,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -795,14 +749,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -842,14 +789,7 @@
             "description": "Indicates a successful call."
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -876,24 +816,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/action_response_properties"
-                }
-              }
-            }
+            "$ref": "#/components/responses/200_actions"
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -949,24 +875,10 @@
         },
         "responses": {
           "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/action_response_properties"
-                }
-              }
-            }
+            "$ref": "#/components/responses/200_actions"
           },
           "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/404"
           }
         },
         "servers": [
@@ -1010,14 +922,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -1073,24 +978,10 @@
         },
         "responses": {
           "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/action_response_properties"
-                }
-              }
-            }
+            "$ref": "#/components/responses/200_actions"
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -1163,14 +1054,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -1263,14 +1147,7 @@
             }
           },
           "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/401_response"
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           }
         },
         "servers": [
@@ -2074,8 +1951,32 @@
       "secrets_properties_slack": {
         "title": "Connector secrets properties for a Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
-        "type": "object",
-        "additionalProperties": true
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "token"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "The Slack bot user OAuth token."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "webhookUrl"
+            ],
+            "properties": {
+              "webhookUrl": {
+                "type": "string",
+                "description": "The Slack webhook url."
+              }
+            }
+          }
+        ]
       },
       "create_connector_request_slack": {
         "title": "Create Slack connector request",
@@ -3318,29 +3219,6 @@
           "propertyName": "connector_type_id"
         }
       },
-      "401_response": {
-        "type": "object",
-        "title": "Unsuccessful rule API response",
-        "properties": {
-          "error": {
-            "type": "string",
-            "example": "Unauthorized",
-            "enum": [
-              "Unauthorized"
-            ]
-          },
-          "message": {
-            "type": "string"
-          },
-          "statusCode": {
-            "type": "integer",
-            "example": 401,
-            "enum": [
-              401
-            ]
-          }
-        }
-      },
       "update_connector_request_cases_webhook": {
         "title": "Update Webhook - Case Managment connector request",
         "type": "object",
@@ -3497,6 +3375,30 @@
           }
         }
       },
+      "update_connector_request_slack": {
+        "title": "Update Slack connector request",
+        "type": "object",
+        "required": [
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "config": {
+            "type": "string",
+            "enum": [
+              "web_api",
+              "webhook"
+            ]
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_slack"
+          }
+        }
+      },
       "update_connector_request_swimlane": {
         "title": "Update Swimlane connector request",
         "type": "object",
@@ -3516,29 +3418,6 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_swimlane"
-          }
-        }
-      },
-      "404_response": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string",
-            "example": "Not Found",
-            "enum": [
-              "Not Found"
-            ]
-          },
-          "message": {
-            "type": "string",
-            "example": "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
-          },
-          "statusCode": {
-            "type": "integer",
-            "example": 404,
-            "enum": [
-              404
-            ]
           }
         }
       },
@@ -4624,6 +4503,79 @@
             ]
           },
           "status": "ok"
+        }
+      }
+    },
+    "responses": {
+      "401": {
+        "description": "Authorization information is missing or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "title": "Unauthorized response",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Unauthorized",
+                  "enum": [
+                    "Unauthorized"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "example": 401,
+                  "enum": [
+                    401
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Object is not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "title": "Not found response",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Not Found",
+                  "enum": [
+                    "Not Found"
+                  ]
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "example": 404,
+                  "enum": [
+                    404
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "200_actions": {
+        "description": "Indicates a successful call.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/action_response_properties"
+            }
+          }
         }
       }
     }

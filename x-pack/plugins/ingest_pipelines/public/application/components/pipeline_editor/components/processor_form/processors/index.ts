@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+// please try to keep this list sorted by module name (e.g. './bar' before './foo')
+
 export { Append } from './append';
+export { Attachment } from './attachment';
 export { Bytes } from './bytes';
 export { Circle } from './circle';
 export { CommunityId } from './community_id';
@@ -20,6 +23,7 @@ export { Enrich } from './enrich';
 export { Fail } from './fail';
 export { Fingerprint } from './fingerprint';
 export { Foreach } from './foreach';
+export { GeoGrid } from './geogrid';
 export { GeoIP } from './geoip';
 export { Grok } from './grok';
 export { Gsub } from './gsub';
@@ -31,18 +35,19 @@ export { Kv } from './kv';
 export { Lowercase } from './lowercase';
 export { NetworkDirection } from './network_direction';
 export { Pipeline } from './pipeline';
+export { Redact } from './redact';
 export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';
 export { Rename } from './rename';
 export { Script } from './script';
 export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';
-export { Split } from './split';
 export { Sort } from './sort';
+export { Split } from './split';
 export { Trim } from './trim';
 export { Uppercase } from './uppercase';
+export { UriParts } from './uri_parts';
 export { UrlDecode } from './url_decode';
 export { UserAgent } from './user_agent';
-export { UriParts } from './uri_parts';
 
 export type { FormFieldsComponent } from './shared';
