@@ -25,7 +25,8 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
   const retry = getService('retry');
   const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-  describe('getAlertSummary', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156792
+  describe.skip('getAlertSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());

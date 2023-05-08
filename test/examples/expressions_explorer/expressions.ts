@@ -17,7 +17,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  describe('', () => {
+  // failing test: https://github.com/elastic/kibana/issues/156780
+  describe.skip('', () => {
     it('runs expression', async () => {
       await retry.try(async () => {
         const text = await testSubjects.getVisibleText('expressionResult');
