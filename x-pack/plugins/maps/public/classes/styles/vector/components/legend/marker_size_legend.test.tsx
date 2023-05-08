@@ -146,3 +146,19 @@ test('Should render max label with std clamp notification', () => {
   );
   expect(component).toMatchSnapshot();
 });
+
+test('Should invert legend', () => {
+  const component = shallow(
+    <MarkerSizeLegend style={{
+      ...mockStyle,
+      getOptions: () => {
+        return {
+          ...dynamicSizeOptions,
+          maxSize: 24,
+          invert: true,
+        };
+      },
+    }} />
+  );
+  expect(component).toMatchSnapshot();
+});

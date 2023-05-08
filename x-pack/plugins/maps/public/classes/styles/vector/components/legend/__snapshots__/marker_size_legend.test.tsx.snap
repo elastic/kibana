@@ -1,5 +1,162 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Should invert legend 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content=""
+        delay="regular"
+        display="inlineBlock"
+        position="top"
+        title="Symbol size"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong />
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <svg
+    height={55}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g
+      key="7"
+    >
+      <line
+        style={
+          Object {
+            "stroke": "#d3dae6",
+          }
+        }
+        x1={25}
+        x2={56.25}
+        y1={40}
+        y2={40}
+      />
+      <RightAlignedText
+        setWidth={[Function]}
+        style={
+          Object {
+            "fill": "#343741",
+            "fontSize": 10,
+          }
+        }
+        value="19KB"
+        x={61.25}
+        y={45}
+      />
+      <circle
+        cx={25}
+        cy={47}
+        r={7}
+        style={
+          Object {
+            "fillOpacity": 0,
+            "stroke": "#343741",
+            "strokeWidth": 1,
+          }
+        }
+      />
+    </g>
+    <g
+      key="15.5"
+    >
+      <line
+        style={
+          Object {
+            "stroke": "#d3dae6",
+          }
+        }
+        x1={25}
+        x2={56.25}
+        y1={23}
+        y2={23}
+      />
+      <RightAlignedText
+        setWidth={[Function]}
+        style={
+          Object {
+            "fill": "#343741",
+            "fontSize": 10,
+          }
+        }
+        value="14.25KB"
+        x={61.25}
+        y={28}
+      />
+      <circle
+        cx={25}
+        cy={38.5}
+        r={15.5}
+        style={
+          Object {
+            "fillOpacity": 0,
+            "stroke": "#343741",
+            "strokeWidth": 1,
+          }
+        }
+      />
+    </g>
+    <g
+      key="24"
+    >
+      <line
+        style={
+          Object {
+            "stroke": "#d3dae6",
+          }
+        }
+        x1={25}
+        x2={56.25}
+        y1={6}
+        y2={6}
+      />
+      <RightAlignedText
+        setWidth={[Function]}
+        style={
+          Object {
+            "fill": "#343741",
+            "fontSize": 10,
+          }
+        }
+        value="0KB"
+        x={61.25}
+        y={11}
+      />
+      <circle
+        cx={25}
+        cy={30}
+        r={24}
+        style={
+          Object {
+            "fillOpacity": 0,
+            "stroke": "#343741",
+            "strokeWidth": 1,
+          }
+        }
+      />
+    </g>
+  </svg>
+</div>
+`;
+
 exports[`Should render legend 1`] = `
 <div>
   <EuiFlexGroup
