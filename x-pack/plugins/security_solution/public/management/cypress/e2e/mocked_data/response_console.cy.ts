@@ -265,7 +265,7 @@ describe('Response console', () => {
       });
       cy.getByTestSubj('getFileSuccess').within(() => {
         cy.contains('File retrieved from the host.');
-        cy.contains('(ZIP file passcode: elastic');
+        cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
           'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );

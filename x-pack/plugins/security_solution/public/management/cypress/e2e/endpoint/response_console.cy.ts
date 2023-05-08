@@ -186,7 +186,7 @@ describe('Response console', () => {
         })
       );
 
-      cy.task('installPackageOnEndpoint', { hostname: endpointHostname, packageName: 'unzip' });
+      cy.task('installPackagesOnEndpoint', { hostname: endpointHostname, packages: ['unzip'] });
 
       cy.task('createFileOnEndpoint', {
         hostname: endpointHostname,
@@ -228,7 +228,7 @@ describe('Response console', () => {
         cy.task('readZippedFileContentOnEndpoint', {
           hostname: endpointHostname,
           path: '/home/ubuntu/upload.zip',
-          zipPassword: 'elastic',
+          password: 'elastic',
         }).then((unzippedFileContent) => {
           expect(unzippedFileContent).to.equal(fileContent);
         });

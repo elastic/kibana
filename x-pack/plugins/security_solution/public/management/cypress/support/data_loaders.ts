@@ -248,12 +248,12 @@ export const dataLoadersForRealEndpoints = (
       return null;
     },
 
-    installPackageOnEndpoint: async ({
+    installPackagesOnEndpoint: async ({
       hostname,
-      packageName,
+      packages,
     }: {
       hostname: string;
-      packageName: string;
+      packages: string[];
     }): Promise<null> => {
       await execa(`multipass`, [
         'exec',
@@ -261,7 +261,7 @@ export const dataLoadersForRealEndpoints = (
         '--',
         'sh',
         '-c',
-        `sudo apt install -y ${packageName}`,
+        `sudo apt install -y ${packages.join(' ')}`,
       ]);
       return null;
     },
@@ -269,21 +269,21 @@ export const dataLoadersForRealEndpoints = (
     readZippedFileContentOnEndpoint: async ({
       hostname,
       path,
-      zipPassword,
+      password,
     }: {
       hostname: string;
       path: string;
-      zipPassword?: string;
+      password?: string;
     }): Promise<string> => {
-      const stdout = await execa(`multipass`, [
+      const result = await execa(`multipass`, [
         'exec',
         hostname,
         '--',
         'sh',
         '-c',
-        `unzip -p ${zipPassword ? `-P ${zipPassword} ` : ''}${path}`,
+        `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
       ]);
-      return stdout.stdout;
+      return result.stdout;
     },
   });
 };
