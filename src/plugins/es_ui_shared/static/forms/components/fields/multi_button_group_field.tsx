@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiButtonGroup, EuiButtonGroupOptionProps, EuiFormRow } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
@@ -28,13 +28,6 @@ interface Props {
 
 export const MultiButtonGroupField = ({ field, euiFieldProps, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const onChange = useCallback(
-    (e) => {
-      const value = field.value as MultiButtonGroupFieldValue;
-      field.setValue({ ...value, [e]: !value[e] });
-    },
-    [field]
-  );
 
   return (
     <EuiFormRow
@@ -48,7 +41,10 @@ export const MultiButtonGroupField = ({ field, euiFieldProps, idAria, ...rest }:
     >
       <EuiButtonGroup
         isFullWidth
-        onChange={onChange}
+        onChange={(e) => {
+          const value = field.value as MultiButtonGroupFieldValue;
+          field.setValue({ ...value, [e]: !value[e] });
+        }}
         idToSelectedMap={field.value as MultiButtonGroupFieldValue}
         type="multi"
         data-test-subj="button-group"
