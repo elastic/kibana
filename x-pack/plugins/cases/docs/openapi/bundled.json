@@ -247,17 +247,6 @@
             "example": "OR"
           },
           {
-            "name": "fields",
-            "in": "query",
-            "description": "The fields in the entity to return in the response.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
             "name": "from",
             "in": "query",
             "description": "[preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
@@ -323,12 +312,12 @@
             "schema": {
               "oneOf": [
                 {
-                  "type": "string"
+                  "$ref": "#/components/schemas/search_fields"
                 },
                 {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/search_fields"
                   }
                 }
               ]
@@ -3463,6 +3452,36 @@
             }
           }
         }
+      },
+      "search_fields": {
+        "type": "string",
+        "enum": [
+          "closed_by.username",
+          "closed_by.full_name",
+          "closed_by.email",
+          "closed_by.profile_uid",
+          "created_by.username",
+          "created_by.full_name",
+          "created_by.email",
+          "created_by.profile_uid",
+          "description",
+          "connector.name",
+          "connector.type",
+          "external_service.pushed_by.username",
+          "external_service.pushed_by.full_name",
+          "external_service.pushed_by.email",
+          "external_service.pushed_by.profile_uid",
+          "external_service.connector_name",
+          "external_service.external_id",
+          "external_service.external_title",
+          "external_service.external_url",
+          "title",
+          "title.keyword",
+          "updated_by.username",
+          "updated_by.full_name",
+          "updated_by.email",
+          "updated_by.profile_uid"
+        ]
       },
       "closure_types": {
         "type": "string",
