@@ -20,6 +20,15 @@ function nextMinor() {
   return Semver.inc(esTestConfig.getVersion(), 'minor') || '10.0.0';
 }
 
+function previousMinor() {
+  const [major, minor] = esTestConfig
+    .getVersion()
+    .split('.')
+    .map((s) => parseInt(s, 10));
+  // We should be fine for now. When we jump to the next major, we'll need to handle that.
+  return `${major}.${minor - 1}.0`;
+}
+
 describe('Version Compatibility', () => {
   let esServer: TestElasticsearchUtils | undefined;
   let kibanaServer: TestKibanaUtils | undefined;
@@ -76,7 +85,11 @@ describe('Version Compatibility', () => {
     await expect(startServers({})).resolves.toBeUndefined();
   });
 
-  it('should flag the incompatibility on version mismatch', async () => {
+  it('should start when ES is next minor', async () => {
+    await expect(startServers({ customKibanaVersion: previousMinor() })).resolves.toBeUndefined();
+  });
+
+  it('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
     const found$ = new Subject<void>();
     consoleSpy.mockImplementation((str) => {
       if (str.includes('is incompatible')) {
