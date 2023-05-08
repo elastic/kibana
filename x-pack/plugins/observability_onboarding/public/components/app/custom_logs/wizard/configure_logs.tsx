@@ -31,6 +31,7 @@ import {
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { getFilename, replaceSpecialChars } from './get_filename';
+import { OptionalFormRow } from '../../../shared/optional_form_row';
 
 export function ConfigureLogs() {
   const { goToStep, goBack, getState, setState } = useWizard();
@@ -255,27 +256,13 @@ export function ConfigureLogs() {
                   />
                 </EuiFormRow>
                 <EuiSpacer size="l" />
-                <EuiFormRow
-                  label={
-                    <>
-                      <span>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.configureLogs.customConfig',
-                          {
-                            defaultMessage: 'Custom configurations',
-                          }
-                        )}
-                      </span>
-                      <span>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.configureLogs.customConfig.optional',
-                          {
-                            defaultMessage: 'Optional',
-                          }
-                        )}
-                      </span>
-                    </>
-                  }
+                <OptionalFormRow
+                  label={i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.customConfig',
+                    {
+                      defaultMessage: 'Custom configurations',
+                    }
+                  )}
                   helpText={
                     <FormattedMessage
                       id="xpack.observability_onboarding.configureLogs.customConfig.helper"
@@ -307,7 +294,7 @@ export function ConfigureLogs() {
                       setCustomConfigurations(event.target.value)
                     }
                   />
-                </EuiFormRow>
+                </OptionalFormRow>
               </EuiAccordion>
             </EuiFlexItem>
             <EuiSpacer size="s" />
