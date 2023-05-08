@@ -22,15 +22,12 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CasesSetup } from '@kbn/cases-plugin/server';
-import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
-  osqueryCreateAction: (
-    payload: CreateLiveQueryRequestBodySchema,
-    alertData?: ParsedTechnicalFields
-  ) => void;
+  createActionService: ReturnType<typeof createActionService>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -45,6 +42,7 @@ export interface SetupPlugins {
   security: SecurityPluginStart;
   taskManager?: TaskManagerPluginSetup;
   telemetry?: TelemetryPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface StartPlugins {

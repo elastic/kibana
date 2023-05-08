@@ -6,6 +6,7 @@
  */
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
+import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
@@ -55,7 +56,9 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'add',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle),
+          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
+            transformNormalizedRuleToAlertAction
+          ),
         },
       ];
 
@@ -64,7 +67,9 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'set',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle),
+          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
+            transformNormalizedRuleToAlertAction
+          ),
         },
       ];
 
