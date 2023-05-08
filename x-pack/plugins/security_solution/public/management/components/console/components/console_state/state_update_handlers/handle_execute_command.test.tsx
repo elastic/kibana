@@ -259,6 +259,14 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
+  it.todo('should validate argument with `mustHaveValue=non-empty-string');
+
+  it.todo('should validate argument with `mustHaveValue=truthy');
+
+  it.todo('should validate argument with `mustHaveValue=number');
+
+  it.todo('should validate argument with `mustHaveValue=number-greater-than-zero');
+
   it('should show success when one exclusive argument is used', async () => {
     render();
     enterCommand('cmd6 --foo 234');
