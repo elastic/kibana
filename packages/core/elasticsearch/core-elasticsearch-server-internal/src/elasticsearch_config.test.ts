@@ -152,6 +152,13 @@ describe('reserved headers', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"[customHeaders]: cannot use reserved headers: [x-elastic-product-origin]"`
     );
+    expect(() => {
+      config.schema.validate({
+        customHeaders: { foo: 'bar', 'x-elastic-internal-origin': 'heya' },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[customHeaders]: cannot use reserved headers: [x-elastic-internal-origin]"`
+    );
   });
 
   test('throws if requestHeadersWhitelist contains reserved headers', () => {
@@ -167,6 +174,20 @@ describe('reserved headers', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[requestHeadersWhitelist]: types that failed validation:
       - [requestHeadersWhitelist.0]: cannot use reserved headers: [x-elastic-product-origin]
+      - [requestHeadersWhitelist.1]: could not parse array value from json input"
+    `);
+    expect(() => {
+      config.schema.validate({ requestHeadersWhitelist: ['foo', 'x-elastic-internal-origin'] });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestHeadersWhitelist]: types that failed validation:
+      - [requestHeadersWhitelist.0]: expected value of type [string] but got [Array]
+      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-internal-origin]"
+    `);
+    expect(() => {
+      config.schema.validate({ requestHeadersWhitelist: 'x-elastic-internal-origin' });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[requestHeadersWhitelist]: types that failed validation:
+      - [requestHeadersWhitelist.0]: cannot use reserved headers: [x-elastic-internal-origin]
       - [requestHeadersWhitelist.1]: could not parse array value from json input"
     `);
   });

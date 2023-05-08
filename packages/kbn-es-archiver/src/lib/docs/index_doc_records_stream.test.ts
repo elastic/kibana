@@ -151,6 +151,7 @@ it('indexes documents using the bulk client helper', async () => {
           },
           Object {
             "headers": Object {
+              "x-elastic-internal-origin": "kibana",
               "x-elastic-product-origin": "kibana",
             },
           },
@@ -174,6 +175,7 @@ it('indexes documents using the bulk client helper', async () => {
           },
           Object {
             "headers": Object {
+              "x-elastic-internal-origin": "kibana",
               "x-elastic-product-origin": "kibana",
             },
           },

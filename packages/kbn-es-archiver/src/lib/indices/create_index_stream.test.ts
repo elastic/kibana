@@ -73,6 +73,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
             },
             Object {
               "headers": Object {
+                "x-elastic-internal-origin": "kibana",
                 "x-elastic-product-origin": "kibana",
               },
               "ignore": Array [
@@ -94,6 +95,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
             },
             Object {
               "headers": Object {
+                "x-elastic-internal-origin": "kibana",
                 "x-elastic-product-origin": "kibana",
               },
             },

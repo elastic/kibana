@@ -129,105 +129,107 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     ]);
 
     expect(client.helpers.scrollSearch).toMatchInlineSnapshot(`
-    [MockFunction] {
-      "calls": Array [
-        Array [
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "_source": true,
+              "index": "bar",
+              "query": undefined,
+              "rest_total_hits_as_int": true,
+              "scroll": "1m",
+              "size": 1000,
+            },
+            Object {
+              "headers": Object {
+                "x-elastic-internal-origin": "kibana",
+                "x-elastic-product-origin": "kibana",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "_source": true,
+              "index": "foo",
+              "query": undefined,
+              "rest_total_hits_as_int": true,
+              "scroll": "1m",
+              "size": 1000,
+            },
+            Object {
+              "headers": Object {
+                "x-elastic-internal-origin": "kibana",
+                "x-elastic-product-origin": "kibana",
+              },
+            },
+          ],
+        ],
+        "results": Array [
           Object {
-            "_source": true,
-            "index": "bar",
-            "query": undefined,
-            "rest_total_hits_as_int": true,
-            "scroll": "1m",
-            "size": 1000,
+            "type": "return",
+            "value": Object {},
           },
           Object {
-            "headers": Object {
-              "x-elastic-product-origin": "kibana",
-            },
+            "type": "return",
+            "value": Object {},
           },
         ],
-        Array [
-          Object {
-            "_source": true,
-            "index": "foo",
-            "query": undefined,
-            "rest_total_hits_as_int": true,
-            "scroll": "1m",
-            "size": 1000,
-          },
-          Object {
-            "headers": Object {
-              "x-elastic-product-origin": "kibana",
-            },
-          },
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": Object {},
-        },
-        Object {
-          "type": "return",
-          "value": Object {},
-        },
-      ],
-    }
-  `);
+      }
+    `);
     expect(results).toMatchInlineSnapshot(`
-    Array [
-      "bar:0",
-      "bar:1",
-      "foo:0",
-      "foo:1",
-      "foo:2",
-      "foo:3",
-      "foo:4",
-    ]
-  `);
+          Array [
+            "bar:0",
+            "bar:1",
+            "foo:0",
+            "foo:1",
+            "foo:2",
+            "foo:3",
+            "foo:4",
+          ]
+      `);
     expect(progress).toMatchInlineSnapshot(`
-    Progress {
-      "complete": 7,
-      "loggingInterval": undefined,
-      "total": 7,
-    }
-  `);
+          Progress {
+            "complete": 7,
+            "loggingInterval": undefined,
+            "total": 7,
+          }
+      `);
     expect(stats).toMatchInlineSnapshot(`
-    Object {
-      "bar": Object {
-        "archived": false,
-        "configDocs": Object {
-          "tagged": 0,
-          "upToDate": 0,
-          "upgraded": 0,
-        },
-        "created": false,
-        "deleted": false,
-        "docs": Object {
-          "archived": 2,
-          "indexed": 0,
-        },
-        "skipped": false,
-        "waitForSnapshot": 0,
-      },
-      "foo": Object {
-        "archived": false,
-        "configDocs": Object {
-          "tagged": 0,
-          "upToDate": 0,
-          "upgraded": 0,
-        },
-        "created": false,
-        "deleted": false,
-        "docs": Object {
-          "archived": 5,
-          "indexed": 0,
-        },
-        "skipped": false,
-        "waitForSnapshot": 0,
-      },
-    }
-  `);
+          Object {
+            "bar": Object {
+              "archived": false,
+              "configDocs": Object {
+                "tagged": 0,
+                "upToDate": 0,
+                "upgraded": 0,
+              },
+              "created": false,
+              "deleted": false,
+              "docs": Object {
+                "archived": 2,
+                "indexed": 0,
+              },
+              "skipped": false,
+              "waitForSnapshot": 0,
+            },
+            "foo": Object {
+              "archived": false,
+              "configDocs": Object {
+                "tagged": 0,
+                "upToDate": 0,
+                "upgraded": 0,
+              },
+              "created": false,
+              "deleted": false,
+              "docs": Object {
+                "archived": 5,
+                "indexed": 0,
+              },
+              "skipped": false,
+              "waitForSnapshot": 0,
+            },
+          }
+      `);
   });
 
   it('supports data streams', async () => {
