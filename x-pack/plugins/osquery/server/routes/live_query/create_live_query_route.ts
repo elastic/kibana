@@ -11,7 +11,7 @@ import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
-import { PARAMETER_NOT_FOUND } from '../../handlers/action/create_queries';
+import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';

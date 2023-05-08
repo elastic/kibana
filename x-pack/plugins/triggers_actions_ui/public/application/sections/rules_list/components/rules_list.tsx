@@ -847,7 +847,7 @@ export const RulesList = ({
               itemIdToExpandedRowMap={itemIdToExpandedRowMap}
               onSort={setSort}
               onPage={setPage}
-              onRuleChanged={() => refreshRules()}
+              onRuleChanged={refreshRules}
               onRuleClick={(rule) => {
                 const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
                 history.push(detailsRoute.replace(`:ruleId`, rule.id));
@@ -883,7 +883,7 @@ export const RulesList = ({
                   key={rule.id}
                   item={rule}
                   onLoading={onLoading}
-                  onRuleChanged={() => refreshRules()}
+                  onRuleChanged={refreshRules}
                   onDeleteRule={() =>
                     updateRulesToBulkEdit({
                       action: 'delete',
