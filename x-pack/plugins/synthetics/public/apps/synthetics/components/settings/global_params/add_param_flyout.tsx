@@ -22,6 +22,7 @@ import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
 import {
   addNewGlobalParamAction,
   editGlobalParamAction,
@@ -162,16 +163,18 @@ export const AddParamFlyout = ({
 
   return (
     <div>
-      <EuiButton
-        data-test-subj="syntheticsAddParamFlyoutButton"
-        fill
-        iconType="plusInCircleFilled"
-        iconSide="left"
-        onClick={() => setIsFlyoutVisible(true)}
-        isDisabled={!canSave}
-      >
-        {CREATE_PARAM}
-      </EuiButton>
+      <NoPermissionsTooltip canEditSynthetics={canSave}>
+        <EuiButton
+          data-test-subj="syntheticsAddParamFlyoutButton"
+          fill
+          iconType="plusInCircleFilled"
+          iconSide="left"
+          onClick={() => setIsFlyoutVisible(true)}
+          isDisabled={!canSave}
+        >
+          {CREATE_PARAM}
+        </EuiButton>
+      </NoPermissionsTooltip>
       {flyout}
     </div>
   );
