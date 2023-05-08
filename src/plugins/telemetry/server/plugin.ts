@@ -40,6 +40,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
+import apm from 'elastic-apm-node';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
@@ -164,14 +165,23 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
     });
 
+    const telemetryLabels$ = new ReplaySubject<TelemetryConfigLabels>(1);
+    this.config$
+      .pipe(
+        map(({ labels }) => labels),
+        tap((labels) => apm.addLabels(labels))
+      )
+      .subscribe(telemetryLabels$);
+
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
       name: 'telemetry labels',
-      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      context$: telemetryLabels$.pipe(map((labels) => ({ labels }))),
       schema: {
         labels: {
           type: 'pass_through',
           _meta: {
-            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+            description:
+              'Custom labels added to the telemetry.labels config in the kibana.yml or extended via PUT /api/internal/telemetry/labels. Validated and limited to a known set of labels.',
           },
         },
       },
@@ -183,6 +193,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const router = http.createRouter();
 
     registerRoutes({
+      telemetryLabels$,
       config$,
       currentKibanaVersion,
       isDev,
