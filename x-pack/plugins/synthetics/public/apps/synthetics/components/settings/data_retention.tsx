@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PolicyLink } from './policy_link';
+import { PolicyLink, PolicyNameLabel } from './policy_link';
 import { useGetIlmPolicies } from './hooks/use_get_ilm_policies';
 
 export const DataRetentionTab = () => {
@@ -51,9 +51,7 @@ export const DataRetentionTab = () => {
     },
     {
       field: 'policy.name',
-      name: i18n.translate('xpack.synthetics.settingsRoute.table.policy', {
-        defaultMessage: 'Policy',
-      }),
+      name: <PolicyNameLabel />,
       render: (name: string, _item: typeof data[0]) => <PolicyLink name={name} />,
     },
   ];
@@ -103,8 +101,8 @@ const Unprivileged = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.synthetics.noFindingsStates.unprivileged.unprivilegedTitle"
-            defaultMessage="Privileges required"
+            id="xpack.synthetics.dataRetention.unprivileged.unprivilegedTitle"
+            defaultMessage="Missing privileges"
           />
         </h2>
       }
@@ -112,7 +110,7 @@ const Unprivileged = () => {
         <p>
           <FormattedMessage
             id="xpack.synthetics.params.unprivileged.unprivilegedDescription"
-            defaultMessage="To view Synthetics monitors data usage and retention, you must update privileges. For more information, contact your Kibana administrator. {docsLink}"
+            defaultMessage="You need additional privileges to view Synthetics app data usage and retention settings. {docsLink}"
             values={{
               docsLink: (
                 <EuiLink
@@ -142,12 +140,12 @@ const Unprivileged = () => {
 };
 
 const INDEX_PRIVILEGES = i18n.translate('xpack.synthetics.dataRetention.unprivileged.index', {
-  defaultMessage:
-    'Required Elasticsearch index privilege `read`, `monitor` for the following indices: `synthetics-*`',
+  defaultMessage: '`read`, `monitor` on the following Elasticsearch indices: `synthetics-*`',
 });
 
 const CLUSTER_PRIVILEGES = i18n.translate('xpack.synthetics.dataRetention.unprivileged.cluster', {
-  defaultMessage: 'Required Elasticsearch cluster privilege `read_ilm`, `monitor`.',
+  defaultMessage:
+    '`read_ilm`, `monitor` to view and `manage_ilm` to manage ILM policies on the Elasticsearch cluster.',
 });
 
 const CALLOUT_TITLE = i18n.translate('xpack.synthetics.settingsRoute.retentionCalloutTitle', {
