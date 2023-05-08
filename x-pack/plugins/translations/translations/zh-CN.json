@@ -30965,7 +30965,6 @@
     "xpack.securitySolution.kpiUsers.totalUsers.errorSearchDescription": "搜索总体用户 KPI 时发生错误",
     "xpack.securitySolution.kpiUsers.totalUsers.title": "用户",
     "xpack.securitySolution.kubernetes.columnContainer": "容器",
-    "xpack.securitySolution.kubernetes.columnEntryType": "条目类型",
     "xpack.securitySolution.kubernetes.columnExecutable": "会话 Leader",
     "xpack.securitySolution.kubernetes.columnInteractive": "交互性",
     "xpack.securitySolution.kubernetes.columnNode": "节点",
