@@ -25,7 +25,6 @@ import type {
   CaseSeverity,
   CommentRequestExternalReferenceType,
   CasesFindRequest,
-  CommentTypeFilter,
 } from '../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
@@ -582,14 +581,4 @@ export const constructSearch = (
   }
 
   return { search };
-};
-
-export const buildAttachmentTypeFilter = (type?: CommentTypeFilter): KueryNode | undefined => {
-  if (type !== null) {
-    return buildFilter({
-      filters: type,
-      field: 'type',
-      operator: 'or',
-    });
-  }
 };

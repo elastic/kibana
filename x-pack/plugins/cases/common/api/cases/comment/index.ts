@@ -273,13 +273,7 @@ export const CommentsFindResponseRt = rt.type({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const CommentTypeFilterRt = rt.array(rt.literal('user'));
-
 export const FindCommentsQueryParamsRt = rt.partial({
-  /**
-   * The attachment type we want to filter by
-   */
-  type: CommentTypeFilterRt,
   /**
    * The page of objects to return
    */
@@ -324,7 +318,6 @@ export type AttributesTypeExternalReferenceNoSO = rt.TypeOf<
   typeof AttributesTypeExternalReferenceNoSORt
 >;
 export type AttributesTypePersistableState = rt.TypeOf<typeof AttributesTypePersistableStateRt>;
-export type CommentTypeFilter = rt.TypeOf<typeof CommentTypeFilterRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentAttributesNoSO = rt.TypeOf<typeof CommentAttributesNoSORt>;
 export type CommentAttributesWithoutRefs = rt.TypeOf<typeof CommentAttributesWithoutRefsRt>;

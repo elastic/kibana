@@ -6,6 +6,7 @@
  */
 import type { SavedObject } from '@kbn/core/server';
 
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type {
   AlertResponse,
   Comments,
@@ -24,7 +25,7 @@ import {
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import type { CasesClientArgs } from '../types';
-import { buildAttachmentTypeFilter, combineFilters } from '../utils';
+import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
 import type { CasesClient } from '../client';
 import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
@@ -111,36 +112,31 @@ export async function find(
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);
 
-    const id = caseID;
-    const { type, ...queryWithoutType } = queryParams ?? {};
+    const filter = combineFilters([
+      buildFilter({
+        filters: ['user'],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+      authorizationFilter,
+    ]);
 
-    const args = queryParams
-      ? {
-          caseService,
-          unsecuredSavedObjectsClient,
-          id,
-          options: {
-            // We need this because the default behavior of getAllCaseComments is to return all the comments
-            // unless the page and/or perPage is specified. Since we're spreading the query after the request can
-            // still override this behavior.
-            page: DEFAULT_PAGE,
-            perPage: DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            filter: combineFilters([buildAttachmentTypeFilter(type), authorizationFilter]),
-            ...queryWithoutType,
-          },
-        }
-      : {
-          caseService,
-          unsecuredSavedObjectsClient,
-          id,
-          options: {
-            page: DEFAULT_PAGE,
-            perPage: DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            filter: authorizationFilter,
-          },
-        };
+    const args = {
+      caseService,
+      unsecuredSavedObjectsClient,
+      id: caseID,
+      options: {
+        // We need this because the default behavior of getAllCaseComments is to return all the comments
+        // unless the page and/or perPage is specified. Since we're spreading the query after the request can
+        // still override this behavior.
+        page: DEFAULT_PAGE,
+        perPage: DEFAULT_PER_PAGE,
+        sortField: 'created_at',
+        filter,
+        ...queryParams,
+      },
+    };
 
     const theComments = await caseService.getAllCaseComments(args);
 
