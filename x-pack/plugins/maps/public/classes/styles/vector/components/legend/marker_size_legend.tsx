@@ -130,7 +130,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
             <circle style={circleStyle} cx={circleCenterX} cy={circleCenterY} r={radius} />
           </g>
         ),
-        textY
+        textY,
       };
     };
 
@@ -162,7 +162,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const markerList = new MarkerList(
       FONT_SIZE,
-      makeMarker(options.maxSize, invert ? minLabel : maxLabel),
+      makeMarker(options.maxSize, invert ? minLabel : maxLabel)
     );
 
     if (fieldMeta.delta > 0) {

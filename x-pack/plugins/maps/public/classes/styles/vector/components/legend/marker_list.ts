@@ -16,7 +16,7 @@ export class MarkerList {
   private readonly _markers: Marker[] = [];
 
   constructor(fontSize: number, maxMarker: Marker) {
-    this._minFontDistance = fontSize * .85;
+    this._minFontDistance = fontSize * 0.85;
     this._maxMarker = maxMarker;
   }
 
@@ -41,9 +41,6 @@ export class MarkerList {
     const svgs = this._markers.map((marker: Marker) => {
       return marker.svg;
     });
-    return [
-      ...svgs,
-      this._maxMarker.svg,
-    ];
+    return [...svgs, this._maxMarker.svg];
   }
 }
