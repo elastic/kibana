@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSideNavItemType, IconType } from '@elastic/eui';
-import { Observable } from 'rxjs';
-import { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
+import type { ReactNode } from 'react';
+import type { Observable } from 'rxjs';
+import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 
 /**
  * A list of services that are consumed by this component.
@@ -17,7 +17,8 @@ import { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 export interface NavigationServices {
   activeNavItemId?: string;
   basePath: BasePathService;
-  loadingCount: number;
+  loadingCount$: Observable<number>;
+  recentlyAccessed$: Observable<RecentItem[]>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
 }
@@ -40,21 +41,99 @@ export interface NavigationKibanaDependencies {
   };
 }
 
+/** @public */
+export type ChromeNavigationLink = string;
+
 /**
- * Props for the `NavItem` component representing the content of a navigational item with optional children.
+ * Chrome navigatioin node definition.
+ *
  * @public
  */
-export type NavItemProps<T = unknown> = Pick<EuiSideNavItemType<T>, 'id' | 'name'> & {
+export interface ChromeNavigationNode {
+  /** An optional id. If not provided a link must be passed */
+  id?: string;
+  /** An optional title for the node */
+  title?: string | ReactNode;
+  /** An optional eui icon */
+  icon?: string;
+  /** An app id or a deeplink id */
+  link?: ChromeNavigationLink;
+  /** Sub navigation item for this node */
+  items?: ChromeNavigationNode[];
+}
+
+/**
+ * Chrome navigation definition used internally in the components.
+ * Each "link" (if present) has been converted to a propert href. Additional metadata has been added
+ * like the "isActive" flag or the "path" (indicating the full path of the node in the nav tree).
+ *
+ * @public
+ */
+export interface ChromeNavigationNodeViewModel extends Omit<ChromeNavigationNode, 'items' | 'id'> {
+  id: string;
   /**
-   * Nav Items
+   * Full path that points to this node (includes all parent ids). If not set
+   * the path is the id
    */
-  items?: Array<NavItemProps<T>>;
-  /**
-   * Href for a link destination
-   * Example: /app/fleet
-   */
+  path?: string;
+  isActive?: boolean;
   href?: string;
-};
+  items?: ChromeNavigationNodeViewModel[];
+}
+
+/**
+ * External definition of the side navigation.
+ *
+ * @public
+ */
+export interface ChromeNavigation {
+  /**
+   * Target for the logo icon. Must be an app id or a deeplink id.
+   */
+  homeLink: ChromeNavigationLink;
+  /**
+   * Control of the link that takes the user to their projects or deployments
+   */
+  linkToCloud?: 'projects' | 'deployments';
+  /**
+   * The navigation tree definition.
+   *
+   * NOTE: For now this tree will _only_ contain the solution tree and we will concatenate
+   * the different platform trees inside the <Navigation /> component.
+   * In a following work we will build the full navigation tree inside a "buildNavigationTree()"
+   * helper exposed from this package. This helper will allow an array of PlatformId to be disabled
+   *
+   * e.g. buildNavigationTree({ solutionTree: [...], disable: ['devTools'] })
+   */
+  navigationTree: ChromeNavigationNode[];
+  /**
+   * Controls over which Platform nav sections is enabled or disabled.
+   * NOTE: this is a temporary solution until we have the buildNavigationTree() helper mentioned
+   * above.
+   */
+  platformConfig?: Partial<PlatformConfigSet>;
+  /**
+   * Filter function to allow consumer to remove items from the recently accessed section
+   */
+  recentlyAccessedFilter?: (items: RecentItem[]) => RecentItem[];
+}
+
+/**
+ * Internal definition of the side navigation.
+ *
+ * @internal
+ */
+export interface ChromeNavigationViewModel
+  extends Pick<ChromeNavigation, 'linkToCloud' | 'platformConfig' | 'recentlyAccessedFilter'> {
+  /**
+   * Target for the logo icon
+   */
+  homeHref: string;
+  /**
+   * The navigation tree definition
+   */
+  navigationTree: ChromeNavigationNodeViewModel[];
+}
 
 /**
  * @public
@@ -67,28 +146,6 @@ export interface PlatformSectionConfig {
 /**
  * @public
  */
-export interface SolutionProperties {
-  /**
-   * Solutions' navigation items
-   */
-  items?: NavItemProps[];
-  /**
-   * Solutions' navigation collapsible nav ID
-   */
-  id: string;
-  /**
-   * Name to show as title for Solutions' collapsible nav "bucket"
-   */
-  name: React.ReactNode;
-  /**
-   * Solution logo, i.e. "logoObservability"
-   */
-  icon: IconType;
-}
-
-/**
- * @public
- */
 export type PlatformId = 'analytics' | 'ml' | 'devTools' | 'management';
 
 /**
@@ -96,37 +153,3 @@ export type PlatformId = 'analytics' | 'ml' | 'devTools' | 'management';
  * @public
  */
 export type PlatformConfigSet = Record<PlatformId, PlatformSectionConfig>;
-
-/**
- * Props for the `Navigation` component.
- * @public
- */
-export interface NavigationProps {
-  /**
-   * ID of sections to initially open
-   * Path to the nav item is given with hierarchy expressed in dotted notation.
-   * Example: `my_project.settings.index_management`
-   */
-  activeNavItemId?: string;
-  /**
-   * Configuration for Solutions' section(s)
-   */
-  solutions: SolutionProperties[];
-  /**
-   * Controls over how Platform nav sections appear
-   */
-  platformConfig?: Partial<PlatformConfigSet>;
-  /**
-   * Target for the logo icon
-   */
-  homeHref: string;
-  /**
-   * Control of the link that takes the user to their projects or deployments
-   */
-  linkToCloud?: 'projects' | 'deployments';
-}
-
-export type NavigationBucketProps = (SolutionProperties &
-  Pick<NavigationProps, 'activeNavItemId'>) & {
-  platformConfig?: PlatformSectionConfig;
-};

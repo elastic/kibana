@@ -7,6 +7,7 @@
 
 import type {
   DatatableVisualizationState,
+  FieldBasedIndexPatternColumn,
   FormBasedPersistedState,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
@@ -67,7 +68,7 @@ export interface LensEmbeddableComponentProps {
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
-  height?: string;
+  height?: number; // px
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: React.ReactNode;
@@ -76,7 +77,7 @@ export interface LensEmbeddableComponentProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
-  width?: string;
+  width?: string | number;
   withActions?: boolean;
 }
 
@@ -180,4 +181,9 @@ export interface LensDataTableEmbeddable {
   attributes: LensDataTableAttributes<'lnsDatatable', DatatableVisualizationState>;
   id: string;
   timeRange: { from: string; to: string; fromStr: string; toStr: string };
+}
+
+export interface LensEmbeddableDataTableColumn extends FieldBasedIndexPatternColumn {
+  operationType: string;
+  params?: unknown;
 }
