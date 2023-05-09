@@ -580,7 +580,7 @@ x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/appex-sharedux
-x-pack/plugins/serverless_security @elastic/appex-sharedux
+x-pack/plugins/serverless_security @elastic/security-solution
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
@@ -790,6 +790,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /src/plugins/home/server/services/ @elastic/appex-sharedux
 #CC# /src/plugins/home/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
+#CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
 ### Observability Plugins
 
