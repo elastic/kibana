@@ -9,7 +9,12 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataDriftView, DataDriftOverviewTable, ReferenceDataViewSelector, ProductionDataViewSelector , ReferenceDistribution} from '../../../model_management/data_drift_detection/data_drift_view';
+import {
+  DataDriftView,
+  DataDriftOverviewTable,
+  ReferenceDataViewSelector,
+  ProductionDataViewSelector,
+} from '../../../model_management/data_drift_detection/data_drift_view';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -62,7 +67,8 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <ReferenceDataViewSelector/><ProductionDataViewSelector/>
+      <ReferenceDataViewSelector />
+      <ProductionDataViewSelector />
       <DataDriftOverviewTable />
       <DataDriftView />
     </PageLoader>

@@ -4,10 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React  from 'react';
+import React from 'react';
 import { Chart, Settings, BarSeries, ScaleType, Position, Axis } from '@elastic/charts';
 import {
-  EuiLink, EuiSpacer, EuiBasicTable, EuiBasicTableColumn, EuiTableFieldDataColumnType, EuiFormRow, EuiSuggest, EuiSuggestionProps,
+  EuiLink,
+  EuiSpacer,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiTableFieldDataColumnType,
+  EuiFormRow,
+  EuiSuggest,
+  EuiSuggestionProps,
   htmlIdGenerator,
 } from '@elastic/eui';
 
@@ -15,13 +22,13 @@ import {
 const sampleDataViews = [
   {
     type: { iconType: 'search', color: 'tint10' },
-    label: "baseline",
-    description: "baseline"
+    label: 'baseline',
+    description: 'baseline',
   },
   {
     type: { iconType: 'search', color: 'tint10' },
-    label: "drifted"
-  }
+    label: 'drifted',
+  },
 ];
 
 const idPrefix = htmlIdGenerator()();
@@ -46,30 +53,29 @@ export const ReferenceDataViewSelector = () => {
       </EuiFormRow>
     </div>
   );
+};
+
+export const ProductionDataViewSelector = () => {
+  const onItemClick = (item: EuiSuggestionProps) => {
+    console.log(item);
   };
 
-  export const ProductionDataViewSelector = () => {
-    const onItemClick = (item: EuiSuggestionProps) => {
-      console.log(item);
-    };
-  
-    return (
-      <div>
-        <EuiFormRow label="Select production data view" id={idPrefix}>
-          <EuiSuggest
-            fullWidth
-            aria-labelledby={`${idPrefix}-label`}
-            // status={status}
-            onInput={() => {}}
-            onItemClick={onItemClick}
-            placeholder="Start typing to display suggestions"
-            suggestions={sampleDataViews}
-          />
-        </EuiFormRow>
-      </div>
-    );
-    };
-
+  return (
+    <div>
+      <EuiFormRow label="Select production data view" id={idPrefix}>
+        <EuiSuggest
+          fullWidth
+          aria-labelledby={`${idPrefix}-label`}
+          // status={status}
+          onInput={() => {}}
+          onItemClick={onItemClick}
+          placeholder="Start typing to display suggestions"
+          suggestions={sampleDataViews}
+        />
+      </EuiFormRow>
+    </div>
+  );
+};
 
 // export const ReferenceDataViewSelector = () => {
 //   const [isClearable, setIsClearable] = useState(true);
@@ -102,18 +108,18 @@ export const ReferenceDistribution = () => {
   ];
 
   return (
-        <Chart>
-          <Settings />
-          <BarSeries
-            id="reference-distr-viz"
-            name="Simple bar series"
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={data1}
-          />
-        </Chart>
+    <Chart>
+      <Settings />
+      <BarSeries
+        id="reference-distr-viz"
+        name="Simple bar series"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={data1}
+      />
+    </Chart>
   );
 };
 
@@ -127,17 +133,17 @@ export const ProductionDistribution = () => {
   ];
 
   return (
-        <Chart>
-          <Settings />
-          <BarSeries
-            id="production-distr-viz"
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={data1}
-          />
-        </Chart>
+    <Chart>
+      <Settings />
+      <BarSeries
+        id="production-distr-viz"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={data1}
+      />
+    </Chart>
   );
 };
 
@@ -175,9 +181,14 @@ export const DataDriftView = () => {
           Example chart to be integrated into above table
         </EuiLink>
         <Chart>
-          <Settings showLegend showLegendExtra legendPosition={Position.Right}/>
+          <Settings showLegend showLegendExtra legendPosition={Position.Right} />
           <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
-          <Axis id="left2" title="Left axis" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
+          <Axis
+            id="left2"
+            title="Left axis"
+            position={Position.Left}
+            tickFormat={(d: any) => Number(d).toFixed(2)}
+          />
           <BarSeries
             id="data-drift-viz"
             name="Simple bar series"
@@ -195,7 +206,7 @@ export const DataDriftView = () => {
 };
 
 // Show the overview table
-type Feature = {
+interface Feature {
   featureName: string;
   featureType: string;
   driftDetected: boolean;
@@ -203,10 +214,31 @@ type Feature = {
 }
 
 const features: Feature[] = [
-  { "featureName": "numeric_unchangeable", "featureType": "number", "driftDetected": false, "similarityTestPValue": 0.25},
-  { "featureName": "numeric_changeable", "featureType": "number", "driftDetected": true, "similarityTestPValue": 0.00001 },
-  { "featureName": "categorial_unchangeable", "featureType": "categorical", "driftDetected": false, "similarityTestPValue": 0.25 },
-  { "featureName": "categorical_changeable", "featureType": "categorical", "driftDetected": true, "similarityTestPValue": 0.00001 }];
+  {
+    featureName: 'numeric_unchangeable',
+    featureType: 'number',
+    driftDetected: false,
+    similarityTestPValue: 0.25,
+  },
+  {
+    featureName: 'numeric_changeable',
+    featureType: 'number',
+    driftDetected: true,
+    similarityTestPValue: 0.00001,
+  },
+  {
+    featureName: 'categorial_unchangeable',
+    featureType: 'categorical',
+    driftDetected: false,
+    similarityTestPValue: 0.25,
+  },
+  {
+    featureName: 'categorical_changeable',
+    featureType: 'categorical',
+    driftDetected: true,
+    similarityTestPValue: 0.00001,
+  },
+];
 
 export const DataDriftOverviewTable = () => {
   const columns: Array<EuiBasicTableColumn<Feature>> = [
@@ -257,7 +289,7 @@ export const DataDriftOverviewTable = () => {
       sortable: false,
       render: () => {
         return <ReferenceDistribution />;
-      } 
+      },
     },
     {
       field: 'productionDistribution',
@@ -266,15 +298,15 @@ export const DataDriftOverviewTable = () => {
       sortable: false,
       render: () => {
         return <ProductionDistribution />;
-      } 
-    }
+      },
+    },
   ];
 
   const getRowProps = (item: Feature) => {
     return {
       'data-test-subj': `mlDataDriftOverviewTableRow row-${item.featureName}`,
       className: 'mlDataDriftOverviewTableRow',
-      onClick: () => { },
+      onClick: () => {},
     };
   };
 
@@ -282,21 +314,21 @@ export const DataDriftOverviewTable = () => {
     const { field } = column;
     return {
       className: 'mlDataDriftOverviewTableCell',
-      'data-test-subj': `mlDataDriftOverviewTableCell row-${item.featureName}-column-${String(field)}`,
+      'data-test-subj': `mlDataDriftOverviewTableCell row-${item.featureName}-column-${String(
+        field
+      )}`,
       textOnly: true,
     };
   };
 
   return (
     <EuiBasicTable
-      tableCaption='Data drift overview'
+      tableCaption="Data drift overview"
       items={features}
-      rowHeader='featureName'
+      rowHeader="featureName"
       columns={columns}
       rowProps={getRowProps}
       cellProps={getCellProps}
     />
   );
 };
-
-
