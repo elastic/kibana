@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
@@ -67,6 +68,19 @@ export class Plugin implements InfraClientPluginClass {
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
+
+    pluginsSetup.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.LogEntryContextMenu,
+    });
+
+    // demo, will remove before merging
+    pluginsSetup.uiActions.addTriggerAction(ObservabilityTriggerId.LogEntryContextMenu, {
+      id: 'my-test',
+      getDisplayName: () => 'My external action',
+      execute: async (context) => {
+        console.log('executed', context);
+      },
+    });
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createInventoryMetricRuleType()

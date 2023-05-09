@@ -19,6 +19,8 @@ export type {
 
 export type { NavigationEntry } from './components/page_template/page_template';
 
+export { getContextMenuItemsFromActions } from './services/get_context_menu_items_from_actions';
+
 export { useObservabilityTourContext } from './components/tour';
 
 export const plugin = () => {

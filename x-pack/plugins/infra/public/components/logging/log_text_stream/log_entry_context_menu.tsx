@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuItemProps,
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -30,6 +31,7 @@ interface LogEntryContextMenuProps {
   onOpen: () => void;
   onClose: () => void;
   items: LogEntryContextMenuItem[];
+  externalItems?: EuiContextMenuItemProps[];
 }
 
 const DEFAULT_MENU_LABEL = i18n.translate(
@@ -45,12 +47,13 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   onOpen,
   onClose,
   items,
+  externalItems,
 }) => {
   const closeMenuAndCall = useMemo(() => {
-    return (callback: LogEntryContextMenuItem['onClick']) => {
+    return (callback: LogEntryContextMenuItem['onClick'] | EuiContextMenuItemProps['onClick']) => {
       return (e: React.MouseEvent) => {
         onClose();
-        callback(e);
+        callback?.(e);
       };
     };
   }, [onClose]);
@@ -78,6 +81,16 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
     ));
   }, [items, closeMenuAndCall]);
 
+  const allItems = wrappedItems.concat(
+    (externalItems ?? []).map((item, i) => (
+      <EuiContextMenuItem
+        key={i + wrappedItems.length}
+        {...item}
+        onClick={closeMenuAndCall(item.onClick)}
+      />
+    ))
+  );
+
   return (
     <LogEntryContextMenuContent>
       <AbsoluteWrapper>
@@ -88,7 +101,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
           button={button}
           ownFocus={true}
         >
-          <EuiContextMenuPanel items={wrappedItems} />
+          <EuiContextMenuPanel items={allItems} />
         </EuiPopover>
       </AbsoluteWrapper>
     </LogEntryContextMenuContent>

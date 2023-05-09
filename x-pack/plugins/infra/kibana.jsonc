@@ -24,6 +24,7 @@
       "security",
       "share",
       "triggersActionsUi",
+      "uiActions",
       "unifiedSearch",
       "usageCollection",
       "visTypeTimeseries"
