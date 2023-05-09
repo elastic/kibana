@@ -128,8 +128,8 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
             defaultValue: defaultByWeekday,
           }}
           componentProps={{
+            'data-test-subj': 'byweekday-field',
             euiFieldProps: {
-              'data-test-subj': 'byweekday-field',
               legend: 'Repeat on weekday',
               options: WEEKDAY_OPTIONS,
             },
@@ -141,8 +141,8 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
         <UseField
           path="recurringSchedule.bymonth"
           componentProps={{
+            'data-test-subj': 'bymonth-field',
             euiFieldProps: {
-              'data-test-subj': 'bymonth-field',
               legend: 'Repeat on weekday or month day',
               options: bymonthOptions,
             },

@@ -20,3 +20,4 @@ export * from './text_area_field';
 export * from './json_editor_field';
 export * from './button_group_field';
 export * from './multi_button_group_field';
+export * from './date_picker_field';

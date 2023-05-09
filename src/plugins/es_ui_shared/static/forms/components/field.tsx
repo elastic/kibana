@@ -30,6 +30,7 @@ import {
   JsonEditorField,
   ButtonGroupField,
   MultiButtonGroupField,
+  DatePickerField,
 } from './fields';
 
 const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
@@ -47,6 +48,7 @@ const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.JSON]: JsonEditorField,
   [FIELD_TYPES.BUTTON_GROUP]: ButtonGroupField,
   [FIELD_TYPES.MULTI_BUTTON_GROUP]: MultiButtonGroupField,
+  [FIELD_TYPES.DATE_PICKER]: DatePickerField,
 };
 
 export const Field = (props: Props) => {

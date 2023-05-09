@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import moment from 'moment';
+import React, { useMemo, useState } from 'react';
+import moment, { Moment } from 'moment';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -15,7 +15,11 @@ import {
   EuiSpacer,
   EuiSplitPanel,
 } from '@elastic/eui';
-import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  FIELD_TYPES,
+  getUseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import {
@@ -26,7 +30,6 @@ import {
   RECURRENCE_END_OPTIONS,
 } from '../../constants';
 import * as i18n from '../../translations';
-import { DatePickerField } from '../fields/date_picker_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
@@ -34,7 +37,12 @@ import { FormProps } from '../schema';
 
 const UseField = getUseField({ component: Field });
 
+export const toMoment = (value: string): Moment => moment(value);
+export const toString = (value: Moment): string => value.toISOString();
+
 export const RecurringSchedule: React.FC = React.memo(() => {
+  const [today] = useState<Moment>(moment());
+
   const [{ startDate, endDate, timezone, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',
@@ -105,8 +113,8 @@ export const RecurringSchedule: React.FC = React.memo(() => {
         <UseField
           path="recurringSchedule.ends"
           componentProps={{
+            'data-test-subj': 'ends-field',
             euiFieldProps: {
-              'data-test-subj': 'ends-field',
               legend: 'Recurrence ends',
               options: RECURRENCE_END_OPTIONS,
             },
@@ -120,14 +128,19 @@ export const RecurringSchedule: React.FC = React.memo(() => {
                 <UseField
                   path="recurringSchedule.until"
                   config={{
+                    type: FIELD_TYPES.DATE_PICKER,
                     label: '',
                     defaultValue: moment(endDate).endOf('day').toISOString(),
                     validations: [],
+                    serializer: toString,
+                    deserializer: toMoment,
                   }}
-                  component={DatePickerField}
                   componentProps={{
                     'data-test-subj': 'until-field',
-                    showTimeSelect: false,
+                    euiFieldProps: {
+                      showTimeSelect: false,
+                      minDate: today,
+                    },
                   }}
                 />
               </EuiFlexItem>
