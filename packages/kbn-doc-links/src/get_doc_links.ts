@@ -155,6 +155,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
+      searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
+      searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
@@ -378,6 +380,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
