@@ -24,8 +24,6 @@ import type {
   ResponseActionGetFileParameters,
   ResponseActionsExecuteParameters,
   ResponseActionExecuteOutputContent,
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import {
@@ -237,24 +235,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
               ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
             },
           }),
-        };
-      }
-    }
-
-    if (command === 'upload') {
-      if (!details.parameters) {
-        (
-          details as ActionDetails<
-            ResponseActionUploadOutputContent,
-            ResponseActionUploadParameters
-          >
-        ).parameters = {
-          file: {
-            file_id: 'file-x-y-z',
-            file_name: 'foo.txt',
-            size: 1234,
-            sha256: 'file-hash-sha-256',
-          },
         };
       }
     }
