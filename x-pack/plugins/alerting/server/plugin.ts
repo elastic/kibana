@@ -475,6 +475,7 @@ export class AlertingPlugin {
       actions: plugins.actions,
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       alertsService: this.alertsService,

@@ -38,6 +38,7 @@ export interface RulesClientFactoryOpts {
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  kibanaBaseUrl: string | undefined;
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   alertsService: AlertsService | null;
@@ -59,7 +60,8 @@ export class RulesClientFactory {
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
-  private alertsService: AlertsService | null;
+  private alertsService: AlertsService | null = null;
+  private kibanaBaseUrl?: string;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -78,6 +80,7 @@ export class RulesClientFactory {
     this.actions = options.actions;
     this.eventLog = options.eventLog;
     this.kibanaVersion = options.kibanaVersion;
+    this.kibanaBaseUrl = options.kibanaBaseUrl;
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
     this.alertsService = options.alertsService;
@@ -95,6 +98,7 @@ export class RulesClientFactory {
     return new RulesClient({
       spaceId,
       kibanaVersion: this.kibanaVersion,
+      kibanaBaseUrl: this.kibanaBaseUrl,
       logger: this.logger,
       taskManager: this.taskManager,
       ruleTypeRegistry: this.ruleTypeRegistry,
@@ -141,6 +145,7 @@ export class RulesClientFactory {
         return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
+      actionsPlugin: this.actions!,
       alertsService: this.alertsService,
       isAuthenticationTypeAPIKey() {
         if (!securityPluginStart) {

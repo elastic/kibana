@@ -190,6 +190,7 @@ export class PreviewAlertsClient implements UntypedAlertsClient {
         '@timestamp': currentTime,
         kibana: {
           alert: {
+            action_group: legacyAlert.getScheduledActionOptions()?.actionGroup,
             context: legacyAlert.getContext(),
             ...(legacyAlert.getState().duration
               ? { duration: { us: legacyAlert.getState().duration } }

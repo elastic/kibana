@@ -7,7 +7,6 @@
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { ExecutionHandler, RunResult } from '../task_runner/execution_handler';
 import { TaskRunnerContext } from './preview_task_runner_factory';
 import { ErrorWithReason } from '../lib';
 import { RuleExecutionStatusErrorReasons, RuleTypeRegistry } from '../types';
@@ -173,6 +172,7 @@ export class PreviewTaskRunner {
     } catch (err) {
       // Check if this error is due to reaching the alert limit
       if (!checkHasReachedAlertLimit()) {
+        this.context.logger.error(err);
         throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
       }
     }
@@ -180,88 +180,27 @@ export class PreviewTaskRunner {
     checkHasReachedAlertLimit();
 
     await alertsClient!.processAndLogAlerts({ shouldLogAlerts: false });
-    // const executionHandler = new ExecutionHandler({
-    //   rule,
-    //   ruleType: this.ruleType,
-    //   logger: this.logger,
-    //   taskRunnerContext: this.context,
-    //   taskInstance: this.taskInstance,
-    //   ruleRunMetricsStore,
-    //   apiKey,
-    //   ruleConsumer: this.ruleConsumer!,
-    //   executionId: this.executionId,
-    //   ruleLabel,
-    //   previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-    //   alertingEventLogger: this.alertingEventLogger,
-    //   actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
-    //   maintenanceWindowIds,
-    // });
-    // let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
-    // await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-    //   await rulesClient.clearExpiredSnoozes({ id: rule.id });
-    //   if (isRuleSnoozed(rule)) {
-    //     this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-    //   } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
-    //     this.logger.debug(
-    //       `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
-    //     );
-    //     this.countUsageOfActionExecutionAfterRuleCancellation();
-    //   } else {
-    //     executionHandlerRunResult = await executionHandler.run({
-    //       ...this.legacyAlertsClient.getProcessedAlerts('activeCurrent'),
-    //       ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
-    //     });
-    //   }
-    // });
-
     await alertsClient!.getAlertsToSerialize();
   }
 
   async run() {
-    console.log(`taskInstance ${JSON.stringify(this.taskInstance)}`);
     const {
       params: { executionUuid, rule },
     } = this.taskInstance;
     const runDate = new Date();
-    this.logger.info(`previewing rule ${rule.alertTypeId}:${rule.id} at ${runDate.toISOString()}`);
+    this.logger.info(
+      `previewing rule ${rule.alertTypeId}:${
+        rule.id
+      } at ${runDate.toISOString()} with taskInstance ${JSON.stringify(this.taskInstance)}`
+    );
 
     // Generate fake request with API key
     const fakeRequest = getFakeKibanaRequest(this.context, rule.spaceId, rule.apiKey);
     try {
       await this.runRule({ fakeRequest, executionUuid, rule });
-    } catch (err) {}
-    //   let nextRun: string | null = null;
-    //   if (isOk(schedule)) {
-    //     nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
-    //   } else if (taskSchedule) {
-    //     nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-    //   }
-    //   const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
-    //     TaskRunnerTimerSpan.ProcessRuleRun,
-    //     async () =>
-    //       this.processRunResults({
-    //         nextRun,
-    //         runDate,
-    //         stateWithMetrics,
-    //       })
-    //   );
-    //   const transformRunStateToTaskState = (
-    //     runStateWithMetrics: RuleTaskStateAndMetrics
-    //   ): RuleTaskState => {
-    //     return {
-    //       ...omit(runStateWithMetrics, ['metrics']),
-    //       previousStartedAt: startedAt,
-    //     };
-    //   };
-    //   if (startedAt) {
-    //     // Capture how long it took for the rule to run after being claimed
-    //     this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-    //   }
-    //   this.alertingEventLogger.done({
-    //     status: executionStatus,
-    //     metrics: executionMetrics,
-    //     timings: this.timer.toJson(),
-    //   });
+    } catch (err) {
+      this.logger.error(`Error previewing rule - ${err.message}`);
+    }
   }
 
   async cancel(): Promise<void> {
@@ -270,65 +209,5 @@ export class PreviewTaskRunner {
     }
 
     this.cancelled = true;
-
-    //   // Write event log entry
-    //   const {
-    //     params: { alertId: ruleId, spaceId, consumer },
-    //     schedule: taskSchedule,
-    //     startedAt,
-    //   } = this.taskInstance;
-    //   const namespace = this.context.spaceIdToNamespace(spaceId);
-
-    //   if (consumer && !this.ruleConsumer) {
-    //     this.ruleConsumer = consumer;
-    //   }
-
-    //   this.logger.debug(
-    //     `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
-    //   );
-
-    //   this.logger.debug(
-    //     `Aborting any in-progress ES searches for rule type ${this.ruleType.id} with id ${ruleId}`
-    //   );
-    //   this.searchAbortController.abort();
-
-    //   this.alertingEventLogger.logTimeout();
-
-    //   this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
-
-    //   let nextRun: string | null = null;
-    //   if (taskSchedule) {
-    //     nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-    //   }
-
-    //   const outcomeMsg = [
-    //     `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
-    //   ];
-    //   const date = new Date();
-    //   // Update the rule saved object with execution status
-    //   const executionStatus: RuleExecutionStatus = {
-    //     lastExecutionDate: date,
-    //     status: 'error',
-    //     error: {
-    //       reason: RuleExecutionStatusErrorReasons.Timeout,
-    //       message: outcomeMsg.join(' '),
-    //     },
-    //   };
-    //   this.logger.debug(
-    //     `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
-    //   );
-    //   const outcome = 'failed';
-    //   await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
-    //     executionStatus: ruleExecutionStatusToRaw(executionStatus),
-    //     lastRun: {
-    //       outcome,
-    //       outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
-    //       warning: RuleExecutionStatusErrorReasons.Timeout,
-    //       outcomeMsg,
-    //       alertsCount: {},
-    //     },
-    //     monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-    //     nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
-    //   });
   }
 }

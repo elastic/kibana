@@ -16,6 +16,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
@@ -64,9 +65,11 @@ export interface RulesClientContext {
   readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
+  readonly actionsPlugin: ActionsPluginStartContract;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
   readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  readonly kibanaBaseUrl: string | undefined;
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
   readonly alertsService: AlertsService | null;
