@@ -15,6 +15,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Project } from 'ts-morph';
+import { initApm } from '@kbn/apm-config-loader';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
@@ -35,9 +36,15 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
+const rootDir = Path.join(__dirname, '../../..');
+const apm = initApm(process.argv, rootDir, false, 'build_api_docs_cli');
+
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
+      const transaction = apm.startTransaction('build-api-docs', 'kibana-cli');
+      const spanSetup = transaction?.startSpan('build_api_docs.setup', 'setup');
+
       const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
       const pluginFilter =
@@ -62,14 +69,40 @@ export function runBuildApiDocsCli() {
 
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
 
+      spanSetup?.end();
+      const spanInitialDocIds = transaction?.startSpan('build_api_docs.initialDocIds', 'setup');
+
       const initialDocIds =
         !pluginFilter && Fs.existsSync(outputFolder)
           ? await getAllDocFileIds(outputFolder)
           : undefined;
 
-      const project = getTsProject(REPO_ROOT);
+      spanInitialDocIds?.end();
+      const spanPlugins = transaction?.startSpan('build_api_docs.findPlugins', 'setup');
 
-      const plugins = findPlugins();
+      const plugins = findPlugins(stats ? pluginFilter : undefined);
+
+      spanPlugins?.end();
+
+      const spanPathsByPackage = transaction?.startSpan(
+        'build_api_docs.getPathsByPackage',
+        'setup'
+      );
+
+      const pathsByPlugin = await getPathsByPackage(plugins);
+
+      spanPathsByPackage?.end();
+
+      const spanProject = transaction?.startSpan('build_api_docs.getTsProject', 'setup');
+
+      const project = getTsProject(
+        REPO_ROOT,
+        stats && pluginFilter && plugins.length === 1 ? plugins[0].directory : undefined
+      );
+
+      spanProject?.end();
+
+      const spanFolders = transaction?.startSpan('build_api_docs.check-folders', 'setup');
 
       // if the output folder already exists, and we don't have a plugin filter, delete all the files in the output folder
       if (Fs.existsSync(outputFolder) && !pluginFilter) {
@@ -81,6 +114,9 @@ export function runBuildApiDocsCli() {
         await Fsp.mkdir(outputFolder, { recursive: true });
       }
 
+      spanFolders?.end();
+      const spanPluginApiMap = transaction?.startSpan('build_api_docs.getPluginApiMap', 'setup');
+
       const {
         pluginApiMap,
         missingApiItems,
@@ -89,12 +125,23 @@ export function runBuildApiDocsCli() {
         adoptionTrackedAPIs,
       } = getPluginApiMap(project, plugins, log, { collectReferences, pluginFilter });
 
+      spanPluginApiMap?.end();
+
       const reporter = CiStatsReporter.fromEnv(log);
-      const pathsByPlugin = await getPathsByPackage(plugins);
 
       const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
       for (const plugin of plugins) {
         const id = plugin.id;
+
+        if (stats && pluginFilter && !pluginFilter.includes(plugin.id)) {
+          continue;
+        }
+
+        const spanApiStatsForPlugin = transaction?.startSpan(
+          `build_api_docs.collectApiStatsForPlugin-${id}`,
+          'stats'
+        );
+
         const pluginApi = pluginApiMap[id];
         const paths = pathsByPlugin.get(plugin) ?? [];
 
@@ -110,9 +157,20 @@ export function runBuildApiDocsCli() {
           description: plugin.manifest.description,
           isPlugin: plugin.isPlugin,
         };
+
+        spanApiStatsForPlugin?.end();
       }
 
-      await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+      const spanWritePluginDirectoryDoc = transaction?.startSpan(
+        'build_api_docs.writePluginDirectoryDoc',
+        'write'
+      );
+
+      if (!stats) {
+        await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+      }
+
+      spanWritePluginDirectoryDoc?.end();
 
       for (const plugin of plugins) {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
@@ -126,6 +184,11 @@ export function runBuildApiDocsCli() {
         const pluginApi = pluginApiMap[id];
         const pluginStats = allPluginStats[id];
         const pluginTeam = plugin.manifest.owner.name;
+
+        const spanMetrics = transaction?.startSpan(
+          `build_api_docs.collectApiStatsForPlugin-${id}`,
+          'stats'
+        );
 
         reporter.metrics([
           {
@@ -283,20 +346,56 @@ export function runBuildApiDocsCli() {
           }
         }
 
-        if (pluginStats.apiCount > 0) {
-          log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
-          await writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
-        } else {
-          log.info(`Plugin ${pluginApi.id} has no public API.`);
+        spanMetrics?.end();
+
+        if (!stats) {
+          if (pluginStats.apiCount > 0) {
+            log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
+
+            const spanWritePluginDocs = transaction?.startSpan(
+              'build_api_docs.writePluginDocs',
+              'write'
+            );
+
+            await writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
+
+            spanWritePluginDocs?.end();
+          } else {
+            log.info(`Plugin ${pluginApi.id} has no public API.`);
+          }
+
+          const spanWriteDeprecationDocByPlugin = transaction?.startSpan(
+            'build_api_docs.writeDeprecationDocByPlugin',
+            'write'
+          );
+
+          await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+
+          spanWriteDeprecationDocByPlugin?.end();
+
+          const spanWriteDeprecationDueByTeam = transaction?.startSpan(
+            'build_api_docs.writeDeprecationDueByTeam',
+            'write'
+          );
+
+          await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
+
+          spanWriteDeprecationDueByTeam?.end();
+
+          const spanWriteDeprecationDocByApi = transaction?.startSpan(
+            'build_api_docs.writeDeprecationDocByApi',
+            'write'
+          );
+
+          await writeDeprecationDocByApi(
+            outputFolder,
+            referencedDeprecations,
+            unreferencedDeprecations,
+            log
+          );
+
+          spanWriteDeprecationDocByApi?.end();
         }
-        await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-        await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
-        await writeDeprecationDocByApi(
-          outputFolder,
-          referencedDeprecations,
-          unreferencedDeprecations,
-          log
-        );
       }
 
       if (Object.values(pathsOutsideScopes).length > 0) {
@@ -307,6 +406,8 @@ export function runBuildApiDocsCli() {
       if (initialDocIds) {
         await trimDeletedDocsFromNav(log, initialDocIds, outputFolder);
       }
+
+      transaction?.end();
     },
     {
       log: {
@@ -318,6 +419,7 @@ export function runBuildApiDocsCli() {
         help: `
           --plugin             Optionally, run for only a specific plugin
           --stats              Optionally print API stats. Must be one or more of: any, comments or exports.
+                               The stats option will skip writing any API docs as a tradeoff to just produce the stats more quickly.
           --references         Collect references for API items
         `,
       },
@@ -325,17 +427,25 @@ export function runBuildApiDocsCli() {
   );
 }
 
-function getTsProject(repoPath: string) {
-  const xpackTsConfig = `${repoPath}/tsconfig.json`;
+function getTsProject(repoPath: string, overridePath?: string) {
+  const xpackTsConfig = !overridePath
+    ? `${repoPath}/tsconfig.json`
+    : `${overridePath}/tsconfig.json`;
+
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
     // We'll use the files added below instead.
     skipAddingFilesFromTsConfig: true,
   });
-  project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
-  project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
-  project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
-  project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
+
+  if (!overridePath) {
+    project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
+  } else {
+    project.addSourceFilesAtPaths([`${overridePath}/**/*.ts`, '!**/*.d.ts']);
+  }
   project.resolveSourceFileDependencies();
   return project;
 }
