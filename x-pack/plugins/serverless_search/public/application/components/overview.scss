@@ -5,9 +5,9 @@
 .serverlessSearchHeaderSection {
   background-color: $euiColorPrimary;
   color: $euiColorEmptyShade;
-  min-height: 291px;
 }
 
 .serverlessSearchHeaderSection > div {
+  padding-bottom: 0;
   padding-top: 0;
 }

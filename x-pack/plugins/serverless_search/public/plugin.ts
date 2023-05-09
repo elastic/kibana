@@ -23,7 +23,7 @@ export class ServerlessSearchPlugin
     _setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
     core.application.register({
-      id: 'elasticsearch',
+      id: 'serverlessElasticsearch',
       title: 'Elasticsearch',
       appRoute: '/app/elasticsearch',
       async mount({ element }: AppMountParameters) {

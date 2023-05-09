@@ -60,7 +60,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'enterpriseSearchElasticsearch',
+  ID: 'elasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
