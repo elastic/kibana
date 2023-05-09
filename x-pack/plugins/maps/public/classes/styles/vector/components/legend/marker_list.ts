@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-interface Marker {
+import { ReactNode } from 'react';
+
+export interface Marker {
   svg: ReactNode;
   textY: number;
 }

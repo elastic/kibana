@@ -133,14 +133,14 @@ export class OrdinalLegend extends Component<Props, State> {
       const min = this._formatValue(_.get(fieldMeta, 'min', EMPTY_VALUE));
       minLabel = getMinLabel(
         this.props.style.isFieldMetaEnabled(),
-        fieldMeta.isMinOutsideStdRange,
+        Boolean(fieldMeta.isMinOutsideStdRange),
         min
       );
 
       const max = this._formatValue(_.get(fieldMeta, 'max', EMPTY_VALUE));
       maxLabel = getMaxLabel(
         this.props.style.isFieldMetaEnabled(),
-        fieldMeta.isMaxOutsideStdRange,
+        Boolean(fieldMeta.isMaxOutsideStdRange),
         max
       );
     }

@@ -28,7 +28,7 @@ const dynamicSizeOptions = {
 };
 
 const mockStyle = {
-  formatField: (value) => {
+  formatField: (value: number) => {
     return `${value * 0.001}KB`;
   },
   getDisplayStyleName: () => {
@@ -76,7 +76,7 @@ test('Should render legend with 3 markers when size difference does not provide 
             maxSize: 24,
           };
         },
-      }}
+      } as unknown as DynamicSizeProperty}
     />
   );
   // Ensure all promises resolve
@@ -97,7 +97,7 @@ test('Should render legend with 2 markers when size difference does not provide 
             maxSize: 15,
           };
         },
-      }}
+      } as unknown as DynamicSizeProperty}
     />
   );
   // Ensure all promises resolve
@@ -118,7 +118,7 @@ test('Should render legend with only max marker when size difference does not pr
             maxSize: 11,
           };
         },
-      }}
+      } as unknown as DynamicSizeProperty}
     />
   );
   // Ensure all promises resolve
@@ -140,7 +140,7 @@ test('Should render legend without label cutoff when min size is 1', async () =>
             maxSize: 7,
           };
         },
-      }}
+      } as unknown as DynamicSizeProperty}
     />
   );
   // Ensure all promises resolve
@@ -169,7 +169,7 @@ test('Should render max label with std clamp notification', async () => {
             isMaxOutsideStdRange: true,
           };
         },
-      }}
+      } as unknown as DynamicSizeProperty}
     />
   );
   // Ensure all promises resolve
@@ -191,7 +191,7 @@ test('Should invert legend', async () => {
             invert: true,
           };
         },
-      }}
+      } as unknown as DynamicSizeProperty}
     />
   );
   // Ensure all promises resolve

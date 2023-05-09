@@ -150,13 +150,13 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const maxLabel = getMaxLabel(
       this.props.style.isFieldMetaEnabled(),
-      fieldMeta.isMaxOutsideStdRange,
+      Boolean(fieldMeta.isMaxOutsideStdRange),
       this._formatValue(fieldMeta.max)
     );
 
     const minLabel = getMinLabel(
       this.props.style.isFieldMetaEnabled(),
-      fieldMeta.isMinOutsideStdRange,
+      Boolean(fieldMeta.isMinOutsideStdRange),
       this._formatValue(fieldMeta.min)
     );
 

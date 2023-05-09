@@ -28,7 +28,7 @@ const dynamicSizeOptions = {
 };
 
 const mockStyle = {
-  formatField: (value) => {
+  formatField: (value: number) => {
     return `${value * 0.001}KB`;
   },
   getDisplayStyleName: () => {
@@ -66,6 +66,6 @@ test('Should render legend', async () => {
   await new Promise((resolve) => process.nextTick(resolve));
   // Ensure the state changes are reflected
   component.update();
-  
+
   expect(component).toMatchSnapshot();
 });
