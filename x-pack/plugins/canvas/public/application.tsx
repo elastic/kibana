@@ -47,6 +47,7 @@ import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
 import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
 
 import './style/index.scss';
+import { KeyboardShortcutsDoc } from './components/keyboard_shortcuts_doc';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
@@ -151,14 +152,7 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <Provider store={canvasStore}>
-            <HelpMenu hideHelpMenu={hideHelpMenu} />
-          </Provider>
-        </KibanaThemeProvider>,
-        domNode
-      );
+      ReactDOM.render(<KeyboardShortcutsDoc />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });
