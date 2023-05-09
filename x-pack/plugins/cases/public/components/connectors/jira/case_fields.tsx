@@ -10,20 +10,22 @@ import { map } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from './translations';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
+import * as i18n from './translations';
 import type { JiraFieldsType } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+const { emptyField } = fieldValidators;
 
 const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
   const { http } = useKibana().services;
 
-  const { issueType = null } = fields ?? {};
+  const { issueType } = fields ?? {};
 
   const { isLoading: isLoadingIssueTypes, data: issueTypesData } = useGetIssueTypes({
     connector,
@@ -66,6 +68,11 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
         component={SelectField}
         config={{
           label: i18n.ISSUE_TYPE,
+          validations: [
+            {
+              validator: emptyField(i18n.ISSUE_TYPE_REQUIRED),
+            },
+          ],
         }}
         componentProps={{
           euiFieldProps: {
@@ -74,7 +81,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
             fullWidth: true,
             disabled: isLoadingIssueTypes,
             isLoading: isLoadingIssueTypes,
-            hasNoInitialSelection: false,
+            hasNoInitialSelection: true,
           },
         }}
       />

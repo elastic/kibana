@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiButton } from '@elastic/eui';
 
 interface MockFormWrapperComponentProps {
   fields?: Record<string, unknown>;
@@ -20,7 +21,16 @@ export const MockFormWrapperComponent: React.FC<MockFormWrapperComponentProps> =
     defaultValue: { fields },
   });
 
-  return <Form form={form}>{children}</Form>;
+  const onClick = () => {
+    form.submit();
+  };
+
+  return (
+    <Form form={form}>
+      {children}
+      <EuiButton data-test-subj="submit-form" onClick={onClick} />
+    </Form>
+  );
 };
 
 MockFormWrapperComponent.displayName = 'MockFormWrapper';

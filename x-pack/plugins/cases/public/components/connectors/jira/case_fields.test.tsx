@@ -10,7 +10,6 @@ import { omit } from 'lodash/fp';
 import { waitFor, screen, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useKibana } from '../../../common/lib/kibana';
 import { connector, issues } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
@@ -28,7 +27,6 @@ jest.mock('../../../common/lib/kibana');
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetIssuesMock = useGetIssues as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
@@ -49,22 +47,25 @@ describe('Jira Fields', () => {
 
   const useGetFieldsByIssueTypeResponse = {
     isLoading: false,
-    fields: {
-      summary: { allowedValues: [], defaultValue: {} },
-      labels: { allowedValues: [], defaultValue: {} },
-      description: { allowedValues: [], defaultValue: {} },
-      priority: {
-        allowedValues: [
-          {
-            name: 'Medium',
-            id: '3',
-          },
-          {
-            name: 'Low',
-            id: '2',
-          },
-        ],
-        defaultValue: { name: 'Medium', id: '3' },
+    data: {
+      data: {
+        summary: { allowedValues: [], defaultValue: {} },
+        labels: { allowedValues: [], defaultValue: {} },
+        description: { allowedValues: [], defaultValue: {} },
+        parent: { allowedValues: [], defaultValue: {} },
+        priority: {
+          allowedValues: [
+            {
+              name: 'Medium',
+              id: '3',
+            },
+            {
+              name: 'Low',
+              id: '2',
+            },
+          ],
+          defaultValue: { name: 'Medium', id: '3' },
+        },
       },
     },
   };
@@ -77,7 +78,8 @@ describe('Jira Fields', () => {
 
   const useGetIssuesResponse = {
     isLoading: false,
-    issues,
+    isFetching: false,
+    data: { data: issues },
   };
 
   let appMockRenderer: AppMockRenderer;
@@ -86,36 +88,43 @@ describe('Jira Fields', () => {
     appMockRenderer = createAppMockRenderer();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.jira',
-      iconClass: 'logoSecurity',
-    });
+    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
     jest.clearAllMocks();
   });
 
-  it('all params fields are rendered', () => {
+  it('all params fields are rendered', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10006');
-    expect(screen.getByTestId('prioritySelect')).toHaveValue('High');
-    expect(screen.getByTestId('search-parent-issues')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+      expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
+      expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
+    });
+  });
+
+  it('renders the fields correctly when selecting an issue type', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    const issueTypeSelect = screen.getByTestId('issueTypeSelect');
+    expect(issueTypeSelect).toBeInTheDocument();
+
+    userEvent.selectOptions(issueTypeSelect, 'Task');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+      expect(screen.getByTestId('search-parent-issues')).toBeInTheDocument();
+    });
   });
 
   it('sets parent correctly', async () => {
-    useGetFieldsByIssueTypeMock.mockReturnValue({
-      ...useGetFieldsByIssueTypeResponse,
-      fields: {
-        ...useGetFieldsByIssueTypeResponse.fields,
-        parent: {},
-      },
-    });
-
-    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
-
     appMockRenderer.render(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
@@ -131,28 +140,18 @@ describe('Jira Fields', () => {
   });
 
   it('searches parent correctly', async () => {
-    useGetFieldsByIssueTypeMock.mockReturnValue({
-      ...useGetFieldsByIssueTypeResponse,
-      fields: {
-        ...useGetFieldsByIssueTypeResponse.fields,
-        parent: {},
-      },
-    });
-
-    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
-
     appMockRenderer.render(
       <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
-    await act(async () => {
-      const event = { target: { value: 'womanId' } };
-      fireEvent.change(screen.getByTestId('comboBoxSearchInput'), event);
-    });
+    const checkbox = within(screen.getByTestId('search-parent-issues')).getByTestId(
+      'comboBoxSearchInput'
+    );
 
-    expect(useGetIssuesMock.mock.calls[2][0].query).toEqual('womanId');
+    userEvent.type(checkbox, 'Person Task{enter}');
+    expect(checkbox).toHaveValue('Person Task');
   });
 
   it('disabled the fields when loading issue types', () => {
@@ -168,7 +167,7 @@ describe('Jira Fields', () => {
     expect(screen.getByTestId('prioritySelect')).toBeDisabled();
   });
 
-  it('disabled the fields when loading fields', () => {
+  it('disabled the priority when loading fields', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       isLoading: true,
@@ -180,12 +179,11 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('issueTypeSelect')).toBeDisabled();
     expect(screen.getByTestId('prioritySelect')).toBeDisabled();
   });
 
   it('hides the priority if not supported', () => {
-    const response = omit('fields.priority', useGetFieldsByIssueTypeResponse);
+    const response = omit('data.data.priority', useGetFieldsByIssueTypeResponse);
 
     useGetFieldsByIssueTypeMock.mockReturnValue(response);
 
@@ -209,26 +207,6 @@ describe('Jira Fields', () => {
     expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
-  it('sets issue type when it comes as null', () => {
-    appMockRenderer.render(
-      <MockFormWrapperComponent fields={{ ...fields, issueType: null }}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-
-    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10006');
-  });
-
-  it('sets issue type when it comes as unknown value', () => {
-    appMockRenderer.render(
-      <MockFormWrapperComponent fields={{ ...fields, issueType: '99999' }}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-
-    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10006');
-  });
-
   it('sets priority correctly', () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
@@ -241,46 +219,52 @@ describe('Jira Fields', () => {
     expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
   });
 
-  it('resets priority when changing issue type', () => {
+  it('should submit Jira connector', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), '2');
+    const issueTypeSelect = screen.getByTestId('issueTypeSelect');
+    expect(issueTypeSelect).toBeInTheDocument();
+
+    userEvent.selectOptions(issueTypeSelect, 'Bug');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+      expect(screen.getByTestId('search-parent-issues')).toBeInTheDocument();
+    });
+
+    const checkbox = within(screen.getByTestId('search-parent-issues')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    userEvent.type(checkbox, 'Person Task{enter}');
+    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
 
     expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
-    expect(screen.getByTestId('prioritySelect')).toHaveValue('');
+    expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
+    expect(checkbox).toHaveValue('Person Task');
   });
 
-  it('should submit Jira connector', async () => {
-    const { rerender } = appMockRenderer.render(
-      <MockFormWrapperComponent fields={fields}>
+  it('should validate the issue type correctly', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'Bug' }));
-      expect(screen.getByRole('option', { name: 'Low' }));
+      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+      expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
+      expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
     });
 
-    const checkbox = within(screen.getByTestId('issueTypeSelect')).getByTestId(
-      'comboBoxSearchInput'
-    );
+    userEvent.click(screen.getByTestId('submit-form'));
 
-    userEvent.type(checkbox, 'Bug{enter}');
-
-    rerender(
-      <MockFormWrapperComponent fields={{ ...fields, issueType: '10007' }}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
-
-    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
-    expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
+    await waitFor(() => {
+      expect(screen.getByText('Issue type is required')).toBeInTheDocument();
+    });
   });
 });

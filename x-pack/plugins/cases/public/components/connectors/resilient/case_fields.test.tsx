@@ -95,7 +95,7 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('incidentTypeComboBox')).toBeDisabled();
+    expect(within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox')).toBeDisabled();
   });
 
   it('disabled the fields when loading severity', () => {
