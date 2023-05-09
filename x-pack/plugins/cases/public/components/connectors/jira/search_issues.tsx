@@ -38,11 +38,6 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
 
   const options = issues.map((issue) => ({ label: issue.title, value: issue.key }));
 
-  // const inputPlaceholder = useMemo(
-  //   (): string => (isLoadingIssues ? i18n.SEARCH_ISSUES_LOADING : i18n.SEARCH_ISSUES_PLACEHOLDER),
-  //   [isLoadingIssues]
-  // );
-
   return (
     <UseField path="fields.parent">
       {(field) => {
@@ -54,7 +49,7 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
 
         const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
           setSelectedOptions(changedOptions);
-          field.setValue(changedOptions[0].value);
+          field.setValue(changedOptions[0].value ?? '');
         };
 
         return (

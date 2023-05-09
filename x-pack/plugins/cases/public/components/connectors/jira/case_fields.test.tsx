@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { omit } from 'lodash/fp';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -17,20 +15,18 @@ import { connector, issues } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import Fields from './case_fields';
-import { useGetSingleIssue } from './use_get_single_issue';
 import { useGetIssues } from './use_get_issues';
-import { EuiComboBox } from '@elastic/eui';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
-jest.mock('./use_get_single_issue');
 jest.mock('./use_get_issues');
 jest.mock('../../../common/lib/kibana');
+
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const useGetSingleIssueMock = useGetSingleIssue as jest.Mock;
 const useGetIssuesMock = useGetIssues as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -71,11 +67,6 @@ describe('Jira Fields', () => {
     },
   };
 
-  const useGetSingleIssueResponse = {
-    isLoading: false,
-    issue: { title: 'Parent Task', key: 'parentId' },
-  };
-
   const fields = {
     issueType: '10006',
     priority: 'High',
@@ -87,14 +78,12 @@ describe('Jira Fields', () => {
     issues,
   };
 
-  const onChange = jest.fn();
-  let mockedContext: AppMockRenderer;
+  let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    mockedContext = createAppMockRenderer();
+    appMockRenderer = createAppMockRenderer();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    useGetSingleIssueMock.mockReturnValue(useGetSingleIssueResponse);
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.jira',
       iconClass: 'logoSecurity',
@@ -102,35 +91,19 @@ describe('Jira Fields', () => {
     jest.clearAllMocks();
   });
 
-  test('all params fields are rendered - isEdit: true', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    expect(wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('value')).toStrictEqual(
-      '10006'
+  it('all params fields are rendered', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('value')).toStrictEqual(
-      'High'
-    );
-    expect(wrapper.find('[data-test-subj="search-parent-issues"]').first().exists()).toBeFalsy();
+
+    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10006');
+    expect(screen.getByTestId('prioritySelect')).toHaveValue('High');
+    expect(screen.getByTestId('search-parent-issues')).not.toBeInTheDocument();
   });
 
-  test('all params fields are rendered - isEdit: false', () => {
-    const wrapper = mount(
-      <Fields
-        isEdit={false}
-        fields={{ ...fields, parent: 'Parent Task' }}
-        onChange={onChange}
-        connector={connector}
-      />
-    );
-
-    const nodes = wrapper.find('[data-test-subj="card-list-item"]').hostNodes();
-
-    expect(nodes.at(0).text()).toEqual('Issue type: Task');
-    expect(nodes.at(1).text()).toEqual('Parent issue: Parent Task');
-    expect(nodes.at(2).text()).toEqual('Priority: High');
-  });
-
-  test('it sets parent correctly', async () => {
+  it('sets parent correctly', async () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       fields: {
@@ -138,25 +111,24 @@ describe('Jira Fields', () => {
         parent: {},
       },
     });
-    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
-    await waitFor(() =>
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ label: 'parentId', value: 'parentId' }])
+    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    wrapper.update();
-    expect(onChange).toHaveBeenCalledWith({
-      issueType: '10006',
-      parent: 'parentId',
-      priority: 'High',
+
+    await act(async () => {
+      const event = { target: { value: 'parentId' } };
+      fireEvent.change(screen.getByTestId('comboBoxSearchInput'), event);
     });
+
+    expect(screen.getByText('parentId')).toBeInTheDocument();
   });
 
-  test('it searches parent correctly', async () => {
+  it('searches parent correctly', async () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       fields: {
@@ -164,119 +136,127 @@ describe('Jira Fields', () => {
         parent: {},
       },
     });
-    useGetSingleIssueMock.mockReturnValue({ useGetSingleIssueResponse, issue: null });
-    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
-    await waitFor(() =>
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onSearchChange: (a: string) => void;
-        }
-      ).onSearchChange('womanId')
+    useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    wrapper.update();
+
+    await act(async () => {
+      const event = { target: { value: 'womanId' } };
+      fireEvent.change(screen.getByTestId('comboBoxSearchInput'), event);
+    });
+
     expect(useGetIssuesMock.mock.calls[2][0].query).toEqual('womanId');
   });
 
-  test('it disabled the fields when loading issue types', () => {
+  it('disabled the fields when loading issue types', () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    expect(
-      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
-    ).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('disabled')).toBeTruthy();
+    expect(screen.getByTestId('issueTypeSelect')).toBeDisabled();
+    expect(screen.getByTestId('prioritySelect')).toBeDisabled();
   });
 
-  test('it disabled the fields when loading fields', () => {
+  it('disabled the fields when loading fields', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       isLoading: true,
     });
 
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    expect(
-      wrapper.find('[data-test-subj="issueTypeSelect"]').first().prop('disabled')
-    ).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('disabled')).toBeTruthy();
+    expect(screen.getByTestId('issueTypeSelect')).toBeDisabled();
+    expect(screen.getByTestId('prioritySelect')).toBeDisabled();
   });
 
-  test('it hides the priority if not supported', () => {
+  it('hides the priority if not supported', () => {
     const response = omit('fields.priority', useGetFieldsByIssueTypeResponse);
 
     useGetFieldsByIssueTypeMock.mockReturnValue(response);
 
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().exists()).toBeFalsy();
-  });
-
-  test('it sets issue type correctly', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-
-    wrapper
-      .find('select[data-test-subj="issueTypeSelect"]')
-      .first()
-      .simulate('change', {
-        target: { value: '10007' },
-      });
-
-    expect(onChange).toHaveBeenCalledWith({ issueType: '10007', parent: null, priority: null });
-  });
-
-  test('it sets issue type when it comes as null', () => {
-    const wrapper = mount(
-      <Fields fields={{ ...fields, issueType: null }} onChange={onChange} connector={connector} />
+    appMockRenderer.render(
+      <MockFormWrapperComponent>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    expect(wrapper.find('select[data-test-subj="issueTypeSelect"]').first().props().value).toEqual(
-      '10006'
-    );
+
+    expect(screen.queryByTestId('prioritySelect')).not.toBeInTheDocument();
   });
 
-  test('it sets issue type when it comes as unknown value', () => {
-    const wrapper = mount(
-      <Fields
-        fields={{ ...fields, issueType: '99999' }}
-        onChange={onChange}
-        connector={connector}
-      />
+  it('sets issue type correctly', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    expect(wrapper.find('select[data-test-subj="issueTypeSelect"]').first().props().value).toEqual(
-      '10006'
-    );
+
+    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), '10007');
+    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
-  test('it sets priority correctly', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+  it('sets issue type when it comes as null', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={{ ...fields, issueType: null }}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    wrapper
-      .find('select[data-test-subj="prioritySelect"]')
-      .first()
-      .simulate('change', {
-        target: { value: '2' },
-      });
-
-    expect(onChange).toHaveBeenCalledWith({ issueType: '10006', parent: null, priority: '2' });
+    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10006');
   });
 
-  test('it resets priority when changing issue type', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    wrapper
-      .find('select[data-test-subj="issueTypeSelect"]')
-      .first()
-      .simulate('change', {
-        target: { value: '10007' },
-      });
+  it('sets issue type when it comes as unknown value', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={{ ...fields, issueType: '99999' }}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    expect(onChange).toBeCalledWith({ issueType: '10007', parent: null, priority: null });
+    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10006');
+  });
+
+  it('sets priority correctly', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    userEvent.selectOptions(screen.getByTestId('prioritySelect'), 'Low');
+
+    expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
+  });
+
+  it('resets priority when changing issue type', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), '2');
+
+    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
+    expect(screen.getByTestId('prioritySelect')).toHaveValue('');
   });
 
   it('should submit Jira connector', async () => {
-    const { rerender } = mockedContext.render(
-      <Fields fields={fields} onChange={onChange} connector={connector} />
+    const { rerender } = appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
     await waitFor(() => {
@@ -284,26 +264,21 @@ describe('Jira Fields', () => {
       expect(screen.getByRole('option', { name: 'Low' }));
     });
 
-    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), ['10007']);
+    const checkbox = within(screen.getByTestId('issueTypeSelect')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    userEvent.type(checkbox, 'Bug{enter}');
 
     rerender(
-      <Fields
-        fields={{ ...fields, issueType: '10007' }}
-        onChange={onChange}
-        connector={connector}
-      />
+      <MockFormWrapperComponent fields={{ ...fields, issueType: '10007' }}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
     userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalled();
-    });
-
-    expect(onChange).toBeCalledWith({
-      issueType: '10007',
-      parent: null,
-      priority: 'Low',
-    });
+    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
+    expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
   });
 });

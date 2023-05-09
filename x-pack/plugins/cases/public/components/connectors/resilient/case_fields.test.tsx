@@ -6,9 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -18,6 +15,7 @@ import { useGetSeverity } from './use_get_severity';
 import Fields from './case_fields';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');
@@ -64,85 +62,85 @@ describe('ResilientParamsFields renders', () => {
     incidentTypes: ['19'],
   };
 
-  const onChange = jest.fn();
-  let mockedContext: AppMockRenderer;
+  let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    mockedContext = createAppMockRenderer();
+    appMockRenderer = createAppMockRenderer();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     jest.clearAllMocks();
   });
 
-  test('all params fields are rendered', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    expect(wrapper.find('[data-test-subj="incidentTypeComboBox"]').first().prop('options')).toEqual(
-      [
-        { label: 'Malware', value: '19' },
-        { label: 'Denial of Service', value: '21' },
-      ]
+  it('all params fields are rendered', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="incidentTypeComboBox"]').first().prop('selectedOptions')
-    ).toEqual([{ label: 'Malware', value: '19' }]);
-
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      '6'
-    );
+    expect(screen.getByText('Malware')).toBeInTheDocument();
+    expect(screen.getByTestId('severitySelect')).toHaveValue('6');
   });
 
-  test('it disabled the fields when loading incident types', () => {
+  it('disabled the fields when loading incident types', async () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
 
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    expect(
-      wrapper.find('[data-test-subj="incidentTypeComboBox"]').first().prop('isDisabled')
-    ).toBeTruthy();
+    expect(screen.getByTestId('incidentTypeComboBox')).toBeDisabled();
   });
 
-  test('it disabled the fields when loading severity', () => {
+  it('disabled the fields when loading severity', () => {
     useGetSeverityMock.mockReturnValue({
       ...useGetSeverityResponse,
       isLoading: true,
     });
 
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('disabled')).toBeTruthy();
+    expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
 
-  test('it sets issue type correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+  it('sets issue type correctly', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    await waitFor(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ value: '19', label: 'Denial of Service' }]);
-    });
+    const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
+      'comboBoxSearchInput'
+    );
 
-    expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '6' });
+    userEvent.type(checkbox, 'Denial of Service{enter}');
+
+    expect(screen.getByText('Denial of Service')).toBeInTheDocument();
   });
 
-  test('it sets severity correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+  it('sets severity correctly', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    wrapper
-      .find('select[data-test-subj="severitySelect"]')
-      .first()
-      .simulate('change', {
-        target: { value: '4' },
-      });
-
-    expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '4' });
+    userEvent.selectOptions(screen.getByTestId('severitySelect'), 'Low');
+    expect(screen.getByText('Low')).toBeInTheDocument();
   });
 
   it('should submit a resilient connector', async () => {
-    const { rerender } = mockedContext.render(
-      <Fields fields={fields} onChange={onChange} connector={connector} />
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
     await waitFor(() => {
@@ -156,23 +154,9 @@ describe('ResilientParamsFields renders', () => {
 
     userEvent.type(checkbox, 'Denial of Service{enter}');
 
-    rerender(
-      <Fields
-        fields={{ ...fields, incidentTypes: ['21'] }}
-        onChange={onChange}
-        connector={connector}
-      />
-    );
-
     userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalled();
-    });
-
-    expect(onChange).toBeCalledWith({
-      incidentTypes: ['21'],
-      severityCode: '4',
-    });
+    expect(screen.getByText('Denial of Service')).toBeInTheDocument();
+    expect(screen.getByText('Low')).toBeInTheDocument();
   });
 });

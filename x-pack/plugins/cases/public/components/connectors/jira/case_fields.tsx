@@ -13,22 +13,17 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import * as i18n from './translations';
 
 import type { JiraFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
-import { ConnectorCard } from '../card';
 
-const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFieldsType>> = ({
-  connector,
-  isEdit = true,
-}) => {
+const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
   const { http, notifications } = useKibana().services;
 
-  const { issueType = null, priority = null, parent = null } = fields ?? {};
+  const { issueType = null } = fields ?? {};
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     connector,
@@ -62,37 +57,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
     );
   }, [fieldsByIssueType]);
 
-  const listItems = useMemo(
-    () => [
-      ...(issueType != null && issueType.length > 0
-        ? [
-            {
-              title: i18n.ISSUE_TYPE,
-              description: issueTypes.find((issue) => issue.id === issueType)?.name ?? '',
-            },
-          ]
-        : []),
-      ...(parent != null && parent.length > 0
-        ? [
-            {
-              title: i18n.PARENT_ISSUE,
-              description: parent,
-            },
-          ]
-        : []),
-      ...(priority != null && priority.length > 0
-        ? [
-            {
-              title: i18n.PRIORITY,
-              description: priority,
-            },
-          ]
-        : []),
-    ],
-    [issueType, issueTypes, parent, priority]
-  );
-
-  return isEdit ? (
+  return (
     <div data-test-subj={'connector-fields-jira'}>
       <UseField
         path="fields.issueType"
@@ -149,13 +114,6 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
         )}
       </>
     </div>
-  ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.jira}
-      isLoading={isLoadingIssueTypes || isLoadingFields}
-      listItems={listItems}
-      title={connector.name}
-    />
   );
 };
 

@@ -44,8 +44,8 @@ export const issues = [
 export const choices = [
   {
     dependent_value: '',
-    label: 'Priviledge Escalation',
-    value: 'Priviledge Escalation',
+    label: 'Privilege Escalation',
+    value: 'Privilege Escalation',
     element: 'category',
   },
   {
