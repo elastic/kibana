@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExecuteActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
@@ -83,3 +84,32 @@ export const ExecuteActionResult = memo<
   );
 });
 ExecuteActionResult.displayName = 'ExecuteActionResult';
+
+const ABOUT_ESCAPE_DASHES = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.execute.args.command.aboutConsecutiveDashes',
+  {
+    defaultMessage: 'Multiple consecutive dashes in the value provided must be escaped. Ex:',
+  }
+);
+
+const ABOUT_ESCAPE_QUOTES = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.execute.args.command.aboutQuotes',
+  {
+    defaultMessage: 'Quotes provided in the value can be used without escaping. Ex:',
+  }
+);
+
+export const getExecuteCommandArgAboutInfo = (): React.ReactNode => {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpointConsoleCommands.execute.args.command.about"
+        defaultMessage="The command to execute."
+      />
+      <br />
+      {`${ABOUT_ESCAPE_DASHES} execute --command "/opt/directory\\-\\-\\-directory/myBinary \\-\\-version"`}
+      <br />
+      {`${ABOUT_ESCAPE_QUOTES} execute --command "cd "C:\\Program Files\\directory""`}
+    </>
+  );
+};

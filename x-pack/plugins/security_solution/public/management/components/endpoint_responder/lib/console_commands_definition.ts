@@ -20,7 +20,10 @@ import { KillProcessActionResult } from '../command_render_components/kill_proce
 import { SuspendProcessActionResult } from '../command_render_components/suspend_process_action';
 import { EndpointStatusActionResult } from '../command_render_components/status_action';
 import { GetProcessesActionResult } from '../command_render_components/get_processes_action';
-import { ExecuteActionResult } from '../command_render_components/execute_action';
+import {
+  ExecuteActionResult,
+  getExecuteCommandArgAboutInfo,
+} from '../command_render_components/execute_action';
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
@@ -499,12 +502,7 @@ export const getEndpointConsoleCommands = ({
         command: {
           required: true,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.execute.args.command.about',
-            {
-              defaultMessage: 'The command to execute',
-            }
-          ),
+          about: getExecuteCommandArgAboutInfo(),
           mustHaveValue: 'non-empty-string',
         },
         timeout: {

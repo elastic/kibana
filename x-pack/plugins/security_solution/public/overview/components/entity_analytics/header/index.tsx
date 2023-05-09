@@ -33,6 +33,7 @@ import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../anomalies';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { SEVERITY_COLOR } from '../../detection_response/utils';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => SEVERITY_COLOR.critical};
@@ -43,6 +44,7 @@ const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader = () => {
   const { from, to } = useGlobalTime();
+  const { filterQuery } = useGlobalFilterQuery();
   const timerange = useMemo(
     () => ({
       from,
@@ -59,6 +61,7 @@ export const EntityAnalyticsHeader = () => {
   } = useRiskScoreKpi({
     timerange,
     riskEntity: RiskScoreEntity.host,
+    filterQuery,
   });
 
   const {
@@ -67,6 +70,7 @@ export const EntityAnalyticsHeader = () => {
     refetch: refetchUserRiskScore,
     inspect: inspectUserRiskScore,
   } = useRiskScoreKpi({
+    filterQuery,
     timerange,
     riskEntity: RiskScoreEntity.user,
   });
