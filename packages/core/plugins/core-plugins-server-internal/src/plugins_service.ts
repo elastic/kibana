@@ -69,6 +69,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
   node: InternalNodeServicePreboot;
+  isBackgroundTaskOnly: boolean;
 }
 
 /** @internal */
@@ -97,6 +98,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async discover({
     environment,
     node,
+    isBackgroundTaskOnly,
   }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
@@ -112,7 +114,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     });
 
     await this.handleDiscoveryErrors(error$);
-    await this.handleDiscoveredPlugins(plugin$);
+    await this.handleDiscoveredPlugins(plugin$, isBackgroundTaskOnly);
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
@@ -254,7 +256,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
+  private async handleDiscoveredPlugins(
+    plugin$: Observable<PluginWrapper>,
+    isBackgroundTaskOnly: boolean
+  ) {
     const pluginEnableStatuses = new Map<
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
@@ -315,6 +320,16 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
       pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
     }
+
+    const pluginDump: any[] = [];
+    for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
+      pluginDump.push({
+        pluginName,
+        optionalPlugins: plugin.optionalPlugins,
+        requiredPlugins: plugin.requiredPlugins,
+      });
+    }
+    this.log.info(JSON.stringify(pluginDump));
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
