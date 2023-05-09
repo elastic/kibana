@@ -13,9 +13,10 @@ import {
   GaugeLabelMajorModes,
 } from '@kbn/expression-gauge-plugin/common';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import { Origin } from '@kbn/expression-reveal-image-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
-import type { GaugeVisualizationState } from './constants';
+import type { RevealImageVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
@@ -24,69 +25,53 @@ const isNotNumericMetric = (table: TableSuggestion) =>
 const hasLayerMismatch = (keptLayerIds: string[], table: TableSuggestion) =>
   keptLayerIds.length > 1 || (keptLayerIds.length && table.layerId !== keptLayerIds[0]);
 
-export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggestions'] = ({
+const icon = 'image';
+
+export const getSuggestions: Visualization<RevealImageVisualizationState>['getSuggestions'] = ({
   table,
   state,
   keptLayerIds,
   subVisualizationId,
 }) => {
-  const isGauge = Boolean(
-    state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
-  );
+  const isRevealImage = Boolean(state && (state.maxAccessor || state.metricAccessor));
 
   const numberOfAccessors =
-    state &&
-    [state.minAccessor, state.maxAccessor, state.goalAccessor, state.metricAccessor].filter(Boolean)
-      .length;
+    state && [state.maxAccessor, state.metricAccessor].filter(Boolean).length;
 
   if (
     hasLayerMismatch(keptLayerIds, table) ||
     isNotNumericMetric(table) ||
-    (state && !isGauge && table.columns.length > 1) ||
-    (isGauge && (numberOfAccessors !== table.columns.length || table.changeType === 'initial'))
+    (state && !isRevealImage && table.columns.length > 1) ||
+    (isRevealImage &&
+      (numberOfAccessors !== table.columns.length || table.changeType === 'initial'))
   ) {
     return [];
   }
 
-  const shape: GaugeShape =
-    state?.shape === GaugeShapes.VERTICAL_BULLET
-      ? GaugeShapes.VERTICAL_BULLET
-      : GaugeShapes.HORIZONTAL_BULLET;
-
   const baseSuggestion = {
     state: {
       ...state,
-      shape,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
-      ticksPosition: GaugeTicksPositions.AUTO,
-      labelMajorMode: GaugeLabelMajorModes.AUTO,
     },
-    title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
-      defaultMessage: 'Gauge',
+    title: i18n.translate('xpack.lens.revealImage.revealImageLabel', {
+      defaultMessage: 'RevealImage',
     }),
-    previewIcon:
-      shape === GaugeShapes.VERTICAL_BULLET ? IconChartVerticalBullet : IconChartHorizontalBullet,
+    previewIcon: 'image',
     score: 0.5,
-    hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
+    origin: Origin.BOTTOM,
+    hide: !isRevealImage || state?.metricAccessor === undefined, // only display for gauges for beta
     incomplete: state?.metricAccessor === undefined,
   };
 
-  const suggestions = isGauge
+  const suggestions = isRevealImage
     ? [
         {
           ...baseSuggestion,
-          previewIcon:
-            state?.shape === GaugeShapes.VERTICAL_BULLET
-              ? IconChartHorizontalBullet
-              : IconChartVerticalBullet,
+          previewIcon: icon,
           state: {
             ...baseSuggestion.state,
             ...state,
-            shape:
-              state?.shape === GaugeShapes.VERTICAL_BULLET
-                ? GaugeShapes.HORIZONTAL_BULLET
-                : GaugeShapes.VERTICAL_BULLET,
           },
         },
       ]
@@ -100,17 +85,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
         },
         {
           ...baseSuggestion,
-          previewIcon:
-            state?.shape === GaugeShapes.VERTICAL_BULLET
-              ? IconChartHorizontalBullet
-              : IconChartVerticalBullet,
+          previewIcon: icon,
           state: {
             ...baseSuggestion.state,
             metricAccessor: table.columns[0].columnId,
-            shape:
-              state?.shape === GaugeShapes.VERTICAL_BULLET
-                ? GaugeShapes.HORIZONTAL_BULLET
-                : GaugeShapes.VERTICAL_BULLET,
           },
         },
       ];

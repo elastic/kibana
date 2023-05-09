@@ -10,7 +10,6 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { fromExpression } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
@@ -19,6 +18,7 @@ import {
   ExpressionRevealImageFunctionDefinition,
 } from '@kbn/expression-reveal-image-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { Accessors } from '@kbn/expression-gauge-plugin/common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   DatasourceLayers,
@@ -31,6 +31,7 @@ import type {
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_REVEAL_IMAGE_ID, RevealImageVisualizationState } from './constants';
 import { getAccessorsFromState } from './utils';
+import { generateId } from '../../id_generator';
 
 export const elasticLogo =
   'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgdmlld0JveD0iMCAwIDI3MC42MDAwMSAyNjkuNTQ2NjYiCiAgIGhlaWdodD0iMjY5LjU0NjY2IgogICB3aWR0aD0iMjcwLjYwMDAxIgogICB4bWw6c3BhY2U9InByZXNlcnZlIgogICBpZD0ic3ZnMiIKICAgdmVyc2lvbj0iMS4xIj48bWV0YWRhdGEKICAgICBpZD0ibWV0YWRhdGE4Ij48cmRmOlJERj48Y2M6V29yawogICAgICAgICByZGY6YWJvdXQ9IiI+PGRjOmZvcm1hdD5pbWFnZS9zdmcreG1sPC9kYzpmb3JtYXQ+PGRjOnR5cGUKICAgICAgICAgICByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIiAvPjwvY2M6V29yaz48L3JkZjpSREY+PC9tZXRhZGF0YT48ZGVmcwogICAgIGlkPSJkZWZzNiIgLz48ZwogICAgIHRyYW5zZm9ybT0ibWF0cml4KDEuMzMzMzMzMywwLDAsLTEuMzMzMzMzMywwLDI2OS41NDY2NykiCiAgICAgaWQ9ImcxMCI+PGcKICAgICAgIHRyYW5zZm9ybT0ic2NhbGUoMC4xKSIKICAgICAgIGlkPSJnMTIiPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMTQiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNmZmZmZmY7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMjAyOS40OCw5NjIuNDQxIGMgMCwxNzAuMDk5IC0xMDUuNDYsMzE4Ljc5OSAtMjY0LjE3LDM3Ni42NTkgNi45OCwzNS44NiAxMC42Miw3MS43MSAxMC42MiwxMDkuMDUgMCwzMTYuMTkgLTI1Ny4yNCw1NzMuNDMgLTU3My40Nyw1NzMuNDMgLTE4NC43MiwwIC0zNTYuNTU4LC04OC41OSAtNDY0LjUzLC0yMzcuODUgLTUzLjA5LDQxLjE4IC0xMTguMjg1LDYzLjc1IC0xODYuMzA1LDYzLjc1IC0xNjcuODM2LDAgLTMwNC4zODMsLTEzNi41NCAtMzA0LjM4MywtMzA0LjM4IDAsLTM3LjA4IDYuNjE3LC03Mi41OCAxOS4wMzEsLTEwNi4wOCBDIDEwOC40ODgsMTM4MC4wOSAwLDEyMjcuODkgMCwxMDU4Ljg4IDAsODg3LjkxIDEwNS45NzcsNzM4LjUzOSAyNjUuMzk4LDY4MS4wOSBjIC02Ljc2OSwtMzUuNDQyIC0xMC40NiwtNzIuMDIgLTEwLjQ2LC0xMDkgQyAyNTQuOTM4LDI1Ni42MjEgNTExLjU2NiwwIDgyNy4wMjcsMCAxMDEyLjIsMCAxMTgzLjk0LDg4Ljk0MTQgMTI5MS4zLDIzOC44MzIgYyA1My40NSwtNDEuOTYxIDExOC44LC02NC45OTIgMTg2LjU2LC02NC45OTIgMTY3LjgzLDAgMzA0LjM4LDEzNi40OTIgMzA0LjM4LDMwNC4zMzIgMCwzNy4wNzggLTYuNjIsNzIuNjI5IC0xOS4wMywxMDYuMTI5IDE1Ny43OCw1Ni44NzkgMjY2LjI3LDIwOS4xMjkgMjY2LjI3LDM3OC4xNCIgLz48cGF0aAogICAgICAgICBpZD0icGF0aDE2IgogICAgICAgICBzdHlsZT0iZmlsbDojZmFjZjA5O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDc5Ny44OTgsMTE1MC45MyA0NDQuMDcyLC0yMDIuNDUgNDQ4LjA1LDM5Mi41OCBjIDYuNDksMzIuMzkgOS42Niw2NC42NyA5LjY2LDk4LjQ2IDAsMjc2LjIzIC0yMjQuNjgsNTAwLjk1IC01MDAuOSw1MDAuOTUgLTE2NS4yNCwwIC0zMTkuMzcsLTgxLjM2IC00MTMuMDUzLC0yMTcuNzkgbCAtNzQuNTI0LC0zODYuNjQgODYuNjk1LC0xODUuMTEiIC8+PHBhdGgKICAgICAgICAgaWQ9InBhdGgxOCIKICAgICAgICAgc3R5bGU9ImZpbGw6IzQ5YzFhZTtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSAzMzguMjIzLDY4MC42NzIgYyAtNi40ODksLTMyLjM4MyAtOS44MDksLTY1Ljk4MSAtOS44MDksLTk5Ljk3MyAwLC0yNzYuOTI5IDIyNS4zMzYsLTUwMi4yNTc2IDUwMi4zMTMsLTUwMi4yNTc2IDE2Ni41OTMsMCAzMjEuNDczLDgyLjExNzYgNDE1LjAxMywyMTkuOTQ5NiBsIDczLjk3LDM4NS4zNDcgLTk4LjcyLDE4OC42MjEgTCA3NzUuMTU2LDEwNzUuNTcgMzM4LjIyMyw2ODAuNjcyIiAvPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMjAiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZjI5OWI7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMzM1LjQxLDE0NDkuMTggMzA0LjMzMiwtNzEuODYgNjYuNjgsMzQ2LjAyIGMgLTQxLjU4NiwzMS43OCAtOTIuOTMsNDkuMTggLTE0NS43MzEsNDkuMTggLTEzMi4yNSwwIC0yMzkuODEyLC0xMDcuNjEgLTIzOS44MTIsLTIzOS44NyAwLC0yOS4yMSA0Ljg3OSwtNTcuMjIgMTQuNTMxLC04My40NyIgLz48cGF0aAogICAgICAgICBpZD0icGF0aDIyIgogICAgICAgICBzdHlsZT0iZmlsbDojNGNhYmU0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIgogICAgICAgICBkPSJNIDMwOC45OTIsMTM3Ni43IEMgMTczLjAyLDEzMzEuNjQgNzguNDgwNSwxMjAxLjMgNzguNDgwNSwxMDU3LjkzIDc4LjQ4MDUsOTE4LjM0IDE2NC44Miw3OTMuNjggMjk0LjQwNiw3NDQuMzUyIGwgNDI2Ljk4MSwzODUuOTM4IC03OC4zOTUsMTY3LjUxIC0zMzQsNzguOSIgLz48cGF0aAogICAgICAgICBpZD0icGF0aDI0IgogICAgICAgICBzdHlsZT0iZmlsbDojODVjZTI2O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDEzMjMuOCwyOTguNDEgYyA0MS43NCwtMzIuMDkgOTIuODMsLTQ5LjU5IDE0NC45OCwtNDkuNTkgMTMyLjI1LDAgMjM5LjgxLDEwNy41NTkgMjM5LjgxLDIzOS44MjEgMCwyOS4xNiAtNC44OCw1Ny4xNjggLTE0LjUzLDgzLjQxOCBsIC0zMDQuMDgsNzEuMTYgLTY2LjE4LC0zNDQuODA5IiAvPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMjYiCiAgICAgICAgIHN0eWxlPSJmaWxsOiMzMTc3YTc7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMTM4NS42Nyw3MjIuOTMgMzM0Ljc2LC03OC4zMDEgYyAxMzYuMDIsNDQuOTYxIDIzMC41NiwxNzUuMzUxIDIzMC41NiwzMTguNzYyIDAsMTM5LjMzOSAtODYuNTQsMjYzLjg1OSAtMjE2LjM4LDMxMy4wMzkgbCAtNDM3Ljg0LC0zODMuNTkgODguOSwtMTY5LjkxIiAvPjwvZz48L2c+PC9zdmc+';
@@ -40,6 +41,60 @@ export const elasticOutline =
 
 export const revealImageIcon = 'image';
 export const revealImageId = 'revealImage';
+
+function getNiceNumber(localRange: number) {
+  const exponent = Math.floor(Math.log10(localRange));
+  const fraction = localRange / Math.pow(10, exponent);
+  let niceFraction = 10;
+
+  if (fraction <= 1) niceFraction = 1;
+  else if (fraction <= 2) niceFraction = 2;
+  else if (fraction <= 5) niceFraction = 5;
+
+  return niceFraction * Math.pow(10, exponent);
+}
+
+// returns nice rounded numbers similar to d3 nice() function
+function getNiceRange(min: number, max: number) {
+  const maxTicks = 5;
+  const offsetMax = max + 0.0000001; // added to avoid max value equal to metric value
+  const range = getNiceNumber(offsetMax - min);
+  const tickSpacing = getNiceNumber(range / (maxTicks - 1));
+  return {
+    min: Math.floor(min / tickSpacing) * tickSpacing,
+    max: Math.ceil(Math.ceil(offsetMax / tickSpacing) * tickSpacing),
+  };
+}
+
+export const getMaxValue = (
+  row?: DatatableRow,
+  accessors?: Accessors,
+  isRespectRanges?: boolean
+): number => {
+  const FALLBACK_VALUE = 100;
+  const currentValue = accessors?.max ? getValueFromAccessor(accessors.max, row) : undefined;
+  if (currentValue !== undefined && currentValue !== null) {
+    return currentValue;
+  }
+
+  if (isRespectRanges) {
+    const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
+    return metricValue;
+  }
+
+  if (row && accessors) {
+    const { metric, goal } = accessors;
+    const metricValue = metric && row[metric];
+    const goalValue = goal && row[goal];
+    const minValue = 0;
+    if (metricValue != null) {
+      const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
+      const maxValue = Math.max(...numberValues);
+      return getNiceRange(minValue, maxValue).max;
+    }
+  }
+  return FALLBACK_VALUE;
+};
 
 export const getValueFromAccessor = (
   accessor: string,
@@ -61,7 +116,7 @@ export const getValueFromAccessor = (
   }
 };
 
-const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
+const groupLabelForRevealImage = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
 });
 
@@ -79,19 +134,9 @@ const CHART_NAMES = {
     label: i18n.translate('xpack.lens.revealImage.revealImageLabel', {
       defaultMessage: 'Reveal image',
     }),
-    groupLabel: groupLabelForGauge,
+    groupLabel: groupLabelForRevealImage,
   },
 };
-
-// function computePaletteParams(params: CustomPaletteParams) {
-//   return {
-//     ...params,
-//     // rewrite colors and stops as two distinct arguments
-//     colors: (params?.stops || []).map(({ color }) => color),
-//     stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
-//     reverse: false, // managed at UI level
-//   };
-// }
 
 const getErrorMessages = (
   row?: DatatableRow,
@@ -161,30 +206,19 @@ const toExpression = (
   const revealImageFn = buildExpressionFunction<ExpressionRevealImageFunctionDefinition>(
     'revealImage',
     {
-      // metric: state.metricAccessor,
-      image: state.image ?? elasticOutline,
-      emptyImage: state.emptyImage ?? elasticLogo,
+      image: state.image ?? elasticLogo,
+      emptyImage: state.emptyImage ?? elasticOutline,
       origin: state.origin ?? Origin.BOTTOM,
-      // colorMode: state?.colorMode ?? 'none',
-      // palette: state.palette?.params
-      // ? paletteService.get(CUSTOM_PALETTE).toExpression(computePaletteParams(state.palette.params))
-      // : undefined,
-      // ticksPosition: state.ticksPosition ?? 'auto',
-      // labelMinor: state.labelMinor,
-      // labelMajor: state.labelMajor,
-      // labelMajorMode: state.labelMajorMode ?? 'auto',
     }
   );
 
-  // const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
-
-  const getCellFn = buildExpressionFunction('getCell', { column: state.metricAccessor });
-
-  console.log({ datasourceExpression, getCellFn: getCellFn.toAst(), state });
+  const mathFn = buildExpressionFunction('math', {
+    expression: `"${state.metricAccessor}"${state.maxAccessor ? `/"${state.maxAccessor}"` : ''}`,
+  });
 
   return {
     type: 'expression',
-    chain: [...(datasourceExpression?.chain ?? []), getCellFn.toAst(), revealImageFn.toAst()],
+    chain: [...(datasourceExpression?.chain ?? []), mathFn.toAst(), revealImageFn.toAst()],
   };
 };
 
@@ -209,22 +243,13 @@ export const getRevealImageVisualization = ({
   clearLayer(state) {
     const newState = { ...state };
     delete newState.metricAccessor;
+    delete newState.maxAccessor;
     return newState;
   },
 
   getDescription(state) {
     return CHART_NAMES.revealImage;
   },
-
-  // switchVisualizationType: (visualizationTypeId, state) => {
-  //   return {
-  //     ...state,
-  //     shape:
-  //       visualizationTypeId === GaugeShapes.HORIZONTAL_BULLET
-  //         ? GaugeShapes.HORIZONTAL_BULLET
-  //         : GaugeShapes.VERTICAL_BULLET,
-  //   };
-  // },
 
   initialize(addNewLayer, state) {
     return (
@@ -272,8 +297,34 @@ export const getRevealImageVisualization = ({
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: !metricAccessor,
           requiredMinDimensionCount: 1,
-          dataTestSubj: 'lnsGauge_metricDimensionPanel',
+          dataTestSubj: 'lnsRevealImage_metricDimensionPanel',
           enableDimensionEditor: true,
+        },
+        {
+          supportStaticValue: true,
+          enableFormatSelector: false,
+          layerId: state.layerId,
+          groupId: GROUP_ID.MAX,
+          groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
+            defaultMessage: 'Maximum value',
+          }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.maxValueLabel', {
+                defaultMessage: 'Maximum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
+          isMetricDimension: true,
+          accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
+          filterOperations: isNumericMetric,
+          supportsMoreColumns: !state.maxAccessor,
+          dataTestSubj: 'lnsRevealImage_maxDimensionPanel',
+          prioritizedOperation: 'max',
+          suggestedValue: () => (state.metricAccessor ? getMaxValue(row, accessors) : undefined),
         },
       ],
     };
@@ -283,6 +334,9 @@ export const getRevealImageVisualization = ({
     const update: Partial<RevealImageVisualizationState> = {};
     if (groupId === GROUP_ID.METRIC) {
       update.metricAccessor = columnId;
+    }
+    if (groupId === GROUP_ID.MAX) {
+      update.maxAccessor = columnId;
     }
     return {
       ...prevState,
@@ -295,6 +349,10 @@ export const getRevealImageVisualization = ({
 
     if (prevState.metricAccessor === columnId) {
       delete update.metricAccessor;
+    }
+
+    if (prevState.maxAccessor === columnId) {
+      delete update.maxAccessor;
     }
 
     return update;
@@ -325,6 +383,7 @@ export const getRevealImageVisualization = ({
   getSupportedLayers(state, frame) {
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
     const accessors = getAccessorsFromState(state);
+    const maxValue = getMaxValue(row, accessors);
 
     return [
       {
@@ -332,7 +391,15 @@ export const getRevealImageVisualization = ({
         label: i18n.translate('xpack.lens.gauge.addLayer', {
           defaultMessage: 'Visualization',
         }),
-        initialDimensions: undefined,
+        initialDimensions: state
+          ? [
+              {
+                groupId: 'max',
+                columnId: generateId(),
+                staticValue: maxValue,
+              },
+            ]
+          : undefined,
       },
     ];
   },
@@ -406,6 +473,16 @@ export const getRevealImageVisualization = ({
           defaultMessage: 'Metric',
         }),
         dimensionType: 'metric',
+      });
+    }
+
+    if (accessors?.max) {
+      dimensions.push({
+        id: accessors.max,
+        name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
+          defaultMessage: 'Maximum value',
+        }),
+        dimensionType: 'max',
       });
     }
     return {

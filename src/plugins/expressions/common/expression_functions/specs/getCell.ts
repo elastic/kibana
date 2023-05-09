@@ -50,6 +50,6 @@ export const getCell = {
       // throw errors.columnNotFound(column);
     }
 
-    return 0.5;
+    return value;
   },
 };

@@ -15,6 +15,7 @@ export const LENS_REVEAL_IMAGE_ID = 'lnsRevealImage';
 
 export const GROUP_ID = {
   METRIC: 'metric',
+  MAX: 'max',
   IMAGE: 'image',
   EMPTY_IMAGE: 'emptyImage',
   GOAL: 'origin',
@@ -24,6 +25,7 @@ type RevealImageState = Pick<
   RevealImageStateOriginal,
   'metric' | 'image' | 'emptyImage' | 'origin'
 > & {
+  maxAccessor?: string;
   metricAccessor?: string;
 };
 
