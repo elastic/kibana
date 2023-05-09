@@ -34,10 +34,22 @@ popd
 
 echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
 pushd packages/kbn-test/new_test_runner
+echo "### pwd: $(pwd)"
 tgt="../../../target/junit"
+shutdown() {
+  exit_code=$?
+
+  echo "### Contents of repo root:"
+  ls -la "../../.."
+
+  echo "### tgt: ${tgt}"
+  echo "### Contents of ${tgt}:"
+  ls -la "$tgt"
+
+  exit $exit_code
+}
+trap "shutdown" EXIT
 ls -R "$tgt"
 node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$tgt"
 ls -R "$tgt"
 popd
-
-#target/junit
