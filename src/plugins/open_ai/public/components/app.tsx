@@ -90,21 +90,29 @@ export const OpenAiApp = ({ basename, notifications, http, navigation }: OpenAiA
     ]);
     scrollToBottom();
 
-    const response = await http.get<{
-      answer: string;
-      references: Array<{ title: string; url: string }>;
-    }>('/internal/open_ai/kibana_docs', {
-      query: { query: trimmedQuestion },
-    });
+    let message: string;
 
-    const messageParts = [response.answer];
+    try {
+      const response = await http.get<{
+        answer: string;
+        references: Array<{ title: string; url: string }>;
+      }>('/internal/open_ai/kibana_docs', {
+        query: { query: trimmedQuestion },
+      });
 
-    if (response.references.length) {
-      const references = response.references
-        .map(({ title, url }) => `* [${title}](${url})`)
-        .join('\n');
+      const messageParts = [response.answer];
 
-      messageParts.push(`##### References:\n${references}`);
+      if (response.references.length) {
+        const references = response.references
+          .map(({ title, url }) => `* [${title}](${url})`)
+          .join('\n');
+
+        messageParts.push(`##### References:\n${references}`);
+      }
+
+      message = messageParts.join('\n\n');
+    } catch (e) {
+      message = `Sorry, I encountered an error while trying to answer your question:\n\`\`\`\n${e.toString()}\n\`\`\``;
     }
 
     setLoading(false);
@@ -112,7 +120,7 @@ export const OpenAiApp = ({ basename, notifications, http, navigation }: OpenAiA
       ...newMessages,
       {
         username: kibanaUsername,
-        message: messageParts.join('\n\n'),
+        message,
         timestamp: formatDate(new Date()),
         avatar: kibanaAvatar,
       },
