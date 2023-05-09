@@ -223,6 +223,7 @@ const createHttpServiceMock = () => {
     getStartContract: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    getRegisteredRouters: jest.fn(),
   };
   mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
