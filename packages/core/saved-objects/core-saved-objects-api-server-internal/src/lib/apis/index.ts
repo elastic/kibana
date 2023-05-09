@@ -17,3 +17,4 @@ export { performFind } from './find';
 export { performBulkGet } from './bulk_get';
 export { performGet } from './get';
 export { performUpdate } from './update';
+export { performBulkUpdate } from './bulk_update';
