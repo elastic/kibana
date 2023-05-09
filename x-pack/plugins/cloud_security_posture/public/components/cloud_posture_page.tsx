@@ -186,9 +186,7 @@ export const CloudPosturePage = <TData, TError>({
       return defaultLoadingRenderer();
     }
 
-    // if (!subscriptionStatus.data) {
-    if (true) {
-      // if (getLicenseManagementLocator.isSuccess) {
+    if (!subscriptionStatus.data) {
       return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
     }
 

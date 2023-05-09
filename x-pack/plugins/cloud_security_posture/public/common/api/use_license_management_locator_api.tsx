@@ -17,11 +17,10 @@ export const useLicenseManagementLocatorApi = () => {
 
   return useQuery([getLicenseManagementLocatorKey], () => {
     const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
-    return undefined;
-    // if (!locator) return;
+    if (!locator) return;
 
-    // return locator.getUrl({
-    //   page: 'dashboard',
-    // });
+    return locator.getUrl({
+      page: 'dashboard',
+    });
   });
 };
