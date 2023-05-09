@@ -26,12 +26,14 @@ export function CustomDataStreamSelector({ stateContainer }: Props) {
     <DataStreamSelector
       title={dataView.getName()}
       integrations={mockIntegrations}
-      uncategorizedStreams={[]}
+      uncategorizedStreams={mockUncategorized}
       onStreamSelected={handleStreamSelection}
       onUncategorizedClick={() => console.log('fetch uncategorized streams')}
     />
   );
 }
+
+const mockUncategorized = [{ name: 'metrics-*' }, { name: 'logs-*' }];
 
 const mockIntegrations = [
   {
