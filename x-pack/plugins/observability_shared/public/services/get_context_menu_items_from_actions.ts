@@ -9,6 +9,10 @@ import { EuiContextMenuItemProps } from '@elastic/eui';
 import { buildContextMenuForActions, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '../../common';
 
+type ObservabilityActionContextMenuItemProps = EuiContextMenuItemProps & {
+  children: React.ReactElement;
+};
+
 export function getContextMenuItemsFromActions({
   uiActions,
   triggerId,
@@ -17,7 +21,7 @@ export function getContextMenuItemsFromActions({
   uiActions: UiActionsStart;
   triggerId: ObservabilityTriggerId;
   context: Record<string, any>;
-}): Promise<EuiContextMenuItemProps[]> {
+}): Promise<ObservabilityActionContextMenuItemProps[]> {
   return uiActions
     .getTriggerCompatibleActions(triggerId, context)
     .then((actions) => {
@@ -35,11 +39,10 @@ export function getContextMenuItemsFromActions({
       return descriptors
         .flatMap((descriptor) => descriptor.items ?? [])
         .map((item) => {
-          const { name, ...rest } = item;
           return {
-            ...rest,
-            children: item.children || name,
-          } as EuiContextMenuItemProps & { children: React.ReactElement };
+            ...item,
+            children: (item.children || item.name) as React.ReactNode,
+          } as ObservabilityActionContextMenuItemProps;
         });
     });
 }

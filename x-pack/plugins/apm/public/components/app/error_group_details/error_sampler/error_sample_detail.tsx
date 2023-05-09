@@ -6,26 +6,43 @@
  */
 
 import {
+  EuiBadge,
+  EuiButton,
+  EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingContent,
+  EuiPagination,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
   EuiToolTip,
-  EuiEmptyPrompt,
-  EuiPagination,
-  EuiLoadingContent,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
+import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
+import { TraceSearchType } from '../../../../../common/trace_explorer';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
@@ -35,6 +52,7 @@ import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
+import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import {
   ErrorTab,
   exceptionStacktraceTab,
@@ -42,16 +60,6 @@ import {
   logStacktraceTab,
 } from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
-import { TraceSearchType } from '../../../../../common/trace_explorer';
-import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
-import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SampleSummary } from './sample_summary';
 
 const TransactionLinkName = euiStyled.div`
@@ -91,6 +99,8 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
+  const { uiActions } = useApmPluginContext();
+
   const router = useApmRouter();
 
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
@@ -121,6 +131,19 @@ export function ErrorSampleDetails({
   };
 
   const { error, transaction } = errorData;
+
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
+  const externalContextMenuItems = useAsync(() => {
+    return getContextMenuItemsFromActions({
+      uiActions,
+      triggerId: ObservabilityTriggerId.ApmErrorContextMenu,
+      context: {
+        error,
+        transaction,
+      },
+    });
+  }, []);
 
   if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
@@ -207,6 +230,39 @@ export function ErrorSampleDetails({
             </EuiLink>
           </EuiFlexItem>
         )}
+        {externalContextMenuItems.value?.length ? (
+          <EuiPopover
+            id="errorContextMenu"
+            button={
+              <EuiButton
+                data-test-subj="ErrorSampleDetailsButton"
+                onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
+                iconType="arrowDown"
+                iconSide="right"
+              >
+                {i18n.translate(
+                  'xpack.pam.errorSampleDetails.investigateMenu',
+                  { defaultMessage: 'Investigate' }
+                )}
+              </EuiButton>
+            }
+            isOpen={isContextMenuOpen}
+            closePopover={() => setIsContextMenuOpen(() => false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu
+              initialPanelId="mainMenu"
+              panels={[
+                {
+                  id: 'mainMenu',
+                  items:
+                    externalContextMenuItems.value as EuiContextMenuPanelItemDescriptor[],
+                },
+              ]}
+            />
+          </EuiPopover>
+        ) : undefined}
         <EuiFlexItem grow={false}>
           <DiscoverErrorLink error={error} kuery={kuery}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
