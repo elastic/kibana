@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '../..';
 // import { Datatable } from '../../../types';
 // import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
