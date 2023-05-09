@@ -32,12 +32,10 @@ const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
 
 const bucketToResponse = ({
   bucket,
-  enrichInputs,
   now,
   identifierField,
 }: {
   bucket: RiskScoreBucket;
-  enrichInputs?: boolean;
   now: string;
   identifierField: string;
 }): RiskScore => ({
@@ -50,13 +48,11 @@ const bucketToResponse = ({
   alertsScore: bucket.risk_details.value.alerts_score,
   otherScore: bucket.risk_details.value.other_score,
   notes: bucket.risk_details.value.notes,
-  riskiestInputs: enrichInputs
-    ? bucket.riskiest_inputs.hits.hits
-    : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
-        _id: riskInput._id,
-        _index: riskInput._index,
-        sort: riskInput.sort,
-      })),
+  riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+    _id: riskInput._id,
+    _index: riskInput._index,
+    sort: riskInput.sort,
+  })),
 });
 
 const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContainer => ({
@@ -120,7 +116,6 @@ const buildReduceScript = ({
 
 const buildIdentifierTypeAggregation = (
   identifierType: IdentifierType,
-  enrichInputs?: boolean,
   weights?: GetScoresParams['weights']
 ): SearchRequest['aggs'] => {
   const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType({ identifierType, weights });
@@ -154,7 +149,7 @@ const buildIdentifierTypeAggregation = (
                 },
               },
             ],
-            _source: enrichInputs,
+            _source: false,
           },
         },
         risk_details: {
@@ -190,7 +185,6 @@ const buildIdentifierTypeAggregation = (
 
 export const calculateRiskScores = async ({
   debug,
-  enrichInputs,
   esClient,
   filter: userFilter,
   identifierType,
@@ -223,7 +217,7 @@ export const calculateRiskScores = async ({
       aggs: identifierTypes.reduce(
         (aggs, _identifierType) => ({
           ...aggs,
-          ...buildIdentifierTypeAggregation(_identifierType, enrichInputs, weights),
+          ...buildIdentifierTypeAggregation(_identifierType, weights),
         }),
         {}
       ),
@@ -250,7 +244,6 @@ export const calculateRiskScores = async ({
       .map((bucket) =>
         bucketToResponse({
           bucket,
-          enrichInputs,
           identifierField: 'user.name',
           now,
         })
@@ -259,7 +252,6 @@ export const calculateRiskScores = async ({
         hostBuckets.map((bucket) =>
           bucketToResponse({
             bucket,
-            enrichInputs,
             identifierField: 'host.name',
             now,
           })

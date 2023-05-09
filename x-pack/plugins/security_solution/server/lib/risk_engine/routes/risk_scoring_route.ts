@@ -38,7 +38,6 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
       const {
         data_view_id: dataViewId,
         debug,
-        enrich_inputs: enrichInputs,
         identifier_type: identifierType,
         filter,
         range: userRange,
@@ -58,7 +57,6 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
         const range = userRange ?? { start: 'now-15d', end: 'now' };
         const result = await riskScore.getScores({
           debug,
-          enrichInputs,
           index,
           filter,
           range,

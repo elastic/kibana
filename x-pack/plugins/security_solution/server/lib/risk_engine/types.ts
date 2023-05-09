@@ -23,7 +23,6 @@ export interface GetScoresParams {
   index: string;
   filter?: unknown;
   identifierType?: IdentifierType;
-  enrichInputs?: boolean;
   range: { start: string; end: string };
   weights?: RiskScoreWeight[];
 }
