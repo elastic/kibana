@@ -35,7 +35,7 @@ import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 
 export const EngineView: React.FC = () => {
-  const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
+  const { fetchEngine, closeDeleteEngineModal, hasSchemaConflicts } = useActions(EngineViewLogic);
   const { engineName, fetchEngineApiError, fetchEngineApiStatus, isDeleteModalVisible } =
     useValues(EngineViewLogic);
   const { tabId = EngineViewTabs.PREVIEW } = useParams<{
@@ -61,6 +61,7 @@ export const EngineView: React.FC = () => {
         }}
         engineName={engineName}
         emptyState={<EngineError error={fetchEngineApiError} />}
+        hasSchemaConflicts={hasSchemaConflicts}
       />
     );
   }
@@ -97,6 +98,7 @@ export const EngineView: React.FC = () => {
               rightSideItems: [],
             }}
             engineName={engineName}
+            hasSchemaConflicts={hasSchemaConflicts}
           >
             <EngineError notFound />
           </EnterpriseSearchEnginesPageTemplate>

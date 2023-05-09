@@ -282,7 +282,7 @@ export const EngineSearchPreview: React.FC = () => {
   // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
   // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
+  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { resultFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
@@ -333,6 +333,7 @@ export const EngineSearchPreview: React.FC = () => {
         ],
       }}
       engineName={engineName}
+      hasSchemaConflicts={hasSchemaConflicts}
     >
       <DocumentProvider>
         <SearchProvider config={config}>

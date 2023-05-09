@@ -65,7 +65,7 @@ const getTabBreadCrumb = (tabId: string) => {
 const ContentTabs: string[] = Object.values(SearchApplicationContentTabs);
 
 export const SearchApplicationContent = () => {
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
+  const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { addIndicesFlyoutOpen } = useValues(EngineIndicesLogic);
   const { closeAddIndicesFlyout, openAddIndicesFlyout } = useActions(EngineIndicesLogic);
   const { contentTabId = SearchApplicationContentTabs.INDICES } = useParams<{
@@ -85,6 +85,7 @@ export const SearchApplicationContent = () => {
           rightSideItems: [],
         }}
         engineName={engineName}
+        hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
       </EnterpriseSearchEnginesPageTemplate>
@@ -152,6 +153,7 @@ export const SearchApplicationContent = () => {
         ],
       }}
       engineName={engineName}
+      hasSchemaConflicts={hasSchemaConflicts}
     >
       {contentTabId === SearchApplicationContentTabs.INDICES && <EngineIndices />}
       {contentTabId === SearchApplicationContentTabs.SCHEMA && <EngineSchema />}
