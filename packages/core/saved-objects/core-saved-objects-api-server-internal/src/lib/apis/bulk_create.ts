@@ -10,22 +10,17 @@ import type { Payload } from '@hapi/boom';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsExtensions,
   type SavedObjectSanitizedDoc,
-  type ISavedObjectsSerializer,
   DecoratedError,
   AuthorizeCreateObject,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { type IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { RepositoryHelpers } from '../helpers';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   Either,
@@ -38,23 +33,13 @@ import {
   setManaged,
   errorContent,
 } from '../internal_utils';
-import type { RepositoryEsClient } from '../repository_es_client';
 import { getSavedObjectNamespaces } from '../utils';
 import { PreflightCheckForCreateObject } from '../preflight_check_for_create';
+import { ApiExecutionContext } from './types';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
   options: SavedObjectsCreateOptions;
-}
-
-export interface PerformBulkCreatContext {
-  registry: ISavedObjectTypeRegistry;
-  helpers: RepositoryHelpers;
-  extensions: SavedObjectsExtensions;
-  client: RepositoryEsClient;
-  allowedTypes: string[];
-  serializer: ISavedObjectsSerializer;
-  migrator: IKibanaMigrator;
 }
 
 export const performBulkCreate = async <T>(
@@ -67,7 +52,7 @@ export const performBulkCreate = async <T>(
     serializer,
     migrator,
     extensions = {},
-  }: PerformBulkCreatContext
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkResponse<T>> => {
   const {
     common: commonHelper,

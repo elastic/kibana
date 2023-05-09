@@ -10,38 +10,23 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsExtensions,
   type SavedObjectSanitizedDoc,
-  type ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
-  type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
-import type { RepositoryHelpers } from '../helpers';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { getCurrentTime, normalizeNamespace, setManaged } from '../internal_utils';
-import type { RepositoryEsClient } from '../repository_es_client';
 import type { PreflightCheckForCreateResult } from '../preflight_check_for_create';
 import { getSavedObjectNamespaces } from '../utils';
+import { ApiExecutionContext } from './types';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;
   attributes: T;
   options: SavedObjectsCreateOptions;
-}
-
-export interface PerformCreatContext {
-  registry: ISavedObjectTypeRegistry;
-  helpers: RepositoryHelpers;
-  extensions: SavedObjectsExtensions;
-  client: RepositoryEsClient;
-  allowedTypes: string[];
-  serializer: ISavedObjectsSerializer;
-  migrator: IKibanaMigrator;
 }
 
 export const performCreate = async <T>(
@@ -54,7 +39,7 @@ export const performCreate = async <T>(
     serializer,
     migrator,
     extensions = {},
-  }: PerformCreatContext
+  }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const {
     common: commonHelper,

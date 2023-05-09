@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { ApiExecutionContext } from './types';
 export { performCreate } from './create';
 export { performBulkCreate } from './bulk_create';
+export { performDelete } from './delete';

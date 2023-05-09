@@ -117,14 +117,9 @@ import {
   type Either,
   isLeft,
   isRight,
-  setManaged,
 } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import {
-  preflightCheckForCreate,
-  type PreflightCheckForCreateObject,
-} from './preflight_check_for_create';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 import type {
   BulkDeleteParams,
@@ -145,9 +140,9 @@ import {
   SerializerHelper,
   type PreflightCheckNamespacesResult,
 } from './helpers';
-import { isFoundGetResponse, getSavedObjectNamespaces } from './utils';
+import { isFoundGetResponse } from './utils';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from './constants';
-import { performCreate, performBulkCreate } from './apis';
+import { type ApiExecutionContext, performCreate, performBulkCreate, performDelete } from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -195,6 +190,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private preflightCheckHelper: PreflightCheckHelper;
   private serializerHelper: SerializerHelper;
 
+  private apiExecutionContext: ApiExecutionContext;
   private readonly extensions: SavedObjectsExtensions;
   private readonly helpers: RepositoryHelpers;
 
@@ -305,6 +301,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       encryption: this.encryptionHelper,
       serializer: this.serializerHelper,
     };
+    this.apiExecutionContext = {
+      client: this.client,
+      extensions: this.extensions,
+      helpers: this.helpers,
+      allowedTypes: this._allowedTypes,
+      registry: this._registry,
+      serializer: this._serializer,
+      migrator: this._migrator,
+      mappings: this._mappings,
+      logger: this._logger,
+    };
   }
 
   /**
@@ -315,21 +322,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    return performCreate(
+    return await performCreate(
       {
         type,
         attributes,
         options,
       },
-      {
-        client: this.client,
-        extensions: this.extensions,
-        helpers: this.helpers,
-        allowedTypes: this._allowedTypes,
-        registry: this._registry,
-        serializer: this._serializer,
-        migrator: this._migrator,
-      }
+      this.apiExecutionContext
     );
   }
 
@@ -340,20 +339,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    return performBulkCreate(
+    return await performBulkCreate(
       {
         objects,
         options,
       },
-      {
-        client: this.client,
-        extensions: this.extensions,
-        helpers: this.helpers,
-        allowedTypes: this._allowedTypes,
-        registry: this._registry,
-        serializer: this._serializer,
-        migrator: this._migrator,
-      }
+      this.apiExecutionContext
     );
   }
 
@@ -462,100 +453,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    * {@inheritDoc ISavedObjectsRepository.delete}
    */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
-
-    // we don't need to pass existing namespaces in because we're only concerned with authorizing
-    // the current space. This saves us from performing the preflight check if we're unauthorized
-    await this._securityExtension?.authorizeDelete({
-      namespace,
-      object: { type, id },
-    });
-
-    const rawId = this._serializer.generateRawId(namespace, type, id);
-    let preflightResult: PreflightCheckNamespacesResult | undefined;
-
-    if (this._registry.isMultiNamespace(type)) {
-      // note: this check throws an error if the object is found but does not exist in this namespace
-      preflightResult = await this.preflightCheckHelper.preflightCheckNamespaces({
-        type,
-        id,
-        namespace,
-      });
-      if (
-        preflightResult.checkResult === 'found_outside_namespace' ||
-        preflightResult.checkResult === 'not_found'
-      ) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-      const existingNamespaces = preflightResult.savedObjectNamespaces ?? [];
-      if (
-        !force &&
-        (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
-      ) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
-        );
-      }
-    }
-
-    const { body, statusCode, headers } = await this.client.delete(
+    return await performDelete(
       {
-        id: rawId,
-        index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined),
-        refresh,
-      },
-      { ignore: [404], meta: true }
-    );
-
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
-
-    const deleted = body.result === 'deleted';
-    if (deleted) {
-      const namespaces = preflightResult?.savedObjectNamespaces;
-      if (namespaces) {
-        // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
-        await deleteLegacyUrlAliases({
-          mappings: this._mappings,
-          registry: this._registry,
-          client: this.client,
-          getIndexForType: this.getIndexForType.bind(this),
-          type,
-          id,
-          ...(namespaces.includes(ALL_NAMESPACES_STRING)
-            ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
-            : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
-        }).catch((err) => {
-          // The object has already been deleted, but we caught an error when attempting to delete aliases.
-          // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
-          this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
-        });
-      }
-      return {};
-    }
-
-    const deleteDocNotFound = body.result === 'not_found';
-    // @ts-expect-error @elastic/elasticsearch doesn't declare error on DeleteResponse
-    const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
-    if (deleteDocNotFound || deleteIndexNotFound) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
         type,
         id,
-        response: { body, statusCode },
-      })}`
+        options,
+      },
+      this.apiExecutionContext
     );
   }
 
