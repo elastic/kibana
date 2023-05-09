@@ -8,15 +8,12 @@
 import { interpret } from 'xstate';
 import { waitFor } from 'xstate/lib/waitFor';
 import { flowRight } from 'lodash';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../common/constants';
 import {
   createLogViewStateMachine,
   DEFAULT_LOG_VIEW,
-  initializeFromUrl,
   replaceLogViewInQueryString,
 } from '../observability_logs/log_view_state';
 import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
@@ -24,12 +21,17 @@ import { replaceLogPositionInQueryString } from '../observability_logs/log_strea
 import type { TimeRange } from '../../common/time';
 import type { LogsLocatorParams } from './logs_locator';
 import type { InfraClientCoreSetup } from '../types';
-import type { LogViewColumnConfiguration, ResolvedLogView } from '../../common/log_views';
+import type {
+  LogViewColumnConfiguration,
+  LogViewReference,
+  ResolvedLogView,
+} from '../../common/log_views';
 
 interface LocationToDiscoverParams {
   core: InfraClientCoreSetup;
   timeRange?: TimeRange;
   filter?: string;
+  logView?: LogViewReference;
 }
 
 export const parseSearchString = ({
@@ -49,15 +51,15 @@ export const getLocationToDiscover = async ({
   core,
   timeRange,
   filter,
+  logView,
 }: LocationToDiscoverParams) => {
-  const [coreStart, plugins, pluginStart] = await core.getStartServices();
+  const [, plugins, pluginStart] = await core.getStartServices();
   const { discover } = plugins;
   const { logViews } = pluginStart;
 
   const machine = createLogViewStateMachine({
-    initialContext: { logViewReference: DEFAULT_LOG_VIEW },
+    initialContext: { logViewReference: logView || DEFAULT_LOG_VIEW },
     logViews: logViews.client,
-    initializeFromUrl: createInitializeFromUrl(coreStart),
   });
 
   const discoverParams: DiscoverAppLocatorParams = {
@@ -132,15 +134,4 @@ const getColumnValue = (column: LogViewColumnConfiguration) => {
   if ('fieldColumn' in column) return column.fieldColumn.field;
 
   return null;
-};
-
-const createInitializeFromUrl = (core: CoreStart) => {
-  const toastsService = core.notifications.toasts;
-
-  const urlStateStorage = createKbnUrlStateStorage({
-    useHash: false,
-    useHashQuery: false,
-  });
-
-  return initializeFromUrl({ toastsService, urlStateStorage });
 };

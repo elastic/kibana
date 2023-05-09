@@ -156,11 +156,10 @@ export class Plugin implements InfraClientPluginClass {
         appRoute: '/app/logs',
         mount: async (params: AppMountParameters) => {
           // mount callback should not use setup dependencies, get start dependencies instead
-          const [, , pluginStart] = await core.getStartServices();
+          const [coreStart, , pluginStart] = await core.getStartServices();
+          const { renderApp } = await import('./apps/discover_app');
 
-          pluginStart.locators.logsLocator.navigate({}, { replace: true });
-
-          return () => true;
+          return renderApp(coreStart, pluginStart, params);
         },
       });
     }

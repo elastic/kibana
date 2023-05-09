@@ -34,12 +34,12 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
     const { parseSearchString, getLocationToDiscover } = await import('./helpers');
     const { findInventoryFields } = await import('../../common/inventory_models');
 
-    const { nodeType, nodeId, filter, timeRange } = params;
+    const { nodeType, nodeId, filter, timeRange, logView } = params;
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
 
     if (this.deps.appTarget === DISCOVER_APP_TARGET) {
-      return await getLocationToDiscover({ core: this.deps.core, timeRange, filter });
+      return await getLocationToDiscover({ core: this.deps.core, timeRange, filter, logView });
     }
 
     const searchString = parseSearchString({ ...params, filter: query });
