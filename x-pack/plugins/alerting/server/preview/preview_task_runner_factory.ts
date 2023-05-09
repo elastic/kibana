@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Logger,
   KibanaRequest,

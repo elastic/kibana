@@ -17,11 +17,9 @@ import { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/typesWithBody
 import { Logger } from '@kbn/logging';
 import { Rule, RuleAction, RuleExecutionStatuses } from '../../types';
 import { validateRuleTypeParams } from '../../lib';
-import { validateActions } from '../lib';
 import { apiKeyAsAlertAttributes } from '../common';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
 import { PREVIEW_COMPLETE_STATUS } from '../../alerts_client/preview_alerts_client';
-import { injectActionParams } from '../../task_runner/inject_action_params';
 import {
   transformSummaryActionParams,
   transformActionParams,
