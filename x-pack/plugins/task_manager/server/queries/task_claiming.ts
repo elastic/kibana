@@ -223,34 +223,7 @@ export class TaskClaiming {
           .filter((p): p is Promise<ConcreteTaskInstance[]> => !!p)
       );
 
-      // Calculate capacity again in case more capacity opened up since the search queries started
-      let availableCapacity = this.getCapacity();
-      const docsToUpdate: ConcreteTaskInstance[] = [];
-      for (const result of results) {
-        for (const doc of result) {
-          if (availableCapacity - this.definitions.get(doc.taskType).workerCost >= 0) {
-            const updates: Partial<ConcreteTaskInstance> = {};
-
-            if (this.unusedTypes.includes(doc.taskType)) {
-              updates.status = TaskStatus.Unrecognized;
-            } else {
-              if (doc.retryAt && doc.retryAt < new Date()) {
-                updates.scheduledAt = doc.retryAt || undefined;
-              } else {
-                updates.scheduledAt = doc.runAt;
-              }
-
-              // TODO: We should be able to set them directly to running at this point
-              updates.status = TaskStatus.Claiming;
-              updates.ownerId = this.taskStore.taskManagerId;
-              updates.retryAt = claimOwnershipUntil;
-            }
-
-            docsToUpdate.push({ ...doc, ...updates });
-            availableCapacity -= this.definitions.get(doc.taskType).workerCost;
-          }
-        }
-      }
+      const docsToUpdate = this.processResultFromSearches(results, claimOwnershipUntil);
 
       if (docsToUpdate.length === 0) {
         return {
@@ -291,6 +264,41 @@ export class TaskClaiming {
       apmTrans?.end('failure');
       throw e;
     }
+  }
+
+  private processResultFromSearches(
+    results: ConcreteTaskInstance[][],
+    claimOwnershipUntil: Date
+  ): ConcreteTaskInstance[] {
+    // Calculate capacity again in case more capacity opened up since the search queries started
+    let availableCapacity = this.getCapacity();
+    const docsToUpdate: ConcreteTaskInstance[] = [];
+    for (const result of results) {
+      for (const doc of result) {
+        if (availableCapacity - this.definitions.get(doc.taskType).workerCost >= 0) {
+          const updates: Partial<ConcreteTaskInstance> = {};
+
+          if (this.unusedTypes.includes(doc.taskType)) {
+            updates.status = TaskStatus.Unrecognized;
+          } else {
+            if (doc.retryAt && doc.retryAt < new Date()) {
+              updates.scheduledAt = doc.retryAt || undefined;
+            } else {
+              updates.scheduledAt = doc.runAt;
+            }
+
+            // TODO: We should be able to set them directly to running at this point
+            updates.status = TaskStatus.Claiming;
+            updates.ownerId = this.taskStore.taskManagerId;
+            updates.retryAt = claimOwnershipUntil;
+          }
+
+          docsToUpdate.push({ ...doc, ...updates });
+          availableCapacity -= this.definitions.get(doc.taskType).workerCost;
+        }
+      }
+    }
+    return docsToUpdate;
   }
 
   private async searchForTasks({
