@@ -14,3 +14,4 @@ export { performCheckConflicts } from './check_conflicts';
 export { performBulkDelete } from './bulk_delete';
 export { performDeleteByNamespace } from './delete_by_namespace';
 export { performFind } from './find';
+export { performBulkGet } from './bulk_get';
