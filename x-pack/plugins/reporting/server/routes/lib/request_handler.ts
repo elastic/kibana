@@ -21,8 +21,8 @@ export const handleUnavailable = (res: KibanaResponseFactory) => {
 };
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
-  const config = reporting.getConfig();
-  return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+  const basePath = reporting.getBasePath();
+  return basePath + `${API_BASE_URL}/jobs/download`;
 };
 
 /**

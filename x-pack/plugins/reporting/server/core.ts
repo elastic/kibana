@@ -6,6 +6,7 @@
  */
 
 import type {
+  CoreSetup,
   DocLinksServiceSetup,
   FakeRawRequest,
   Headers,
@@ -42,7 +43,7 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
-import type { ReportingConfig, ReportingSetup } from '.';
+import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
@@ -92,19 +93,24 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
-  private config?: ReportingConfig; // final config, includes dynamic values based on OS type
+  private config: ReportingConfigType; // final config, includes dynamic values based on OS type
   private executing: Set<string>;
 
   public getContract: () => ReportingSetup;
 
   private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
 
-  constructor(private logger: Logger, context: PluginInitializerContext<ReportingConfigType>) {
+  constructor(
+    private core: CoreSetup,
+    private logger: Logger,
+    private context: PluginInitializerContext<ReportingConfigType>
+  ) {
     this.packageInfo = context.env.packageInfo;
     const syncConfig = context.config.get<ReportingConfigType>();
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
     this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
+    this.config = context.config.get<ReportingConfigType>();
 
     this.getContract = () => ({
       usesUiCapabilities: () => syncConfig.roles.enabled === false,
@@ -193,7 +199,7 @@ export class ReportingCore {
   /*
    * Allows config to be set in the background
    */
-  public setConfig(config: ReportingConfig) {
+  public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
   }
@@ -234,9 +240,28 @@ export class ReportingCore {
   }
 
   /*
+   * Returns configurable server info
+   */
+  public getKibanaServerInfo() {
+    const { http } = this.core;
+    const serverInfo = http.getServerInfo();
+    const kbnConfig = {
+      server: {
+        basePath: this.core.http.basePath.serverBasePath,
+        host: serverInfo.hostname,
+        name: serverInfo.name,
+        port: serverInfo.port,
+        uuid: this.context.env.instanceUuid,
+        protocol: serverInfo.protocol,
+      },
+    };
+    return kbnConfig;
+  }
+
+  /*
    * Gives synchronous access to the config
    */
-  public getConfig(): ReportingConfig {
+  public getConfig() {
     if (!this.config) {
       throw new Error('Config is not yet initialized');
     }
