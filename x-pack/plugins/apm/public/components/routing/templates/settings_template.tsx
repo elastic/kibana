@@ -17,8 +17,8 @@ import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmRouter } from '../apm_route_config';
 import { ApmMainTemplate } from './apm_main_template';
-import { useApmSetting } from '../../../hooks/use_apm_setting';
-import { ApmSettingName } from '../../../../common/apm_settings';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -43,8 +43,8 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const router = useApmRouter();
   const defaultEnvironment = useDefaultEnvironment();
 
-  const agentConfigurationAvailable = useApmSetting(
-    ApmSettingName.AgentConfigurationAvailable
+  const agentConfigurationAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.AgentConfigurationAvailable
   );
 
   const tabs = getTabs({

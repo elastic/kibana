@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { mapValues } from 'lodash';
 
-export enum ApmSettingName {
+export enum ApmFeatureFlagName {
   AgentConfigurationAvailable = 'agentConfigurationAvailable',
   ConfigurableIndicesAvailable = 'configurableIndicesAvailable',
   InfrastructureTabAvailable = 'infrastructureTabAvailable',
@@ -18,46 +18,47 @@ export enum ApmSettingName {
   SpacesAvailable = 'spacesAvailable',
 }
 
-const apmSettingsMap = {
-  [ApmSettingName.AgentConfigurationAvailable]: {
+const apmFeatureFlagMap = {
+  [ApmFeatureFlagName.AgentConfigurationAvailable]: {
     default: true,
     type: t.boolean,
   },
-  [ApmSettingName.ConfigurableIndicesAvailable]: {
+  [ApmFeatureFlagName.ConfigurableIndicesAvailable]: {
     default: true,
     type: t.boolean,
   },
-  [ApmSettingName.InfrastructureTabAvailable]: {
+  [ApmFeatureFlagName.InfrastructureTabAvailable]: {
     default: true,
     type: t.boolean,
   },
-  [ApmSettingName.InfraUiAvailable]: {
+  [ApmFeatureFlagName.InfraUiAvailable]: {
     default: true,
     type: t.boolean,
   },
-  [ApmSettingName.MigrationToFleetAvailable]: {
+  [ApmFeatureFlagName.MigrationToFleetAvailable]: {
     default: true,
     type: t.boolean,
   },
-  [ApmSettingName.SourcemapUploadAvailable]: {
+  [ApmFeatureFlagName.SourcemapUploadAvailable]: {
     default: true,
     type: t.boolean,
   },
-  [ApmSettingName.SpacesAvailable]: {
+  [ApmFeatureFlagName.SpacesAvailable]: {
     default: true,
     type: t.boolean,
   },
 };
 
-type ApmSettingsMap = typeof apmSettingsMap;
+type ApmFeatureFlagMap = typeof apmFeatureFlagMap;
 
-export type ApmSettings = {
-  [TApmSettingName in keyof ApmSettingsMap]: ValueOfApmSetting<TApmSettingName>;
+export type ApmFeatureFlags = {
+  [TApmFeatureFlagName in keyof ApmFeatureFlagMap]: ValueOfApmFeatureFlag<TApmFeatureFlagName>;
 };
 
-export type ValueOfApmSetting<TApmSettingName extends ApmSettingName> =
-  t.OutputOf<ApmSettingsMap[TApmSettingName]['type']>;
+export type ValueOfApmFeatureFlag<
+  TApmFeatureFlagName extends ApmFeatureFlagName
+> = t.OutputOf<ApmFeatureFlagMap[TApmFeatureFlagName]['type']>;
 
-export function getApmSettings(): ApmSettings {
-  return mapValues(apmSettingsMap, (value, key) => value.default);
+export function getApmFeatureFlags(): ApmFeatureFlags {
+  return mapValues(apmFeatureFlagMap, (value, key) => value.default);
 }
