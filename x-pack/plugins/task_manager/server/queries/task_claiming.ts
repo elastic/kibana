@@ -91,16 +91,10 @@ export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershi
   isPlainObject((result as ClaimOwnershipResult).stats) &&
   Array.isArray((result as ClaimOwnershipResult).docs);
 
-interface TaskClaimingBatches {
-  excluded: string[];
-  byCost: {
-    [cost: number]: string[];
-  };
-  byConcurrency: Array<{
-    taskType: string;
-    concurrency: number;
-  }>;
-}
+type TaskClaimingBatches = Array<{
+  size: () => number;
+  types: string[];
+}>;
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
 
@@ -113,7 +107,7 @@ export class TaskClaiming {
   private taskStore: TaskStore;
   private getCapacity: (taskType?: string) => number;
   private logger: Logger;
-  private readonly taskClaimingBatchesByType: TaskClaimingBatches;
+  private readonly taskClaimingBatches: TaskClaimingBatches;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
   private readonly shareWorkers: boolean;
@@ -134,39 +128,40 @@ export class TaskClaiming {
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
 
-    this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
+    this.taskClaimingBatches = this.partitionIntoClaimingBatches(this.definitions);
     this.events$ = new Subject<TaskClaim>();
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
-    const result: TaskClaimingBatches = {
-      excluded: [],
-      byCost: {},
-      byConcurrency: [],
+    const result: TaskClaimingBatches = [];
+    const typesByCost: Record<number, string[]> = {
+      // Add unrecognized tasks to the default cost (1)
+      1: this.unusedTypes,
     };
-
     for (const taskTypeDef of definitions.getAllDefinitions()) {
-      if (this.isTaskTypeExcluded(taskTypeDef.type)) {
-        // Task type is configured by kibana.yml to be excluded
-        result.excluded.push(taskTypeDef.type);
-      } else if (typeof taskTypeDef.maxConcurrency === 'number') {
+      if (typeof taskTypeDef.maxConcurrency === 'number') {
         // A Kibana instance should only run a given task type X at a time
-        result.byConcurrency.push({
-          taskType: taskTypeDef.type,
-          concurrency: taskTypeDef.maxConcurrency,
+        result.push({
+          size: () => this.getCapacity(taskTypeDef.type),
+          types: [taskTypeDef.type],
         });
-      } else {
+      } else if (!this.isTaskTypeExcluded(taskTypeDef.type)) {
         const cost = this.shareWorkers ? taskTypeDef.workerCost : 1;
-        result.byCost[cost] = result.byCost[cost]
-          ? result.byCost[cost].concat(taskTypeDef.type)
-          : [taskTypeDef.type];
+        if (!typesByCost[cost]) {
+          typesByCost[cost] = [];
+        }
+        typesByCost[cost].push(taskTypeDef.type);
       }
     }
 
-    // Add unrecognized tasks to the default cost (1)
-    result.byCost[1] = result.byCost[1]
-      ? result.byCost[1].concat(this.unusedTypes)
-      : this.unusedTypes;
+    for (const cost of Object.keys(typesByCost)
+      .map((c) => parseFloat(c))
+      .sort()) {
+      result.push({
+        size: () => Math.floor(this.getCapacity() / cost),
+        types: typesByCost[cost],
+      });
+    }
 
     return result;
   }
@@ -204,27 +199,17 @@ export class TaskClaiming {
       TASK_MANAGER_TRANSACTION_TYPE
     );
 
-    const taskCostGroups = Object.keys(this.taskClaimingBatchesByType.byCost)
-      .map((cost) => parseFloat(cost))
-      .sort();
-
     try {
-      const results = await Promise.all([
-        ...this.taskClaimingBatchesByType.byConcurrency
-          .map((taskDef) => {
-            const capacity = this.getCapacity(taskDef.taskType);
-            if (capacity > 0) {
-              return this.searchForTasks({ size: capacity, taskTypes: [taskDef.taskType] });
+      const results = await Promise.all(
+        this.taskClaimingBatches
+          .map((batch) => {
+            const size = batch.size();
+            if (size > 0) {
+              return this.searchForTasks({ size, taskTypes: batch.types });
             }
           })
-          .filter((p): p is Promise<ConcreteTaskInstance[]> => !!p),
-        ...taskCostGroups.map((cost) =>
-          this.searchForTasks({
-            size: Math.floor(initialCapacity / cost),
-            taskTypes: this.taskClaimingBatchesByType.byCost[cost],
-          })
-        ),
-      ]);
+          .filter((p): p is Promise<ConcreteTaskInstance[]> => !!p)
+      );
 
       // Calculate capacity again in case more capacity opened up since the search queries started
       let availableCapacity = this.getCapacity();
