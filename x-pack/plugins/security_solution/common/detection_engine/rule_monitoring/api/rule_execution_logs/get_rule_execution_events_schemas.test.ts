@@ -12,7 +12,7 @@ import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import {
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,
-} from './request_schema';
+} from './get_rule_execution_events_schemas';
 
 describe('Request schema of Get rule execution events', () => {
   describe('GetRuleExecutionEventsRequestParams', () => {

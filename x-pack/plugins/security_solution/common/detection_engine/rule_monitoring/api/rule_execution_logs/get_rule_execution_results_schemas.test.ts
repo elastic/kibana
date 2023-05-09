@@ -10,7 +10,10 @@ import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { RULE_EXECUTION_STATUSES } from '../../model/execution_status';
-import { DefaultSortField, DefaultRuleExecutionStatusCsvArray } from './request_schema';
+import {
+  DefaultSortField,
+  DefaultRuleExecutionStatusCsvArray,
+} from './get_rule_execution_results_schemas';
 
 describe('Request schema of Get rule execution results', () => {
   describe('DefaultRuleExecutionStatusCsvArray', () => {

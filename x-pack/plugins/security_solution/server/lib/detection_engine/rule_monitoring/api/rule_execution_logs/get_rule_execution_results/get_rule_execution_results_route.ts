@@ -6,16 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import { buildSiemResponse } from '../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type { GetRuleExecutionResultsResponse } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   GET_RULE_EXECUTION_RESULTS_URL,
   GetRuleExecutionResultsRequestParams,
   GetRuleExecutionResultsRequestQuery,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/detection_engine/rule_monitoring';
 
 /**
  * Returns execution results of a given rule (aggregated by execution UUID) from Event Log.

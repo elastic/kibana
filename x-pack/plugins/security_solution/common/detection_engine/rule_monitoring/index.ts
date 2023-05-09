@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export * from './api/get_rule_execution_events/request_schema';
-export * from './api/get_rule_execution_events/response_schema';
-export * from './api/get_rule_execution_results/request_schema';
-export * from './api/get_rule_execution_results/response_schema';
+export * from './api/detection_engine_health/get_cluster_health_schemas';
+export * from './api/detection_engine_health/get_rule_health_schemas';
+export * from './api/detection_engine_health/get_space_health_schemas';
+export * from './api/rule_execution_logs/get_rule_execution_events_schemas';
+export * from './api/rule_execution_logs/get_rule_execution_results_schemas';
 export * from './api/urls';
 
 export * from './model/execution_event';

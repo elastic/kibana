@@ -10,8 +10,8 @@ import * as t from 'io-ts';
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
 import { defaultCsvArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-import { DefaultSortOrderDesc } from '../../../schemas/common';
-import { TRuleExecutionEventType } from '../../model/execution_event';
+import { DefaultSortOrderDesc, PaginationResult } from '../../../schemas/common';
+import { RuleExecutionEvent, TRuleExecutionEventType } from '../../model/execution_event';
 import { TLogLevel } from '../../model/log_level';
 
 /**
@@ -39,5 +39,16 @@ export const GetRuleExecutionEventsRequestQuery = t.exact(
     sort_order: DefaultSortOrderDesc, // defaults to 'desc'
     page: DefaultPage, // defaults to 1
     per_page: DefaultPerPage, // defaults to 20
+  })
+);
+
+/**
+ * Response body of the API route.
+ */
+export type GetRuleExecutionEventsResponse = t.TypeOf<typeof GetRuleExecutionEventsResponse>;
+export const GetRuleExecutionEventsResponse = t.exact(
+  t.type({
+    events: t.array(RuleExecutionEvent),
+    pagination: PaginationResult,
   })
 );

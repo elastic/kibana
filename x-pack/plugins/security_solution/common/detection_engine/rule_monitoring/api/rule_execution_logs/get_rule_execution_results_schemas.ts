@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-io-ts-types';
 
 import { DefaultSortOrderDesc } from '../../../schemas/common';
-import { SortFieldOfRuleExecutionResult } from '../../model/execution_result';
+import { RuleExecutionResult, SortFieldOfRuleExecutionResult } from '../../model/execution_result';
 import { TRuleExecutionStatus } from '../../model/execution_status';
 
 /**
@@ -68,5 +68,16 @@ export const GetRuleExecutionResultsRequestQuery = t.exact(
     sort_order: DefaultSortOrderDesc, // defaults to 'desc'
     page: DefaultPage, // defaults to 1
     per_page: DefaultPerPage, // defaults to 20
+  })
+);
+
+/**
+ * Response body of the API route.
+ */
+export type GetRuleExecutionResultsResponse = t.TypeOf<typeof GetRuleExecutionResultsResponse>;
+export const GetRuleExecutionResultsResponse = t.exact(
+  t.type({
+    events: t.array(RuleExecutionResult),
+    total: t.number,
   })
 );

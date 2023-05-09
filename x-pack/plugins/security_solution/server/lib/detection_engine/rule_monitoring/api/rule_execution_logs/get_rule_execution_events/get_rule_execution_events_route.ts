@@ -6,16 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import { buildSiemResponse } from '../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type { GetRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionEventsResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   GET_RULE_EXECUTION_EVENTS_URL,
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/detection_engine/rule_monitoring';
 
 /**
  * Returns execution events of a given rule (e.g. status changes) from Event Log.

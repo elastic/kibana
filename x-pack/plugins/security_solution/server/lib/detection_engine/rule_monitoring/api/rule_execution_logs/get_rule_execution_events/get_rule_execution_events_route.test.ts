@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { serverMock, requestContextMock, requestMock } from '../../../routes/__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 
 import {
   GET_RULE_EXECUTION_EVENTS_URL,
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../../common/detection_engine/rule_monitoring';
-import { getRuleExecutionEventsResponseMock } from '../../../../../../common/detection_engine/rule_monitoring/mocks';
-import type { GetExecutionEventsArgs } from '../../logic/rule_execution_log';
-import { getRuleExecutionEventsRoute } from './route';
+} from '../../../../../../../common/detection_engine/rule_monitoring';
+import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/detection_engine/rule_monitoring/mocks';
+import type { GetExecutionEventsArgs } from '../../../logic/rule_execution_log';
+import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
 
 describe('getRuleExecutionEventsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
