@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isPlainObject, isArray } from 'lodash/fp';
+import { get, isPlainObject } from 'lodash/fp';
 import type { SignalSource } from '../../../types';
 
 /**
@@ -25,6 +25,6 @@ export const isPathValid = (path: string, source: SignalSource): boolean => {
   return splitPath.every((_, index, array) => {
     const newPath = [...array].splice(0, index + 1).join('.');
     const valueToCheck = get(newPath, source);
-    return (valueToCheck === undefined || isPlainObject(valueToCheck)) && !isArray(valueToCheck);
+    return valueToCheck === undefined || isPlainObject(valueToCheck);
   });
 };
