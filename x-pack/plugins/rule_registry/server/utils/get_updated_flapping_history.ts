@@ -6,19 +6,22 @@
  */
 
 import { RuleTypeState } from '@kbn/alerting-plugin/common';
-import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlappingProperties,
+} from '@kbn/alerting-plugin/common/rules_settings';
 import { updateFlappingHistory } from '@kbn/alerting-plugin/server/lib';
 import { remove } from 'lodash';
 import { WrappedLifecycleRuleState } from './create_lifecycle_executor';
 
 export function getUpdatedFlappingHistory<State extends RuleTypeState = never>(
-  flappingSettings: RulesSettingsFlappingProperties,
   alertId: string,
   state: WrappedLifecycleRuleState<State>,
   isNew: boolean,
   isRecovered: boolean,
   isActive: boolean,
-  recoveredIds: string[]
+  recoveredIds: string[],
+  flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS
 ) {
   // duplicating this logic to determine flapping at this level
   let flappingHistory: boolean[] = [];

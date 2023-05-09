@@ -45,6 +45,7 @@ import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
+import { previewRuleRoute } from './preview_rule';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
 import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
@@ -67,6 +68,7 @@ export function defineRoutes(opts: RouteOptions) {
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
+  previewRuleRoute(opts);
   getRuleRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);

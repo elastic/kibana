@@ -253,13 +253,13 @@ export const createLifecycleExecutor =
         const isActive = !isRecovered;
 
         const flappingHistory = getUpdatedFlappingHistory<State>(
-          flappingSettings,
           alertId,
           state,
           isNew,
           isRecovered,
           isActive,
-          trackedAlertRecoveredIds
+          trackedAlertRecoveredIds,
+          flappingSettings
         );
 
         const { alertUuid, started, flapping, pendingRecoveredCount } = !isNew
@@ -319,7 +319,7 @@ export const createLifecycleExecutor =
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
     const allEventsToIndex = [
-      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex),
+      ...getAlertsForNotification(trackedEventsToIndex, flappingSettings),
       ...newEventsToIndex,
     ];
 
@@ -356,7 +356,7 @@ export const createLifecycleExecutor =
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+          const flapping = isFlapping(flappingHistory, isCurrentlyFlapping, flappingSettings);
           return [
             alertId,
             { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
@@ -378,7 +378,7 @@ export const createLifecycleExecutor =
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+          const flapping = isFlapping(flappingHistory, isCurrentlyFlapping, flappingSettings);
           return [
             alertId,
             { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },

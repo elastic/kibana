@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlappingProperties,
+} from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_END,
   ALERT_STATUS,
@@ -15,8 +18,8 @@ import {
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(
-  flappingSettings: RulesSettingsFlappingProperties,
-  trackedEventsToIndex: any[]
+  trackedEventsToIndex: any[],
+  flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS
 ) {
   return trackedEventsToIndex.map((trackedEvent) => {
     if (!flappingSettings.enabled || trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {

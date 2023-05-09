@@ -39,12 +39,17 @@ import {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './lib';
+import { PreviewAlertsClient } from '../alerts_client/preview_alerts_client';
+import { LegacyAlertsClientParams } from '../alerts_client/legacy_alerts_client';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
-const PREVIEW_CONTEXT = 'preview';
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
 export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
+export const PREVIEW_CONTEXT = 'preview';
+
+export type CreatePreviewAlertsClientParams = LegacyAlertsClientParams;
+
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
@@ -115,6 +120,24 @@ export class AlertsService implements IAlertsService {
 
   public isInitialized() {
     return this.initialized;
+  }
+
+  public async createPreviewAlertsClient(opts: CreatePreviewAlertsClientParams) {
+    // Check if preview installation has succeeded
+    const { result: initialized, error } = await this.getPreviewInitializationPromise();
+
+    if (!initialized) {
+      // TODO - retry initialization here
+      this.options.logger.warn(
+        `There was an error in the framework installing preview resources - ${error}`
+      );
+      return null;
+    }
+
+    return new PreviewAlertsClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+    });
   }
 
   public async getContextInitializationPromise(
@@ -385,6 +408,34 @@ export class AlertsService implements IAlertsService {
     const componentTemplateRefs: string[] = [];
 
     componentTemplateRefs.push(getComponentTemplateName({ name: ECS_CONTEXT }));
+
+    // Create a component template to dynamically hold context variables
+    const componentTemplate = getComponentTemplate({
+      fieldMap: {
+        context: {
+          type: 'object',
+          dynamic: true,
+          required: false,
+        },
+        state: {
+          type: 'object',
+          dynamic: true,
+          required: false,
+        },
+      },
+      dynamic: 'strict',
+      context: PREVIEW_CONTEXT,
+    });
+    initFns.push(
+      async () =>
+        await createOrUpdateComponentTemplate({
+          logger: this.options.logger,
+          esClient,
+          template: componentTemplate,
+          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+        })
+    );
+    componentTemplateRefs.push(componentTemplate.name);
 
     [...this.registeredContexts.keys()].forEach((context: string) => {
       componentTemplateRefs.push(getComponentTemplateName({ context }));

@@ -30,13 +30,60 @@ import {
   WithoutReservedActionGroups,
   RuleNotifyWhenType,
 } from '../types';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlappingProperties,
+} from '../../common/rules_settings';
+import { DEFAULT_MAX_ALERTS } from '../config';
 
-interface ConstructorOpts {
+export interface LegacyAlertsClientParams {
   logger: Logger;
+}
+
+export interface InitializeExecutionOpts {
   maxAlerts: number;
   ruleType: UntypedNormalizedRuleType;
+  ruleLabel: string;
+  activeAlertsFromState: Record<string, RawAlertInstance>;
+  recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  maintenanceWindowIds: string[];
 }
+
+export interface ProcessAndLogAlertsOpts {
+  eventLogger?: AlertingEventLogger;
+  shouldLogAlerts: boolean;
+  ruleRunMetricsStore?: RuleRunMetricsStore;
+  flappingSettings?: RulesSettingsFlappingProperties;
+  notifyWhen?: RuleNotifyWhenType | null;
+  maintenanceWindowIds?: string[];
+}
+
+export interface IAlertsClient<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
+  hasReachedAlertLimit(): boolean;
+  checkLimitUsage(): void;
+  processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
+  getProcessedAlerts(
+    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
+  ): Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
+  getAlertsToSerialize(): Promise<{
+    alertsToReturn: Record<string, RawAlertInstance>;
+    recoveredAlertsToReturn: Record<string, RawAlertInstance>;
+  }>;
+  setFlapping(flappingSettings: RulesSettingsFlappingProperties): void;
+}
+
+export type UntypedAlertsClient = IAlertsClient<
+  AlertInstanceState,
+  AlertInstanceContext,
+  string,
+  string
+>;
 
 export class LegacyAlertsClient<
   State extends AlertInstanceState,
@@ -55,12 +102,17 @@ export class LegacyAlertsClient<
     recoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
 
+  private maxAlerts: number = DEFAULT_MAX_ALERTS;
+  private autoRecoverAlerts: boolean = true;
+  private doesSetRecoveryContext: boolean = false;
+  private defaultActionGroupId: string = '';
+  private ruleLabel: string = '';
   private alertFactory?: AlertFactory<
     State,
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
-  constructor(private readonly options: ConstructorOpts) {
+  constructor(private readonly options: LegacyAlertsClientParams) {
     this.alerts = {};
     this.activeAlertsFromPreviousExecution = {};
     this.recoveredAlertsFromPreviousExecution = {};
@@ -73,11 +125,21 @@ export class LegacyAlertsClient<
     };
   }
 
-  public initialize(
-    activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>,
-    maintenanceWindowIds: string[]
-  ) {
+  public initializeExecution({
+    maxAlerts,
+    ruleType,
+    ruleLabel,
+    activeAlertsFromState,
+    recoveredAlertsFromState,
+    maintenanceWindowIds,
+  }: InitializeExecutionOpts) {
+    this.maxAlerts = maxAlerts;
+    this.autoRecoverAlerts =
+      ruleType.autoRecoverAlerts !== undefined ? ruleType.autoRecoverAlerts : true;
+    this.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+    this.defaultActionGroupId = ruleType.defaultActionGroupId;
+    this.ruleLabel = ruleLabel;
+
     for (const id in activeAlertsFromState) {
       if (activeAlertsFromState.hasOwnProperty(id)) {
         this.activeAlertsFromPreviousExecution[id] = new Alert<State, Context>(
@@ -105,30 +167,21 @@ export class LegacyAlertsClient<
     >({
       alerts: this.alerts,
       logger: this.options.logger,
-      maxAlerts: this.options.maxAlerts,
-      autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
-      canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
+      maxAlerts,
+      autoRecoverAlerts: this.autoRecoverAlerts,
+      canSetRecoveryContext: this.doesSetRecoveryContext,
       maintenanceWindowIds,
     });
   }
 
   public processAndLogAlerts({
     eventLogger,
-    ruleLabel,
     ruleRunMetricsStore,
-    shouldLogAndScheduleActionsForAlerts,
-    flappingSettings,
-    notifyWhen,
-    maintenanceWindowIds,
-  }: {
-    eventLogger: AlertingEventLogger;
-    ruleLabel: string;
-    shouldLogAndScheduleActionsForAlerts: boolean;
-    ruleRunMetricsStore: RuleRunMetricsStore;
-    flappingSettings: RulesSettingsFlappingProperties;
-    notifyWhen: RuleNotifyWhenType | null;
-    maintenanceWindowIds: string[];
-  }) {
+    shouldLogAlerts,
+    flappingSettings = DEFAULT_FLAPPING_SETTINGS,
+    notifyWhen = null,
+    maintenanceWindowIds = [],
+  }: ProcessAndLogAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
       activeAlerts: processedAlertsActive,
@@ -139,11 +192,8 @@ export class LegacyAlertsClient<
       existingAlerts: this.activeAlertsFromPreviousExecution,
       previouslyRecoveredAlerts: this.recoveredAlertsFromPreviousExecution,
       hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
-      alertLimit: this.options.maxAlerts,
-      autoRecoverAlerts:
-        this.options.ruleType.autoRecoverAlerts !== undefined
-          ? this.options.ruleType.autoRecoverAlerts
-          : true,
+      alertLimit: this.maxAlerts,
+      autoRecoverAlerts: this.autoRecoverAlerts,
       flappingSettings,
       maintenanceWindowIds,
     });
@@ -151,13 +201,13 @@ export class LegacyAlertsClient<
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
       this.options.logger,
       processedAlertsRecovered,
-      this.options.maxAlerts
+      this.maxAlerts
     );
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
       notifyWhen,
-      this.options.ruleType.defaultActionGroupId,
+      this.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,
       trimmedAlertsRecovered,
@@ -177,10 +227,10 @@ export class LegacyAlertsClient<
       newAlerts: alerts.newAlerts,
       activeAlerts: alerts.currentActiveAlerts,
       recoveredAlerts: alerts.currentRecoveredAlerts,
-      ruleLogPrefix: ruleLabel,
+      ruleLogPrefix: this.ruleLabel,
       ruleRunMetricsStore,
-      canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
+      canSetRecoveryContext: this.doesSetRecoveryContext,
+      shouldPersistAlerts: shouldLogAlerts,
     });
   }
 
@@ -194,7 +244,7 @@ export class LegacyAlertsClient<
     return {};
   }
 
-  public getAlertsToSerialize() {
+  public async getAlertsToSerialize() {
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
       this.processedAlerts.recovered

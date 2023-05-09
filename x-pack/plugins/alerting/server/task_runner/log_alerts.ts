@@ -20,12 +20,12 @@ export interface LogAlertsParams<
   RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  alertingEventLogger: AlertingEventLogger;
+  alertingEventLogger?: AlertingEventLogger;
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   ruleLogPrefix: string;
-  ruleRunMetricsStore: RuleRunMetricsStore;
+  ruleRunMetricsStore?: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
 }
@@ -87,9 +87,9 @@ export function logAlerts<
   }
 
   if (shouldPersistAlerts) {
-    ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
-    ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
-    ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
+    ruleRunMetricsStore?.setNumberOfNewAlerts(newAlertIds.length);
+    ruleRunMetricsStore?.setNumberOfActiveAlerts(activeAlertIds.length);
+    ruleRunMetricsStore?.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
     for (const id of recoveredAlertIds) {
       const alert = recoveredAlerts[id];
       const { group: actionGroup } = alert.getLastScheduledActions() ?? {};
@@ -97,7 +97,7 @@ export function logAlerts<
       const state = recoveredAlerts[id].getState();
       const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-      alertingEventLogger.logAlert({
+      alertingEventLogger?.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
         uuid,
@@ -116,7 +116,7 @@ export function logAlerts<
       const uuid = alert.getUuid();
       const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} created new alert: '${id}'`;
-      alertingEventLogger.logAlert({
+      alertingEventLogger?.logAlert({
         action: EVENT_LOG_ACTIONS.newInstance,
         id,
         uuid,
@@ -135,7 +135,7 @@ export function logAlerts<
       const uuid = alert.getUuid();
       const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
-      alertingEventLogger.logAlert({
+      alertingEventLogger?.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,
         uuid,

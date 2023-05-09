@@ -114,12 +114,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private legacyAlertsClient: LegacyAlertsClient<
-    State,
-    Context,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -158,11 +152,6 @@ export class TaskRunner<
       loggerId
     );
     this.ruleResult = new RuleResultService();
-    this.legacyAlertsClient = new LegacyAlertsClient({
-      logger: this.logger,
-      maxAlerts: context.maxAlerts,
-      ruleType: this.ruleType as UntypedNormalizedRuleType,
-    });
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -318,6 +307,13 @@ export class TaskRunner<
     const flappingSettings = await rulesSettingsClient.flapping().get();
     const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
 
+    const legacyAlertsClient: LegacyAlertsClient<
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    > = new LegacyAlertsClient({ logger: this.logger });
+
     let activeMaintenanceWindows: MaintenanceWindow[] = [];
     try {
       activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
@@ -337,14 +333,17 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(
-          alertRawInstances,
-          alertRecoveredRawInstances,
-          maintenanceWindowIds
-        );
+        legacyAlertsClient.initializeExecution({
+          maxAlerts: this.context.maxAlerts,
+          ruleType: this.ruleType as UntypedNormalizedRuleType,
+          ruleLabel,
+          activeAlertsFromState: alertRawInstances,
+          recoveredAlertsFromState: alertRecoveredRawInstances,
+          maintenanceWindowIds,
+        });
 
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
+          const reachedLimit = legacyAlertsClient.hasReachedAlertLimit();
           if (reachedLimit) {
             this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
@@ -382,7 +381,7 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: this.legacyAlertsClient.getExecutorServices(),
+                alertFactory: legacyAlertsClient.getExecutorServices(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
@@ -428,7 +427,7 @@ export class TaskRunner<
           // or requested it and then reported back whether it exceeded the limit
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
-          this.legacyAlertsClient.checkLimitUsage();
+          legacyAlertsClient.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -460,11 +459,10 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      this.legacyAlertsClient.processAndLogAlerts({
+      legacyAlertsClient.processAndLogAlerts({
         eventLogger: this.alertingEventLogger,
-        ruleLabel,
         ruleRunMetricsStore,
-        shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
         notifyWhen,
         maintenanceWindowIds,
@@ -502,13 +500,13 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...this.legacyAlertsClient.getProcessedAlerts('activeCurrent'),
-          ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
+          ...legacyAlertsClient.getProcessedAlerts('activeCurrent'),
+          ...legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
         });
       }
     });
 
-    this.legacyAlertsClient.setFlapping(flappingSettings);
+    legacyAlertsClient.setFlapping(flappingSettings);
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
@@ -516,7 +514,7 @@ export class TaskRunner<
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
       const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        this.legacyAlertsClient.getAlertsToSerialize();
+        await legacyAlertsClient.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }

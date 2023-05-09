@@ -43,6 +43,7 @@ import { previewRule } from '../../../lib/rule_api/preview';
 import { getInitialInterval } from '../../rule_form/get_initial_interval';
 import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import { getRuleWithInvalidatedFields } from '../../../lib/value_validators';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 interface CreateRuleFormProps<MetaData = Record<string, any>> {
   consumer: string;
@@ -99,7 +100,7 @@ export const CreateRuleForm = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
-
+  const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -309,13 +310,16 @@ export const CreateRuleForm = ({
                   <EuiSuperUpdateButton
                     isDisabled={!isValidRule(rule, ruleErrors, ruleActionsErrors)}
                     iconType="refresh"
-                    onClick={() => {
-                      console.log('preview!');
+                    onClick={async () => {
+                      setIsLoadingPreview(true);
+                      await previewRule({ http, rule: rule as RuleUpdates });
+                      setIsLoadingPreview(false);
                     }}
                     color="primary"
                     fill={true}
                     data-test-subj="previewSubmitButton"
                   />
+                  {isLoadingPreview ? <CenterJustifiedSpinner /> : null}
                 </EuiResizablePanel>
               </>
             );

@@ -46,6 +46,6 @@ export function isAlertFlapping<
   const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
   const isCurrentlyFlapping = alert.getFlapping();
   return flappingSettings.enabled
-    ? isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping)
+    ? isFlapping(flappingHistory, isCurrentlyFlapping, flappingSettings)
     : false;
 }

@@ -27,6 +27,7 @@ import {
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
+import { AlertsService } from '../alerts_service';
 
 export type {
   BulkEditOperation,
@@ -68,6 +69,7 @@ export interface RulesClientContext {
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
+  readonly alertsService: AlertsService | null;
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
