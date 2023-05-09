@@ -9,7 +9,11 @@ import { tlsFormatters } from '../tls/formatters';
 import { HTTPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
-import { arrayToJsonFormatter, objectToJsonFormatter } from '../formatting_utils';
+import {
+  stringToJsonFormatter,
+  arrayToJsonFormatter,
+  objectToJsonFormatter,
+} from '../formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
@@ -19,13 +23,15 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.RESPONSE_BODY_INDEX]: null,
   [ConfigKey.RESPONSE_HEADERS_INDEX]: null,
   [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.URLS]: null,
-  [ConfigKey.USERNAME]: null,
-  [ConfigKey.PASSWORD]: null,
-  [ConfigKey.PROXY_URL]: null,
-  [ConfigKey.PORT]: null,
+  [ConfigKey.URLS]: stringToJsonFormatter,
+  [ConfigKey.USERNAME]: stringToJsonFormatter,
+  [ConfigKey.PASSWORD]: stringToJsonFormatter,
+  [ConfigKey.PROXY_URL]: stringToJsonFormatter,
+  [ConfigKey.PROXY_HEADERS]: objectToJsonFormatter,
+  [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: arrayToJsonFormatter,
+  [ConfigKey.RESPONSE_JSON_CHECK]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: objectToJsonFormatter,
   [ConfigKey.RESPONSE_STATUS_CHECK]: arrayToJsonFormatter,
   [ConfigKey.REQUEST_HEADERS_CHECK]: objectToJsonFormatter,
@@ -33,6 +39,10 @@ export const httpFormatters: HTTPFormatMap = {
     fields[ConfigKey.REQUEST_BODY_CHECK]?.value
       ? JSON.stringify(fields[ConfigKey.REQUEST_BODY_CHECK]?.value)
       : null,
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: null,
+  [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { useMemo } from 'react';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
-import { apiService } from '../../../../../utils/api_service';
-import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
+import { useMemo, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getGlobalParamAction, selectGlobalParamState } from '../../../state/global_params';
 
-export const useParamsList = (lastRefresh: number) => {
-  const { data, loading } = useFetcher<
-    Promise<{ data: Array<SavedObject<SyntheticsParam>> }>
-  >(() => {
-    return apiService.get(SYNTHETICS_API_URLS.PARAMS);
-  }, [lastRefresh]);
+export const useParamsList = () => {
+  const { isLoading, listOfParams } = useSelector(selectGlobalParamState);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getGlobalParamAction.get());
+  }, [dispatch]);
 
   return useMemo(() => {
     return {
       items:
-        data?.data.map((item) => ({
+        listOfParams?.map((item) => ({
           id: item.id,
           ...item.attributes,
           namespaces: item.namespaces,
         })) ?? [],
-      loading,
+      isLoading,
     };
-  }, [data, loading]);
+  }, [listOfParams, isLoading]);
 };

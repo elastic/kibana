@@ -28,8 +28,18 @@ export const activeMaintenanceWindowsRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        // We do not want to throw for this route because other solutions
+        // will be using it to determine whether or not they should
+        // display a callout in their rules list.
+        try {
+          licenseState.ensureLicenseForMaintenanceWindow();
+        } catch (e) {
+          return res.ok({
+            body: [],
+          });
+        }
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
-        const result = await maintenanceWindowClient.getActiveMaintenanceWindows({});
+        const result = await maintenanceWindowClient.getActiveMaintenanceWindows();
 
         return res.ok({
           body: result.map((maintenanceWindow) => rewriteMaintenanceWindowRes(maintenanceWindow)),

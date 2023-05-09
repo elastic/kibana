@@ -27,7 +27,7 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
+import { TermJoinTooltipProperty } from '../../tooltips/term_join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
 import { canSkipStyleMetaUpdate, canSkipFormattersUpdate } from '../../util/can_skip_fetch';
 import {
@@ -57,7 +57,8 @@ import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
-import { ITermJoinSource } from '../../sources/term_join_source';
+import type { IJoinSource, ITermJoinSource } from '../../sources/join_sources';
+import { isTermJoinSource } from '../../sources/join_sources';
 import type { IESAggSource } from '../../sources/es_agg_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
@@ -430,7 +431,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }: {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
-    source: IVectorSource | ITermJoinSource;
+    source: IVectorSource | IJoinSource;
     sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
@@ -511,7 +512,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }: {
     dataRequestId: string;
     fields: IField[];
-    source: IVectorSource | ITermJoinSource;
+    source: IVectorSource | IJoinSource;
   } & DataRequestContext) {
     if (fields.length === 0) {
       return;
@@ -983,17 +984,28 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getId() === mbSourceId;
   }
 
+  /*
+   * Replaces source property tooltips with join property tooltips
+   * join property tooltips allow tooltips to
+   *  1) Create filter from right source context
+   *  2) Display tooltip with right source context
+   */
   _addJoinsToSourceTooltips(tooltipsFromSource: ITooltipProperty[]) {
     for (let i = 0; i < tooltipsFromSource.length; i++) {
       const tooltipProperty = tooltipsFromSource[i];
-      const matchingJoins = [];
+      const matchingTermJoins: ITermJoinSource[] = [];
       for (let j = 0; j < this.getJoins().length; j++) {
-        if (this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
-          matchingJoins.push(this.getJoins()[j]);
+        const join = this.getJoins()[j];
+        const joinRightSource = join.getRightJoinSource();
+        if (
+          isTermJoinSource(joinRightSource) &&
+          this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()
+        ) {
+          matchingTermJoins.push(joinRightSource as ITermJoinSource);
         }
       }
-      if (matchingJoins.length) {
-        tooltipsFromSource[i] = new JoinTooltipProperty(tooltipProperty, matchingJoins);
+      if (matchingTermJoins.length) {
+        tooltipsFromSource[i] = new TermJoinTooltipProperty(tooltipProperty, matchingTermJoins);
       }
     }
   }

@@ -6,13 +6,16 @@
  */
 
 import { defaults, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ForLastExpression,
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -27,6 +30,13 @@ import {
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+} from '../../../../../common/es_fields/apm';
 
 export interface RuleParams {
   windowSize?: number;
@@ -36,6 +46,7 @@ export interface RuleParams {
   transactionType?: string;
   transactionName?: string;
   environment?: string;
+  groupBy?: string[] | undefined;
 }
 
 export interface Props {
@@ -100,6 +111,13 @@ export function TransactionErrorRateRuleType(props: Props) {
     ]
   );
 
+  const onGroupByChange = useCallback(
+    (group: string[] | null) => {
+      setRuleParams('groupBy', group ?? []);
+    },
+    [setRuleParams]
+  );
+
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
@@ -119,7 +137,12 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
       serviceName={params.serviceName}
     />,
     <TransactionNameField
@@ -148,19 +171,56 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
   ];
 
-  const chartPreview = (
+  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
+  const showChartPreview = false;
+  const chartPreview = showChartPreview ? (
     <ChartPreview
       series={[{ data: data?.errorRateChartPreview ?? [] }]}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
       uiSettings={services.uiSettings}
     />
+  ) : null;
+
+  const groupAlertsBy = (
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.apm.ruleFlyout.errorRate.createAlertPerText',
+          {
+            defaultMessage: 'Group alerts by',
+          }
+        )}
+        helpText={i18n.translate(
+          'xpack.apm.ruleFlyout.errorRate.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
+          }
+        )}
+        fullWidth
+        display="rowCompressed"
+      >
+        <APMRuleGroupBy
+          onChange={onGroupByChange}
+          options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME]}
+          preSelectedOptions={[
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            TRANSACTION_TYPE,
+          ]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
   );
 
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       fields={fields}
+      groupAlertsBy={groupAlertsBy}
       defaultParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}

@@ -24,22 +24,20 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { useDebounce } from 'react-use';
 import { TableTitle } from '../../common/components/table_title';
 import { ParamsText } from './params_text';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
 
-export interface ListParamItem extends SyntheticsParam {
+export interface ListParamItem extends SyntheticsParamSO {
   id: string;
 }
 
 export const ParamsList = () => {
-  const [refreshList, setRefreshList] = useState(Date.now());
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const { items, loading } = useParamsList(refreshList);
+  const { items, isLoading } = useParamsList();
 
   const [isEditingItem, setIsEditingItem] = useState<ListParamItem | null>(null);
 
@@ -182,7 +180,6 @@ export const ParamsList = () => {
       <AddParamFlyout
         isEditingItem={isEditingItem}
         setIsEditingItem={setIsEditingItem}
-        setRefreshList={setRefreshList}
         items={items}
       />,
     ];
@@ -235,7 +232,7 @@ export const ParamsList = () => {
       <EuiSpacer size="m" />
       <EuiInMemoryTable<ListParamItem>
         itemId="id"
-        loading={loading}
+        loading={isLoading}
         tableCaption={PARAMS_TABLE}
         items={filteredItems}
         columns={columns}
@@ -285,14 +282,10 @@ export const ParamsList = () => {
             },
           ],
         }}
-        message={loading ? LOADING_TEXT : undefined}
+        message={isLoading ? LOADING_TEXT : undefined}
       />
       {isDeleteModalVisible && deleteParam && (
-        <DeleteParam
-          items={deleteParam}
-          setIsDeleteModalVisible={setIsDeleteModalVisible}
-          setRefreshList={setRefreshList}
-        />
+        <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />
       )}
     </div>
   );

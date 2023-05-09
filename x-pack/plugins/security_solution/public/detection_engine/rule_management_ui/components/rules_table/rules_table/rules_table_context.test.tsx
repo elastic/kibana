@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import type { PropsWithChildren } from 'react';
 import React from 'react';
+import type { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
-import type { Rule, RuleSnoozeSettings } from '../../../../rule_management/logic/types';
+import type { Rule, RulesSnoozeSettingsMap } from '../../../../rule_management/logic';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import type { RulesTableState } from './rules_table_context';
@@ -34,7 +34,7 @@ function renderUseRulesTableContext({
   savedState,
 }: {
   rules?: Rule[] | Error;
-  rulesSnoozeSettings?: RuleSnoozeSettings[] | Error;
+  rulesSnoozeSettings?: RulesSnoozeSettingsMap | Error;
   savedState?: ReturnType<typeof useRulesTableSavedState>;
 }): RulesTableState {
   (useFindRules as jest.Mock).mockReturnValue({
@@ -189,10 +189,10 @@ describe('RulesTableContextProvider', () => {
             { id: '1', name: 'rule 1' },
             { id: '2', name: 'rule 2' },
           ] as Rule[],
-          rulesSnoozeSettings: [
-            { id: '1', mute_all: true, snooze_schedule: [] },
-            { id: '2', mute_all: false, snooze_schedule: [] },
-          ],
+          rulesSnoozeSettings: {
+            '1': { muteAll: true, snoozeSchedule: [] },
+            '2': { muteAll: false, snoozeSchedule: [] },
+          },
         });
 
         expect(state.rules).toEqual([
@@ -215,22 +215,20 @@ describe('RulesTableContextProvider', () => {
             { id: '1', name: 'rule 1' },
             { id: '2', name: 'rule 2' },
           ] as Rule[],
-          rulesSnoozeSettings: [
-            { id: '1', mute_all: true, snooze_schedule: [] },
-            { id: '2', mute_all: false, snooze_schedule: [] },
-          ],
+          rulesSnoozeSettings: {
+            '1': { muteAll: true, snoozeSchedule: [] },
+            '2': { muteAll: false, snoozeSchedule: [] },
+          },
         });
 
         expect(state.rulesSnoozeSettings.data).toEqual({
           '1': {
-            id: '1',
-            mute_all: true,
-            snooze_schedule: [],
+            muteAll: true,
+            snoozeSchedule: [],
           },
           '2': {
-            id: '2',
-            mute_all: false,
-            snooze_schedule: [],
+            muteAll: false,
+            snoozeSchedule: [],
           },
         });
       });

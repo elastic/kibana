@@ -15,6 +15,7 @@ import {
   getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   deleteAllRules,
@@ -230,6 +231,32 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.original_event.outcome': 'success',
         'kibana.alert.original_event.type': 'authentication_success',
       });
+    });
+
+    it('generates max signals warning when circuit breaker is exceeded', async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        new_terms_fields: ['process.pid'],
+        from: '2018-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2018-02-19T20:41:59.000Z',
+      };
+      const { logs } = await previewRule({ supertest, rule });
+
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        new_terms_fields: ['host.ip'],
+        from: '2019-02-19T20:42:00.000Z',
+        history_window_start: '2019-01-19T20:42:00.000Z',
+        max_signals: 3,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+
+      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
     });
 
     it('should generate 3 alerts when 1 document has 3 new values', async () => {

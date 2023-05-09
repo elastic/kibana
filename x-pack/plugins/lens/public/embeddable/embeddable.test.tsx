@@ -166,6 +166,7 @@ describe('embeddable', () => {
       capabilities: {
         canSaveDashboards: true,
         canSaveVisualizations: true,
+        canOpenVisualizations: true,
         discover: {},
         navLinks: {},
       },
@@ -361,6 +362,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -413,6 +415,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -440,11 +443,6 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-
-    embeddable.updateInput({
-      filters: [{ meta: { alias: 'test', negate: false, disabled: false } }],
-    });
-    await new Promise((resolve) => setTimeout(resolve, 0));
 
     embeddable.updateInput({
       searchSessionId: 'nextSession',
@@ -945,6 +943,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -1044,6 +1043,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -1140,6 +1140,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -1190,5 +1191,26 @@ describe('embeddable', () => {
         },
       })
     );
+  });
+
+  it('should not be editable for no visualize library privileges', async () => {
+    const embeddable = new Embeddable(
+      getEmbeddableProps({
+        capabilities: {
+          canSaveDashboards: false,
+          canSaveVisualizations: true,
+          canOpenVisualizations: false,
+          discover: {},
+          navLinks: {},
+        },
+      }),
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    expect(embeddable.getOutput().editable).toBeUndefined();
   });
 });

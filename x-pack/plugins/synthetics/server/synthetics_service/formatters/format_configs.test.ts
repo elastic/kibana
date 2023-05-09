@@ -14,7 +14,7 @@ import {
 import {
   ConfigKey,
   DataStream,
-  Mode,
+  CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
@@ -39,11 +39,19 @@ const testHTTPConfig: Partial<MonitorFields> = {
   proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],
+  'check.response.json': [
+    {
+      description: 'test description',
+      expression: 'foo.bar == "myValue"',
+    },
+  ],
   'response.include_body': 'on_error' as ResponseBodyIndexPolicy,
-  'check.response.headers': {},
+  'check.response.headers': {
+    'test-header': 'test-value',
+  },
   'response.include_headers': true,
   'check.response.status': [],
-  'check.request.body': { type: 'text' as Mode, value: '' },
+  'check.request.body': { type: 'text' as CodeEditorMode, value: '' },
   'check.request.headers': {},
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
@@ -99,18 +107,27 @@ describe('formatMonitorConfig', () => {
 
       expect(yamlConfig).toEqual({
         'check.request.method': 'GET',
+        'check.response.headers': {
+          'test-header': 'test-value',
+        },
+        'check.response.json': [
+          {
+            description: 'test description',
+            expression: 'foo.bar == "myValue"',
+          },
+        ],
         enabled: true,
         locations: [],
         max_redirects: '0',
-        name: 'Test',
-        password: '3z9SBOQWW5F0UrdqLVFqlF6z',
+        name: '"Test"',
+        password: '"3z9SBOQWW5F0UrdqLVFqlF6z"',
         'response.include_body': 'on_error',
         'response.include_headers': true,
         schedule: '@every 3m',
         timeout: '16s',
         type: 'http',
-        urls: 'https://www.google.com',
-        proxy_url: 'https://www.google.com',
+        urls: '"https://www.google.com"',
+        proxy_url: '"https://www.google.com"',
       });
     });
 
@@ -129,18 +146,27 @@ describe('formatMonitorConfig', () => {
 
         expect(yamlConfig).toEqual({
           'check.request.method': 'GET',
+          'check.response.headers': {
+            'test-header': 'test-value',
+          },
+          'check.response.json': [
+            {
+              description: 'test description',
+              expression: 'foo.bar == "myValue"',
+            },
+          ],
           enabled: true,
           locations: [],
           max_redirects: '0',
-          name: 'Test',
-          password: '3z9SBOQWW5F0UrdqLVFqlF6z',
-          proxy_url: 'https://www.google.com',
+          name: '"Test"',
+          password: '"3z9SBOQWW5F0UrdqLVFqlF6z"',
+          proxy_url: '"https://www.google.com"',
           'response.include_body': 'on_error',
           'response.include_headers': true,
           schedule: '@every 3m',
           timeout: '16s',
           type: 'http',
-          urls: 'https://www.google.com',
+          urls: '"https://www.google.com"',
           ...(isTLSEnabled ? { 'ssl.verification_mode': 'none' } : {}),
         });
       }
@@ -157,7 +183,7 @@ describe('browser fields', () => {
       enabled: true,
       'filter_journeys.tags': ['dev'],
       ignore_https_errors: false,
-      name: 'Test',
+      name: '"Test"',
       locations: [],
       schedule: '@every 3m',
       screenshots: 'on',

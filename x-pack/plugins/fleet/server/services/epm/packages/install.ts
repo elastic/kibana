@@ -511,6 +511,7 @@ async function installPackageCommon(options: {
       verificationResult,
       installSource,
       authorizationHeader,
+      force,
     })
       .then(async (assets) => {
         await removeOldAssets({

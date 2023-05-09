@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { some } from 'lodash';
 import { ActionsLogTable } from '../../../management/components/endpoint_response_actions_list/components/actions_log_table';
 import { useGetEndpointActionList } from '../../../management/hooks';
 import type { ExpandedEventFieldsObject, RawEventData } from './types';
@@ -25,6 +26,7 @@ const TabContentWrapper = styled.div`
 
 export const useEndpointResponseActionsTab = ({ rawEventData }: { rawEventData: RawEventData }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
+  const [isLive, setIsLive] = useState(false);
   const commonResponseActionsTabEnabled = useIsExperimentalFeatureEnabled(
     'commonResponseActionsTabEnabled'
   );
@@ -43,7 +45,16 @@ export const useEndpointResponseActionsTab = ({ rawEventData }: { rawEventData: 
     {
       retry: false,
       enabled: !shouldEarlyReturn,
+      refetchInterval: isLive ? 5000 : false,
     }
+  );
+
+  useEffect(
+    () =>
+      setIsLive(() =>
+        some(actionList?.data, (action) => !action.errors?.length && action.status === 'pending')
+      ),
+    [actionList?.data]
   );
 
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);

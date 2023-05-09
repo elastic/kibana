@@ -11,7 +11,7 @@ import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
-import { PARAMETER_NOT_FOUND } from '../../handlers/action/create_queries';
+import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
@@ -113,8 +113,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           body: { data: osqueryAction },
         });
       } catch (error) {
-        // TODO validate for 400 (when agents are not found for selection)
-        // return response.badRequest({ body: new Error('No agents found for selection') });
+        if (error.statusCode === 400) {
+          return response.badRequest({ body: error });
+        }
 
         return response.customError({
           statusCode: 500,

@@ -36,11 +36,11 @@ import type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
 import type {
-  IRouter,
   RequestHandler,
   KibanaResponseFactory,
   RouteMethod,
   HttpServiceSetup,
+  IRouter,
 } from '@kbn/core-http-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
