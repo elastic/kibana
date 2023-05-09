@@ -113,7 +113,7 @@ import {
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
-import { getConfigPanel } from './app_plugin/shared/config_panel_lazy';
+// import { getConfigPanel } from './app_plugin/shared/config_panel_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
@@ -659,6 +659,7 @@ export class LensPlugin {
         };
       },
       ConfigPanelComponentApi: async () => {
+        const { getConfigPanel } = await import('./async_services');
         if (!this.editorFrameService) {
           this.initDependenciesForApi();
         }

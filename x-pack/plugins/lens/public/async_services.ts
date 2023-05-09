@@ -32,6 +32,8 @@ export * from './visualizations/gauge';
 export * from './datasources/form_based/form_based';
 export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
 export { createFormulaPublicApi } from './datasources/form_based/operations/definitions/formula/formula_public_api';
+export { getConfigPanel } from './app_plugin/shared/config_panel_lazy';
+
 export * from './lens_suggestions_api';
 
 export * from './datasources/text_based';

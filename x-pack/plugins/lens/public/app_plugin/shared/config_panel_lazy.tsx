@@ -12,6 +12,8 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
   // EuiFocusTrap,
   EuiFlyout,
   EuiFlyoutBody,
@@ -32,6 +34,7 @@ import { getResolvedDateRange } from '../../utils';
 
 import type { ActiveDimensionState } from '../../editor_frame_service/editor_frame/config_panel/types';
 import { DimensionContainer } from '../../editor_frame_service/editor_frame/config_panel/dimension_container';
+import { LayerSettings } from '../../editor_frame_service/editor_frame/config_panel/layer_settings';
 // import { ConfigPanelWrapper } from '../../editor_frame_service/editor_frame/config_panel/config_panel';
 // import { LayerPanel } from '../../editor_frame_service/editor_frame/config_panel/layer_panel';
 // import { DraggableDimensionButton } from '../../editor_frame_service/editor_frame/config_panel/buttons/draggable_dimension_button';
@@ -363,6 +366,20 @@ export function getConfigPanel(
                 )}
                 <EuiSpacer size="m" />
                 <EuiPanel data-test-subj={`lns-layerPanel-0`} paddingSize="none">
+                  <header className="lnsLayerPanel__layerHeader">
+                    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                      <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
+                        <LayerSettings
+                          layerConfigProps={{
+                            ...layerVisualizationConfigProps,
+                            setState: updateVisualizationState,
+                            onChangeIndexPattern: (indexPatternId) => {},
+                          }}
+                          activeVisualization={activeVisualization}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </header>
                   {groups.map((group, groupIndex) => {
                     let errorText: string = '';
                     if (!isEmptyLayer) {
