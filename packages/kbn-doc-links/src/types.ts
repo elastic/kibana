@@ -509,4 +509,7 @@ export interface DocLinks {
     readonly appSearch: string;
     readonly elasticsearch: string;
   };
+  readonly synthetics: {
+    readonly featureRoles: string;
+  };
 }
