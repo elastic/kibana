@@ -66,7 +66,7 @@ export const registerSyntheticsStatusCheckRule = (
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
-    async executor({ state, params, services, startedAt, spaceId, previousStartedAt }) {
+    async executor({ state, params, services, spaceId, previousStartedAt }) {
       const ruleState = state as SyntheticsCommonState;
 
       const { basePath } = server;
@@ -76,7 +76,10 @@ export const registerSyntheticsStatusCheckRule = (
         savedObjectsClient,
         scopedClusterClient,
         alertWithLifecycle,
+        uiSettingsClient,
       } = services;
+
+      const dateFormat = await uiSettingsClient.get('dateFormat');
 
       const statusRule = new StatusRuleExecutor(
         previousStartedAt,
@@ -93,7 +96,13 @@ export const registerSyntheticsStatusCheckRule = (
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
         const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
-        const monitorSummary = getMonitorSummary(ping, DOWN_LABEL, locationId, configId);
+        const monitorSummary = getMonitorSummary(
+          ping,
+          DOWN_LABEL,
+          locationId,
+          configId,
+          dateFormat
+        );
         const alertId = getInstanceId(ping, idWithLocation);
         const alert = alertWithLifecycle({
           id: alertId,
@@ -140,6 +149,7 @@ export const registerSyntheticsStatusCheckRule = (
         spaceId,
         staleDownConfigs,
         upConfigs,
+        dateFormat,
       });
 
       return {

@@ -11,10 +11,12 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultActionMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
-      defaultMessage: `"{monitorName}", {locationName} - {monitorType} monitor, is {status} at {checkedAt}.\nThe error received is: "{lastErrorMessage}".\n{linkMessage}`,
+      defaultMessage: `"{monitorName}" is {status} from {locationName}. Details:\nMonitor name: {monitorName}\n{monitorUrlLabel}: {monitorUrl}\nMonitor type: {monitorType}\nChecked at: {checkedAt}\nFrom: {locationName}\nError received: {lastErrorMessage}\n{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
         monitorType: '{{context.monitorType}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        monitorUrlLabel: '{{context.monitorUrlLabel}}',
         status: '{{{context.status}}}',
         lastErrorMessage: '{{{context.lastErrorMessage}}}',
         locationName: '{{context.locationName}}',
@@ -48,9 +50,11 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
       defaultMessage:
-        'The alert for "{monitorName}", {locationName} - {monitorType} monitor, is no longer active: {recoveryReason}.\nThe latest error received was: "{lastErrorMessage}".\n{linkMessage}',
+        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}. Details:\nMonitor name: {monitorName}\n{monitorUrlLabel}: {monitorUrl}\nMonitor type: {monitorType}\nFrom: {locationName}\nLatest error received: {lastErrorMessage}\n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
+        monitorUrlLabel: '{{context.monitorUrlLabel}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
         monitorType: '{{context.monitorType}}',
         locationName: '{{context.locationName}}',
         lastErrorMessage: '{{{context.lastErrorMessage}}}',

@@ -41,11 +41,12 @@ export const getMonitorSummary = (
   monitorInfo: OverviewPing,
   statusMessage: string,
   locationId: string,
-  configId: string
+  configId: string,
+  dateFormat: string
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp']).format('HH:MM:SS on DD/MM/YYYY');
+  const checkedAt = moment(monitorInfo['@timestamp']).format(dateFormat);
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
     tcp: 'TCP',
@@ -54,13 +55,21 @@ export const getMonitorSummary = (
       defaultMessage: 'browser',
     }),
   };
+  const typeToUrlLabelMap: Record<string, string> = {
+    http: 'URL',
+    tcp: HOST_LABEL,
+    icmp: HOST_LABEL,
+    browser: 'URL',
+  };
+  const monitorType = monitorInfo.monitor?.type;
   const stateId = monitorInfo.state?.id || null;
 
   return {
     checkedAt,
     locationId,
     configId,
-    monitorUrl: monitorInfo.url?.full!,
+    monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
+    monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
@@ -104,4 +113,15 @@ export const getReasonMessage = ({
 
 export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
   defaultMessage: `down`,
+});
+
+export const UNAVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.alertRules.monitorStatus.unavailableUrlLabel',
+  {
+    defaultMessage: `(unavailable)`,
+  }
+);
+
+export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
+  defaultMessage: 'Host',
 });
