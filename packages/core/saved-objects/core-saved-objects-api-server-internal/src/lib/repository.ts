@@ -7,10 +7,8 @@
  */
 
 import { isObject } from 'lodash';
-import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import type { BulkResolveError } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
@@ -65,7 +63,6 @@ import {
   type ISavedObjectsSpacesExtension,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -102,6 +99,7 @@ import {
   performUpdate,
   performBulkUpdate,
   performRemoveReferencesTo,
+  performOpenPointInTime,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -759,69 +757,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsOpenPointInTimeOptions = {},
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsOpenPointInTimeResponse> {
-    const { disableExtensions } = internalOptions;
-    let namespaces!: string[];
-    if (disableExtensions || !this._spacesExtension) {
-      namespaces = options.namespaces ?? [DEFAULT_NAMESPACE_STRING];
-      // If the consumer specified `namespaces: []`, throw a Bad Request error
-      if (namespaces.length === 0)
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          'options.namespaces cannot be an empty array'
-        );
-    }
-
-    const { keepAlive = '5m', preference } = options;
-    const types = Array.isArray(type) ? type : [type];
-    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
-    if (allowedTypes.length === 0) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
-    }
-
-    if (!disableExtensions && this._spacesExtension) {
-      try {
-        namespaces = await this._spacesExtension.getSearchableNamespaces(options.namespaces);
-      } catch (err) {
-        if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
-          // The user is not authorized to access any space, throw a bad request error.
-          throw SavedObjectsErrorHelpers.createBadRequestError();
-        }
-        throw err;
-      }
-      if (namespaces.length === 0) {
-        // The user is authorized to access *at least one space*, but not any of the spaces they requested; throw a bad request error.
-        throw SavedObjectsErrorHelpers.createBadRequestError();
-      }
-    }
-
-    if (!disableExtensions && this._securityExtension) {
-      await this._securityExtension.authorizeOpenPointInTime({
-        namespaces: new Set(namespaces),
-        types: new Set(types),
-      });
-    }
-
-    const esOptions = {
-      index: this.getIndicesForTypes(allowedTypes),
-      keep_alive: keepAlive,
-      ...(preference ? { preference } : {}),
-    };
-
-    const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
-      ignore: [404],
-      meta: true,
-    });
-
-    if (statusCode === 404) {
-      if (!isSupportedEsServer(headers)) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-      } else {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError();
-      }
-    }
-
-    return {
-      id: body.id,
-    };
+    return await performOpenPointInTime(
+      {
+        type,
+        options,
+        internalOptions,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**
@@ -833,7 +776,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsClosePointInTimeResponse> {
     const { disableExtensions } = internalOptions;
-
     if (!disableExtensions && this._securityExtension) {
       this._securityExtension.auditClosePointInTime();
     }
@@ -868,9 +810,5 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
   private getIndexForType(type: string) {
     return this.commonHelper.getIndexForType(type);
-  }
-
-  private getIndicesForTypes(types: string[]) {
-    return this.commonHelper.getIndicesForTypes(types);
   }
 }

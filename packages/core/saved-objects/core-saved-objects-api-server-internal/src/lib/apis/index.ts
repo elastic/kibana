@@ -19,3 +19,4 @@ export { performGet } from './get';
 export { performUpdate } from './update';
 export { performBulkUpdate } from './bulk_update';
 export { performRemoveReferencesTo } from './remove_references_to';
+export { performOpenPointInTime } from './open_point_in_time';
