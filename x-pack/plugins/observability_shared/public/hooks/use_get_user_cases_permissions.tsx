@@ -8,8 +8,8 @@
 import { useEffect, useState } from 'react';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
+import { ObservabilitySharedStart } from '../plugin';
 
 export function useGetUserCasesPermissions() {
   const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
@@ -22,9 +22,10 @@ export function useGetUserCasesPermissions() {
   });
   const uiCapabilities = useKibana().services.application!.capabilities;
 
-  const casesCapabilities = useKibana<{
-    cases: CasesUiStart;
-  }>().services.cases.helpers.getUICapabilities(uiCapabilities[casesFeatureId]);
+  const casesCapabilities =
+    useKibana<ObservabilitySharedStart>().services.cases.helpers.getUICapabilities(
+      uiCapabilities[casesFeatureId]
+    );
 
   useEffect(() => {
     setCasesPermissions({
