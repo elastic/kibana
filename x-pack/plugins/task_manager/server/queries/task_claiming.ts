@@ -163,6 +163,11 @@ export class TaskClaiming {
       }
     }
 
+    // Add unrecognized tasks to the default cost (1)
+    result.byCost[1] = result.byCost[1]
+      ? result.byCost[1].concat(this.unusedTypes)
+      : this.unusedTypes;
+
     return result;
   }
 
@@ -219,8 +224,6 @@ export class TaskClaiming {
             taskTypes: this.taskClaimingBatchesByType.byCost[cost],
           })
         ),
-        // TODO: Optimize so a dedicated query isn't necessary
-        this.searchForTasks({ size: initialCapacity, taskTypes: this.unusedTypes }),
       ]);
 
       // Calculate capacity again in case more capacity opened up since the search queries started
