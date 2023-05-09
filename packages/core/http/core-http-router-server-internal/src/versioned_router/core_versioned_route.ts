@@ -28,7 +28,7 @@ import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
 
-type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
+type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 export const passThroughValidation = {

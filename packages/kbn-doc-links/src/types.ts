@@ -281,6 +281,7 @@ export interface DocLinks {
     readonly networkMap: string;
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
+    readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
@@ -302,6 +303,7 @@ export interface DocLinks {
       value_lists: string;
     };
     readonly privileges: string;
+    readonly manageDetectionRules: string;
   };
   readonly query: {
     readonly eql: string;
@@ -387,6 +389,7 @@ export interface DocLinks {
     serviceNowSIRAction: string;
     setupPrerequisites: string;
     slackAction: string;
+    slackApiAction: string;
     teamsAction: string;
     connectors: string;
   }>;
@@ -507,5 +510,8 @@ export interface DocLinks {
   readonly searchUI: {
     readonly appSearch: string;
     readonly elasticsearch: string;
+  };
+  readonly synthetics: {
+    readonly featureRoles: string;
   };
 }
