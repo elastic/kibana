@@ -111,7 +111,7 @@ export function DependenciesDetailTable() {
     const thisDepForMap = {
       data: {
         id: `>${dependencyName}`,
-        'span.destination.services.resource': dependencyName,
+        'span.destination.service.resource': dependencyName,
         label: dependencyName,
         // TODO: subtype/type
       },
@@ -122,6 +122,7 @@ export function DependenciesDetailTable() {
       ...(dependencyNodes ?? []),
       ...(dependencyEdges ?? []),
     ]);
+    cy.$id(`>${dependencyName}`).select();
     cy.trigger('custom:data', [addedElements]);
   }, [dependencyName, dependencyNodes, dependencyEdges]);
 
