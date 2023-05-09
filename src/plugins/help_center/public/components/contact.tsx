@@ -7,28 +7,30 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiCard } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
-
-export const DocumentationCards = () => {
+export const Contact = () => {
   const { helpFetchResults } = useContext(HelpCenterContext);
-
   return (
-    <EuiFlexGroup gutterSize="l">
-      {(helpFetchResults?.documentation ?? []).map((doc) => {
+    <>
+      {(helpFetchResults?.contact ?? []).map((contact) => {
         return (
-          <EuiFlexItem key={doc.title}>
-            <EuiCard
-              icon={<EuiIcon size="xl" type={doc.iconType ?? 'document'} />}
-              title={doc.title}
-              description="Example of a card's description. Stick to one or two sentences."
+          <>
+            <EuiButtonEmpty
+              href={contact.href}
               target="_blank"
-              href={doc.href}
-            />
-          </EuiFlexItem>
+              size="s"
+              iconType={contact.iconType}
+              flush="left"
+              aria-label={contact.title}
+            >
+              {contact.title}
+            </EuiButtonEmpty>
+            <EuiSpacer size="s" />
+          </>
         );
       })}
-    </EuiFlexGroup>
+    </>
   );
 };

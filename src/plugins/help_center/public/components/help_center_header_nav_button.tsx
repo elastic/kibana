@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-import { ChromeGlobalHelpExtensionMenuLink, ChromeHelpExtension } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
-import { combineLatest, Observable, takeUntil } from 'rxjs';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { HelpCenterApi } from '../lib/api';
+import { Observable } from 'rxjs';
+
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+
 import { HelpCenterFlyout } from './flyout_list';
-import { FetchResult, HelpCenterLinks } from '../types';
+import type { HelpCenterApi } from '../lib/api';
+import { FetchResult } from '../types';
 
 export interface IHelpCenterContext {
+  kibanaVersion: string;
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  newsFetchResult: FetchResult | void | null;
-  helpLinks?: HelpCenterLinks;
+  helpFetchResults: void | FetchResult | null;
 }
 
 export const HelpCenterContext = React.createContext({} as IHelpCenterContext);
@@ -27,51 +27,35 @@ export const HelpCenterContext = React.createContext({} as IHelpCenterContext);
 export interface Props {
   helpCenterApi: HelpCenterApi;
   hasCustomBranding$: Observable<boolean>;
-  helpCenterLinksSubject: Observable<HelpCenterLinks>;
 }
 
-export const HelpCenterNavButton = ({
-  helpCenterApi,
-  hasCustomBranding$,
-  helpCenterLinksSubject,
-}: Props) => {
+export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
-  const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+  const [helpFetchResult, setHelpFetchResult] = useState<void | FetchResult | null>(null);
   const hasCustomBranding = useObservable(hasCustomBranding$, false);
-  const [helpLinks, setHelpLinks] = useState<HelpCenterLinks>();
-
+  const kibanaVersion = helpCenterApi.kibanaVersion;
   useEffect(() => {
-    const helpLinksSubscription = helpCenterLinksSubject.subscribe((links) => {
-      setHelpLinks(links);
+    const helpLinksSubscription = helpCenterApi.fetchResults$.subscribe((links) => {
+      setHelpFetchResult(links);
     });
     return () => {
       helpLinksSubscription.unsubscribe();
     };
-  }, [helpCenterLinksSubject]);
+  }, [helpCenterApi.fetchResults$]);
 
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const setButtonRef = (node: HTMLButtonElement | null) => (buttonRef.current = node);
 
-  useEffect(() => {
-    const subscription = helpCenterApi.fetchResults$.subscribe((results) => {
-      setNewsFetchResult(results);
-    });
-    return () => subscription.unsubscribe();
-  }, [helpCenterApi]);
-
   const showFlyout = useCallback(() => {
-    if (newsFetchResult) {
-      helpCenterApi.markAsRead(newsFetchResult.feedItems.map((item) => item.hash));
-    }
     setFlyoutVisible(!flyoutVisible);
-  }, [helpCenterApi, newsFetchResult, flyoutVisible]);
+  }, [flyoutVisible]);
 
   return (
     <HelpCenterContext.Provider
       value={{
+        kibanaVersion,
         setFlyoutVisible,
-        newsFetchResult,
-        helpLinks,
+        helpFetchResults: helpFetchResult,
       }}
     >
       <>

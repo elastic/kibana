@@ -6,31 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, Observable, timer, of } from 'rxjs';
-import { map, catchError, filter, mergeMap, tap } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import { FetchResult, HelpCenterPluginBrowserConfig } from '../types';
-import { HelpCenterApiDriver } from './driver';
-import { HelpCenterStorage } from './storage';
-
-export enum HelpCenterApiEndpoint {
-  KIBANA = 'kibana',
-  KIBANA_ANALYTICS = 'kibana-analytics',
-  SECURITY_SOLUTION = 'security-solution',
-  OBSERVABILITY = 'observability',
-}
+import { combineLatest, map, Observable, ReplaySubject, takeUntil } from 'rxjs';
+import {
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
+  CoreStart,
+} from '@kbn/core/public';
+import {
+  GITHUB_CREATE_ISSUE_LINK,
+  KIBANA_FEEDBACK_LINK,
+} from '@kbn/core-chrome-browser-internal/src/constants';
+import { FetchResult } from '../types';
 
 export interface HelpCenterApi {
   /**
    * The current fetch results
    */
+  kibanaVersion: string;
   fetchResults$: Observable<void | null | FetchResult>;
-
-  /**
-   * Mark the given items as read.
-   * Will refresh the `hasNew` value of the emitted FetchResult accordingly
-   */
-  markAsRead(itemHashes: string[]): void;
 }
 
 /*
@@ -38,53 +32,119 @@ export interface HelpCenterApi {
  * Computes hasNew value from new item hashes saved in localStorage
  */
 export function getApi(
-  config: HelpCenterPluginBrowserConfig,
   kibanaVersion: string,
-  helpCenterId: string,
-  isScreenshotMode: boolean
+  core: CoreStart,
+  stop$: ReplaySubject<void>
 ): HelpCenterApi {
-  const storage = new HelpCenterStorage(helpCenterId);
-  const mainInterval = config.mainInterval.asMilliseconds();
+  const fetchResults$ = combineLatest([
+    core.chrome.getHelpExtension$(),
+    core.chrome.getHelpSupportUrl$(),
+    core.chrome.getGlobalHelpExtensionMenuLinks$(),
+  ]).pipe(
+    takeUntil(stop$),
+    map(([helpExtension, helpSupportLink, globalHelpExtensionMenuLinks]) => {
+      const documentationLinks: Array<
+        ChromeHelpExtensionMenuDocumentationLink & { title: string; priority: number }
+      > = [
+        {
+          title: 'Kibana',
+          priority: -1, // should always go last since it's the most general
+          linkType: 'documentation',
+          iconType: 'logoKibana',
+          href: core.docLinks.links.kibana.guide,
+        },
+      ];
 
-  const createHelpCenterApiDriver = () => {
-    const userLanguage = i18n.getLocale();
-    const fetchInterval = config.fetchInterval.asMilliseconds();
-    return new HelpCenterApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);
-  };
+      let githubLink: ChromeHelpExtensionMenuDiscussLink = {
+        linkType: 'discuss',
+        title: 'Open an issue on Github',
+        href: GITHUB_CREATE_ISSUE_LINK,
+        iconType: 'logoGithub',
+      };
 
-  const driver = createHelpCenterApiDriver();
+      const contactLinks: ChromeHelpExtensionMenuDiscussLink[] = [
+        {
+          linkType: 'discuss',
+          title: 'Give feedback',
+          iconType: 'discuss',
+          href: KIBANA_FEEDBACK_LINK,
+        },
+      ];
+      if (helpSupportLink) {
+        contactLinks.push({
+          linkType: 'discuss',
+          title: 'Ask Elastic',
+          iconType: 'logoElastic',
+          href: helpSupportLink,
+        });
+      }
 
-  const results$ = timer(0, mainInterval).pipe(
-    filter(() => driver.shouldFetch()),
-    mergeMap(() =>
-      driver.fetchHelpCenterItems(config.service).pipe(
-        catchError((err) => {
-          window.console.error(err);
-          return of({
-            error: err,
-            kibanaVersion,
-            hasNew: false,
-            feedItems: [],
-          });
-        })
-      )
-    ),
-    tap(() => storage.setLastFetchTime(new Date()))
-  );
+      if (helpExtension) {
+        const links = helpExtension.links ?? [];
+        links.map((link) => {
+          switch (link.linkType) {
+            case 'documentation': {
+              documentationLinks.push({
+                title: helpExtension.appName,
+                ...link,
+                priority: link.priority ?? 0,
+              });
+              break;
+            }
+            case 'github': {
+              githubLink = {
+                ...link,
+                title: 'Open an issue on Github',
+                iconType: 'logoGithub',
+                linkType: 'discuss',
+                href: createGithubUrl(
+                  (link as ChromeHelpExtensionMenuGitHubLink).labels,
+                  (link as ChromeHelpExtensionMenuGitHubLink).title
+                ),
+              };
+              break;
+            }
+            case 'discuss': {
+              contactLinks.push(link as ChromeHelpExtensionMenuDiscussLink);
+              break;
+            }
+            case 'custom': {
+              contactLinks.push({
+                ...link,
+                linkType: 'discuss',
+              } as ChromeHelpExtensionMenuDiscussLink);
+            }
+            default:
+              break;
+          }
+        });
+      }
+      contactLinks.push(githubLink);
 
-  const merged$ = combineLatest([results$, storage.isAnyUnread$()]).pipe(
-    map(([results, isAnyUnread]) => {
       return {
-        ...results,
-        hasNew: results.error ? false : isAnyUnread,
+        global: globalHelpExtensionMenuLinks.sort((a, b) => b.priority - a.priority),
+        documentation: documentationLinks.sort((a, b) => b.priority - a.priority),
+        contact: contactLinks,
       };
     })
   );
 
   return {
-    fetchResults$: merged$,
-    markAsRead: (itemHashes) => {
-      storage.markItemsAsRead(itemHashes);
-    },
+    kibanaVersion,
+    fetchResults$,
   };
 }
+
+const createGithubUrl = (labels: string[], title?: string) => {
+  const url = new URL('https://github.com/elastic/kibana/issues/new?');
+
+  if (labels.length) {
+    url.searchParams.set('labels', labels.join(','));
+  }
+
+  if (title) {
+    url.searchParams.set('title', title);
+  }
+
+  return url.toString();
+};

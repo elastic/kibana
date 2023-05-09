@@ -6,21 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Duration, Moment } from 'moment';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { ChromeGlobalHelpExtensionMenuLink, ChromeHelpExtension } from '@kbn/core-chrome-browser';
+import {
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+} from '@kbn/core-chrome-browser';
+
 export interface HelpCenterPluginStartDependencies {
   screenshotMode: ScreenshotModePluginStart;
-}
-
-// Ideally, we may want to obtain the type from the configSchema and exposeToBrowser keys...
-export interface HelpCenterPluginBrowserConfig {
-  service: {
-    urlRoot: string;
-    pathTemplate: string;
-  };
-  mainInterval: Duration; // how often to check last updated time
-  fetchInterval: Duration; // how often to fetch remote service and set last updated
 }
 
 export interface HelpCenterLinks {
@@ -30,33 +25,11 @@ export interface HelpCenterLinks {
   globalHelpExtensionMenuLinks?: ChromeGlobalHelpExtensionMenuLink[];
 }
 
-export interface ApiItem {
-  hash: string;
-  expire_on: Date;
-  publish_on: Date;
-  title: { [lang: string]: string };
-  description: { [lang: string]: string };
-  link_text?: { [lang: string]: string };
-  link_url: { [lang: string]: string };
-  badge?: { [lang: string]: string } | null;
-  languages?: string[] | null;
-  image_url?: null; // not used phase 1
-}
-
-export interface HelpCenterItem {
-  title: string;
-  description: string;
-  linkText: string | null;
-  linkUrl: string;
-  badge: string | null;
-  publishOn: Moment;
-  expireOn: Moment;
-  hash: string;
-}
-
 export interface FetchResult {
-  kibanaVersion: string;
-  hasNew: boolean;
-  feedItems: HelpCenterItem[];
-  error: Error | null;
+  // links: HelpCenterLinks;
+  documentation: Array<
+    ChromeHelpExtensionMenuDocumentationLink & { title: string; priority: number }
+  >;
+  contact: ChromeHelpExtensionMenuDiscussLink[];
+  global: ChromeGlobalHelpExtensionMenuLink[];
 }

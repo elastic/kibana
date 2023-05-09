@@ -7,100 +7,43 @@
  */
 
 import Draggable from 'react-draggable';
-import { Resizable, ResizableBox } from 'react-resizable';
+import { ResizableBox } from 'react-resizable';
 import './style.scss';
 import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiFlyoutProps,
   EuiTitle,
-  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
   EuiPortal,
   EuiSpacer,
   EuiIcon,
   EuiTab,
   EuiTabs,
-  EuiImage,
-  EuiButton,
   EuiSearchBar,
-  EuiSplitPanel,
   EuiPanel,
-  EuiOverlayMask,
-  EuiFocusTrap,
   euiCanAnimate,
   euiFlyoutSlideInRight,
   useEuiTheme,
   EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  GITHUB_CREATE_ISSUE_LINK,
-  KIBANA_FEEDBACK_LINK,
-} from '@kbn/core-chrome-browser-internal/src/constants';
+import { css } from '@emotion/react';
 import { HelpCenterContext } from './help_center_header_nav_button';
 import { DocumentationCards } from './documentation_cards';
-import { css } from '@emotion/react';
+import { Contact } from './contact';
+import { GlobalContent } from './global_content';
 
 export const HelpCenterFlyout = (
   props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }
 ) => {
-  const { newsFetchResult, setFlyoutVisible, helpLinks } = useContext(HelpCenterContext);
+  const { setFlyoutVisible, kibanaVersion } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
   const { showPlainSpinner, ...rest } = props;
 
   const euiThemeContext = useEuiTheme();
   const euiTheme = euiThemeContext.euiTheme;
-
-  const globalCustomContent = useMemo(() => {
-    return helpLinks?.globalHelpExtensionMenuLinks
-      ?.sort((a, b) => b.priority - a.priority)
-      .map((link, index) => {
-        const { content: text, href, image, description } = link;
-        return (
-          <EuiPanel>
-            <EuiFlexGroup
-              alignItems="center"
-              responsive={true}
-              css={css`
-                width: 100%;
-                height: 100%;
-              `}
-            >
-              <EuiFlexItem grow={2}>
-                <EuiText>
-                  <h2>{text}</h2>
-                  <p>{description}</p>
-                  <EuiButton target="_blank" color="primary" fill href={href}>
-                    Get started!
-                  </EuiButton>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>
-                <EuiImage size="fill" src={image} alt="" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {/* <EuiSplitPanel.Inner paddingSize="l" grow={true}>
-              <EuiText>
-                <h2>{text}</h2>
-                <p>{description}</p>
-                <EuiButton target="_blank" color="primary" fill href={href}>
-                  Get started!
-                </EuiButton>
-              </EuiText>
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner grow={false}>
-              <EuiImage size="l" src={image} alt="" />
-            </EuiSplitPanel.Inner> */}
-          </EuiPanel>
-        );
-      });
-  }, [helpLinks?.globalHelpExtensionMenuLinks]);
 
   const tabs = useMemo(
     () => [
@@ -123,63 +66,22 @@ export const HelpCenterFlyout = (
             <EuiSpacer size="m" />
             <DocumentationCards />
             <EuiSpacer size="m" />
-            {helpLinks?.globalHelpExtensionMenuLinks && globalCustomContent}
+            <GlobalContent />
           </>
         ),
       },
       {
-        id: 'feedback',
-        name: 'Feedback',
+        id: 'talkToUs',
+        name: 'Contact us',
         prepend: <EuiIcon type="discuss" />,
         content: (
           <Fragment>
-            <EuiButtonEmpty
-              iconType={'discuss'}
-              href={KIBANA_FEEDBACK_LINK}
-              target="_blank"
-              size="s"
-              flush="left"
-            >
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
-                defaultMessage="Give feedback"
-              />
-            </EuiButtonEmpty>
-            <EuiSpacer size="xs" />
-            <EuiButtonEmpty
-              href={GITHUB_CREATE_ISSUE_LINK}
-              target="_blank"
-              size="s"
-              iconType="logoGithub"
-              flush="left"
-            >
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
-                defaultMessage="Open an issue in GitHub"
-              />
-            </EuiButtonEmpty>
-
-            <EuiSpacer size="xs" />
-
-            <EuiButtonEmpty
-              iconType={'questionInCircle'}
-              href={helpLinks?.helpSupportLink}
-              target="_blank"
-              size="s"
-              flush="left"
-            >
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-                defaultMessage="Ask Elastic"
-              />
-            </EuiButtonEmpty>
-
-            <EuiSpacer size="xs" />
+            <Contact />
           </Fragment>
         ),
       },
     ],
-    [globalCustomContent, helpLinks?.globalHelpExtensionMenuLinks, helpLinks?.helpSupportLink]
+    []
   );
 
   const [selectedTabId, setSelectedTabId] = useState('documentation');
@@ -291,29 +193,17 @@ export const HelpCenterFlyout = (
 
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                    <FormattedMessage
-                      id="HelpCenter.flyoutList.closeButtonLabel"
-                      defaultMessage="Close"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  {newsFetchResult ? (
-                    <EuiText color="subdued" size="s">
-                      <p>
-                        <FormattedMessage
-                          id="HelpCenter.flyoutList.versionTextLabel"
-                          defaultMessage="{version}"
-                          values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
-                        />
-                      </p>
-                    </EuiText>
-                  ) : null}
+                  <EuiText color="subdued" size="s">
+                    <p>
+                      <FormattedMessage
+                        id="HelpCenter.flyoutList.versionTextLabel"
+                        defaultMessage="{version}"
+                        values={{ version: `Version ${kibanaVersion}` }}
+                      />
+                    </p>
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              {/* </div> */}
             </EuiPanel>
           </ResizableBox>
         </Draggable>

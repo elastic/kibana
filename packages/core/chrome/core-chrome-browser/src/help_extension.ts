@@ -33,7 +33,7 @@ export interface ChromeHelpExtension {
 /** @public */
 export type ChromeHelpExtensionLinkBase = Pick<
   EuiButtonEmptyProps,
-  'iconType' | 'target' | 'rel' | 'data-test-subj'
+  'iconType' | 'target' | 'rel' | 'data-test-subj' | 'title'
 >;
 
 /** @public */
@@ -46,6 +46,8 @@ export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLi
    * Include at least one app-specific label to be applied to the new github issue
    */
   labels: string[];
+
+  href: string;
   /**
    * Provides initial text for the title of the issue
    */
@@ -76,6 +78,8 @@ export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExte
    * i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
    */
   href: string;
+
+  priority?: number;
 }
 
 /** @public */
