@@ -140,6 +140,26 @@ export const ElasticsearchOverview = () => {
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <IngestData selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
       </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
+        <OverviewPanel
+          description={i18n.translate('xpack.serverlessSearch.searchQuery.description', {
+            defaultMessage:
+              "Now you're ready to start experimenting with searching and performing aggregations on your Elasticsearch data.",
+          })}
+          leftPanelContent={
+            <CodeBox
+              code="buildSearchQuery"
+              languages={languageDefinitions}
+              selectedLanguage={selectedLanguage}
+              setSelectedLanguage={setSelectedLanguage}
+            />
+          }
+          links={[]}
+          title={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
+            defaultMessage: 'Build your first search query',
+          })}
+        />
+      </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
 };
