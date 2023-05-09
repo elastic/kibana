@@ -390,6 +390,7 @@ export interface DocLinks {
     serviceNowSIRAction: string;
     setupPrerequisites: string;
     slackAction: string;
+    slackApiAction: string;
     teamsAction: string;
     connectors: string;
   }>;
@@ -519,5 +520,8 @@ export interface DocLinks {
   };
   readonly serverlessSearch: {
     readonly integrations: string;
+  };
+  readonly synthetics: {
+    readonly featureRoles: string;
   };
 }

@@ -19,6 +19,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import {
   CASES,
   CASES_BY_STATUS_SECTION_TITLE,
+  CASES_BY_STATUS_SECTION_TOOLTIP,
   STATUS_CLOSED,
   STATUS_IN_PROGRESS,
   STATUS_OPEN,
@@ -143,6 +144,7 @@ const CasesByStatusComponent: React.FC = () => {
         toggleQuery={setToggleStatus}
         subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
         showInspectButton={false}
+        tooltip={CASES_BY_STATUS_SECTION_TOOLTIP}
       >
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
