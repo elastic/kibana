@@ -17,21 +17,24 @@ const nonEmptyString = z.string().trim().nonempty();
 
 const soAttribute = z.union([z.string(), z.boolean(), z.undefined(), z.number(), z.null()]);
 
-const soObject = z.record(
+const anyRecord = z.record(
   z.string(),
-  soAttribute
-    .or(
-      z.record(
-        z.string(),
-        z.any({ description: 'Allow any valid, primitive value or object here' })
-      )
-    )
-    .default({})
+  z.any({ description: 'Allow any valid, primitive value or object here' })
 );
 
-const response = z.object({
-  actionTypeId: nonEmptyString,
+const soObject = z.record(z.string(), soAttribute.or(anyRecord.default({}))).default({});
+
+export const bodySchema = z.object({
   name: nonEmptyString,
+  connector_type_id: nonEmptyString,
+  config: soObject,
+  secrets: soObject,
+});
+
+const response = z.object({
+  id: nonEmptyString,
+  name: nonEmptyString,
+  actionTypeId: z.string().optional(),
   config: soObject,
   secrets: soObject,
 });
@@ -41,13 +44,6 @@ const createConnectorParams = z
     id: z.string().default(''),
   })
   .optional();
-
-export const bodySchema = z.object({
-  name: nonEmptyString,
-  connector_type_id: nonEmptyString,
-  config: soObject,
-  secrets: soObject,
-});
 
 // We should be able to share this between all routes
 const versionDate = '2023-10-31';
