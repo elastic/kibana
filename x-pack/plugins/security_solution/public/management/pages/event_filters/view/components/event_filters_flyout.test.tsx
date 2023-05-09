@@ -98,6 +98,11 @@ describe('Event filter flyout', () => {
                   },
                 ],
                 getIndexPattern: () => title,
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
               }),
             get: jest
               .fn()
@@ -144,6 +149,11 @@ describe('Event filter flyout', () => {
                       },
                     ],
                     getIndexPattern: () => 'hello*,world*,refreshed*',
+                    getRuntimeMappings: () => ({
+                      myfield: {
+                        type: 'keyword',
+                      },
+                    }),
                   })
               ),
           },

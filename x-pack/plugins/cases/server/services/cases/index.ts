@@ -27,7 +27,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, CommentAttributes, User, CaseStatuses } from '../../../common/api';
+import type { Case, User, CaseStatuses } from '../../../common/api';
 import { caseStatuses } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
@@ -66,6 +66,7 @@ import type {
   PatchCaseArgs,
   PatchCasesArgs,
 } from './types';
+import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 
 export class CasesService {
   private readonly log: Logger;
@@ -343,7 +344,7 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
@@ -378,7 +379,7 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
       if (refs.length <= 0) {

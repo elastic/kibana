@@ -48,6 +48,10 @@ export function useTransactionLatencyChartsFetcher({
     type: ApmDocumentType.ServiceTransactionMetric,
   });
 
+  const shouldUseDurationSummary =
+    latencyAggregationType === 'avg' &&
+    preferred?.source?.hasDurationSummaryField;
+
   const { data, error, status } = useFetcher(
     (callApmApi) => {
       if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
@@ -73,6 +77,7 @@ export function useTransactionLatencyChartsFetcher({
                 start,
                 end,
                 transactionType,
+                useDurationSummary: shouldUseDurationSummary,
                 transactionName: transactionName || undefined,
                 latencyAggregationType,
                 offset:
@@ -89,18 +94,19 @@ export function useTransactionLatencyChartsFetcher({
       }
     },
     [
-      environment,
-      kuery,
+      transactionType,
+      transactionTypeStatus,
       serviceName,
       start,
       end,
-      transactionName,
-      transactionType,
-      transactionTypeStatus,
       latencyAggregationType,
-      offset,
-      comparisonEnabled,
       preferred,
+      environment,
+      kuery,
+      shouldUseDurationSummary,
+      transactionName,
+      comparisonEnabled,
+      offset,
     ]
   );
 

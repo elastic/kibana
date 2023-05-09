@@ -14,6 +14,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
@@ -33,7 +34,6 @@ import { useJobSelection } from '../../components/job_selector/use_job_selection
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
@@ -139,7 +139,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     try {
       const fetchedStoppedPartitions = await ml.results.getCategoryStoppedPartitions(
         selectedJobIds,
-        JOB_ID
+        ML_JOB_ID
       );
       if (
         fetchedStoppedPartitions &&

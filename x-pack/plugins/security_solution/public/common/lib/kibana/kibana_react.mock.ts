@@ -45,6 +45,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { mockApm } from '../apm/service.mock';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
 
 const mockUiSettings: Record<string, unknown> = {
@@ -105,6 +106,7 @@ export const createStartServicesMock = (
   const fleet = fleetMock.createStartMock();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cases = mockCasesContract();
+  const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
@@ -115,6 +117,7 @@ export const createStartServicesMock = (
     apm,
     cases,
     unifiedSearch,
+    dataViews: dataViewServiceMock,
     data: {
       ...data,
       dataViews: {
@@ -122,6 +125,8 @@ export const createStartServicesMock = (
         getIdsWithTitle: jest.fn(),
         get: jest.fn(),
         getIndexPattern: jest.fn(),
+        getFieldsForWildcard: jest.fn(),
+        getRuntimeMappings: jest.fn(),
       },
       query: {
         ...data.query,

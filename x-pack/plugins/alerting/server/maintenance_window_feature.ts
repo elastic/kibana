@@ -17,7 +17,7 @@ import {
 export const maintenanceWindowFeature: KibanaFeatureConfig = {
   id: MAINTENANCE_WINDOW_FEATURE_ID,
   name: i18n.translate('xpack.alerting.feature.maintenanceWindowFeatureName', {
-    defaultMessage: 'Maintenance Window',
+    defaultMessage: 'Maintenance Windows',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],

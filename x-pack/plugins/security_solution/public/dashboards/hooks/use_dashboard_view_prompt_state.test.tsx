@@ -38,20 +38,4 @@ describe('useDashboardViewPromptState', () => {
       }
     `);
   });
-
-  it('returns IndicesNotFound state', () => {
-    const { result } = renderHook<
-      DashboardViewPromptState | null,
-      Partial<EuiEmptyPromptProps> | null
-    >(() => useDashboardViewPromptState(DashboardViewPromptState.IndicesNotFound));
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "color": "danger",
-        "iconType": "error",
-        "title": <h2>
-          Indices not found
-        </h2>,
-      }
-    `);
-  });
 });

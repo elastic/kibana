@@ -6,7 +6,7 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import type { UserAction } from '../../../../common/api';
+import type { ActionCategory } from '../../../../common/api';
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
@@ -44,7 +44,7 @@ export class AssigneesUserActionBuilder extends UserActionBuilder {
   }
 }
 
-const getVerbMessage = (action: UserAction, uids: string[]) => {
+const getVerbMessage = (action: ActionCategory, uids: string[]) => {
   const uidText = `uids: [${uids}]`;
 
   switch (action) {

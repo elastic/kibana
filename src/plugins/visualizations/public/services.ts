@@ -19,6 +19,7 @@ import type {
   ThemeServiceStart,
   ExecutionContextSetup,
 } from '@kbn/core/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -80,3 +81,6 @@ export const [getUsageCollection, setUsageCollection] =
 
 export const [getSavedObjectsManagement, setSavedObjectsManagement] =
   createGetterSetter<SavedObjectsManagementPluginStart>('SavedObjectsManagement');
+
+export const [getContentManagement, setContentManagement] =
+  createGetterSetter<ContentManagementPublicStart>('SavedObjectsManagement');
