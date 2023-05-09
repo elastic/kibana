@@ -56,7 +56,7 @@ export const FilterInButtonIcon: VFC<FilterInProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -88,7 +88,7 @@ export const FilterInButtonEmpty: VFC<FilterInProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -121,7 +121,7 @@ export const FilterInContextMenu: VFC<FilterInProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -152,7 +152,7 @@ export const FilterInCellAction: VFC<FilterInCellActionProps> = ({
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
-    return <></>;
+    return null;
   }
 
   return (

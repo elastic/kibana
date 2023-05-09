@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
-
-export const useStyles = () => {
-  const comboBox: CSSObject = {
-    maxWidth: '400px',
-    width: '400px',
-  };
-
-  return {
-    comboBox,
-  };
-};
+export const CHART_UPDATE_PROGRESS_TEST_ID = 'tiBarchartWrapper-updating';
+export const LOADING_TEST_ID = 'tiBarchartWrapper-loading';
+export const BARCHART_WRAPPER_TEST_ID = 'tiBarchartWrapper';
