@@ -318,7 +318,7 @@ export const ConfigurePipeline: React.FC = () => {
               <InferenceConfiguration />
             </EuiForm>
             <EuiSpacer />
-            <TextExpansionCallOut />
+            <TextExpansionCallOut isCompact />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

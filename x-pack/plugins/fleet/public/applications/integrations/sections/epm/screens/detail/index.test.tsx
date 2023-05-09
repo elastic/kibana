@@ -46,6 +46,7 @@ describe('when on integration detail', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
+
   const render = async () => {
     await act(async () => {
       renderResult = testRenderer.render(
@@ -67,16 +68,15 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(async () => render());
+    beforeEach(async () => await render());
 
     it('should display agent policy usage count', async () => {
       await act(() => mockedApi.waitForApi());
-
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await mockedApi.waitForApi();
+      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
@@ -85,6 +85,7 @@ describe('when on integration detail', () => {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };

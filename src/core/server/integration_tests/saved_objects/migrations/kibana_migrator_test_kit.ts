@@ -36,12 +36,13 @@ import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
 
@@ -53,6 +54,7 @@ export const currentVersion = env.packageInfo.version;
 export const nextMinor = new SemVer(currentVersion).inc('minor').format();
 export const currentBranch = env.packageInfo.branch;
 export const defaultKibanaIndex = '.kibana_migrator_tests';
+export const defaultNodeRoles: NodeRoles = { migrator: true, ui: true, backgroundTasks: true };
 
 export interface GetEsClientParams {
   settings?: Record<string, any>;
@@ -64,6 +66,7 @@ export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
   kibanaVersion?: string;
   kibanaBranch?: string;
+  nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   logFilePath?: string;
@@ -72,7 +75,7 @@ export interface KibanaMigratorTestKitParams {
 export interface KibanaMigratorTestKit {
   client: ElasticsearchClient;
   migrator: IKibanaMigrator;
-  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  runMigrations: () => Promise<MigrationResult[]>;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
@@ -121,6 +124,7 @@ export const getKibanaMigratorTestKit = async ({
   kibanaBranch = currentBranch,
   types = [],
   logFilePath = defaultLogFilePath,
+  nodeRoles = defaultNodeRoles,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   const loggingSystem = new LoggingSystem();
@@ -146,7 +150,8 @@ export const getKibanaMigratorTestKit = async ({
     loggerFactory,
     kibanaIndex,
     kibanaVersion,
-    kibanaBranch
+    kibanaBranch,
+    nodeRoles
   );
 
   const runMigrations = async () => {
@@ -255,7 +260,8 @@ const getMigrator = async (
   loggerFactory: LoggerFactory,
   kibanaIndex: string,
   kibanaVersion: string,
-  kibanaBranch: string
+  kibanaBranch: string,
+  nodeRoles: NodeRoles
 ) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -279,7 +285,44 @@ const getMigrator = async (
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
+    nodeRoles,
   });
+};
+
+export const getAggregatedTypesCount = async (client: ElasticsearchClient, index: string) => {
+  await client.indices.refresh();
+  const response = await client.search<unknown, { typesAggregation: { buckets: any[] } }>({
+    index,
+    _source: false,
+    aggs: {
+      typesAggregation: {
+        terms: {
+          // assign type __UNKNOWN__ to those documents that don't define one
+          missing: '__UNKNOWN__',
+          field: 'type',
+          size: 100,
+        },
+        aggs: {
+          docs: {
+            top_hits: {
+              size: 10,
+              _source: {
+                excludes: ['*'],
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return (response.aggregations!.typesAggregation.buckets as unknown as any).reduce(
+    (acc: any, current: any) => {
+      acc[current.key] = current.doc_count;
+      return acc;
+    },
+    {}
+  );
 };
 
 const registerTypes = (
@@ -335,7 +378,9 @@ export const getCompatibleMappingsMigrator = async ({
   filterDeprecated = false,
   kibanaVersion = nextMinor,
   settings = {},
-}: GetMutatedMigratorParams & { filterDeprecated?: boolean } = {}) => {
+}: GetMutatedMigratorParams & {
+  filterDeprecated?: boolean;
+} = {}) => {
   const types = baselineTypes
     .filter((type) => !filterDeprecated || type.name !== 'deprecated')
     .map<SavedObjectsType>((type) => {
@@ -388,6 +433,28 @@ export const getIncompatibleMappingsMigrator = async ({
     kibanaVersion,
     settings,
   });
+};
+
+export const getCurrentVersionTypeRegistry = async ({
+  oss,
+}: {
+  oss: boolean;
+}): Promise<ISavedObjectTypeRegistry> => {
+  const root = createRootWithCorePlugins({}, { oss });
+  await root.preboot();
+  const coreSetup = await root.setup();
+  const typeRegistry = coreSetup.savedObjects.getTypeRegistry();
+  root.shutdown(); // do not await for it, or we might block the tests
+  return typeRegistry;
+};
+
+export const overrideTypeRegistry = (
+  typeRegistry: ISavedObjectTypeRegistry,
+  transform: (type: SavedObjectsType<any>) => SavedObjectsType<any>
+): ISavedObjectTypeRegistry => {
+  const updatedTypeRegistry = new SavedObjectTypeRegistry();
+  typeRegistry.getAllTypes().forEach((type) => updatedTypeRegistry.registerType(transform(type)));
+  return updatedTypeRegistry;
 };
 
 export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {

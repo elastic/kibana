@@ -49,6 +49,8 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
 
       expect(telemetry).toHaveProperty('reportHostEntryClicked');
+      expect(telemetry).toHaveProperty('reportHostFlyoutFilterRemoved');
+      expect(telemetry).toHaveProperty('reportHostFlyoutFilterAdded');
       expect(telemetry).toHaveProperty('reportHostsViewQuerySubmitted');
     });
   });
@@ -74,7 +76,7 @@ describe('TelemetryService', () => {
       );
     });
 
-    it('should report hosts entry click with cloud provider equal to "unknow" if not exist', async () => {
+    it('should report hosts entry click with cloud provider equal to "unknown" if not exist', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
       const telemetry = service.start();
@@ -115,6 +117,46 @@ describe('TelemetryService', () => {
           filters: [],
           interval: 'interval(now-1h)',
           query: '',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostFlyoutFilterRemoved', () => {
+    it('should report Host Flyout Filter Removed click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostFlyoutFilterRemoved({
+        field_name: 'agent.version',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED,
+        {
+          field_name: 'agent.version',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostFlyoutFilterAdded', () => {
+    it('should report Host Flyout Filter Added click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostFlyoutFilterAdded({
+        field_name: 'agent.version',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
+        {
+          field_name: 'agent.version',
         }
       );
     });

@@ -33,7 +33,8 @@
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/safer-lodash-set",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/tinymath",
   ],
   "exclude": [
     "target/**/*",

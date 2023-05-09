@@ -301,7 +301,6 @@ Object {
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          aria-invalid="false"
                           class="euiFieldText euiFieldText--fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
@@ -1874,6 +1873,27 @@ Object {
                 <button
                   class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
                   data-test-subj="RightSideMenuItemsMenuActionsActionItem2"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="euiContextMenu__itemLayout"
+                  >
+                    <span
+                      class="euiContextMenu__icon"
+                      color="inherit"
+                      data-euiicon-type="copy"
+                    />
+                    <span
+                      class="euiContextMenuItem__text"
+                    >
+                      Duplicate exception list
+                    </span>
+                  </span>
+                </button>
+                <button
+                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
+                  data-test-subj="RightSideMenuItemsMenuActionsActionItem3"
                   disabled=""
                   type="button"
                 >

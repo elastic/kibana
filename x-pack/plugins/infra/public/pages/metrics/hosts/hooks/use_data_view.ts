@@ -72,6 +72,7 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   }, [hasError, notifications, metricAlias]);
 
   return {
+    metricAlias,
     dataView,
     loading,
     hasError,

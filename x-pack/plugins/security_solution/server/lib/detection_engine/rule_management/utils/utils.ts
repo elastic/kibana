@@ -370,6 +370,7 @@ export const convertAlertSuppressionToCamel = (
     ? {
         groupBy: input.group_by,
         duration: input.duration,
+        missingFieldsStrategy: input.missing_fields_strategy,
       }
     : undefined;
 
@@ -380,5 +381,6 @@ export const convertAlertSuppressionToSnake = (
     ? {
         group_by: input.groupBy,
         duration: input.duration,
+        missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;

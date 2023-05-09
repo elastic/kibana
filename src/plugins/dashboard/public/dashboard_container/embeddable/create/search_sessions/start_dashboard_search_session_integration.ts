@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { debounceTime, pairwise, skip } from 'rxjs/operators';
+import { pairwise, skip } from 'rxjs/operators';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardContainerInput } from '../../../../../common';
 import { pluginServices } from '../../../../services/plugin_services';
-import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
 import { getShouldRefresh } from '../../../state/diffing/dashboard_diffing_integration';
 
@@ -57,10 +56,10 @@ export function startDashboardSearchSessionIntegration(
 
   // listen to and compare states to determine when to launch a new session.
   this.getInput$()
-    .pipe(pairwise(), debounceTime(CHANGE_CHECK_DEBOUNCE))
-    .subscribe(async (states) => {
+    .pipe(pairwise())
+    .subscribe((states) => {
       const [previous, current] = states as DashboardContainerInput[];
-      const shouldRefetch = await getShouldRefresh.bind(this)(previous, current);
+      const shouldRefetch = getShouldRefresh.bind(this)(previous, current);
       if (!shouldRefetch) return;
 
       const currentSearchSessionId = this.getState().explicitInput.searchSessionId;
@@ -83,7 +82,7 @@ export function startDashboardSearchSessionIntegration(
       })();
 
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-        this.dispatch.setSearchSessionId(updatedSearchSessionId);
+        this.searchSessionId = updatedSearchSessionId;
       }
     });
 

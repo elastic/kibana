@@ -14,6 +14,24 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
+import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+
+const licenseMock: LicenseGetResponse = {
+  license: {
+    status: 'active',
+    uid: '1d34eb9f-e66f-47d1-8d24-cd60d187587a',
+    type: 'trial',
+    issue_date: '2022-05-05T14:25:00.732Z',
+    issue_date_in_millis: 165176070074432,
+    expiry_date: '2022-06-04T14:25:00.732Z',
+    expiry_date_in_millis: 165435270073332,
+    max_nodes: 1000,
+    max_resource_units: null,
+    issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+    issuer: 'elasticsearch',
+    start_date_in_millis: -1,
+  },
+};
 
 jest.mock('axios', () => jest.fn());
 jest.mock('@kbn/server-http-tools', () => ({
@@ -167,7 +185,7 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
-      licenseLevel: 'trial',
+      license: licenseMock.license,
     });
 
     expect(spy).toHaveBeenCalledTimes(3);
@@ -181,7 +199,7 @@ describe('callAPI', () => {
           monitor.locations.some((loc: any) => loc.id === 'us_central')
         ),
         output,
-        licenseLevel: 'trial',
+        license: licenseMock.license,
       },
       'POST',
       devUrl
@@ -195,7 +213,7 @@ describe('callAPI', () => {
           monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
         ),
         output,
-        licenseLevel: 'trial',
+        license: licenseMock.license,
       },
       'POST',
       'https://qa.service.elstc.co'
@@ -209,7 +227,7 @@ describe('callAPI', () => {
           monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
         ),
         output,
-        licenseLevel: 'trial',
+        license: licenseMock.license,
       },
       'POST',
       'https://qa.service.stg.co'
@@ -223,6 +241,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
@@ -242,6 +261,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
@@ -261,6 +281,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
@@ -324,7 +345,7 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
-      licenseLevel: 'platinum',
+      license: licenseMock.license,
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
@@ -333,7 +354,8 @@ describe('callAPI', () => {
         is_edit: undefined,
         output,
         stack_version: '8.7.0',
-        license_level: 'platinum',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         'x-kibana-version': '8.7.0',
@@ -376,7 +398,7 @@ describe('callAPI', () => {
     await apiClient.runOnce({
       monitors: testMonitors,
       output,
-      licenseLevel: 'trial',
+      license: licenseMock.license,
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
@@ -386,6 +408,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         'x-kibana-version': '8.7.0',
@@ -418,7 +441,11 @@ describe('callAPI', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
         tls: { certificate: 'test-certificate', key: 'test-key' } as any,
       },
-      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as UptimeServerSetup
     );
 
     apiClient.locations = testLocations;
@@ -428,7 +455,7 @@ describe('callAPI', () => {
     await apiClient.syncMonitors({
       monitors: testMonitors,
       output,
-      licenseLevel: 'trial',
+      license: licenseMock.license,
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
@@ -438,6 +465,9 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+        cloud_id: 'test-id',
+        deployment_id: 'deployment-id',
       },
       headers: {
         'x-kibana-version': '8.7.0',

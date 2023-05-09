@@ -20,6 +20,20 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const READ_ONLY_BADGE_TEXT = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.text',
+  {
+    defaultMessage: 'Read only',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create or edit maintenance Windows',
+  }
+);
+
 export const CREATE_NEW_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.createNewButton',
   {
@@ -454,6 +468,102 @@ export const SAVE_MAINTENANCE_WINDOW = i18n.translate(
   }
 );
 
+export const TABLE_ACTION_CANCEL = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CANCEL_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelModal.title',
+  {
+    defaultMessage: 'Cancel maintenance window',
+  }
+);
+
+export const CANCEL_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelModal.subtitle',
+  {
+    defaultMessage:
+      'Rule notifications resume immediately. Running maintenance window events are canceled; upcoming events are unaffected.',
+  }
+);
+
+export const CANCEL_MODAL_BUTTON = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelModal.button',
+  {
+    defaultMessage: 'Keep running',
+  }
+);
+
+export const TABLE_ACTION_CANCEL_AND_ARCHIVE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.cancelAndArchive',
+  {
+    defaultMessage: 'Cancel and archive',
+  }
+);
+
+export const CANCEL_AND_ARCHIVE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelAndArchiveModal.title',
+  {
+    defaultMessage: 'Cancel and archive maintenance window',
+  }
+);
+
+export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle',
+  {
+    defaultMessage:
+      'Rule notifications resume immediately. All running and upcoming maintenance window events are canceled and the window is queued for deletion.',
+  }
+);
+
+export const ARCHIVE = i18n.translate('xpack.alerting.maintenanceWindows.archive', {
+  defaultMessage: 'Archive',
+});
+
+export const ARCHIVE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.archive.title', {
+  defaultMessage: 'Archive maintenance window',
+});
+
+export const ARCHIVE_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.archive.subtitle',
+  {
+    defaultMessage:
+      'Upcoming maintenance window events are canceled and the window is queued for deletion.',
+  }
+);
+
+export const TABLE_ACTION_UNARCHIVE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.unarchive',
+  {
+    defaultMessage: 'Unarchive',
+  }
+);
+
+export const UNARCHIVE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.unarchiveModal.title',
+  {
+    defaultMessage: 'Unarchive maintenance window',
+  }
+);
+
+export const UNARCHIVE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.unarchiveModal.subtitle',
+  {
+    defaultMessage: 'Upcoming maintenance window events are scheduled.',
+  }
+);
+
+export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.archiveCallout.subtitle',
+  {
+    defaultMessage:
+      'The changes you have made here will not be saved. Are you sure you want to discard these unsaved changes and archive this maintenance window?',
+  }
+);
+
 export const EXPERIMENTAL_LABEL = i18n.translate(
   'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
   {
@@ -472,3 +582,31 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
 export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcoming', {
   defaultMessage: 'Upcoming',
 });
+
+export const UPGRADE_TO_PLATINUM = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.updgradeToPlatinumTitle',
+  {
+    defaultMessage: 'Maintenance windows are a subscription feature',
+  }
+);
+
+export const UPGRADE_TO_PLATINUM_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.upgradeToPlatinumSubtitle',
+  {
+    defaultMessage: 'Select an option to unlock it.',
+  }
+);
+
+export const UPGRADE_SUBSCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.upgradeSubscription',
+  {
+    defaultMessage: 'Upgrade subscription',
+  }
+);
+
+export const START_TRIAL = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.startTrial',
+  {
+    defaultMessage: 'Start trial',
+  }
+);

@@ -68,6 +68,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -85,7 +89,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -94,6 +98,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -344,6 +352,10 @@
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -394,22 +406,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -560,6 +556,10 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -704,18 +704,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
@@ -734,26 +722,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -7746,7 +7714,7 @@
                 "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
-              ") => Promise<",
+              " & { initialNamespaces?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -7803,7 +7771,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.SavedObjectsClientCommon.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -7816,7 +7784,8 @@
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
                     "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
-                  }
+                  },
+                  " & { initialNamespaces?: string[] | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -8333,6 +8302,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -8350,7 +8323,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8359,6 +8332,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8609,6 +8586,10 @@
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -8659,22 +8640,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -8825,6 +8790,10 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -8969,18 +8938,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
@@ -8999,26 +8956,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -13805,7 +13742,7 @@
                 "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
-              ") => Promise<",
+              " & { initialNamespaces?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -13862,7 +13799,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-server.SavedObjectsClientCommon.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -13875,7 +13812,8 @@
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
                     "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
-                  }
+                  },
+                  " & { initialNamespaces?: string[] | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -14441,9 +14379,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
-                ">; }; helpers: ",
-                "default",
-                "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params?: ",
                 "SearchRequest",
@@ -14475,7 +14411,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                "<TDocument, TAggregations>>; }; helpers: ",
+                "default",
+                "; name: string | symbol; security: ",
                 "default",
                 "; monitoring: ",
                 "default",
@@ -14505,27 +14443,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "CountResponse",
-                ">; }; exists: { (this: That, params: ",
-                "ExistsRequest",
-                " | ",
-                "ExistsRequest",
-                ", options?: ",
-                "TransportRequestOptionsWithOutMeta",
-                " | undefined): Promise<boolean>; (this: That, params: ",
-                "ExistsRequest",
-                " | ",
-                "ExistsRequest",
-                ", options?: ",
-                "TransportRequestOptionsWithMeta",
-                " | undefined): Promise<",
-                "TransportResult",
-                "<boolean, unknown>>; (this: That, params: ",
-                "ExistsRequest",
-                " | ",
-                "ExistsRequest",
-                ", options?: ",
-                "TransportRequestOptions",
-                " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
                 "; child: (opts: ",
                 "ClientOptions",
@@ -14703,7 +14621,27 @@
                 "default",
                 "; eql: ",
                 "default",
-                "; existsSource: { (this: That, params: ",
+                "; exists: { (this: That, params: ",
+                "ExistsRequest",
+                " | ",
+                "ExistsRequest",
+                ", options?: ",
+                "TransportRequestOptionsWithOutMeta",
+                " | undefined): Promise<boolean>; (this: That, params: ",
+                "ExistsRequest",
+                " | ",
+                "ExistsRequest",
+                ", options?: ",
+                "TransportRequestOptionsWithMeta",
+                " | undefined): Promise<",
+                "TransportResult",
+                "<boolean, unknown>>; (this: That, params: ",
+                "ExistsRequest",
+                " | ",
+                "ExistsRequest",
+                ", options?: ",
+                "TransportRequestOptions",
+                " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
                 "ExistsSourceRequest",
                 " | ",
                 "ExistsSourceRequest",
@@ -15655,6 +15593,10 @@
                 "path": "packages/kbn-es-query/src/es_query/types.ts"
               },
               {
+                "plugin": "visualizationUiComponents",
+                "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -15672,7 +15614,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15681,6 +15623,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15931,6 +15877,10 @@
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -15981,22 +15931,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -16147,6 +16081,10 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -16291,18 +16229,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
@@ -16321,26 +16247,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -24535,7 +24441,7 @@
                 "section": "def-common.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               },
-              ") => Promise<",
+              " & { initialNamespaces?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -24592,7 +24498,7 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-common.SavedObjectsClientCommon.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -24605,7 +24511,8 @@
                     "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
                     "section": "def-common.SavedObjectsCreateOptions",
                     "text": "SavedObjectsCreateOptions"
-                  }
+                  },
+                  " & { initialNamespaces?: string[] | undefined; }"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -26358,22 +26265,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -26510,16 +26401,32 @@
             "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/actions.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/global_params/index.ts"
           },
           {
             "plugin": "synthetics",
@@ -26548,14 +26455,6 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
           },
           {
             "plugin": "cases",

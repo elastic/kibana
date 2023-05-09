@@ -6,20 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { RawBucket, StatRenderer, getGroupingQuery, isNoneGroup, useGrouping } from './src';
+import { getGroupingQuery, isNoneGroup, useGrouping } from './src';
 import type {
+  DynamicGroupingProps,
   GroupOption,
   GroupingAggregation,
-  GroupingFieldTotalAggregation,
   NamedAggregation,
+  RawBucket,
+  StatRenderer,
 } from './src';
 
 export { getGroupingQuery, isNoneGroup, useGrouping };
 
 export type {
+  DynamicGroupingProps,
   GroupOption,
   GroupingAggregation,
-  GroupingFieldTotalAggregation,
   NamedAggregation,
   RawBucket,
   StatRenderer,

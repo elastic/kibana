@@ -25,7 +25,7 @@ import darkIosIcon from './icons/ios_dark.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
-import openTelemetryIcon from './icons/opentelemetry.svg';
+import openTelemetryIcon from './icons/otel_default.svg';
 import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';

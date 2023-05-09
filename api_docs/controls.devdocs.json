@@ -772,7 +772,7 @@
                 "section": "def-public.ControlGroupContainer",
                 "text": "ControlGroupContainer"
               },
-              ", controlInputTransform?: ",
+              ", options?: { controlInputTransform?: ",
               {
                 "pluginId": "controls",
                 "scope": "common",
@@ -780,7 +780,7 @@
                 "section": "def-common.ControlInputTransform",
                 "text": "ControlInputTransform"
               },
-              " | undefined) => void"
+              " | undefined; onSave?: ((id: string) => void) | undefined; } | undefined) => void"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -790,11 +790,12 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.ControlGroupContainer.openAddDataControlFlyout.$1",
-                "type": "Function",
+                "type": "Object",
                 "tags": [],
-                "label": "controlInputTransform",
+                "label": "options",
                 "description": [],
                 "signature": [
+                  "{ controlInputTransform?: ",
                   {
                     "pluginId": "controls",
                     "scope": "common",
@@ -802,7 +803,7 @@
                     "section": "def-common.ControlInputTransform",
                     "text": "ControlInputTransform"
                   },
-                  " | undefined"
+                  " | undefined; onSave?: ((id: string) => void) | undefined; } | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx",
                 "deprecated": false,

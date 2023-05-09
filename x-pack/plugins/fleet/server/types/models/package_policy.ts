@@ -99,6 +99,7 @@ const PackagePolicyBaseSchema = {
   namespace: NamespaceSchema,
   policy_id: schema.string(),
   enabled: schema.boolean(),
+  is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(
     schema.object({
       name: schema.string(),

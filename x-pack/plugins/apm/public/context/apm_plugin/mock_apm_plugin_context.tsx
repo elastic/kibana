@@ -98,6 +98,12 @@ const mockCorePlugins = {
   data: {},
 };
 
+const mockUnifiedSearch = {
+  ui: {
+    SearchBar: () => <div className="searchBar" />,
+  },
+};
+
 export const mockApmPluginContextValue = {
   appMountParameters: coreMock.createAppMountParameters('/basepath'),
   config: mockConfig,
@@ -106,6 +112,7 @@ export const mockApmPluginContextValue = {
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
   deps: {},
+  unifiedSearch: mockUnifiedSearch,
 };
 
 export function MockApmPluginContextWrapper({

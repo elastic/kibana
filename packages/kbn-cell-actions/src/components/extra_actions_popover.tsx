@@ -24,6 +24,7 @@ const euiContextMenuItemCSS = css`
 `;
 
 interface ActionsPopOverProps {
+  anchorPosition: 'rightCenter' | 'downCenter';
   actionContext: CellActionExecutionContext;
   isOpen: boolean;
   closePopOver: () => void;
@@ -32,6 +33,7 @@ interface ActionsPopOverProps {
 }
 
 export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
+  anchorPosition,
   actions,
   actionContext,
   isOpen,
@@ -43,7 +45,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
     isOpen={isOpen}
     closePopover={closePopOver}
     panelPaddingSize="xs"
-    anchorPosition={'downCenter'}
+    anchorPosition={anchorPosition}
     hasArrow
     repositionOnScroll
     ownFocus
@@ -59,11 +61,15 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
 );
 
 interface ExtraActionsPopOverWithAnchorProps
-  extends Pick<ActionsPopOverProps, 'actionContext' | 'closePopOver' | 'isOpen' | 'actions'> {
+  extends Pick<
+    ActionsPopOverProps,
+    'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions'
+  > {
   anchorRef: React.RefObject<HTMLElement>;
 }
 
 export const ExtraActionsPopOverWithAnchor = ({
+  anchorPosition,
   anchorRef,
   actionContext,
   isOpen,
@@ -77,7 +83,7 @@ export const ExtraActionsPopOverWithAnchor = ({
       isOpen={isOpen}
       closePopover={closePopOver}
       panelPaddingSize="xs"
-      anchorPosition={'downCenter'}
+      anchorPosition={anchorPosition}
       hasArrow={false}
       repositionOnScroll
       ownFocus

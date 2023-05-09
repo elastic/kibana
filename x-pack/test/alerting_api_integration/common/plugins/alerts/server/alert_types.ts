@@ -47,6 +47,7 @@ export const DeepContextVariables = {
   arrayI: [44, 45],
   nullJ: null,
   undefinedK: undefined,
+  dateL: '2023-04-20T04:13:17.858Z',
 };
 
 function getAlwaysFiringAlertType() {

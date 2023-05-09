@@ -36,6 +36,7 @@ describe('createAlertEventLogRecordObject', () => {
         ruleType,
         consumer: 'rule-consumer',
         action: 'execute-start',
+        ruleRevision: 0,
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -66,6 +67,7 @@ describe('createAlertEventLogRecordObject', () => {
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            revision: 0,
             rule_type_id: 'test',
           },
           maintenance_window_ids: MAINTENANCE_WINDOW_IDS,
@@ -107,6 +109,7 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'message text here',
         namespace: 'default',
+        ruleRevision: 0,
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -139,6 +142,7 @@ describe('createAlertEventLogRecordObject', () => {
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            revision: 0,
             rule_type_id: 'test',
           },
           maintenance_window_ids: MAINTENANCE_WINDOW_IDS,
@@ -182,6 +186,7 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'action execution start',
         namespace: 'default',
+        ruleRevision: 0,
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -224,6 +229,7 @@ describe('createAlertEventLogRecordObject', () => {
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            revision: 0,
             rule_type_id: 'test',
           },
           maintenance_window_ids: MAINTENANCE_WINDOW_IDS,

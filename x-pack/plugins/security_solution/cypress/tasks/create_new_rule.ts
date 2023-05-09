@@ -99,7 +99,6 @@ import {
   NEW_TERMS_HISTORY_SIZE,
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
-  ACTIONS_THROTTLE_INPUT,
   CONTINUE_BUTTON,
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
@@ -407,7 +406,6 @@ export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) =
 };
 
 export const fillRuleAction = (actions: Actions) => {
-  cy.get(ACTIONS_THROTTLE_INPUT).select(actions.throttle);
   actions.connectors.forEach((connector) => {
     switch (connector.type) {
       case 'index':

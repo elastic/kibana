@@ -58,7 +58,7 @@ interface AlertsCountPanelProps {
   isExpanded?: boolean;
   setIsExpanded?: (status: boolean) => void;
 }
-const CHART_HEIGHT = '100%';
+const CHART_HEIGHT = 218; // px
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -84,7 +84,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     isExpanded,
     setIsExpanded,
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+    const { to, from, deleteQuery, setQuery } = useGlobalTime();
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
     // create a unique, but stable (across re-renders) query id

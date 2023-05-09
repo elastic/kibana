@@ -45,6 +45,7 @@ const MOCK_USAGE_STATS: UsageStats = {
 };
 
 const kibanaIndex = '.kibana-tests';
+const getIndexForType = () => Promise.resolve(kibanaIndex);
 
 function setup({
   license = { isAvailable: true },
@@ -122,7 +123,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -146,7 +147,7 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -205,7 +206,7 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -246,7 +247,7 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),

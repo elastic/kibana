@@ -241,7 +241,7 @@ export const generateAlertOpts = ({
   group,
   state,
   id,
-  maintenanceWindowIds = [],
+  maintenanceWindowIds,
 }: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
@@ -264,7 +264,7 @@ export const generateAlertOpts = ({
     state,
     ...(group ? { group } : {}),
     flapping: false,
-    maintenanceWindowIds,
+    ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
   };
 };
 
@@ -374,6 +374,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      maintenanceWindowIds: [],
       pendingRecoveredCount: 0,
     },
     state: {
@@ -409,6 +410,7 @@ export const mockAAD = {
         execution: { uuid: 'c35db7cc-5bf7-46ea-b43f-b251613a5b72' },
         name: 'test-rule',
         producer: 'infrastructure',
+        revision: 0,
         rule_type_id: 'metrics.alert.threshold',
         uuid: '0de91960-7643-11ed-b719-bb9db8582cb6',
         tags: [],

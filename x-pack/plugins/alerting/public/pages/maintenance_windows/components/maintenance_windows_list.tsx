@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiButton,
-  useEuiBackgroundColor,
   EuiFlexGroup,
   EuiFlexItem,
   SearchFilterConfig,
+  EuiBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
+import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
 import { StatusFilter } from './status_filter';
+import { TableActionsPopover } from './table_actions_popover';
+import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
+import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
+import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
   items: MaintenanceWindowFindResponse[];
+  readOnly: boolean;
+  refreshData: () => void;
 }
 
-const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
+const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'title',
     name: i18n.NAME,
@@ -39,23 +45,10 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'status',
     name: i18n.TABLE_STATUS,
-    render: (status: string) => {
+    'data-test-subj': 'maintenance-windows-column-status',
+    render: (status: MaintenanceWindowStatus) => {
       return (
-        <EuiButton
-          css={css`
-            cursor: default;
-
-            :hover:not(:disabled) {
-              text-decoration: none;
-            }
-          `}
-          fill={status === MaintenanceWindowStatus.Running}
-          color={STATUS_DISPLAY[status].color as StatusColor}
-          size="s"
-          onClick={() => {}}
-        >
-          {STATUS_DISPLAY[status].label}
-        </EuiButton>
+        <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
       );
     },
     sortable: ({ status }) => STATUS_SORT[status],
@@ -108,49 +101,81 @@ const search: { filters: SearchFilterConfig[] } = {
 };
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
-  ({ loading, items }) => {
+  ({ loading, items, readOnly, refreshData }) => {
+    const { euiTheme } = useEuiTheme();
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
-    const warningBackgroundColor = useEuiBackgroundColor('warning');
-    const subduedBackgroundColor = useEuiBackgroundColor('subdued');
+    const onEdit = useCallback(
+      (id) => navigateToEditMaintenanceWindows(id),
+      [navigateToEditMaintenanceWindows]
+    );
+    const { mutate: finishMaintenanceWindow, isLoading: isLoadingFinish } =
+      useFinishMaintenanceWindow();
+    const onCancel = useCallback(
+      (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
+      [finishMaintenanceWindow, refreshData]
+    );
+    const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =
+      useArchiveMaintenanceWindow();
+    const onArchive = useCallback(
+      (id: string, archive: boolean) =>
+        archiveMaintenanceWindow(
+          { maintenanceWindowId: id, archive },
+          { onSuccess: () => refreshData() }
+        ),
+      [archiveMaintenanceWindow, refreshData]
+    );
+    const { mutate: finishAndArchiveMaintenanceWindow, isLoading: isLoadingFinishAndArchive } =
+      useFinishAndArchiveMaintenanceWindow();
+    const onCancelAndArchive = useCallback(
+      (id: string) => finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() }),
+      [finishAndArchiveMaintenanceWindow, refreshData]
+    );
+
     const tableCss = useMemo(() => {
       return css`
         .euiTableRow {
           &.running {
-            background-color: ${warningBackgroundColor};
-          }
-
-          &.archived {
-            background-color: ${subduedBackgroundColor};
+            background-color: ${euiTheme.colors.highlight};
           }
         }
       `;
-    }, [warningBackgroundColor, subduedBackgroundColor]);
+    }, [euiTheme.colors.highlight]);
 
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
-      {
-        name: '',
-        actions: [
-          {
-            name: i18n.TABLE_ACTION_EDIT,
-            isPrimary: true,
-            description: 'Edit maintenance window',
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (mw: MaintenanceWindowFindResponse) => navigateToEditMaintenanceWindows(mw.id),
-            'data-test-subj': 'action-edit',
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = useMemo(
+      () => [
+        {
+          name: '',
+          render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
+            return (
+              <TableActionsPopover
+                id={id}
+                status={status}
+                onEdit={onEdit}
+                onCancel={onCancel}
+                onArchive={onArchive}
+                onCancelAndArchive={onCancelAndArchive}
+              />
+            );
           },
-        ],
-      },
-    ];
+        },
+      ],
+      [onArchive, onCancel, onCancelAndArchive, onEdit]
+    );
+
+    const columns = useMemo(
+      () => (readOnly ? COLUMNS : COLUMNS.concat(actions)),
+      [actions, readOnly]
+    );
 
     return (
       <EuiInMemoryTable
+        data-test-subj="maintenance-windows-table"
         css={tableCss}
         itemId="id"
-        loading={loading}
+        loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
         tableCaption="Maintenance Windows List"
         items={items}
-        columns={columns.concat(actions)}
+        columns={columns}
         pagination={true}
         sorting={sorting}
         rowProps={rowProps}

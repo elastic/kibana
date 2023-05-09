@@ -8,13 +8,16 @@
 import { getTimelineNonValidQuery } from '../../objects/timeline';
 
 import {
+  DELETE_NOTE,
   NOTES_AUTHOR,
   NOTES_CODE_BLOCK,
+  NOTE_DESCRIPTION,
   NOTES_LINK,
   NOTES_TEXT,
   NOTES_TEXT_AREA,
   MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../screens/timeline';
+import { MODAL_CONFIRMATION_BTN } from '../../screens/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
@@ -96,5 +99,13 @@ describe('Timeline notes tab', () => {
       `!{investigate{"description":"2 top level OR providers, 1 nested AND","label":"test insight", "providers": [[{ "field": "event.id", "value": "kibana.alert.original_event.id", "queryType": "phrase", "excluded": "false" }], [{ "field": "event.category", "value": "network", "queryType": "phrase", "excluded": "false" }, {"field": "process.pid", "value": "process.pid", "queryType": "phrase", "excluded": "false"}]]}}`
     );
     cy.get(MARKDOWN_INVESTIGATE_BUTTON).should('exist');
+  });
+
+  it('should be able to delete a note', () => {
+    const deleteNoteContent = 'delete me';
+    addNotesToTimeline(deleteNoteContent);
+    cy.get(DELETE_NOTE).last().click();
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+    cy.get(NOTE_DESCRIPTION).last().should('not.have.text', deleteNoteContent);
   });
 });

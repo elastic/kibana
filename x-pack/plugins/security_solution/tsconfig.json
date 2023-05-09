@@ -23,7 +23,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    {
+      "path": "../../../src/setup_node_env/tsconfig.json"
+    },
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/files-plugin",
@@ -153,5 +155,7 @@
     "@kbn/security-solution-side-nav",
     "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
+    "@kbn/url-state",
+    "@kbn/ml-anomaly-utils"
   ]
 }

@@ -43,7 +43,7 @@ import {
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
 
-import { persistNoteRoute } from '../lib/timeline/routes/notes';
+import { persistNoteRoute, deleteNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
@@ -129,6 +129,7 @@ export const initRoutes = (
   installPrepackedTimelinesRoute(router, config, security);
 
   persistNoteRoute(router, config, security);
+  deleteNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals

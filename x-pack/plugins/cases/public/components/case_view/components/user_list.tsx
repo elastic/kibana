@@ -22,7 +22,7 @@ import styled, { css } from 'styled-components';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCaseViewNavigation } from '../../../common/navigation';
-import type { Case } from '../../../containers/types';
+import type { CaseUI } from '../../../containers/types';
 import * as i18n from '../translations';
 import type { CaseUserWithProfileInfo, UserInfoWithAvatar } from '../../user_profiles/types';
 import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
@@ -30,7 +30,7 @@ import { convertToUserInfo } from '../../user_profiles/user_converter';
 import { getSortField } from '../../user_profiles/sort';
 
 interface UserListProps {
-  theCase: Case;
+  theCase: CaseUI;
   headline: string;
   loading?: boolean;
   users: CaseUserWithProfileInfo[];

@@ -16,6 +16,7 @@ export type {
   GuideConfig,
   StepConfig,
   StepDescriptionWithLink,
+  GuideParams,
 } from './src/types';
 export { GuideCards, GuideFilters } from './src/components/landing_page';
 export type { GuideFilterValues } from './src/components/landing_page';

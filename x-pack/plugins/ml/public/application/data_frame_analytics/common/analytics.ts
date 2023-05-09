@@ -9,9 +9,9 @@ import { useEffect } from 'react';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { extractErrorMessage } from '../../../../common/util/errors';
 import {
   ClassificationEvaluateResponse,
   EvaluateMetrics,

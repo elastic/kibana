@@ -87,6 +87,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   // defines padding and border; use 'inPage' to avoid any padding or border;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached';
@@ -105,6 +106,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Disables all inputs and interactive elements,
    */
   isDisabled?: boolean;
+
+  submitOnBlur?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -470,6 +473,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     const queryBarMenu = this.props.showQueryMenu ? (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
+        disableQueryLanguageSwitcher={this.props.disableQueryLanguageSwitcher}
         language={
           this.state.query && isOfQueryType(this.state?.query)
             ? this.state?.query?.language
@@ -585,6 +589,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isScreenshotMode={this.props.isScreenshotMode}
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
           onTextLangQueryChange={this.onTextLangQueryChange}
+          submitOnBlur={this.props.submitOnBlur}
         />
       </div>
     );

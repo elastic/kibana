@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
@@ -24,6 +24,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useShowSections } from '../hooks/use_show_sections';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
@@ -50,12 +51,15 @@ export function SloEditForm({ slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    notifications: { toasts },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
   const history = useHistory();
   const { search } = useLocation();
+
+  const { data: rules, isInitialLoading } = useFetchRulesForSlo({
+    sloIds: slo?.id ? [slo.id] : undefined,
+  });
 
   const urlStateStorage = createKbnUrlStateStorage({
     history,
@@ -75,6 +79,12 @@ export function SloEditForm({ slo }: Props) {
   if (searchParams.has(CREATE_RULE_SEARCH_PARAM) && isEditMode && !isAddRuleFlyoutOpen) {
     setIsAddRuleFlyoutOpen(true);
   }
+
+  useEffect(() => {
+    if (isEditMode && rules && rules[slo.id].length && isCreateRuleCheckboxChecked) {
+      setIsCreateRuleCheckboxChecked(false);
+    }
+  }, [isCreateRuleCheckboxChecked, isEditMode, rules, slo]);
 
   const methods = useForm({
     defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
@@ -110,63 +120,38 @@ export function SloEditForm({ slo }: Props) {
     const values = getValues();
 
     if (isEditMode) {
-      try {
-        const processedValues = transformValuesToUpdateSLOInput(values);
+      const processedValues = transformValuesToUpdateSLOInput(values);
 
+      if (isCreateRuleCheckboxChecked) {
         await updateSlo({ sloId: slo.id, slo: processedValues });
-
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.sloEdit.update.success', {
-            defaultMessage: 'Successfully updated {name}',
-            values: { name: getValues().name },
-          })
+        navigate(
+          basePath.prepend(
+            `${paths.observability.sloEdit(slo.id)}?${CREATE_RULE_SEARCH_PARAM}=true`
+          )
         );
-
-        if (isCreateRuleCheckboxChecked) {
-          navigateToUrl(
-            basePath.prepend(
-              `${paths.observability.sloEdit(slo.id)}?${CREATE_RULE_SEARCH_PARAM}=true`
-            )
-          );
-        } else {
-          navigateToUrl(basePath.prepend(paths.observability.slos));
-        }
-      } catch (error) {
-        toasts.addError(new Error(error), {
-          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
-            defaultMessage: 'Something went wrong',
-          }),
-        });
+      } else {
+        updateSlo({ sloId: slo.id, slo: processedValues });
+        navigate(basePath.prepend(paths.observability.slos));
       }
     } else {
-      try {
-        const processedValues = transformValuesToCreateSLOInput(values);
+      const processedValues = transformValuesToCreateSLOInput(values);
 
+      if (isCreateRuleCheckboxChecked) {
         const { id } = await createSlo({ slo: processedValues });
-
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.sloEdit.creation.success', {
-            defaultMessage: 'Successfully created {name}',
-            values: { name: getValues().name },
-          })
+        navigate(
+          basePath.prepend(`${paths.observability.sloEdit(id)}?${CREATE_RULE_SEARCH_PARAM}=true`)
         );
-
-        if (isCreateRuleCheckboxChecked) {
-          navigateToUrl(
-            basePath.prepend(`${paths.observability.sloEdit(id)}?${CREATE_RULE_SEARCH_PARAM}=true`)
-          );
-        } else {
-          navigateToUrl(basePath.prepend(paths.observability.slos));
-        }
-      } catch (error) {
-        toasts.addError(new Error(error), {
-          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
-            defaultMessage: 'Something went wrong',
-          }),
-        });
+      } else {
+        createSlo({ slo: processedValues });
+        navigate(basePath.prepend(paths.observability.slos));
       }
     }
   };
+
+  const navigate = useCallback(
+    (url: string) => setTimeout(() => navigateToUrl(url)),
+    [navigateToUrl]
+  );
 
   const handleChangeCheckbox = () => {
     setIsCreateRuleCheckboxChecked(!isCreateRuleCheckboxChecked);
@@ -211,6 +196,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiCheckbox
               id="createNewRuleCheckbox"
               checked={isCreateRuleCheckboxChecked}
+              disabled={isInitialLoading}
               data-test-subj="createNewRuleCheckbox"
               label={
                 <>

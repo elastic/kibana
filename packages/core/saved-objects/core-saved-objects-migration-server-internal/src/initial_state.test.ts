@@ -13,44 +13,63 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import {
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
+  type IndexMapping,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createInitialState } from './initial_state';
+import { createInitialState, type CreateInitialStateParams } from './initial_state';
 
 const mockLogger = loggingSystemMock.create();
+
+const migrationsConfig = {
+  retryAttempts: 15,
+  batchSize: 1000,
+  maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
+} as unknown as SavedObjectsMigrationConfigType;
+
+const createInitialStateCommonParams = {
+  kibanaVersion: '8.1.0',
+  waitForMigrationCompletion: false,
+  mustRelocateDocuments: true,
+  indexTypesMap: {
+    '.kibana': ['typeA', 'typeB', 'typeC'],
+    '.kibana_task_manager': ['task'],
+    '.kibana_cases': ['typeD', 'typeE'],
+  },
+  targetMappings: {
+    dynamic: 'strict',
+    properties: { my_type: { properties: { title: { type: 'text' } } } },
+  } as IndexMapping,
+  migrationVersionPerType: {},
+  indexPrefix: '.kibana_task_manager',
+  migrationsConfig,
+};
 
 describe('createInitialState', () => {
   let typeRegistry: SavedObjectTypeRegistry;
   let docLinks: DocLinksServiceSetup;
+  let logger: Logger;
+  let createInitialStateParams: CreateInitialStateParams;
 
   beforeEach(() => {
     typeRegistry = new SavedObjectTypeRegistry();
     docLinks = docLinksServiceMock.createSetupContract();
+    logger = mockLogger.get();
+    createInitialStateParams = {
+      ...createInitialStateCommonParams,
+      typeRegistry,
+      docLinks,
+      logger,
+    };
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  const migrationsConfig = {
-    retryAttempts: 15,
-    batchSize: 1000,
-    maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
-  } as unknown as SavedObjectsMigrationConfigType;
-
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
       createInitialState({
-        kibanaVersion: '8.1.0',
+        ...createInitialStateParams,
         waitForMigrationCompletion: true,
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
-        migrationVersionPerType: {},
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-        typeRegistry,
-        docLinks,
-        logger: mockLogger.get(),
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -86,6 +105,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "csp_rule",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "endpoint:user-artifact",
                 },
               },
               Object {
@@ -172,6 +196,20 @@ describe('createInitialState', () => {
           },
         },
         "indexPrefix": ".kibana_task_manager",
+        "indexTypesMap": Object {
+          ".kibana": Array [
+            "typeA",
+            "typeB",
+            "typeC",
+          ],
+          ".kibana_cases": Array [
+            "typeD",
+            "typeE",
+          ],
+          ".kibana_task_manager": Array [
+            "task",
+          ],
+        },
         "kibanaVersion": "8.1.0",
         "knownTypes": Array [],
         "legacyIndex": ".kibana_task_manager",
@@ -183,6 +221,7 @@ describe('createInitialState', () => {
           "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
           "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
         },
+        "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
           "bool": Object {
             "should": Array [],
@@ -195,6 +234,22 @@ describe('createInitialState', () => {
         "retryCount": 0,
         "retryDelay": 0,
         "targetIndexMappings": Object {
+          "_meta": Object {
+            "indexTypesMap": Object {
+              ".kibana": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              ".kibana_cases": Array [
+                "typeD",
+                "typeE",
+              ],
+              ".kibana_task_manager": Array [
+                "task",
+              ],
+            },
+          },
           "dynamic": "strict",
           "properties": Object {
             "my_type": Object {
@@ -227,22 +282,7 @@ describe('createInitialState', () => {
   });
 
   it('creates the initial state for the model with waitForMigrationCompletion false,', () => {
-    expect(
-      createInitialState({
-        kibanaVersion: '8.1.0',
-        waitForMigrationCompletion: false,
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
-        migrationVersionPerType: {},
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-        typeRegistry,
-        docLinks,
-        logger: mockLogger.get(),
-      })
-    ).toMatchObject({
+    expect(createInitialState(createInitialStateParams)).toMatchObject({
       waitForMigrationCompletion: false,
     });
   });
@@ -262,18 +302,10 @@ describe('createInitialState', () => {
     });
 
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
+      ...createInitialStateParams,
       typeRegistry,
       docLinks,
-      logger: mockLogger.get(),
+      logger,
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
@@ -289,40 +321,15 @@ describe('createInitialState', () => {
       excludeOnUpgrade: fooExcludeOnUpgradeHook,
     });
 
-    const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
-    });
-
+    const initialState = createInitialState(createInitialStateParams);
     expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
   });
 
   it('returns state with a preMigration script', () => {
     const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
+      ...createInitialStateParams,
       preMigrationScript,
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
     });
 
     expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -334,19 +341,8 @@ describe('createInitialState', () => {
     expect(
       Option.isNone(
         createInitialState({
-          kibanaVersion: '8.1.0',
-          waitForMigrationCompletion: false,
-          targetMappings: {
-            dynamic: 'strict',
-            properties: { my_type: { properties: { title: { type: 'text' } } } },
-          },
+          ...createInitialStateParams,
           preMigrationScript: undefined,
-          migrationVersionPerType: {},
-          indexPrefix: '.kibana_task_manager',
-          migrationsConfig,
-          typeRegistry,
-          docLinks,
-          logger: mockLogger.get(),
         }).preMigrationScript
       )
     ).toEqual(true);
@@ -354,19 +350,9 @@ describe('createInitialState', () => {
   it('returns state with an outdatedDocumentsQuery', () => {
     expect(
       createInitialState({
-        kibanaVersion: '8.1.0',
-        waitForMigrationCompletion: false,
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
+        ...createInitialStateParams,
         preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
         migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-        typeRegistry,
-        docLinks,
-        logger: mockLogger.get(),
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
       Object {
@@ -473,44 +459,19 @@ describe('createInitialState', () => {
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
-    const logger = mockLogger.get();
-    const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
-      typeRegistry,
-      docLinks,
-      logger,
-    });
+    const initialState = createInitialState(createInitialStateParams);
 
     expect(logger.warn).not.toBeCalled();
     expect(initialState.discardUnknownObjects).toEqual(false);
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
-    const logger = mockLogger.get();
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardUnknownObjects: '8.0.0',
       },
-      typeRegistry,
-      docLinks,
-      logger,
     });
 
     expect(initialState.discardUnknownObjects).toEqual(false);
@@ -522,44 +483,23 @@ describe('createInitialState', () => {
 
   it('initializes the `discardUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardUnknownObjects: '8.1.0',
       },
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
     });
 
     expect(initialState.discardUnknownObjects).toEqual(true);
   });
 
   it('initializes the `discardCorruptObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
-    const logger = mockLogger.get();
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardCorruptObjects: '8.0.0',
       },
-      typeRegistry,
-      docLinks,
-      logger,
     });
 
     expect(initialState.discardCorruptObjects).toEqual(false);
@@ -571,21 +511,11 @@ describe('createInitialState', () => {
 
   it('initializes the `discardCorruptObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardCorruptObjects: '8.1.0',
       },
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
     });
 
     expect(initialState.discardCorruptObjects).toEqual(true);

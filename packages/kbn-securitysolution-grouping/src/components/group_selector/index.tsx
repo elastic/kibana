@@ -10,7 +10,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
@@ -21,64 +21,54 @@ export interface GroupSelectorProps {
   'data-test-subj'?: string;
   fields: FieldSpec[];
   groupingId: string;
-  groupSelected: string;
+  groupsSelected: string[];
   onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
+  maxGroupingLevels?: number;
 }
-
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
   fields,
-  groupSelected = 'none',
+  groupsSelected = ['none'],
   onGroupChange,
   options,
   title = i18n.GROUP_BY,
+  maxGroupingLevels = 1,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const isGroupSelected = useCallback(
+    (groupKey: string) =>
+      !!groupsSelected.find((selectedGroupKey) => selectedGroupKey === groupKey),
+    [groupsSelected]
+  );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
       {
         id: 'firstPanel',
-        title: (
-          <EuiFlexGroup
-            component="span"
-            justifyContent="spaceBetween"
-            gutterSize="none"
-            style={{ lineHeight: 1 }}
-          >
-            <EuiFlexItem grow={false} component="p" style={{ lineHeight: 1.5 }}>
-              {i18n.SELECT_FIELD.toUpperCase()}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <EuiBetaBadge
-                label={i18n.BETA}
-                size="s"
-                tooltipContent={i18n.BETA_TOOL_TIP}
-                tooltipPosition="left"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        title: i18n.SELECT_FIELD(maxGroupingLevels),
         items: [
           {
             'data-test-subj': 'panel-none',
             name: i18n.NONE,
-            icon: groupSelected === 'none' ? 'check' : 'empty',
+            icon: isGroupSelected('none') ? 'check' : 'empty',
             onClick: () => onGroupChange('none'),
           },
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
+            disabled: groupsSelected.length === maxGroupingLevels && !isGroupSelected(o.key),
             name: o.label,
             onClick: () => onGroupChange(o.key),
-            icon: groupSelected === o.key ? 'check' : 'empty',
+            icon: isGroupSelected(o.key) ? 'check' : 'empty',
           })),
           {
             'data-test-subj': `panel-custom`,
             name: i18n.CUSTOM_FIELD,
             icon: 'empty',
+            disabled: groupsSelected.length === maxGroupingLevels,
             panel: 'customPanel',
+            hasPanel: true,
           },
         ],
       },
@@ -91,24 +81,35 @@ const GroupSelectorComponent = ({
             currentOptions={options.map((o) => ({ text: o.label, field: o.key }))}
             onSubmit={(field: string) => {
               onGroupChange(field);
+              setIsPopoverOpen(false);
             }}
             fields={fields}
           />
         ),
       },
     ],
-    [fields, groupSelected, onGroupChange, options]
+    [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]
   );
-  const selectedOption = useMemo(
-    () => options.filter((groupOption) => groupOption.key === groupSelected),
-    [groupSelected, options]
+  const selectedOptions = useMemo(
+    () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
+    [isGroupSelected, options]
   );
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const button = useMemo(
-    () => (
+  const button = useMemo(() => {
+    // need to use groupsSelected to ensure proper selection order (selectedOptions does not handle selection order)
+    const buttonLabel = isGroupSelected('none')
+      ? i18n.NONE
+      : groupsSelected.reduce((optionsTitle, o) => {
+          const selection = selectedOptions.find((opt) => opt.key === o);
+          if (selection == null) {
+            return optionsTitle;
+          }
+          return optionsTitle ? [optionsTitle, selection.label].join(', ') : selection.label;
+        }, '');
+    return (
       <StyledEuiButtonEmpty
         data-test-subj="group-selector-dropdown"
         flush="both"
@@ -116,22 +117,13 @@ const GroupSelectorComponent = ({
         iconSize="s"
         iconType="arrowDown"
         onClick={onButtonClick}
-        title={
-          groupSelected !== 'none' && selectedOption.length > 0
-            ? selectedOption[0].label
-            : i18n.NONE
-        }
+        title={buttonLabel}
         size="xs"
       >
-        {`${title}: ${
-          groupSelected !== 'none' && selectedOption.length > 0
-            ? selectedOption[0].label
-            : i18n.NONE
-        }`}
+        {`${title}: ${buttonLabel}`}
       </StyledEuiButtonEmpty>
-    ),
-    [groupSelected, onButtonClick, selectedOption, title]
-  );
+    );
+  }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title]);
 
   return (
     <EuiPopover

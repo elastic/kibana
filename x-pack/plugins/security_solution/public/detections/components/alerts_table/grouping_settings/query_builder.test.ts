@@ -15,6 +15,7 @@ describe('getAlertsGroupingQuery', () => {
       pageIndex: 0,
       pageSize: 25,
       runtimeMappings: {},
+      selectedGroupEsTypes: ['keyword'],
       selectedGroup: 'kibana.alert.rule.name',
       additionalFilters: [
         {
@@ -46,6 +47,12 @@ describe('getAlertsGroupingQuery', () => {
         unitsCount: {
           value_count: {
             field: 'kibana.alert.rule.name',
+            missing: '-',
+          },
+        },
+        unitsCountWithoutNull: {
+          value_count: {
+            field: 'kibana.alert.rule.name',
           },
         },
         groupsCount: {
@@ -60,11 +67,23 @@ describe('getAlertsGroupingQuery', () => {
                 field: 'kibana.alert.uuid',
               },
             },
+            description: {
+              terms: {
+                field: 'kibana.alert.rule.description',
+                size: 1,
+              },
+            },
             bucket_truncate: {
               bucket_sort: {
                 from: 0,
                 size: 25,
-                sort: undefined,
+                sort: [
+                  {
+                    unitsCount: {
+                      order: 'desc',
+                    },
+                  },
+                ],
               },
             },
             countSeveritySubAggregation: {
@@ -98,9 +117,11 @@ describe('getAlertsGroupingQuery', () => {
             terms: [
               {
                 field: 'kibana.alert.rule.name',
+                missing: '-',
               },
               {
-                field: 'kibana.alert.rule.description',
+                field: 'kibana.alert.rule.name',
+                missing: '--',
               },
             ],
           },
@@ -152,6 +173,7 @@ describe('getAlertsGroupingQuery', () => {
       pageIndex: 0,
       pageSize: 25,
       runtimeMappings: {},
+      selectedGroupEsTypes: ['keyword'],
       selectedGroup: 'process.name',
       additionalFilters: [
         {
@@ -183,6 +205,12 @@ describe('getAlertsGroupingQuery', () => {
         unitsCount: {
           value_count: {
             field: 'process.name',
+            missing: '-',
+          },
+        },
+        unitsCountWithoutNull: {
+          value_count: {
+            field: 'process.name',
           },
         },
         groupsCount: {
@@ -201,7 +229,13 @@ describe('getAlertsGroupingQuery', () => {
               bucket_sort: {
                 from: 0,
                 size: 25,
-                sort: undefined,
+                sort: [
+                  {
+                    unitsCount: {
+                      order: 'desc',
+                    },
+                  },
+                ],
               },
             },
             rulesCountAggregation: {
@@ -210,9 +244,18 @@ describe('getAlertsGroupingQuery', () => {
               },
             },
           },
-          terms: {
-            field: 'process.name',
+          multi_terms: {
             size: 10000,
+            terms: [
+              {
+                field: 'process.name',
+                missing: '-',
+              },
+              {
+                field: 'process.name',
+                missing: '--',
+              },
+            ],
           },
         },
       },

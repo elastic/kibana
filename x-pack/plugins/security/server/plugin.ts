@@ -59,6 +59,9 @@ import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
+import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
+import type { UserSettingServiceStart } from './user_profile/user_setting_service';
+import { UserSettingService } from './user_profile/user_setting_service';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -195,6 +198,9 @@ export class SecurityPlugin
 
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
+
+  private readonly userSettingService: UserSettingService;
+  private userSettingServiceStart?: UserSettingServiceStart;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -222,14 +228,18 @@ export class SecurityPlugin
     this.userProfileService = new UserProfileService(
       this.initializerContext.logger.get('user-profile')
     );
+    this.userSettingService = new UserSettingService(
+      this.initializerContext.logger.get('user-settings')
+    );
+
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
   }
 
   public setup(
-    core: CoreSetup<PluginStartDependencies>,
+    core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
-    this.kibanaIndexName = core.savedObjects.getKibanaIndex();
+    this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
@@ -245,10 +255,25 @@ export class SecurityPlugin
     const kibanaIndexName = this.getKibanaIndexName();
 
     // A subset of `start` services we need during `setup`.
-    const startServicesPromise = core.getStartServices().then(([coreServices, depsServices]) => ({
-      elasticsearch: coreServices.elasticsearch,
-      features: depsServices.features,
-    }));
+    const startServicesPromise = core
+      .getStartServices()
+      .then(([coreServices, depsServices, startServices]) => ({
+        elasticsearch: coreServices.elasticsearch,
+        features: depsServices.features,
+        userProfiles: startServices.userProfiles,
+      }));
+
+    /**
+     * Once the UserProfileServiceStart is available, use it to start the SecurityPlugin > UserSettingService.
+     *
+     * Then the UserProfileSettingsClient is created with the SecurityPlugin > UserSettingServiceStart and set on
+     * the Core > UserSettingsServiceSetup
+     */
+    startServicesPromise.then(({ userProfiles }) => {
+      this.userSettingServiceStart = this.userSettingService.start(userProfiles);
+      const client = new UserProfileSettingsClient(this.userSettingServiceStart);
+      core.userSettings.setUserProfileSettings(client);
+    });
 
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
@@ -381,6 +406,7 @@ export class SecurityPlugin
     this.session = session;
 
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+    this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
 
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({

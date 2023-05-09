@@ -55,7 +55,14 @@ export const EXCEPTIONS_TABLE_LINK_RULES_BTN =
 export const EXCEPTIONS_TABLE_EXPORT_MODAL_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemExport"]';
 
-export const EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+export const EXCEPTIONS_TABLE_DUPLICATE_BTN =
+  '[data-test-subj="sharedListOverflowCardActionItemDuplicate"]';
+
+export const EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN =
+  '[data-test-subj="confirmModalConfirmButton"]';
+
+export const INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH =
+  '[data-test-subj="includeExpiredExceptionsConfirmationModalSwitch"]';
 
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR =
   '[data-test-subj="allExceptionListsPanel"] button.euiFormControlLayoutClearButton';
@@ -179,3 +186,5 @@ export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModal
 
 export const EXCEPTIONS_LIST_DETAILS_HEADER =
   '[data-test-subj="exceptionListManagementPageHeader"]';
+
+export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';

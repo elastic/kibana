@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isNoneGroup } from '@kbn/securitysolution-grouping';
 import {
   dataTableSelectors,
   tableDefaults,
@@ -29,9 +28,6 @@ export const getPersistentControlsHook = (tableId: TableId) => {
     const getGroupSelector = groupSelectors.getGroupSelector();
 
     const groupSelector = useSelector((state: State) => getGroupSelector(state));
-    const getSelectedGroup = groupSelectors.getSelectedGroup();
-
-    const selectedGroup = useSelector((state: State) => getSelectedGroup(state));
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -88,10 +84,10 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           hasRightOffset={false}
           additionalFilters={additionalFiltersComponent}
           showInspect={false}
-          additionalMenuOptions={isNoneGroup(selectedGroup) ? [groupSelector] : []}
+          additionalMenuOptions={groupSelector != null ? [groupSelector] : []}
         />
       ),
-      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector, selectedGroup]
+      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector]
     );
 
     return {

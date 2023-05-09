@@ -140,6 +140,7 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -233,6 +234,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
+
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
     detailName: string;
@@ -329,21 +331,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   useEffect(() => {
-    const fetchDataViews = async () => {
+    const fetchDV = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      if (dataViewsRefs.length > 0) {
-        const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-          (acc, item) => ({
-            ...acc,
-            [item.id]: item,
-          }),
-          {}
-        );
-        setDataViewOptions(dataViewIdIndexPatternMap);
-      }
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
     };
-    fetchDataViews();
-  }, [data.dataViews]);
+    fetchDV();
+    // if this array is not empty the data.dataViews dependency
+    // causes the jest tests for this file to re-render the
+    // step_define_rule component infinitely for some reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -539,23 +544,30 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionMessage = lastExecution?.message ?? '';
 
   const ruleStatusInfo = useMemo(() => {
-    return ruleLoading ? (
-      <EuiFlexItem>
-        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-      </EuiFlexItem>
-    ) : (
-      <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-        <EuiButtonIcon
-          data-test-subj="refreshButton"
-          color="primary"
-          onClick={refreshRule}
-          iconType="refresh"
-          aria-label={ruleI18n.REFRESH}
-          isDisabled={!isExistingRule}
-        />
-      </RuleStatus>
+    return (
+      <>
+        {ruleLoading ? (
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+          </EuiFlexItem>
+        ) : (
+          <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+            <EuiButtonIcon
+              data-test-subj="refreshButton"
+              color="primary"
+              onClick={refreshRule}
+              iconType="refresh"
+              aria-label={ruleI18n.REFRESH}
+              isDisabled={!isExistingRule}
+            />
+          </RuleStatus>
+        )}
+        <EuiFlexItem grow={false}>
+          <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
+        </EuiFlexItem>
+      </>
     );
-  }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
+  }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
   const ruleError = useMemo(() => {
     return ruleLoading ? (
@@ -844,7 +856,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={filterGroup}
+                        currentAlertStatusFilterValue={[filterGroup]}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}

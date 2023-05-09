@@ -65,21 +65,27 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       name={name}
       value={serviceType}
     >
-      {documentationUrl && (
-        <EuiLink target="_blank" href={documentationUrl}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
-            {
-              defaultMessage: 'Documentation',
-            }
-          )}
-        </EuiLink>
-      )}
-      {isBeta && (
-        <EuiBadge color="hollow" iconType="beaker">
-          <EuiText size="xs">{BETA_LABEL}</EuiText>
-        </EuiBadge>
-      )}
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        {documentationUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink target="_blank" href={documentationUrl}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
+                {
+                  defaultMessage: 'Documentation',
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+        {isBeta && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" iconType="beaker">
+              <EuiText size="xs">{BETA_LABEL}</EuiText>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </EuiCheckableCard>
   );
 };

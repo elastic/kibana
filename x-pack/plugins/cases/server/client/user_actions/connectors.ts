@@ -13,7 +13,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type {
   GetCaseConnectorsResponse,
   CaseConnector,
-  CaseUserActionInjectedAttributes,
+  UserActionAttributes,
   CaseExternalServiceBasic,
   GetCaseConnectorsPushDetails,
 } from '../../../common/api';
@@ -75,7 +75,7 @@ const checkConnectorsAuthorization = async ({
   authorization,
 }: {
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
+  latestUserAction?: SavedObject<UserActionAttributes>;
   authorization: PublicMethodsOf<Authorization>;
 }) => {
   const entities: OwnerEntity[] = latestUserAction
@@ -127,7 +127,7 @@ const getConnectorsInfo = async ({
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
+  latestUserAction?: SavedObject<UserActionAttributes>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
   logger: CasesClientArgs['logger'];
@@ -224,7 +224,7 @@ const getPushDetails = (activity: CaseConnectorActivity[]) => {
 };
 
 const getExternalServiceFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
+  savedObject: SavedObject<UserActionAttributes> | undefined
 ): CaseExternalServiceBasic | undefined => {
   if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
     return savedObject.attributes.payload.externalService;
@@ -248,7 +248,7 @@ const isDateValid = (date: Date): boolean => {
 };
 
 const getConnectorInfoFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
+  savedObject: SavedObject<UserActionAttributes> | undefined
 ): CaseConnector | undefined => {
   if (
     savedObject != null &&
@@ -268,7 +268,7 @@ const createConnectorInfoResult = ({
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
+  latestUserAction?: SavedObject<UserActionAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
   const actionConnectorsMap = new Map(

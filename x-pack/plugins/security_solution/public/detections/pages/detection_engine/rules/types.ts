@@ -33,6 +33,7 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
+  AlertSuppressionMissingFields,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -176,6 +177,7 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
+  suppressionMissingFields?: AlertSuppressionMissingFields;
 }
 
 export interface Duration {
@@ -194,7 +196,6 @@ export interface ActionsStepRule {
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
-  throttle?: string | null;
 }
 
 export interface DefineStepRuleJson {

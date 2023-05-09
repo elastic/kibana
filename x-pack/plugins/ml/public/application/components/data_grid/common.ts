@@ -12,16 +12,14 @@ import { useMemo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { CoreSetup } from '@kbn/core/public';
-
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { extractErrorMessage } from '../../../../common/util/errors';
 import {
   FeatureImportance,
   FeatureImportanceClassName,

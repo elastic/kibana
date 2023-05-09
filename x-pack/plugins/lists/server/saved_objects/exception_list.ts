@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import {
   exceptionListAgnosticSavedObjectType,
@@ -182,6 +183,7 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 export const exceptionListType: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   hidden: false,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   mappings: combinedMappings,
   migrations,
   name: exceptionListSavedObjectType,
@@ -190,6 +192,7 @@ export const exceptionListType: SavedObjectsType = {
 
 export const exceptionListAgnosticType: SavedObjectsType = {
   hidden: false,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   mappings: combinedMappings,
   migrations,
   name: exceptionListAgnosticSavedObjectType,

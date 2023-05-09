@@ -28,11 +28,6 @@ import {
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
 
-export interface ErrorMessage {
-  query: string;
-  message: string;
-}
-
 export interface Field {
   name: EsFieldName;
   type: KBN_FIELD_TYPES | TIME_SERIES_METRIC_TYPES.COUNTER;

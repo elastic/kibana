@@ -99,13 +99,6 @@ export const dashboardContainerReducers = {
     state.explicitInput.title = action.payload;
   },
 
-  setSearchSessionId: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerInput['searchSessionId']>
-  ) => {
-    state.explicitInput.searchSessionId = action.payload;
-  },
-
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------
@@ -123,8 +116,19 @@ export const dashboardContainerReducers = {
     state.componentState.lastSavedInput = action.payload;
   },
 
+  /**
+   * Resets the dashboard to the last saved input, excluding:
+   * 1) The time range, unless `timeRestore` is `true` - if we include the time range on reset even when
+   *    `timeRestore` is `false`, this causes unecessary data fetches for the control group.
+   * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
+   *    have this saved in and we don't want resetting to cause unexpected view mode changes.
+   */
   resetToLastSavedInput: (state: DashboardReduxState) => {
-    state.explicitInput = state.componentState.lastSavedInput;
+    state.explicitInput = {
+      ...state.componentState.lastSavedInput,
+      ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
+      viewMode: state.explicitInput.viewMode,
+    };
   },
 
   // ------------------------------------------------------------------------------
@@ -205,5 +209,13 @@ export const dashboardContainerReducers = {
 
   setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
     state.componentState.hasOverlays = action.payload;
+  },
+
+  setScrollToPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.scrollToPanelId = action.payload;
+  },
+
+  setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.highlightPanelId = action.payload;
   },
 };

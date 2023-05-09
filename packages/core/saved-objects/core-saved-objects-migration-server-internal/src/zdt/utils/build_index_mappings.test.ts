@@ -69,14 +69,14 @@ describe('buildIndexMeta', () => {
 
     expect(meta).toEqual({
       mappingVersions: {
-        foo: 2,
-        bar: 1,
-        dolly: 3,
+        foo: '10.2.0',
+        bar: '10.1.0',
+        dolly: '10.3.0',
       },
       docVersions: {
-        foo: 2,
-        bar: 1,
-        dolly: 3,
+        foo: '10.2.0',
+        bar: '10.1.0',
+        dolly: '10.3.0',
       },
       migrationState: {
         convertingDocuments: false,
