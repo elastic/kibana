@@ -56,11 +56,6 @@ export interface OwnershipClaimingOpts {
   taskTypes: Set<string>;
 }
 
-export interface SearchForTasksOpts {
-  size: number;
-  taskTypes: string[];
-}
-
 export type IncrementalOwnershipClaimingOpts = OwnershipClaimingOpts & {
   precedingQueryResult: UpdateByQueryResult;
 };
@@ -80,11 +75,6 @@ export interface ClaimOwnershipResult {
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
-}
-
-export interface ClaimAvailableTasksImplResult {
-  docs: ConcreteTaskInstance[];
-  tasksConflicted: number;
 }
 
 export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershipResult =>
@@ -132,18 +122,6 @@ export class TaskClaiming {
     this.events$ = new Subject<TaskClaim>();
   }
 
-  private claimingBatchIndex = 0;
-  private getClaimingBatches() {
-    // return all batches, starting at index and cycling back to where we began
-    const batch = [
-      ...this.taskClaimingBatches.slice(this.claimingBatchIndex),
-      ...this.taskClaimingBatches.slice(0, this.claimingBatchIndex),
-    ];
-    // shift claimingBatchIndex by one so that next cycle begins at the next index
-    this.claimingBatchIndex = (this.claimingBatchIndex + 1) % this.taskClaimingBatches.length;
-    return batch;
-  }
-
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
     const result: TaskClaimingBatches = [];
     const typesByCost: Record<number, string[]> = {
@@ -176,6 +154,18 @@ export class TaskClaiming {
     }
 
     return result;
+  }
+
+  private claimingBatchIndex = 0;
+  private getClaimingBatches() {
+    // return all batches, starting at index and cycling back to where we began
+    const batch = [
+      ...this.taskClaimingBatches.slice(this.claimingBatchIndex),
+      ...this.taskClaimingBatches.slice(0, this.claimingBatchIndex),
+    ];
+    // shift claimingBatchIndex by one so that next cycle begins at the next index
+    this.claimingBatchIndex = (this.claimingBatchIndex + 1) % this.taskClaimingBatches.length;
+    return batch;
   }
 
   public get events(): Observable<TaskClaim> {
@@ -217,7 +207,7 @@ export class TaskClaiming {
           .map((batch) => {
             const size = batch.size();
             if (size > 0) {
-              return this.searchForTasks({ size, taskTypes: batch.types });
+              return this.searchForTasks(size, batch.types);
             }
           })
           .filter((p): p is Promise<ConcreteTaskInstance[]> => !!p)
@@ -301,17 +291,14 @@ export class TaskClaiming {
     return docsToUpdate;
   }
 
-  private async searchForTasks({
-    size,
-    taskTypes,
-  }: SearchForTasksOpts): Promise<ConcreteTaskInstance[]> {
+  private async searchForTasks(size: number, types: string[]): Promise<ConcreteTaskInstance[]> {
     const queryForScheduledTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      tasksOfType(taskTypes)
+      tasksOfType(types)
     );
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
