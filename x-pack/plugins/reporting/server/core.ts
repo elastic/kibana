@@ -96,13 +96,13 @@ export class ReportingCore {
   private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
-  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
-  private config: ReportingConfigType; // final config, includes dynamic values based on OS type
+  private config: ReportingConfigType;
   private executing: Set<string>;
 
   public getContract: () => ReportingSetup;
@@ -115,14 +115,15 @@ export class ReportingCore {
     private context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.packageInfo = context.env.packageInfo;
-    const syncConfig = context.config.get<ReportingConfigType>();
-    this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
-    this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
-    this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
-    this.config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
+    const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
+    this.config = config;
+
+    this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
+    this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.monitorTask = new MonitorReportsTask(this, config, this.logger);
 
     this.getContract = () => ({
-      usesUiCapabilities: () => syncConfig.roles.enabled === false,
+      usesUiCapabilities: () => config.roles.enabled === false,
     });
 
     this.executing = new Set();
