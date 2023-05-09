@@ -182,13 +182,13 @@ PUT localhost:5601/api/security/role/custom_reporting_user
 
 If you are using an external identity provider, such as LDAP or Active Directory, you can assign roles to individual users or groups of users. Role mappings are configured in {ref}/mapping-roles.html[`config/role_mapping.yml`].
 
-For example, assign the `kibana_admin` and `reporting_user` roles to the Bill Murray user:
+For example, assign the `kibana_admin` and `custom_reporting_user` roles to the Bill Murray user:
 
 [source,yaml]
 --------------------------------------------------------------------------------
 kibana_admin:
   - "cn=Bill Murray,dc=example,dc=com"
-reporting_user:
+custom_reporting_user:
   - "cn=Bill Murray,dc=example,dc=com"
 --------------------------------------------------------------------------------
 
