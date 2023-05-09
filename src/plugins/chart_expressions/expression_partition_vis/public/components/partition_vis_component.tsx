@@ -36,6 +36,8 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { css } from '@emotion/react';
+import { RenderMode } from '@kbn/expressions-plugin/common';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -93,7 +95,15 @@ export type PartitionVisComponentProps = Omit<
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   columnCellValueActions: ColumnCellValueActions;
+  renderMode: RenderMode;
+  children: ((props: { datatables: Datatable[] }) => JSX.Element) | undefined;
 };
+
+const partitionVisRenderer = css({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+});
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const {
@@ -105,6 +115,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     syncColors,
     interactive,
     overrides,
+    children,
+    renderMode,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartTheme = props.chartsThemeService.useChartsTheme();
@@ -451,118 +463,127 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     };
   }, [bucketColumns, flatLegend, showLegend, visData.rows]);
 
+  if (renderMode === 'dataOnly') {
+    if (children) {
+      return children({ datatables: [visData] });
+    }
+    return null;
+  }
+
   return (
-    <div css={chartContainerStyle} data-test-subj="partitionVisChart">
-      {!canShowPieChart ? (
-        <VisualizationNoResults
-          hasNegativeValues={hasNegative}
-          chartType={visType}
-          renderComplete={onRenderChange}
-        />
-      ) : (
-        <div css={partitionVisWrapperStyle} ref={parentRef}>
-          <LegendColorPickerWrapperContext.Provider
-            value={{
-              legendPosition,
-              setColor,
-              bucketColumns,
-              palette: visParams.palette.name,
-              data: visData.rows,
-              uiState: props.uiState,
-              distinctColors: visParams.distinctColors ?? false,
-            }}
-          >
-            {showToggleLegendElement && (
-              <LegendToggle
-                onClick={toggleLegend}
-                showLegend={showLegend}
-                legendPosition={legendPosition}
-              />
-            )}
-            <Chart size="100%">
-              <ChartSplit
-                splitColumnAccessor={splitChartColumnAccessor}
-                splitRowAccessor={splitChartRowAccessor}
-              />
-              <Settings
-                noResults={
-                  <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
-                }
-                debugState={window._echDebugStateFlag ?? false}
-                showLegend={
-                  showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
-                }
-                legendPosition={legendPosition}
-                legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
-                legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-                legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
-                flatLegend={flatLegend}
-                legendSort={customLegendSort}
-                tooltip={tooltip}
-                showLegendExtra={visParams.showValuesInLegend}
-                onElementClick={([elementEvent]) => {
-                  // this cast is safe because we are rendering a partition chart
-                  const [layerValues] = elementEvent as PartitionElementEvent;
-                  handleSliceClick(
-                    layerValues,
-                    bucketColumns,
-                    visData,
-                    splitChartDimension,
-                    splitChartFormatter
-                  );
-                }}
-                legendAction={legendActions}
-                theme={[
-                  // Chart background should be transparent for the usage at Canvas.
-                  { background: { color: 'transparent' } },
-                  themeOverrides,
-                  chartTheme,
-                  {
-                    legend: {
-                      labelOptions: {
-                        maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+    <div css={partitionVisRenderer}>
+      <div css={chartContainerStyle} data-test-subj="partitionVisChart">
+        {!canShowPieChart ? (
+          <VisualizationNoResults
+            hasNegativeValues={hasNegative}
+            chartType={visType}
+            renderComplete={onRenderChange}
+          />
+        ) : (
+          <div css={partitionVisWrapperStyle} ref={parentRef}>
+            <LegendColorPickerWrapperContext.Provider
+              value={{
+                legendPosition,
+                setColor,
+                bucketColumns,
+                palette: visParams.palette.name,
+                data: visData.rows,
+                uiState: props.uiState,
+                distinctColors: visParams.distinctColors ?? false,
+              }}
+            >
+              {showToggleLegendElement && (
+                <LegendToggle
+                  onClick={toggleLegend}
+                  showLegend={showLegend}
+                  legendPosition={legendPosition}
+                />
+              )}
+              <Chart size="100%">
+                <ChartSplit
+                  splitColumnAccessor={splitChartColumnAccessor}
+                  splitRowAccessor={splitChartRowAccessor}
+                />
+                <Settings
+                  noResults={
+                    <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
+                  }
+                  debugState={window._echDebugStateFlag ?? false}
+                  showLegend={
+                    showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
+                  }
+                  legendPosition={legendPosition}
+                  legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
+                  legendMaxDepth={visParams.nestedLegend ? undefined : 1}
+                  legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
+                  flatLegend={flatLegend}
+                  legendSort={customLegendSort}
+                  tooltip={tooltip}
+                  showLegendExtra={visParams.showValuesInLegend}
+                  onElementClick={([elementEvent]) => {
+                    // this cast is safe because we are rendering a partition chart
+                    const [layerValues] = elementEvent as PartitionElementEvent;
+                    handleSliceClick(
+                      layerValues,
+                      bucketColumns,
+                      visData,
+                      splitChartDimension,
+                      splitChartFormatter
+                    );
+                  }}
+                  legendAction={legendActions}
+                  theme={[
+                    // Chart background should be transparent for the usage at Canvas.
+                    { background: { color: 'transparent' } },
+                    themeOverrides,
+                    chartTheme,
+                    {
+                      legend: {
+                        labelOptions: {
+                          maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+                        },
                       },
                     },
-                  },
 
-                  ...(Array.isArray(settingsThemeOverrides)
-                    ? settingsThemeOverrides
-                    : [settingsThemeOverrides]),
-                ]}
-                baseTheme={chartBaseTheme}
-                onRenderChange={onRenderChange}
-                ariaLabel={props.visParams.ariaLabel}
-                ariaUseDefaultSummary={!props.visParams.ariaLabel}
-                {...settingsOverrides}
-              />
-              <Partition
-                id={visType}
-                smallMultiples={SMALL_MULTIPLES_ID}
-                data={visData.rows}
-                layout={partitionType}
-                specialFirstInnermostSector={visParams.startFromSecondLargestSlice}
-                valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-                percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-                valueGetter={
-                  !visParams.labels.show ||
-                  visParams.labels.valuesFormat === ValueFormats.VALUE ||
-                  !visParams.labels.values
-                    ? undefined
-                    : ValueFormats.PERCENT
-                }
-                valueFormatter={(d: number) =>
-                  !visParams.labels.show || !visParams.labels.values
-                    ? ''
-                    : metricFieldFormatter.convert(d)
-                }
-                layers={layers}
-                topGroove={!visParams.labels.show ? 0 : undefined}
-                {...getOverridesFor(overrides, 'partition')}
-              />
-            </Chart>
-          </LegendColorPickerWrapperContext.Provider>
-        </div>
-      )}
+                    ...(Array.isArray(settingsThemeOverrides)
+                      ? settingsThemeOverrides
+                      : [settingsThemeOverrides]),
+                  ]}
+                  baseTheme={chartBaseTheme}
+                  onRenderChange={onRenderChange}
+                  ariaLabel={props.visParams.ariaLabel}
+                  ariaUseDefaultSummary={!props.visParams.ariaLabel}
+                  {...settingsOverrides}
+                />
+                <Partition
+                  id={visType}
+                  smallMultiples={SMALL_MULTIPLES_ID}
+                  data={visData.rows}
+                  layout={partitionType}
+                  specialFirstInnermostSector={visParams.startFromSecondLargestSlice}
+                  valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
+                  percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
+                  valueGetter={
+                    !visParams.labels.show ||
+                    visParams.labels.valuesFormat === ValueFormats.VALUE ||
+                    !visParams.labels.values
+                      ? undefined
+                      : ValueFormats.PERCENT
+                  }
+                  valueFormatter={(d: number) =>
+                    !visParams.labels.show || !visParams.labels.values
+                      ? ''
+                      : metricFieldFormatter.convert(d)
+                  }
+                  layers={layers}
+                  topGroove={!visParams.labels.show ? 0 : undefined}
+                  {...getOverridesFor(overrides, 'partition')}
+                />
+              </Chart>
+            </LegendColorPickerWrapperContext.Provider>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

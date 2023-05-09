@@ -40,7 +40,6 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CodeEditor, HJsonLang, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import type { StartDependencies } from './plugin';
 import {
   AllOverrides,
@@ -651,41 +650,7 @@ export const App = (props: {
                               ]
                             : undefined
                         }
-                        overrides={{
-                          settings: {
-                            legendAction: undefined,
-                          },
-                        }}
-                      >
-                        {(innerProps) => {
-                          const { datatables } = innerProps as { datatables: Datatable[] };
-                          return (
-                            <div
-                              style={{
-                                position: 'absolute',
-                                backgroundColor: 'rgba(255, 0, 0, 0.3)',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                color: 'black',
-                                textAlign: 'center',
-                                alignItems: 'center',
-                              }}
-                            >
-                              Tables: {datatables.length}
-                              <ul>
-                                {datatables.map((table, i) => (
-                                  <li key={i}>
-                                    Table {i + 1} : {table.columns.length} columns x{' '}
-                                    {table.rows.length} rows
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          );
-                        }}
-                      </LensComponent>
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiPanel>

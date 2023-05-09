@@ -63,7 +63,7 @@ export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
  * * preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline
  * * edit: The chart is rendered within an editor and configuration elements within the chart should be displayed
  */
-export type RenderMode = 'edit' | 'preview' | 'view';
+export type RenderMode = 'edit' | 'preview' | 'view' | 'dataOnly';
 
 export interface IInterpreterRenderUpdateParams<Params = unknown> {
   newExpression?: string | ExpressionAstExpression;

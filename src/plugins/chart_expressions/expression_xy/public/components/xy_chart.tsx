@@ -144,8 +144,16 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
-  children: ((props: unknown) => JSX.Element) | undefined;
+  children:
+    | ((props: { datatables: Datatable[]; onRenderComplete?: () => void }) => JSX.Element)
+    | undefined;
 };
+
+const chartWrapperStyle = css({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+});
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -230,6 +238,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  renderMode,
   children,
 }: XYChartRenderProps) {
   const {
@@ -332,7 +341,9 @@ export function XYChart({
 
   if (dataLayers.length === 0) {
     return (
-      <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+      <div css={chartWrapperStyle} data-test-subj="xyVisChart">
+        <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+      </div>
     );
   }
 
@@ -802,304 +813,315 @@ export function XYChart({
     'settings'
   ) as Partial<SettingsProps>;
 
-  return (
-    <div css={chartContainerStyle}>
-      {showLegend !== undefined && uiState && (
-        <LegendToggle
-          onClick={toggleLegend}
-          showLegend={showLegend}
-          legendPosition={legend.position}
-        />
-      )}
-      <LegendColorPickerWrapperContext.Provider
-        value={{
-          uiState,
-          setColor,
-          legendPosition: legend.position,
-          dataLayers,
-          formattedDatatables,
-          titles,
-          fieldFormats,
-          singleTable,
-        }}
-      >
-        <Chart ref={chartRef}>
-          <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
-            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
-            headerFormatter={
-              !args.detailedTooltip && xAxisColumn
-                ? ({ value }) => (
-                    <TooltipHeader
-                      value={value}
-                      formatter={safeXAccessorLabelRenderer}
-                      xDomain={rawXDomain}
-                    />
-                  )
-                : undefined
-            }
-            actions={
-              !args.detailedTooltip && hasTooltipActions
-                ? [
-                    {
-                      disabled: (selected) => selected.length < 1,
-                      label: (selected) =>
-                        selected.length === 0
-                          ? i18n.translate('expressionXY.tooltipActions.emptyFilterSelection', {
-                              defaultMessage: 'Select at least one series to filter',
-                            })
-                          : i18n.translate('expressionXY.tooltipActions.filterValues', {
-                              defaultMessage: 'Filter {seriesNumber} series',
-                              values: { seriesNumber: selected.length },
-                            }),
-                      onSelect: filterSelectedTooltipValues,
-                    },
-                  ]
-                : undefined
-            }
-            customTooltip={
-              args.detailedTooltip
-                ? ({ header, values }) => (
-                    <CustomTooltip
-                      header={header}
-                      values={values}
-                      titles={titles}
-                      fieldFormats={fieldFormats}
-                      formatFactory={formatFactory}
-                      formattedDatatables={formattedDatatables}
-                      splitAccessors={{
-                        splitColumnAccessor: splitColumnId,
-                        splitRowAccessor: splitRowId,
-                      }}
-                      layers={dataLayers}
-                      xDomain={isTimeViz ? rawXDomain : undefined}
-                    />
-                  )
-                : undefined
-            }
-            type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
-          />
-          <Settings
-            noResults={
-              <EmptyPlaceholder
-                className="xyChart__empty"
-                icon={icon}
-                renderComplete={onRenderChange}
-              />
-            }
-            onRenderChange={onRenderChange}
-            onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
-            externalPointerEvents={{
-              tooltip: { visible: syncTooltips, placement: Placement.Right },
-            }}
-            legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
-            debugState={window._echDebugStateFlag ?? false}
-            showLegend={showLegend}
-            legendPosition={legend?.isInside ? legendInsideParams : legend.position}
-            legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-            theme={[
-              {
-                ...chartTheme,
-                barSeriesStyle: {
-                  ...chartTheme.barSeriesStyle,
-                  ...valueLabelsStyling,
-                },
-                background: {
-                  color: undefined, // removes background for embeddables
-                },
-                legend: {
-                  labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
-                },
-                // if not title or labels are shown for axes, add some padding if required by reference line markers
-                chartMargins: {
-                  ...chartTheme.chartPaddings,
-                  ...computeChartMargins(
-                    linesPaddings,
-                    { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
-                    { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
-                    yAxesMap,
-                    shouldRotate
-                  ),
-                },
-                markSizeRatio: args.markSizeRatio,
-              },
-              ...(Array.isArray(settingsThemeOverrides)
-                ? settingsThemeOverrides
-                : [settingsThemeOverrides]),
-            ]}
-            baseTheme={chartBaseTheme}
-            allowBrushingLastHistogramBin={isTimeViz}
-            rotation={shouldRotate ? 90 : 0}
-            xDomain={xDomain}
-            onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-            onElementClick={interactive ? clickHandler : undefined}
-            legendAction={
-              interactive
-                ? getLegendAction(
-                    dataLayers,
-                    onClickValue,
-                    layerCellValueActions,
-                    fieldFormats,
-                    formattedDatatables,
-                    titles,
-                    singleTable
-                  )
-                : undefined
-            }
-            showLegendExtra={isHistogramViz && valuesInLegend}
-            ariaLabel={args.ariaLabel}
-            ariaUseDefaultSummary={!args.ariaLabel}
-            orderOrdinalBinsBy={
-              args.orderBucketsBySum
-                ? {
-                    direction: Direction.Descending,
-                  }
-                : undefined
-            }
-            {...settingsOverrides}
-          />
-          <XYCurrentTime
-            enabled={Boolean(args.addTimeMarker && isTimeViz)}
-            isDarkMode={darkMode}
-            domain={rawXDomain}
-          />
+  if (renderMode === 'dataOnly') {
+    if (children) {
+      return children({ datatables: [dataLayers[0].table], onRenderComplete: onRenderChange });
+    }
+    return null;
+  }
 
-          <Axis
-            id="x"
-            position={
-              xAxisConfig?.position
-                ? getOriginalAxisPosition(xAxisConfig?.position, shouldRotate)
-                : defaultXAxisPosition
-            }
-            title={xTitle}
-            gridLine={gridLineStyle}
-            hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
-            tickFormat={(d) => {
-              let value = safeXAccessorLabelRenderer(d) || '';
-              if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
-                value = `${value.slice(0, xAxisConfig.truncate)}...`;
-              }
-              return value;
-            }}
-            style={xAxisStyle}
-            showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
-            showDuplicatedTicks={xAxisConfig?.showDuplicates}
-            timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
-            {...getOverridesFor(overrides, 'axisX')}
+  return (
+    <div css={chartWrapperStyle} data-test-subj="xyVisChart">
+      <div css={chartContainerStyle}>
+        {showLegend !== undefined && uiState && (
+          <LegendToggle
+            onClick={toggleLegend}
+            showLegend={showLegend}
+            legendPosition={legend.position}
           />
-          {isSplitChart && splitTable && (
-            <SplitChart
-              splitColumnAccessor={splitColumnAccessor}
-              splitRowAccessor={splitRowAccessor}
-              columns={splitTable.columns}
+        )}
+        <LegendColorPickerWrapperContext.Provider
+          value={{
+            uiState,
+            setColor,
+            legendPosition: legend.position,
+            dataLayers,
+            formattedDatatables,
+            titles,
+            fieldFormats,
+            singleTable,
+          }}
+        >
+          <Chart ref={chartRef}>
+            <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
+              boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+              headerFormatter={
+                !args.detailedTooltip && xAxisColumn
+                  ? ({ value }) => (
+                      <TooltipHeader
+                        value={value}
+                        formatter={safeXAccessorLabelRenderer}
+                        xDomain={rawXDomain}
+                      />
+                    )
+                  : undefined
+              }
+              actions={
+                !args.detailedTooltip && hasTooltipActions
+                  ? [
+                      {
+                        disabled: (selected) => selected.length < 1,
+                        label: (selected) =>
+                          selected.length === 0
+                            ? i18n.translate('expressionXY.tooltipActions.emptyFilterSelection', {
+                                defaultMessage: 'Select at least one series to filter',
+                              })
+                            : i18n.translate('expressionXY.tooltipActions.filterValues', {
+                                defaultMessage: 'Filter {seriesNumber} series',
+                                values: { seriesNumber: selected.length },
+                              }),
+                        onSelect: filterSelectedTooltipValues,
+                      },
+                    ]
+                  : undefined
+              }
+              customTooltip={
+                args.detailedTooltip
+                  ? ({ header, values }) => (
+                      <CustomTooltip
+                        header={header}
+                        values={values}
+                        titles={titles}
+                        fieldFormats={fieldFormats}
+                        formatFactory={formatFactory}
+                        formattedDatatables={formattedDatatables}
+                        splitAccessors={{
+                          splitColumnAccessor: splitColumnId,
+                          splitRowAccessor: splitRowId,
+                        }}
+                        layers={dataLayers}
+                        xDomain={isTimeViz ? rawXDomain : undefined}
+                      />
+                    )
+                  : undefined
+              }
+              type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
             />
-          )}
-          {yAxesConfiguration.map((axis) => {
-            return (
-              <Axis
-                key={axis.groupId}
-                id={axis.groupId}
-                groupId={axis.groupId}
-                position={axis.position}
-                title={axis.title || getYAxesTitles(axis.series)}
-                gridLine={{
-                  visible: axis.showGridLines,
-                }}
-                hide={axis.hide || dataLayers[0]?.simpleView}
-                tickFormat={(d) => {
-                  let value = axis.formatter?.convert(d) || '';
-                  if (axis.truncate && value.length > axis.truncate) {
-                    value = `${value.slice(0, axis.truncate)}...`;
-                  }
-                  return value;
-                }}
-                style={getYAxesStyle(axis)}
-                domain={getYAxisDomain(axis)}
-                showOverlappingLabels={axis.showOverlappingLabels}
-                showDuplicatedTicks={axis.showDuplicates}
-                {...getOverridesFor(
-                  overrides,
-                  /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'
+            <Settings
+              noResults={
+                <EmptyPlaceholder
+                  className="xyChart__empty"
+                  icon={icon}
+                  renderComplete={onRenderChange}
+                />
+              }
+              onRenderChange={onRenderChange}
+              onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
+              externalPointerEvents={{
+                tooltip: { visible: syncTooltips, placement: Placement.Right },
+              }}
+              legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
+              debugState={window._echDebugStateFlag ?? false}
+              showLegend={showLegend}
+              legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+              legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
+              theme={[
+                {
+                  ...chartTheme,
+                  barSeriesStyle: {
+                    ...chartTheme.barSeriesStyle,
+                    ...valueLabelsStyling,
+                  },
+                  background: {
+                    color: undefined, // removes background for embeddables
+                  },
+                  legend: {
+                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                  },
+                  // if not title or labels are shown for axes, add some padding if required by reference line markers
+                  chartMargins: {
+                    ...chartTheme.chartPaddings,
+                    ...computeChartMargins(
+                      linesPaddings,
+                      { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
+                      { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
+                      yAxesMap,
+                      shouldRotate
+                    ),
+                  },
+                  markSizeRatio: args.markSizeRatio,
+                },
+                ...(Array.isArray(settingsThemeOverrides)
+                  ? settingsThemeOverrides
+                  : [settingsThemeOverrides]),
+              ]}
+              baseTheme={chartBaseTheme}
+              allowBrushingLastHistogramBin={isTimeViz}
+              rotation={shouldRotate ? 90 : 0}
+              xDomain={xDomain}
+              onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
+              onElementClick={interactive ? clickHandler : undefined}
+              legendAction={
+                interactive
+                  ? getLegendAction(
+                      dataLayers,
+                      onClickValue,
+                      layerCellValueActions,
+                      fieldFormats,
+                      formattedDatatables,
+                      titles,
+                      singleTable
+                    )
+                  : undefined
+              }
+              showLegendExtra={isHistogramViz && valuesInLegend}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
+              orderOrdinalBinsBy={
+                args.orderBucketsBySum
+                  ? {
+                      direction: Direction.Descending,
+                    }
+                  : undefined
+              }
+              {...settingsOverrides}
+            />
+            <XYCurrentTime
+              enabled={Boolean(args.addTimeMarker && isTimeViz)}
+              isDarkMode={darkMode}
+              domain={rawXDomain}
+            />
+
+            <Axis
+              id="x"
+              position={
+                xAxisConfig?.position
+                  ? getOriginalAxisPosition(xAxisConfig?.position, shouldRotate)
+                  : defaultXAxisPosition
+              }
+              title={xTitle}
+              gridLine={gridLineStyle}
+              hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
+              tickFormat={(d) => {
+                let value = safeXAccessorLabelRenderer(d) || '';
+                if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
+                  value = `${value.slice(0, xAxisConfig.truncate)}...`;
+                }
+                return value;
+              }}
+              style={xAxisStyle}
+              showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
+              showDuplicatedTicks={xAxisConfig?.showDuplicates}
+              timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
+              {...getOverridesFor(overrides, 'axisX')}
+            />
+            {isSplitChart && splitTable && (
+              <SplitChart
+                splitColumnAccessor={splitColumnAccessor}
+                splitRowAccessor={splitRowAccessor}
+                columns={splitTable.columns}
+              />
+            )}
+            {yAxesConfiguration.map((axis) => {
+              return (
+                <Axis
+                  key={axis.groupId}
+                  id={axis.groupId}
+                  groupId={axis.groupId}
+                  position={axis.position}
+                  title={axis.title || getYAxesTitles(axis.series)}
+                  gridLine={{
+                    visible: axis.showGridLines,
+                  }}
+                  hide={axis.hide || dataLayers[0]?.simpleView}
+                  tickFormat={(d) => {
+                    let value = axis.formatter?.convert(d) || '';
+                    if (axis.truncate && value.length > axis.truncate) {
+                      value = `${value.slice(0, axis.truncate)}...`;
+                    }
+                    return value;
+                  }}
+                  style={getYAxesStyle(axis)}
+                  domain={getYAxisDomain(axis)}
+                  showOverlappingLabels={axis.showOverlappingLabels}
+                  showDuplicatedTicks={axis.showDuplicates}
+                  {...getOverridesFor(
+                    overrides,
+                    /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'
+                  )}
+                />
+              );
+            })}
+
+            {!hideEndzones && (
+              <XyEndzones
+                baseDomain={rawXDomain}
+                extendedDomain={xDomain}
+                darkMode={darkMode}
+                histogramMode={dataLayers.every(
+                  (layer) =>
+                    layer.isHistogram &&
+                    (layer.isStacked || !layer.splitAccessors || !layer.splitAccessors.length) &&
+                    (layer.isStacked ||
+                      layer.seriesType !== SeriesTypes.BAR ||
+                      !chartHasMoreThanOneBarSeries)
                 )}
               />
-            );
-          })}
+            )}
 
-          {!hideEndzones && (
-            <XyEndzones
-              baseDomain={rawXDomain}
-              extendedDomain={xDomain}
-              darkMode={darkMode}
-              histogramMode={dataLayers.every(
-                (layer) =>
-                  layer.isHistogram &&
-                  (layer.isStacked || !layer.splitAccessors || !layer.splitAccessors.length) &&
-                  (layer.isStacked ||
-                    layer.seriesType !== SeriesTypes.BAR ||
-                    !chartHasMoreThanOneBarSeries)
-              )}
-            />
-          )}
-
-          {dataLayers.length && (
-            <DataLayers
-              titles={titles}
-              layers={dataLayers}
-              endValue={endValue}
-              timeZone={timeZone}
-              syncColors={syncColors}
-              valueLabels={valueLabels}
-              fillOpacity={args.fillOpacity}
-              formatFactory={formatFactory}
-              paletteService={paletteService}
-              fittingFunction={fittingFunction}
-              emphasizeFitting={emphasizeFitting}
-              yAxesConfiguration={yAxesConfiguration}
-              xAxisConfiguration={
-                xAxisConfig ? axesConfiguration[axesConfiguration.length - 1] : undefined
-              }
-              shouldShowValueLabels={shouldShowValueLabels}
-              formattedDatatables={formattedDatatables}
-              chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
-              defaultXScaleType={defaultXScaleType}
-              fieldFormats={fieldFormats}
-              uiState={uiState}
-              singleTable={singleTable}
-            />
-          )}
-          {referenceLineLayers.length ? (
-            <ReferenceLines
-              layers={referenceLineLayers}
-              xAxisFormatter={xAxisFormatter}
-              axesConfiguration={axesConfiguration}
-              isHorizontal={shouldRotate}
-              paddingMap={linesPaddings}
-              titles={titles}
-              yAxesMap={yAxesMap}
-            />
-          ) : null}
-          {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
-            <Annotations
-              rangeAnnotations={rangeAnnotations}
-              groupedLineAnnotations={groupedLineAnnotations}
-              formatter={xAxisFormatter}
-              isHorizontal={shouldRotate}
-              paddingMap={linesPaddings}
-              isBarChart={filteredBarLayers.length > 0}
-              minInterval={minInterval}
-              simpleView={shouldHideDetails}
-              outsideDimension={
-                rangeAnnotations.length && shouldHideDetails
-                  ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
-                  : shouldUseNewTimeAxis
-                  ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
-                    Number(chartTheme.axes?.tickLabel?.fontSize || 0)
-                  : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
-              }
-            />
-          ) : null}
-          {children?.({ datatables: dataLayers.map(({ table }) => table) })}
-        </Chart>
-      </LegendColorPickerWrapperContext.Provider>
+            {dataLayers.length && (
+              <DataLayers
+                titles={titles}
+                layers={dataLayers}
+                endValue={endValue}
+                timeZone={timeZone}
+                syncColors={syncColors}
+                valueLabels={valueLabels}
+                fillOpacity={args.fillOpacity}
+                formatFactory={formatFactory}
+                paletteService={paletteService}
+                fittingFunction={fittingFunction}
+                emphasizeFitting={emphasizeFitting}
+                yAxesConfiguration={yAxesConfiguration}
+                xAxisConfiguration={
+                  xAxisConfig ? axesConfiguration[axesConfiguration.length - 1] : undefined
+                }
+                shouldShowValueLabels={shouldShowValueLabels}
+                formattedDatatables={formattedDatatables}
+                chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
+                defaultXScaleType={defaultXScaleType}
+                fieldFormats={fieldFormats}
+                uiState={uiState}
+                singleTable={singleTable}
+              />
+            )}
+            {referenceLineLayers.length ? (
+              <ReferenceLines
+                layers={referenceLineLayers}
+                xAxisFormatter={xAxisFormatter}
+                axesConfiguration={axesConfiguration}
+                isHorizontal={shouldRotate}
+                paddingMap={linesPaddings}
+                titles={titles}
+                yAxesMap={yAxesMap}
+              />
+            ) : null}
+            {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
+              <Annotations
+                rangeAnnotations={rangeAnnotations}
+                groupedLineAnnotations={groupedLineAnnotations}
+                formatter={xAxisFormatter}
+                isHorizontal={shouldRotate}
+                paddingMap={linesPaddings}
+                isBarChart={filteredBarLayers.length > 0}
+                minInterval={minInterval}
+                simpleView={shouldHideDetails}
+                outsideDimension={
+                  rangeAnnotations.length && shouldHideDetails
+                    ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+                    : shouldUseNewTimeAxis
+                    ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
+                      Number(chartTheme.axes?.tickLabel?.fontSize || 0)
+                    : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+                }
+              />
+            ) : null}
+            {children?.({
+              datatables: dataLayers.map(({ table }) => table),
+            })}
+          </Chart>
+        </LegendColorPickerWrapperContext.Provider>
+      </div>
     </div>
   );
 }

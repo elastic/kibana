@@ -4046,6 +4046,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/enhanced-lens-embeddable-plugin@link:x-pack/examples/enhance_lens_embeddable_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
   version "0.0.0"
   uid ""

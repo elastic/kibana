@@ -9,7 +9,6 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   Datatable,
@@ -40,12 +39,6 @@ export const strings = {
 
 const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
 const PartitionVisComponent = withSuspense(LazyPartitionVisComponent);
-
-const partitionVisRenderer = css({
-  position: 'relative',
-  width: '100%',
-  height: '100%',
-});
 
 /**
  * Retrieves the compatible CELL_VALUE_TRIGGER actions indexed by column
@@ -81,7 +74,8 @@ export const getPartitionVisRenderer: (
   render: async (
     domNode,
     { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
-    handlers
+    handlers,
+    childrenFn
   ) => {
     const { core, plugins } = getStartDeps();
 
@@ -113,23 +107,24 @@ export const getPartitionVisRenderer: (
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <div css={partitionVisRenderer}>
-            <PartitionVisComponent
-              chartsThemeService={plugins.charts.theme}
-              palettesRegistry={palettesRegistry}
-              visParams={visConfig}
-              visData={visData}
-              visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={renderComplete}
-              fireEvent={handlers.event}
-              interactive={handlers.isInteractive()}
-              uiState={handlers.uiState as PersistedState}
-              services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
-              syncColors={syncColors}
-              columnCellValueActions={columnCellValueActions}
-              overrides={overrides}
-            />
-          </div>
+          <PartitionVisComponent
+            chartsThemeService={plugins.charts.theme}
+            palettesRegistry={palettesRegistry}
+            visParams={visConfig}
+            visData={visData}
+            visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+            renderComplete={renderComplete}
+            fireEvent={handlers.event}
+            interactive={handlers.isInteractive()}
+            uiState={handlers.uiState as PersistedState}
+            services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
+            syncColors={syncColors}
+            columnCellValueActions={columnCellValueActions}
+            overrides={overrides}
+            renderMode={handlers.getRenderMode()}
+          >
+            {childrenFn}
+          </PartitionVisComponent>
         </KibanaThemeProvider>
       </I18nProvider>,
       domNode

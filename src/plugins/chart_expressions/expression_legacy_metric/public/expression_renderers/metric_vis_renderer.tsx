@@ -10,10 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  ExpressionValueVisDimension,
-  VisualizationContainer,
-} from '@kbn/visualizations-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -66,7 +63,7 @@ export const getMetricVisRenderer: (
   name: EXPRESSION_METRIC_NAME,
   displayName: 'metric visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers) => {
+  render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers, childrenFn) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -94,21 +91,16 @@ export const getMetricVisRenderer: (
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
-        <VisualizationContainer
-          data-test-subj="legacyMtrVis"
-          className="legacyMtrVis"
-          showNoResult={!visData.rows?.length}
+        <MetricVisComponent
+          visData={visData}
+          visParams={visConfig}
           renderComplete={renderComplete}
+          fireEvent={handlers.event}
+          filterable={filterable}
           handlers={handlers}
         >
-          <MetricVisComponent
-            visData={visData}
-            visParams={visConfig}
-            renderComplete={renderComplete}
-            fireEvent={handlers.event}
-            filterable={filterable}
-          />
-        </VisualizationContainer>
+          {childrenFn}
+        </MetricVisComponent>
       </KibanaThemeProvider>,
       domNode
     );

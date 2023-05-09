@@ -989,6 +989,10 @@ export interface VisualizationType {
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+  /**
+   * Whether to show or hide the visualization type in the chart switcher
+   */
+  hidden?: boolean;
 }
 
 export interface VisualizationDisplayOptions {

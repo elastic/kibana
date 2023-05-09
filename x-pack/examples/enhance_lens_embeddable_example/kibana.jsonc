@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/enhanced-lens-embeddable-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "enhancedLensEmbeddable",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "enhanced_lens_embeddable_example"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "embeddable",
+      "developerExamples",
+      "kibanaReact"
+    ]
+  }
+}

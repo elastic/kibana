@@ -186,6 +186,9 @@ export interface MetricVisComponentProps {
   renderMode: RenderMode;
   filterable: boolean;
   overrides?: AllowedSettingsOverrides;
+  children:
+    | ((props: { datatables: Datatable[]; onRenderComplete: () => void }) => JSX.Element)
+    | undefined;
 }
 
 export const MetricVis = ({
@@ -196,25 +199,27 @@ export const MetricVis = ({
   renderMode,
   filterable,
   overrides,
+  children,
 }: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
 
-  let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
-  if (config.dimensions.secondaryMetric) {
-    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
-    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, data.columns);
-  }
+  const secondaryMetricColumn: DatatableColumn | undefined = config.dimensions.secondaryMetric
+    ? getColumnByAccessor(config.dimensions.secondaryMetric, data.columns)
+    : undefined;
+  const formatSecondaryMetric: ReturnType<typeof getMetricFormatter> | undefined = config.dimensions
+    .secondaryMetric
+    ? getMetricFormatter(config.dimensions.secondaryMetric, data.columns)
+    : undefined;
 
-  let breakdownByColumn: DatatableColumn | undefined;
-  let formatBreakdownValue: FieldFormatConvertFunction;
-  if (config.dimensions.breakdownBy) {
-    breakdownByColumn = getColumnByAccessor(config.dimensions.breakdownBy, data.columns);
-    formatBreakdownValue = getFormatService()
-      .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
-      .getConverterFor('text');
-  }
+  const breakdownByColumn: DatatableColumn | undefined = config.dimensions.breakdownBy
+    ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
+    : undefined;
+  const formatBreakdownValue: FieldFormatConvertFunction | undefined = config.dimensions.breakdownBy
+    ? getFormatService()
+        .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
+        .getConverterFor('text')
+    : undefined;
 
   const maxColId = config.dimensions.max
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
@@ -224,9 +229,10 @@ export const MetricVis = ({
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
     const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
-    const title = breakdownByColumn
-      ? formatBreakdownValue(row[breakdownByColumn.id])
-      : primaryMetricColumn.name;
+    const title =
+      breakdownByColumn && formatBreakdownValue
+        ? formatBreakdownValue(row[breakdownByColumn.id])
+        : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
     const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
     const baseMetric: MetricWNumber = {
@@ -293,10 +299,9 @@ export const MetricVis = ({
 
     return baseMetric;
   });
-
-  if (config.metric.minTiles) {
-    while (metricConfigs.length < config.metric.minTiles) metricConfigs.push(undefined);
-  }
+  const minTiles = config.metric.minTiles || 0;
+  const missingTiles = minTiles - metricConfigs.length;
+  metricConfigs.push(...Array(missingTiles > 0 ? missingTiles : 0));
 
   const grid: MetricSpec['data'] = [];
   const {
@@ -316,14 +321,11 @@ export const MetricVis = ({
     [renderComplete]
   );
 
-  let pixelHeight;
-  let pixelWidth;
-  if (renderMode === 'edit') {
-    // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
-    const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
-    pixelHeight = grid.length * maxTileSideLength;
-    pixelWidth = grid[0]?.length * maxTileSideLength;
-  }
+  // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
+  const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
+
+  const pixelHeight = renderMode === 'edit' ? grid.length * maxTileSideLength : undefined;
+  const pixelWidth = renderMode === 'edit' ? grid[0]?.length * maxTileSideLength : undefined;
 
   const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -331,7 +333,7 @@ export const MetricVis = ({
 
   const baseTheme = getThemeService().useChartsBaseTheme();
 
-  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
+  const minHeight = chartTheme.metric?.minHeight || baseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * grid.length;
@@ -341,11 +343,19 @@ export const MetricVis = ({
         : `${minimumRequiredVerticalSpace}px`
     );
   }, [grid.length, minHeight, scrollDimensions.height]);
+  const scrollStyling = useEuiScrollBar();
 
   const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
     overrides,
     'settings'
   ) as Partial<SettingsProps>;
+
+  if (renderMode === 'dataOnly') {
+    if (children) {
+      return children({ datatables: [data], onRenderComplete: () => onRenderChange(true) });
+    }
+    return null;
+  }
 
   return (
     <div
@@ -356,7 +366,7 @@ export const MetricVis = ({
         max-height: 100%;
         max-width: 100%;
         overflow-y: auto;
-        ${useEuiScrollBar()}
+        ${scrollStyling}
       `}
     >
       <div

@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -244,44 +243,35 @@ export const getXyChartRenderer = ({
       handlers.done();
     };
 
-    const chartContainerStyle = css({
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-    });
-    console.log({ childrenFn });
-
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <div css={chartContainerStyle} data-test-subj="xyVisChart">
-            <XYChartReportable
-              {...config}
-              data={deps.data}
-              formatFactory={deps.formatFactory}
-              chartsActiveCursorService={deps.activeCursor}
-              chartsThemeService={deps.theme}
-              paletteService={deps.paletteService}
-              timeZone={deps.timeZone}
-              timeFormat={deps.timeFormat}
-              eventAnnotationService={deps.eventAnnotationService}
-              useLegacyTimeAxis={deps.useLegacyTimeAxis}
-              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
-              interactive={handlers.isInteractive()}
-              onClickValue={onClickValue}
-              onClickMultiValue={onClickMultiValue}
-              layerCellValueActions={layerCellValueActions}
-              onSelectRange={onSelectRange}
-              renderMode={handlers.getRenderMode()}
-              syncColors={config.syncColors}
-              syncTooltips={config.syncTooltips}
-              syncCursor={config.syncCursor}
-              uiState={handlers.uiState as PersistedState}
-              renderComplete={renderComplete}
-            >
-              {childrenFn}
-            </XYChartReportable>
-          </div>
+          <XYChartReportable
+            {...config}
+            data={deps.data}
+            formatFactory={deps.formatFactory}
+            chartsActiveCursorService={deps.activeCursor}
+            chartsThemeService={deps.theme}
+            paletteService={deps.paletteService}
+            timeZone={deps.timeZone}
+            timeFormat={deps.timeFormat}
+            eventAnnotationService={deps.eventAnnotationService}
+            useLegacyTimeAxis={deps.useLegacyTimeAxis}
+            minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+            interactive={handlers.isInteractive()}
+            onClickValue={onClickValue}
+            onClickMultiValue={onClickMultiValue}
+            layerCellValueActions={layerCellValueActions}
+            onSelectRange={onSelectRange}
+            renderMode={handlers.getRenderMode()}
+            syncColors={config.syncColors}
+            syncTooltips={config.syncTooltips}
+            syncCursor={config.syncCursor}
+            uiState={handlers.uiState as PersistedState}
+            renderComplete={renderComplete}
+          >
+            {childrenFn}
+          </XYChartReportable>
         </I18nProvider>
       </KibanaThemeProvider>,
       domNode

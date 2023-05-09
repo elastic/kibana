@@ -78,7 +78,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
-import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
+import { ExpressionWrapper, ExpressionWrapperProps, RenderProps } from './expression_wrapper';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
@@ -163,7 +163,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
-  children?: (props: unknown) => JSX.Element;
+  children?: (props: RenderProps) => JSX.Element;
 }
 
 export type LensByValueInput = {
@@ -939,7 +939,7 @@ export class Embeddable
               lensInspector={this.lensInspector}
               searchContext={this.getMergedSearchContext()}
               variables={{
-                embeddableTitle: this.getTitle(),
+                embeddableTitle: input.renderMode === 'dataOnly' ? this.getTitle() : undefined,
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
                 ...('overrides' in input ? { overrides: input.overrides } : {}),
               }}
@@ -1339,8 +1339,14 @@ export class Embeddable
       this.logError('validation');
     }
 
-    const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
-    const description = input.hidePanelTitles ? '' : input.description ?? this.savedVis.description;
+    const title =
+      input.hidePanelTitles || input.renderMode === 'dataOnly'
+        ? ''
+        : input.title ?? this.savedVis.title;
+    const description =
+      input.hidePanelTitles || input.renderMode === 'dataOnly'
+        ? ''
+        : input.description ?? this.savedVis.description;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       defaultTitle: this.savedVis.title,
