@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, within, act } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -139,6 +139,7 @@ const getMockStorageState = (groups: string[] = ['none']) =>
       options: mockOptions,
     },
   });
+
 describe('GroupedAlertsTable', () => {
   const { storage } = createSecuritySolutionStorageMock();
   let store: ReturnType<typeof createStore>;
@@ -192,20 +193,6 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('renders grouping table in first accordion level when single group is selected', async () => {
-    mockUseQueryAlerts
-      .mockImplementationOnce(() => mockQueryResponse)
-      .mockImplementationOnce(() => mockQueryResponse)
-      // wait for queriedGroup ref update before return data
-      .mockImplementation((i) => {
-        if (i.skip) {
-          return mockQueryResponse;
-        }
-        return {
-          ...mockQueryResponse,
-          data: groupingSearchResponse,
-        };
-      });
-
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
@@ -215,9 +202,7 @@ describe('GroupedAlertsTable', () => {
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
-    act(() => {
-      fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
-    });
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
 
     const level0 = getAllByTestId('grouping-accordion-content')[0];
     expect(within(level0).getByTestId('alerts-table')).toBeInTheDocument();
@@ -295,39 +280,12 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it.only('renders grouping table in second accordion level when 2 groups are selected', async () => {
+  it('renders grouping table in second accordion level when 2 groups are selected', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
-    mockUseQueryAlerts
-      .mockImplementationOnce(() => mockQueryResponse)
-      .mockImplementationOnce(() => mockQueryResponse)
-      // wait for queriedGroup ref update before return data
-      .mockImplementation((i) => {
-        if (i.skip) {
-          return mockQueryResponse;
-        }
-        // return different result for host.name in order to trigger update to parseGroupingQuery
-        if (i.query?.aggs?.groupsCount?.cardinality?.field === 'host.name') {
-          return {
-            ...mockQueryResponse,
-            data: {
-              ...groupingSearchResponse,
-              aggregations: {
-                groupsCount: {
-                  value: 3000,
-                },
-              },
-            },
-          };
-        }
-        return {
-          ...mockQueryResponse,
-          data: groupingSearchResponse,
-        };
-      });
 
-    const { getAllByTestId, debug } = render(
+    const { getAllByTestId } = render(
       <TestProviders store={store}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
@@ -336,18 +294,7 @@ describe('GroupedAlertsTable', () => {
 
     const level0 = getAllByTestId('grouping-accordion-content')[0];
     expect(within(level0).queryByTestId('alerts-table')).not.toBeInTheDocument();
-    fireEvent.click(getAllByTestId('group-panel-toggle')[1]);
-    // console.log('first debug');
-    // debug(getAllByTestId('group-panel-toggle')[1]);
-    // console.log('about to debug', within(getAllByTestId('grouping-accordion-content')[0]));
-    // debug(getAllByTestId('grouping-accordion'));
-    // await waitFor(() => {
-    expect(
-      within(getAllByTestId('grouping-accordion-content')[0]).getAllByTestId(
-        'group-panel-toggle'
-      )[0]
-    ).toBeInTheDocument();
-    // });
+
     fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
     const level1 = within(getAllByTestId('grouping-accordion-content')[1]);
     expect(level1.getByTestId('alerts-table')).toBeInTheDocument();

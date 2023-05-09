@@ -179,6 +179,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     endDate: to,
   });
 
+  const queriedGroup = useRef<string | null>(null);
   const {
     data: alertsGroupsData,
     loading: isLoadingGroups,
@@ -193,28 +194,20 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
-  const queriedGroup = useRef('');
-
   const aggs = useMemo(
     // queriedGroup because `selectedGroup` updates before the query response
-    () => {
-      console.log(
-        'Step 2: update queriedGroup and groupsCount',
-        queriedGroup.current,
-        alertsGroupsData?.aggregations?.groupsCount?.value
-      );
-      return parseGroupingQuery(queriedGroup.current, alertsGroupsData?.aggregations);
-    },
-    [alertsGroupsData?.aggregations]
+    () =>
+      parseGroupingQuery(
+        // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
+        queriedGroup.current === null ? selectedGroup : queriedGroup.current,
+        alertsGroupsData?.aggregations
+      ),
+    [alertsGroupsData?.aggregations, selectedGroup]
   );
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
       queriedGroup.current = queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '';
-      console.log(
-        'Step 1: set queriedGroup.current to',
-        queryGroups?.aggs?.groupsCount?.cardinality?.field ?? ''
-      );
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
