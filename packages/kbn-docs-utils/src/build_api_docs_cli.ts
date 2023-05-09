@@ -80,7 +80,11 @@ export function runBuildApiDocsCli() {
       spanInitialDocIds?.end();
       const spanPlugins = transaction?.startSpan('build_api_docs.findPlugins', 'setup');
 
-      const plugins = findPlugins(stats ? pluginFilter : undefined);
+      const plugins = findPlugins(stats && pluginFilter ? pluginFilter : undefined);
+
+      if (Array.isArray(pluginFilter) && pluginFilter.length !== plugins.length) {
+        throw createFlagError('expected --plugin was not found');
+      }
 
       spanPlugins?.end();
 
