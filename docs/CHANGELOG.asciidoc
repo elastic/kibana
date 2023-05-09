@@ -394,7 +394,7 @@ Dashboard::
 * Removed Reload on Clone and Replace Panel {kibana-pull}155561[#155561]
 * Fixes z index of toolbar items {kibana-pull}154501[#154501]
 * Fixes inherited input race condition {kibana-pull}154293[#154293]
-* Fixes Changing label of a geospatial filter on causes filter disappear from map {kibana-pull}154087[#154087]
+* Fixes Changing label of a geospatial filter causes filter disappear from map {kibana-pull}154087[#154087]
 
 Discover::
 * Adds a "Temporary" badge for temporary data views in the Alerts flyout {kibana-pull}155717[#155717]
