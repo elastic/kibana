@@ -80,6 +80,7 @@ export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';
 
+export { useAlertsHistory } from './hooks/use_alerts_history';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';

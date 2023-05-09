@@ -19,7 +19,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { estypes } from '@elastic/elasticsearch';
-import { InfraClientCoreStart } from '../types';
+import { ObservabilityAppServices } from '../application/types';
 
 interface Props {
   featureIds: ValidFeatureId[];
@@ -37,7 +37,7 @@ interface FetchAlertsHistory {
 }
 
 export function useAlertsHistory({ featureIds, ruleId, dateRange }: Props) {
-  const { http } = useKibana<InfraClientCoreStart>().services;
+  const { http } = useKibana<ObservabilityAppServices>().services;
   const abortCtrlRef = useRef(new AbortController());
 
   const [state, refetch] = useAsyncFn(

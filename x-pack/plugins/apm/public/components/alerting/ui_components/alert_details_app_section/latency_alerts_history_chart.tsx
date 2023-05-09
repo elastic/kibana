@@ -21,14 +21,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { convertTo } from '@kbn/observability-plugin/public';
+import { convertTo, useAlertsHistory } from '@kbn/observability-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useFetchTriggeredAlertsHistory } from '../../../../hooks/use_fetch_triggered_alert_history';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { filterNil } from '../../../shared/charts/latency_chart';
@@ -125,10 +125,12 @@ export function LatencyAlertsHistoryChart({
   const timeseriesLatency = [currentPeriod, previousPeriod].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
-  const { triggeredAlertsData } = useFetchTriggeredAlertsHistory({
-    features: 'apm',
-    ruleId,
-  });
+  const { totalTriggeredAlerts, avgTimeToRecoverUS, histogramTriggeredAlerts } =
+    useAlertsHistory({
+      featureIds: [AlertConsumers.APM],
+      ruleId,
+      dateRange: { from: start, to: end },
+    });
 
   return (
     <EuiPanel hasBorder={true}>
@@ -159,7 +161,7 @@ export function LatencyAlertsHistoryChart({
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
+                  <h3>{totalTriggeredAlerts || '-'}</h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
@@ -180,10 +182,10 @@ export function LatencyAlertsHistoryChart({
             <EuiText>
               <EuiTitle size="s">
                 <h3>
-                  {triggeredAlertsData?.avgTimeToRecoverUS
+                  {avgTimeToRecoverUS
                     ? convertTo({
                         unit: 'minutes',
-                        microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
+                        microseconds: avgTimeToRecoverUS,
                         extended: true,
                       }).formatted
                     : '-'}
@@ -213,8 +215,8 @@ export function LatencyAlertsHistoryChart({
             key={'annotationsAlertHistory'}
             domainType={AnnotationDomainType.XDomain}
             dataValues={
-              triggeredAlertsData?.histogramTriggeredAlerts
-                .filter((annotation) => annotation.doc_count > 0)
+              histogramTriggeredAlerts
+                ?.filter((annotation) => annotation.doc_count > 0)
                 .map((annotation) => {
                   return {
                     dataValue: annotation.key,
