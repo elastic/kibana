@@ -11,7 +11,7 @@ set -euo pipefail
 install() {
   curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.2/install.sh | bash
   source ~/.nvm/nvm.sh
-  nvm install 20.0.0
+  nvm install v20.0.0
 
   echo '--- Verify Install'
   node --version
@@ -26,6 +26,7 @@ install
 # popd
 
 junitReport() {
+  nvm use v20.0.0
   pushd packages/kbn-test/new_test_runner
   tgt="../../../target/junit"
   node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$tgt"
