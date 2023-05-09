@@ -18,6 +18,7 @@ import {
 } from '@kbn/core/server';
 
 import { upsertTemplate } from './lib/manage_index_templates';
+import { runImplicitCollection } from './lib/implicit_collection';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 
@@ -28,7 +29,7 @@ const configSchema = schema.object({
   implicitCollection: schema.maybe(
     schema.object({
       enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-      interval: schema.maybe(schema.duration({ defaultValue: '5m' })),
+      interval: schema.duration({ defaultValue: '5m' }),
       input: ElasticsearchBaseConfig.elasticsearch.schema,
     })
   ),
@@ -41,10 +42,12 @@ export const config: PluginConfigDescriptor<AssetManagerConfig> = {
 };
 
 export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
+  private context: PluginInitializerContext<AssetManagerConfig>;
   public config: AssetManagerConfig;
   public logger: Logger;
 
   constructor(context: PluginInitializerContext<AssetManagerConfig>) {
+    this.context = context;
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -65,6 +68,11 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
       this.logger.info(
         `Implicit collection set to run every ${this.config.implicitCollection.interval}`
       );
+
+      runImplicitCollection({
+        intervalMs: this.config.implicitCollection.interval.asMilliseconds(),
+        logger: this.context.logger.get('implicit_collection'),
+      });
     }
 
     return {};
