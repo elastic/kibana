@@ -929,6 +929,20 @@
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.synthetics",
+            "type": "Object",
+            "tags": [],
+            "label": "synthetics",
+            "description": [],
+            "signature": [
+              "{ readonly featureRoles: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
