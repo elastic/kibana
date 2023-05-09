@@ -11,7 +11,8 @@ import { setupSpacesAndUsers, tearDown } from '../../../setup';
 // eslint-disable-next-line import/no-default-export
 export default function telemetryTests({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  describe('Alerting and Actions Telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/136153
+  describe.skip('Alerting and Actions Telemetry', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/event_log_telemetry');
       // reset the state in the telemetry task
