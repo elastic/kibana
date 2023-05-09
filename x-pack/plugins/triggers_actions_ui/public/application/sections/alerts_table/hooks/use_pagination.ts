@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { BulkActionsVerbs } from '../../../../types';
 import { BulkActionsContext } from '../bulk_actions/context';
@@ -74,6 +74,19 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
     },
     [onChangePageIndex, pagination.pageIndex, pagination.pageSize]
   );
+
+  useEffect(() => {
+    setPagination((prevPagination) => {
+      if (prevPagination.pageIndex !== pageIndex && prevPagination.pageSize !== pageSize) {
+        return { pageIndex, pageSize };
+      } else if (prevPagination.pageIndex !== pageIndex && prevPagination.pageSize === pageSize) {
+        return { ...prevPagination, pageIndex };
+      } else if (prevPagination.pageIndex === pageIndex && prevPagination.pageSize !== pageSize) {
+        return { ...prevPagination, pageSize };
+      }
+      return prevPagination;
+    });
+  }, [pageIndex, pageSize]);
 
   return {
     pagination,
