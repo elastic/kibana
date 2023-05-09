@@ -12,9 +12,7 @@ import { update, UpdateParams } from './methods/update';
 import { find, FindResult } from './methods/find';
 import { deleteMaintenanceWindow, DeleteParams } from './methods/delete';
 import { archive, ArchiveParams } from './methods/archive';
-import {
-  getActiveMaintenanceWindows,
-} from './methods/get_active_maintenance_windows';
+import { getActiveMaintenanceWindows } from './methods/get_active_maintenance_windows';
 import { finish, FinishParams } from './methods/finish';
 
 import {

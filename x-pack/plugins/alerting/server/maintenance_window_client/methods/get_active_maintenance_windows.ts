@@ -26,7 +26,7 @@ export interface MaintenanceWindowAggregationResult {
 }
 
 export async function getActiveMaintenanceWindows(
-  context: MaintenanceWindowClientContext,
+  context: MaintenanceWindowClientContext
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
 
