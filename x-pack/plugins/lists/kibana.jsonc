@@ -12,15 +12,10 @@
     ],
     "optionalPlugins": [
       "spaces",
-      "security",
-      "kibana"
+      "security"
     ],
     "extraPublicDirs": [
       "common"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "data"
     ]
   }
 }

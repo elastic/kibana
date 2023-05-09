@@ -12,14 +12,15 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FILTER_OPERATORS, Operator } from './filter_operators';
+import { Operator } from './filter_operators';
 
 export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
   return indexPattern?.fields.find((field) => field.name === filter.meta.key);
 }
 
-export function getOperatorFromFilter(filter: Filter) {
-  return FILTER_OPERATORS.find((operator) => {
+export function getOperatorFromFilter(filter: Filter, operators: Operator[]) {
+  console.log('getOperatorFromFilter', { filter, operators });
+  return operators.find((operator) => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }
@@ -28,8 +29,8 @@ export function getFilterableFields(indexPattern: DataView) {
   return indexPattern.fields.filter(isFilterable);
 }
 
-export function getOperatorOptions(field: DataViewField) {
-  return FILTER_OPERATORS.filter((operator) => {
+export function getOperatorOptions(field: DataViewField, operators: Operator[]) {
+  return operators.filter((operator) => {
     if (operator.field) return operator.field(field);
     if (operator.fieldTypes) return operator.fieldTypes.includes(field.type);
     return true;

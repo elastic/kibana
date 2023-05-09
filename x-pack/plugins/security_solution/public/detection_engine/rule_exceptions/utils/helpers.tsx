@@ -896,7 +896,6 @@ export const prepopulateAlertData = (
   name = 'foo',
   alertData: AlertData
 ): ExceptionsBuilderExceptionItem[] => {
-  console.log({ alertData });
   const item = getNewExceptionItem({
     listId: undefined,
     namespaceType: undefined,
@@ -904,12 +903,11 @@ export const prepopulateAlertData = (
   });
   const entries = fieldsToLookFor.reduce((acc, field) => {
     if (alertData[field]) {
-      return [...acc, { field, operator: 'is_one_of', type: 'matches', value: alertData[field] }];
+      return [...acc, { field, operator: 'is_one_of', type: 'match_any', value: alertData[field] }];
     } else {
       return acc;
     }
   }, []);
   item.entries = entries;
-  console.log({ item });
   return [item];
 };

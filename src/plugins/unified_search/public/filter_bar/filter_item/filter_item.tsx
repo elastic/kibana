@@ -41,6 +41,7 @@ import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { FilterPanelOption } from '../../types';
 import {
+  FILTER_OPERATORS,
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_editor';
@@ -385,6 +386,7 @@ function FilterItemComponent(props: FilterItemProps) {
           items={[
             <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
               <FilterEditor
+                operators={FILTER_OPERATORS}
                 filter={filter}
                 indexPatterns={indexPatterns}
                 onSubmit={onSubmit}

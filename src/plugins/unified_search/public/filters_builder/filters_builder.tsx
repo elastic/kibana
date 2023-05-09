@@ -16,8 +16,10 @@ import { FiltersBuilderReducer } from './reducer';
 import { getPathInArray } from './utils';
 import { FilterLocation } from './types';
 import { filtersBuilderCss } from './filters_builder.styles';
+import { Operator } from '../filter_bar/filter_editor/lib';
 
 export interface FiltersBuilderProps {
+  operators: Operator[];
   filters: Filter[];
   dataView: DataView;
   onChange: (filters: Filter[]) => void;
@@ -37,11 +39,11 @@ function FiltersBuilder({
   filters,
   timeRangeForSuggestionsOverride,
   filtersForSuggestions,
+  operators,
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
   disabled = false,
 }: FiltersBuilderProps) {
-  console.log({ dataView });
   const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
@@ -122,6 +124,7 @@ function FiltersBuilder({
     <div className={filtersBuilderCss(sPaddingSize)}>
       <FiltersBuilderContextType.Provider
         value={{
+          operators,
           globalParams: { hideOr, maxDepth },
           dataView,
           dispatch,

@@ -56,12 +56,14 @@ export const transformExceptionsToFilter = (
 
       switch (entry.type) {
         case 'match':
-          console.log('META', { indexPattern });
-          return buildPhraseFilter(foundField, entry.value, indexPattern);
+          const match = buildPhraseFilter(foundField, entry.value, indexPattern);
+          return { ...match, meta: { ...match.meta, negate: entry.operator === 'excluded' } };
         case 'exists':
-          return buildExistsFilter(foundField, indexPattern);
+          const exists = buildExistsFilter(foundField, indexPattern);
+          return { ...exists, meta: { ...exists.meta, negate: entry.operator === 'excluded' } };
         case 'match_any':
-          return buildPhrasesFilter(foundField, entry.value, indexPattern);
+          const matchAny = buildPhrasesFilter(foundField, entry.value, indexPattern);
+          return { ...matchAny, meta: { ...matchAny.meta, negate: entry.operator === 'excluded' } };
         default:
           return buildEmptyFilter(false, indexPattern.title);
       }
@@ -72,7 +74,7 @@ export const transformExceptionsToFilter = (
     return buildCombinedFilter('AND', entryFilters, indexPattern);
   });
   if (itemsFilters.length === 1) {
-    return itemsFilters;
+    return itemsFilters[0];
   }
   return buildCombinedFilter('OR', itemsFilters, indexPattern);
 };
