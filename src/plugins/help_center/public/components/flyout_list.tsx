@@ -33,6 +33,9 @@ import {
   EuiPanel,
   EuiOverlayMask,
   EuiFocusTrap,
+  euiCanAnimate,
+  euiFlyoutSlideInRight,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -50,9 +53,8 @@ export const HelpCenterFlyout = (
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
   const { showPlainSpinner, ...rest } = props;
 
-  const [width, setWidth] = useState(400);
-  const [height, setHeight] = useState(400);
-  // console.log(helpLinks);
+  const euiThemeContext = useEuiTheme();
+  const euiTheme = euiThemeContext.euiTheme;
 
   const globalCustomContent = useMemo(() => {
     return helpLinks?.globalHelpExtensionMenuLinks
@@ -201,24 +203,31 @@ export const HelpCenterFlyout = (
           left: 0px;
         `}
       >
-        <Draggable handle=".handle" bounds="parent" defaultPosition={{ x: 400, y: 0 }}>
+        <Draggable handle=".handle" bounds="parent" positionOffset={{ x: 0, y: 0 }}>
           <ResizableBox
-            width={300}
-            height={300}
+            width={400}
+            height={400}
             css={css`
+              position: absolute;
+              top: 15px;
+              left: calc(100vw - 430px);
+
               min-height: 100px;
               min-width: 33%;
               max-height: 95%;
               max-width: 95%;
             `}
-            // minConstraints={[300, 100]}
-            // maxConstraints={[600, 800]}
           >
             <EuiPanel
               paddingSize="l"
               css={css`
                 width: 100%;
                 height: 100%;
+
+                ${euiCanAnimate} {
+                  animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.normal}
+                    ${euiTheme.animation.resistance};
+                }
               `}
               aria-labelledby="flyoutSmallTitle"
               className="eui-yScroll"
