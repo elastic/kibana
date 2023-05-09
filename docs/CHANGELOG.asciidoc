@@ -186,7 +186,10 @@ APM::
 * Adds warning to Edit Rule Flyout when publicUrl is not configured {kibana-pull}149832[#149832]
 
 Dashboard::
-Adds the ability to scroll the panel section {kibana-pull}145628[#145628]
+Pins the unified search bar and dashboard toolbar to the top of the dashboard page when scrolling {kibana-pull}145628[#145628]
+
+Discover::
+Adds log pattern analysis {kibana-pull}153449[#153449]
 
 Elastic Security::
 For the Elastic Security 8.8.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -266,7 +269,6 @@ Dashboard::
 * Adds reset button {kibana-pull}154872[#154872]
 * Adds unified dashboard settings {kibana-pull}153862[#153862]
 * Adds the ability to scroll to a new panel {kibana-pull}152056[#152056]
-* Adds button and minimal editor settings {kibana-pull}151161[#151161]
 
 Discover::
 * Adds the ability to allow wildcards in field search {kibana-pull}155540[#155540]
@@ -315,7 +317,7 @@ Lens & Visualizations::
 * Adds Random Sampling to *Lens* {kibana-pull}151749[#151749]
 
 Machine Learning::
-* DFA creation wizard: add ability to add time field to result data view {kibana-pull}155669[#155669]
+* Data Frame Analytics creation wizard: add ability to add time field to result data view {kibana-pull}155669[#155669]
 * Display info when no datafeed preview results are found {kibana-pull}155650[#155650]
 * Adding ignore unavailable indices option to anomaly detection job wizards {kibana-pull}155527[#155527]
 * Support multiple model deployments {kibana-pull}155375[#155375]
@@ -327,17 +329,14 @@ Machine Learning::
 * Explain Log Rate Spikes: adds popover to analysis table for viewing other field values {kibana-pull}154689[#154689]
 * Explain Log Rate Spikes: Makes use of random sampling for overall histogram chart {kibana-pull}154520[#154520]
 * Explain Log Rate Spikes: Adds table action to copy filter to clipboard {kibana-pull}154311[#154311]
-* Data Frame Analytics: support custom urls in jobs {kibana-pull}154287[#154287]
 * Change point detection: support for multiple metric and split fields {kibana-pull}154237[#154237]
 * Enhances support for counter fields in data visualizer / field statistics {kibana-pull}153893[#153893]
-* Explain Log Rate Spikes: Support to filter fields from grouping {kibana-pull}153864[#153864]
 * Custom sorting by message level on Notifications page {kibana-pull}153462[#153462]
-* Log pattern analysis in Discover {kibana-pull}153449[#153449]
+* Adds log pattern analysis in Discover {kibana-pull}153449[#153449]
 * Explain Log Rate Spikes: Improves grouping using the `include` option of the `frequent_item_sets` agg {kibana-pull}153091[#153091]
 * Data Frame Analytics exploration: adds actions column with link to discover {kibana-pull}151482[#151482]
 * Allows row expansion for blocked anomaly detection jobs {kibana-pull}151351[#151351]
 * Enhances job and datafeed config editors in the Advanced anomaly detection job wizard to provide suggestions and documentation {kibana-pull}146968[#146968]
-* Adds option to Reauthorize transform on Management page {kibana-pull}154736[#154736]
 
 Management::
 * Adds timezone support for Transforms date histogram pivot configuration {kibana-pull}155535[#155535]
@@ -349,6 +348,7 @@ Management::
 * Adds improvements for index pattern input in the data view flyout {kibana-pull}152138[#152138]
 * Adds a new description for the metadata field in ingest pipelines {kibana-pull}150935[#150935]
 * Adds a _meta field to the Ingest pipelines form {kibana-pull}149976[#149976]
+* Adds option to Reauthorize transform on Management page {kibana-pull}154736[#154736]
 
 Maps::
 Adds metrics mask {kibana-pull}154983[#154983]
