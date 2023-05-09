@@ -7,6 +7,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { migrationRetryCallCluster } from '@kbn/core-elasticsearch-server-internal';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { IndexMap } from './core';
@@ -40,17 +41,24 @@ export async function getCurrentIndexTypesMap({
   mainIndex,
   defaultIndexTypesMap,
   logger,
+  retryDelay = 2500,
 }: {
   client: ElasticsearchClient;
   mainIndex: string;
   defaultIndexTypesMap: IndexTypesMap;
   logger: Logger;
+  retryDelay?: number;
 }): Promise<IndexTypesMap | undefined> {
   try {
     // check if the main index (i.e. .kibana) exists
-    const mapping = await client.indices.getMapping({
-      index: mainIndex,
-    });
+    const mapping = await migrationRetryCallCluster(
+      () =>
+        client.indices.getMapping({
+          index: mainIndex,
+        }),
+      logger,
+      retryDelay
+    );
 
     // main index exists, try to extract the indexTypesMap from _meta
     const meta = Object.values(mapping)?.[0]?.mappings._meta;

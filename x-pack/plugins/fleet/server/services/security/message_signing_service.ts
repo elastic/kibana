@@ -15,6 +15,8 @@ import type {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import { MessageSigningError } from '../../../common/errors';
+
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';
 
@@ -30,6 +32,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  rotateKeyPair(): Promise<void>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -39,15 +42,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  public get isEncryptionAvailable(): boolean {
+  public get isEncryptionAvailable(): MessageSigningServiceInterface['isEncryptionAvailable'] {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
   }
 
-  public async generateKeyPair(providedPassphrase?: string): Promise<{
-    privateKey: string;
-    publicKey: string;
-    passphrase: string;
-  }> {
+  public async generateKeyPair(
+    providedPassphrase?: string
+  ): ReturnType<MessageSigningServiceInterface['generateKeyPair']> {
     const existingKeyPair = await this.checkForExistingKeyPair();
     if (existingKeyPair) {
       return existingKeyPair;
@@ -81,21 +82,25 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         }
       : { ...keypairSoObject, passphrase_plain: passphrase };
 
-    await this.soClient.create<Partial<MessageSigningKeys>>(
-      MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-      keypairSoObject
-    );
+    try {
+      await this.soClient.create<Partial<MessageSigningKeys>>(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        keypairSoObject
+      );
 
-    return {
-      privateKey,
-      publicKey,
-      passphrase,
-    };
+      return {
+        privateKey,
+        publicKey,
+        passphrase,
+      };
+    } catch (error) {
+      throw new MessageSigningError(`Error creating key pair: ${error.message}`, error);
+    }
   }
 
   public async sign(
     message: Buffer | Record<string, unknown>
-  ): Promise<{ data: Buffer; signature: string }> {
+  ): ReturnType<MessageSigningServiceInterface['sign']> {
     const { privateKey: serializedPrivateKey, passphrase } = await this.generateKeyPair();
 
     const msgBuffer = Buffer.isBuffer(message)
@@ -124,7 +129,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     };
   }
 
-  public async getPublicKey(): Promise<string> {
+  public async getPublicKey(): ReturnType<MessageSigningServiceInterface['getPublicKey']> {
     const { publicKey } = await this.generateKeyPair();
 
     if (!publicKey) {
@@ -134,7 +139,34 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
-  private get soClient() {
+  public async rotateKeyPair(): ReturnType<MessageSigningServiceInterface['rotateKeyPair']> {
+    try {
+      await this.removeKeyPair();
+      await this.generateKeyPair();
+    } catch (error) {
+      throw new MessageSigningError(`Error rotating key pair: ${error.message}`, error);
+    }
+  }
+
+  private async removeKeyPair(): Promise<void> {
+    let currentKeyPair: Awaited<ReturnType<typeof this.getCurrentKeyPairObj>>;
+    try {
+      currentKeyPair = await this.getCurrentKeyPairObj();
+      if (!currentKeyPair) {
+        throw new MessageSigningError('No current key pair found!');
+      }
+    } catch (error) {
+      throw new MessageSigningError(`Error fetching current key pair: ${error.message}`, error);
+    }
+
+    try {
+      await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+    } catch (error) {
+      throw new MessageSigningError(`Error deleting current key pair: ${error.message}`, error);
+    }
+  }
+
+  private get soClient(): SavedObjectsClientContract {
     if (this._soClient) {
       return this._soClient;
     }

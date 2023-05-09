@@ -8,6 +8,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from '.';
 
@@ -33,7 +34,9 @@ export const Default: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
-      valueChange={(value: string) => window.alert(`${value} selected`)}
+      valueChange={({ label }: EuiComboBoxOptionOption<string>) =>
+        window.alert(`${label} selected`)
+      }
     />
   );
 };
@@ -42,7 +45,9 @@ export const WithDefaultValue: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
-      valueChange={(value: string) => window.alert(`${value} selected`)}
+      valueChange={({ label }: EuiComboBoxOptionOption<string>) =>
+        window.alert(`${label} selected`)
+      }
       defaultStackByValue={RawIndicatorFieldId.LastSeen}
     />
   );

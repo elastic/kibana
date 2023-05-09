@@ -80,6 +80,7 @@ describe('SyntheticsService', () => {
         password: '12345',
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
+      enabled: true,
     },
     coreStart: mockCoreStart,
     encryptedSavedObjects: mockEncryptedSO(),
@@ -101,7 +102,11 @@ describe('SyntheticsService', () => {
       };
     });
     serverMock.config = {
-      service: { devUrl: 'http://localhost', manifestUrl: 'https://test-manifest.com' },
+      service: {
+        devUrl: 'http://localhost',
+        manifestUrl: 'https://test-manifest.com',
+      },
+      enabled: true,
     };
     if (serverMock.savedObjectsClient) {
       serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
@@ -165,6 +170,7 @@ describe('SyntheticsService', () => {
         username: 'dev',
         password: '12345',
       },
+      enabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
@@ -195,7 +201,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfig({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -291,7 +297,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfig({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(

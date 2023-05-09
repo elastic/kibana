@@ -1632,6 +1632,74 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.CategorizeFieldContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategorizeFieldContext",
+        "description": [],
+        "path": "src/plugins/ui_actions/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CategorizeFieldContext.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CategorizeFieldContext.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CategorizeFieldContext.originatingApp",
+            "type": "string",
+            "tags": [],
+            "label": "originatingApp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.Presentable",
         "type": "Interface",
         "tags": [],
@@ -2212,6 +2280,21 @@
     "misc": [
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.ACTION_CATEGORIZE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_CATEGORIZE_FIELD",
+        "description": [],
+        "signature": [
+          "\"ACTION_CATEGORIZE_FIELD\""
+        ],
+        "path": "src/plugins/ui_actions/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.ACTION_VISUALIZE_FIELD",
         "type": "string",
         "tags": [],
@@ -2275,6 +2358,21 @@
           }
         ],
         "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CATEGORIZE_FIELD_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "CATEGORIZE_FIELD_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"CATEGORIZE_FIELD_TRIGGER\""
+        ],
+        "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2348,6 +2446,53 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.categorizeFieldTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "categorizeFieldTrigger",
+        "description": [],
+        "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.categorizeFieldTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.categorizeFieldTrigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.categorizeFieldTrigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/ui_actions/public/triggers/categorize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "uiActions",
         "id": "def-public.rowClickTrigger",

@@ -237,6 +237,7 @@ Object {
         "yRight": true,
       },
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

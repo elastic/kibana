@@ -10,6 +10,7 @@ import {
   createLogViewsServiceSetupMock,
   createLogViewsServiceStartMock,
 } from './services/log_views/log_views_service.mock';
+import { createMetricsExplorerViewsServiceStartMock } from './services/metrics_explorer_views/metrics_explorer_views_service.mock';
 import { InfraPluginSetup, InfraPluginStart } from './types';
 
 const createInfraSetupMock = () => {
@@ -26,6 +27,7 @@ const createInfraStartMock = () => {
     getMetricIndices: jest.fn(),
     inventoryViews: createInventoryViewsServiceStartMock(),
     logViews: createLogViewsServiceStartMock(),
+    metricsExplorerViews: createMetricsExplorerViewsServiceStartMock(),
   };
   return infraStartMock;
 };

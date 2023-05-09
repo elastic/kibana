@@ -171,6 +171,11 @@ export const AGENTS_SETUP_API_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agents/setup`,
 };
 
+// Message signing service
+export const MESSAGE_SIGNING_SERVICE_API_ROUTES = {
+  ROTATE_KEY_PAIR: `${API_ROOT}/message_signing_service/rotate_key_pair`,
+};
+
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;
 
 export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;

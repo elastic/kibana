@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ANALYTICS_PLUGIN,
+  APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
@@ -19,18 +20,15 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import {
-  ENGINES_PATH,
-  SEARCH_INDICES_PATH,
-  SETTINGS_PATH,
-  EngineViewTabs,
-} from '../../enterprise_search_content/routes';
+import { ENGINES_PATH, EngineViewTabs } from '../../applications/routes';
+import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess, productFeatures } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
+  if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -109,7 +107,7 @@ export const useEnterpriseSearchNav = () => {
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
+            to: APPLICATIONS_PLUGIN.URL,
           }),
         },
         {
@@ -174,13 +172,14 @@ export const useEnterpriseSearchNav = () => {
 
 export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
   const navItems = useEnterpriseSearchNav();
+  if (!navItems) return undefined;
   if (!engineName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'applications');
   if (!applicationsItem || !applicationsItem.items) return navItems;
   const enginesItem = applicationsItem.items?.find((item) => item.id === 'searchApplications');
   if (!enginesItem || enginesItem.id !== 'searchApplications') return navItems;
 
-  const enginePath = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
+  const enginePath = `${APPLICATIONS_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
 
   enginesItem.items = !isEmptyState
     ? [
@@ -196,7 +195,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
             {
               id: 'enterpriseSearchEnginePreview',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-                defaultMessage: 'Preview',
+                defaultMessage: 'Search Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
@@ -255,6 +254,9 @@ export const useEnterpriseSearchAnalyticsNav = (
   }
 ) => {
   const navItems = useEnterpriseSearchNav();
+
+  if (!navItems) return undefined;
+
   const applicationsNav = navItems.find((item) => item.id === 'applications');
   const analyticsNav = applicationsNav?.items?.find((item) => item.id === 'analyticsCollections');
 

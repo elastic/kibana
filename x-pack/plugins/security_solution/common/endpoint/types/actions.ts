@@ -6,12 +6,14 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { EcsError } from '@kbn/ecs';
 import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
+  UploadActionRequestBody,
 } from '../schema/actions';
 import type {
   ResponseActionStatus,
@@ -91,14 +93,6 @@ export const ActivityLogItemTypes = {
   FLEET_ACTION: 'fleetAction' as const,
   FLEET_RESPONSE: 'fleetResponse' as const,
 };
-
-interface EcsError {
-  code?: string;
-  id?: string;
-  message: string;
-  stack_trace?: string;
-  type?: string;
-}
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
@@ -183,7 +177,8 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
   | ResponseActionsExecuteParameters
-  | ResponseActionGetFileParameters;
+  | ResponseActionGetFileParameters
+  | ResponseActionUploadParameters;
 
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
@@ -474,4 +469,26 @@ export type UploadedFileInfo = Pick<
 
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;
+}
+
+/**
+ * The parameters that are sent to the Endpoint.
+ *
+ * NOTE: Most of the parameters below are NOT accepted via the API. They are inserted into
+ * the action's parameters via the API route handler
+ */
+export type ResponseActionUploadParameters = UploadActionRequestBody['parameters'] & {
+  file: {
+    sha256: string;
+    size: number;
+    file_name: string;
+    file_id: string;
+  };
+};
+
+export interface ResponseActionUploadOutputContent {
+  /** Full path to the file on the host machine where it was saved */
+  path: string;
+  /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
+  disk_free_space: number;
 }

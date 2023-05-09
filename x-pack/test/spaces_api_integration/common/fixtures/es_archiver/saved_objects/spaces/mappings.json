@@ -73,7 +73,6 @@
           ],
           ".kibana_security_solution": [
             "csp-rule-template",
-            "endpoint:user-artifact",
             "endpoint:user-artifact-manifest",
             "exception-list",
             "exception-list-agnostic",
@@ -213,7 +212,6 @@
           ],
           ".kibana_security_solution": [
             "csp-rule-template",
-            "endpoint:user-artifact",
             "endpoint:user-artifact-manifest",
             "exception-list",
             "exception-list-agnostic",

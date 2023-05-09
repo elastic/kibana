@@ -209,15 +209,16 @@ class PackageClientImpl implements PackageClient {
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
     const authorizationHeader = await this.getAuthorizationHeader();
 
-    const { installedTransforms } = await installTransforms(
-      packageInfo,
+    const { installedTransforms } = await installTransforms({
+      installablePackage: packageInfo,
       paths,
-      this.internalEsClient,
-      this.internalSoClient,
-      this.logger,
-      undefined,
-      authorizationHeader
-    );
+      esClient: this.internalEsClient,
+      savedObjectsClient: this.internalSoClient,
+      logger: this.logger,
+      force: true,
+      esReferences: undefined,
+      authorizationHeader,
+    });
     return installedTransforms;
   }
 

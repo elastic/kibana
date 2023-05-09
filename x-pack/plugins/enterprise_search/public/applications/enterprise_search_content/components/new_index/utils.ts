@@ -7,9 +7,9 @@
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
-import connectorLogo from '../../../../assets/enterprise_search_features/connector.svg';
+import connectorLogo from '../../../../assets/source_icons/connector.svg';
 
-import crawlerLogo from '../../../../assets/enterprise_search_features/crawler.svg';
+import crawlerLogo from '../../../../assets/source_icons/crawler.svg';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import { LanguageForOptimization } from './types';

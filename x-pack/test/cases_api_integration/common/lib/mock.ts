@@ -7,9 +7,9 @@
 
 import {
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CommentResponse,
+  Comment,
   ConnectorTypes,
   CommentRequestUserType,
   CommentRequestAlertType,
@@ -161,7 +161,7 @@ export const persistableStateAttachment: CommentRequestPersistableStateType = {
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<CaseResponse> => ({
+): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
@@ -185,7 +185,7 @@ export const commentsResp = ({
   comments,
 }: {
   comments: CommentRequestWithID[];
-}): Array<Partial<CommentResponse>> => {
+}): Array<Partial<Comment>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
       id,

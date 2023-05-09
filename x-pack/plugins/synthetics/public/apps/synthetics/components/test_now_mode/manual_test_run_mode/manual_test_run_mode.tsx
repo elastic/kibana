@@ -15,11 +15,14 @@ import { Locations } from '../../../../../../common/runtime_types';
 export function ManualTestRunMode({
   manualTestRun,
   onDone,
+  showErrors,
 }: {
+  showErrors: boolean;
   manualTestRun: ManualTestRun;
   onDone: (testRunId: string) => void;
 }) {
   const { expectPings } = useRunOnceErrors({
+    showErrors,
     testRunId: manualTestRun.testRunId!,
     locations: (manualTestRun.monitor!.locations ?? []) as Locations,
     errors: manualTestRun.errors ?? [],

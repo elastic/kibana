@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { IndicatorsFieldSelector } from '.';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 const mockIndexPattern: DataView = {
   fields: [
@@ -31,7 +32,7 @@ describe('<IndicatorsFieldSelector />', () => {
         <IndicatorsFieldSelector
           indexPattern={{ fields: [] } as any}
           // eslint-disable-next-line no-console
-          valueChange={(value: string) => console.log(value)}
+          valueChange={(value: EuiComboBoxOptionOption<string>) => console.log(value)}
         />
       </TestProvidersComponent>
     );
@@ -45,7 +46,7 @@ describe('<IndicatorsFieldSelector />', () => {
         <IndicatorsFieldSelector
           indexPattern={mockIndexPattern}
           // eslint-disable-next-line no-console
-          valueChange={(value: string) => console.log(value)}
+          valueChange={(value: EuiComboBoxOptionOption<string>) => console.log(value)}
         />
       </TestProvidersComponent>
     );

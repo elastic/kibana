@@ -69,7 +69,6 @@ import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
@@ -102,7 +101,7 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { ActionCreateService } from './endpoint/services/actions';
+import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
@@ -131,8 +130,10 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
+    const serverConfig = createConfig(context);
+
     this.pluginContext = context;
-    this.config = createConfig(context);
+    this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
 
@@ -146,6 +147,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
+      get serverConfig() {
+        return serverConfig;
+      },
       experimentalFeatures: this.config.experimentalFeatures,
     };
   }
@@ -239,6 +243,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       lists: plugins.lists,
       logger: this.logger,
       config: this.config,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
@@ -247,7 +252,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+        osqueryCreateActionService: plugins.osquery.createActionService,
       }),
     };
 
@@ -450,17 +455,15 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
-          logger.info('Dependent plugin setup complete - Starting ManifestTask');
+        logger.info('Dependent plugin setup complete - Starting ManifestTask');
 
-          if (this.manifestTask) {
-            this.manifestTask.start({
-              taskManager,
-            });
-          } else {
-            logger.error(new Error('User artifacts task not available.'));
-          }
-        });
+        if (this.manifestTask) {
+          this.manifestTask.start({
+            taskManager,
+          });
+        } else {
+          logger.error(new Error('User artifacts task not available.'));
+        }
       });
 
       // License related start
@@ -506,7 +509,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      actionCreateService: new ActionCreateService(
+      actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
       ),

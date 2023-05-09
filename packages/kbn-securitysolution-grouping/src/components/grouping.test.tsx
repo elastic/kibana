@@ -10,11 +10,11 @@ import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Grouping } from './grouping';
-import { createGroupFilter } from './accordion_panel/helpers';
+import { createGroupFilter, getNullGroupFilter } from './accordion_panel/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
 
-import { mockGroupingProps, rule1Name, rule2Name } from './grouping.mock';
+import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
@@ -37,9 +37,9 @@ describe('grouping container', () => {
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('unit-count').textContent).toBe('2 events');
-    expect(getByTestId('group-count').textContent).toBe('2 groups');
-    expect(getAllByTestId('grouping-accordion').length).toBe(2);
+    expect(getByTestId('unit-count').textContent).toBe('14 events');
+    expect(getByTestId('group-count').textContent).toBe('3 groups');
+    expect(getAllByTestId('grouping-accordion').length).toBe(3);
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
@@ -79,12 +79,12 @@ describe('grouping container', () => {
     fireEvent.click(group1);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       1,
-      createGroupFilter(testProps.selectedGroup, rule1Name)
+      createGroupFilter(testProps.selectedGroup, host1Name)
     );
     fireEvent.click(group2);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       2,
-      createGroupFilter(testProps.selectedGroup, rule2Name)
+      createGroupFilter(testProps.selectedGroup, host2Name)
     );
   });
 
@@ -115,5 +115,25 @@ describe('grouping container', () => {
         groupNumber: 0,
       })
     );
+  });
+
+  it('Renders a null group and passes the correct filter to take actions and child component', () => {
+    takeActionItems.mockReturnValue([]);
+    const { getAllByTestId, getByTestId } = render(
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
+    );
+    expect(getByTestId('null-group-icon')).toBeInTheDocument();
+
+    let lastGroup = getAllByTestId('grouping-accordion').at(-1);
+    fireEvent.click(within(lastGroup!).getByTestId('take-action-button'));
+
+    expect(takeActionItems).toHaveBeenCalledWith(getNullGroupFilter('host.name'), 2);
+
+    lastGroup = getAllByTestId('grouping-accordion').at(-1);
+    fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
+
+    expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter('host.name'));
   });
 });

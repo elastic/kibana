@@ -59,6 +59,13 @@ export const Findings = () => {
                   display: block;
                 `}
                 label="Beta"
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.csp.findings.betaLabel"
+                    defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
+                  />
+                }
+                tooltipPosition="bottom"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

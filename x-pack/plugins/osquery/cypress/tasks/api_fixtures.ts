@@ -10,7 +10,7 @@ import type {
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { CaseResponse } from '@kbn/cases-plugin/common';
+import type { Case } from '@kbn/cases-plugin/common';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
 import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
 import type { PackSavedObject, PackItem } from '../../public/packs/types';
@@ -181,7 +181,7 @@ export const cleanupRule = (id: string) => {
 };
 
 export const loadCase = (owner: string) =>
-  request<CaseResponse>({
+  request<Case>({
     method: 'POST',
     url: '/api/cases',
     body: {

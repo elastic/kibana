@@ -146,6 +146,7 @@ export const mobileServiceDetail = {
             osVersion: t.string,
             appVersion: t.string,
             netConnectionType: t.string,
+            mobileSelectedTab: t.string,
           }),
         }),
         children: {

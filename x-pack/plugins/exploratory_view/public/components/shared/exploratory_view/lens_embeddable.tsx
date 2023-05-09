@@ -74,7 +74,7 @@ export function LensEmbeddable(props: Props) {
         });
       } else {
         notifications?.toasts.add(
-          i18n.translate('xpack.exploratoryView.exploratoryView.noBrusing', {
+          i18n.translate('xpack.exploratoryView.noBrushing', {
             defaultMessage: 'Zoom by brush selection is only available on time series charts.',
           })
         );

@@ -29,6 +29,7 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
 
 function TriggerLabel({ label, icon }: TriggerLabelProps) {
   const { euiTheme } = useEuiTheme();
+
   if (!icon) {
     return <>{label}</>;
   }

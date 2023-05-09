@@ -29,6 +29,8 @@
     },
     "@kbn/rison",
     "@kbn/datemath",
-    "@kbn/alerting-plugin"
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/securitysolution-data-table"
   ]
 }

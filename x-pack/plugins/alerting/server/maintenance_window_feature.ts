@@ -17,12 +17,12 @@ import {
 export const maintenanceWindowFeature: KibanaFeatureConfig = {
   id: MAINTENANCE_WINDOW_FEATURE_ID,
   name: i18n.translate('xpack.alerting.feature.maintenanceWindowFeatureName', {
-    defaultMessage: 'Maintenance Window',
+    defaultMessage: 'Maintenance Windows',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['maintenanceWindows'],
   },
   privileges: {
     all: {
@@ -32,7 +32,7 @@ export const maintenanceWindowFeature: KibanaFeatureConfig = {
         MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW,
       ],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['maintenanceWindows'],
       },
       savedObject: {
         all: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
@@ -44,7 +44,7 @@ export const maintenanceWindowFeature: KibanaFeatureConfig = {
       app: [],
       api: [MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['maintenanceWindows'],
       },
       savedObject: {
         all: [],
