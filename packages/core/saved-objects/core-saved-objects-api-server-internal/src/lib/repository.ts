@@ -89,7 +89,6 @@ import {
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
-  getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
   errorContent,
@@ -109,7 +108,6 @@ import {
   SerializerHelper,
   type PreflightCheckNamespacesResult,
 } from './helpers';
-import { isFoundGetResponse } from './utils';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from './constants';
 import {
   type ApiExecutionContext,
@@ -121,6 +119,7 @@ import {
   performDeleteByNamespace,
   performFind,
   performBulkGet,
+  performGet,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -455,50 +454,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     id: string,
     options: SavedObjectsGetOptions = {}
   ): Promise<SavedObject<T>> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const { migrationVersionCompatibility } = options;
-
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
+    return await performGet(
       {
-        id: this._serializer.generateRawId(namespace, type, id),
-        index: this.getIndexForType(type),
-      },
-      { ignore: [404], meta: true }
-    );
-    const indexNotFound = statusCode === 404;
-    // check if we have the elasticsearch header when index is not found and, if we do, ensure it is from Elasticsearch
-    if (indexNotFound && !isSupportedEsServer(headers)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
-
-    const objectNotFound =
-      !isFoundGetResponse(body) || indexNotFound || !this.rawDocExistsInNamespace(body, namespace);
-
-    const authorizationResult = await this._securityExtension?.authorizeGet({
-      namespace,
-      object: {
         type,
         id,
-        existingNamespaces: body?._source?.namespaces ?? [],
+        options,
       },
-      objectNotFound,
-    });
-
-    if (objectNotFound) {
-      // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    const result = getSavedObjectFromSource<T>(this._registry, type, id, body, {
-      migrationVersionCompatibility,
-    });
-
-    return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
-      result,
-      authorizationResult?.typeMap
+      this.apiExecutionContext
     );
   }
 
