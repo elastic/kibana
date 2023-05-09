@@ -7,7 +7,8 @@
  */
 
 import Draggable from 'react-draggable';
-// import { Resizable } from 'react-resizable';
+import { Resizable, ResizableBox } from 'react-resizable';
+import './style.scss';
 import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
 import {
   EuiFlyout,
@@ -48,6 +49,9 @@ export const HelpCenterFlyout = (
   const { newsFetchResult, setFlyoutVisible, helpLinks } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
   const { showPlainSpinner, ...rest } = props;
+
+  const [width, setWidth] = useState(400);
+  const [height, setHeight] = useState(400);
   // console.log(helpLinks);
 
   const globalCustomContent = useMemo(() => {
@@ -188,65 +192,74 @@ export const HelpCenterFlyout = (
 
   return (
     <EuiPortal>
-      {/* <EuiFocusTrap onClickOutside={closeFlyout}> */}
-      <Draggable>
-        <EuiPanel
-          paddingSize="l"
-          // {...rest}
-          // onClose={closeFlyout}
-          // size="m"
+      <div
+        css={css`
+          position: fixed;
+          top: 120px;
+          right: 30px;
+        `}
+      >
+        <Draggable
+          handle=".handle"
           css={css`
-            min-width: 50vw;
-            height: 90vh;
-            position: fixed;
-            max-height: 76vh;
-            max-inline-size: 480px;
-            max-block-size: auto;
-            inset-inline-end: 46px;
-            inset-block-start: 128px;
+            position: fixed !important;
           `}
-          aria-labelledby="flyoutSmallTitle"
-          className="eui-yScroll"
-          data-test-subj="HelpCenterFlyout"
         >
-          <EuiTitle size="s">
-            <h2 id="flyoutSmallTitle">
-              <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
-            </h2>
-          </EuiTitle>
+          <ResizableBox width={300} height={300}>
+            <EuiPanel
+              paddingSize="l"
+              css={css`
+                width: 100%;
+                height: 100%;
+              `}
+              aria-labelledby="flyoutSmallTitle"
+              className="eui-yScroll"
+              data-test-subj="HelpCenterFlyout"
+            >
+              <div style={{ backgroundColor: 'green', width: '30%' }} className="handle">
+                Drag from here
+              </div>
 
-          <EuiTabs>{renderTabs()}</EuiTabs>
-          <EuiSpacer size="l" />
+              <EuiTitle size="s">
+                <h2 id="flyoutSmallTitle">
+                  <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
+                </h2>
+              </EuiTitle>
 
-          {selectedTabContent}
+              <EuiTabs>{renderTabs()}</EuiTabs>
+              <EuiSpacer size="l" />
 
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                <FormattedMessage
-                  id="HelpCenter.flyoutList.closeButtonLabel"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+              {selectedTabContent}
 
-            <EuiFlexItem grow={false}>
-              {newsFetchResult ? (
-                <EuiText color="subdued" size="s">
-                  <p>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
                     <FormattedMessage
-                      id="HelpCenter.flyoutList.versionTextLabel"
-                      defaultMessage="{version}"
-                      values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
+                      id="HelpCenter.flyoutList.closeButtonLabel"
+                      defaultMessage="Close"
                     />
-                  </p>
-                </EuiText>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {/* </div> */}
-        </EuiPanel>
-      </Draggable>
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  {newsFetchResult ? (
+                    <EuiText color="subdued" size="s">
+                      <p>
+                        <FormattedMessage
+                          id="HelpCenter.flyoutList.versionTextLabel"
+                          defaultMessage="{version}"
+                          values={{ version: `Version ${newsFetchResult.kibanaVersion}` }}
+                        />
+                      </p>
+                    </EuiText>
+                  ) : null}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {/* </div> */}
+            </EuiPanel>
+          </ResizableBox>
+        </Draggable>
+      </div>
     </EuiPortal>
   );
 };
