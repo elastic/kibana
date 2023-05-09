@@ -8,16 +8,22 @@
 import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { compare } from 'fast-json-patch';
 import { recordUndoableStateChange, undoRedoActions } from './lens_slice';
+import { StateCoordinator } from './state_coordinator';
 
-export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => {
-  return (next: Dispatch) => (action: Action) => {
+export const stateHistoryMiddleware =
+  () => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
     if (undoRedoActions.some((testAction) => testAction.match(action))) {
-      const prevState = store.getState();
+      const prevState = store.getState().lens;
       next(action);
 
-      next(recordUndoableStateChange({ patch: compare(store.getState().lens, prevState.lens) }));
+      const newState = store.getState().lens;
+      const forwardPatch = compare(prevState, newState);
+      const backwardPatch = compare(newState, prevState);
+
+      StateCoordinator.instance.sendPatch(forwardPatch);
+
+      next(recordUndoableStateChange({ patch: backwardPatch }));
     } else {
       next(action);
     }
   };
-};

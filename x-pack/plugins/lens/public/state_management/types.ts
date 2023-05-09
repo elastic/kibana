@@ -9,12 +9,11 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { Operation } from 'fast-json-patch';
 import type { MainHistoryLocationState } from '../../common/locator/locator';
 import type { Document } from '../persistence';
 
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { DateRange } from '../../common/types';
+import type { DateRange, Patch } from '../../common/types';
 import type { LensAppServices } from '../app_plugin/types';
 import type {
   DatasourceMap,
@@ -72,7 +71,7 @@ export interface LensAppState extends EditorFrameState {
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsStateInStateStore;
 
-  undoableOperationHistory: Operation[][];
+  undoableOperationHistory: Patch[];
 }
 
 export type DispatchSetState = (state: Partial<LensAppState>) => {

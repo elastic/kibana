@@ -16,6 +16,7 @@ export const LENS_EMBEDDABLE_TYPE = 'lens';
 export const DOC_TYPE = 'lens';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
+export const STATE_PATCH_API_PATH = `${BASE_API_URL}/state_patch`;
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 
 export const ENABLE_SQL = 'discover:enableSql';

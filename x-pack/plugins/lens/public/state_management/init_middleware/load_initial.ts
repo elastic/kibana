@@ -18,6 +18,7 @@ import { initializeSources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document } from '../../persistence';
+import { StateCoordinator } from '../state_coordinator';
 
 export const getPersisted = async ({
   initialInput,
@@ -274,6 +275,11 @@ export function loadInitial(
               doc.title,
               initialInput.savedObjectId
             );
+          }
+
+          if (doc.savedObjectId) {
+            // TODO - this only works for by reference
+            StateCoordinator.setVisId(doc.savedObjectId);
           }
 
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(

@@ -10,7 +10,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
-import { applyPatch, type Operation as JsonPatchOperation } from 'fast-json-patch';
+import { applyPatch } from 'fast-json-patch';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -24,7 +24,7 @@ import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { LayerType } from '../../common/types';
+import type { LayerType, Patch } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
@@ -241,7 +241,7 @@ export const removeDimension = createAction<{
   datasourceId?: string;
 }>('lens/removeDimension');
 export const recordUndoableStateChange = createAction<{
-  patch: JsonPatchOperation[];
+  patch: Patch;
 }>('lens/recordUndoableStateChange');
 export const undo = createAction('lens/undo');
 
@@ -1227,7 +1227,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload: { patch },
       }: {
         payload: {
-          patch: JsonPatchOperation[];
+          patch: Patch;
         };
       }
     ) => {

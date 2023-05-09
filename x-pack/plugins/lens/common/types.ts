@@ -12,6 +12,7 @@ import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { Operation } from 'fast-json-patch';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
@@ -96,3 +97,5 @@ export interface LegacyMetricState {
   size?: string;
   textAlign?: 'left' | 'right' | 'center';
 }
+
+export type Patch = Operation[];
