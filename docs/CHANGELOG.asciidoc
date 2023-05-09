@@ -204,6 +204,7 @@ Infrastructure::
 * Adds refactoring to the Time and Position log stream state {kibana-pull}149052[#149052]
 
 Machine Learning::
+* Adds ELSER config to the Trained Models UI {kibana-pull}155867[#155867]
 * Adds support for custom URLs in jobs for Data Frame Analytics {kibana-pull}154287[#154287]
 * Adds support to filter fields from grouping in Explain Log Rate Spikes {kibana-pull}153864[#153864]
 * Adds log pattern analysis in Discover {kibana-pull}153449[#153449]
