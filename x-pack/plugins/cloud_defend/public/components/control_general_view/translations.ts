@@ -124,13 +124,10 @@ export const unusedSelectorHelp = i18n.translate('xpack.cloudDefend.unusedSelect
   defaultMessage: 'This selector is not in use by any response.',
 });
 
-export const errorInvalidResourceLabel = i18n.translate(
-  'xpack.cloudDefend.errorInvalidResourceLabel',
-  {
-    defaultMessage:
-      '"Orchestrator resource label" values must have the format: "key:value". A wildcard "*" can be used at the end of the value. e.g. "key:val*". To match on an empty label value, use "key:".',
-  }
-);
+export const errorInvalidPodLabel = i18n.translate('xpack.cloudDefend.errorInvalidPodLabel', {
+  defaultMessage:
+    'Kubernetes pod label values must have the format: "key:value". A wildcard "*" can be used at the end of the value. e.g. "key:val*". To match on an empty label value, use "key:".',
+});
 
 export const errorInvalidFullContainerImageName = i18n.translate(
   'xpack.cloudDefend.errorInvalidFullContainerImageName',
@@ -164,7 +161,7 @@ export const errorBlockActionRequiresTargetFilePath = i18n.translate(
   'xpack.cloudDefend.errorBlockActionRequiresTargetFilePath',
   {
     defaultMessage:
-      'The "block" action requires targetFilePath be included in all "match" selectors using FIM operations (createFile, modifyFile or deleteFile) or in at least one "exclude" selector.',
+      'The "block" action requires targetFilePath be included in all "match" selectors using FIM operations or in at least one "exclude" selector. Note that selectors without operation will match on all operations, including createFile, modifyFile or deleteFile',
   }
 );
 
@@ -179,7 +176,7 @@ export const warningFIMUsingSlashStarStarText = i18n.translate(
   'xpack.cloudDefend.warningFIMUsingSlashStarStarText',
   {
     defaultMessage:
-      'It is dangerous to block FIM operations (createFile, modifyFile, deleteFile) using a targetFilePath of /**. This can lead to system instability.',
+      'It is dangerous to block FIM operations using a targetFilePath of /**. This can lead to system instability. Note that selectors without operation will match on all operations, including createFile, modifyFile or deleteFile',
   }
 );
 

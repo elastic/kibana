@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { DiscoverAppState } from '../services/discover_app_state_container';
+import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -20,7 +19,6 @@ import {
   sendLoadingMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
-import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
@@ -29,8 +27,7 @@ import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
-  data: DataPublicPluginStart;
+  getAppState: () => DiscoverAppState;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -48,35 +45,28 @@ export interface FetchDeps {
  */
 export function fetchAll(
   dataSubjects: SavedSearchData,
-  searchSource: ISearchSource,
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const {
-    initialFetchStatus,
-    appStateContainer,
-    services,
-    useNewFieldsApi,
-    data,
-    inspectorAdapters,
-  } = fetchDeps;
+  const { initialFetchStatus, getAppState, services, inspectorAdapters, savedSearch } = fetchDeps;
+  const { data } = services;
+  const searchSource = savedSearch.searchSource.createChild();
 
   try {
     const dataView = searchSource.getField('index')!;
-    if (reset) {
-      sendResetMsg(dataSubjects, initialFetchStatus);
-    }
-    const { sort, query } = appStateContainer.getState();
+    const query = getAppState().query;
     const recordRawType = getRawRecordType(query);
+    if (reset) {
+      sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
+    }
     const useSql = recordRawType === RecordRawType.PLAIN;
 
     if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
-      updateSearchSource(searchSource, false, {
+      updateVolatileSearchSource(searchSource, {
         dataView,
         services,
-        sort: sort as SortOrder[],
-        useNewFieldsApi,
+        sort: getAppState().sort as SortOrder[],
       });
     }
 
@@ -89,7 +79,7 @@ export function fetchAll(
     const response =
       useSql && query
         ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
-        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+        : fetchDocuments(searchSource, fetchDeps);
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
