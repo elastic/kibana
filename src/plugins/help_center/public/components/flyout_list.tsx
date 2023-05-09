@@ -194,18 +194,26 @@ export const HelpCenterFlyout = (
     <EuiPortal>
       <div
         css={css`
+          width: 100%;
+          height: calc(100% - 96px);
           position: fixed;
-          top: 120px;
-          right: 30px;
+          top: 96px;
+          left: 0px;
         `}
       >
-        <Draggable
-          handle=".handle"
-          css={css`
-            position: fixed !important;
-          `}
-        >
-          <ResizableBox width={300} height={300}>
+        <Draggable handle=".handle" bounds="parent" defaultPosition={{ x: 400, y: 0 }}>
+          <ResizableBox
+            width={300}
+            height={300}
+            css={css`
+              min-height: 100px;
+              min-width: 33%;
+              max-height: 95%;
+              max-width: 95%;
+            `}
+            // minConstraints={[300, 100]}
+            // maxConstraints={[600, 800]}
+          >
             <EuiPanel
               paddingSize="l"
               css={css`
