@@ -35,6 +35,7 @@ import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 interface UserAlertsTableProps {
   signalIndexName: string | null;
@@ -48,6 +49,7 @@ const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuer
 
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+  const { filterQuery } = useGlobalFilterQuery();
 
   const openUserInAlerts = useCallback(
     ({ userName, severity }: { userName: string; severity?: string }) =>
@@ -78,6 +80,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID,
     signalIndexName,
+    filterQuery,
   });
 
   const columns = useMemo(() => getTableColumns(openUserInAlerts), [openUserInAlerts]);

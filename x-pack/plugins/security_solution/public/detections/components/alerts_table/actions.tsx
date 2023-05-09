@@ -27,6 +27,7 @@ import {
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import { lastValueFrom } from 'rxjs';
@@ -155,10 +156,13 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   const elapsedTimeRule = moment.duration(
     moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-1d'))
   );
-  const from = moment(ecsData.timestamp ?? new Date())
-    .subtract(elapsedTimeRule)
-    .toISOString();
-  const to = moment(ecsData.timestamp ?? new Date()).toISOString();
+
+  const alertTimestampEcsValue = getField(ecsData, TIMESTAMP);
+  const alertTimestamp = Array.isArray(alertTimestampEcsValue)
+    ? alertTimestampEcsValue[0]
+    : alertTimestampEcsValue;
+  const to = moment(alertTimestamp ?? new Date()).toISOString();
+  const from = moment(to).subtract(elapsedTimeRule).toISOString();
 
   return { to, from };
 };

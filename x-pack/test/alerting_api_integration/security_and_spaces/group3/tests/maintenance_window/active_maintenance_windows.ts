@@ -28,7 +28,7 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
         freq: 2, // weekly
       },
     };
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -123,40 +123,50 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
     }
 
     it('should return active maintenance windows', async () => {
-      await supertest
+      const { body: window1 } = await supertest
         .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
           ...createParams,
-          duration: 5 * 60 * 1000, // 5 mins
+          duration: 30 * 60 * 1000,
           r_rule: {
             ...createParams.r_rule,
-            dtstart: moment.utc().subtract(10, 'minutes').toISOString(),
+            dtstart: moment().subtract(1, 'hour').toISOString(),
           },
         })
         .expect(200);
+
+      objectRemover.add('space1', window1.id, 'rules/maintenance_window', 'alerting', true);
 
       const { body: window2 } = await supertest
         .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
           ...createParams,
-          duration: 5 * 60 * 1000, // 5 mins
+          duration: 30 * 60 * 1000,
+          r_rule: {
+            ...createParams.r_rule,
+            dtstart: moment().subtract(5, 'minutes').toISOString(),
+          },
         })
         .expect(200);
 
-      await supertest
+      objectRemover.add('space1', window2.id, 'rules/maintenance_window', 'alerting', true);
+
+      const { body: window3 } = await supertest
         .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
           ...createParams,
-          duration: 5 * 60 * 1000, // 5 mins
+          duration: 30 * 60 * 1000,
           r_rule: {
             ...createParams.r_rule,
-            dtstart: moment.utc().add(10, 'minutes').toISOString(),
+            dtstart: moment().add(1, 'hour').toISOString(),
           },
         })
         .expect(200);
+
+      objectRemover.add('space1', window3.id, 'rules/maintenance_window', 'alerting', true);
 
       const { body: activeWindows } = await supertest
         .get(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/_active`)

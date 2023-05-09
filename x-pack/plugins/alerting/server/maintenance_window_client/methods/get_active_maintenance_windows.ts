@@ -25,22 +25,31 @@ export interface MaintenanceWindowAggregationResult {
   };
 }
 
+<<<<<<< HEAD
 export interface ActiveParams {
   start?: string;
   interval?: string;
 }
 
 // TODO: Clean up this API sinde we no longer use start or interval
+=======
+>>>>>>> main
 export async function getActiveMaintenanceWindows(
-  context: MaintenanceWindowClientContext,
-  params?: ActiveParams
+  context: MaintenanceWindowClientContext
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
+<<<<<<< HEAD
   const { start, interval } = params || {};
 
   const startDate = start ? new Date(start) : new Date();
   const startDateISO = startDate.toISOString();
   
+=======
+
+  const startDate = new Date();
+  const startDateISO = startDate.toISOString();
+
+>>>>>>> main
   const filter = nodeBuilder.and([
     nodeBuilder.is('maintenance-window.attributes.events', startDateISO),
     nodeBuilder.is('maintenance-window.attributes.enabled', 'true'),
@@ -59,7 +68,7 @@ export async function getActiveMaintenanceWindows(
       })
     );
   } catch (e) {
-    const errorMessage = `Failed to find active maintenance window by interval: ${interval} with start date: ${startDate.toISOString()}, Error: ${e}`;
+    const errorMessage = `Failed to find active maintenance window by interval, Error: ${e}`;
     logger.error(errorMessage);
     throw Boom.boomify(e, { message: errorMessage });
   }
