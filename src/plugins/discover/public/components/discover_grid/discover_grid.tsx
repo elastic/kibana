@@ -26,6 +26,10 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
+import {
+  useDataGridColumnsCellActions,
+  UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -200,6 +204,10 @@ export interface DiscoverGridProps {
    */
   DocumentView?: typeof DiscoverGridFlyout;
   /**
+   * Optional triggerId to retrieve the column cell actions that will override the default ones
+   */
+  cellActionsTriggerId?: string;
+  /**
    * Service dependencies
    */
   services: {
@@ -243,6 +251,7 @@ export const DiscoverGrid = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  cellActionsTriggerId,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -422,14 +431,45 @@ export const DiscoverGrid = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
+  const visibleColumns = useMemo(
+    () => getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+    [dataView, displayedColumns, showTimeCol]
+  );
+
+  const cellActionProps = useMemo<UseDataGridColumnsCellActionsProps>(() => {
+    const fields = cellActionsTriggerId
+      ? visibleColumns.map((columnName) => {
+          const field = dataView.getFieldByName(columnName)?.spec;
+          return {
+            name: columnName,
+            type: field?.type ?? 'keyword',
+            values: displayedRows.map((row) => {
+              const value = row.flattened?.[columnName];
+              const valuesArray = Array.isArray(value) ? value : [value];
+              return valuesArray;
+            }),
+            aggregatable: field?.aggregatable ?? false,
+          };
+        })
+      : undefined;
+
+    return {
+      triggerId: cellActionsTriggerId ?? '',
+      fields,
+      dataGridRef,
+    };
+  }, [visibleColumns, cellActionsTriggerId, dataView, displayedRows]);
+
+  const columnsCellActions = useDataGridColumnsCellActions(cellActionProps);
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
-        columns: displayedColumns,
+        visibleColumns,
+        columnsCellActions,
         rowsCount: displayedRows.length,
         settings,
         dataView,
-        showTimeCol,
         defaultColumns,
         isSortEnabled,
         services: {
@@ -443,10 +483,10 @@ export const DiscoverGrid = ({
       }),
     [
       onFilter,
-      displayedColumns,
+      visibleColumns,
+      columnsCellActions,
       displayedRows,
       dataView,
-      showTimeCol,
       settings,
       defaultColumns,
       isSortEnabled,
@@ -465,12 +505,12 @@ export const DiscoverGrid = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+      visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, dataView, showTimeCol, hideTimeColumn, onSetColumns]
+    [visibleColumns, hideTimeColumn, onSetColumns]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {

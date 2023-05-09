@@ -65,3 +65,13 @@ export interface SecurityCellActions {
 
 // All security cell actions names
 export type SecurityCellActionName = keyof SecurityCellActions;
+
+export interface DiscoverCellActions {
+  filterIn?: CellActionFactory;
+  filterOut?: CellActionFactory;
+  addToTimeline?: CellActionFactory;
+  copyToClipboard?: CellActionFactory;
+}
+
+// All Discover cell actions names
+export type DiscoverCellActionName = keyof DiscoverCellActions;

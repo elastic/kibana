@@ -35,12 +35,13 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import {
@@ -399,6 +400,7 @@ export class SavedSearchEmbeddable
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
       },
+      cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -562,11 +564,14 @@ export class SavedSearchEmbeddable
       useLegacyTable,
     };
     if (searchProps.services) {
+      const { getTriggerCompatibleActions } = searchProps.services.uiActions;
       ReactDOM.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
-              <SavedSearchEmbeddableComponent {...props} />
+              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+                <SavedSearchEmbeddableComponent {...props} />
+              </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>
         </I18nProvider>,
@@ -599,9 +604,9 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public reload(forceFetch = true) {
+  public async reload(forceFetch = true) {
     if (this.searchProps) {
-      this.load(this.searchProps, forceFetch);
+      await this.load(this.searchProps, forceFetch);
     }
   }
 

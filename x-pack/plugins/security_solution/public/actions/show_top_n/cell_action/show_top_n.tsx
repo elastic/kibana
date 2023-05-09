@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
-import type * as H from 'history';
+import type { History } from 'history';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,7 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
     services,
   }: {
     store: SecurityAppStore;
-    history: H.History;
+    history: History;
     services: StartServices;
   }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.SHOW_TOP_N,
