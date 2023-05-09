@@ -7,6 +7,17 @@
  */
 
 import { ExpressionRevealImagePlugin } from './plugin';
+export type {
+  Output,
+  RevealImageInput,
+  ExpressionRevealImageFunctionDefinition,
+  ExpressionRevealImageFunction,
+  RevealImageState,
+  OriginString,
+  RevealImageRendererConfig,
+  NodeDimensions,
+} from './types';
+export { Origin, Position } from './types';
 
 export type { ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart } from './plugin';
 

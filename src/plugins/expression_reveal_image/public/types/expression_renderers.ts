@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
+export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 
-export * from './constants';
-export * from './expression_functions';
-export * from './types';
+export interface RevealImageRendererConfig {
+  percent: number;
+  origin?: OriginString;
+  image: string;
+  emptyImage?: string;
+}
+
+export interface NodeDimensions {
+  width: number;
+  height: number;
+}

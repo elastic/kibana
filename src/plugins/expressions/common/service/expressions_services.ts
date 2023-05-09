@@ -39,6 +39,7 @@ import {
   overallMetric,
   math,
   mathColumn,
+  getCell,
 } from '../expression_functions';
 import { ExpressionsServiceFork } from './expressions_fork';
 
@@ -465,6 +466,7 @@ export class ExpressionsService
       mapColumn,
       math,
       mathColumn,
+      getCell,
     ]) {
       this.registerFunction(fn);
     }

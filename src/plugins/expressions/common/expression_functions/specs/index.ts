@@ -23,3 +23,4 @@ export type { MathArguments, MathInput } from './math';
 export { math } from './math';
 export type { MathColumnArguments } from './math_column';
 export { mathColumn } from './math_column';
+export { getCell } from './getCell';

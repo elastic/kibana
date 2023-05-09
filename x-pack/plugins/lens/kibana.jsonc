@@ -32,6 +32,7 @@
       "expressionGauge",
       "expressionMetricVis",
       "expressionHeatmap",
+      "expressionRevealImage",
       "expressionXY",
       "eventAnnotation",
       "unifiedSearch",
