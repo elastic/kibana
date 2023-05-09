@@ -29,7 +29,7 @@
           "\nComposes grouping query and aggregations"
         ],
         "signature": [
-          "({ additionalFilters, from, groupByFields, rootAggregations, runtimeMappings, size, pageNumber, sort, statsAggregations, to, }: ",
+          "({ additionalFilters, from, groupByField, pageNumber, rootAggregations, runtimeMappings, selectedGroupEsTypes, size, sort, statsAggregations, to, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -43,7 +43,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  pageNumber,\n  sort,\n  statsAggregations,\n  to,\n}",
+            "label": "{\n  additionalFilters = [],\n  from,\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  selectedGroupEsTypes,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  to,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"

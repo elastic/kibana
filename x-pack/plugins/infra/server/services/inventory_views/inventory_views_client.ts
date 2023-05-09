@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
+  SavedObjectsUtils,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
@@ -50,6 +51,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     const defaultView = InventoryViewsClient.createStaticView(
       sourceConfiguration.configuration.inventoryDefaultView
     );
+
     const views = inventoryViewSavedObject.saved_objects.map((savedObject) =>
       this.mapSavedObjectToInventoryView(
         savedObject,
@@ -95,37 +97,26 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     );
   }
 
-  public async create(
-    attributes: CreateInventoryViewAttributesRequestPayload
-  ): Promise<InventoryView> {
-    this.logger.debug(`Trying to create inventory view ...`);
-
-    // Validate there is not a view with the same name
-    await this.assertNameConflict(attributes.name);
-
-    const inventoryViewSavedObject = await this.savedObjectsClient.create(
-      inventoryViewSavedObjectName,
-      attributes
-    );
-
-    return this.mapSavedObjectToInventoryView(inventoryViewSavedObject);
-  }
-
   public async update(
-    inventoryViewId: string,
+    inventoryViewId: string | null,
     attributes: CreateInventoryViewAttributesRequestPayload,
     query: InventoryViewRequestQuery
   ): Promise<InventoryView> {
     this.logger.debug(`Trying to update inventory view with id "${inventoryViewId}"...`);
 
+    const viewId = inventoryViewId ?? SavedObjectsUtils.generateId();
+
     // Validate there is not a view with the same name
-    await this.assertNameConflict(attributes.name, [inventoryViewId]);
+    await this.assertNameConflict(attributes.name, [viewId]);
 
     const sourceId = query.sourceId ?? InventoryViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
-      this.savedObjectsClient.update(inventoryViewSavedObjectName, inventoryViewId, attributes),
+      this.savedObjectsClient.create(inventoryViewSavedObjectName, attributes, {
+        id: viewId,
+        overwrite: true,
+      }),
     ]);
 
     return this.mapSavedObjectToInventoryView(

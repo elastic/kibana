@@ -9,23 +9,30 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { HttpResponse } from '@kbn/core/public';
 
-import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { ErrorResponse, HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
 import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
 import {
+  getTextExpansionError,
   TextExpansionCalloutLogic,
   TextExpansionCalloutValues,
 } from './text_expansion_callout_logic';
 
 const DEFAULT_VALUES: TextExpansionCalloutValues = {
+  createTextExpansionModelError: undefined,
   createTextExpansionModelStatus: Status.IDLE,
   createdTextExpansionModel: undefined,
+  fetchTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
+  isModelStarted: false,
   isPollingTextExpansionModelActive: false,
+  isStartButtonDisabled: false,
+  startTextExpansionModelError: undefined,
+  startTextExpansionModelStatus: Status.IDLE,
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,
 };
@@ -50,6 +57,37 @@ describe('TextExpansionCalloutLogic', () => {
 
   it('has expected default values', () => {
     expect(TextExpansionCalloutLogic.values).toEqual(DEFAULT_VALUES);
+  });
+
+  describe('getTextExpansionError', () => {
+    const error = {
+      body: {
+        error: 'some-error',
+        message: 'some-error-message',
+        statusCode: 500,
+      },
+    } as HttpError;
+    it('returns null if there is no error', () => {
+      expect(getTextExpansionError(undefined, undefined, undefined)).toBe(null);
+    });
+    it('uses the correct title and message from a create error', () => {
+      expect(getTextExpansionError(error, undefined, undefined)).toEqual({
+        title: 'Error with ELSER deployment',
+        message: error.body?.message,
+      });
+    });
+    it('uses the correct title and message from a fetch error', () => {
+      expect(getTextExpansionError(undefined, error, undefined)).toEqual({
+        title: 'Error fetching ELSER model',
+        message: error.body?.message,
+      });
+    });
+    it('uses the correct title and message from a start error', () => {
+      expect(getTextExpansionError(undefined, undefined, error)).toEqual({
+        title: 'Error starting ELSER deployment',
+        message: error.body?.message,
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -184,6 +222,19 @@ describe('TextExpansionCalloutLogic', () => {
       });
     });
 
+    describe('startTextExpansionModelSuccess', () => {
+      it('sets startedTextExpansionModel', () => {
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
+
+        TextExpansionCalloutLogic.actions.startTextExpansionModelSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+        });
+
+        expect(TextExpansionCalloutLogic.actions.fetchTextExpansionModel).toHaveBeenCalled();
+      });
+    });
+
     describe('stopPollingTextExpansionModel', () => {
       it('clears polling timeout and poll timeout ID if it is set', () => {
         mount({
@@ -266,6 +317,23 @@ describe('TextExpansionCalloutLogic', () => {
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(false);
+      });
+    });
+
+    describe('isModelStarted', () => {
+      it('is set to true if the model is started', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(true);
+      });
+      it('is set to false if the model is not started', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.NotDeployed,
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(false);
       });
     });
 

@@ -147,14 +147,16 @@ export function TransactionDurationRuleType(props: Props) {
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
 
-  const chartPreview = (
+  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
+  const showChartPreview = false;
+  const chartPreview = showChartPreview ? (
     <ChartPreview
       series={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}
     />
-  );
+  ) : null;
 
   const onGroupByChange = useCallback(
     (group: string[] | null) => {
@@ -183,7 +185,12 @@ export function TransactionDurationRuleType(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
       serviceName={params.serviceName}
     />,
     <TransactionNameField

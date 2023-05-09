@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
 
@@ -15,7 +16,8 @@ export class DeleteSLO {
   constructor(
     private repository: SLORepository,
     private transformManager: TransformManager,
-    private esClient: ElasticsearchClient
+    private esClient: ElasticsearchClient,
+    private rulesClient: RulesClientApi
   ) {}
 
   public async execute(sloId: string): Promise<void> {
@@ -26,6 +28,7 @@ export class DeleteSLO {
     await this.transformManager.uninstall(sloTransformId);
 
     await this.deleteRollupData(slo.id);
+    await this.deleteAssociatedRules(slo.id);
     await this.repository.deleteById(slo.id);
   }
 
@@ -39,5 +42,15 @@ export class DeleteSLO {
         },
       },
     });
+  }
+
+  private async deleteAssociatedRules(sloId: string): Promise<void> {
+    try {
+      await this.rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.params.sloId:${sloId}`,
+      });
+    } catch (err) {
+      // no-op: bulkDeleteRules throws if no rules are found.
+    }
   }
 }

@@ -9,12 +9,7 @@
 import './discover_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
@@ -266,7 +261,7 @@ export function DiscoverSidebarComponent({
   }
 
   return (
-    <EuiPageSideBar
+    <EuiPageSidebar
       className="dscSidebar"
       aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
         defaultMessage: 'Index and fields',
@@ -327,7 +322,7 @@ export function DiscoverSidebarComponent({
           </FieldList>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageSideBar>
+    </EuiPageSidebar>
   );
 }
 

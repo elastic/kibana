@@ -4401,20 +4401,6 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleTableItem.activeSnoozes",
-            "type": "Array",
-            "tags": [],
-            "label": "activeSnoozes",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5870,7 +5856,9 @@
           "EuiDataGridToolBarAdditionalControlsOptions",
           " | undefined; showInspectButton?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
-          " | undefined; } & Partial<Pick<",
+          " | undefined; shouldHighlightRow?: ((alert: ",
+          "EcsFieldsResponse",
+          ") => boolean) | undefined; } & Partial<Pick<",
           "EuiDataGridProps",
           ", \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
@@ -7846,7 +7834,7 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesListNotifyBadge.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "props",
               "description": [],

@@ -306,6 +306,7 @@ const StyleForStepStatus = ({
     <EuiText
       css={{
         fontWeight: euiTheme.font.weight.bold,
+        whiteSpace: 'nowrap',
       }}
       size={textSize}
       color={euiTheme.colors[getTextColorForMonitorStatus(status)] as CSSProperties['color']}

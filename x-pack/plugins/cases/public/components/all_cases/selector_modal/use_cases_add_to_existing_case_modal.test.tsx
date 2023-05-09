@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { CaseStatuses, StatusAll } from '../../../../common';
 import type { AppMockRenderer } from '../../../common/mock';
 import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
@@ -144,7 +144,7 @@ describe('use cases add to existing case modal hook', () => {
 
   it('should call getAttachments with the case info', async () => {
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
@@ -159,7 +159,7 @@ describe('use cases add to existing case modal hook', () => {
 
   it('should show a toaster info when no attachments are defined and noAttachmentsToaster is defined', async () => {
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
@@ -182,7 +182,7 @@ describe('use cases add to existing case modal hook', () => {
 
   it('should show a toaster info when no attachments are defined and noAttachmentsToaster is not defined', async () => {
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
@@ -213,7 +213,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
@@ -244,7 +244,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
@@ -295,7 +295,7 @@ describe('use cases add to existing case modal hook', () => {
 
     // simulate a case selected
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
+      onRowClick({ id: 'test' } as CaseUI);
       return null;
     });
 
