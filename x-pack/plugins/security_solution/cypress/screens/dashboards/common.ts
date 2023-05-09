@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
+import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export interface HapiReadableStream extends Readable {
-  hapi: {
-    filename: string;
-  };
-}
+export const DASHBOARD_INVESTIGATE_IN_TIMELINE_CELL_ACTION = getDataTestSubjectSelector(
+  'actionItem-security-alertsCount-cellActions-investigateInNewTimeline'
+);

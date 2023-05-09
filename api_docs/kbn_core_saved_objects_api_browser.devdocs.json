@@ -2413,6 +2413,14 @@
                 "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
               },
               {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               },

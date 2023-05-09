@@ -34,12 +34,10 @@ export interface ListParamItem extends SyntheticsParamSO {
 }
 
 export const ParamsList = () => {
-  const [refreshList, setRefreshList] = useState(Date.now());
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const { items, loading } = useParamsList(refreshList);
+  const { items, isLoading } = useParamsList();
 
   const [isEditingItem, setIsEditingItem] = useState<ListParamItem | null>(null);
 
@@ -182,7 +180,6 @@ export const ParamsList = () => {
       <AddParamFlyout
         isEditingItem={isEditingItem}
         setIsEditingItem={setIsEditingItem}
-        setRefreshList={setRefreshList}
         items={items}
       />,
     ];
@@ -235,7 +232,7 @@ export const ParamsList = () => {
       <EuiSpacer size="m" />
       <EuiInMemoryTable<ListParamItem>
         itemId="id"
-        loading={loading}
+        loading={isLoading}
         tableCaption={PARAMS_TABLE}
         items={filteredItems}
         columns={columns}
@@ -285,14 +282,10 @@ export const ParamsList = () => {
             },
           ],
         }}
-        message={loading ? LOADING_TEXT : undefined}
+        message={isLoading ? LOADING_TEXT : undefined}
       />
       {isDeleteModalVisible && deleteParam && (
-        <DeleteParam
-          items={deleteParam}
-          setIsDeleteModalVisible={setIsDeleteModalVisible}
-          setRefreshList={setRefreshList}
-        />
+        <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />
       )}
     </div>
   );
