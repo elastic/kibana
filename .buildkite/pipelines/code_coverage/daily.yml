@@ -27,11 +27,11 @@ steps:
 #    timeout_in_minutes: 30
 #    key: ingest
 
-  - command: .buildkite/scripts/steps/nodejs_std_test_runner/node_test.sh
-    label: 'Playing with new NodeJS Test Runner'
-    agents:
-      queue: n2-4-spot
-    timeout_in_minutes: 30
+#  - command: .buildkite/scripts/steps/nodejs_std_test_runner/node_test.sh
+#    label: 'Playing with new NodeJS Test Runner'
+#    agents:
+#      queue: n2-4-spot
+#    timeout_in_minutes: 30
 
   - commands:
       - .buildkite/scripts/bootstrap.sh
@@ -40,10 +40,16 @@ steps:
       - nvm install 20.0.0
       - node --version
       - npm --version
-    label: 'Bootstrap, Install NVM && NodeJS v20.0.0, & Verify'
+      - node --test packages/kbn-test/new_test_runner --test-reporter tap
+      - pushd packages/kbn-test/new_test_runner
+      - node --test-reporter=./lifecycle_gen.mjs --test
+      - node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$tgt"
+      - popd
+      - npx junit2json target/junit/tap.xml | jq
+    label: 'Kitchen Sink'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 10
+    timeout_in_minutes: 20
 
   - command: node --test packages/kbn-test/new_test_runner --test-reporter tap
     label: 'Use TAP Reporter'
