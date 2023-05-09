@@ -13,6 +13,8 @@ export const UNCATEGORIZED_STREAMS_PANEL_ID = 'uncategorized_streams_panel';
 
 export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 
+export const contextMenuStyles = { maxHeight: 320 };
+
 export const selectViewLabel = i18n.translate(
   'xpack.observabilityLogs.dataStreamSelector.selectView',
   { defaultMessage: 'Select view' }
