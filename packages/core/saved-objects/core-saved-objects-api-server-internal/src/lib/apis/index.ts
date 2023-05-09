@@ -21,4 +21,6 @@ export { performBulkUpdate } from './bulk_update';
 export { performRemoveReferencesTo } from './remove_references_to';
 export { performOpenPointInTime } from './open_point_in_time';
 export { performIncrementCounter } from './increment_counter';
+export { performBulkResolve } from './bulk_resolve';
+export { performResolve } from './resolve';
 export { incrementCounterInternal } from './internals';

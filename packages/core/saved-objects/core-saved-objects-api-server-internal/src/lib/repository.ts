@@ -8,7 +8,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { BulkResolveError } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
@@ -67,8 +66,6 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
-import { internalBulkResolve, isBulkResolveError } from './internal_bulk_resolve';
-import { errorContent } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
 import {
@@ -96,6 +93,8 @@ import {
   performOpenPointInTime,
   incrementCounterInternal,
   performIncrementCounter,
+  performBulkResolve,
+  performResolve,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -394,32 +393,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
-      registry: this._registry,
-      allowedTypes: this._allowedTypes,
-      client: this.client,
-      serializer: this._serializer,
-      getIndexForType: this.getIndexForType.bind(this),
-      incrementCounterInternal: this.incrementCounterInternal.bind(this),
-      encryptionExtension: this._encryptionExtension,
-      securityExtension: this._securityExtension,
-      objects,
-      options: { ...options, namespace },
-    });
-    const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
-      // extract payloads from saved object errors
-      if (isBulkResolveError(result)) {
-        const errorResult = result as BulkResolveError;
-        const { type, id, error } = errorResult;
-        return {
-          saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
-          outcome: 'exactMatch',
-        };
-      }
-      return result;
-    });
-    return { resolved_objects: resolvedObjects };
+    return await performBulkResolve(
+      {
+        objects,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**
@@ -448,24 +428,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     id: string,
     options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
-      registry: this._registry,
-      allowedTypes: this._allowedTypes,
-      client: this.client,
-      serializer: this._serializer,
-      getIndexForType: this.getIndexForType.bind(this),
-      incrementCounterInternal: this.incrementCounterInternal.bind(this),
-      encryptionExtension: this._encryptionExtension,
-      securityExtension: this._securityExtension,
-      objects: [{ type, id }],
-      options: { ...options, namespace },
-    });
-    const [result] = bulkResults;
-    if (isBulkResolveError(result)) {
-      throw result.error;
-    }
-    return result;
+    return await performResolve(
+      {
+        type,
+        id,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**

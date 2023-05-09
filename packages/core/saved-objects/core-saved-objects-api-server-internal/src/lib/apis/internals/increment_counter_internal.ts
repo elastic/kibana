@@ -30,15 +30,7 @@ export interface PerformIncrementCounterInternalParams<T = unknown> {
 
 export const incrementCounterInternal = async <T>(
   { type, id, counterFields, options }: PerformIncrementCounterInternalParams<T>,
-  {
-    registry,
-    helpers,
-    allowedTypes,
-    client,
-    serializer,
-    migrator,
-    extensions = {},
-  }: ApiExecutionContext
+  { registry, helpers, client, serializer, migrator }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const { common: commonHelper, preflight: preflightHelper } = helpers;
 

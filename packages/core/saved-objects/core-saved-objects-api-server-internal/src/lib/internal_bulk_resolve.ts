@@ -23,12 +23,12 @@ import {
   type SavedObjectsRawDocSource,
   type SavedObject,
   type BulkResolveError,
+  type ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
-  type SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   CORE_USAGE_STATS_ID,
@@ -59,7 +59,7 @@ export interface InternalBulkResolveParams {
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
   client: RepositoryEsClient;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   incrementCounterInternal: <T = unknown>(
     type: string,
@@ -290,7 +290,7 @@ function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTy
 async function fetchAndUpdateAliases(
   validObjects: Array<Right<SavedObjectsBulkResolveObject>>,
   client: RepositoryEsClient,
-  serializer: SavedObjectsSerializer,
+  serializer: ISavedObjectsSerializer,
   getIndexForType: (type: string) => string,
   namespace: string | undefined
 ) {
@@ -342,6 +342,7 @@ async function fetchAndUpdateAliases(
     return item.update?.get;
   });
 }
+
 class ResolveCounter {
   private record = new Map<string, number>();
 
