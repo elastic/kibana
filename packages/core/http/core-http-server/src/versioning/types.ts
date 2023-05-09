@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { z } from '@kbn/zod';
 import type { Type } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
