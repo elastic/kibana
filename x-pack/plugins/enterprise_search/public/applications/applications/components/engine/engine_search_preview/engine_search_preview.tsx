@@ -348,7 +348,7 @@ export const EngineSearchPreview: React.FC = () => {
               <EuiSpacer size="m" />
               <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
-              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+              <EuiLink href={docLinks.searchTemplates} target="_blank">
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
                   defaultMessage="Improve these results"
