@@ -98,40 +98,40 @@ EOF
 # }
 
 # GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
-# export GITHUB_TOKEN
+export GITHUB_TOKEN=""
 
 # KIBANA_CI_GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibana-ci-github)
-# export KIBANA_CI_GITHUB_TOKEN
+export KIBANA_CI_GITHUB_TOKEN=""
 
 # KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
-# export KIBANA_CI_REPORTER_KEY
+export KIBANA_CI_REPORTER_KEY=""
 
 # KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
-# export KIBANA_DOCKER_USERNAME
+export KIBANA_DOCKER_USERNAME=""
 
 # KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
-# export KIBANA_DOCKER_PASSWORD
+export KIBANA_DOCKER_PASSWORD=""
 
 # EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
-# export EC_API_KEY
+export EC_API_KEY=""
 
 # SYNTHETICS_SERVICE_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
-# export SYNTHETICS_SERVICE_USERNAME
+export SYNTHETICS_SERVICE_USERNAME=""
 
 # SYNTHETICS_SERVICE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
-# export SYNTHETICS_SERVICE_PASSWORD
+export SYNTHETICS_SERVICE_PASSWORD=""
 
 # SYNTHETICS_SERVICE_MANIFEST="$(retry 5 5 vault read -field=manifest secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
-# export SYNTHETICS_SERVICE_MANIFEST
+export SYNTHETICS_SERVICE_MANIFEST=""
 
 # SYNTHETICS_REMOTE_KIBANA_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
-# export SYNTHETICS_REMOTE_KIBANA_USERNAME
+export SYNTHETICS_REMOTE_KIBANA_USERNAME=""
 
 # SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
-# export SYNTHETICS_REMOTE_KIBANA_PASSWORD
+export SYNTHETICS_REMOTE_KIBANA_PASSWORD=""
 
 # SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"}
-# export SYNTHETICS_REMOTE_KIBANA_URL
+export SYNTHETICS_REMOTE_KIBANA_URL=""
 
 # # Setup Failed Test Reporter Elasticsearch credentials
 # {
@@ -146,7 +146,7 @@ EOF
 # }
 
 # BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
-# export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE=""
 # retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
