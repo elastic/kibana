@@ -132,6 +132,18 @@ export class TaskClaiming {
     this.events$ = new Subject<TaskClaim>();
   }
 
+  private claimingBatchIndex = 0;
+  private getClaimingBatches() {
+    // return all batches, starting at index and cycling back to where we began
+    const batch = [
+      ...this.taskClaimingBatches.slice(this.claimingBatchIndex),
+      ...this.taskClaimingBatches.slice(0, this.claimingBatchIndex),
+    ];
+    // shift claimingBatchIndex by one so that next cycle begins at the next index
+    this.claimingBatchIndex = (this.claimingBatchIndex + 1) % this.taskClaimingBatches.length;
+    return batch;
+  }
+
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
     const result: TaskClaimingBatches = [];
     const typesByCost: Record<number, string[]> = {
@@ -201,7 +213,7 @@ export class TaskClaiming {
 
     try {
       const results = await Promise.all(
-        this.taskClaimingBatches
+        this.getClaimingBatches()
           .map((batch) => {
             const size = batch.size();
             if (size > 0) {
