@@ -40,7 +40,7 @@ export const performResolve = async <T>(
     allowedTypes,
     client,
     serializer,
-    getIndexForType: commonHelper.getIndexForType.bind(this),
+    getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
     incrementCounterInternal: (t, i, counterFields, opts = {}) =>
       incrementCounterInternal(
         { type: t, id: i, counterFields, options: opts },
