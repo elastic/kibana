@@ -18,14 +18,15 @@ import { ConnectorCard } from '../card';
 const JiraFieldsPreviewComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<JiraFieldsType>
 > = ({ fields, connector }) => {
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
   const { issueType = null, priority = null, parent = null } = fields ?? {};
 
-  const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
+  const { isLoading: isLoadingIssueTypes, data: issueTypesData } = useGetIssueTypes({
     connector,
     http,
-    toastNotifications: notifications.toasts,
   });
+
+  const issueTypes = issueTypesData?.data;
 
   const listItems = useMemo(
     () => [
@@ -33,7 +34,7 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.ISSUE_TYPE,
-              description: issueTypes.find((issue) => issue.id === issueType)?.name ?? '',
+              description: (issueTypes ?? []).find((issue) => issue.id === issueType)?.name ?? '',
             },
           ]
         : []),

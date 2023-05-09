@@ -27,14 +27,15 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
 
-  const { isLoading: isLoadingIssues, issues } = useGetIssues({
+  const { isFetching: isLoadingIssues, data: issuesData } = useGetIssues({
     http,
-    toastNotifications: notifications.toasts,
     actionConnector,
     query,
   });
+
+  const issues = issuesData?.data ?? [];
 
   const options = issues.map((issue) => ({ label: issue.title, value: issue.key }));
 

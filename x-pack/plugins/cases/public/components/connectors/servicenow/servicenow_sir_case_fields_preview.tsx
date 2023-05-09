@@ -40,15 +40,16 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
     subcategory = null,
   } = fields ?? {};
 
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
 
-  const { choices } = useGetChoices({
+  const { data: choicesData } = useGetChoices({
     http,
-    toastNotifications: notifications.toasts,
     connector,
     fields: choicesToGet,
   });
+
+  const choices = choicesData?.data ?? [];
 
   const choicesFormatted = choices.reduce(
     (acc, value) => ({

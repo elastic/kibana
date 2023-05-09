@@ -5,86 +5,50 @@
  * 2.0.
  */
 
-import { useState, useEffect, useRef } from 'react';
-import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ServerError } from '../../../types';
 import type { ActionConnector } from '../../../../common/api';
+import { connectorsQueriesKeys } from '../constants';
 import { getIssueTypes } from './api';
 import type { IssueTypes } from './types';
 import * as i18n from './translations';
 
 interface Props {
   http: HttpSetup;
-  toastNotifications: IToasts;
   connector?: ActionConnector;
 }
 
-export interface UseGetIssueTypes {
-  issueTypes: IssueTypes;
-  isLoading: boolean;
-}
-
-export const useGetIssueTypes = ({
-  http,
-  connector,
-  toastNotifications,
-}: Props): UseGetIssueTypes => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [issueTypes, setIssueTypes] = useState<IssueTypes>([]);
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!connector) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        abortCtrl.current = new AbortController();
-        setIsLoading(true);
-
-        const res = await getIssueTypes({
-          http,
-          signal: abortCtrl.current.signal,
-          connectorId: connector.id,
-        });
-
-        if (!didCancel.current) {
-          setIssueTypes(res.data ?? []);
-          setIsLoading(false);
-          if (res.status && res.status === 'error') {
-            toastNotifications.addDanger({
-              title: i18n.ISSUE_TYPES_API_ERROR,
-              text: `${res.serviceMessage ?? res.message}`,
-            });
-          }
+export const useGetIssueTypes = ({ http, connector }: Props) => {
+  const { showErrorToast } = useCasesToast();
+  return useQuery<ActionTypeExecutorResult<IssueTypes>, ServerError>(
+    connectorsQueriesKeys.jiraGetIssueTypes(),
+    () => {
+      const abortCtrlRef = new AbortController();
+      return getIssueTypes({
+        http,
+        signal: abortCtrlRef.signal,
+        connectorId: connector?.id ?? '',
+      });
+    },
+    {
+      enabled: Boolean(connector),
+      staleTime: 60 * 1000, // one minute
+      onSuccess: (res) => {
+        if (res.status && res.status === 'error') {
+          showErrorToast(new Error(i18n.ISSUE_TYPES_API_ERROR), {
+            title: i18n.ISSUE_TYPES_API_ERROR,
+            toastMessage: `${res.serviceMessage ?? res.message}`,
+          });
         }
-      } catch (error) {
-        if (!didCancel.current) {
-          setIsLoading(false);
-          if (error.name !== 'AbortError') {
-            toastNotifications.addDanger({
-              title: i18n.ISSUE_TYPES_API_ERROR,
-              text: error.message,
-            });
-          }
-        }
-      }
-    };
-
-    didCancel.current = false;
-    abortCtrl.current.abort();
-    fetchData();
-
-    return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
-    };
-  }, [http, connector, toastNotifications]);
-
-  return {
-    issueTypes,
-    isLoading,
-  };
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ISSUE_TYPES_API_ERROR });
+      },
+    }
+  );
 };
+
+export type UseGetIssueTypes = ReturnType<typeof useGetIssueTypes>;

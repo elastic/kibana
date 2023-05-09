@@ -21,20 +21,20 @@ const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>
 > = ({ connector, fields }) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
 
-  const { isLoading: isLoadingIncidentTypes, incidentTypes: allIncidentTypes } =
-    useGetIncidentTypes({
-      http,
-      toastNotifications: notifications.toasts,
-      connector,
-    });
-
-  const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
+  const { isLoading: isLoadingIncidentTypes, data: allIncidentTypesData } = useGetIncidentTypes({
     http,
-    toastNotifications: notifications.toasts,
     connector,
   });
+
+  const { isLoading: isLoadingSeverity, data: severityData } = useGetSeverity({
+    http,
+    connector,
+  });
+
+  const allIncidentTypes = allIncidentTypesData?.data;
+  const severity = severityData?.data;
 
   const listItems = useMemo(
     () => [
@@ -42,7 +42,7 @@ const ResilientFieldsComponent: React.FunctionComponent<
         ? [
             {
               title: i18n.INCIDENT_TYPES_LABEL,
-              description: allIncidentTypes
+              description: (allIncidentTypes ?? [])
                 .filter((type) => incidentTypes.includes(type.id.toString()))
                 .map((type) => type.name)
                 .join(', '),
@@ -54,8 +54,8 @@ const ResilientFieldsComponent: React.FunctionComponent<
             {
               title: i18n.SEVERITY_LABEL,
               description:
-                severity.find((severityObj) => severityObj.id.toString() === severityCode)?.name ??
-                '',
+                (severity ?? []).find((severityObj) => severityObj.id.toString() === severityCode)
+                  ?.name ?? '',
             },
           ]
         : []),

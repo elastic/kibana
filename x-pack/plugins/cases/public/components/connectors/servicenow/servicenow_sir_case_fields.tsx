@@ -33,15 +33,16 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
   const [{ fields }] = useFormData<{ fields: ServiceNowSIRFieldsType }>();
   const { category = null } = fields ?? {};
 
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
   const showConnectorWarning = connector.isDeprecated;
 
-  const { isLoading: isLoadingChoices, choices } = useGetChoices({
+  const { isLoading: isLoadingChoices, data: choicesData } = useGetChoices({
     http,
-    toastNotifications: notifications.toasts,
     connector,
     fields: choicesToGet,
   });
+
+  const choices = choicesData?.data ?? [];
 
   const choicesFormatted = choices.reduce(
     (acc, value) => ({

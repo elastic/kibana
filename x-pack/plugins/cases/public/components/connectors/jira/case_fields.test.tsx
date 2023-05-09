@@ -33,16 +33,18 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
     isLoading: false,
-    issueTypes: [
-      {
-        id: '10006',
-        name: 'Task',
-      },
-      {
-        id: '10007',
-        name: 'Bug',
-      },
-    ],
+    data: {
+      data: [
+        {
+          id: '10006',
+          name: 'Task',
+        },
+        {
+          id: '10007',
+          name: 'Bug',
+        },
+      ],
+    },
   };
 
   const useGetFieldsByIssueTypeResponse = {

@@ -35,7 +35,7 @@ describe('ServiceNowSIR Fields', () => {
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
-    useGetChoicesMock.mockReturnValue({ isLoading: false, choices });
+    useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
     jest.clearAllMocks();
   });
 

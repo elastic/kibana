@@ -27,34 +27,38 @@ const useGetSeverityMock = useGetSeverity as jest.Mock;
 describe('ResilientParamsFields renders', () => {
   const useGetIncidentTypesResponse = {
     isLoading: false,
-    incidentTypes: [
-      {
-        id: 19,
-        name: 'Malware',
-      },
-      {
-        id: 21,
-        name: 'Denial of Service',
-      },
-    ],
+    data: {
+      data: [
+        {
+          id: 19,
+          name: 'Malware',
+        },
+        {
+          id: 21,
+          name: 'Denial of Service',
+        },
+      ],
+    },
   };
 
   const useGetSeverityResponse = {
     isLoading: false,
-    severity: [
-      {
-        id: 4,
-        name: 'Low',
-      },
-      {
-        id: 5,
-        name: 'Medium',
-      },
-      {
-        id: 6,
-        name: 'High',
-      },
-    ],
+    data: {
+      data: [
+        {
+          id: 4,
+          name: 'Low',
+        },
+        {
+          id: 5,
+          name: 'Medium',
+        },
+        {
+          id: 6,
+          name: 'High',
+        },
+      ],
+    },
   };
 
   const fields = {

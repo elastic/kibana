@@ -22,24 +22,24 @@ import { useGetSeverity } from './use_get_severity';
 import * as i18n from './translations';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
 
-  const { isLoading: isLoadingIncidentTypes, incidentTypes: allIncidentTypes } =
-    useGetIncidentTypes({
-      http,
-      toastNotifications: notifications.toasts,
-      connector,
-    });
-
-  const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
+  const { isLoading: isLoadingIncidentTypes, data: allIncidentTypesData } = useGetIncidentTypes({
     http,
-    toastNotifications: notifications.toasts,
     connector,
   });
 
+  const { isLoading: isLoadingSeverity, data: severityData } = useGetSeverity({
+    http,
+    connector,
+  });
+
+  const allIncidentTypes = allIncidentTypesData?.data;
+  const severity = severityData?.data;
+
   const severitySelectOptions: EuiSelectOption[] = useMemo(
     () =>
-      severity.map((s) => ({
+      (severity ?? []).map((s) => ({
         value: s.id.toString(),
         text: s.name,
       })),
@@ -69,7 +69,9 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
 
           const selectedOptions = (field.value ?? []).map((incidentType) => ({
             value: incidentType,
-            label: allIncidentTypes.find((type) => incidentType === type.id.toString())?.name ?? '',
+            label:
+              (allIncidentTypes ?? []).find((type) => incidentType === type.id.toString())?.name ??
+              '',
           }));
 
           return (

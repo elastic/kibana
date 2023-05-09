@@ -21,33 +21,35 @@ import { SearchIssues } from './search_issues';
 
 const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
 
   const { issueType = null } = fields ?? {};
 
-  const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
+  const { isLoading: isLoadingIssueTypes, data: issueTypesData } = useGetIssueTypes({
     connector,
     http,
-    toastNotifications: notifications.toasts,
   });
+
+  const issueTypes = issueTypesData?.data ?? [];
 
   const issueTypesSelectOptions = issueTypes.map((type) => ({
     text: type.name ?? '',
     value: type.id ?? '',
   }));
 
-  const { isLoading: isLoadingFields, fields: fieldsByIssueType } = useGetFieldsByIssueType({
+  const { isLoading: isLoadingFields, data: fieldsByIssueTypeData } = useGetFieldsByIssueType({
     connector,
     http,
     issueType,
-    toastNotifications: notifications.toasts,
   });
 
-  const hasPriority = fieldsByIssueType.priority != null;
-  const hasParent = fieldsByIssueType.parent != null;
+  const fieldsByIssueType = fieldsByIssueTypeData?.data;
+
+  const hasPriority = fieldsByIssueType?.priority != null;
+  const hasParent = fieldsByIssueType?.parent != null;
 
   const prioritiesSelectOptions = useMemo(() => {
-    const priorities = fieldsByIssueType.priority?.allowedValues ?? [];
+    const priorities = fieldsByIssueType?.priority?.allowedValues ?? [];
     return map(
       (p) => ({
         text: p.name,
@@ -70,7 +72,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
             'data-test-subj': 'issueTypeSelect',
             options: issueTypesSelectOptions,
             fullWidth: true,
-            disabled: isLoadingIssueTypes || isLoadingFields,
+            disabled: isLoadingIssueTypes,
             isLoading: isLoadingIssueTypes,
             hasNoInitialSelection: false,
           },
