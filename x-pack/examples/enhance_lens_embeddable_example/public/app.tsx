@@ -591,7 +591,11 @@ function DataOnlyExample({
     columnOrder: [],
     columns: {},
   };
-  const formulaText = `unique_count(${keywordField?.displayName}, shift="1m")`;
+  const formulaText = `ifelse(
+    unique_count(${keywordField?.displayName}, shift="1m") > 5, 
+    unique_count(${keywordField?.displayName}, shift="1m"), 
+    0
+  )`;
 
   const dataLayer = formula.insertOrReplaceFormulaColumn(
     'col2',
@@ -639,7 +643,10 @@ function DataOnlyExample({
     <EuiFlexGroup>
       <EuiFlexItem>
         <p>
-          Using a Lens embeddable to compute the Lens formula <code>{formulaText}</code>:{' '}
+          Using a Lens embeddable to compute the Lens formula{' '}
+          <EuiCodeBlock fontSize="m" paddingSize="m">
+            {formulaText}
+          </EuiCodeBlock>
           <LensComponent
             id=""
             withDefaultActions
