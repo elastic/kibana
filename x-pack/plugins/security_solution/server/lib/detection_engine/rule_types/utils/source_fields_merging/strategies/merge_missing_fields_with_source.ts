@@ -8,7 +8,6 @@
 import { get } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
 
-import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 import type { SignalSource } from '../../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
 import type { FieldsType, MergeStrategyFunction } from '../types';
@@ -16,7 +15,7 @@ import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
 import { isTypeObject } from '../utils/is_type_object';
 import { isNestedObject } from '../utils/is_nested_object';
 import { isPathValid } from '../utils/is_path_valid';
-import { flattenNestedObject } from '../utils/flatten_nested_object';
+import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
 
 /**
  * Merges only missing sections of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -32,16 +31,17 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
   const filteredEntries = filterFieldEntries(fieldEntries, ignoreFields);
-  const flattenedSource = flattenNestedObject(source);
+  const fieldsKeyMap = buildFieldsKeyAsArrayMap(source);
 
   const transformedSource = filteredEntries.reduce(
-    (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {
+    (merged, [fieldsKeyAsString, fieldsValue]: [string, FieldsType]) => {
+      const fieldsKey = fieldsKeyMap[fieldsKeyAsString] ?? fieldsKeyAsString;
+      //   console.log('fieldsKey', fieldsKey, JSON.stringify(fieldsKeyMap, null, 2));
       if (
         hasEarlyReturnConditions({
           fieldsValue,
           fieldsKey,
           merged,
-          flattenedSource,
         })
       ) {
         return merged;
@@ -69,23 +69,18 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
  * @param fieldsValue The field value to check
  * @param fieldsKey The key of the field we are checking
  * @param merged The merge document which is what we are testing conditions against
- * @param flattenedSource Flattened source document that works as a backup document in cases when initial source(merged) has mixed plain and do notation keys
  * @returns true if we should return early, otherwise false
  */
 const hasEarlyReturnConditions = ({
   fieldsValue,
   fieldsKey,
   merged,
-  flattenedSource,
 }: {
   fieldsValue: FieldsType;
-  fieldsKey: string;
+  fieldsKey: string[];
   merged: SignalSource;
-  flattenedSource: Record<string, SearchTypes>;
 }) => {
-  // merged document can have properties that contain both dot notation and plain object
-  // lodash.get doesn't work in this cases. Instead we try to look into flattened source to check whether value exists
-  const valueInMergedDocument = get(fieldsKey, merged) || get(fieldsKey, flattenedSource);
+  const valueInMergedDocument = get(fieldsKey, merged);
   return (
     fieldsValue.length === 0 ||
     valueInMergedDocument !== undefined ||

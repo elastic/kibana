@@ -16,7 +16,26 @@ import type { SignalSource } from '../../../types';
  * @param source The source document
  * @returns boolean
  */
-export const isPathValid = (path: string, source: SignalSource): boolean => {
+export const isPathValid = (path: string[] | string, source: SignalSource): boolean => {
+  if (path === '') {
+    return false;
+  }
+  const pathAsArray = typeof path === 'string' ? path.split('.') : path;
+
+  if (pathAsArray.length === 0) {
+    return false;
+  }
+
+  return pathAsArray.every((_, index, array) => {
+    const newPath = [...array].splice(0, index + 1);
+    // _.get when won't retrieve value of flattened key 'a.b' when receives path ['a', 'b'].
+    // so we would try to call _.get with dot-notation path if array path results in undefined
+    const valueToCheck = get(newPath, source) ?? get(newPath.join('.'), source);
+    return valueToCheck === undefined || isPlainObject(valueToCheck);
+  });
+};
+
+export const isPathValidAsString = (path: string, source: SignalSource): boolean => {
   if (!path) {
     return false;
   }
@@ -25,6 +44,8 @@ export const isPathValid = (path: string, source: SignalSource): boolean => {
   return splitPath.every((_, index, array) => {
     const newPath = [...array].splice(0, index + 1).join('.');
     const valueToCheck = get(newPath, source);
+    //   console.log('.....isPathValidAsString', 'newPath', newPath, 'valueToCheck', valueToCheck);
+
     return valueToCheck === undefined || isPlainObject(valueToCheck);
   });
 };

@@ -13,42 +13,38 @@ const isObjectTypeGuard = (value: SearchTypes): value is Record<string, SearchTy
   return isPlainObject(value);
 };
 
-export function flatten(
+function traverseSource(
   document: SearchTypes,
-  res: Record<string, SearchTypes> = {},
-  prefix: string = ''
-): Record<string, SearchTypes> {
+  result: Record<string, string[]> = {},
+  prefix: string[] = []
+): Record<string, string[]> {
   if (isObjectTypeGuard(document)) {
     for (const [key, value] of Object.entries(document)) {
-      const path = prefix ? `${prefix}.${key}` : key;
+      const path = [...prefix, key];
 
-      flatten(value, res, path);
+      traverseSource(value, result, path);
     }
   } else if (isArray(document)) {
     document.forEach((doc) => {
-      flatten(doc, res, prefix);
+      traverseSource(doc, result, prefix);
     });
   } else {
-    if (isArray(res[prefix])) {
-      (res[prefix] as SearchTypes[]).push(document);
-    } else {
-      res[prefix] = [document];
-    }
+    result[prefix.join('.')] = prefix;
   }
 
-  return res;
+  return result;
 }
 
 /**
  * Flattens a deeply nested object to a map of dot-separated paths, including nested arrays
  * NOTE: it transforms primitive value to array, i.e. {a: b} == {a: [b]}, similarly to how fields works in ES _search query
  */
-export function flattenNestedObject(
+export function buildFieldsKeyAsArrayMap(
   document: Record<string, SearchTypes>
-): Record<string, SearchTypes> {
+): Record<string, string[]> {
   if (!isPlainObject(document)) {
-    return document;
+    return {};
   }
 
-  return flatten(document);
+  return traverseSource(document);
 }
