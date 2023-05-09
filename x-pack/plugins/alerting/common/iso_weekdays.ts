@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
-
-export interface HapiReadableStream extends Readable {
-  hapi: {
-    filename: string;
-  };
-}
+export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export const ISO_WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7];
