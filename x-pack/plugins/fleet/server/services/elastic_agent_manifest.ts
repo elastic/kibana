@@ -345,8 +345,8 @@ spec:
             - name: FLEET_ENROLL
               value: "1"
             # Set to true to communicate with Fleet with either insecure HTTP or unverified HTTPS
-            - name: FLEET_INSECURE
-              value: "true"
+            # - name: FLEET_INSECURE
+            #   value: "true"
             # Fleet Server URL to enroll the Elastic Agent into
             # FLEET_URL can be found in Kibana, go to Management > Fleet > Settings
             - name: FLEET_URL
@@ -355,14 +355,13 @@ spec:
             # If FLEET_ENROLLMENT_TOKEN is empty then KIBANA_HOST, KIBANA_FLEET_USERNAME, KIBANA_FLEET_PASSWORD are needed
             - name: FLEET_ENROLLMENT_TOKEN
               value: "token-id"
-            - name: KIBANA_HOST
-              value: "http://kibana:5601"
-            # The basic authentication username used to connect to Kibana and retrieve a service_token to enable Fleet
-            - name: KIBANA_FLEET_USERNAME
-              value: "elastic"
-            # The basic authentication password used to connect to Kibana and retrieve a service_token to enable Fleet
-            - name: KIBANA_FLEET_PASSWORD
-              value: "changeme"
+            # The basic authentication username used to connect to Kibana and retrieve an enrollment. Only required when to this agent runs Fleet Server.
+            # - name: KIBANA_HOST
+            #   value: "http://kibana:5601"
+            # - name: KIBANA_FLEET_USERNAME
+            #   value: "elastic"
+            # - name: KIBANA_FLEET_PASSWORD
+            #   value: "changeme"
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
