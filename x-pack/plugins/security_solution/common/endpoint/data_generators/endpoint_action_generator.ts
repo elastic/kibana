@@ -268,21 +268,30 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     if (command === 'upload') {
-      if (!details.parameters) {
-        (
-          details as ActionDetails<
-            ResponseActionUploadOutputContent,
-            ResponseActionUploadParameters
-          >
-        ).parameters = {
-          file: {
-            file_id: 'file-x-y-z',
-            file_name: 'foo.txt',
-            size: 1234,
-            sha256: 'file-hash-sha-256',
+      const uploadActionDetails = details as ActionDetails<
+        ResponseActionUploadOutputContent,
+        ResponseActionUploadParameters
+      >;
+
+      uploadActionDetails.parameters = {
+        file: {
+          file_id: 'file-x-y-z',
+          file_name: 'foo.txt',
+          size: 1234,
+          sha256: 'file-hash-sha-256',
+        },
+      };
+
+      uploadActionDetails.outputs = {
+        'agent-a': {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: '/path/to/uploaded/file',
+            disk_free_space: 1234567,
           },
-        };
-      }
+        },
+      };
     }
 
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<

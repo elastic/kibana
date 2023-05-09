@@ -11,6 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { css } from '@emotion/react';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import type {
   ActionDetails,
@@ -98,7 +99,7 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
     }
 
     return (
-      <>
+      <div data-test-subj={getTestId()}>
         {outputs.map(({ name, state, result }) => {
           // Use case: action log
           if (!state.isCompleted) {
@@ -156,7 +157,7 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
             </HostUploadResult>
           );
         })}
-      </>
+      </div>
     );
   }
 );
@@ -171,7 +172,7 @@ const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
     <EuiText
       className="eui-textBreakWord"
       size="s"
-      css={`
+      css={css`
         white-space: pre-wrap;
       `}
     >
