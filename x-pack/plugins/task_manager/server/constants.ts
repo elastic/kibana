@@ -14,25 +14,4 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
 
   // task types requiring a concurrency
   'report:execute',
-
-  // task types not requiring a concurrency
-  'actions:.email',
-  'actions:.index',
-  'actions:.pagerduty',
-  'actions:.swimlane',
-  'actions:.server-log',
-  'actions:.slack',
-  'actions:.slack_api',
-  'actions:.webhook',
-  'actions:.cases-webhook',
-  'actions:.xmatters',
-  'actions:.servicenow',
-  'actions:.servicenow-sir',
-  'actions:.servicenow-itom',
-  'actions:.jira',
-  'actions:.resilient',
-  'actions:.teams',
-  'actions:.torq',
-  'actions:.opsgenie',
-  'actions:.tines',
 ];
