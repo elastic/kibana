@@ -68,7 +68,19 @@ export interface TeamsActionParams {
   message: string;
 }
 
-export interface WebhookActionParams {
+export interface OpenAiActionParams {
+  body?: string;
+}
+
+export interface OpenAiConfig {
+  apiUrl: string;
+}
+
+export interface OpenAiSecrets {
+  apiKey: string;
+}
+
+export interface OpenAiActionParams {
   body?: string;
 }
 

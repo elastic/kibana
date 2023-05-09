@@ -17,6 +17,7 @@ import { getTinesConnectorType } from './tines';
 import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
+import { getConnectorType as getOpenAiConnectorType } from './open_ai';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
@@ -41,6 +42,8 @@ export { ConnectorTypeId as EmailConnectorTypeId } from './email';
 export type { ActionParamsType as EmailActionParams } from './email';
 export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';
 export type { ActionParamsType as IndexActionParams } from './es_index';
+export { ConnectorTypeId as OpenAiConnectorTypeId } from './open_ai';
+export type { ActionParamsType as OpenAiActionParams } from './open_ai';
 export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
 export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
@@ -95,6 +98,7 @@ export function registerConnectorTypes({
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
+  actions.registerType(getOpenAiConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
