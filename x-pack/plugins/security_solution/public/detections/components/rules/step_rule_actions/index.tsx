@@ -99,10 +99,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [application]
   );
 
-  const initialState = {
-    ...(defaultValues ?? stepActionsDefaultValue),
-    kibanaSiemAppUrl: kibanaAbsoluteUrl,
-  };
+  const initialState = useMemo(
+    () => ({
+      ...(defaultValues ?? stepActionsDefaultValue),
+      kibanaSiemAppUrl: kibanaAbsoluteUrl,
+    }),
+    [defaultValues, kibanaAbsoluteUrl]
+  );
+  const initialValues = useMemo(() => JSON.stringify(initialState), [initialState]);
 
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
   const { form } = useForm<ActionsStepRule>({
@@ -110,7 +114,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, submit } = form;
+  const { getFields, getFormData, submit, reset } = form;
+
+  useEffect(() => {
+    reset({ defaultValue: JSON.parse(initialValues) });
+  }, [initialValues, reset]);
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {

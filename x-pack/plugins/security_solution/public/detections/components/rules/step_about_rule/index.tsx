@@ -95,6 +95,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
 
+  const initialValues = useMemo(() => JSON.stringify(initialState), [initialState]);
+
   const { ruleIndices } = useRuleIndices(
     defineRuleData?.machineLearningJobId,
     defineRuleData?.index
@@ -135,7 +137,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, submit } = form;
+  const { getFields, getFormData, submit, reset } = form;
   const [{ severity: formSeverity, timestampOverride: formTimestampOverride }] =
     useFormData<AboutStepRule>({
       form,
@@ -159,6 +161,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         }
       },
     });
+
+  useEffect(() => {
+    reset({ defaultValue: JSON.parse(initialValues) });
+  }, [initialValues, reset]);
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;

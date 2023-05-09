@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import type { Rule } from '../../../rule_management/logic';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -38,12 +39,16 @@ import { AccordionTitle } from '../../../../detections/components/rules/accordio
 import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../detections/components/rules/step_about_rule';
 import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
-import { StepRuleActions } from '../../../../detections/components/rules/step_rule_actions';
+import {
+  stepActionsDefaultValue,
+  StepRuleActions,
+} from '../../../../detections/components/rules/step_rule_actions';
 import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
+  getStepsData,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type {
   AboutStepRule,
@@ -52,6 +57,7 @@ import type {
   RuleStepsFormData,
   RuleStepsFormHooks,
   RuleStepsData,
+  ActionsStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import { formatRule, stepIsValid } from './helpers';
@@ -185,6 +191,7 @@ const CreateRulePageComponent: React.FC = () => {
   const [scheduleRuleData, setScheduleRuleData] = useState<ScheduleStepRule>(
     getStepScheduleDefaultValue(defineRuleData.ruleType)
   );
+  const [actionsRuleData, setActionsRuleData] = useState<ActionsStepRule>(stepActionsDefaultValue);
 
   useEffect(() => {
     const isThreatMatchRuleValue = isThreatMatchRule(defineRuleData.ruleType);
@@ -207,6 +214,8 @@ const CreateRulePageComponent: React.FC = () => {
         setAboutRuleData(data as AboutStepRule);
       } else if (activeStep === RuleStep.scheduleRule) {
         setScheduleRuleData(data as ScheduleStepRule);
+      } else {
+        setActionsRuleData(data as ActionsStepRule);
       }
     },
     [activeStep]
@@ -324,9 +333,31 @@ const CreateRulePageComponent: React.FC = () => {
     [updateCurrentDataState, goToStep, createRule, navigateToApp, startMlJobs, addSuccess]
   );
 
-  const copyConfigurations = useCallback(() => {
-    addWarning(`Copy "${activeStep}" configurations"`);
-  }, [activeStep, addWarning]);
+  const copyConfigurations = useCallback(
+    (rule: Rule) => {
+      addWarning(`Copy "${activeStep}" configurations"`);
+
+      const {
+        aboutRuleData: aboutStepData,
+        defineRuleData: defineStepData,
+        scheduleRuleData: scheduleStepData,
+        ruleActionsData: actionsStepData,
+      } = getStepsData({
+        rule,
+      });
+
+      if (activeStep === RuleStep.defineRule) {
+        setDefineRuleData(defineStepData);
+      } else if (activeStep === RuleStep.aboutRule) {
+        setAboutRuleData(aboutStepData);
+      } else if (activeStep === RuleStep.scheduleRule) {
+        setScheduleRuleData(scheduleStepData);
+      } else {
+        setActionsRuleData(actionsStepData);
+      }
+    },
+    [activeStep, addWarning]
+  );
 
   const getAccordionType = useCallback(
     (step: RuleStep) => {
@@ -588,7 +619,7 @@ const CreateRulePageComponent: React.FC = () => {
                           <EuiHorizontalRule margin="m" />
                           <StepRuleActions
                             addPadding={true}
-                            defaultValues={stepsData.current[RuleStep.ruleActions].data}
+                            defaultValues={actionsRuleData}
                             isReadOnlyView={activeStep !== RuleStep.ruleActions}
                             isLoading={isLoading || loading || isStartingJobs}
                             setForm={setFormHook}

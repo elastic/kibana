@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import styled from 'styled-components';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { RuleStepProps, ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -36,13 +36,15 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   setForm,
   onRuleDataChange,
 }) => {
+  const initialValues = useMemo(() => JSON.stringify(initialState), [initialState]);
+
   const { form } = useForm<ScheduleStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
 
-  const { getFormData, submit } = form;
+  const { getFormData, submit, reset } = form;
 
   useFormData<ScheduleStepRule>({
     form,
@@ -53,6 +55,10 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       }
     },
   });
+
+  useEffect(() => {
+    reset({ defaultValue: JSON.parse(initialValues) });
+  }, [initialValues, reset]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {

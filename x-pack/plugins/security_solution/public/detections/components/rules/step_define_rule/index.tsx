@@ -156,6 +156,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [dataViewTitle, setDataViewTitle] = useState<string>();
   const license = useLicense();
 
+  const initialValues = useMemo(() => JSON.stringify(initialState), [initialState]);
+
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -369,6 +371,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   useEffect(() => {
     reset({ resetValues: false });
   }, [reset, ruleType]);
+
+  useEffect(() => {
+    reset({ defaultValue: JSON.parse(initialValues) });
+  }, [initialValues, reset]);
 
   useEffect(() => {
     setIndexModified(!isEqual(index, indicesConfig));
