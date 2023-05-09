@@ -12,3 +12,4 @@ export { performBulkCreate } from './bulk_create';
 export { performDelete } from './delete';
 export { performCheckConflicts } from './check_conflicts';
 export { performBulkDelete } from './bulk_delete';
+export { performDeleteByNamespace } from './delete_by_namespace';

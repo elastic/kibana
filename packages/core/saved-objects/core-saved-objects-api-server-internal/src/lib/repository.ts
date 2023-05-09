@@ -10,7 +10,6 @@ import { omit, isObject } from 'lodash';
 import Boom from '@hapi/boom';
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as esKuery from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -91,8 +90,6 @@ import {
   SavedObjectsSerializer,
   encodeVersion,
   encodeHitVersion,
-  getRootPropertiesObjects,
-  LEGACY_URL_ALIAS_TYPE,
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -137,6 +134,7 @@ import {
   performDelete,
   performCheckConflicts,
   performBulkDelete,
+  performDeleteByNamespace,
 } from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -390,58 +388,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     namespace: string,
     options: SavedObjectsDeleteByNamespaceOptions = {}
   ): Promise<any> {
-    // This is not exposed on the SOC; authorization and audit logging is handled by the Spaces plugin
-    if (!namespace || typeof namespace !== 'string' || namespace === '*') {
-      throw new TypeError(`namespace is required, and must be a string that is not equal to '*'`);
-    }
-
-    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
-    const typesToUpdate = [
-      ...allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type)),
-      LEGACY_URL_ALIAS_TYPE,
-    ];
-
-    // Construct kueryNode to filter legacy URL aliases (these space-agnostic objects do not use root-level "namespace/s" fields)
-    const { buildNode } = esKuery.nodeTypes.function;
-    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetNamespace`, namespace);
-    const match2 = buildNode('not', buildNode('is', 'type', LEGACY_URL_ALIAS_TYPE));
-    const kueryNode = buildNode('or', [match1, match2]);
-
-    const { body, statusCode, headers } = await this.client.updateByQuery(
+    return await performDeleteByNamespace(
       {
-        index: this.getIndicesForTypes(typesToUpdate),
-        refresh: options.refresh,
-        body: {
-          script: {
-            source: `
-              if (!ctx._source.containsKey('namespaces')) {
-                ctx.op = "delete";
-              } else {
-                ctx._source['namespaces'].removeAll(Collections.singleton(params['namespace']));
-                if (ctx._source['namespaces'].empty) {
-                  ctx.op = "delete";
-                }
-              }
-            `,
-            lang: 'painless',
-            params: { namespace },
-          },
-          conflicts: 'proceed',
-          ...getSearchDsl(this._mappings, this._registry, {
-            namespaces: [namespace],
-            type: typesToUpdate,
-            kueryNode,
-          }),
-        },
+        namespace,
+        options,
       },
-      { ignore: [404], meta: true }
+      this.apiExecutionContext
     );
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
-
-    return body;
   }
 
   /**
