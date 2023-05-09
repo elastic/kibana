@@ -35,7 +35,8 @@ export function ControlsTools() {
   const { core } = useApmPluginContext();
   const cy = useContext(CytoscapeContext);
   const selectedNode = cy.$('node:selected');
-  const isNodeSelected = selectedNode.length === 1;
+  const isDisabled =
+    selectedNode.length === 0 || !selectedNode.data('service.name');
   async function explore() {
     const cyTemp = cytoscape();
     cyTemp.add(selectedNode);
@@ -311,7 +312,7 @@ export function ControlsTools() {
             aria-label="Find related assets"
             color="text"
             iconType="cluster"
-            isDisabled={!isNodeSelected}
+            isDisabled={isDisabled}
             onClick={explore}
           />
         </EuiToolTip>
