@@ -209,34 +209,46 @@ export function Chart({
       }),
     [breakdown?.field, chart?.timeInterval, chart?.title, suggestion, dataView, filters, query]
   );
-  const updateVisualizationState = useCallback(
-    (state) => {
-      const updatedSuggestion = {
-        ...suggestion,
-        visualizationState: state,
-      } as Suggestion;
-      setSuggestion(updatedSuggestion);
-    },
-    [suggestion]
-  );
+  // const updateVisualizationState = useCallback(
+  //   (state) => {
+  //     const updatedSuggestion = {
+  //       ...suggestion,
+  //       visualizationState: state,
+  //     } as Suggestion;
+  //     setSuggestion(updatedSuggestion);
+  //   },
+  //   [suggestion]
+  // );
 
-  const updateDatasourceState = useCallback(
-    (state) => {
-      const updatedSuggestion = {
-        ...suggestion,
-        datasourceState: state,
-      } as Suggestion;
-      setSuggestion(updatedSuggestion);
-    },
-    [suggestion]
-  );
+  // const updateDatasourceState = useCallback(
+  //   (state) => {
+  //     const updatedSuggestion = {
+  //       ...suggestion,
+  //       datasourceState: state,
+  //     } as Suggestion;
+  //     setSuggestion(updatedSuggestion);
+  //   },
+  //   [suggestion]
+  // );
 
-  const updateAll = useCallback(
+  // const updateAll = useCallback(
+  //   (datasourceState, visualizationState) => {
+  //     const updatedSuggestion = {
+  //       ...suggestion,
+  //       datasourceState,
+  //       visualizationState,
+  //     } as Suggestion;
+  //     setSuggestion(updatedSuggestion);
+  //   },
+  //   [suggestion]
+  // );
+
+  const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
       const updatedSuggestion = {
         ...suggestion,
-        datasourceState,
-        visualizationState,
+        ...(datasourceState && { datasourceState }),
+        ...(visualizationState && { visualizationState }),
       } as Suggestion;
       setSuggestion(updatedSuggestion);
     },
@@ -256,9 +268,7 @@ export function Chart({
         <Component
           attributes={lensAttributesContext.attributes}
           dataView={dataView}
-          updateVisualizationState={updateVisualizationState}
-          updateDatasourceState={updateDatasourceState}
-          updateAll={updateAll}
+          updateAll={updateSuggestion}
           setIsFlyoutVisible={setIsFlyoutVisible}
         />
       );
@@ -271,9 +281,7 @@ export function Chart({
     lensAttributesContext.attributes,
     services.lens,
     dataView,
-    updateVisualizationState,
-    updateDatasourceState,
-    updateAll,
+    updateSuggestion,
     isPlainRecord,
     isFlyoutVisible,
   ]);
@@ -286,17 +294,6 @@ export function Chart({
   });
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
-  // const panel = ConfigPanel && (
-  //   <ConfigPanel
-  //     attributes={lensAttributesContext.attributes}
-  //     dataView={dataView}
-  //     updateVisualizationState={updateVisualizationState}
-  //     updateDatasourceState={updateDatasourceState}
-  //     updateAll={updateAll}
-  //     setIsFlyoutVisible={setIsFlyoutVisible}
-  //     isFlyoutVisible={isFlyoutVisible}
-  //   />
-  // );
 
   return (
     <EuiFlexGroup

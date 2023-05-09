@@ -100,10 +100,8 @@ export function getConfigPanel(
   return (props: {
     attributes: TypedLensByValueInput['attributes'];
     dataView: DataView;
-    updateVisualizationState: (state: unknown) => void;
-    updateDatasourceState: (state: unknown) => void;
     updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
-    setIsFlyoutVisible: (flag: boolean) => void;
+    setIsFlyoutVisible?: (flag: boolean) => void;
   }) => {
     const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
       initialActiveDimensionState
@@ -129,7 +127,7 @@ export function getConfigPanel(
 
     const updateDatasourceState = useCallback(
       (newState) => {
-        props.updateDatasourceState(newState);
+        props.updateAll(newState, undefined);
         const attrs = {
           ...attributes,
           state: {
@@ -166,13 +164,8 @@ export function getConfigPanel(
     );
 
     const closeFlyout = () => {
-      props.setIsFlyoutVisible(false);
+      props.setIsFlyoutVisible?.(false);
       setActiveDimension(initialActiveDimensionState);
-      // const vizState = attributes.state.visualization;
-      // const dsState = attributes.state.datasourceStates.textBased;
-      // props.updateAll(dsState, vizState);
-      // activeDimensionBackup = initialActiveDimensionState;
-      // setFocusTrapIsEnabled(false);
     };
     const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -319,408 +312,409 @@ export function getConfigPanel(
         framePublicAPI,
       ]
     );
-    return (
-      <>
-        {/* <EuiOutsideClickDetector
-          onOutsideClick={closeFlyout}
-          // isDisabled={Boolean(activeDimension?.activeId)}
-          isDisabled={true}
-        > */}
-        <EuiFocusTrap
-          disabled={false}
-          clickOutsideDisables={false}
-          onClickOutside={(event) => {
-            closeFlyout();
-          }}
-          onEscapeKey={closeFlyout}
-        >
-          <EuiFlyout
-            type="push"
-            ownFocus
-            onClose={() => props.setIsFlyoutVisible(false)}
-            aria-labelledby="Edit Lens configuration"
-            size="s"
+
+    const getWrapper = (children: JSX.Element) => {
+      if (props.setIsFlyoutVisible) {
+        return (
+          <EuiFocusTrap
+            disabled={false}
+            clickOutsideDisables={false}
+            onClickOutside={(event) => {
+              closeFlyout();
+            }}
+            onEscapeKey={closeFlyout}
           >
-            {!activeDimension?.activeId && (
-              <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-                <EuiTitle size="xs">
-                  <h2 id="Edit Lens configuration"> Edit Lens configuration</h2>
-                </EuiTitle>
-              </EuiFlyoutHeader>
+            <EuiFlyout
+              type="push"
+              ownFocus
+              onClose={() => props.setIsFlyoutVisible?.(false)}
+              aria-labelledby="Edit Lens configuration"
+              size="s"
+            >
+              {children}
+            </EuiFlyout>
+          </EuiFocusTrap>
+        );
+      } else {
+        return children;
+      }
+    };
+
+    const context = (
+      <>
+        {!activeDimension?.activeId && (
+          <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+            <EuiTitle size="xs">
+              <h2 id="Edit Lens configuration"> Edit Lens configuration</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+        )}
+        <EuiFlyoutBody>
+          <section tabIndex={-1} className="lnsLayerPanel">
+            {activeVisualization && activeVisualization.renderToolbar && (
+              <NativeRenderer
+                render={activeVisualization.renderToolbar}
+                nativeProps={{
+                  frame: framePublicAPI,
+                  state: visualizationState,
+                  setState: (payload) => {
+                    updateVisualizationState(payload);
+                    setActiveDimension(initialActiveDimensionState);
+                    // activeDimensionBackup = initialActiveDimensionState;
+                  },
+                }}
+              />
             )}
-            <EuiFlyoutBody>
-              <section tabIndex={-1} className="lnsLayerPanel">
-                {activeVisualization && activeVisualization.renderToolbar && (
-                  <NativeRenderer
-                    render={activeVisualization.renderToolbar}
-                    nativeProps={{
-                      frame: framePublicAPI,
-                      state: visualizationState,
-                      setState: (payload) => {
-                        updateVisualizationState(payload);
-                        setActiveDimension(initialActiveDimensionState);
-                        // activeDimensionBackup = initialActiveDimensionState;
-                      },
-                    }}
-                  />
-                )}
-                <EuiSpacer size="m" />
-                <EuiPanel data-test-subj={`lns-layerPanel-0`} paddingSize="none">
-                  <header className="lnsLayerPanel__layerHeader">
-                    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                      <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
-                        <LayerSettings
-                          layerConfigProps={{
-                            ...layerVisualizationConfigProps,
-                            setState: updateVisualizationState,
-                            onChangeIndexPattern: (indexPatternId) => {},
-                          }}
-                          activeVisualization={activeVisualization}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </header>
-                  {groups.map((group, groupIndex) => {
-                    let errorText: string = '';
-                    if (!isEmptyLayer) {
-                      if (
-                        group.requiredMinDimensionCount &&
-                        group.requiredMinDimensionCount > group.accessors.length
-                      ) {
-                        if (group.requiredMinDimensionCount > 1) {
-                          errorText = i18n.translate(
-                            'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
-                            {
-                              defaultMessage: 'Requires {requiredMinDimensionCount} fields',
-                              values: {
-                                requiredMinDimensionCount: group.requiredMinDimensionCount,
-                              },
-                            }
-                          );
-                        } else {
-                          errorText = i18n.translate(
-                            'xpack.lens.editorFrame.requiresFieldWarningLabel',
-                            {
-                              defaultMessage: 'Requires field',
-                            }
-                          );
+            <EuiSpacer size="m" />
+            <EuiPanel data-test-subj={`lns-layerPanel-0`} paddingSize="none">
+              <header className="lnsLayerPanel__layerHeader">
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
+                    <LayerSettings
+                      layerConfigProps={{
+                        ...layerVisualizationConfigProps,
+                        setState: updateVisualizationState,
+                        onChangeIndexPattern: (indexPatternId) => {},
+                      }}
+                      activeVisualization={activeVisualization}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </header>
+              {groups.map((group, groupIndex) => {
+                let errorText: string = '';
+                if (!isEmptyLayer) {
+                  if (
+                    group.requiredMinDimensionCount &&
+                    group.requiredMinDimensionCount > group.accessors.length
+                  ) {
+                    if (group.requiredMinDimensionCount > 1) {
+                      errorText = i18n.translate(
+                        'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                        {
+                          defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                          values: {
+                            requiredMinDimensionCount: group.requiredMinDimensionCount,
+                          },
                         }
-                      } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
-                        errorText = i18n.translate(
-                          'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
-                          {
-                            defaultMessage:
-                              'Please remove {dimensionsTooMany, plural, one {a dimension} other {{dimensionsTooMany} dimensions}}',
-                            values: {
-                              dimensionsTooMany: group.dimensionsTooMany,
-                            },
-                          }
-                        );
-                      }
+                      );
+                    } else {
+                      errorText = i18n.translate(
+                        'xpack.lens.editorFrame.requiresFieldWarningLabel',
+                        {
+                          defaultMessage: 'Requires field',
+                        }
+                      );
                     }
-                    const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
-                    return (
-                      <EuiFormRow
-                        className="lnsLayerPanel__row"
-                        fullWidth
-                        label={
+                  } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
+                    errorText = i18n.translate(
+                      'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
+                      {
+                        defaultMessage:
+                          'Please remove {dimensionsTooMany, plural, one {a dimension} other {{dimensionsTooMany} dimensions}}',
+                        values: {
+                          dimensionsTooMany: group.dimensionsTooMany,
+                        },
+                      }
+                    );
+                  }
+                }
+                const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
+                return (
+                  <EuiFormRow
+                    className="lnsLayerPanel__row"
+                    fullWidth
+                    label={
+                      <>
+                        {group.groupLabel}
+                        {group.groupTooltip && (
                           <>
-                            {group.groupLabel}
-                            {group.groupTooltip && (
-                              <>
-                                <EuiIconTip
-                                  color="subdued"
-                                  content={group.groupTooltip}
-                                  iconProps={{
-                                    className: 'eui-alignTop',
-                                  }}
-                                  position="top"
-                                  size="s"
-                                  type="questionInCircle"
-                                />
-                              </>
-                            )}
-                          </>
-                        }
-                        labelAppend={
-                          isOptional ? (
-                            <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
-                              {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
-                                defaultMessage: 'Optional',
-                              })}
-                            </EuiText>
-                          ) : null
-                        }
-                        labelType="legend"
-                        key={group.groupId}
-                        isInvalid={Boolean(errorText)}
-                        error={errorText}
-                      >
-                        <>
-                          {group.accessors.length ? (
-                            <>
-                              {group.accessors.map((accessorConfig, accessorIndex) => {
-                                const { columnId } = accessorConfig;
-
-                                return (
-                                  <DimensionButton
-                                    className="lnsLayerPanel__dimension"
-                                    accessorConfig={accessorConfig}
-                                    label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
-                                    groupLabel={group.groupLabel}
-                                    key={accessorConfig.columnId}
-                                    onClick={(id: string) => {
-                                      setActiveDimension({
-                                        isNew: false,
-                                        activeGroup: group,
-                                        activeId: id,
-                                      });
-                                    }}
-                                    onRemoveClick={(id: string) => {
-                                      removeDimension({ columnId: id, layerId });
-                                      // removeButtonRef(id);
-                                    }}
-                                    message={undefined}
-                                  >
-                                    {layerDatasource ? (
-                                      <NativeRenderer
-                                        render={layerDatasource.renderDimensionTrigger}
-                                        nativeProps={{
-                                          ...layerDatasourceConfigProps,
-                                          columnId: accessorConfig.columnId,
-                                          groupId: group.groupId,
-                                          filterOperations: group.filterOperations,
-                                          indexPatterns: dataViews.indexPatterns,
-                                        }}
-                                      />
-                                    ) : (
-                                      <>
-                                        {activeVisualization?.renderDimensionTrigger?.({
-                                          columnId,
-                                          label: columnLabelMap?.[columnId] ?? '',
-                                          hideTooltip: true,
-                                        })}
-                                      </>
-                                    )}
-                                  </DimensionButton>
-                                );
-                              })}
-                            </>
-                          ) : null}
-
-                          {group.fakeFinalAccessor && (
-                            <div
-                              className="lnsLayerPanel__dimension domDragDrop-isDraggable"
-                              css={css`
-                                cursor: default !important;
-                                border-color: transparent !important;
-                                margin-top: ${group.accessors.length ? 8 : 0}px !important;
-                                background-color: ${euiThemeVars.euiColorLightShade} !important;
-                                box-shadow: none !important;
-                              `}
-                            >
-                              <EuiText
-                                size="s"
-                                className="lnsLayerPanel__triggerText"
-                                data-test-subj="lns-fakeDimension"
-                                color={'subdued'}
-                              >
-                                <span className="lnsLayerPanel__triggerTextLabel">
-                                  {group.fakeFinalAccessor.label}
-                                </span>
-                              </EuiText>
-                            </div>
-                          )}
-
-                          {group.supportsMoreColumns ? (
-                            <EmptyDimensionButton
-                              activeVisualization={activeVisualization}
-                              order={[2, 0, groupIndex, group.accessors.length]}
-                              group={group}
-                              target={{
-                                layerId,
-                                groupId: group.groupId,
-                                filterOperations: group.filterOperations,
-                                prioritizedOperation: group.prioritizedOperation,
-                                isNewColumn: true,
-                                isMetricDimension: group?.isMetricDimension,
-                                indexPatternId: layerDatasource
-                                  ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
-                                  : activeVisualization.getUsedDataView?.(
-                                      visualizationState,
-                                      layerId
-                                    ),
-                                humanData: {
-                                  groupLabel: group.groupLabel,
-                                  layerNumber: 1,
-                                  position: group.accessors.length + 1,
-                                  label: i18n.translate(
-                                    'xpack.lens.indexPattern.emptyDimensionButton',
-                                    {
-                                      defaultMessage: 'Empty dimension',
-                                    }
-                                  ),
-                                },
+                            <EuiIconTip
+                              color="subdued"
+                              content={group.groupTooltip}
+                              iconProps={{
+                                className: 'eui-alignTop',
                               }}
-                              layerDatasource={layerDatasource}
-                              state={layerDatasourceState}
-                              datasourceLayers={framePublicAPI.datasourceLayers}
-                              onClick={(id) => {
-                                setActiveDimension({
-                                  activeGroup: group,
-                                  activeId: id,
-                                  isNew: !group.supportStaticValue && Boolean(layerDatasource),
-                                });
-                                // activeDimensionBackup = {
-                                //   activeGroup: group,
-                                //   activeId: id,
-                                //   isNew: !group.supportStaticValue && Boolean(layerDatasource),
-                                // };
-                              }}
-                              indexPatterns={dataViews.indexPatterns}
-                              onDrop={() => {}}
+                              position="top"
+                              size="s"
+                              type="questionInCircle"
                             />
-                          ) : null}
-                          <DimensionContainer
-                            panelRef={(el) => (panelRef.current = el)}
-                            enableBackButton={true}
-                            isOpen={isDimensionPanelOpen}
-                            isFullscreen={false}
-                            groupLabel={
-                              activeGroup?.dimensionEditorGroupLabel ??
-                              (activeGroup?.groupLabel || '')
-                            }
-                            handleClose={() => {
-                              if (layerDatasource) {
-                                if (
-                                  layerDatasource.canCloseDimensionEditor &&
-                                  !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
-                                ) {
-                                  return false;
-                                }
-                                if (layerDatasource.updateStateOnCloseDimension) {
-                                  const newState = layerDatasource.updateStateOnCloseDimension({
-                                    state: layerDatasourceState,
-                                    layerId,
-                                    columnId: activeId!,
-                                  });
-                                  if (newState) {
-                                    updateDatasourceState(newState);
-                                  }
-                                }
-                              }
+                          </>
+                        )}
+                      </>
+                    }
+                    labelAppend={
+                      isOptional ? (
+                        <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
+                          {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                            defaultMessage: 'Optional',
+                          })}
+                        </EuiText>
+                      ) : null
+                    }
+                    labelType="legend"
+                    key={group.groupId}
+                    isInvalid={Boolean(errorText)}
+                    error={errorText}
+                  >
+                    <>
+                      {group.accessors.length ? (
+                        <>
+                          {group.accessors.map((accessorConfig, accessorIndex) => {
+                            const { columnId } = accessorConfig;
 
-                              setActiveDimension(initialActiveDimensionState);
-                              return true;
-                            }}
-                            panel={
-                              <>
-                                {activeGroup && activeId && layerDatasource && (
+                            return (
+                              <DimensionButton
+                                className="lnsLayerPanel__dimension"
+                                accessorConfig={accessorConfig}
+                                label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
+                                groupLabel={group.groupLabel}
+                                key={accessorConfig.columnId}
+                                onClick={(id: string) => {
+                                  setActiveDimension({
+                                    isNew: false,
+                                    activeGroup: group,
+                                    activeId: id,
+                                  });
+                                }}
+                                onRemoveClick={(id: string) => {
+                                  removeDimension({ columnId: id, layerId });
+                                  // removeButtonRef(id);
+                                }}
+                                message={undefined}
+                              >
+                                {layerDatasource ? (
                                   <NativeRenderer
-                                    render={layerDatasource.renderDimensionEditor}
+                                    render={layerDatasource.renderDimensionTrigger}
                                     nativeProps={{
                                       ...layerDatasourceConfigProps,
-                                      core: coreStart,
-                                      columnId: activeId,
-                                      groupId: activeGroup.groupId,
-                                      hideGrouping: activeGroup.hideGrouping,
-                                      filterOperations: activeGroup.filterOperations,
-                                      isMetricDimension: activeGroup?.isMetricDimension,
-                                      dimensionGroups: groups,
-                                      toggleFullscreen: () => {},
-                                      isFullscreen: false,
-                                      setState: updateDataLayerState,
-                                      supportStaticValue: Boolean(activeGroup.supportStaticValue),
-                                      paramEditorCustomProps: activeGroup.paramEditorCustomProps,
-                                      enableFormatSelector:
-                                        activeGroup.enableFormatSelector !== false,
-                                      formatSelectorOptions: activeGroup.formatSelectorOptions,
-                                      layerType: activeVisualization.getLayerType(
-                                        layerId,
-                                        visualizationState
-                                      ),
+                                      columnId: accessorConfig.columnId,
+                                      groupId: group.groupId,
+                                      filterOperations: group.filterOperations,
                                       indexPatterns: dataViews.indexPatterns,
-                                      activeData: {},
-                                      dataSectionExtra: !activeDimension.isNew &&
-                                        activeVisualization.renderDimensionEditorDataExtra && (
-                                          <NativeRenderer
-                                            render={
-                                              activeVisualization.renderDimensionEditorDataExtra
-                                            }
-                                            nativeProps={{
-                                              ...layerVisualizationConfigProps,
-                                              groupId: activeGroup.groupId,
-                                              accessor: activeId,
-                                              datasource,
-                                              setState: (state: unknown) => {
-                                                updateVisualizationState(state);
-                                              },
-                                              addLayer: () => {},
-                                              removeLayer: () => {},
-                                              panelRef,
-                                            }}
-                                          />
-                                        ),
                                     }}
                                   />
+                                ) : (
+                                  <>
+                                    {activeVisualization?.renderDimensionTrigger?.({
+                                      columnId,
+                                      label: columnLabelMap?.[columnId] ?? '',
+                                      hideTooltip: true,
+                                    })}
+                                  </>
                                 )}
-                                {activeGroup &&
-                                  activeId &&
-                                  !activeDimension.isNew &&
-                                  activeVisualization.renderDimensionEditor &&
-                                  activeGroup?.enableDimensionEditor && (
-                                    <>
-                                      <div className="lnsLayerPanel__styleEditor">
-                                        <NativeRenderer
-                                          render={activeVisualization.renderDimensionEditor}
-                                          nativeProps={{
-                                            ...layerVisualizationConfigProps,
-                                            groupId: activeGroup.groupId,
-                                            accessor: activeId,
-                                            datasource,
-                                            setState: (state: unknown) => {
-                                              updateVisualizationState(state);
-                                            },
-                                            addLayer: () => {},
-                                            removeLayer: () => {},
-                                            panelRef,
-                                          }}
-                                        />
-                                      </div>
-                                      {activeVisualization.renderDimensionEditorAdditionalSection && (
-                                        <NativeRenderer
-                                          render={
-                                            activeVisualization.renderDimensionEditorAdditionalSection
-                                          }
-                                          nativeProps={{
-                                            ...layerVisualizationConfigProps,
-                                            groupId: activeGroup.groupId,
-                                            accessor: activeId,
-                                            datasource,
-                                            setState: (state: unknown) => {
-                                              updateVisualizationState(state);
-                                            },
-                                            addLayer: () => {},
-                                            removeLayer: () => {},
-                                            panelRef,
-                                          }}
-                                        />
-                                      )}
-                                    </>
-                                  )}
-                              </>
-                            }
-                          />
+                              </DimensionButton>
+                            );
+                          })}
                         </>
-                      </EuiFormRow>
-                    );
-                  })}
-                </EuiPanel>
-              </section>
-            </EuiFlyoutBody>
-          </EuiFlyout>
-        </EuiFocusTrap>
+                      ) : null}
+
+                      {group.fakeFinalAccessor && (
+                        <div
+                          className="lnsLayerPanel__dimension domDragDrop-isDraggable"
+                          css={css`
+                            cursor: default !important;
+                            border-color: transparent !important;
+                            margin-top: ${group.accessors.length ? 8 : 0}px !important;
+                            background-color: ${euiThemeVars.euiColorLightShade} !important;
+                            box-shadow: none !important;
+                          `}
+                        >
+                          <EuiText
+                            size="s"
+                            className="lnsLayerPanel__triggerText"
+                            data-test-subj="lns-fakeDimension"
+                            color={'subdued'}
+                          >
+                            <span className="lnsLayerPanel__triggerTextLabel">
+                              {group.fakeFinalAccessor.label}
+                            </span>
+                          </EuiText>
+                        </div>
+                      )}
+
+                      {group.supportsMoreColumns ? (
+                        <EmptyDimensionButton
+                          activeVisualization={activeVisualization}
+                          order={[2, 0, groupIndex, group.accessors.length]}
+                          group={group}
+                          target={{
+                            layerId,
+                            groupId: group.groupId,
+                            filterOperations: group.filterOperations,
+                            prioritizedOperation: group.prioritizedOperation,
+                            isNewColumn: true,
+                            isMetricDimension: group?.isMetricDimension,
+                            indexPatternId: layerDatasource
+                              ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                              : activeVisualization.getUsedDataView?.(visualizationState, layerId),
+                            humanData: {
+                              groupLabel: group.groupLabel,
+                              layerNumber: 1,
+                              position: group.accessors.length + 1,
+                              label: i18n.translate(
+                                'xpack.lens.indexPattern.emptyDimensionButton',
+                                {
+                                  defaultMessage: 'Empty dimension',
+                                }
+                              ),
+                            },
+                          }}
+                          layerDatasource={layerDatasource}
+                          state={layerDatasourceState}
+                          datasourceLayers={framePublicAPI.datasourceLayers}
+                          onClick={(id) => {
+                            setActiveDimension({
+                              activeGroup: group,
+                              activeId: id,
+                              isNew: !group.supportStaticValue && Boolean(layerDatasource),
+                            });
+                            // activeDimensionBackup = {
+                            //   activeGroup: group,
+                            //   activeId: id,
+                            //   isNew: !group.supportStaticValue && Boolean(layerDatasource),
+                            // };
+                          }}
+                          indexPatterns={dataViews.indexPatterns}
+                          onDrop={() => {}}
+                        />
+                      ) : null}
+                      <DimensionContainer
+                        panelRef={(el) => (panelRef.current = el)}
+                        enableBackButton={true}
+                        isOpen={isDimensionPanelOpen}
+                        isFullscreen={false}
+                        groupLabel={
+                          activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')
+                        }
+                        handleClose={() => {
+                          if (layerDatasource) {
+                            if (
+                              layerDatasource.canCloseDimensionEditor &&
+                              !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
+                            ) {
+                              return false;
+                            }
+                            if (layerDatasource.updateStateOnCloseDimension) {
+                              const newState = layerDatasource.updateStateOnCloseDimension({
+                                state: layerDatasourceState,
+                                layerId,
+                                columnId: activeId!,
+                              });
+                              if (newState) {
+                                updateDatasourceState(newState);
+                              }
+                            }
+                          }
+
+                          setActiveDimension(initialActiveDimensionState);
+                          return true;
+                        }}
+                        panel={
+                          <>
+                            {activeGroup && activeId && layerDatasource && (
+                              <NativeRenderer
+                                render={layerDatasource.renderDimensionEditor}
+                                nativeProps={{
+                                  ...layerDatasourceConfigProps,
+                                  core: coreStart,
+                                  columnId: activeId,
+                                  groupId: activeGroup.groupId,
+                                  hideGrouping: activeGroup.hideGrouping,
+                                  filterOperations: activeGroup.filterOperations,
+                                  isMetricDimension: activeGroup?.isMetricDimension,
+                                  dimensionGroups: groups,
+                                  toggleFullscreen: () => {},
+                                  isFullscreen: false,
+                                  setState: updateDataLayerState,
+                                  supportStaticValue: Boolean(activeGroup.supportStaticValue),
+                                  paramEditorCustomProps: activeGroup.paramEditorCustomProps,
+                                  enableFormatSelector: activeGroup.enableFormatSelector !== false,
+                                  formatSelectorOptions: activeGroup.formatSelectorOptions,
+                                  layerType: activeVisualization.getLayerType(
+                                    layerId,
+                                    visualizationState
+                                  ),
+                                  indexPatterns: dataViews.indexPatterns,
+                                  activeData: {},
+                                  dataSectionExtra: !activeDimension.isNew &&
+                                    activeVisualization.renderDimensionEditorDataExtra && (
+                                      <NativeRenderer
+                                        render={activeVisualization.renderDimensionEditorDataExtra}
+                                        nativeProps={{
+                                          ...layerVisualizationConfigProps,
+                                          groupId: activeGroup.groupId,
+                                          accessor: activeId,
+                                          datasource,
+                                          setState: (state: unknown) => {
+                                            updateVisualizationState(state);
+                                          },
+                                          addLayer: () => {},
+                                          removeLayer: () => {},
+                                          panelRef,
+                                        }}
+                                      />
+                                    ),
+                                }}
+                              />
+                            )}
+                            {activeGroup &&
+                              activeId &&
+                              !activeDimension.isNew &&
+                              activeVisualization.renderDimensionEditor &&
+                              activeGroup?.enableDimensionEditor && (
+                                <>
+                                  <div className="lnsLayerPanel__styleEditor">
+                                    <NativeRenderer
+                                      render={activeVisualization.renderDimensionEditor}
+                                      nativeProps={{
+                                        ...layerVisualizationConfigProps,
+                                        groupId: activeGroup.groupId,
+                                        accessor: activeId,
+                                        datasource,
+                                        setState: (state: unknown) => {
+                                          updateVisualizationState(state);
+                                        },
+                                        addLayer: () => {},
+                                        removeLayer: () => {},
+                                        panelRef,
+                                      }}
+                                    />
+                                  </div>
+                                  {activeVisualization.renderDimensionEditorAdditionalSection && (
+                                    <NativeRenderer
+                                      render={
+                                        activeVisualization.renderDimensionEditorAdditionalSection
+                                      }
+                                      nativeProps={{
+                                        ...layerVisualizationConfigProps,
+                                        groupId: activeGroup.groupId,
+                                        accessor: activeId,
+                                        datasource,
+                                        setState: (state: unknown) => {
+                                          updateVisualizationState(state);
+                                        },
+                                        addLayer: () => {},
+                                        removeLayer: () => {},
+                                        panelRef,
+                                      }}
+                                    />
+                                  )}
+                                </>
+                              )}
+                          </>
+                        }
+                      />
+                    </>
+                  </EuiFormRow>
+                );
+              })}
+            </EuiPanel>
+          </section>
+        </EuiFlyoutBody>
       </>
     );
+
+    return getWrapper(context);
   };
 }

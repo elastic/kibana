@@ -126,7 +126,9 @@ import {
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import type { TypedLensByValueInput } from './embeddable_component';
 import { getDatasourceLayers } from '../state_management/utils';
+import type { LensPluginStartDependencies } from '../plugin';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -1280,6 +1282,54 @@ export class Embeddable
     return this.viewUnderlyingDataArgs;
   }
 
+  public isTextBasedLanguage() {
+    if (!this.savedVis) {
+      return;
+    }
+    const query = this.savedVis.state.query;
+    return !isOfQueryType(query);
+  }
+
+  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+    const viz = this.savedVis;
+    if (viz?.state) {
+      const attrs = {
+        ...viz,
+        state: {
+          ...viz.state,
+          visualization: visualizationState,
+          datasourceStates: {
+            ...viz.state.datasourceStates,
+            textBased: datasourceState,
+          },
+        },
+      };
+      this.updateInput({ attributes: attrs });
+    }
+  }
+
+  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+    const { getConfigPanel } = await import('../async_services');
+    const Component = getConfigPanel(
+      this.deps.coreStart,
+      startDependencies,
+      this.deps.visualizationMap,
+      this.deps.datasourceMap
+    );
+    const attributes = this.savedVis as TypedLensByValueInput['attributes'];
+    const dataView = this.dataViews[0];
+    if (attributes) {
+      return (
+        <Component
+          attributes={attributes}
+          dataView={dataView}
+          updateAll={this.updateVisualization.bind(this)}
+        />
+      );
+    }
+    return null;
+  }
+
   public canViewUnderlyingData() {
     return this.loadViewUnderlyingDataArgs();
   }
@@ -1342,7 +1392,7 @@ export class Embeddable
     this.updateOutput({
       defaultTitle: this.savedVis.title,
       defaultDescription: this.savedVis.description,
-      editable: this.getIsEditable(),
+      editable: this.getIsEditable() && !this.isTextBasedLanguage(),
       title,
       description,
       editPath: getEditPath(savedObjectId),

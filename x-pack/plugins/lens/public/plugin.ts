@@ -100,6 +100,7 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -267,10 +268,8 @@ export type LensSuggestionsApi = (
 export type ConfigPanelComponent = React.ComponentType<{
   attributes: TypedLensByValueInput['attributes'];
   dataView: DataView;
-  updateVisualizationState: (state: unknown) => void;
-  updateDatasourceState: (state: unknown) => void;
   updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
-  setIsFlyoutVisible: (flag: boolean) => void;
+  setIsFlyoutVisible?: (flag: boolean) => void;
 }>;
 
 export class LensPlugin {
@@ -598,6 +597,13 @@ export class LensPlugin {
         )
       );
     }
+
+    const editInLensAction = new ConfigureInLensPanelAction(
+      startDependencies,
+      core.overlays,
+      core.theme
+    );
+    startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 
     return {
       EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
