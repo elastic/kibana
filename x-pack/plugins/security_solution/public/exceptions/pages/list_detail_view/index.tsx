@@ -12,7 +12,7 @@ import {
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
@@ -95,7 +95,7 @@ export const ListsDetailViewComponent: FC = () => {
     if (viewerStatus === ViewerStatus.ERROR)
       return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
 
-    if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
+    if (isLoading) return <EuiSkeletonText lines={4} data-test-subj="loading" />;
 
     if (invalidListId || !listName || !list) return <NotFoundPage />;
     return (
