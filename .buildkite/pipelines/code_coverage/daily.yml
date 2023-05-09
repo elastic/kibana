@@ -48,7 +48,7 @@ steps:
       queue: n2-4-spot
     timeout_in_minutes: 10
 
-  - command: .buildkite/scripts/steps/nodejs_std_test_runner/custom_reporter.sh
+  - command: .buildkite/scripts/steps/nodejs_std_test_runner/junit_reporter.sh
     label: 'Use NodeJS v20 to play with custom reporter'
     agents:
       queue: n2-4-spot
