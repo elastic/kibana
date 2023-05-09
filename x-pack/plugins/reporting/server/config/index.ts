@@ -68,7 +68,6 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   },
 };
 
-export { registerUiSettings } from './ui_settings';
-export type { ReportingConfigType };
-export { ConfigSchema };
 export { createConfig } from './create_config';
+export { registerUiSettings } from './ui_settings';
+export { type ReportingConfigType, ConfigSchema };

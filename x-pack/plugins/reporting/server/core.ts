@@ -80,15 +80,6 @@ export interface ReportingInternalStart {
   taskManager: TaskManagerStartContract;
 }
 
-export interface ReportingServerConfig {
-  basePath: string;
-  hostname: string;
-  name: string;
-  port: number;
-  uuid: string;
-  protocol: string;
-}
-
 /**
  * @internal
  */
@@ -252,7 +243,7 @@ export class ReportingCore {
   /*
    * Returns configurable server info
    */
-  public getServerInfo(): ReportingServerConfig {
+  public getServerInfo() {
     const { http } = this.core;
     const serverInfo = http.getServerInfo();
     return {
@@ -268,10 +259,7 @@ export class ReportingCore {
   /*
    * Gives synchronous access to the config
    */
-  public getConfig() {
-    if (!this.config) {
-      throw new Error('Config is not yet initialized');
-    }
+  public getConfig(): ReportingConfigType {
     return this.config;
   }
 
