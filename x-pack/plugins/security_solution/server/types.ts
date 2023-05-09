@@ -6,19 +6,18 @@
  */
 
 import type {
-  CoreRequestHandlerContext,
-  CustomRequestHandlerContext,
   IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
   KibanaRequest,
 } from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
-import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
+import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
-import type { Readable } from 'stream';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -53,13 +52,3 @@ export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<
 }>;
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;
-
-/**
- * Readable returned by Hapi when `stream` is used to defined a property and/or route payload
- */
-export interface HapiReadableStream extends Readable {
-  hapi: {
-    filename: string;
-    headers: Record<string, string>;
-  };
-}
