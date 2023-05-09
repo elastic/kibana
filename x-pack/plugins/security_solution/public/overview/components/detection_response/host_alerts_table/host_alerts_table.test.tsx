@@ -21,6 +21,12 @@ jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', (
   };
 });
 
+jest.mock('../../../../common/hooks/use_global_filter_query', () => {
+  return {
+    useGlobalFilterQuery: () => ({}),
+  };
+});
+
 type UseHostAlertsItemsReturn = ReturnType<UseHostAlertsItems>;
 const defaultUseHostAlertsItemsReturn: UseHostAlertsItemsReturn = {
   items: [],

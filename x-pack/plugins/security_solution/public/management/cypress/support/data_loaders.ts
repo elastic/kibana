@@ -8,7 +8,10 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import { sendEndpointActionResponse } from '../../../../scripts/endpoint/agent_emulator/services/endpoint_response_actions';
+import {
+  sendEndpointActionResponse,
+  sendFleetActionResponse,
+} from '../../../../scripts/endpoint/common/response_actions';
 import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
@@ -21,11 +24,7 @@ import {
   deleteIndexedEndpointPolicyResponse,
   indexEndpointPolicyResponse,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type {
-  ActionDetails,
-  HostPolicyResponse,
-  LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
 import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
   IndexedEndpointRuleAlerts,
@@ -47,8 +46,11 @@ import {
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import {
+  startEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
+  getEndpointHosts,
+  stopEndpointHost,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
@@ -162,9 +164,17 @@ export const dataLoaders = (
     sendHostActionResponse: async (data: {
       action: ActionDetails;
       state: { state?: 'success' | 'failure' };
-    }): Promise<LogsEndpointActionResponse> => {
+    }): Promise<null> => {
       const { esClient } = await stackServicesPromise;
-      return sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
+      const fleetResponse = await sendFleetActionResponse(esClient, data.action, {
+        state: data.state.state,
+      });
+
+      if (!fleetResponse.error) {
+        await sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
+      }
+
+      return null;
     },
 
     deleteAllEndpointData: async ({
@@ -212,6 +222,18 @@ export const dataLoadersForRealEndpoints = (
     ): Promise<null> => {
       const { kbnClient } = await stackServicesPromise;
       return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+    },
+
+    stopEndpointHost: async () => {
+      const hosts = await getEndpointHosts();
+      const hostName = hosts[0].name;
+      return stopEndpointHost(hostName);
+    },
+
+    startEndpointHost: async () => {
+      const hosts = await getEndpointHosts();
+      const hostName = hosts[0].name;
+      return startEndpointHost(hostName);
     },
   });
 };

@@ -6,6 +6,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { addGlobalParamEffect, editGlobalParamEffect, getGlobalParamEffect } from './global_params';
 import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
 import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
@@ -53,5 +54,8 @@ export const rootEffect = function* root(): Generator {
     fork(executeEsQueryEffect),
     fork(fetchJourneyStepsEffect),
     fork(fetchManualTestRunsEffect),
+    fork(addGlobalParamEffect),
+    fork(editGlobalParamEffect),
+    fork(getGlobalParamEffect),
   ]);
 };

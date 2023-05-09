@@ -197,7 +197,7 @@ export interface TestKibanaUtils {
 
 export interface TestUtils {
   startES: () => Promise<TestElasticsearchUtils>;
-  startKibana: () => Promise<TestKibanaUtils>;
+  startKibana: (abortSignal?: AbortSignal) => Promise<TestKibanaUtils>;
 }
 
 /**
@@ -261,7 +261,7 @@ export function createTestServers({
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);
 
-  const kbnSettings = settings.kbn ?? {};
+  const { cliArgs = {}, customKibanaVersion, ...kbnSettings } = settings.kbn ?? {};
 
   return {
     startES: async () => {
@@ -284,8 +284,10 @@ export function createTestServers({
         password: kibanaServerTestUser.password,
       };
     },
-    startKibana: async () => {
-      const root = createRootWithCorePlugins(kbnSettings);
+    startKibana: async (abortSignal?: AbortSignal) => {
+      const root = createRootWithCorePlugins(kbnSettings, cliArgs, customKibanaVersion);
+
+      abortSignal?.addEventListener('abort', async () => await root.shutdown());
 
       await root.preboot();
       const coreSetup = await root.setup();
