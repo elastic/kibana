@@ -70,10 +70,6 @@ export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.
   defaultMessage: 'Osquery Results',
 });
 
-export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails.endpointView', {
-  defaultMessage: 'Endpoint Results',
-});
-
 export const RESPONSE_ACTIONS_VIEW = i18n.translate(
   'xpack.securitySolution.eventDetails.responseActionsView',
   {

@@ -42,9 +42,7 @@ export const useResponseActionsTab = ({
     services: { osquery, application },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
-  const commonResponseActionsTabEnabled = useIsExperimentalFeatureEnabled(
-    'commonResponseActionsTabEnabled'
-  );
+
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
     : undefined;
@@ -52,8 +50,7 @@ export const useResponseActionsTab = ({
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  const shouldEarlyReturn =
-    !ecsData || !responseActionsEnabled || !responseActions || !commonResponseActionsTabEnabled;
+  const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
   const alertId = rawEventData?._id ?? '';
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(

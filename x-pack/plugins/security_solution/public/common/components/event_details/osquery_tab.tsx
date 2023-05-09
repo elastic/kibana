@@ -55,8 +55,8 @@ export const useOsqueryTab = ({
     services: { osquery, application },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
-  const commonResponseActionsTabEnabled = useIsExperimentalFeatureEnabled(
-    'commonResponseActionsTabEnabled'
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
   );
   const emptyPrompt = useMemo(
     () => (
@@ -81,7 +81,7 @@ export const useOsqueryTab = ({
   );
 
   const shouldEarlyReturn =
-    !rawEventData || !responseActionsEnabled || !ecsData || commonResponseActionsTabEnabled;
+    !rawEventData || !responseActionsEnabled || !ecsData || endpointResponseActionsEnabled;
   const alertId = rawEventData?._id ?? '';
 
   const { OsqueryResults, fetchAllLiveQueries } = osquery;

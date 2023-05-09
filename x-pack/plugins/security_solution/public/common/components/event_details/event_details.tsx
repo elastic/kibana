@@ -21,7 +21,6 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { RawEventData } from './types';
 import { useResponseActionsTab } from './response_actions_tab';
@@ -69,9 +68,8 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  // Depending on commonResponseActionsTabEnabled flag whether to render the Endpoint + Osquery 2 or the ResponseActions - ultimately we should migrate to ResponseActions
+  // Depending on endpointResponseActionsEnabled flag whether to render Osquery Tab or the commonTab (osquery + endpoint results)
   | EventsViewType.osqueryView
-  | EventsViewType.endpointView
   | EventsViewType.responseActionsView;
 
 export enum EventsViewType {
@@ -80,7 +78,6 @@ export enum EventsViewType {
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
   osqueryView = 'osquery-results-view',
-  endpointView = 'endpoint-results-view',
   responseActionsView = 'response-actions-results-view',
 }
 
@@ -220,8 +217,8 @@ const EventDetailsComponent: React.FC<Props> = ({
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-  const commonResponseActionsTabEnabled = useIsExperimentalFeatureEnabled(
-    'commonResponseActionsTabEnabled'
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
   );
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
@@ -442,15 +439,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
-  const endpointResponseActionsTab = useEndpointResponseActionsTab({
-    rawEventData: rawEventData as RawEventData,
-  });
 
   const responseActionsTabs = useMemo(() => {
-    return commonResponseActionsTabEnabled
-      ? [responseActionsTab]
-      : [osqueryTab, endpointResponseActionsTab];
-  }, [commonResponseActionsTabEnabled, endpointResponseActionsTab, osqueryTab, responseActionsTab]);
+    return endpointResponseActionsEnabled ? [responseActionsTab] : [osqueryTab];
+  }, [endpointResponseActionsEnabled, osqueryTab, responseActionsTab]);
+
   const tabs = useMemo(() => {
     return [summaryTab, threatIntelTab, tableTab, jsonTab, ...responseActionsTabs].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
