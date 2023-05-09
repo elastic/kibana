@@ -38,7 +38,7 @@ export const UploadActionResult = memo<
 
     const reqBody: UploadActionUIRequestBody = {
       endpoint_ids: [endpointId],
-      comment: comment?.[0],
+      ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters:
         overwrite !== undefined
           ? {
