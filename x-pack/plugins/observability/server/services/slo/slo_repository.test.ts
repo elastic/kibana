@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { sloSchema } from '@kbn/slo-schema';
 
