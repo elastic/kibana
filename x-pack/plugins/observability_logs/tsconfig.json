@@ -11,6 +11,7 @@
     "@kbn/i18n-react",
     "@kbn/fleet-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/io-ts-utils",
   ],
   "exclude": ["target/**/*"]
 }
