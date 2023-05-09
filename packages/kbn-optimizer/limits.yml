@@ -116,7 +116,7 @@ pageLoadAssetSize:
   security: 65433
   securitySolution: 66738
   serverless: 16573
-  serverlessObservability: 16582
+  serverlessObservability: 30000
   serverlessSearch: 22555
   serverlessSecurity: 41807
   sessionView: 77750
