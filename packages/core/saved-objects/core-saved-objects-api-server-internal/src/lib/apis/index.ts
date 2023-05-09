@@ -10,3 +10,4 @@ export type { ApiExecutionContext } from './types';
 export { performCreate } from './create';
 export { performBulkCreate } from './bulk_create';
 export { performDelete } from './delete';
+export { performCheckConflicts } from './check_conflicts';

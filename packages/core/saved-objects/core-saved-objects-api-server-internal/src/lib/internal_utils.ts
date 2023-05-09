@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Payload } from '@hapi/boom';
 import {
   type ISavedObjectTypeRegistry,
@@ -301,3 +302,7 @@ export function setManaged({
  * Extracts the contents of a decorated error to return the attributes for bulk operations.
  */
 export const errorContent = (error: DecoratedError) => error.output.payload;
+
+export function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
+}

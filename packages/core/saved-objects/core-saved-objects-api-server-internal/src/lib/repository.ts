@@ -75,7 +75,6 @@ import {
   type ISavedObjectsSecurityExtension,
   type ISavedObjectsSpacesExtension,
   type CheckAuthorizationResult,
-  AuthorizeCreateObject,
   AuthorizeUpdateObject,
   type AuthorizeBulkGetObject,
   type SavedObject,
@@ -117,6 +116,7 @@ import {
   type Either,
   isLeft,
   isRight,
+  isMgetDoc,
 } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
@@ -142,7 +142,13 @@ import {
 } from './helpers';
 import { isFoundGetResponse } from './utils';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from './constants';
-import { type ApiExecutionContext, performCreate, performBulkCreate, performDelete } from './apis';
+import {
+  type ApiExecutionContext,
+  performCreate,
+  performBulkCreate,
+  performDelete,
+  performCheckConflicts,
+} from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -160,10 +166,6 @@ export interface SavedObjectsRepositoryOptions {
 }
 
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
-
-function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
-  return Boolean(doc && 'found' in doc);
-}
 
 /**
  * Saved Objects Respositiry - the client entry point for saved object manipulation.
@@ -355,98 +357,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsCheckConflictsResponse> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-
-    if (objects.length === 0) {
-      return { errors: [] };
-    }
-
-    let bulkGetRequestIndexCounter = 0;
-    type ExpectedBulkGetResult = Either<
-      { type: string; id: string; error: Payload },
-      { type: string; id: string; esRequestIndex: number }
-    >;
-    const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
-      const { type, id } = object;
-
-      if (!this._allowedTypes.includes(type)) {
-        return {
-          tag: 'Left',
-          value: {
-            id,
-            type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
-          },
-        };
-      }
-
-      return {
-        tag: 'Right',
-        value: {
-          type,
-          id,
-          esRequestIndex: bulkGetRequestIndexCounter++,
-        },
-      };
-    });
-
-    const validObjects = expectedBulkGetResults.filter(isRight);
-    await this._securityExtension?.authorizeCheckConflicts({
-      namespace,
-      objects: validObjects.map((element) => ({ type: element.value.type, id: element.value.id })),
-    });
-
-    const bulkGetDocs = validObjects.map(({ value: { type, id } }) => ({
-      _id: this._serializer.generateRawId(namespace, type, id),
-      _index: this.getIndexForType(type),
-      _source: { includes: ['type', 'namespaces'] },
-    }));
-    const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget<SavedObjectsRawDocSource>(
-          {
-            body: {
-              docs: bulkGetDocs,
-            },
-          },
-          { ignore: [404], meta: true }
-        )
-      : undefined;
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (
-      bulkGetResponse &&
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetResponse.statusCode,
-        headers: bulkGetResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
-
-    const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
-    expectedBulkGetResults.forEach((expectedResult) => {
-      if (isLeft(expectedResult)) {
-        errors.push(expectedResult.value as any);
-        return;
-      }
-
-      const { type, id, esRequestIndex } = expectedResult.value;
-      const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      if (isMgetDoc(doc) && doc.found) {
-        errors.push({
-          id,
-          type,
-          error: {
-            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            // @ts-expect-error MultiGetHit._source is optional
-            ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
-              metadata: { isNotOverwritable: true },
-            }),
-          },
-        });
-      }
-    });
-
-    return { errors };
+    return await performCheckConflicts(
+      {
+        objects,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**
