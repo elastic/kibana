@@ -26,15 +26,15 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
-const uploadPipeline = (pipelineContent: string | object) => {
-  const str =
-    typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
+// const uploadPipeline = (pipelineContent: string | object) => {
+//   const str =
+//     typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
 
-  execSync('buildkite-agent pipeline upload', {
-    input: str,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
-};
+//   execSync('buildkite-agent pipeline upload', {
+//     input: str,
+//     stdio: ['pipe', 'inherit', 'inherit'],
+//   });
+// };
 
 (async () => {
   try {
@@ -189,7 +189,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    uploadPipeline(pipeline.join('\n'));
+    console.log(pipeline.join('\n'));
   } catch (ex) {
     console.error('PR pipeline generation error', ex.message);
     process.exit(1);
