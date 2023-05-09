@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { ExpandRowColumn } from '../../test_now_mode/simple/ping_list/columns/expand_row';
+import { useExpandedPingList } from '../../test_now_mode/simple/ping_list/use_ping_expanded';
 import { THUMBNAIL_SCREENSHOT_SIZE_MOBILE } from '../../common/screenshot/screenshot_size';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 
@@ -87,6 +89,8 @@ export const TestRunsTable = ({
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
+  const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
+
   const sorting: EuiTableSortingType<Ping> = {
     sort: {
       field: sortField as keyof Ping,
@@ -104,7 +108,7 @@ export const TestRunsTable = ({
     }
   };
 
-  const columns: Array<EuiBasicTableColumn<Ping>> = [
+  const columns = [
     ...((isBrowserMonitor
       ? [
           {
@@ -188,7 +192,23 @@ export const TestRunsTable = ({
         show: false,
       },
     },
-  ];
+    ...(!isBrowserMonitor
+      ? [
+          {
+            align: 'right',
+            width: '24px',
+            isExpander: true,
+            render: (item: Ping) => (
+              <ExpandRowColumn
+                item={item}
+                expandedRows={expandedRows}
+                setExpandedRows={setExpandedRows}
+              />
+            ),
+          },
+        ]
+      : []),
+  ] as Array<EuiBasicTableColumn<Ping>>;
 
   const getRowProps = (item: Ping) => {
     if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
@@ -224,6 +244,9 @@ export const TestRunsTable = ({
         pings={pings}
       />
       <EuiBasicTable
+        itemId="docId"
+        isExpandable={true}
+        itemIdToExpandedRowMap={expandedRows}
         css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         compressed={false}
         loading={pingsLoading}
