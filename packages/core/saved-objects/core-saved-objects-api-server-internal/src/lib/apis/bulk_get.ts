@@ -21,7 +21,14 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { Either, errorContent, getSavedObjectFromSource, isLeft, isRight } from '../internal_utils';
+import {
+  Either,
+  errorContent,
+  getSavedObjectFromSource,
+  isLeft,
+  isRight,
+  rawDocExistsInNamespaces,
+} from '../internal_utils';
 import { ApiExecutionContext } from './types';
 import { includedFields } from '../included_fields';
 
@@ -32,7 +39,7 @@ export interface PerformBulkGetParams<T = unknown> {
 
 export const performBulkGet = async <T>(
   { objects, options }: PerformBulkGetParams<T>,
-  { helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
+  { helpers, allowedTypes, client, serializer, registry, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsBulkResponse<T>> => {
   const {
     common: commonHelper,
@@ -168,7 +175,7 @@ export const performBulkGet = async <T>(
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
       // @ts-expect-error MultiGetHit._source is optional
-      const docNotFound = !doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces);
+      const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
 
       authObjects.push({
         type,
@@ -188,7 +195,7 @@ export const performBulkGet = async <T>(
       }
 
       // @ts-expect-error MultiGetHit._source is optional
-      return getSavedObjectFromSource(this._registry, type, id, doc, {
+      return getSavedObjectFromSource(registry, type, id, doc, {
         migrationVersionCompatibility,
       });
     }),
