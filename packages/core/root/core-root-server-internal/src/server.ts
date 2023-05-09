@@ -170,6 +170,7 @@ export class Server {
 
     const isBackgroundTaskOnly =
       this.nodeRoles.backgroundTasks && !this.nodeRoles.ui && !this.nodeRoles.migrator;
+    // eslint-disable-next-line no-console
     console.log(`isBackgroundTaskOnly: ${isBackgroundTaskOnly}`);
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.

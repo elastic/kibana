@@ -6,6 +6,16 @@ Each visualization is using a different engine.
 The input for these images is provided at the bottom of this page.
 Try yourself at https://dreampuf.github.io/GraphvizOnline
 
+The first set of four images is the graph of all the Kibana plugins.
+The second set of four images is the graph of only the plugins needed
+when running with `background_tasks` role only.
+
+This set was determined by analyzing that graph data, best I could,
+trying to find plugins which did not end up requiring task manager, nor
+were required by a plugin which required task manager.  Turns out that
+only eliminated 9 plugins, and that's if you don't require optional 
+plugins.  If optionals are required, only 6 plugins are eliminated.
+
 Obviously, these aren't useful.  I've used Graphviz in the past to 
 plot out tangled graphs - but this is something I've not seen before.
 
@@ -13,21 +23,26 @@ While not being actually useful, I do think there is a beauty to them.
 
 Enjoy.
 
-## engine fdp
+## all Kibana plugins
+
+### engine fdp
 
 ![](images/graphviz-fdp.svg)
 
-## engine neato
+### engine neato
 
 ![](images/graphviz-neato.svg)
 
-## engine osage
+### engine osage
 
 ![](images/graphviz-osage.svg)
 
-## engine twopi
+### engine twopi
 
 ![](images/graphviz-twopi.svg)
+
+
+----
 
 <details>
 <summary>Graphviz input</summary>
