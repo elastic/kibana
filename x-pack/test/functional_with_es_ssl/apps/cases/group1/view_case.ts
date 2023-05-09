@@ -272,16 +272,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved comment message when page is refreshed', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
-
-          await testSubjects.click('submit-comment');
-
-          await header.waitUntilLoadingHasFinished();
-
           await testSubjects.click('property-actions-user-action-ellipses');
 
           await header.waitUntilLoadingHasFinished();
@@ -298,6 +288,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await editCommentTextArea.focus();
           await editCommentTextArea.type('Edited comment');
+
+          await header.waitUntilLoadingHasFinished();
 
           await browser.refresh();
 
@@ -338,6 +330,104 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.singleCase.deleteCase();
         await cases.casesTable.waitForTableToFinishLoading();
         await cases.casesTable.validateCasesTableHasNthRows(0);
+      });
+    });
+
+    describe('Lens visualization', () => {
+      before(async () => {
+        await cases.testResources.installKibanaSampleData('logs');
+      });
+
+      after(async () => {
+        await cases.testResources.removeKibanaSampleData('logs');
+      });
+
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('adds lens visualization in description', async () => {
+        await testSubjects.click('description-edit-icon');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await editCommentTextArea.focus();
+
+        const editableDescription = await testSubjects.find('editable-markdown-form');
+
+        const addVisualizationButton = await editableDescription.findByCssSelector(
+          '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+        );
+        await addVisualizationButton.click();
+
+        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('editable-save-markdown');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const description = await find.byCssSelector('[data-test-subj="description"]');
+
+        await description.findByCssSelector('[data-test-subj="xyVisChart"]');
+      });
+
+      it('adds lens visualization in existing comment', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('submit-comment');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('property-actions-user-action-pencil');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const editComment = await find.byCssSelector('[data-test-subj*="editable-markdown-form"]');
+
+        const addVisualizationButton = await editComment.findByCssSelector(
+          '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+        );
+        await addVisualizationButton.click();
+
+        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('editable-save-markdown');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const createdComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+
+        await createdComment.findByCssSelector('[data-test-subj="xyVisChart"]');
+      });
+
+      it('adds lens visualization in new comment', async () => {
+        await cases.singleCase.addVisualizationToNewComment('[Logs] Bytes distribution');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const newComment = await find.byCssSelector('[data-test-subj*="comment-create-action"]');
+
+        await newComment.findByCssSelector('[data-test-subj="xyVisChart"]');
       });
     });
 

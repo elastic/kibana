@@ -293,11 +293,5 @@ export function setManaged({
   optionsManaged?: boolean;
   objectManaged?: boolean;
 }): boolean {
-  if (optionsManaged !== undefined) {
-    return optionsManaged;
-  } else if (optionsManaged === undefined && objectManaged !== undefined) {
-    return objectManaged;
-  } else {
-    return false;
-  }
+  return optionsManaged ?? objectManaged ?? false;
 }

@@ -88,7 +88,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "event_loop_delays_daily": "ef49e7f15649b551b458c7ea170f3ed17f89abd0",
         "exception-list": "38181294f64fc406c15f20d85ca306c8a4feb3c0",
         "exception-list-agnostic": "d527ce9d12b134cb163150057b87529043a8ec77",
-        "file": "d12998f49bc82da596a9e6c8397999930187ec6a",
+        "file": "487a562dd895407307980cc4404ca08e87e8999d",
         "file-upload-usage-collection-telemetry": "c6fcb9a7efcf19b2bb66ca6e005bfee8961f6073",
         "fileShare": "f07d346acbb724eacf139a0fb781c38dc5280115",
         "fleet-fleet-server-host": "67180a54a689111fb46403c3603c9b3a329c698d",
@@ -150,7 +150,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "uptime-synthetics-api-key": "599319bedbfa287e8761e1ba49d536417a33fa13",
         "url": "816fa15bfe460ce39108ed8095e60fdbfcc40f11",
         "usage-counters": "f478b2668be350f5bdc08d9e1cf6fbce0e079f61",
-        "visualization": "55530e57ffe86bfd7c2a2b50461398c1f7a99e95",
+        "visualization": "cee4d02c56af349054642c6744bf9c471c1ad941",
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
       }
     `);

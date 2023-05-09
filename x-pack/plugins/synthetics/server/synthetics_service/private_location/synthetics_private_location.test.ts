@@ -31,7 +31,7 @@ describe('SyntheticsPrivateLocation', () => {
     type: 'http',
     enabled: true,
     schedule: '@every 3m',
-    'service.name': '',
+    'service.name': 'test service',
     locations: [mockPrivateLocation],
     tags: [],
     timeout: '16',
@@ -107,7 +107,7 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitors(
+      await syntheticsPrivateLocation.createPackagePolicies(
         [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
@@ -226,7 +226,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         name: {
           type: 'text',
-          value: 'Browser monitor',
+          value: '"Browser monitor"',
         },
         params: {
           type: 'yaml',
@@ -246,7 +246,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'service.name': {
           type: 'text',
-          value: '',
+          value: '"test service"',
         },
         'source.inline.script': {
           type: 'yaml',
@@ -286,7 +286,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   type: DataStream.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
-  'service.name': '',
+  'service.name': 'test service',
   tags: [],
   timeout: null,
   name: 'Browser monitor',

@@ -221,7 +221,8 @@ export class SavedObjectsService
       this.config.migration,
       elasticsearch.client.asInternalUser,
       docLinks,
-      waitForMigrationCompletion
+      waitForMigrationCompletion,
+      node
     );
 
     this.migrator$.next(migrator);
@@ -365,7 +366,8 @@ export class SavedObjectsService
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
-    waitForMigrationCompletion: boolean
+    waitForMigrationCompletion: boolean,
+    nodeInfo: NodeInfo
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -376,6 +378,7 @@ export class SavedObjectsService
       client,
       docLinks,
       waitForMigrationCompletion,
+      nodeRoles: nodeInfo.roles,
     });
   }
 

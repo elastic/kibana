@@ -10,7 +10,7 @@ import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/ma
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type {
   CaseConnector,
-  CaseResponse,
+  Case,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
@@ -256,7 +256,7 @@ describe('common utils', () => {
 
   describe('transformCases', () => {
     it('transforms correctly', () => {
-      const casesMap = new Map<string, CaseResponse>(
+      const casesMap = new Map<string, Case>(
         mockCases.map((obj) => {
           return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
         })

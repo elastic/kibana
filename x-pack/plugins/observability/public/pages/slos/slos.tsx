@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,7 +16,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
@@ -55,12 +54,14 @@ export function SlosPage() {
     setIsAutoRefreshing(!isAutoRefreshing);
   };
 
+  useEffect(() => {
+    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false) {
+      navigateToUrl(basePath.prepend(paths.observability.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isLoading, navigateToUrl, total]);
+
   if (isInitialLoading) {
     return null;
-  }
-
-  if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
-    return <SloListWelcomePrompt />;
   }
 
   return (

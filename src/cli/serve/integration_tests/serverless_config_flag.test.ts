@@ -6,15 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { spawn, spawnSync } from 'child_process';
+import { spawn, spawnSync, ChildProcessWithoutNullStreams } from 'child_process';
+import type { Readable } from 'stream';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { filter, firstValueFrom, from, take, concatMap } from 'rxjs';
+import { filter, firstValueFrom, from, concatMap } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigDirectory } from '@kbn/utils';
 
 describe('cli serverless project type', () => {
+  let child: ChildProcessWithoutNullStreams | undefined;
+
+  afterEach(() => {
+    child?.kill('SIGKILL');
+    child = undefined;
+  });
+
+  async function waitForMessage(stream: Readable, expectedMsg: string) {
+    let leftover = '';
+    return await firstValueFrom(
+      from(stream).pipe(
+        concatMap((chunk: Buffer) => {
+          const data = leftover + chunk.toString('utf-8');
+          const msgs = data.split('\n');
+          leftover = msgs.pop() ?? '';
+          return msgs;
+        }),
+        filter((msg) => msg.includes(expectedMsg) || msg.includes('FATAL'))
+      )
+    );
+  }
+
   it(
     'exits with statusCode 1 and logs an error when serverless project type is invalid',
     () => {
@@ -36,52 +59,36 @@ describe('cli serverless project type', () => {
     20 * 1000
   );
 
-  // Skipping this one because on CI it fails to read the config file
-  it.skip.each(['es', 'oblt', 'security'])(
+  it.each(['es', 'oblt', 'security'])(
     'writes the serverless project type %s in config/serverless.recent.yml',
     async (mode) => {
       // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
-      const child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
+      child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
         cwd: REPO_ROOT,
       });
 
-      // Wait for 5 lines in the logs
-      await firstValueFrom(from(child.stdout).pipe(take(5)));
+      // Wait until Kibana starts bootstrapping (at that point the file should be present)
+      const found = await waitForMessage(child.stdout, 'Kibana process configured with roles');
+      expect(found).not.toContain('FATAL');
 
       expect(
         readFileSync(resolve(getConfigDirectory(), 'serverless.recent.yml'), 'utf-8')
       ).toContain(`serverless: ${mode}\n`);
-
-      child.kill('SIGKILL');
     }
   );
 
   it.each(['es', 'oblt', 'security'])(
     'Kibana does not crash when running project type %s',
     async (mode) => {
-      const child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
+      child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
         cwd: REPO_ROOT,
       });
 
       // Wait until Kibana starts listening to the port
-      let leftover = '';
-      const found = await firstValueFrom(
-        from(child.stdout).pipe(
-          concatMap((chunk: Buffer) => {
-            const data = leftover + chunk.toString('utf-8');
-            const msgs = data.split('\n');
-            leftover = msgs.pop() ?? '';
-            return msgs;
-          }),
-          filter(
-            (msg) =>
-              msg.includes('http server running at http://localhost:5601') || msg.includes('FATAL')
-          )
-        )
+      const found = await waitForMessage(
+        child.stdout,
+        'http server running at http://localhost:5601'
       );
-
-      child.kill('SIGKILL');
-
       expect(found).not.toContain('FATAL');
     }
   );

@@ -106,18 +106,25 @@ const deleteSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
+  handler: async ({
+    request,
+    context,
+    params,
+    logger,
+    dependencies: { getRulesClientWithRequest },
+  }) => {
     if (!isLicenseAtLeastPlatinum(context)) {
       throw badRequest('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
+    const rulesClient = getRulesClientWithRequest(request);
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
 
-    const deleteSLO = new DeleteSLO(repository, transformManager, esClient);
+    const deleteSLO = new DeleteSLO(repository, transformManager, esClient, rulesClient);
 
     await deleteSLO.execute(params.path.id);
   },

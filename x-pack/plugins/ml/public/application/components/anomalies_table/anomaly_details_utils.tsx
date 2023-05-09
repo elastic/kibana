@@ -18,19 +18,17 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { EntityCell, EntityCellFilter } from '../entity_cell';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import {
-  showActualForFunction,
-  showTypicalForFunction,
-} from '../../../../common/util/anomaly_utils';
-import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
-import { formatValue } from '../../formatters/format_value';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import {
   getAnomalyScoreExplanationImpactValue,
   getSeverityColor,
-} from '../../../../common/util/anomaly_utils';
+  showActualForFunction,
+  showTypicalForFunction,
+} from '@kbn/ml-anomaly-utils';
+import type { MlAnomaliesTableRecord, MLAnomalyDoc } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { EntityCell, EntityCellFilter } from '../entity_cell';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
+import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';
 
 const TIME_FIELD_NAME = 'timestamp';
@@ -68,7 +66,7 @@ export function getInfluencersItems(
 }
 
 export const DetailsItems: FC<{
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   filter: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
@@ -328,7 +326,7 @@ export const DetailsItems: FC<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> = ({ anomaly }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

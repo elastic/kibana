@@ -38,6 +38,7 @@ export function extractErrors(
             type: 'conflict',
             ...(destinationId && { destinationId }),
           },
+          managed: savedObject.managed,
         });
         continue;
       }
@@ -49,6 +50,7 @@ export function extractErrors(
           ...savedObject.error,
           type: 'unknown',
         },
+        managed: savedObject.managed,
       });
     }
   }
@@ -70,6 +72,7 @@ export function extractErrors(
           ...legacyUrlAliasResult.error,
           type: 'unknown',
         },
+        managed: legacyUrlAlias.managed,
       });
     }
   }

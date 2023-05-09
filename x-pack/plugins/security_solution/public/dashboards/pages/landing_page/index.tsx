@@ -13,7 +13,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../../../landing_pages/components/landing_links_images';
 import { SecurityPageName } from '../../../../common/constants';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
-import { useAppRootNavLink } from '../../../common/components/navigation/nav_links';
+import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
 import { LinkButton } from '../../../common/components/links/helpers';
 import * as i18n from './translations';
@@ -54,7 +54,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboards)?.links ?? [];
+  const dashboardLinks = useRootNavLink(SecurityPageName.dashboards)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 

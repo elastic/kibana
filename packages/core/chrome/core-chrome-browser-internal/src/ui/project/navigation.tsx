@@ -11,7 +11,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiCollapsibleNav, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiCollapsibleNav } from '@elastic/eui';
 
 const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
 const SIZE_OPEN = 248;
@@ -33,8 +33,6 @@ const closedAriaLabel = i18n.translate('core.ui.chrome.projectNav.collapsibleNav
 });
 
 export const ProjectNavigation: React.FC = ({ children }) => {
-  const { euiTheme, colorMode } = useEuiTheme();
-
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
 
   const toggleOpen = useCallback(() => {
@@ -43,34 +41,32 @@ export const ProjectNavigation: React.FC = ({ children }) => {
 
   const collabsibleNavCSS = css`
     border-inline-end-width: 1,
-    background: ${euiTheme.colors.darkestShade},
     display: flex,
     flex-direction: row,
   `;
 
   return (
-    <EuiThemeProvider colorMode={colorMode === 'DARK' ? 'LIGHT' : 'DARK'}>
-      <EuiCollapsibleNav
-        css={collabsibleNavCSS}
-        isOpen={true}
-        showButtonIfDocked={true}
-        onClose={toggleOpen}
-        isDocked={true}
-        size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
-        hideCloseButton={false}
-        button={
-          <span css={buttonCSS}>
-            <EuiButtonIcon
-              iconType={isOpen ? 'menuLeft' : 'menuRight'}
-              aria-label={isOpen ? openAriaLabel : closedAriaLabel}
-              color="text"
-              onClick={toggleOpen}
-            />
-          </span>
-        }
-      >
-        {isOpen && children}
-      </EuiCollapsibleNav>
-    </EuiThemeProvider>
+    <EuiCollapsibleNav
+      css={collabsibleNavCSS}
+      isOpen={true}
+      showButtonIfDocked={true}
+      onClose={toggleOpen}
+      isDocked={true}
+      size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
+      hideCloseButton={false}
+      ownFocus={false}
+      button={
+        <span css={buttonCSS}>
+          <EuiButtonIcon
+            iconType={isOpen ? 'menuLeft' : 'menuRight'}
+            aria-label={isOpen ? openAriaLabel : closedAriaLabel}
+            color={isOpen ? 'ghost' : 'text'}
+            onClick={toggleOpen}
+          />
+        </span>
+      }
+    >
+      {isOpen && children}
+    </EuiCollapsibleNav>
   );
 };
