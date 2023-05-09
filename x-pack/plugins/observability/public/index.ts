@@ -24,6 +24,7 @@ export type {
   ObservabilityPublicPluginsStart,
 };
 export {
+  syntheticsThrottlingEnabled,
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
