@@ -13,10 +13,7 @@ import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   ExecuteActionRequestSchema,
-  UploadActionRequestSchema,
 } from './actions';
-import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
-import type { HapiReadableStream } from '../../../server/types';
 
 describe('actions schemas', () => {
   describe('Endpoint action list API Schema', () => {
@@ -640,58 +637,6 @@ describe('actions schemas', () => {
           comment: 'a user comment',
         });
       }).not.toThrow();
-    });
-  });
-
-  describe(`UploadActionRequestSchema`, () => {
-    let fileStream: HapiReadableStream;
-
-    beforeEach(() => {
-      fileStream = createHapiReadableStreamMock();
-    });
-
-    it('should not error if `override` parameter is not defined', () => {
-      expect(() => {
-        UploadActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          file: fileStream,
-        });
-      }).not.toThrow();
-    });
-
-    it('should allow `override` parameter', () => {
-      expect(() => {
-        UploadActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: {
-            overwrite: true,
-          },
-          file: fileStream,
-        });
-      }).not.toThrow();
-    });
-
-    it('should error if `file` is not defined', () => {
-      expect(() => {
-        UploadActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: {
-            override: true,
-          },
-        });
-      }).toThrow();
-    });
-
-    it('should error if `file` is not a Stream', () => {
-      expect(() => {
-        UploadActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: {
-            overwrite: true,
-          },
-          file: {},
-        });
-      }).toThrow();
     });
   });
 });

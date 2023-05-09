@@ -11,7 +11,6 @@ import type { EndpointActionListRequestQuery } from '../../../../common/endpoint
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import {
-  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -20,12 +19,15 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { LicenseService } from '../../../../common/license';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -81,7 +83,12 @@ describe('Action List Route', () => {
       licenseService,
     });
 
-    registerActionListRoutes(routerMock, createMockEndpointAppContext());
+    registerActionListRoutes(routerMock, {
+      logFactory: loggingSystemMock.create(),
+      service: endpointAppContextService,
+      config: () => Promise.resolve(createMockConfig()),
+      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+    });
 
     callApiRoute = async (
       routePrefix: string,
