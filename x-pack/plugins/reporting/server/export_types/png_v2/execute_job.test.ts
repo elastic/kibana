@@ -78,7 +78,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.objectContaining({
       urls: [
         [
-          'localhost:80undefined/app/reportingRedirect?forceNow=test',
+          'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
           { id: 'test', params: {}, version: 'test' },
         ],
       ],

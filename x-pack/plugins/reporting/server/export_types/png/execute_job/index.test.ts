@@ -74,7 +74,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.anything(),
     expect.anything(),
     expect.objectContaining({
-      urls: ['localhost:80undefined/app/kibana#/something'],
+      urls: ['http://localhost:80/mock-server-basepath/app/kibana#/something'],
       browserTimezone: 'UTC',
       headers: {},
     })

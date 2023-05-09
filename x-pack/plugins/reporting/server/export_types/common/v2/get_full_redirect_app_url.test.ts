@@ -19,7 +19,7 @@ describe('getFullRedirectAppUrl', () => {
       basePath: 'test',
       protocol: 'http',
       hostname: 'localhost',
-      port: 1523,
+      port: 1234,
     }));
   });
 
