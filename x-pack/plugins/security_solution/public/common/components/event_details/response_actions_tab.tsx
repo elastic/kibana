@@ -143,6 +143,7 @@ const EndpointResponseActionResults = ({
         action={
           {
             ...action.EndpointActions.data,
+            ...(action.error ? { errors: [action.error.message] } : {}),
             startedAt: action['@timestamp'],
             ...responseData,
             // Did not type this strictly, because we're still waiting for UI, but this component will not be used in the long run
