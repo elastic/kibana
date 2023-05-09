@@ -40,6 +40,7 @@ import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 
 export interface TaskClaimingOpts {
+  shareWorkers: boolean;
   logger: Logger;
   definitions: TaskTypeDictionary;
   unusedTypes: string[];
@@ -112,6 +113,7 @@ export class TaskClaiming {
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
+  private readonly shareWorkers: boolean;
 
   /**
    * Constructs a new TaskStore.
@@ -125,10 +127,11 @@ export class TaskClaiming {
     this.taskStore = opts.taskStore;
     this.getCapacity = opts.getCapacity;
     this.logger = opts.logger;
-    this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
+    this.shareWorkers = opts.shareWorkers;
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
 
+    this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.events$ = new Subject<TaskClaim>();
   }
 
@@ -145,8 +148,9 @@ export class TaskClaiming {
       } else if (taskTypeDef.maxConcurrency === 0) {
         result.skipped.push(taskTypeDef.type);
       } else if (!taskTypeDef.maxConcurrency || taskTypeDef.maxConcurrency > 1) {
-        result.byCost[taskTypeDef.workerCost] = result.byCost[taskTypeDef.workerCost]
-          ? result.byCost[taskTypeDef.workerCost].concat(taskTypeDef.type)
+        const cost = this.shareWorkers ? taskTypeDef.workerCost : 1;
+        result.byCost[cost] = result.byCost[cost]
+          ? result.byCost[cost].concat(taskTypeDef.type)
           : [taskTypeDef.type];
       }
     }

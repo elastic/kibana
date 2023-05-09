@@ -20,6 +20,7 @@ import { TaskManagerStat } from './task_events';
 interface Opts {
   maxWorkers$: Observable<number>;
   logger: Logger;
+  shareWorkers: boolean;
 }
 
 export enum TaskPoolRunResult {
@@ -43,6 +44,7 @@ export class TaskPool {
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
+  private readonly shareWorkers: boolean;
 
   /**
    * Creates an instance of TaskPool.
@@ -54,6 +56,7 @@ export class TaskPool {
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
+    this.shareWorkers = opts.shareWorkers;
     opts.maxWorkers$.subscribe((maxWorkers) => {
       this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
       this.maxWorkers = maxWorkers;
@@ -70,7 +73,7 @@ export class TaskPool {
   public get occupiedWorkers() {
     let count = 0;
     for (const [, runner] of Array.from(this.tasksInPool)) {
-      count += runner.definition.workerCost;
+      count += this.shareWorkers ? runner.definition.workerCost : 1;
     }
     return count;
   }

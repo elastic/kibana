@@ -136,6 +136,7 @@ export const configSchema = schema.object(
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
+    share_workers: schema.boolean({ defaultValue: false }),
   },
   {
     validate: (config) => {
