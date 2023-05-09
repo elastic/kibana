@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { getDefaultGroupingOptions } from '../../../detections/components/alerts_table/grouping_settings';
+import { getDefaultGroupingOptions } from '../../utils/alerts';
 import { updateGroups } from './actions';
 import type { Groups } from './types';
 
