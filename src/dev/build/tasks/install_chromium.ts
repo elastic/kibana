@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { install, paths } from '@kbn/screenshotting-plugin/server/utils';
+import type { Task } from '../lib';
 
-export const InstallChromium = {
+export const InstallChromium: Task = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
@@ -43,7 +45,7 @@ export const InstallChromium = {
         platform,
         'node_modules/@kbn/screenshotting-plugin/chromium'
       );
-      await install(logger, pkg, path);
+      await install(logger as unknown as Logger, pkg, path);
     }
   },
 };

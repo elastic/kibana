@@ -57,7 +57,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
-import { actionCreateService, EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
@@ -101,6 +101,7 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
@@ -246,7 +247,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+        osqueryCreateActionService: plugins.osquery.createActionService,
       }),
     };
 
@@ -505,8 +506,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       messageSigningService: plugins.fleet?.messageSigningService,
       actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
-        this.endpointContext,
-        licenseService
+        this.endpointContext
       ),
     });
 

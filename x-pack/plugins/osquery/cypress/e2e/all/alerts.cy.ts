@@ -37,6 +37,7 @@ import {
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
 import {
+  closeDateTabIfVisible,
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
@@ -128,8 +129,8 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
+      closeDateTabIfVisible();
       cy.getBySel('edit-rule-actions-tab').click();
       cy.contains('Response actions are run on each rule execution');
       cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
@@ -168,7 +169,6 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -214,7 +214,6 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -280,7 +279,6 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
-      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
 
@@ -338,7 +336,9 @@ describe('Alert Event Details', () => {
         cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
       });
       cy.contains('Cancel').click();
-      cy.contains(TIMELINE_NAME).click();
+      cy.getBySel('flyoutBottomBar').within(() => {
+        cy.contains(TIMELINE_NAME).click();
+      });
       cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
       // timeline unsaved changes modal
       cy.visit('/app/osquery');

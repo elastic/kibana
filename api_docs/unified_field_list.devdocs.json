@@ -3770,6 +3770,21 @@
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsResponse.numberSummary",
+            "type": "Object",
+            "tags": [],
+            "label": "numberSummary",
+            "description": [],
+            "signature": [
+              "NumberSummary",
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3987,6 +4002,21 @@
             "signature": [
               "BucketedAggregation",
               "<string | number> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsState.numberSummary",
+            "type": "Object",
+            "tags": [],
+            "label": "numberSummary",
+            "description": [],
+            "signature": [
+              "NumberSummary",
+              " | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
             "deprecated": false,
@@ -4799,10 +4829,10 @@
       },
       {
         "parentPluginId": "unifiedFieldList",
-        "id": "def-public.NumberStatsResult",
+        "id": "def-public.NumberSummary",
         "type": "Interface",
         "tags": [],
-        "label": "NumberStatsResult",
+        "label": "NumberSummary",
         "description": [],
         "path": "src/plugins/unified_field_list/common/types/stats.ts",
         "deprecated": false,
@@ -4810,25 +4840,13 @@
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
-            "id": "def-public.NumberStatsResult.count",
-            "type": "number",
+            "id": "def-public.NumberSummary.minValue",
+            "type": "CompoundType",
             "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.NumberStatsResult.histogram",
-            "type": "Object",
-            "tags": [],
-            "label": "histogram",
+            "label": "minValue",
             "description": [],
             "signature": [
-              "BucketedAggregation",
-              "<number>"
+              "number | null"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
             "deprecated": false,
@@ -4836,14 +4854,13 @@
           },
           {
             "parentPluginId": "unifiedFieldList",
-            "id": "def-public.NumberStatsResult.topValues",
-            "type": "Object",
+            "id": "def-public.NumberSummary.maxValue",
+            "type": "CompoundType",
             "tags": [],
-            "label": "topValues",
+            "label": "maxValue",
             "description": [],
             "signature": [
-              "BucketedAggregation",
-              "<number>"
+              "number | null"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
             "deprecated": false,
@@ -4976,46 +4993,6 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedFieldList",
-        "id": "def-public.TopValuesResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "TopValuesResult",
-        "description": [],
-        "path": "src/plugins/unified_field_list/common/types/stats.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.TopValuesResult.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.TopValuesResult.topValues",
-            "type": "Object",
-            "tags": [],
-            "label": "topValues",
-            "description": [],
-            "signature": [
-              "BucketedAggregation",
-              "<string>"
-            ],
-            "path": "src/plugins/unified_field_list/common/types/stats.ts",
             "deprecated": false,
             "trackAdoption": false
           }
