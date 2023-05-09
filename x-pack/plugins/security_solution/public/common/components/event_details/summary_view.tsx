@@ -17,7 +17,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import type { AlertSummaryRow } from './helpers';
+import { NewChat } from '../../../security_assistant/new_chat';
 import * as i18n from './translations';
 import { VIEW_ALL_FIELDS } from './translations';
 import { SummaryTable } from './table/summary_table';
@@ -67,15 +69,17 @@ const rowProps = {
 };
 
 const SummaryViewComponent: React.FC<{
+  data: TimelineEventsDetailsItem[];
   goToTable: () => void;
   title: string;
   rows: AlertSummaryRow[];
   isReadOnly?: boolean;
-}> = ({ goToTable, rows, title, isReadOnly }) => {
+}> = ({ data, goToTable, rows, title, isReadOnly }) => {
   const columns = isReadOnly ? baseColumns : allColumns;
 
   return (
     <div>
+      <NewChat data={data} />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxxs">

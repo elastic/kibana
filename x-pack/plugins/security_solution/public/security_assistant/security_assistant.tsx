@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -22,37 +23,37 @@ import {
   EuiAvatar,
   EuiPageHeader,
   EuiFilePicker,
-  EuiCommentProps,
   EuiMarkdownFormat,
   EuiIcon,
 } from '@elastic/eui';
 import crypto from 'crypto';
-import { DataProvider } from '@kbn/timelines-plugin/common';
-import { SendToTimelineButton } from './send_to_timeline_button';
-import { useKibana } from '../../public/common/lib/kibana';
+import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
+import styled from 'styled-components';
+
 import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal, sendMessage } from './api';
+import { useKibana } from '../common/lib/kibana';
+import type { SecurityAssistantUiSettings } from './helpers';
+import { fetchVirusTotalReport } from './helpers';
+import { SendToTimelineButton } from './send_to_timeline_button';
+
+const CommentsContainer = styled.div`
+  max-height: 600px;
+  overflow-y: scroll;
+`;
 
 export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
-export interface SecurityAssistantUiSettings {
-  virusTotal: {
-    apiKey: string;
-    baseUrl: string;
-  };
-  openAI: {
-    apiKey: string;
-    baseUrl: string;
-  };
-}
 
 export interface SecurityAssistantProps {
+  input?: string;
   useLocalStorage?: boolean;
 }
 
 export const SecurityAssistant: React.FC<SecurityAssistantProps> =
-  React.memo<SecurityAssistantProps>(() => {
+  React.memo<SecurityAssistantProps>(({ input = '' }) => {
+    const bottomRef = useRef<HTMLDivElement | null>(null);
     const { uiSettings } = useKibana().services;
-    const [inputText, setInputText] = useState<string>('');
+    const [inputText, setInputText] = useState<string>(input);
     const [lastResponse, setLastResponse] = useState<string>('');
     const [chatHistory, setChatHistory] = useState<
       Array<{
@@ -67,7 +68,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       SECURITY_ASSISTANT_UI_SETTING_KEY
     );
 
-    //// New code from Garrett for attach to case action
+    // New code from Garrett for attach to case action
     // Attach to case support
     const { cases } = useKibana().services;
     const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -149,7 +150,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
 
       console.log(response);
       const stats = response.data.attributes.stats;
-      //const links = response.data.attributes.links;
+      // const links = response.data.attributes.links;
       const result =
         `**VirusTotal analysis results for \`${sha256Hash}\`**:\n\n` +
         `- Malicious: ${stats.malicious}\n` +
@@ -188,35 +189,19 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
         const alertName = _source['kibana.alert.rule.name'];
         const severity = _source['kibana.alert.severity'];
         const reason = _source['kibana.alert.reason'];
-        const user = _source['user'];
-        const host = _source['host'];
+        const user = _source.user;
+        const host = _source.host;
 
-        const user_risk = user && user['risk'] ? user['risk']['calculated_level'] : 'N/A';
-        const host_risk = host && host['risk'] ? host['risk']['calculated_level'] : 'N/A';
+        const userRisk = user && user.risk ? user.risk.calculated_level : 'N/A';
+        const hostRisk = host && host.risk ? host.risk.calculated_level : 'N/A';
 
         formattedAlerts += `| ${
           index + 1
-        } | ${alertName} | ${severity} | ${reason} | ${user_risk} | ${host_risk} |\n`;
+        } | ${alertName} | ${severity} | ${reason} | ${userRisk} | ${hostRisk} |\n`;
       });
       return formattedAlerts;
     }
 
-    async function fetchVirusTotalReport(hash: string): Promise<any> {
-      const url = `${virusTotal.baseUrl}/files/${hash}`;
-
-      const response = await fetch(url, {
-        headers: {
-          'x-apikey': virusTotal.apiKey,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`VirusTotal API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    }
     const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       setInputText(event.target.value);
     };
@@ -281,7 +266,18 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       }
 
       setIsLoading(false);
-    }, [inputText, chatHistory, openAI.apiKey, openAI.baseUrl]);
+    }, [inputText, chatHistory, dateTimeString, handleOpenAlerts, openAI.baseUrl, openAI.apiKey]);
+
+    useEffect(() => {
+      if (chatHistory.length === 0) {
+        sendMessageLocal();
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, [chatHistory.length, input, sendMessageLocal]);
+
+    useEffect(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [lastResponse]);
 
     const clearChat = () => {
       setChatHistory([]);
@@ -298,7 +294,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       fileReader.onload = async (event) => {
         if (event.target && event.target.result) {
           const fileContent = event.target.result as ArrayBuffer;
-          //const base64File = btoa(String.fromCharCode(...new Uint8Array(fileContent)));
+          // const base64File = btoa(String.fromCharCode(...new Uint8Array(fileContent)));
 
           // Calculate the SHA-256 hash
           const hash = crypto.createHash('sha256');
@@ -364,7 +360,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       fileReader.readAsArrayBuffer(file);
     };
 
-    //// New Code from Garrett for Add To Timeline action
+    // New Code from Garrett for Add To Timeline action
     // Grab all relevant dom elements
     const commentBlocks = [...document.getElementsByClassName('euiMarkdownFormat')];
     // Filter if no code block exists as to not make extra portals
@@ -374,7 +370,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       chatHistory.length > 0
         ? commentBlocks.map((commentBlock) => {
             return {
-              commentBlock: commentBlock,
+              commentBlock,
               codeBlocks: [...commentBlock.querySelectorAll('.euiCodeBlock__code')],
               codeBlockControls: [...commentBlock.querySelectorAll('.euiCodeBlock__controls')],
             };
@@ -436,52 +432,56 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
               });
             }
           })}
-        <EuiCommentList
-          comments={chatHistory.map((message, index) => {
-            const isUser = message.role === 'user';
-            const commentProps: EuiCommentProps = {
-              username: isUser ? 'You' : 'Assistant',
-              actions: (
-                <>
-                  <EuiButtonIcon
-                    onClick={() => handleAddToExistingCaseClick(message.content)}
-                    iconType="addDataApp"
-                    color="primary"
-                    aria-label="Add to existing case"
+
+        <CommentsContainer>
+          <EuiCommentList
+            comments={chatHistory.map((message, index) => {
+              const isUser = message.role === 'user';
+              const commentProps: EuiCommentProps = {
+                username: isUser ? 'You' : 'Assistant',
+                actions: (
+                  <>
+                    <EuiButtonIcon
+                      onClick={() => handleAddToExistingCaseClick(message.content)}
+                      iconType="addDataApp"
+                      color="primary"
+                      aria-label="Add to existing case"
+                    />
+                    <EuiCopy textToCopy={message.content}>
+                      {(copy) => (
+                        <EuiButtonIcon
+                          onClick={copy}
+                          iconType="copyClipboard"
+                          color="primary"
+                          aria-label="Copy message content to clipboard"
+                        />
+                      )}
+                    </EuiCopy>
+                  </>
+                ),
+                // event: isUser ? 'Asked a question' : 'Responded with',
+                children: (
+                  <EuiText>
+                    <EuiMarkdownFormat>{message.content}</EuiMarkdownFormat>
+                  </EuiText>
+                ),
+                timelineAvatar: isUser ? (
+                  <EuiAvatar name="user" size="l" color="subdued" iconType={'logoSecurity'} />
+                ) : (
+                  <EuiAvatar
+                    name="machine"
+                    size="l"
+                    color="subdued"
+                    iconType={'machineLearningApp'}
                   />
-                  <EuiCopy textToCopy={message.content}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        onClick={copy}
-                        iconType="copyClipboard"
-                        color="primary"
-                        aria-label="Copy message content to clipboard"
-                      />
-                    )}
-                  </EuiCopy>
-                </>
-              ),
-              //event: isUser ? 'Asked a question' : 'Responded with',
-              children: (
-                <EuiText>
-                  <EuiMarkdownFormat>{message.content}</EuiMarkdownFormat>
-                </EuiText>
-              ),
-              timelineAvatar: isUser ? (
-                <EuiAvatar name="user" size="l" color="subdued" iconType={'logoSecurity'} />
-              ) : (
-                <EuiAvatar
-                  name="machine"
-                  size="l"
-                  color="subdued"
-                  iconType={'machineLearningApp'}
-                />
-              ),
-              timestamp: 'at: ' + message.timestamp,
-            };
-            return commentProps;
-          })}
-        />
+                ),
+                timestamp: `at: ${message.timestamp}`,
+              };
+              return commentProps;
+            })}
+          />
+          <div ref={bottomRef} />
+        </CommentsContainer>
 
         <EuiSpacer />
 

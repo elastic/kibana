@@ -30,7 +30,13 @@ const AlertSummaryViewComponent: React.FC<{
   );
 
   return (
-    <SummaryView rows={summaryRows} title={title} goToTable={goToTable} isReadOnly={isReadOnly} />
+    <SummaryView
+      data={data}
+      rows={summaryRows}
+      title={title}
+      goToTable={goToTable}
+      isReadOnly={isReadOnly}
+    />
   );
 };
 

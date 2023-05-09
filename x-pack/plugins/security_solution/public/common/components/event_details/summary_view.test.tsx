@@ -66,7 +66,7 @@ describe('Summary View', () => {
     test('should show an empty table', () => {
       render(
         <TestProviders>
-          <SummaryView goToTable={jest.fn()} title="Test Summary View" rows={[]} />
+          <SummaryView data={[]} goToTable={jest.fn()} title="Test Summary View" rows={[]} />
         </TestProviders>
       );
       expect(screen.getByText('No items found')).toBeInTheDocument();
@@ -84,7 +84,12 @@ describe('Summary View', () => {
 
       render(
         <TestProviders>
-          <SummaryView goToTable={jest.fn()} title="Test Summary View" rows={sampleRows} />
+          <SummaryView
+            data={[]}
+            goToTable={jest.fn()}
+            title="Test Summary View"
+            rows={sampleRows}
+          />
         </TestProviders>
       );
       // Shows the field name
@@ -113,6 +118,7 @@ describe('Summary View', () => {
       render(
         <TestProviders>
           <SummaryView
+            data={[]}
             goToTable={jest.fn()}
             title="Test Summary View"
             rows={sampleRows}
