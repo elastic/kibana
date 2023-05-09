@@ -948,6 +948,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
               </span>
             }
+            fullWidth
           >
             <UseMultiFields
               fields={{
