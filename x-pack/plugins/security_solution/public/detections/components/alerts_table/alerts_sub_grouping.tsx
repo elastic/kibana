@@ -179,7 +179,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     endDate: to,
   });
 
-  const queriedGroup = useRef<string | null>(null);
   const {
     data: alertsGroupsData,
     loading: isLoadingGroups,
@@ -193,6 +192,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
     skip: isNoneGroup([selectedGroup]),
   });
+
+  const queriedGroup = useRef<string | null>(null);
 
   const aggs = useMemo(
     // queriedGroup because `selectedGroup` updates before the query response

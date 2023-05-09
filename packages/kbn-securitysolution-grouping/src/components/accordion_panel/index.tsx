@@ -83,7 +83,7 @@ const GroupPanelComponent = <T,>({
   }, [onGroupClose, forceState, selectedGroup]);
   const groupFieldValue = useMemo(
     () => (groupBucket.selectedGroup === selectedGroup ? firstNonNullValue(groupBucket.key) : null),
-    [groupBucket, selectedGroup]
+    [groupBucket.key, groupBucket.selectedGroup, selectedGroup]
   );
 
   const groupFilters = useMemo(
