@@ -23,7 +23,6 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { TimelineId } from '../../../../../common/types';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
@@ -40,7 +39,6 @@ import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import { useDetailPanel } from '../../../../timelines/components/side_panel/hooks/use_detail_panel';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const emptyValue = getEmptyValue();
 
@@ -326,8 +324,9 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
 
     const { DetailsPanel, openEventDetailsPanel } = useDetailPanel({
       isFlyoutView: true,
-      sourcererScope: SourcererScopeName.detections,
-      scopeId: TimelineId.active,
+      // @ts-expect-error test if we can pass string in order to have smaller bundle size
+      sourcererScope: 'detections',
+      scopeId: 'timeline-1',
     });
     const { withAutomatedActions: withAutomatedActionsFromUrl } = useActionHistoryUrlParams();
 
