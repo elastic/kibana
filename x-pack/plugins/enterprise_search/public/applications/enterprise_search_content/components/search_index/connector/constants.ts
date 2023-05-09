@@ -87,7 +87,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.amazon_s3,
   },
   sharepoint: {
-    docsUrl: '',
+    docsUrl: docLinks.connectorsSharepoint,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
