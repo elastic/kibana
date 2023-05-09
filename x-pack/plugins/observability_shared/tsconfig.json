@@ -22,6 +22,7 @@
     "@kbn/shared-ux-page-kibana-template-mocks",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": ["target/**/*"]
 }
