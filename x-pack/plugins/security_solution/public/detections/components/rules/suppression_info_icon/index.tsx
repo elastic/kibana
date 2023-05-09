@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 
-const POPOVER_WIDTH = 300;
+const POPOVER_WIDTH = 320;
 
 /**
  * Icon and popover that gives hint to users how suppression for missing fields work
@@ -33,7 +33,7 @@ const SuppressionInfoIconComponent = () => {
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }}>
+      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsTooltipContent"
           defaultMessage="Choose how to handle events with missing {suppressBy} fields. Either group events with missing fields together, or create a separate alert for each event. {learnMoreLink}"
