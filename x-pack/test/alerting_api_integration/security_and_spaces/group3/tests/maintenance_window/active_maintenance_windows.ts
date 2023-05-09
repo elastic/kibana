@@ -122,7 +122,7 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
       });
     }
 
-    it.only('should return active maintenance windows', async () => {
+    it('should return active maintenance windows', async () => {
       await supertest
         .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
         .set('kbn-xsrf', 'foo')

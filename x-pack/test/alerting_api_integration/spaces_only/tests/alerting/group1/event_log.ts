@@ -1400,7 +1400,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               actions: new Map([['execute-action', { equal: 1 }]]),
             });
             hasActions = true;
-          } catch (e) {}
+          } catch (e) {
+            hasActions = false;
+          }
 
           expect(hasActions).eql(false);
         });

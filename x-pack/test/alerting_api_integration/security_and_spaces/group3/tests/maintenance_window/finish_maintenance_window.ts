@@ -91,14 +91,24 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
           r_rule: {
             ...createParams.r_rule,
             count: 1,
-          }
+          },
         })
         .expect(200);
 
-      objectRemover.add( space1, createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
+      objectRemover.add(
+        space1,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
 
       const { body: finish } = await supertest
-        .post(`${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${createdMaintenanceWindow.id}/_finish`)
+        .post(
+          `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }/_finish`
+        )
         .set('kbn-xsrf', 'foo')
         .send()
         .expect(200);
@@ -106,7 +116,11 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
 
       // Cant finish a finished maintenance window
       await supertest
-        .post(`${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${createdMaintenanceWindow.id}/_finish`)
+        .post(
+          `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }/_finish`
+        )
         .set('kbn-xsrf', 'foo')
         .send()
         .expect(400);
@@ -122,26 +136,40 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
           r_rule: {
             ...createParams.r_rule,
             count: 2, // 2 occurrences
-          }
+          },
         })
         .expect(200);
 
-      objectRemover.add( space1, createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
+      objectRemover.add(
+        space1,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
 
       const { body: finish } = await supertest
-        .post(`${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${createdMaintenanceWindow.id}/_finish`)
+        .post(
+          `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }/_finish`
+        )
         .set('kbn-xsrf', 'foo')
         .send()
         .expect(200);
-      
+
       // Status now upcoming, new start and end dates reflect the upcoming event
       expect(finish.status).eql('upcoming');
       expect(finish.event_start_time).eql(createdMaintenanceWindow.events[1].gte);
       expect(finish.event_end_time).eql(createdMaintenanceWindow.events[1].lte);
-      
+
       // Cannot finish an upcoming maintenance window
       await supertest
-        .post(`${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${createdMaintenanceWindow.id}/_finish`)
+        .post(
+          `${getUrlPrefix(space1)}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }/_finish`
+        )
         .set('kbn-xsrf', 'foo')
         .send()
         .expect(400);
