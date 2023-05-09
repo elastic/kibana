@@ -82,9 +82,7 @@ export const useFetchBrowserFieldCapabilities = ({
     cacheTime: 0,
     refetchOnWindowFocus: false,
   });
-
   const loading = useRef<boolean | undefined>(isFetching);
-
   const browserFields = useMemo(() => {
     if (!enabled && initialBrowserFields) {
       loading.current = undefined;
@@ -94,11 +92,12 @@ export const useFetchBrowserFieldCapabilities = ({
       loading.current = undefined;
       return {};
     }
+    loading.current = isFetching;
     return getDataViewStateFromIndexFields(
       dataView.id ?? '',
       dataView.fields != null ? dataView.fields : []
     );
-  }, [enabled, initialBrowserFields, dataView]);
+  }, [enabled, initialBrowserFields, dataView, isFetching]);
 
   return [loading.current, browserFields];
 };
