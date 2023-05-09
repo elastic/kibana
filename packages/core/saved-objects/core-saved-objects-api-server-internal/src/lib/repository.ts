@@ -106,9 +106,8 @@ import {
   ValidationHelper,
   PreflightCheckHelper,
   SerializerHelper,
-  type PreflightCheckNamespacesResult,
 } from './helpers';
-import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from './constants';
+import { DEFAULT_REFRESH_SETTING } from './constants';
 import {
   type ApiExecutionContext,
   performCreate,
@@ -120,6 +119,7 @@ import {
   performFind,
   performBulkGet,
   performGet,
+  performUpdate,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -501,137 +501,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-    if (!id) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
-    }
-
-    const {
-      version,
-      references,
-      upsert,
-      refresh = DEFAULT_REFRESH_SETTING,
-      retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
-    } = options;
-
-    let preflightResult: PreflightCheckNamespacesResult | undefined;
-    if (this._registry.isMultiNamespace(type)) {
-      preflightResult = await this.preflightCheckHelper.preflightCheckNamespaces({
+    return await performUpdate(
+      {
         type,
         id,
-        namespace,
-      });
-    }
-
-    const existingNamespaces = preflightResult?.savedObjectNamespaces ?? [];
-
-    const authorizationResult = await this._securityExtension?.authorizeUpdate({
-      namespace,
-      object: { type, id, existingNamespaces },
-    });
-
-    if (
-      preflightResult?.checkResult === 'found_outside_namespace' ||
-      (!upsert && preflightResult?.checkResult === 'not_found')
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-    if (upsert && preflightResult?.checkResult === 'not_found') {
-      // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
-      // This takes an extra round trip to Elasticsearch, but this won't happen often.
-      // TODO: improve performance by combining these into a single preflight check
-      await this.preflightCheckHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
-    }
-    const time = getCurrentTime();
-
-    let rawUpsert: SavedObjectsRawDoc | undefined;
-    // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
-    if (upsert && (!preflightResult || preflightResult.checkResult === 'not_found')) {
-      let savedObjectNamespace: string | undefined;
-      let savedObjectNamespaces: string[] | undefined;
-
-      if (this._registry.isSingleNamespace(type) && namespace) {
-        savedObjectNamespace = namespace;
-      } else if (this._registry.isMultiNamespace(type)) {
-        savedObjectNamespaces = preflightResult!.savedObjectNamespaces;
-      }
-
-      const migrated = this._migrator.migrateDocument({
-        id,
-        type,
-        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-        attributes: {
-          ...(await this.encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
-        },
-        updated_at: time,
-      });
-      rawUpsert = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
-    }
-
-    const doc = {
-      [type]: await this.encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        namespace,
-        attributes
-      ),
-      updated_at: time,
-      ...(Array.isArray(references) && { references }),
-    };
-
-    const body = await this.client
-      .update<unknown, unknown, SavedObjectsRawDocSource>({
-        id: this._serializer.generateRawId(namespace, type, id),
-        index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version),
-        refresh,
-        retry_on_conflict: retryOnConflict,
-        body: {
-          doc,
-          ...(rawUpsert && { upsert: rawUpsert._source }),
-        },
-        _source_includes: ['namespace', 'namespaces', 'originId'],
-        require_alias: true,
-      })
-      .catch((err) => {
-        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
-          throw err;
-        }
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          // see "404s from missing index" above
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        throw err;
-      });
-
-    const { originId } = body.get?._source ?? {};
-    let namespaces: string[] = [];
-    if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = body.get?._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(body.get?._source.namespace),
-      ];
-    }
-
-    const result = {
-      id,
-      type,
-      updated_at: time,
-      version: encodeHitVersion(body),
-      namespaces,
-      ...(originId && { originId }),
-      references,
-      attributes,
-    } as SavedObject<T>;
-
-    return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
-      result,
-      authorizationResult?.typeMap,
-      attributes
+        attributes,
+        options,
+      },
+      this.apiExecutionContext
     );
   }
 
