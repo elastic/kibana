@@ -84,7 +84,7 @@ export interface ReportingInternalStart {
  * @internal
  */
 export interface ReportingServerInfo {
-  port?: number;
+  port: number;
   name: string;
   uuid: string;
   basePath: string;
