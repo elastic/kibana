@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import { APM_INDICES, LOGS_INDICES, METRICS_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
+import { CollectorOptions } from '.';
 
-export async function collectPods({ esClient }: { esClient: Client }) {
+export async function collectPods({ client, from }: CollectorOptions) {
   const dsl = {
     index: [APM_INDICES, LOGS_INDICES, METRICS_INDICES],
     size: 1000,
@@ -44,7 +44,7 @@ export async function collectPods({ esClient }: { esClient: Client }) {
     },
   };
 
-  const esResponse = await esClient.search(dsl);
+  const esResponse = await client.search(dsl);
 
   const pods = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
     const { fields = {} } = hit;

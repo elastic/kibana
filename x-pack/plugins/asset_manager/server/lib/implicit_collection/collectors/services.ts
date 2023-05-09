@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-
 import { APM_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
+import { CollectorOptions } from '.';
 
 const MISSING_KEY = '__unknown__';
 
-export async function collectServices({ esClient }: { esClient: Client }): Promise<Asset[]> {
+export async function collectServices({ client, from }: CollectorOptions): Promise<Asset[]> {
   const dsl = {
     index: APM_INDICES,
     size: 0,
@@ -71,10 +70,10 @@ export async function collectServices({ esClient }: { esClient: Client }): Promi
     },
   };
 
-  const esResponse = await esClient.search(dsl);
+  const esResponse = await client.search(dsl);
   const serviceEnvironment = esResponse.aggregations?.service_environment as { buckets: any[] };
 
-  const services = serviceEnvironment.buckets.reduce<Asset[]>((acc: Asset[], hit: any) => {
+  const services = (serviceEnvironment?.buckets ?? []).reduce<Asset[]>((acc: Asset[], hit: any) => {
     const [serviceName, environment] = hit.key;
     const containerHosts = hit.container_host.buckets;
 
