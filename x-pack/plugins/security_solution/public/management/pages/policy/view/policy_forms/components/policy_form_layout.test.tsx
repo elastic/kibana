@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
 import { PolicyFormLayout } from './policy_form_layout';
@@ -173,6 +174,61 @@ describe('Policy Form Layout', () => {
       expect(antivirusRegistrationFormTextContent).toContain(
         'Toggle on to register Elastic as an official Antivirus solution for Windows OS. This will also disable Windows Defender.'
       );
+    });
+
+    describe('Advanced settings', () => {
+      let showHideAdvancedSettingsButton: ReactWrapper;
+
+      beforeEach(() => {
+        showHideAdvancedSettingsButton = policyFormLayoutView.find(
+          'EuiButtonEmpty[data-test-subj="advancedPolicyButton"]'
+        );
+      });
+
+      it('should display "Show advanced settings" button, and hide advanced options on default', () => {
+        expect(showHideAdvancedSettingsButton.text()).toEqual('Show advanced settings');
+        expect(
+          policyFormLayoutView.find('EuiPanel[data-test-subj="advancedPolicyPanel"]').length
+        ).toEqual(0);
+      });
+
+      it('clicking on "Show/Hide advanced settings" should show/hide advanced settings', () => {
+        showHideAdvancedSettingsButton.simulate('click');
+
+        expect(showHideAdvancedSettingsButton.text()).toEqual('Hide advanced settings');
+        expect(
+          policyFormLayoutView.find('EuiPanel[data-test-subj="advancedPolicyPanel"]').length
+        ).toEqual(1);
+
+        showHideAdvancedSettingsButton.simulate('click');
+
+        expect(
+          policyFormLayoutView.find('EuiPanel[data-test-subj="advancedPolicyPanel"]').length
+        ).toEqual(0);
+      });
+
+      it('should display a warning message', () => {
+        showHideAdvancedSettingsButton.simulate('click');
+
+        expect(
+          policyFormLayoutView.find('div[data-test-subj="advancedSettingsWarning"]').text()
+        ).toContain(
+          `This section contains policy values that support advanced use cases. If not configured
+    properly, these values can cause unpredictable behavior. Please consult documentation
+    carefully or contact support before editing these values.`
+        );
+      });
+
+      it('every row should contain a tooltip', () => {
+        showHideAdvancedSettingsButton.simulate('click');
+
+        policyFormLayoutView
+          .find('EuiPanel[data-test-subj="advancedPolicyPanel"]')
+          .find('EuiFormRow')
+          .forEach((row) => {
+            expect(row.find('EuiIconTip').length).toEqual(1);
+          });
+      });
     });
 
     describe('when the save button is clicked', () => {
