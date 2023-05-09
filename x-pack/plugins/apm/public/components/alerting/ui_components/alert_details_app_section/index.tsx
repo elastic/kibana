@@ -126,7 +126,8 @@ export function AlertDetailsAppSection({
           .toISOString();
 
   const rangeTo = alert.active
-    ? 'now'
+    ? // Add one minute to chart range to ensure that the active alert annotation is shown when seconds are involved.
+      moment().add(1, 'minute').toISOString()
     : moment(alert.fields[ALERT_END])
         .add(ruleWindowSizeMS, 'millisecond')
         .toISOString();

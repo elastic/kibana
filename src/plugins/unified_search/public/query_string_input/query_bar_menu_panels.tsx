@@ -147,6 +147,7 @@ export interface QueryBarMenuPanelsProps {
   manageFilterSetComponent?: JSX.Element;
   hiddenPanelOptions?: FilterPanelOption[];
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   closePopover: () => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -170,6 +171,7 @@ export function QueryBarMenuPanels({
   manageFilterSetComponent,
   hiddenPanelOptions,
   nonKqlMode,
+  disableQueryLanguageSwitcher = false,
   closePopover,
   onQueryBarSubmit,
   onFiltersUpdated,
@@ -384,7 +386,7 @@ export function QueryBarMenuPanels({
   }
 
   // language menu appears when the showQueryInput is true
-  if (showQueryInput) {
+  if (showQueryInput && !disableQueryLanguageSwitcher) {
     items.push({
       name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
       panel: 3,

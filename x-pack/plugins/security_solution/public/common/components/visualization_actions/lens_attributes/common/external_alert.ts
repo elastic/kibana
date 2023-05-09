@@ -42,6 +42,12 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
         yLeftExtent: {
           mode: 'full',
         },
+        axisTitlesVisibilitySettings: {
+          x: false,
+          yLeft: false,
+          yRight: true,
+        },
+        valuesInLegend: true,
       },
       query: {
         query: '',

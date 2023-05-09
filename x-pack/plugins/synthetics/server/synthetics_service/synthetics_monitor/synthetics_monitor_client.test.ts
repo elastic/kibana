@@ -69,7 +69,7 @@ describe('SyntheticsMonitorClient', () => {
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfig = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
 
@@ -129,7 +129,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.createMonitors = jest.fn();
+    client.privateLocationAPI.createPackagePolicies = jest.fn();
 
     await client.addMonitors(
       [{ monitor, id }],
@@ -139,8 +139,8 @@ describe('SyntheticsMonitorClient', () => {
       'test-space'
     );
 
-    expect(syntheticsService.addConfig).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.createMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.addConfigs).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('should edit a monitor', async () => {
@@ -148,7 +148,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     await client.editMonitors(
       [
@@ -159,8 +159,10 @@ describe('SyntheticsMonitorClient', () => {
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );
@@ -175,7 +177,7 @@ describe('SyntheticsMonitorClient', () => {
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     syntheticsService.editConfig = jest.fn();
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     monitor.locations = previousMonitor.attributes.locations.filter(
       (loc: any) => loc.id !== locations[0].id
@@ -190,8 +192,10 @@ describe('SyntheticsMonitorClient', () => {
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );

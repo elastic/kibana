@@ -49,6 +49,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
+        valuesInLegend: true,
       },
       query: {
         query: '',

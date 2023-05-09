@@ -118,9 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156539
-    // FLAKY: https://github.com/elastic/kibana/issues/156544
-    describe.skip('by reference', () => {
+    describe('by reference', () => {
       it('linking a by value panel with a custom title to the library will overwrite the custom title with the library title', async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
