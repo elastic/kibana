@@ -25,6 +25,10 @@ Enjoy.
 
 ## all Kibana plugins
 
+### engine dot
+
+![](images/graphviz-dot.svg)
+
 ### engine fdp
 
 ![](images/graphviz-fdp.svg)

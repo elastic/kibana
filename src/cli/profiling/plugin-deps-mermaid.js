@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-const AddOptional = !true;
-
 /** @typedef { { pluginName: string, optionalPlugins: string[], requiredPlugins: string[] } } Plug */
 /** @typedef { { pluginName: string, optionalPlugins: Set<string>, requiredPlugins: Set<string> } } Plugg */
 /** @typedef { Map<string, Plugg> } PluggMap */
 
 /** @type { Plug[] } */
+const { getBackgroundPlugins } = require('./get_background_tasks');
 const originalPlugins = require('./plugin-deps.json');
 
 /** @type { Map<string, Plugg> } */
@@ -27,15 +26,14 @@ const plugins = new Map(
   ])
 );
 
-// const foregroundPlugins = getForegroundPlugins(plugins);
-// console.log(`# foreground plugins: ${foregroundPlugins.size} / ${plugins.length}`);
-
 // Mermaid: try here: https://mermaid.live/edit
 console.log(`# Kibana plugin dependency diagrams\n`);
 
 const Backtics = '```';
 
-const pluginNames = Array.from(plugins.keys()).sort();
+const backgroundPlugins = getBackgroundPlugins(plugins);
+
+const pluginNames = Array.from(backgroundPlugins.keys()).sort();
 for (const pluginName of pluginNames) {
   const plugin = plugins.get(pluginName);
   console.log(`
@@ -73,75 +71,18 @@ function getMermaidDepLines(pluginName, result, processed) {
 
   processed.add(plugin.pluginName);
   for (const dep of plugin.requiredPlugins) {
+    if (!backgroundPlugins.has(dep)) continue;
+
     result.push(`  _${plugin.pluginName} --> _${dep}`);
     getMermaidDepLines(dep, result, processed);
   }
 
-  if (AddOptional) {
-    for (const dep of plugin.optionalPlugins) {
-      result.push(`  _${plugin.pluginName} --> _${dep}`);
-      getMermaidDepLines(dep, result, processed);
-    }
+  for (const dep of plugin.optionalPlugins) {
+    if (!backgroundPlugins.has(dep)) continue;
+
+    result.push(`  _${plugin.pluginName} --> _${dep}`);
+    getMermaidDepLines(dep, result, processed);
   }
 
   return result;
-}
-
-/** @type { (plugins: PluggMap ) => Set<string> } */
-function getForegroundPlugins(plugins) {
-  const unknown = new Set(plugins.keys());
-  /** @type { Set<string> } */
-  const keepers = new Set();
-
-  let changes = 0;
-  keep('taskManager');
-  console.log(`# calculating foreground plugins`);
-  while (changes > 0) {
-    console.log(`# changes this round: ${changes}`);
-    changes = 0;
-
-    for (const plugin of plugins) {
-      if (keepers.has(plugin.pluginName)) continue;
-
-      for (const dep of plugin.requiredPlugins) {
-        if (keepers.has(dep)) {
-          keep(plugin.pluginName);
-          break;
-        }
-      }
-
-      if (AddOptional) {
-        for (const dep of plugin.optionalPlugins) {
-          if (keepers.has(dep)) {
-            keep(plugin.pluginName);
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  return unknown;
-
-  /** @type { (plugin: string) => void } */
-  function keep(plugin) {
-    if (keepers.has(plugin)) return;
-
-    changes++;
-    keepers.add(plugin);
-    unknown.delete(plugin);
-
-    const plug = plugins.get(plugin);
-    if (!plug) return;
-
-    for (const dep of plug.requiredPlugins) {
-      keep(dep);
-    }
-
-    if (AddOptional) {
-      for (const dep of plug.optionalPlugins) {
-        keep(dep);
-      }
-    }
-  }
 }
