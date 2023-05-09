@@ -74,8 +74,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
             <EditorContentSpinner />
           ) : (
             <EditorUI
-              //initialTextValue={currentTextObject.text}
-              //setEditorInstance={setEditorInstance}
+            // initialTextValue={currentTextObject.text}
+            // setEditorInstance={setEditorInstance}
             />
           )}
         </Panel>
