@@ -126,7 +126,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
       behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
       behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
-      buildConnector: `{$ENTERPRISE_SEARCH_DOCS}build-connector.html`,
+      buildConnector: `${ENTERPRISE_SEARCH_DOCS}build-connector.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
@@ -378,6 +378,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
@@ -507,7 +508,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
       serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
-      slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
+      slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-webhook`,
+      slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
     },
@@ -739,6 +741,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     searchUI: {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
+    },
+    synthetics: {
+      featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
     },
   });
 };

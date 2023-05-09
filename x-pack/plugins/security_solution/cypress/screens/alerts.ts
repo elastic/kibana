@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
+
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-exception-menu-item"]';
@@ -177,3 +179,6 @@ export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
 export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
 
 export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';
+
+export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
+  getDataTestSubjectSelector('severity-level-donut');
