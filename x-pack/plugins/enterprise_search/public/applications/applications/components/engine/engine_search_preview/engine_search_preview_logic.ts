@@ -90,12 +90,7 @@ export const EngineSearchPreviewLogic = kea<
         if (!data) return {};
 
         const searchableFields = Object.fromEntries(
-          data.fields
-            .filter(
-              ({ type, metadata_field: isMeta, searchable: isSearchable }) =>
-                type === 'text' && !isMeta && isSearchable
-            )
-            .map(({ name }) => [name, { weight: 1 }])
+          data.fields.filter(({ type }) => type === 'text').map(({ name }) => [name, { weight: 1 }])
         );
 
         return searchableFields;

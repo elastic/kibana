@@ -16,6 +16,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -68,6 +69,7 @@ export type AlertsTableStateProps = {
   showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
@@ -140,6 +142,7 @@ const AlertsTableStateWithQueryProvider = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
@@ -233,6 +236,7 @@ const AlertsTableStateWithQueryProvider = ({
     featureIds,
     query,
     pagination,
+    runtimeMappings,
     sort,
     skip: false,
   });
