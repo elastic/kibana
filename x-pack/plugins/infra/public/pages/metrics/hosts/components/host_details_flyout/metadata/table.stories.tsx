@@ -127,19 +127,3 @@ NoMetadata.args = {
   loading: false,
   rows: [],
 };
-
-// export const FailedToLoadSource = Template.bind({});
-// FailedToLoadSource.args = {
-//   data: {
-//     state: 'error',
-//     errors: [new Error('Failed to load source configuration')],
-//   },
-// };
-
-// export const FailedToLoadMetrics = Template.bind({});
-// FailedToLoadMetrics.args = {
-//   data: {
-//     state: 'error',
-//     errors: [new Error('Failed to load metrics')],
-//   },
-// };
