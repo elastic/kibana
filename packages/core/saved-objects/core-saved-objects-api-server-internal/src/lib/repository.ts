@@ -6,20 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { omit, isObject } from 'lodash';
+import { isObject } from 'lodash';
 import Boom from '@hapi/boom';
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  BulkResolveError,
-  SavedObjectsRawDocParseOptions,
-} from '@kbn/core-saved-objects-server';
+import type { BulkResolveError } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
@@ -40,7 +36,6 @@ import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
   SavedObjectsBulkUpdateOptions,
-  SavedObjectsFindResult,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsOpenPointInTimeResponse,
@@ -73,19 +68,13 @@ import {
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectsSpacesExtension,
-  type CheckAuthorizationResult,
   AuthorizeUpdateObject,
   type AuthorizeBulkGetObject,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
-import {
-  ALL_NAMESPACES_STRING,
-  FIND_DEFAULT_PAGE,
-  FIND_DEFAULT_PER_PAGE,
-  SavedObjectsUtils,
-} from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsSerializer,
   encodeVersion,
@@ -98,8 +87,6 @@ import { createRepositoryEsClient, type RepositoryEsClient } from './repository_
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { internalBulkResolve, isBulkResolveError } from './internal_bulk_resolve';
-import { validateConvertFilterToKueryNode } from './filter_utils';
-import { validateAndConvertAggregations } from './aggregations';
 import {
   getBulkOperationError,
   getCurrentTime,
@@ -135,6 +122,7 @@ import {
   performCheckConflicts,
   performBulkDelete,
   performDeleteByNamespace,
+  performFind,
 } from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -404,215 +392,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsFindOptions,
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsFindResponse<T, A>> {
-    let namespaces!: string[];
-    const { disableExtensions } = internalOptions;
-    if (disableExtensions || !this._spacesExtension) {
-      namespaces = options.namespaces ?? [DEFAULT_NAMESPACE_STRING];
-      // If the consumer specified `namespaces: []`, throw a Bad Request error
-      if (namespaces.length === 0)
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          'options.namespaces cannot be an empty array'
-        );
-    }
-
-    const {
-      search,
-      defaultSearchOperator = 'OR',
-      searchFields,
-      rootSearchFields,
-      hasReference,
-      hasReferenceOperator,
-      hasNoReference,
-      hasNoReferenceOperator,
-      page = FIND_DEFAULT_PAGE,
-      perPage = FIND_DEFAULT_PER_PAGE,
-      pit,
-      searchAfter,
-      sortField,
-      sortOrder,
-      fields,
-      type,
-      filter,
-      preference,
-      aggs,
-      migrationVersionCompatibility,
-    } = options;
-
-    if (!type) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.type must be a string or an array of strings'
-      );
-    } else if (preference?.length && pit) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.preference must be excluded when options.pit is used'
-      );
-    }
-
-    const types = Array.isArray(type) ? type : [type];
-    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
-    if (allowedTypes.length === 0) {
-      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-    }
-
-    if (searchFields && !Array.isArray(searchFields)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('options.searchFields must be an array');
-    }
-
-    if (fields && !Array.isArray(fields)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
-    }
-
-    let kueryNode;
-    if (filter) {
-      try {
-        kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
-      } catch (e) {
-        if (e.name === 'KQLSyntaxError') {
-          throw SavedObjectsErrorHelpers.createBadRequestError(`KQLSyntaxError: ${e.message}`);
-        } else {
-          throw e;
-        }
-      }
-    }
-
-    let aggsObject;
-    if (aggs) {
-      try {
-        aggsObject = validateAndConvertAggregations(allowedTypes, aggs, this._mappings);
-      } catch (e) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid aggregation: ${e.message}`);
-      }
-    }
-
-    if (!disableExtensions && this._spacesExtension) {
-      try {
-        namespaces = await this._spacesExtension.getSearchableNamespaces(options.namespaces);
-      } catch (err) {
-        if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
-          // The user is not authorized to access any space, return an empty response.
-          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-        }
-        throw err;
-      }
-      if (namespaces.length === 0) {
-        // The user is authorized to access *at least one space*, but not any of the spaces they requested; return an empty response.
-        return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-      }
-    }
-
-    // We have to first perform an initial authorization check so that we can construct the search DSL accordingly
-    const spacesToAuthorize = new Set(namespaces);
-    const typesToAuthorize = new Set(types);
-    let typeToNamespacesMap: Map<string, string[]> | undefined;
-    let authorizationResult: CheckAuthorizationResult<string> | undefined;
-    if (!disableExtensions && this._securityExtension) {
-      authorizationResult = await this._securityExtension.authorizeFind({
-        namespaces: spacesToAuthorize,
-        types: typesToAuthorize,
-      });
-      if (authorizationResult?.status === 'unauthorized') {
-        // If the user is unauthorized to find *anything* they requested, return an empty response
-        return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-      }
-      if (authorizationResult?.status === 'partially_authorized') {
-        typeToNamespacesMap = new Map<string, string[]>();
-        for (const [objType, entry] of authorizationResult.typeMap) {
-          if (!entry.find) continue;
-          // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
-          const { authorizedSpaces, isGloballyAuthorized } = entry.find;
-          typeToNamespacesMap.set(objType, isGloballyAuthorized ? namespaces : authorizedSpaces);
-        }
-      }
-    }
-
-    const esOptions = {
-      // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
-      index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
-      // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
-      from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(allowedTypes, fields),
-      preference,
-      rest_total_hits_as_int: true,
-      size: perPage,
-      body: {
-        size: perPage,
-        seq_no_primary_term: true,
-        from: perPage * (page - 1),
-        _source: includedFields(allowedTypes, fields),
-        ...(aggsObject ? { aggs: aggsObject } : {}),
-        ...getSearchDsl(this._mappings, this._registry, {
-          search,
-          defaultSearchOperator,
-          searchFields,
-          pit,
-          rootSearchFields,
-          type: allowedTypes,
-          searchAfter,
-          sortField,
-          sortOrder,
-          namespaces,
-          typeToNamespacesMap, // If defined, this takes precedence over the `type` and `namespaces` fields
-          hasReference,
-          hasReferenceOperator,
-          hasNoReference,
-          hasNoReferenceOperator,
-          kueryNode,
-        }),
-      },
-    };
-
-    const { body, statusCode, headers } = await this.client.search<SavedObjectsRawDocSource>(
-      esOptions,
+    return await performFind(
       {
-        ignore: [404],
-        meta: true,
-      }
-    );
-    if (statusCode === 404) {
-      if (!isSupportedEsServer(headers)) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-      }
-      // 404 is only possible here if the index is missing, which
-      // we don't want to leak, see "404s from missing index" above
-      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
-    }
-
-    const result = {
-      ...(body.aggregations ? { aggregations: body.aggregations as unknown as A } : {}),
-      page,
-      per_page: perPage,
-      total: body.hits.total,
-      saved_objects: body.hits.hits.map(
-        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
-          // @ts-expect-error @elastic/elasticsearch _source is optional
-          ...this._rawToSavedObject(hit, { migrationVersionCompatibility }),
-          score: hit._score!,
-          sort: hit.sort,
-        })
-      ),
-      pit_id: body.pit_id,
-    } as SavedObjectsFindResponse<T, A>;
-
-    if (disableExtensions) {
-      return result;
-    }
-
-    // Now that we have a full set of results with all existing namespaces for each object,
-    // we need an updated authorization type map to pass on to the redact method
-    const redactTypeMap = await this._securityExtension?.getFindRedactTypeMap({
-      previouslyCheckedNamespaces: spacesToAuthorize,
-      objects: result.saved_objects.map((obj) => {
-        return {
-          type: obj.type,
-          id: obj.id,
-          existingNamespaces: obj.namespaces ?? [],
-        };
-      }),
-    });
-
-    return this.encryptionHelper.optionallyDecryptAndRedactBulkResult(
-      result,
-      redactTypeMap ?? authorizationResult?.typeMap // If the redact type map is valid, use that one; otherwise, fall back to the authorization check
+        options,
+        internalOptions,
+      },
+      this.apiExecutionContext
     );
   }
 
@@ -1731,19 +1516,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
   private getIndicesForTypes(types: string[]) {
     return this.commonHelper.getIndicesForTypes(types);
-  }
-
-  private _rawToSavedObject<T = unknown>(
-    raw: SavedObjectsRawDoc,
-    options?: SavedObjectsRawDocParseOptions
-  ): SavedObject<T> {
-    const savedObject = this._serializer.rawToSavedObject(raw, options);
-    const { namespace, type } = savedObject;
-    if (this._registry.isSingleNamespace(type)) {
-      savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
-    }
-
-    return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
   private rawDocExistsInNamespaces(raw: SavedObjectsRawDoc, namespaces: string[]) {
