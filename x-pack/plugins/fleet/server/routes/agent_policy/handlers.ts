@@ -18,7 +18,7 @@ import { safeDump } from 'js-yaml';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService } from '../../services';
+import { appContextService, agentPolicyService, licenseService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
 import { AGENTS_PREFIX } from '../../constants';
 import type {
@@ -179,6 +179,13 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
+  if (newPolicy.is_protected && !licenseService.isPlatinum()) {
+    return response.customError({
+      statusCode: 403,
+      body: { message: 'Tamper protection requires Platinum license' },
+    });
+  }
+
   try {
     const body: CreateAgentPolicyResponse = {
       item: await createAgentPolicyWithPackages({
@@ -213,6 +220,14 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+
+  if (data.is_protected && !licenseService.isPlatinum()) {
+    return response.customError({
+      statusCode: 403,
+      body: { message: 'Tamper protection requires Platinum license' },
+    });
+  }
+
   const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
