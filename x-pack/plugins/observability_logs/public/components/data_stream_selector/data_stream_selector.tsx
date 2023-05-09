@@ -19,7 +19,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiPopover,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -28,6 +27,7 @@ import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
+  contextMenuStyles,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
   INTEGRATION_PANEL_ID,
@@ -107,13 +107,19 @@ export function DataStreamSelector({
   ];
 
   const contextPanelItems = [
-    // <SearchControls />,
+    <SearchControls />,
     <EuiHorizontalRule key="sep" margin="none" />,
-    <EuiContextMenu key="integrations-menu" initialPanelId={currentPanel} panels={panels} />,
+    <EuiContextMenu
+      key="integrations-menu"
+      initialPanelId={currentPanel}
+      panels={panels}
+      className="eui-yScroll"
+      css={contextMenuStyles}
+    />,
   ];
 
   const button = (
-    <DataStreamButton isAdHocSelected onClick={togglePopover} fullWidth={isMobile}>
+    <DataStreamButton onClick={togglePopover} fullWidth={isMobile}>
       {title}
     </DataStreamButton>
   );
@@ -134,25 +140,15 @@ export function DataStreamSelector({
 }
 
 interface DataStreamButtonProps extends EuiButtonProps {
-  isAdHocSelected: boolean;
   onClick: () => void;
 }
 
-const DataStreamButton = ({
-  children,
-  isAdHocSelected = false,
-  ...props
-}: DataStreamButtonProps) => {
+const DataStreamButton = (props: DataStreamButtonProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
 
-  return (
-    <EuiButton css={buttonStyles} iconType="arrowDown" iconSide="right" {...props}>
-      {isAdHocSelected && <EuiIcon type="indexTemporary" />}
-      <span className="eui-textTruncate">{children}</span>
-    </EuiButton>
-  );
+  return <EuiButton css={buttonStyles} iconType="arrowDown" iconSide="right" {...props} />;
 };
 
 type SearchStrategy = 'integrations' | 'integrationsStreams' | 'uncategorizedStreams';
@@ -168,13 +164,17 @@ const SearchControls = ({ strategy }: SearchControlsProps) => {
    * - Search integrations streams: in memory sorting
    * - Search uncategorized streams: API request
    */
-  const { search, searchByText, sortByDirection, isSearching } = useSearch(strategy);
+  // const { search, searchByText, sortByDirection, isSearching } = useSearch(strategy);
 
   return (
     <EuiContextMenuItem disabled css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
         <EuiFlexItem>
-          <EuiFieldSearch compressed incremental onChange={searchByText} isLoading={isSearching} />
+          <EuiFieldSearch
+            compressed
+            incremental
+            // onChange={searchByText} isLoading={isSearching}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
@@ -195,8 +195,8 @@ const SearchControls = ({ strategy }: SearchControlsProps) => {
             legend={i18n.translate('xpack.observabilityLogs.dataStreamSelector.sortDirections', {
               defaultMessage: 'Sort directions',
             })}
-            idSelected={search.sortingDirection}
-            onChange={sortByDirection}
+            // idSelected={search.sortingDirection}
+            // onChange={sortByDirection}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
