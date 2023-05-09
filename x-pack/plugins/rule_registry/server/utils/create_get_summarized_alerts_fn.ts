@@ -24,7 +24,6 @@ import {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsFilter, ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
-import { AlertHit, SummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
