@@ -10,6 +10,7 @@ import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { ReportTaskParams } from '@kbn/reporting-plugin/server/lib/tasks';
 import { BaseParams, BasePayload } from '@kbn/reporting-plugin/server/types';
 import type { Writable } from 'stream';
+import { Logger } from '@kbn/core/server';
 import { ReportingExportTypesCore } from '../../core';
 import { ReportingRequestHandlerContext } from '../../routes';
 

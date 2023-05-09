@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginInitializerContext, Logger, CoreSetup } from '@kbn/core/server';
-import { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
-import type {
-  CreateJobFn,
-  ExportTypeDefinition,
-  ReportingSetup,
-  RunTaskFn,
-} from '@kbn/reporting-plugin/server/types';
+import { Plugin, PluginInitializerContext, Logger, CoreSetup, CoreStart } from '@kbn/core/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ReportingSetup } from '@kbn/reporting-plugin/server/types';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import {
   getTypeCsv,
@@ -26,6 +21,7 @@ import {
 } from '.';
 import { ReportingExportTypesCore } from './core';
 import { setFieldFormats } from './services/services';
+// import { setFieldFormats } from './services/services';
 
 export interface ExportTypesPluginSetupDependencies {
   reporting: ReportingSetup;
@@ -34,6 +30,7 @@ export interface ExportTypesPluginSetupDependencies {
 
 export interface ExportTypesPluginStartDependencies {
   screenshotting: ScreenshottingStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
@@ -50,36 +47,14 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     /**
      * Export types to the central reporting plugin
      */
-    type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
-    type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
-    const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
-      getTypeCsv,
-      getTypeCsvFromSavedObject,
-      getTypeCsvFromSavedObjectImmediate,
-      getTypePng,
-      getTypePngV2,
-      getTypePrintablePdf,
-      getTypePrintablePdfV2,
-    ];
-    getTypeFns.forEach((getType) => {
-      if (
-        getType === getTypeCsv ||
-        getType === getTypeCsvFromSavedObject ||
-        getType === getTypeCsvFromSavedObjectImmediate
-      ) {
-        return (
-          // setFieldFormats(fieldFormats),
-          reporting.registerExportType(
-            getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
-          ),
-          setFieldFormats(fieldFormats)
-        );
-      } else {
-        return reporting.registerExportType(
-          getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
-        );
-      }
-    });
+    reporting.registerExportType(getTypeCsv());
+    reporting.registerExportType(getTypeCsvFromSavedObject());
+    // @ts-ignore
+    reporting.registerExportType(getTypeCsvFromSavedObjectImmediate());
+    reporting.registerExportType(getTypePng());
+    reporting.registerExportType(getTypePngV2());
+    reporting.registerExportType(getTypePrintablePdf());
+    reporting.registerExportType(getTypePrintablePdfV2());
 
     /**
      * Export Types Plugin Routes
@@ -87,6 +62,7 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     // registerRoutes(reportingExportTypesCore, this.logger);
   }
 
-  // do nothing
-  public start({}, {}) {}
+  public start(_core: CoreStart, plugins: ExportTypesPluginStartDependencies) {
+    setFieldFormats(plugins.fieldFormats);
+  }
 }

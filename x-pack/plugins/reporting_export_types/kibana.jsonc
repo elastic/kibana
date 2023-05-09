@@ -8,7 +8,7 @@
     "browser": false,
     "configPath": [
       "xpack",
-      "reportingExportTypes"
+      "reporting"
     ],
     "requiredPlugins": ["reporting"],
     "optionalPlugins": [],

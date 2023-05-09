@@ -7,7 +7,7 @@ There are three constructs that interact: the `ReportingPlugin`, the `ExportType
 - PNGExportTypeDefinition
 - PDFExportTypeDefinition
 
-The `ReportingPlugin`  calls the `ReportingExportTypesPlugin` and creates an instance of the `ExportTypeRegistry`. These export types use the `ReportingPlugin`'s registerExportType() within the `ExportTypeRegistry`. The `ReportingPlugin` uses the getExportType() method to use the registered export types for exporting.
+The `ReportingPlugin` creates an instance of the `ExportTypeRegistry` and exposes its `registerExportType()` to other plugins, which `ReportingExportTypesPlugin` uses to register all of the export types. The `ReportingPlugin` uses the getExportType() method to use the registered export types for exporting.
 
 ### Problems this solves
 
