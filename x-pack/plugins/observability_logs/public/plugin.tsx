@@ -22,6 +22,9 @@ export class ObservabilityLogsPlugin
   public start(core: CoreStart, plugins: ObservabilityLogsStartDeps): ObservabilityLogsPluginStart {
     const { discover } = plugins;
 
+    /**
+     * Replace the DataViewPicker with a custom DataStreamSelector to access only integrations streams
+     */
     discover.customize('observability-logs', async ({ customizations, stateContainer }) => {
       const { CustomDataStreamSelector } = await import(
         './customizations/custom_data_stream_selector'
@@ -35,6 +38,18 @@ export class ObservabilityLogsPlugin
               <CustomDataStreamSelector stateContainer={stateContainer} />
             </InternalStateProvider>
           );
+        },
+      });
+
+      /**
+       * Hide New, Open and Save settings to prevent working with saved views.
+       */
+      customizations.set({
+        id: 'top_nav',
+        defaultMenu: {
+          new: { disabled: true },
+          open: { disabled: true },
+          save: { disabled: true },
         },
       });
 
