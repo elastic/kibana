@@ -148,7 +148,7 @@ export const bulkDuplicateRuleActions = {
   DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL: (rulesCount: number) => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.includeExpiredExceptionsCheckboxLabel"
-      defaultMessage="The {rulesCount, plural, one {rule} other {rules}} and all of {rulesCount, plural, one {its} other {their}} exceptions (active and expired)"
+      defaultMessage="The {rulesCount, plural, one {rule} other {rules}} and {rulesCount, plural, one {its} other {their}} exceptions"
       values={{ rulesCount }}
     />
   ),
@@ -179,7 +179,7 @@ export const bulkDuplicateRuleActions = {
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.tooltip',
     {
       defaultMessage:
-        ' If you choose to duplicate exceptions, the shared exceptions list will be duplicated by reference and the rule exceptions will be copied and created anew',
+        'Exception items associated with individual rules are duplicated. Exception items linked to shared exception lists are not. Instead, duplicated rules will reference the shared exception lists that contain the exception items.',
     }
   ),
 };
