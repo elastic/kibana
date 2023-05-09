@@ -7,14 +7,14 @@
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
-import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
+import { useRootNavLink } from '../../common/links/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksImages } from '../components/landing_links_images';
 import { EXPLORE_PAGE_TITLE } from './translations';
 
 export const ExploreLandingPage = () => {
-  const exploreLinks = useAppRootNavLink(SecurityPageName.exploreLanding)?.links ?? [];
+  const exploreLinks = useRootNavLink(SecurityPageName.exploreLanding)?.links ?? [];
 
   return (
     <SecuritySolutionPageWrapper>

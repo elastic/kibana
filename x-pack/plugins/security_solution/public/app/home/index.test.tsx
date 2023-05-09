@@ -180,6 +180,11 @@ jest.mock('../../common/lib/kibana', () => {
                       },
                     ],
                     getIndexPattern: () => 'hello*,world*,refreshed*',
+                    getRuntimeMappings: () => ({
+                      myfield: {
+                        type: 'keyword',
+                      },
+                    }),
                   })
               ),
           },

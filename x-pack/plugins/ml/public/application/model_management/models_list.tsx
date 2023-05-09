@@ -33,6 +33,13 @@ import {
   DEPLOYMENT_STATE,
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import {
+  ELASTIC_MODEL_DEFINITIONS,
+  ELASTIC_MODEL_TAG,
+  ELASTIC_MODEL_TYPE,
+  MODEL_STATE,
+} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
@@ -62,6 +69,8 @@ export type ModelItem = TrainedModelConfigResponse & {
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
   deployment_ids: string[];
+  putModelConfig?: object;
+  state: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -134,6 +143,35 @@ export const ModelsList: FC<Props> = ({
     []
   );
 
+  const isElasticModel = useCallback(
+    (item: ModelItem) => item.tags.includes(ELASTIC_MODEL_TAG),
+    []
+  );
+
+  /**
+   * Checks if the model download complete.
+   */
+  const isDownloadComplete = useCallback(
+    async (modelId: string): Promise<boolean> => {
+      try {
+        const response = await trainedModelsApiService.getTrainedModels(modelId, {
+          include: 'definition_status',
+        });
+        // @ts-ignore
+        return !!response[0]?.fully_defined;
+      } catch (error) {
+        displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadStatusCheckErrorMessage', {
+            defaultMessage: 'Failed to check download status',
+          })
+        );
+      }
+      return false;
+    },
+    [trainedModelsApiService, displayErrorToast]
+  );
+
   /**
    * Fetches trained models.
    */
@@ -158,6 +196,7 @@ export const ModelsList: FC<Props> = ({
                   model.model_type,
                   ...Object.keys(model.inference_config),
                   ...(isBuiltInModel(model as ModelItem) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ...(isElasticModel(model as ModelItem) ? [ELASTIC_MODEL_TYPE] : []),
                 ],
               }
             : {}),
@@ -239,7 +278,26 @@ export const ModelsList: FC<Props> = ({
           model.deployment_ids = modelStats
             .map((v) => v.deployment_stats?.deployment_id)
             .filter(isDefined);
+          model.state = model.stats.deployment_stats?.some(
+            (v) => v.state === DEPLOYMENT_STATE.STARTED
+          )
+            ? DEPLOYMENT_STATE.STARTED
+            : '';
         });
+
+        const elasticModels = models.filter((model) =>
+          ELASTIC_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
+        );
+        if (elasticModels.length > 0) {
+          for (const model of elasticModels) {
+            if (model.state === MODEL_STATE.STARTED) {
+              // no need to check for the download status if the model has been deployed
+              continue;
+            }
+            const isDownloaded = await isDownloadComplete(model.model_id);
+            model.state = isDownloaded ? MODEL_STATE.DOWNLOADED : MODEL_STATE.DOWNLOADING;
+          }
+        }
       }
 
       return true;
@@ -310,21 +368,26 @@ export const ModelsList: FC<Props> = ({
       align: 'left',
       width: '40px',
       isExpander: true,
-      render: (item: ModelItem) => (
-        <EuiButtonIcon
-          onClick={toggleDetails.bind(null, item)}
-          aria-label={
-            itemIdToExpandedRowMap[item.model_id]
-              ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
-                  defaultMessage: 'Expand',
-                })
-          }
-          iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
-        />
-      ),
+      render: (item: ModelItem) => {
+        if (!item.stats) {
+          return null;
+        }
+        return (
+          <EuiButtonIcon
+            onClick={toggleDetails.bind(null, item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.model_id]
+                ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
       'data-test-subj': 'mlModelsTableRowDetailsToggle',
     },
     {
@@ -345,6 +408,16 @@ export const ModelsList: FC<Props> = ({
       sortable: false,
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
+      render: (description: string) => {
+        if (!description) return null;
+        const isTechPreview = description.includes('(Tech Preview)');
+        return (
+          <>
+            {description.replace('(Tech Preview)', '')}
+            {isTechPreview ? <TechnicalPreviewBadge compressed /> : null}
+          </>
+        );
+      },
     },
     {
       field: ModelsTableToConfigMapping.type,
@@ -368,17 +441,13 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnType',
     },
     {
+      field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
       align: 'left',
       truncateText: false,
-      render: (model: ModelItem) => {
-        const state = model.stats?.deployment_stats?.some(
-          (v) => v.state === DEPLOYMENT_STATE.STARTED
-        )
-          ? DEPLOYMENT_STATE.STARTED
-          : '';
+      render: (state: string) => {
         return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
@@ -473,7 +542,10 @@ export const ModelsList: FC<Props> = ({
 
           return '';
         },
-        selectable: (item) => !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
+        selectable: (item) =>
+          !isPopulatedObject(item.pipelines) &&
+          !isBuiltInModel(item) &&
+          !(isElasticModel(item) && !item.state),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
@@ -510,6 +582,22 @@ export const ModelsList: FC<Props> = ({
       : {}),
   };
 
+  const resultItems = useMemo<ModelItem[]>(() => {
+    const idSet = new Set(items.map((i) => i.model_id));
+    const notDownloaded: ModelItem[] = Object.entries(ELASTIC_MODEL_DEFINITIONS)
+      .filter(([modelId]) => !idSet.has(modelId))
+      .map(([modelId, modelDefinition]) => {
+        return {
+          model_id: modelId,
+          type: [ELASTIC_MODEL_TYPE],
+          tags: [ELASTIC_MODEL_TAG],
+          putModelConfig: modelDefinition.config,
+          description: modelDefinition.description,
+        } as ModelItem;
+      });
+    return [...items, ...notDownloaded];
+  }, [items]);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
@@ -531,7 +619,7 @@ export const ModelsList: FC<Props> = ({
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={items}
+          items={resultItems}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}

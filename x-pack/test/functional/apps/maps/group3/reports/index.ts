@@ -12,11 +12,15 @@ const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
   const reporting = getService('reporting');
   const png = getService('png');
 
+  // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
+  // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
+  // the debug logs.
   describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
@@ -29,15 +33,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         reportData,
         REPORTS_FOLDER
       );
-      log.debug(`session report path: ${sessionReportPath}`);
-
       expect(sessionReportPath).not.to.be(null);
+
+      const baselineReportPath = PageObjects.reporting.getBaselineReportPath(
+        fileName,
+        'png',
+        REPORTS_FOLDER
+      );
+      log.debug(`session report path: ${sessionReportPath}`);
+      log.debug(`baseline report path: ${baselineReportPath}`);
+
       return await png.checkIfPngsMatch(
         sessionReportPath,
-        PageObjects.reporting.getBaselineReportPath(fileName, 'png', REPORTS_FOLDER),
+        baselineReportPath,
         config.get('screenshots.directory')
       );
     };
+
+    before(async () => {
+      await browser.setWindowSize(1600, 1000);
+    });
 
     after(async () => {
       await reporting.deleteAllReports();
@@ -52,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
-      expect(percentDiff).to.be.lessThan(0.09);
+      expect(percentDiff).to.be.lessThan(0.03);
 
       await reporting.teardownEcommerce();
     });
@@ -64,6 +79,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
+      // TODO: lower the threshold to 0.03. Currently this test is not passing with a low diff percentage due to
+      // unwanted behavior: https://github.com/elastic/kibana/issues/156623
       expect(percentDiff).to.be.lessThan(0.09);
     });
   });

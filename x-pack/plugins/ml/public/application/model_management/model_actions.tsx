@@ -15,6 +15,10 @@ import {
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
+import {
+  ELASTIC_MODEL_TAG,
+  MODEL_STATE,
+} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -38,7 +42,7 @@ export function useModelActions({
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (modelsIds: string[]) => void;
   onLoading: (isLoading: boolean) => void;
-  fetchModels: () => void;
+  fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
 }): Array<Action<ModelItem>> {
   const {
@@ -154,7 +158,7 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         enabled: (item) => {
-          return canStartStopTrainedModels && !isLoading;
+          return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
         },
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         onClick: async (item) => {
@@ -232,9 +236,13 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.updateModelDeployment(deploymentParams.deploymentId!, {
-              number_of_allocations: deploymentParams.numOfAllocations,
-            });
+            await trainedModelsApiService.updateModelDeployment(
+              item.model_id,
+              deploymentParams.deploymentId!,
+              {
+                number_of_allocations: deploymentParams.numOfAllocations,
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
                 defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
@@ -290,12 +298,77 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.stopModelAllocation(deploymentIds, {
-              force: requireForceStop,
-            });
+            const results = await trainedModelsApiService.stopModelAllocation(
+              item.model_id,
+              deploymentIds,
+              {
+                force: requireForceStop,
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-                defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
+                defaultMessage:
+                  '{numberOfDeployments, plural, one {Deployment} other {Deployments}}  for "{modelId}" has been stopped successfully.',
+                values: {
+                  modelId: item.model_id,
+                  numberOfDeployments: deploymentIds.length,
+                },
+              })
+            );
+            if (Object.values(results).some((r) => r.error !== undefined)) {
+              Object.entries(results).forEach(([id, r]) => {
+                if (r.error !== undefined) {
+                  displayErrorToast(
+                    r.error,
+                    i18n.translate('xpack.ml.trainedModels.modelsList.stopDeploymentWarning', {
+                      defaultMessage: 'Failed to stop "{deploymentId}"',
+                      values: {
+                        deploymentId: id,
+                      },
+                    })
+                  );
+                }
+              });
+            }
+          } catch (e) {
+            displayErrorToast(
+              e,
+              i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
+                defaultMessage: 'Failed to stop "{modelId}"',
+                values: {
+                  modelId: item.model_id,
+                },
+              })
+            );
+            onLoading(false);
+          }
+          // Need to fetch model state updates
+          await fetchModels();
+        },
+      },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
+          defaultMessage: 'Download model',
+        }),
+        description: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
+          defaultMessage: 'Download model',
+        }),
+        'data-test-subj': 'mlModelsTableRowDownloadModelAction',
+        icon: 'download',
+        type: 'icon',
+        isPrimary: true,
+        available: (item) => item.tags.includes(ELASTIC_MODEL_TAG),
+        enabled: (item) => !item.state && !isLoading,
+        onClick: async (item) => {
+          try {
+            onLoading(true);
+            await trainedModelsApiService.putTrainedModelConfig(
+              item.model_id,
+              item.putModelConfig!
+            );
+            displaySuccessToast(
+              i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+                defaultMessage: '"{modelId}" model download has been started successfully.',
                 values: {
                   modelId: item.model_id,
                 },
@@ -306,8 +379,8 @@ export function useModelActions({
           } catch (e) {
             displayErrorToast(
               e,
-              i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
-                defaultMessage: 'Failed to stop "{modelId}"',
+              i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+                defaultMessage: 'Failed to download "{modelId}"',
                 values: {
                   modelId: item.model_id,
                 },
@@ -350,7 +423,8 @@ export function useModelActions({
         onClick: (model) => {
           onModelsDeleteRequest([model.model_id]);
         },
-        available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
+        available: (item) =>
+          canDeleteTrainedModels && !isBuiltInModel(item) && !item.putModelConfig,
         enabled: (item) => {
           // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.

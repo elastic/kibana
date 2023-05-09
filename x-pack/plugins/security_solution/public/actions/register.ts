@@ -13,7 +13,7 @@ import { createFilterInCellActionFactory, createFilterOutCellActionFactory } fro
 import {
   createAddToTimelineLensAction,
   createAddToTimelineCellActionFactory,
-  createAddToNewTimelineCellActionFactory,
+  createInvestigateInNewTimelineCellActionFactory,
 } from './add_to_timeline';
 import { createShowTopNCellActionFactory } from './show_top_n';
 import {
@@ -53,7 +53,7 @@ const registerCellActions = (
     filterIn: createFilterInCellActionFactory({ store, services }),
     filterOut: createFilterOutCellActionFactory({ store, services }),
     addToTimeline: createAddToTimelineCellActionFactory({ store, services }),
-    addToNewTimeline: createAddToNewTimelineCellActionFactory({ store, services }),
+    investigateInNewTimeline: createInvestigateInNewTimelineCellActionFactory({ store, services }),
     showTopN: createShowTopNCellActionFactory({ store, history, services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
     toggleColumn: createToggleColumnCellActionFactory({ store }),
@@ -83,7 +83,7 @@ const registerCellActions = (
   registerCellActionsTrigger({
     triggerId: SecurityCellActionsTrigger.ALERTS_COUNT,
     cellActions,
-    actionsOrder: ['addToNewTimeline'],
+    actionsOrder: ['investigateInNewTimeline'],
     services,
   });
 };

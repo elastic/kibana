@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, act } from '@testing-library/react';
+import { screen, act, waitFor } from '@testing-library/react';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -23,6 +23,7 @@ import { SlosPage } from './slos';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { paths } from '../../config/paths';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -70,7 +71,7 @@ const mockKibana = () => {
       charts: chartPluginMock.createSetupContract(),
       http: {
         basePath: {
-          prepend: jest.fn(),
+          prepend: (url: string) => url,
         },
       },
       notifications: {
@@ -106,17 +107,22 @@ describe('SLOs Page', () => {
   });
 
   describe('when the incorrect license is found', () => {
-    it('renders the welcome prompt with subscription buttons', async () => {
+    beforeEach(() => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
-
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        sloHistoricalSummaryResponse: {},
+      });
+    });
+    it('navigates to the SLOs Welcome Page', async () => {
       await act(async () => {
         render(<SlosPage />);
       });
 
-      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
-      expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
-      expect(screen.queryByTestId('slosPageWelcomePromptSignupForLicenseButton')).toBeTruthy();
+      await waitFor(() => {
+        expect(mockNavigate).toBeCalledWith(paths.observability.slosWelcome);
+      });
     });
   });
 
@@ -125,14 +131,20 @@ describe('SLOs Page', () => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     });
 
-    it('renders the SLOs Welcome Prompt when the API has finished loading and there are no results', async () => {
+    it('navigates to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        sloHistoricalSummaryResponse: {},
+      });
 
       await act(async () => {
         render(<SlosPage />);
       });
 
-      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+      await waitFor(() => {
+        expect(mockNavigate).toBeCalledWith(paths.observability.slosWelcome);
+      });
     });
 
     it('should have a create new SLO button', async () => {
@@ -206,7 +218,9 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockNavigate).toBeCalled();
+        expect(mockNavigate).toBeCalledWith(
+          `${paths.observability.sloEdit(sloList.results.at(0)?.id || '')}`
+        );
       });
 
       it('allows creating a new rule for an SLO', async () => {
@@ -283,7 +297,10 @@ describe('SLOs Page', () => {
 
         screen.getByTestId('confirmModalConfirmButton').click();
 
-        expect(mockDeleteSlo).toBeCalledWith({ id: sloList.results.at(0)?.id });
+        expect(mockDeleteSlo).toBeCalledWith({
+          id: sloList.results.at(0)?.id,
+          name: sloList.results.at(0)?.name,
+        });
       });
 
       it('allows cloning an SLO', async () => {

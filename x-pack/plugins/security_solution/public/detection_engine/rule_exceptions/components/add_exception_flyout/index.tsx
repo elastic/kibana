@@ -81,7 +81,6 @@ export interface AddExceptionFlyoutProps {
   sharedListToAddTo?: ExceptionListSchema[];
   onCancel: (didRuleChange: boolean) => void;
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  isNonTimeline?: boolean;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -115,7 +114,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   sharedListToAddTo,
   onCancel,
   onConfirm,
-  isNonTimeline = false,
 }: AddExceptionFlyoutProps) {
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -466,13 +464,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [listType]);
 
   return (
-    <EuiFlyout
-      ownFocus
-      maskProps={{ style: isNonTimeline === false ? 'z-index: 5000' : 'z-index: 1000' }} // For an edge case to display above the timeline flyout
-      size="l"
-      onClose={handleCloseFlyout}
-      data-test-subj="addExceptionFlyout"
-    >
+    <EuiFlyout size="l" onClose={handleCloseFlyout} data-test-subj="addExceptionFlyout">
       <FlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="exceptionFlyoutTitle">{addExceptionMessage}</h2>

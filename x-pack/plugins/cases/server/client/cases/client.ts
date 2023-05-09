@@ -13,9 +13,8 @@ import type {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
-  CaseResponse,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -65,9 +64,7 @@ export interface CasesSubClient {
   /**
    * Retrieves multiple cases with the specified IDs.
    */
-  bulkGet<Field extends keyof CaseResponse = keyof CaseResponse>(
-    params: CasesBulkGetRequestCertainFields<Field>
-  ): Promise<CasesBulkGetResponseCertainFields<Field>>;
+  bulkGet(params: CasesBulkGetRequest): Promise<CasesBulkGetResponse>;
   /**
    * Pushes a specific case to an external system.
    */
