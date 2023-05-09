@@ -38,7 +38,6 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
-  EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
@@ -85,13 +84,10 @@ export const actionCreateService = (
     return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
   };
 
-  const createAction = async <
-    TOutputContent extends object = object,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
-  >(
+  const createAction = async (
     payload: CreateActionPayload,
     { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
-  ): Promise<ActionDetails<TOutputContent, TParameters>> => {
+  ): Promise<ActionDetails> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
@@ -315,7 +311,7 @@ export const actionCreateService = (
     return {
       ...actionId,
       ...data,
-    } as ActionDetails<TOutputContent, TParameters>;
+    };
   };
 
   return {
