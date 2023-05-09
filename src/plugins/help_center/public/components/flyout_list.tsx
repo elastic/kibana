@@ -201,6 +201,7 @@ export const HelpCenterFlyout = (
           position: fixed;
           top: 96px;
           left: 0px;
+          padding: 20px;
         `}
       >
         <Draggable handle=".handle" bounds="parent" positionOffset={{ x: 0, y: 0 }}>
@@ -209,8 +210,8 @@ export const HelpCenterFlyout = (
             height={400}
             css={css`
               position: absolute;
-              top: 15px;
-              left: calc(100vw - 430px);
+              top: 0px;
+              left: calc(100% - 400px);
 
               min-height: 100px;
               min-width: 33%;
