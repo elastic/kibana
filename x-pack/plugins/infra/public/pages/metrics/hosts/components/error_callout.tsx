@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiCodeBlock,
+} from '@elastic/eui';
 import { KQLSyntaxError } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 interface Props {
@@ -33,7 +41,8 @@ export const ErrorCallout = ({
     services: { notifications },
   } = useKibanaContextForPlugin();
 
-  const title = titleOverride ? titleOverride : getErrorTitle(error);
+  const errorContent = getErrorContent(error);
+  const title = titleOverride ? titleOverride : errorContent.title;
 
   const openDetails = () => {
     notifications.showErrorDialog({ title, error });
@@ -43,11 +52,11 @@ export const ErrorCallout = ({
     <EuiEmptyPrompt
       iconType="error"
       color="danger"
-      title={<h2>{title}</h2>}
+      title={<h2>{titleOverride ? titleOverride : errorContent.title}</h2>}
       data-test-subj="hostsViewErrorCallout"
       body={
         <>
-          <p>{messageOverride ?? error.message}</p>
+          {messageOverride ? <p>{messageOverride}</p> : errorContent.body}
           <EuiFlexGroup justifyContent="center">
             {hasDetailsModal && (
               <EuiFlexItem grow={false}>
@@ -57,8 +66,8 @@ export const ErrorCallout = ({
                   color="danger"
                 >
                   <FormattedMessage
-                    id="xpack.infra.hostsViewPage.error.showDetailsButton"
-                    defaultMessage="Show details"
+                    id="xpack.infra.hostsViewPage.error.detailsButton"
+                    defaultMessage="Error details"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -85,14 +94,31 @@ export const ErrorCallout = ({
   );
 };
 
-const getErrorTitle = (error: Error) => {
+const getErrorContent = (error: Error): { title: string; body: JSX.Element } => {
   if (error instanceof KQLSyntaxError) {
-    return i18n.translate('xpack.infra.hostsViewPage.error.kqlErrorTitle', {
-      defaultMessage: 'Invalid KQL expression',
-    });
+    return {
+      title: i18n.translate('xpack.infra.hostsViewPage.error.kqlErrorTitle', {
+        defaultMessage: 'Invalid KQL expression',
+      }),
+      body: (
+        <>
+          <FormattedMessage
+            id="xpack.infra.hostsViewPage.error.kqlErrorMessage"
+            defaultMessage="We can't show any results because we couldn't apply your query."
+          />
+          <EuiSpacer size="s" />
+          <EuiCodeBlock transparentBackground paddingSize="s">
+            {error.message}
+          </EuiCodeBlock>
+        </>
+      ),
+    };
   }
 
-  return i18n.translate('xpack.infra.hostsViewPage.error.unknownErrorTitle', {
-    defaultMessage: 'An Error Occurred',
-  });
+  return {
+    title: i18n.translate('xpack.infra.hostsViewPage.error.unknownErrorTitle', {
+      defaultMessage: 'An error occurred',
+    }),
+    body: <>{error.message}</>,
+  };
 };
