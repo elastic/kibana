@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           // Create transforms with secondary authorization headers
           headers: generateHeaders(apiKeysForTransformUsers.get(testData.created_by_user)!),
         });
-        // For transforms created insufficient permissions, they can be created but not started
+        // For transforms created with insufficient permissions, they can be created but not started
         // so we should not assert that the api call is successful here
         await transform.api.startTransform(testData.originalConfig.id, false);
       }
@@ -179,7 +179,9 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('should display the transforms table');
           await transform.management.assertTransformsTableExists();
 
-          await transform.testExecution.logTestStep('should display the transforms table');
+          await transform.testExecution.logTestStep(
+            'should display the transforms reauthorize callout'
+          );
           await transform.management.assertTransformsReauthorizeCalloutExists();
 
           await transform.testExecution.logTestStep(
