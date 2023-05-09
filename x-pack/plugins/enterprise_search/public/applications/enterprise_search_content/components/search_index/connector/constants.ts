@@ -19,6 +19,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: 'https://learn.microsoft.com/azure/storage/blobs/',
     icon: CONNECTOR_ICONS.azure_blob_storage,
   },
+  confluence: {
+    docsUrl: docLinks.connectorsConfluence,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.confluence_cloud,
+  },
   custom: {
     docsUrl: docLinks.connectors,
     externalAuthDocsUrl: '',
@@ -30,6 +36,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
     externalDocsUrl: 'https://cloud.google.com/storage/docs',
     icon: CONNECTOR_ICONS.google_cloud_storage,
+  },
+  jira: {
+    docsUrl: docLinks.connectorsJira,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.jira_cloud,
   },
   mongodb: {
     docsUrl: docLinks.connectorsMongoDB,
@@ -73,6 +85,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://docs.aws.amazon.com/s3/index.html',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.amazon_s3,
+  },
+  sharepoint: {
+    docsUrl: '',
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint_online,
   },
 };
 

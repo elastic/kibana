@@ -62,7 +62,9 @@ class DocLinks {
   public cloudIndexManagement: string;
   public connectors: string;
   public connectorsAzureBlobStorage: string;
+  public connectorsConfluence: string;
   public connectorsGoogleCloudStorage: string;
+  public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
@@ -191,7 +193,9 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
+    this.connectorsConfluence = '';
     this.connectorsGoogleCloudStorage = '';
+    this.connectorsJira = '';
     this.connectorsMicrosoftSQL = '';
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
@@ -321,8 +325,10 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
+    this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
