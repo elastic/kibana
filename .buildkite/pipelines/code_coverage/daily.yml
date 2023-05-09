@@ -33,14 +33,23 @@ steps:
   #     queue: n2-4-spot
   #   timeout_in_minutes: 30
 
-  # - command: node --test packages/kbn-test/new_test_runner --test-reporter tap
-  #   label: 'Use TAP Reporter'
-  #   agents:
-  #     queue: n2-4-spot
-  #   timeout_in_minutes: 30
+  - command: node --test packages/kbn-test/new_test_runner --test-reporter tap
+    label: 'Use TAP Reporter'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 10
+
+  - commands:
+      - pushd packages/kbn-test/new_test_runner
+      - node --test-reporter=./lifecycle_gen.mjs --test
+      - popd
+    label: 'Use Generator Fn w/ Custom Reporter'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 10
 
   - command: .buildkite/scripts/steps/nodejs_std_test_runner/custom_reporter.sh
     label: 'Use NodeJS v20 to play with custom reporter'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 30
+    timeout_in_minutes: 10

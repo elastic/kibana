@@ -27,11 +27,6 @@ npm --version
 # node --test-reporter=./lifecycle_stream.mjs --test
 # popd
 
-echo '--- New NodeJS Std Test Runner with Custom Reporter [Generator Fn]'
-pushd packages/kbn-test/new_test_runner
-node --test-reporter=./lifecycle_gen.mjs --test
-popd
-
 echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
 pushd packages/kbn-test/new_test_runner
 echo "### pwd: $(pwd)"
