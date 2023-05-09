@@ -22,10 +22,8 @@ import { defaultColumnHeaderType } from '../timeline/body/column_headers/default
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 let mockIndexPatternFieldEditor: Start;
-jest.mock('../../../common/hooks/use_selector');
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -36,6 +34,14 @@ const defaultDataviewState: {
   missingPatterns: [],
   selectedDataViewId: 'security-solution',
 };
+const mockScopeIdSelector = jest.fn(() => defaultDataviewState);
+jest.mock('../../../common/store', () => {
+  const original = jest.requireActual('../../../common/store');
+  return {
+    ...original,
+    sourcererSelectors: { scopeIdSelector: () => mockScopeIdSelector },
+  };
+});
 
 const mockIndexFieldsSearch = jest.fn();
 jest.mock('../../../common/containers/source/use_data_view', () => ({
@@ -98,7 +104,7 @@ describe('useFieldBrowserOptions', () => {
       ...useKibanaMock().services.application.capabilities,
       indexPatterns: { save: true },
     };
-    (useDeepEqualSelector as jest.Mock).mockImplementation(() => defaultDataviewState);
+    mockScopeIdSelector.mockReturnValue(defaultDataviewState);
     jest.clearAllMocks();
   });
 
@@ -132,10 +138,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it('should not return the button when a dataView is not present', () => {
-    (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
-      missingPatterns: [],
-      selectedDataViewId: null,
-    }));
+    mockScopeIdSelector.mockReturnValue({ missingPatterns: [], selectedDataViewId: null });
     const { result } = renderUseFieldBrowserOptions();
 
     expect(result.current.createFieldButton).toBeUndefined();
