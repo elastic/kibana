@@ -421,10 +421,11 @@ export function runBuildApiDocsCli() {
         string: ['plugin', 'stats'],
         boolean: ['references'],
         help: `
-          --plugin             Optionally, run for only a specific plugin
-          --stats              Optionally print API stats. Must be one or more of: any, comments or exports.
-                               The stats option will skip writing any API docs as a tradeoff to just produce the stats more quickly.
-          --references         Collect references for API items
+          --plugin           Optionally, run for only a specific plugin
+          --stats            Optionally print API stats. Must be one or more of: any, comments or exports.
+                             The stats option will skip writing any API docs as a tradeoff
+                             to just produce the stats output more quickly.
+          --references       Collect references for API items
         `,
       },
     }
