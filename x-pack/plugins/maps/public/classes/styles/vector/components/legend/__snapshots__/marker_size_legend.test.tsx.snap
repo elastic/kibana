@@ -10,7 +10,7 @@ exports[`Should invert legend 1`] = `
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -26,7 +26,9 @@ exports[`Should invert legend 1`] = `
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>
@@ -167,7 +169,7 @@ exports[`Should render legend 1`] = `
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -183,7 +185,9 @@ exports[`Should render legend 1`] = `
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>
@@ -402,7 +406,7 @@ exports[`Should render legend with 2 markers when size difference does not provi
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -418,7 +422,9 @@ exports[`Should render legend with 2 markers when size difference does not provi
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>
@@ -520,7 +526,7 @@ exports[`Should render legend with 3 markers when size difference does not provi
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -536,7 +542,9 @@ exports[`Should render legend with 3 markers when size difference does not provi
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>
@@ -677,7 +685,7 @@ exports[`Should render legend with only max marker when size difference does not
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -693,7 +701,9 @@ exports[`Should render legend with only max marker when size difference does not
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>
@@ -756,7 +766,7 @@ exports[`Should render legend without label cutoff when min size is 1 1`] = `
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -772,7 +782,9 @@ exports[`Should render legend without label cutoff when min size is 1 1`] = `
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>
@@ -874,7 +886,7 @@ exports[`Should render max label with std clamp notification 1`] = `
       grow={false}
     >
       <EuiToolTip
-        content=""
+        content="bytes"
         delay="regular"
         display="inlineBlock"
         position="top"
@@ -890,7 +902,9 @@ exports[`Should render max label with std clamp notification 1`] = `
           }
         >
           <small>
-            <strong />
+            <strong>
+              bytes
+            </strong>
           </small>
         </EuiText>
       </EuiToolTip>

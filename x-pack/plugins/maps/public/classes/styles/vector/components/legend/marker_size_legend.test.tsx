@@ -56,12 +56,16 @@ const mockStyle = {
   },
 } as unknown as DynamicSizeProperty;
 
-test('Should render legend', () => {
+test('Should render legend', async () => {
   const component = shallow(<MarkerSizeLegend style={mockStyle} />);
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
 
-test('Should render legend with 3 markers when size difference does not provide enough vertical space for more labels', () => {
+test('Should render legend with 3 markers when size difference does not provide enough vertical space for more labels', async () => {
   const component = shallow(
     <MarkerSizeLegend
       style={{
@@ -75,10 +79,14 @@ test('Should render legend with 3 markers when size difference does not provide 
       }}
     />
   );
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
 
-test('Should render legend with 2 markers when size difference does not provide enough vertical space for more labels', () => {
+test('Should render legend with 2 markers when size difference does not provide enough vertical space for more labels', async () => {
   const component = shallow(
     <MarkerSizeLegend
       style={{
@@ -92,10 +100,14 @@ test('Should render legend with 2 markers when size difference does not provide 
       }}
     />
   );
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
 
-test('Should render legend with only max marker when size difference does not provide enough vertical space for more labels', () => {
+test('Should render legend with only max marker when size difference does not provide enough vertical space for more labels', async () => {
   const component = shallow(
     <MarkerSizeLegend
       style={{
@@ -109,10 +121,14 @@ test('Should render legend with only max marker when size difference does not pr
       }}
     />
   );
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
 
-test('Should render legend without label cutoff when min size is 1', () => {
+test('Should render legend without label cutoff when min size is 1', async () => {
   const component = shallow(
     <MarkerSizeLegend
       style={{
@@ -127,10 +143,14 @@ test('Should render legend without label cutoff when min size is 1', () => {
       }}
     />
   );
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
 
-test('Should render max label with std clamp notification', () => {
+test('Should render max label with std clamp notification', async () => {
   const component = shallow(
     <MarkerSizeLegend
       style={{
@@ -152,10 +172,14 @@ test('Should render max label with std clamp notification', () => {
       }}
     />
   );
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
 
-test('Should invert legend', () => {
+test('Should invert legend', async () => {
   const component = shallow(
     <MarkerSizeLegend
       style={{
@@ -170,5 +194,9 @@ test('Should invert legend', () => {
       }}
     />
   );
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
   expect(component).toMatchSnapshot();
 });
