@@ -13,7 +13,6 @@ import type {
   NoParametersRequestSchema,
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
-  UploadActionRequestBody,
 } from '../schema/actions';
 import type {
   ResponseActionStatus,
@@ -177,8 +176,7 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
   | ResponseActionsExecuteParameters
-  | ResponseActionGetFileParameters
-  | ResponseActionUploadParameters;
+  | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
@@ -469,26 +467,4 @@ export type UploadedFileInfo = Pick<
 
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;
-}
-
-/**
- * The parameters that are sent to the Endpoint.
- *
- * NOTE: Most of the parameters below are NOT accepted via the API. They are inserted into
- * the action's parameters via the API route handler
- */
-export type ResponseActionUploadParameters = UploadActionRequestBody['parameters'] & {
-  file: {
-    sha256: string;
-    size: number;
-    file_name: string;
-    file_id: string;
-  };
-};
-
-export interface ResponseActionUploadOutputContent {
-  /** Full path to the file on the host machine where it was saved */
-  path: string;
-  /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
-  disk_free_space: number;
 }

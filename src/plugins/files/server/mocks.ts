@@ -9,7 +9,6 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import * as stream from 'stream';
-import { clone } from 'lodash';
 import { File } from '../common';
 import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
@@ -57,9 +56,7 @@ export const createFileMock = (): DeeplyMockedKeys<File> => {
     share: jest.fn(),
     listShares: jest.fn(),
     unshare: jest.fn(),
-    toJSON: jest.fn(() => {
-      return clone(fileMock.data);
-    }),
+    toJSON: jest.fn(),
   };
 
   fileMock.update.mockResolvedValue(fileMock);
