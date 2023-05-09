@@ -7,21 +7,22 @@
 
 import { isPlainObject, isArray } from 'lodash';
 
-/**
- * Flattens a deeply nested object to a map of dot-separated paths, including nested arrays
- * NOTE: it transforms primitive value to array, i.e. {a: b} == {a: [b]}, similarly to how fields works in ES _search query
- */
+import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
+
+const isObjectTypeGuard = (value: SearchTypes): value is Record<string, SearchTypes> => {
+  return isPlainObject(value);
+};
 
 export function flatten(
-  document: Record<string, unknown>,
-  res: Record<string, unknown> = {},
+  document: SearchTypes,
+  res: Record<string, SearchTypes> = {},
   prefix: string = ''
-) {
-  if (isPlainObject(document)) {
+): Record<string, SearchTypes> {
+  if (isObjectTypeGuard(document)) {
     for (const [key, value] of Object.entries(document)) {
       const path = prefix ? `${prefix}.${key}` : key;
 
-      flatten(value as Record<string, unknown>, res, path);
+      flatten(value, res, path);
     }
   } else if (isArray(document)) {
     document.forEach((doc) => {
@@ -29,7 +30,7 @@ export function flatten(
     });
   } else {
     if (isArray(res[prefix])) {
-      (res[prefix] as unknown[]).push(document);
+      (res[prefix] as SearchTypes[]).push(document);
     } else {
       res[prefix] = [document];
     }
@@ -38,7 +39,13 @@ export function flatten(
   return res;
 }
 
-export function flattenNestedObject(document: Record<string, unknown>) {
+/**
+ * Flattens a deeply nested object to a map of dot-separated paths, including nested arrays
+ * NOTE: it transforms primitive value to array, i.e. {a: b} == {a: [b]}, similarly to how fields works in ES _search query
+ */
+export function flattenNestedObject(
+  document: Record<string, SearchTypes>
+): Record<string, SearchTypes> {
   if (!isPlainObject(document)) {
     return document;
   }

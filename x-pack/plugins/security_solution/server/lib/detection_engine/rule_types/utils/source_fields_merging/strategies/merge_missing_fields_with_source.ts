@@ -8,6 +8,7 @@
 import { get } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
 
+import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 import type { SignalSource } from '../../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
 import type { FieldsType, MergeStrategyFunction } from '../types';
@@ -80,7 +81,7 @@ const hasEarlyReturnConditions = ({
   fieldsValue: FieldsType;
   fieldsKey: string;
   merged: SignalSource;
-  flattenedSource: Record<string, unknown>;
+  flattenedSource: Record<string, SearchTypes>;
 }) => {
   // merged document can have properties that contain both dot notation and plain object
   // lodash.get doesn't work in this cases. Instead we try to look into flattened source to check whether value exists
