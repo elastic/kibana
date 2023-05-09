@@ -26,7 +26,6 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NOT_INSTALLED: 'cnvm-integration-not-installed',
   NOT_DEPLOYED: 'agent-not-deployed-vuln-mgmt',
   UNPRIVILEGED: 'status-api-vuln-mgmt-unprivileged',
-  INDEX_TIMEOUT: 'status-api-vuln-mgmt-index-timeout',
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
 };
 
