@@ -8,3 +8,4 @@
 
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
 export const DEFAULT_RETRY_COUNT = 3;
+export const MAX_CONCURRENT_ALIAS_DELETIONS = 10;

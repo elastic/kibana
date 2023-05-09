@@ -96,7 +96,6 @@ import {
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
-import pMap from 'p-map';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -120,17 +119,6 @@ import {
 } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import { deleteLegacyUrlAliases } from './legacy_url_aliases';
-import type {
-  BulkDeleteParams,
-  ExpectedBulkDeleteResult,
-  BulkDeleteItemErrorResult,
-  NewBulkItemResponse,
-  BulkDeleteExpectedBulkGetResult,
-  PreflightCheckForBulkDeleteParams,
-  ExpectedBulkDeleteMultiNamespaceDocsParams,
-  ObjectToDeleteAliasesFor,
-} from './repository_bulk_delete_internal_types';
 import {
   RepositoryHelpers,
   CommonHelper,
@@ -148,6 +136,7 @@ import {
   performBulkCreate,
   performDelete,
   performCheckConflicts,
+  performBulkDelete,
 } from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
@@ -164,8 +153,6 @@ export interface SavedObjectsRepositoryOptions {
   logger: Logger;
   extensions?: SavedObjectsExtensions;
 }
-
-const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 
 /**
  * Saved Objects Respositiry - the client entry point for saved object manipulation.
@@ -381,320 +368,19 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
-   * Performs initial checks on object type validity and flags multi-namespace objects for preflight checks by adding an `esRequestIndex`
-   * @param objects SavedObjectsBulkDeleteObject[]
-   * @returns array BulkDeleteExpectedBulkGetResult[]
-   * @internal
-   */
-  private presortObjectsByNamespaceType(objects: SavedObjectsBulkDeleteObject[]) {
-    let bulkGetRequestIndexCounter = 0;
-    return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
-      const { type, id } = object;
-      if (!this._allowedTypes.includes(type)) {
-        return {
-          tag: 'Left',
-          value: {
-            id,
-            type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
-          },
-        };
-      }
-      const requiresNamespacesCheck = this._registry.isMultiNamespace(type);
-      return {
-        tag: 'Right',
-        value: {
-          type,
-          id,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-        },
-      };
-    });
-  }
-
-  /**
-   * Fetch multi-namespace saved objects
-   * @returns MgetResponse
-   * @notes multi-namespace objects shared to more than one space require special handling. We fetch these docs to retrieve their namespaces.
-   * @internal
-   */
-  private async preflightCheckForBulkDelete(params: PreflightCheckForBulkDeleteParams) {
-    const { expectedBulkGetResults, namespace } = params;
-    const bulkGetMultiNamespaceDocs = expectedBulkGetResults
-      .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { type, id } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      }));
-
-    const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
-      ? await this.client.mget(
-          { body: { docs: bulkGetMultiNamespaceDocs } },
-          { ignore: [404], meta: true }
-        )
-      : undefined;
-    // fail fast if we can't verify a 404 response is from Elasticsearch
-    if (
-      bulkGetMultiNamespaceDocsResponse &&
-      isNotFoundFromUnsupportedServer({
-        statusCode: bulkGetMultiNamespaceDocsResponse.statusCode,
-        headers: bulkGetMultiNamespaceDocsResponse.headers,
-      })
-    ) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-    }
-    return bulkGetMultiNamespaceDocsResponse;
-  }
-
-  /**
-   * @returns array of objects sorted by expected delete success or failure result
-   * @internal
-   */
-  private getExpectedBulkDeleteMultiNamespaceDocsResults(
-    params: ExpectedBulkDeleteMultiNamespaceDocsParams
-  ): ExpectedBulkDeleteResult[] {
-    const { expectedBulkGetResults, multiNamespaceDocsResponse, namespace, force } = params;
-    let indexCounter = 0;
-    const expectedBulkDeleteMultiNamespaceDocsResults =
-      expectedBulkGetResults.map<ExpectedBulkDeleteResult>((expectedBulkGetResult) => {
-        if (isLeft(expectedBulkGetResult)) {
-          return { ...expectedBulkGetResult };
-        }
-        const { esRequestIndex: esBulkGetRequestIndex, id, type } = expectedBulkGetResult.value;
-
-        let namespaces;
-
-        if (esBulkGetRequestIndex !== undefined) {
-          const indexFound = multiNamespaceDocsResponse?.statusCode !== 404;
-
-          const actualResult = indexFound
-            ? multiNamespaceDocsResponse?.body.docs[esBulkGetRequestIndex]
-            : undefined;
-
-          const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
-
-          // return an error if the doc isn't found at all or the doc doesn't exist in the namespaces
-          if (!docFound) {
-            return {
-              tag: 'Left',
-              value: {
-                id,
-                type,
-                error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-              },
-            };
-          }
-          // the following check should be redundant since we're retrieving the docs from elasticsearch but we check just to make sure
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          if (!this.rawDocExistsInNamespace(actualResult, namespace)) {
-            return {
-              tag: 'Left',
-              value: {
-                id,
-                type,
-                error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-              },
-            };
-          }
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          namespaces = actualResult!._source.namespaces ?? [
-            SavedObjectsUtils.namespaceIdToString(namespace),
-          ];
-          const useForce = force && force === true;
-          // the document is shared to more than one space and can only be deleted by force.
-          if (!useForce && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
-            return {
-              tag: 'Left',
-              value: {
-                success: false,
-                id,
-                type,
-                error: errorContent(
-                  SavedObjectsErrorHelpers.createBadRequestError(
-                    'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
-                  )
-                ),
-              },
-            };
-          }
-        }
-        // contains all objects that passed initial preflight checks, including single namespace objects that skipped the mget call
-        // single namespace objects will have namespaces:undefined
-        const expectedResult = {
-          type,
-          id,
-          namespaces,
-          esRequestIndex: indexCounter++,
-        };
-
-        return { tag: 'Right', value: expectedResult };
-      });
-    return expectedBulkDeleteMultiNamespaceDocsResults;
-  }
-
-  /**
    *  {@inheritDoc ISavedObjectsRepository.bulkDelete}
    */
   async bulkDelete(
     objects: SavedObjectsBulkDeleteObject[],
     options: SavedObjectsBulkDeleteOptions = {}
   ): Promise<SavedObjectsBulkDeleteResponse> {
-    const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const expectedBulkGetResults = this.presortObjectsByNamespaceType(objects);
-    if (expectedBulkGetResults.length === 0) {
-      return { statuses: [] };
-    }
-
-    const multiNamespaceDocsResponse = await this.preflightCheckForBulkDelete({
-      expectedBulkGetResults,
-      namespace,
-    });
-
-    // First round of filtering (Left: object doesn't exist/doesn't exist in namespace, Right: good to proceed)
-    const expectedBulkDeleteMultiNamespaceDocsResults =
-      this.getExpectedBulkDeleteMultiNamespaceDocsResults({
-        expectedBulkGetResults,
-        multiNamespaceDocsResponse,
-        namespace,
-        force,
-      });
-
-    if (this._securityExtension) {
-      // Perform Auth Check (on both L/R, we'll deal with that later)
-      const authObjects: AuthorizeUpdateObject[] = expectedBulkDeleteMultiNamespaceDocsResults.map(
-        (element) => {
-          const index = (element.value as { esRequestIndex: number }).esRequestIndex;
-          const { type, id } = element.value;
-          const preflightResult =
-            index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
-
-          return {
-            type,
-            id,
-            // @ts-expect-error MultiGetHit._source is optional
-            existingNamespaces: preflightResult?._source?.namespaces ?? [],
-          };
-        }
-      );
-      await this._securityExtension.authorizeBulkDelete({ namespace, objects: authObjects });
-    }
-
-    // Filter valid objects
-    const validObjects = expectedBulkDeleteMultiNamespaceDocsResults.filter(isRight);
-    if (validObjects.length === 0) {
-      // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
-      const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults
-        .filter(isLeft)
-        .map((expectedResult) => {
-          return { ...expectedResult.value, success: false };
-        });
-      return { statuses: [...savedObjects] };
-    }
-
-    // Create the bulkDeleteParams
-    const bulkDeleteParams: BulkDeleteParams[] = [];
-    validObjects.map((expectedResult) => {
-      bulkDeleteParams.push({
-        delete: {
-          _id: this._serializer.generateRawId(
-            namespace,
-            expectedResult.value.type,
-            expectedResult.value.id
-          ),
-          _index: this.getIndexForType(expectedResult.value.type),
-          ...getExpectedVersionProperties(undefined),
-        },
-      });
-    });
-
-    const bulkDeleteResponse = bulkDeleteParams.length
-      ? await this.client.bulk({
-          refresh,
-          body: bulkDeleteParams,
-          require_alias: true,
-        })
-      : undefined;
-
-    // extracted to ensure consistency in the error results returned
-    let errorResult: BulkDeleteItemErrorResult;
-    const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
-
-    const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults.map((expectedResult) => {
-      if (isLeft(expectedResult)) {
-        return { ...expectedResult.value, success: false };
-      }
-      const {
-        type,
-        id,
-        namespaces,
-        esRequestIndex: esBulkDeleteRequestIndex,
-      } = expectedResult.value;
-      // we assume this wouldn't happen but is needed to ensure type consistency
-      if (bulkDeleteResponse === undefined) {
-        throw new Error(
-          `Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined`
-        );
-      }
-      const rawResponse = Object.values(
-        bulkDeleteResponse.items[esBulkDeleteRequestIndex]
-      )[0] as NewBulkItemResponse;
-
-      const error = getBulkOperationError(type, id, rawResponse);
-      if (error) {
-        errorResult = { success: false, type, id, error };
-        return errorResult;
-      }
-      if (rawResponse.result === 'not_found') {
-        errorResult = {
-          success: false,
-          type,
-          id,
-          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-        };
-        return errorResult;
-      }
-
-      if (rawResponse.result === 'deleted') {
-        // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
-        if (namespaces) {
-          objectsToDeleteAliasesFor.push({
-            type,
-            id,
-            ...(namespaces.includes(ALL_NAMESPACES_STRING)
-              ? { namespaces: [], deleteBehavior: 'exclusive' }
-              : { namespaces, deleteBehavior: 'inclusive' }),
-          });
-        }
-      }
-      const successfulResult = {
-        success: true,
-        id,
-        type,
-      };
-      return successfulResult;
-    });
-
-    // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
-    const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) => {
-      await deleteLegacyUrlAliases({
-        mappings: this._mappings,
-        registry: this._registry,
-        client: this.client,
-        getIndexForType: this.getIndexForType.bind(this),
-        type,
-        id,
-        namespaces,
-        deleteBehavior,
-      }).catch((err) => {
-        this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
-      });
-    };
-    await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
-
-    return { statuses: [...savedObjects] };
+    return await performBulkDelete(
+      {
+        objects,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**

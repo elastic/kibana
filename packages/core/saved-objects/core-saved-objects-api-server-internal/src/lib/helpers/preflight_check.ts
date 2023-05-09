@@ -14,7 +14,7 @@ import type {
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
-import { rawDocExistsInNamespaces } from '../internal_utils';
+import { isRight, rawDocExistsInNamespaces } from '../internal_utils';
 import { getSavedObjectNamespaces } from '../utils/namespaces';
 import { GetResponseFound, isFoundGetResponse } from '../utils/es_responses';
 import {
@@ -22,6 +22,7 @@ import {
   PreflightCheckForCreateObject,
 } from '../preflight_check_for_create';
 import type { RepositoryEsClient } from '../repository_es_client';
+import type { PreflightCheckForBulkDeleteParams } from '../repository_bulk_delete_internal_types';
 
 export class PreflightCheckHelper {
   private registry: ISavedObjectTypeRegistry;
@@ -59,6 +60,42 @@ export class PreflightCheckHelper {
       getIndexForType: this.getIndexForType.bind(this),
       createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
     });
+  }
+
+  /**
+   * Fetch multi-namespace saved objects
+   * @returns MgetResponse
+   * @notes multi-namespace objects shared to more than one space require special handling. We fetch these docs to retrieve their namespaces.
+   * @internal
+   */
+  public async preflightCheckForBulkDelete(params: PreflightCheckForBulkDeleteParams) {
+    const { expectedBulkGetResults, namespace } = params;
+    const bulkGetMultiNamespaceDocs = expectedBulkGetResults
+      .filter(isRight)
+      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .map(({ value: { type, id } }) => ({
+        _id: this.serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: ['type', 'namespaces'],
+      }));
+
+    const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
+      ? await this.client.mget(
+          { body: { docs: bulkGetMultiNamespaceDocs } },
+          { ignore: [404], meta: true }
+        )
+      : undefined;
+    // fail fast if we can't verify a 404 response is from Elasticsearch
+    if (
+      bulkGetMultiNamespaceDocsResponse &&
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetMultiNamespaceDocsResponse.statusCode,
+        headers: bulkGetMultiNamespaceDocsResponse.headers,
+      })
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
+    return bulkGetMultiNamespaceDocsResponse;
   }
 
   /**
