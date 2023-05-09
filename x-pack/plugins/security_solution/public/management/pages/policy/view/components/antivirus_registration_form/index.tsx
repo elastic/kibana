@@ -58,6 +58,7 @@ export const AntivirusRegistrationForm = memo(() => {
     <ConfigForm
       type={TRANSLATIONS.title}
       supportedOss={[OperatingSystem.WINDOWS]}
+      dataTestSubj="antivirusRegistrationForm"
       osRestriction={i18n.translate(
         'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
         {

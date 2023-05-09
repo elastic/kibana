@@ -63,7 +63,7 @@ describe('Policy Form Layout', () => {
   describe('when displayed with valid id', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
-    beforeEach(() => {
+    beforeEach(async () => {
       policyPackagePolicy = generator.generatePolicyPackagePolicy();
       policyPackagePolicy.id = '1';
 
@@ -102,6 +102,9 @@ describe('Policy Form Layout', () => {
       });
       history.push(policyDetailsPathUrl);
       policyFormLayoutView = render(<PolicyFormLayout />);
+
+      await asyncActions;
+      policyFormLayoutView.update();
     });
 
     it('should NOT display timeline', async () => {
@@ -109,8 +112,6 @@ describe('Policy Form Layout', () => {
     });
 
     it('should display cancel button', async () => {
-      await asyncActions;
-      policyFormLayoutView.update();
       const cancelbutton = policyFormLayoutView.find(
         'EuiButtonEmpty[data-test-subj="policyDetailsCancelButton"]'
       );
@@ -118,8 +119,6 @@ describe('Policy Form Layout', () => {
       expect(cancelbutton.text()).toEqual('Cancel');
     });
     it('should redirect to policy list when cancel button is clicked', async () => {
-      await asyncActions;
-      policyFormLayoutView.update();
       const cancelbutton = policyFormLayoutView.find(
         'EuiButtonEmpty[data-test-subj="policyDetailsCancelButton"]'
       );
@@ -132,8 +131,6 @@ describe('Policy Form Layout', () => {
       ]);
     });
     it('should display save button', async () => {
-      await asyncActions;
-      policyFormLayoutView.update();
       const saveButton = policyFormLayoutView.find(
         'EuiButton[data-test-subj="policyDetailsSaveButton"]'
       );
@@ -141,17 +138,12 @@ describe('Policy Form Layout', () => {
       expect(saveButton.text()).toEqual('Save');
     });
     it('should display beta badge', async () => {
-      await asyncActions;
-      policyFormLayoutView.update();
       const saveButton = policyFormLayoutView.find('EuiBetaBadge');
       expect(saveButton).toHaveLength(1);
       expect(saveButton.text()).toEqual('beta');
     });
 
     it('should display minimum Agent version number for User Notification', async () => {
-      await asyncActions;
-      policyFormLayoutView.update();
-
       const minVersionsMap = [
         ['malware', '7.11'],
         ['ransomware', '7.12'],
@@ -167,6 +159,20 @@ describe('Policy Form Layout', () => {
             .text()
         ).toEqual(`Agent version ${minVersion}+`);
       }
+    });
+
+    it('"Register as antivirus" should be only available for Windows', () => {
+      const antivirusRegistrationFormTextContent = policyFormLayoutView
+        .find('EuiPanel[data-test-subj="antivirusRegistrationForm"]')
+        .text();
+
+      expect(antivirusRegistrationFormTextContent).toContain('Windows');
+      expect(antivirusRegistrationFormTextContent).not.toContain('Linux');
+      expect(antivirusRegistrationFormTextContent).not.toContain('Mac');
+
+      expect(antivirusRegistrationFormTextContent).toContain(
+        'Toggle on to register Elastic as an official Antivirus solution for Windows OS. This will also disable Windows Defender.'
+      );
     });
 
     describe('when the save button is clicked', () => {
