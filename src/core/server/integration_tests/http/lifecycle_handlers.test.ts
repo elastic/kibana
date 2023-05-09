@@ -382,5 +382,12 @@ describe('core lifecyle handers with restrict internal routes enforced', () => {
       const result = await supertest(innerServer.listener).get(testInternalRoute).expect(400);
       expect(result.body.error).toBe('Bad Request');
     });
+
+    it('accepts requests with the internal product header to internal routes', async () => {
+      await supertest(innerServer.listener)
+        .get(testInternalRoute)
+        .set(internalProductHeader, 'anything')
+        .expect(200, 'ok()');
+    });
   });
 });
