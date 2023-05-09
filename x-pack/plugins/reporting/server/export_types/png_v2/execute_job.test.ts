@@ -12,11 +12,7 @@ import { ReportingCore } from '../..';
 import { CancellationToken } from '@kbn/reporting-common';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { generatePngObservable } from '../common';
 import { runTaskFnFactory } from './execute_job';
 import { TaskPayloadPNGV2 } from './types';
@@ -54,7 +50,6 @@ beforeEach(async () => {
   });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 });
 
 afterEach(() => (generatePngObservable as jest.Mock).mockReset());

@@ -29,7 +29,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   reporting,
   parentLogger
 ) {
-  const config = reporting.getConfig().get('csv');
+  const { csv: csvConfig } = reporting.getConfig();
   const logger = parentLogger.get('execute-job');
 
   return async function runTask(_jobId, immediateJobParams, context, stream, req) {
@@ -60,7 +60,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
 
     const csv = new CsvGenerator(
       job,
-      config,
+      csvConfig,
       clients,
       dependencies,
       cancellationToken,

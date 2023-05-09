@@ -43,7 +43,7 @@ export async function getDeprecationsInfo(
   }
 
   const config = reportingCore.getConfig();
-  const deprecatedRoles = config.get('roles', 'allow') || ['reporting_user'];
+  const deprecatedRoles = config.roles.allow || ['reporting_user'];
 
   return [
     ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),

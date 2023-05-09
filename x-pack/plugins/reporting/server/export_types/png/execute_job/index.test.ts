@@ -11,11 +11,7 @@ import { Writable } from 'stream';
 import { ReportingCore } from '../../..';
 import { CancellationToken } from '@kbn/reporting-common';
 import { cryptoFactory } from '../../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from '.';
@@ -53,7 +49,6 @@ beforeEach(async () => {
   });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 });
 
 afterEach(() => (generatePngObservable as jest.Mock).mockReset());

@@ -15,9 +15,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   reporting,
   parentLogger
 ) => {
-  const config = reporting.getConfig();
-  const encryptionKey = config.get('encryptionKey');
-  const csvConfig = config.get('csv');
+  const { encryptionKey, csv: csvConfig } = reporting.getConfig();
 
   return async function runTask(jobId, job, cancellationToken, stream) {
     const logger = parentLogger.get(`execute-job:${jobId}`);

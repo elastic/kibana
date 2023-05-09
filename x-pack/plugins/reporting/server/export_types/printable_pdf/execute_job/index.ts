@@ -17,8 +17,7 @@ import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
   function executeJobFactoryFn(reporting, parentLogger) {
-    const config = reporting.getConfig();
-    const encryptionKey = config.get('encryptionKey');
+    const { encryptionKey } = reporting.getConfig();
 
     return async function runTask(jobId, job, cancellationToken, stream) {
       const jobLogger = parentLogger.get(`execute-job:${jobId}`);
@@ -30,7 +29,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
         mergeMap(({ headers, logo }) => {
-          const urls = getFullUrls(config, job);
+          const urls = getFullUrls(reporting, job);
 
           const { browserTimezone, layout, title } = job;
           apmGetAssets?.end();
