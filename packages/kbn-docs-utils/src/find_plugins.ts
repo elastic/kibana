@@ -52,7 +52,7 @@ function toPluginOrPackage(pkg: Package): PluginOrPackage {
   };
 }
 
-export function findPlugins(packageFilter?: string[]): PluginOrPackage[] {
+export function findPlugins(pluginOrPackageFilter?: string[]): PluginOrPackage[] {
   const packages = getPackages(REPO_ROOT);
   const plugins = packages.filter(
     getPluginPackagesFilter({
@@ -66,10 +66,15 @@ export function findPlugins(packageFilter?: string[]): PluginOrPackage[] {
     throw new Error('unable to find @kbn/core');
   }
 
-  if (!packageFilter) {
+  if (!pluginOrPackageFilter) {
     return [...[core, ...plugins].map(toPluginOrPackage), ...findPackages()];
   } else {
-    return findPackages(packageFilter);
+    return [
+      ...plugins
+        .filter((p) => pluginOrPackageFilter.includes(p.manifest.plugin.id))
+        .map(toPluginOrPackage),
+      ...findPackages(pluginOrPackageFilter),
+    ];
   }
 }
 
