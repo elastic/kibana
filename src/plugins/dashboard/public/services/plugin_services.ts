@@ -41,6 +41,7 @@ import { analyticsServiceFactory } from './analytics/analytics_service';
 import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object_service';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding_service';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
+import { cloudServiceFactory } from './cloud/cloud_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory, [
@@ -82,6 +83,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
+  cloud: new PluginServiceProvider(cloudServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

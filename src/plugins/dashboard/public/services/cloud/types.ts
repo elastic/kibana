@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeStart } from '@kbn/core-chrome-browser';
+import { CloudCollaborationPluginStart } from '@kbn/cloud-collaboration-plugin/public';
 
-export type DashboardChromeService = Pick<
-  ChromeStart,
-  | 'docTitle'
-  | 'setBadge'
-  | 'getIsVisible$'
-  | 'recentlyAccessed'
-  | 'setBreadcrumbs'
-  | 'setHelpExtension'
-  | 'setIsVisible'
->;
+export interface DashboardCloudService
+  extends Pick<CloudCollaborationPluginStart, 'setBreadcrumbPresence' | 'clearBreadcrumbPresence'> {
+  isCollaborationAvailable: boolean;
+  CollaborationContextProvider: React.FC;
+}

@@ -222,6 +222,14 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  threads: {
+    label: i18n.translate('dashboard.topNave.threadsButtonAriaLabel', {
+      defaultMessage: 'threads',
+    }),
+    description: i18n.translate('dashboard.topNave.threadsConfigDescription', {
+      defaultMessage: 'View threads',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>

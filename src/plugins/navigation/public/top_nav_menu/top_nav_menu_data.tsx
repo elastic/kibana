@@ -26,6 +26,7 @@ export interface TopNavMenuData {
   iconSide?: EuiButtonProps['iconSide'];
   target?: string;
   href?: string;
+  render?: ({ props }: { props: Omit<TopNavMenuData, 'render'> }) => JSX.Element;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

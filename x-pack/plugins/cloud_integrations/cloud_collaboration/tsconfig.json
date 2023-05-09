@@ -1,7 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -14,13 +14,13 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/cloud-plugin",
-    "@kbn/storybook",
     "@kbn/core-http-browser",
-    "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/security-plugin",
     "@kbn/cloud-collaboration-presence",
     "@kbn/kibana-react-plugin",
   ],
-  "exclude": []
+  "exclude": [
+    "target/**/*"
+  ]
 }

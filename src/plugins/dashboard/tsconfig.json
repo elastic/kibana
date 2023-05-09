@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "*.ts",
+    ".storybook/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -57,6 +63,10 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
+    "@kbn/cloud-plugin",
+    "@kbn/cloud-collaboration-plugin",
+    "@kbn/cloud-collaboration-threads",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": [
     "target/**/*",

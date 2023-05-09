@@ -14,6 +14,7 @@ import { DashboardStartDependencies } from '../plugin';
 import { DashboardAnalyticsService } from './analytics/types';
 import { DashboardApplicationService } from './application/types';
 import { DashboardChromeService } from './chrome/types';
+import { DashboardCloudService } from './cloud/types';
 import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCustomBrandingService } from './custom_branding/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
@@ -47,6 +48,7 @@ export interface DashboardServices {
   analytics: DashboardAnalyticsService;
   application: DashboardApplicationService;
   chrome: DashboardChromeService;
+  cloud: DashboardCloudService;
   coreContext: DashboardCoreContextService;
   dashboardCapabilities: DashboardCapabilitiesService;
   data: DashboardDataService;

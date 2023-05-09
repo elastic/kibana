@@ -40,12 +40,14 @@ import { visualizationsServiceFactory } from './visualizations/visualizations.st
 import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object.stub';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
+import { cloudServiceFactory } from './cloud/cloud_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory),
   analytics: new PluginServiceProvider(analyticsServiceFactory),
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
+  cloud: new PluginServiceProvider(cloudServiceFactory),
   coreContext: new PluginServiceProvider(coreContextServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory),

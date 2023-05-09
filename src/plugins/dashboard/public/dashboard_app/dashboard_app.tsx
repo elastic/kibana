@@ -81,6 +81,12 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
     customBranding,
+    cloud: {
+      clearBreadcrumbPresence,
+      CollaborationContextProvider,
+      isCollaborationAvailable,
+      setBreadcrumbPresence,
+    },
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
 
@@ -185,13 +191,26 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage]);
 
+  useEffect(() => {
+    if (!showNoDataPage && isCollaborationAvailable && savedDashboardId) {
+      setBreadcrumbPresence('dashboard', savedDashboardId);
+    }
+    return () => clearBreadcrumbPresence();
+  }, [
+    savedDashboardId,
+    showNoDataPage,
+    isCollaborationAvailable,
+    setBreadcrumbPresence,
+    clearBreadcrumbPresence,
+  ]);
+
   return (
     <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <>
+        <CollaborationContextProvider>
           {dashboardAPI && (
             <DashboardAPIContext.Provider value={dashboardAPI}>
               <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
@@ -206,7 +225,7 @@ export function DashboardApp({
             showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}
           />
-        </>
+        </CollaborationContextProvider>
       )}
     </div>
   );
