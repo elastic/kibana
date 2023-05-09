@@ -245,7 +245,7 @@ export const UploadActionRequestSchema = {
     ...BaseActionRequestSchema,
 
     parameters: schema.object({
-      overwrite: schema.maybe(schema.boolean()),
+      overwrite: schema.maybe(schema.boolean({ defaultValue: false })),
     }),
 
     file: schema.stream(),
