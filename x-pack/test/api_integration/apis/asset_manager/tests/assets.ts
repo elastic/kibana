@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Dynamically grab all types from the sample asset data set
         const sampleTypeSet: Set<string> = new Set();
         for (let i = 0; i < sampleAssetDocs.length; i++) {
-          sampleTypeSet.add(sampleAssetDocs[i]['asset.type']);
+          sampleTypeSet.add(sampleAssetDocs[i]['asset.type']!);
         }
         const sampleTypes = Array.from(sampleTypeSet);
         if (sampleTypes.length <= 2) {
@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Track a reference to how many docs should be returned for these two types
         const samplesForFilteredTypes = sampleAssetDocs.filter((doc) =>
-          filterByTypes.includes(doc['asset.type'])
+          filterByTypes.includes(doc['asset.type']!)
         );
 
         expect(samplesForFilteredTypes.length).to.be.lessThan(sampleAssetDocs.length);
