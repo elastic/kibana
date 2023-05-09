@@ -93,7 +93,6 @@ export const createMockConfigSchema = (
     ...overrides,
     kibanaServer: {
       hostname: 'localhost',
-      port: 80,
       ...overrides.kibanaServer,
     },
     queue: {

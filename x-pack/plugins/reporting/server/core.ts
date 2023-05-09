@@ -83,6 +83,18 @@ export interface ReportingInternalStart {
 /**
  * @internal
  */
+export interface ReportingServerInfo {
+  port?: number;
+  name: string;
+  uuid: string;
+  basePath: string;
+  protocol: string;
+  hostname: string;
+}
+
+/**
+ * @internal
+ */
 export class ReportingCore {
   private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
@@ -243,7 +255,7 @@ export class ReportingCore {
   /*
    * Returns configurable server info
    */
-  public getServerInfo() {
+  public getServerInfo(): ReportingServerInfo {
     const { http } = this.core;
     const serverInfo = http.getServerInfo();
     return {

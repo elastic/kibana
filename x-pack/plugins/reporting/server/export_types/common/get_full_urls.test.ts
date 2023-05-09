@@ -6,6 +6,7 @@
  */
 
 import { ReportingCore } from '../..';
+import { ReportingConfigType } from '../../config';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
@@ -14,14 +15,15 @@ import { getFullUrls } from './get_full_urls';
 let mockReporting: ReportingCore;
 
 beforeEach(async () => {
-  mockReporting = await createMockReportingCore(createMockConfigSchema());
+  mockReporting = await createMockReportingCore(createMockConfigSchema({ kibanaServer: {} }));
+  mockReporting.getConfig = jest.fn(() => ({ kibanaServer: {} } as unknown as ReportingConfigType));
   mockReporting.getServerInfo = jest.fn(() => ({
     hostname: 'localhost',
-    port: 5601,
     protocol: 'http',
     basePath: '/sbp',
     name: 'localhost',
     uuid: 'test-test-test-test',
+    port: 5601,
   }));
 });
 

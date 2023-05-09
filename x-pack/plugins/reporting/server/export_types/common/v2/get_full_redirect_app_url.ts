@@ -15,18 +15,20 @@ export function getFullRedirectAppUrl(
   spaceId?: string,
   forceNow?: string
 ) {
-  const { basePath, protocol, hostname, port } = reporting.getServerInfo();
-
+  const {
+    kibanaServer: { protocol, hostname, port },
+  } = reporting.getConfig();
+  const serverInfo = reporting.getServerInfo();
   const path = buildKibanaPath({
-    basePath,
+    basePath: serverInfo.basePath,
     spaceId,
     appPath: getRedirectAppPath(),
   });
 
   return format({
-    protocol,
-    hostname,
-    port,
+    protocol: protocol ?? serverInfo.protocol,
+    hostname: hostname ?? serverInfo.hostname,
+    port: port ?? serverInfo.port,
     pathname: path,
     query: forceNow ? { forceNow } : undefined,
   });
