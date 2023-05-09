@@ -102,7 +102,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
-  const [isTamperingFlyoutOpen, setTamperingFlyout] = useState(false);
+  const [isProtectedFlyoutOpen, setIsProtectedFlyoutOpen] = useState(false);
 
   return (
     <>
@@ -122,6 +122,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
+        {isTamperingFlyoutOpen && console.log('hello i am open')}
         <EuiFormRow
           fullWidth
           key="description"
@@ -308,15 +309,15 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
             defaultMessage: 'Turn on agent tampering',
           })}
-          checked={agentPolicy.tampering_enabled || false}
-          onChange={(e) => updateAgentPolicy({ tampering_enabled: e.target.checked })}
+          checked={agentPolicy.is_protected ?? false}
+          onChange={(e) => updateAgentPolicy({ is_protected: e.target.checked })}
         />
         <EuiSpacer size="s" />
         <EuiLink
           onClick={() => {
-            setTamperingFlyout(true);
+            setIsProtectedFlyoutOpen(true);
           }}
-          disabled={agentPolicy.tampering_enabled === false}
+          disabled={agentPolicy.is_protected === false}
         >
           {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
             defaultMessage: 'Get uninstall command',

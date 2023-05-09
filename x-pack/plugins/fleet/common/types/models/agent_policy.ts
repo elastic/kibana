@@ -23,7 +23,7 @@ export interface NewAgentPolicy {
   has_fleet_server?: boolean;
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: MonitoringType;
-  tampering_enabled?: boolean;
+  is_protected?: boolean;
   unenroll_timeout?: number;
   inactivity_timeout?: number;
   is_preconfigured?: boolean;
