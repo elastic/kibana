@@ -281,6 +281,7 @@ export interface DocLinks {
     readonly networkMap: string;
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
+    readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
@@ -388,6 +389,7 @@ export interface DocLinks {
     serviceNowSIRAction: string;
     setupPrerequisites: string;
     slackAction: string;
+    slackApiAction: string;
     teamsAction: string;
     connectors: string;
   }>;
