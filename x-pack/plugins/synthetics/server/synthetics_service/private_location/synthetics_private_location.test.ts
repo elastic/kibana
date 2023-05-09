@@ -31,7 +31,7 @@ describe('SyntheticsPrivateLocation', () => {
     type: 'http',
     enabled: true,
     schedule: '@every 3m',
-    'service.name': 'test service',
+    'service.name': '',
     locations: [mockPrivateLocation],
     tags: [],
     timeout: '16',
@@ -226,7 +226,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         name: {
           type: 'text',
-          value: '"Browser monitor"',
+          value: 'Browser monitor',
         },
         params: {
           type: 'yaml',
@@ -246,7 +246,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'service.name': {
           type: 'text',
-          value: '"test service"',
+          value: '',
         },
         'source.inline.script': {
           type: 'yaml',
@@ -286,7 +286,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   type: DataStream.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
-  'service.name': 'test service',
+  'service.name': '',
   tags: [],
   timeout: null,
   name: 'Browser monitor',
