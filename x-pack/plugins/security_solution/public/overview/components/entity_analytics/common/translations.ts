@@ -40,3 +40,10 @@ export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
       'The user risk table is not affected by the time range. This table shows the latest recorded risk score for each user.',
   }
 );
+
+export const RISK_TABLE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.riskDashboard.tableTooltipTitle',
+  {
+    defaultMessage: 'In Technical Preview',
+  }
+);

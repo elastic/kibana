@@ -95,9 +95,11 @@ export function getDurationFieldForTransactions(
     | ApmDocumentType.ServiceTransactionMetric
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent
-    | boolean
+    | boolean,
+  useDurationSummaryField?: boolean
 ) {
   let type: ApmDocumentType;
+
   if (typeOrSearchAgggregatedTransactions === true) {
     type = ApmDocumentType.TransactionMetric;
   } else if (typeOrSearchAgggregatedTransactions === false) {
@@ -111,6 +113,9 @@ export function getDurationFieldForTransactions(
   }
 
   if (type === ApmDocumentType.TransactionMetric) {
+    if (useDurationSummaryField) {
+      return TRANSACTION_DURATION_SUMMARY;
+    }
     return TRANSACTION_DURATION_HISTOGRAM;
   }
 

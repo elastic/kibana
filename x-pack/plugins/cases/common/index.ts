@@ -37,16 +37,12 @@ export {
   ExternalReferenceStorageType,
 } from './api';
 
-export type {
-  Case,
-  Cases,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
-} from './api';
+export type { Case, Cases, CasesBulkGetRequest, CasesBulkGetResponse } from './api';
 
 export type {
   CaseUI,
   CasesUI,
+  CasesFindResponseUI,
   Ecs,
   CasesFeatures,
   CaseViewRefreshPropInterface,

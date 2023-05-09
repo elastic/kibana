@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Test policy',
           namespace: 'default',
         });
+
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
@@ -103,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
   });
 }
 
-async function createPackagePolicy(
+export async function createPackagePolicy(
   supertest: SuperTest<Test>,
   agentPolicyId: string,
   policyTemplate: string,
