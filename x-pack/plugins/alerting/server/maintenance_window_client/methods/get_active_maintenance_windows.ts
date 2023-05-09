@@ -25,31 +25,14 @@ export interface MaintenanceWindowAggregationResult {
   };
 }
 
-<<<<<<< HEAD
-export interface ActiveParams {
-  start?: string;
-  interval?: string;
-}
-
-// TODO: Clean up this API sinde we no longer use start or interval
-=======
->>>>>>> main
 export async function getActiveMaintenanceWindows(
   context: MaintenanceWindowClientContext
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
-<<<<<<< HEAD
-  const { start, interval } = params || {};
-
-  const startDate = start ? new Date(start) : new Date();
-  const startDateISO = startDate.toISOString();
-  
-=======
 
   const startDate = new Date();
   const startDateISO = startDate.toISOString();
 
->>>>>>> main
   const filter = nodeBuilder.and([
     nodeBuilder.is('maintenance-window.attributes.events', startDateISO),
     nodeBuilder.is('maintenance-window.attributes.enabled', 'true'),
