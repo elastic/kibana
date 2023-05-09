@@ -54,9 +54,6 @@ import type {
 import {
   type ISavedObjectTypeRegistry,
   type SavedObjectsExtensions,
-  type ISavedObjectsEncryptionExtension,
-  type ISavedObjectsSecurityExtension,
-  type ISavedObjectsSpacesExtension,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -91,7 +88,6 @@ import {
   performBulkUpdate,
   performRemoveReferencesTo,
   performOpenPointInTime,
-  incrementCounterInternal,
   performIncrementCounter,
   performBulkResolve,
   performResolve,
@@ -123,16 +119,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private _registry: ISavedObjectTypeRegistry;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
-  private readonly _encryptionExtension?: ISavedObjectsEncryptionExtension;
-  private readonly _securityExtension?: ISavedObjectsSecurityExtension;
-  private readonly _spacesExtension?: ISavedObjectsSpacesExtension;
   private _serializer: SavedObjectsSerializer;
   private _logger: Logger;
-  private commonHelper: CommonHelper;
-  private encryptionHelper: EncryptionHelper;
-  private validationHelper: ValidationHelper;
-  private preflightCheckHelper: PreflightCheckHelper;
-  private serializerHelper: SerializerHelper;
 
   private apiExecutionContext: ApiExecutionContext;
   private readonly extensions: SavedObjectsExtensions;
@@ -209,41 +197,39 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     this._serializer = serializer;
     this._logger = logger;
     this.extensions = extensions;
-    this._encryptionExtension = extensions.encryptionExtension;
-    this._securityExtension = extensions.securityExtension;
-    this._spacesExtension = extensions.spacesExtension;
-    this.commonHelper = new CommonHelper({
+
+    const commonHelper = new CommonHelper({
       spaceExtension: extensions?.spacesExtension,
       defaultIndex: index,
       kibanaVersion: migrator.kibanaVersion,
       registry: typeRegistry,
     });
-    this.encryptionHelper = new EncryptionHelper({
+    const encryptionHelper = new EncryptionHelper({
       encryptionExtension: extensions?.encryptionExtension,
       securityExtension: extensions?.securityExtension,
     });
-    this.validationHelper = new ValidationHelper({
+    const validationHelper = new ValidationHelper({
       registry: typeRegistry,
       logger,
       kibanaVersion: migrator.kibanaVersion,
     });
-    this.preflightCheckHelper = new PreflightCheckHelper({
-      getIndexForType: this.commonHelper.getIndexForType.bind(this.commonHelper),
+    const preflightCheckHelper = new PreflightCheckHelper({
+      getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
       createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
       serializer,
       registry: typeRegistry,
       client: this.client,
     });
-    this.serializerHelper = new SerializerHelper({
+    const serializerHelper = new SerializerHelper({
       registry: typeRegistry,
       serializer,
     });
     this.helpers = {
-      common: this.commonHelper,
-      preflight: this.preflightCheckHelper,
-      validation: this.validationHelper,
-      encryption: this.encryptionHelper,
-      serializer: this.serializerHelper,
+      common: commonHelper,
+      preflight: preflightCheckHelper,
+      validation: validationHelper,
+      encryption: encryptionHelper,
+      serializer: serializerHelper,
     };
     this.apiExecutionContext = {
       client: this.client,
@@ -471,9 +457,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       allowedTypes: this._allowedTypes,
       client: this.client,
       serializer: this._serializer,
-      getIndexForType: this.getIndexForType.bind(this),
+      getIndexForType: this.helpers.common.getIndexForType.bind(this.helpers.common),
       createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
-      securityExtension: this._securityExtension,
+      securityExtension: this.extensions.securityExtension,
       objects,
       options: { ...options, namespace },
     });
@@ -496,8 +482,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       client: this.client,
       serializer: this._serializer,
       logger: this._logger,
-      getIndexForType: this.getIndexForType.bind(this),
-      securityExtension: this._securityExtension,
+      getIndexForType: this.helpers.common.getIndexForType.bind(this.helpers.common),
+      securityExtension: this.extensions.securityExtension,
       objects,
       spacesToAdd,
       spacesToRemove,
@@ -559,18 +545,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     );
   }
 
-  async incrementCounterInternal<T = unknown>(
-    type: string,
-    id: string,
-    counterFields: Array<string | SavedObjectsIncrementCounterField>,
-    options: SavedObjectsIncrementCounterOptions<T> = {}
-  ) {
-    return incrementCounterInternal<T>(
-      { type, id, counterFields, options },
-      this.apiExecutionContext
-    );
-  }
-
   /**
    * {@inheritDoc ISavedObjectsRepository.openPointInTimeForType}
    */
@@ -598,8 +572,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     internalOptions: SavedObjectsFindInternalOptions = {}
   ): Promise<SavedObjectsClosePointInTimeResponse> {
     const { disableExtensions } = internalOptions;
-    if (!disableExtensions && this._securityExtension) {
-      this._securityExtension.auditClosePointInTime();
+    if (!disableExtensions && this.extensions.securityExtension) {
+      this.extensions.securityExtension.auditClosePointInTime();
     }
 
     return await this.client.closePointInTime({
@@ -627,10 +601,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    * {@inheritDoc ISavedObjectsRepository.getCurrentNamespace}
    */
   getCurrentNamespace(namespace?: string) {
-    return this.commonHelper.getCurrentNamespace(namespace);
-  }
-
-  private getIndexForType(type: string) {
-    return this.commonHelper.getIndexForType(type);
+    return this.helpers.common.getCurrentNamespace(namespace);
   }
 }

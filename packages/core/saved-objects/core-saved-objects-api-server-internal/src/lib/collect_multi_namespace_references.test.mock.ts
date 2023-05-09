@@ -7,7 +7,7 @@
  */
 
 import type { findLegacyUrlAliases } from './legacy_url_aliases';
-import type { findSharedOriginObjects } from './find_shared_origin_objects';
+import type { findSharedOriginObjects } from './utils';
 import type * as InternalUtils from './internal_utils';
 
 export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
@@ -22,7 +22,7 @@ export const mockFindSharedOriginObjects = jest.fn() as jest.MockedFunction<
   typeof findSharedOriginObjects
 >;
 
-jest.mock('./find_shared_origin_objects', () => {
+jest.mock('./utils/find_shared_origin_objects', () => {
   return { findSharedOriginObjects: mockFindSharedOriginObjects };
 });
 

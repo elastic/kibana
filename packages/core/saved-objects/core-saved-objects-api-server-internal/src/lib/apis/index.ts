@@ -23,4 +23,3 @@ export { performOpenPointInTime } from './open_point_in_time';
 export { performIncrementCounter } from './increment_counter';
 export { performBulkResolve } from './bulk_resolve';
 export { performResolve } from './resolve';
-export { incrementCounterInternal } from './internals';

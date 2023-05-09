@@ -8,3 +8,4 @@
 
 export { getSavedObjectNamespaces } from './namespaces';
 export { isFoundGetResponse, type GetResponseFound } from './es_responses';
+export { findSharedOriginObjects } from './find_shared_origin_objects';
