@@ -11,7 +11,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
 import { useSecurityTags } from '../context/dashboard_context';
 
-// TODO test
 export const useFetchSecurityDashboards = () => {
   const { http } = useKibana().services;
   const securityTags = useSecurityTags();

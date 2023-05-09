@@ -10,6 +10,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getDashboardsByTagIds } from '../../../common/containers/dashboards/api';
 import { getTagsByName } from '../../../common/containers/tags/api';
 import { useFetch, REQUEST_NAMES } from '../../../common/hooks/use_fetch';
+import { SecurityPageName } from '../../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 const CTI_TAG_NAME = 'threat intel';
 
@@ -37,34 +39,23 @@ const useCtiInstalledDashboards = () => {
 };
 
 export const useCtiDashboardLinks = ({
-  to,
-  from,
   tiDataSources = [],
 }: {
-  to: string;
-  from: string;
   tiDataSources?: TiDataSources[];
 }) => {
-  const dashboardLocator = useKibana().services.dashboard?.locator;
   const { dashboards } = useCtiInstalledDashboards();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const listItems = useMemo(() => {
     const installedDashboardIds = dashboards?.map(({ id }) => id) ?? [];
 
     return tiDataSources.map((tiDataSource) => {
       let path = '';
-      if (
-        dashboardLocator &&
-        tiDataSource.dashboardId &&
-        installedDashboardIds.includes(tiDataSource.dashboardId)
-      ) {
-        path = dashboardLocator.getRedirectUrl({
-          dashboardId: tiDataSource.dashboardId,
-          timeRange: {
-            to,
-            from,
-          },
-        });
+      if (tiDataSource.dashboardId && installedDashboardIds.includes(tiDataSource.dashboardId)) {
+        path = `${getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.dashboards,
+          path: tiDataSource.dashboardId,
+        })}`;
       }
 
       return {
@@ -73,7 +64,7 @@ export const useCtiDashboardLinks = ({
         path,
       };
     });
-  }, [dashboards, tiDataSources, dashboardLocator, to, from]);
+  }, [dashboards, tiDataSources, getSecuritySolutionUrl]);
 
   return { listItems };
 };

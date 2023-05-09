@@ -17,7 +17,6 @@ import { getTagsByName, createTag } from '../../common/containers/tags/api';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
 import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
 
-// TODO test
 export const useFetchSecurityTags = () => {
   const { http } = useKibana().services;
 
