@@ -71,4 +71,8 @@ describe('isPathValid', () => {
   test('valid when a path and object value exists within the parent path at level 3', () => {
     expect(isPathValid('a.b.c', { a: { b: { c: {} } } })).toEqual(true);
   });
+
+  test('not valid when array if array present within path', () => {
+    expect(isPathValid('a.b.c.d', { 'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] } })).toEqual(false);
+  });
 });
