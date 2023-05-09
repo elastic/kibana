@@ -24,12 +24,14 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { paths } from '../../config/paths';
 import illustration from './assets/illustration.svg';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 export function SlosWelcomePage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { hasWriteCapabilities } = useCapabilities();
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
@@ -108,6 +110,7 @@ export function SlosWelcomePage() {
                       fill
                       color="primary"
                       onClick={handleClickCreateSlo}
+                      disabled={!hasWriteCapabilities}
                     >
                       {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',
