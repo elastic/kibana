@@ -3396,6 +3396,46 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.SummarizedAlertsChunk",
+        "type": "Interface",
+        "tags": [],
+        "label": "SummarizedAlertsChunk",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.SummarizedAlertsChunk.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.SummarizedAlertsChunk.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "AlertHit",
+              "[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -4262,6 +4302,39 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.contextToSchemaName",
+        "type": "Function",
+        "tags": [],
+        "label": "contextToSchemaName",
+        "description": [],
+        "signature": [
+          "(context: string) => string"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_schema/context_to_schema_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.contextToSchemaName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_schema/context_to_schema_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.formatDefaultAggregationResult",
@@ -10025,7 +10098,7 @@
             "section": "def-common.AggregateOptions",
             "text": "AggregateOptions"
           },
-          ", \"filter\" | \"search\"> & { after?: Record<string, string | number | null> | undefined; maxTags?: number | undefined; }"
+          ", \"search\" | \"filter\"> & { after?: Record<string, string | number | null> | undefined; maxTags?: number | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
         "deprecated": false,
