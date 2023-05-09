@@ -6,21 +6,16 @@
  */
 
 import { format } from 'url';
-import { ReportingConfig } from '../../..';
-import { getRedirectAppPath } from '../../../../common/constants';
+import { ReportingCore } from '../../..';
 import { buildKibanaPath } from '../../../../common/build_kibana_path';
+import { getRedirectAppPath } from '../../../../common/constants';
 
 export function getFullRedirectAppUrl(
-  config: ReportingConfig,
+  reporting: ReportingCore,
   spaceId?: string,
   forceNow?: string
 ) {
-  const [basePath, protocol, hostname, port] = [
-    config.kbnConfig.get('server', 'basePath'),
-    config.get('kibanaServer', 'protocol'),
-    config.get('kibanaServer', 'hostname'),
-    config.get('kibanaServer', 'port'),
-  ] as string[];
+  const { basePath, protocol, hostname, port } = reporting.getServerInfo();
 
   const path = buildKibanaPath({
     basePath,

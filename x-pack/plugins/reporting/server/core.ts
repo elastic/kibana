@@ -80,6 +80,15 @@ export interface ReportingInternalStart {
   taskManager: TaskManagerStartContract;
 }
 
+export interface ReportingServerConfig {
+  basePath: string;
+  hostname: string;
+  name: string;
+  port: number;
+  uuid: string;
+  protocol: string;
+}
+
 /**
  * @internal
  */
@@ -242,20 +251,17 @@ export class ReportingCore {
   /*
    * Returns configurable server info
    */
-  public getKibanaServerInfo() {
+  public getServerInfo(): ReportingServerConfig {
     const { http } = this.core;
     const serverInfo = http.getServerInfo();
-    const kbnConfig = {
-      server: {
-        basePath: this.core.http.basePath.serverBasePath,
-        host: serverInfo.hostname,
-        name: serverInfo.name,
-        port: serverInfo.port,
-        uuid: this.context.env.instanceUuid,
-        protocol: serverInfo.protocol,
-      },
+    return {
+      basePath: this.core.http.basePath.serverBasePath,
+      hostname: serverInfo.hostname,
+      name: serverInfo.name,
+      port: serverInfo.port,
+      uuid: this.context.env.instanceUuid,
+      protocol: serverInfo.protocol,
     };
-    return kbnConfig;
   }
 
   /*

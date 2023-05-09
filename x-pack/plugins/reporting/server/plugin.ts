@@ -43,8 +43,8 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-
-    this.reportingCore = new ReportingCore(core, this.logger, this.initContext);
+    const reportingCore = new ReportingCore(core, this.logger, this.initContext);
+    this.reportingCore = reportingCore;
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
@@ -87,7 +87,6 @@ export class ReportingPlugin
       this.logger.error(e);
     });
 
-    this.reportingCore = reportingCore;
     return reportingCore.getContract();
   }
 

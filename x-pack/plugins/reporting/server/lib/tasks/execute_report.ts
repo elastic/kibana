@@ -116,9 +116,9 @@ export class ExecuteReportTask implements ReportingTask {
 
     this.taskExecutors = executors;
 
-    const config = reporting.getConfig();
-    this.kibanaId = config.kbnConfig.get('server', 'uuid');
-    this.kibanaName = config.kbnConfig.get('server', 'name');
+    const { uuid, name } = reporting.getServerInfo();
+    this.kibanaId = uuid;
+    this.kibanaName = name;
   }
 
   /*

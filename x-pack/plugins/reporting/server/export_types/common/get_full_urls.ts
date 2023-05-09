@@ -11,7 +11,7 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingConfig } from '../..';
+import { ReportingCore } from '../..';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
@@ -24,13 +24,9 @@ function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).objects !== undefined;
 }
 
-export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
-  const [basePath, protocol, hostname, port] = [
-    config.kbnConfig.get('server', 'basePath'),
-    config.get('kibanaServer', 'protocol'),
-    config.get('kibanaServer', 'hostname'),
-    config.get('kibanaServer', 'port'),
-  ] as string[];
+export function getFullUrls(reporting: ReportingCore, job: TaskPayloadPDF | TaskPayloadPNG) {
+  const bbb = reporting.getServerInfo();
+  const { basePath, protocol, hostname, port } = bbb;
   const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
 
   // PDF and PNG job params put in the url differently

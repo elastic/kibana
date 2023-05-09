@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ReportingConfig } from '../..';
+import { ReportingServerConfig } from '../../core';
 import { createMockConfig } from '../../test_helpers';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 
-let mockConfig: ReportingConfig;
+let mockConfig: ReportingServerConfig;
 
 beforeEach(() => {
   const reportingConfig: Record<string, any> = {

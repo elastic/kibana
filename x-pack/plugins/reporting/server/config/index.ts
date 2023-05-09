@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
-export { buildConfig } from './config';
 export { registerUiSettings } from './ui_settings';
 export type { ReportingConfigType };
 export { ConfigSchema };
