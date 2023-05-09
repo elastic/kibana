@@ -77,8 +77,9 @@ function getLayoutOptions({
     spacingFactor: 1.2,
     edgeSep: 32,
     rankSep: 128,
-    rankDir: 'LR',
-    ranker: 'network-simplex',
+    rankDir: 'TB',
+    //    ranker: 'network-simplex',
+    ranker: 'tight-tree',
     // name: 'fcose',
     // randomize: true,
     // tilingPaddingVertical: 75,
@@ -157,13 +158,14 @@ export function useCytoscapeEventHandlers({
     };
 
     const layoutstopHandler: cytoscape.EventHandler = (event) => {
-      const eles = serviceName
-        ? event.cy.$(`#${serviceName}`)
-        : event.cy.elements();
+      const eles =
+        event.cy.$('node:selected').length > 0
+          ? event.cy.$(`node:selected`)
+          : event.cy.elements();
       event.cy.animate({
         ...getAnimationOptions(theme),
         center: { eles },
-        fit: { eles, padding: nodeHeight },
+        zoom: 1,
       });
 
       applyCubicBezierStyles(event.cy.edges());
