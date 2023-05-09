@@ -8,7 +8,13 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { Observable } from 'rxjs';
-import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from '@kbn/core/public';
+import type {
+  NotificationsSetup,
+  CoreTheme,
+  DocLinksStart,
+  HttpSetup,
+  ChromeStart,
+} from '@kbn/core/public';
 
 import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
@@ -16,6 +22,7 @@ import { MetricsTracker } from '../../types';
 import { EsHostService } from '../lib';
 
 interface ContextServices {
+  chrome: ChromeStart;
   history: History;
   storage: Storage;
   settings: Settings;

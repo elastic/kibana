@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiCard, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,10 +14,12 @@ import { HelpCenterContext } from './help_center_header_nav_button';
 
 export const DocumentationCards = () => {
   const { helpLinks } = useContext(HelpCenterContext);
+  const domNode = useRef<HTMLDivElement>(null);
 
+  let customContent = null;
   let customLinks = null;
   if (helpLinks?.helpExtension) {
-    const { appName, links } = helpLinks.helpExtension;
+    const { appName, links, content } = helpLinks.helpExtension;
 
     customLinks =
       links &&
@@ -42,25 +44,45 @@ export const DocumentationCards = () => {
             break;
         }
       });
+    if (content && domNode.current) {
+      console.log('HERE!!');
+      customContent = content(domNode.current, { hideHelpMenu: () => {} });
+    }
   }
 
+  useEffect(() => {
+    if (helpLinks?.helpExtension) {
+      const { content } = helpLinks.helpExtension;
+
+      if (content && domNode.current) {
+        console.log('HERE!!');
+        customContent = content(domNode.current, { hideHelpMenu: () => {} });
+      }
+      console.log(customContent, domNode.current);
+    }
+  }, [domNode]);
+
   return (
-    <EuiFlexGroup gutterSize="l">
-      {customLinks}
-      <EuiFlexItem key={'kibana_docs'}>
-        <EuiCard
-          icon={<EuiIcon size="xl" type={`logoKibana`} />}
-          title={
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-              defaultMessage="Kibana"
-            />
-          }
-          description="Example of a card's description. Stick to one or two sentences."
-          target="_blank"
-          href={helpLinks?.kibanaDocLink}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <div ref={domNode} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="l">
+        {customLinks}
+        <EuiFlexItem key={'kibana_docs'}>
+          <EuiCard
+            icon={<EuiIcon size="xl" type={`logoKibana`} />}
+            title={
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
+                defaultMessage="Kibana"
+              />
+            }
+            description="Example of a card's description. Stick to one or two sentences."
+            target="_blank"
+            href={helpLinks?.kibanaDocLink}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

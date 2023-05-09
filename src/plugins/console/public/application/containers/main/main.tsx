@@ -33,10 +33,12 @@ import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+import ReactDOM from 'react-dom';
+import { ConsoleDocumentation } from '../../components/console_documentation';
 
 export function Main() {
   const {
-    services: { storage },
+    services: { storage, chrome },
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
@@ -46,9 +48,26 @@ export function Main() {
     lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
-  const [showWelcome, setShowWelcomePanel] = useState(
-    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
-  );
+  chrome.setHelpExtension({
+    appName: i18n.translate('console.helpMenu.appName', {
+      defaultMessage: 'Console',
+    }),
+    links: [
+      {
+        iconType: 'discoverApp',
+        linkType: 'documentation',
+        href: `https://www.elastic.co/guide/en/kibana/current/console-kibana.html`,
+      },
+    ],
+    content: (domNode, { hideHelpMenu }) => {
+      ReactDOM.render(<ConsoleDocumentation />, domNode);
+      return () => ReactDOM.unmountComponentAtNode(domNode);
+    },
+  });
+
+  // const [showWelcome, setShowWelcomePanel] = useState(
+  //   () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
+  // );
 
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -124,14 +143,14 @@ export function Main() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {done && showWelcome ? (
+      {/* {done && showWelcome ? (
         <WelcomePanel
           onDismiss={() => {
             storage.set('version_welcome_shown', '@@SENSE_REVISION');
             setShowWelcomePanel(false);
           }}
         />
-      ) : null}
+      ) : null} */}
 
       {showSettings ? (
         <Settings onClose={() => setShowSettings(false)} editorInstance={editorInstance} />

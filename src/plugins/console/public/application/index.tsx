@@ -14,6 +14,7 @@ import {
   NotificationsSetup,
   I18nStart,
   CoreTheme,
+  ChromeStart,
   DocLinksStart,
 } from '@kbn/core/public';
 
@@ -34,6 +35,7 @@ import { createApi, createEsHostService } from './lib';
 
 export interface BootDependencies {
   http: HttpSetup;
+  chrome: ChromeStart;
   docLinkVersion: string;
   I18nContext: I18nStart['Context'];
   notifications: NotificationsSetup;
@@ -50,6 +52,7 @@ export function renderApp({
   docLinkVersion,
   usageCollection,
   element,
+  chrome,
   http,
   theme$,
   docLinks,
@@ -79,6 +82,7 @@ export function renderApp({
             docLinkVersion,
             docLinks,
             services: {
+              chrome,
               esHostService,
               storage,
               history,

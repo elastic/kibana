@@ -62,12 +62,14 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           const {
             i18n: { Context: I18nContext },
             docLinks: { DOC_LINK_VERSION, links },
+            chrome,
           } = core;
 
           const { renderApp } = await import('./application');
 
           return renderApp({
             http,
+            chrome,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
             I18nContext,

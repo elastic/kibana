@@ -36,6 +36,7 @@ import {
   euiCanAnimate,
   euiFlyoutSlideInRight,
   useEuiTheme,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -62,14 +63,29 @@ export const HelpCenterFlyout = (
       .map((link, index) => {
         const { content: text, href, image, description } = link;
         return (
-          <EuiSplitPanel.Outer
-            direction="row"
-            css={css`
-              padding-top: 16px;
-              padding-bottom: 16px;
-            `}
-          >
-            <EuiSplitPanel.Inner paddingSize="l">
+          <EuiPanel>
+            <EuiFlexGroup
+              alignItems="center"
+              responsive={true}
+              css={css`
+                width: 100%;
+                height: 100%;
+              `}
+            >
+              <EuiFlexItem grow={2}>
+                <EuiText>
+                  <h2>{text}</h2>
+                  <p>{description}</p>
+                  <EuiButton target="_blank" color="primary" fill href={href}>
+                    Get started!
+                  </EuiButton>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiImage size="fill" src={image} alt="" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {/* <EuiSplitPanel.Inner paddingSize="l" grow={true}>
               <EuiText>
                 <h2>{text}</h2>
                 <p>{description}</p>
@@ -78,10 +94,10 @@ export const HelpCenterFlyout = (
                 </EuiButton>
               </EuiText>
             </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner>
-              <EuiImage size="fullWidth" src={image} alt="" />
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
+            <EuiSplitPanel.Inner grow={false}>
+              <EuiImage size="l" src={image} alt="" />
+            </EuiSplitPanel.Inner> */}
+          </EuiPanel>
         );
       });
   }, [helpLinks?.globalHelpExtensionMenuLinks]);
@@ -105,9 +121,9 @@ export const HelpCenterFlyout = (
             // onChange={onChange}
             />
             <EuiSpacer size="m" />
-            {helpLinks?.globalHelpExtensionMenuLinks && globalCustomContent}
-            <EuiSpacer size="m" />
             <DocumentationCards />
+            <EuiSpacer size="m" />
+            {helpLinks?.globalHelpExtensionMenuLinks && globalCustomContent}
           </>
         ),
       },
@@ -202,6 +218,7 @@ export const HelpCenterFlyout = (
           top: 96px;
           left: 0px;
           padding: 20px;
+          z-index: 1000;
         `}
       >
         <Draggable handle=".handle" bounds="parent" positionOffset={{ x: 0, y: 0 }}>
@@ -214,9 +231,8 @@ export const HelpCenterFlyout = (
               left: calc(100% - 400px);
 
               min-height: 100px;
-              min-width: 33%;
-              max-height: 95%;
-              max-width: 95%;
+              max-height: 100%;
+              max-width: 100%;
             `}
           >
             <EuiPanel
@@ -234,9 +250,33 @@ export const HelpCenterFlyout = (
               className="eui-yScroll"
               data-test-subj="HelpCenterFlyout"
             >
-              <div style={{ backgroundColor: 'green', width: '30%' }} className="handle">
-                Drag from here
-              </div>
+              <EuiButtonIcon
+                className="handle"
+                color={'text'}
+                onClick={() => {}}
+                iconType="grab"
+                aria-label="Help"
+                display={'fill'}
+                css={css`
+                  position: fixed;
+                  top: -30px;
+                  left: 0px;
+                  cursor: 'grabbing';
+                `}
+              />
+
+              <EuiButtonIcon
+                color={'text'}
+                iconType="cross"
+                aria-label="Help"
+                display={'fill'}
+                onClick={closeFlyout}
+                css={css`
+                  position: fixed;
+                  top: -30px;
+                  right: 0px;
+                `}
+              />
 
               <EuiTitle size="s">
                 <h2 id="flyoutSmallTitle">
