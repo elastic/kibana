@@ -28,10 +28,12 @@ import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_con
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createInternalESClientWithContext } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
-import { ApmSettings } from '../../../../common/apm_settings';
+import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 
-function throwNotFoundIfAgentConfigNotAvailable(settings: ApmSettings): void {
-  if (!settings.agentConfigurationAvailable) {
+function throwNotFoundIfAgentConfigNotAvailable(
+  featureFlags: ApmFeatureFlags
+): void {
+  if (!featureFlags.agentConfigurationAvailable) {
     throw Boom.notFound();
   }
 }
@@ -45,7 +47,7 @@ const agentConfigurationRoute = createApmServerRoute({
   ): Promise<{
     configurations: AgentConfiguration[];
   }> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { context, request, params, config } = resources;
 
@@ -70,7 +72,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<AgentConfiguration> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger, context, request, config } = resources;
     const { name, environment, _inspect } = params.query;
@@ -111,7 +113,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<{ result: string }> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const {
       params,
@@ -178,7 +180,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     t.type({ body: agentConfigurationIntakeRt }),
   ]),
   handler: async (resources): Promise<void> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
     const {
       params,
       logger,
@@ -254,7 +256,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger, context, config, request } = resources;
 
@@ -327,7 +329,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   ): Promise<{
     environments: EnvironmentsResponse;
   }> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { context, request, params, config } = resources;
     const [internalESClient, apmEventClient] = await Promise.all([
@@ -372,7 +374,7 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ agentName: string | undefined }> => {
-    throwNotFoundIfAgentConfigNotAvailable(resources.settings);
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
