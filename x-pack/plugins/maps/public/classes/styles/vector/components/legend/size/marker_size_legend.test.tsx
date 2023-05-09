@@ -68,15 +68,17 @@ test('Should render legend', async () => {
 test('Should render legend with 3 markers when size difference does not provide enough vertical space for more labels', async () => {
   const component = shallow(
     <MarkerSizeLegend
-      style={{
-        ...mockStyle,
-        getOptions: () => {
-          return {
-            ...dynamicSizeOptions,
-            maxSize: 24,
-          };
-        },
-      } as unknown as DynamicSizeProperty}
+      style={
+        {
+          ...mockStyle,
+          getOptions: () => {
+            return {
+              ...dynamicSizeOptions,
+              maxSize: 24,
+            };
+          },
+        } as unknown as DynamicSizeProperty
+      }
     />
   );
   // Ensure all promises resolve
@@ -89,15 +91,17 @@ test('Should render legend with 3 markers when size difference does not provide 
 test('Should render legend with 2 markers when size difference does not provide enough vertical space for more labels', async () => {
   const component = shallow(
     <MarkerSizeLegend
-      style={{
-        ...mockStyle,
-        getOptions: () => {
-          return {
-            ...dynamicSizeOptions,
-            maxSize: 15,
-          };
-        },
-      } as unknown as DynamicSizeProperty}
+      style={
+        {
+          ...mockStyle,
+          getOptions: () => {
+            return {
+              ...dynamicSizeOptions,
+              maxSize: 15,
+            };
+          },
+        } as unknown as DynamicSizeProperty
+      }
     />
   );
   // Ensure all promises resolve
@@ -110,15 +114,17 @@ test('Should render legend with 2 markers when size difference does not provide 
 test('Should render legend with only max marker when size difference does not provide enough vertical space for more labels', async () => {
   const component = shallow(
     <MarkerSizeLegend
-      style={{
-        ...mockStyle,
-        getOptions: () => {
-          return {
-            ...dynamicSizeOptions,
-            maxSize: 11,
-          };
-        },
-      } as unknown as DynamicSizeProperty}
+      style={
+        {
+          ...mockStyle,
+          getOptions: () => {
+            return {
+              ...dynamicSizeOptions,
+              maxSize: 11,
+            };
+          },
+        } as unknown as DynamicSizeProperty
+      }
     />
   );
   // Ensure all promises resolve
@@ -131,16 +137,18 @@ test('Should render legend with only max marker when size difference does not pr
 test('Should render legend without label cutoff when min size is 1', async () => {
   const component = shallow(
     <MarkerSizeLegend
-      style={{
-        ...mockStyle,
-        getOptions: () => {
-          return {
-            ...dynamicSizeOptions,
-            minSize: 1,
-            maxSize: 7,
-          };
-        },
-      } as unknown as DynamicSizeProperty}
+      style={
+        {
+          ...mockStyle,
+          getOptions: () => {
+            return {
+              ...dynamicSizeOptions,
+              minSize: 1,
+              maxSize: 7,
+            };
+          },
+        } as unknown as DynamicSizeProperty
+      }
     />
   );
   // Ensure all promises resolve
@@ -153,23 +161,25 @@ test('Should render legend without label cutoff when min size is 1', async () =>
 test('Should render max label with std clamp notification', async () => {
   const component = shallow(
     <MarkerSizeLegend
-      style={{
-        ...mockStyle,
-        getOptions: () => {
-          return {
-            ...dynamicSizeOptions,
-            maxSize: 11,
-          };
-        },
-        getRangeFieldMeta: () => {
-          return {
-            min: 0,
-            max: 16000,
-            delta: 16000,
-            isMaxOutsideStdRange: true,
-          };
-        },
-      } as unknown as DynamicSizeProperty}
+      style={
+        {
+          ...mockStyle,
+          getOptions: () => {
+            return {
+              ...dynamicSizeOptions,
+              maxSize: 11,
+            };
+          },
+          getRangeFieldMeta: () => {
+            return {
+              min: 0,
+              max: 16000,
+              delta: 16000,
+              isMaxOutsideStdRange: true,
+            };
+          },
+        } as unknown as DynamicSizeProperty
+      }
     />
   );
   // Ensure all promises resolve
@@ -182,16 +192,18 @@ test('Should render max label with std clamp notification', async () => {
 test('Should invert legend', async () => {
   const component = shallow(
     <MarkerSizeLegend
-      style={{
-        ...mockStyle,
-        getOptions: () => {
-          return {
-            ...dynamicSizeOptions,
-            maxSize: 24,
-            invert: true,
-          };
-        },
-      } as unknown as DynamicSizeProperty}
+      style={
+        {
+          ...mockStyle,
+          getOptions: () => {
+            return {
+              ...dynamicSizeOptions,
+              maxSize: 24,
+              invert: true,
+            };
+          },
+        } as unknown as DynamicSizeProperty
+      }
     />
   );
   // Ensure all promises resolve
