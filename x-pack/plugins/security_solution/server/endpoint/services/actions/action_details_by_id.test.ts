@@ -80,12 +80,30 @@ describe('When using `getActionDetailsById()', () => {
       status: 'successful',
       createdBy: doc?.user.id,
       parameters: doc?.EndpointActions.data.parameters,
-      outputs: {},
+      outputs: {
+        'agent-a': {
+          content: {
+            code: 'ra_get-file_success_done',
+            contents: [
+              {
+                file_name: 'bad_file.txt',
+                path: '/some/path/bad_file.txt',
+                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+                size: 1234,
+                type: 'file',
+              },
+            ],
+            zip_size: 123,
+          },
+          type: 'json',
+        },
+      },
       agentState: {
         'agent-a': {
           completedAt: '2022-04-30T16:08:47.449Z',
           isCompleted: true,
           wasSuccessful: true,
+          errors: undefined,
         },
       },
     });
