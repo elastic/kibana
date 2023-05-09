@@ -102,7 +102,7 @@ export const useResponseActionsTab = ({
   return {
     id: EventsViewType.responseActionsView,
     'data-test-subj': 'responseActionsViewTab',
-    name: i18n.ENDPOINT_VIEW,
+    name: i18n.RESPONSE_ACTIONS_VIEW,
     append: (
       <EuiNotificationBadge data-test-subj="response-actions-notification">
         {totalItemCount}

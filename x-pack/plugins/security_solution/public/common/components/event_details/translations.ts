@@ -74,6 +74,13 @@ export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails
   defaultMessage: 'Endpoint Results',
 });
 
+export const RESPONSE_ACTIONS_VIEW = i18n.translate(
+  'xpack.securitySolution.eventDetails.responseActionsView',
+  {
+    defaultMessage: 'Response Results',
+  }
+);
+
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',
 });
