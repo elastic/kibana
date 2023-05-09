@@ -174,6 +174,7 @@ function useServicesDetailedStatisticsFetcher({
 
   useEffect(() => {
     const addedElements = cy.add(currentPageMapElements);
+    cy.elements().unselect();
     cy.trigger('custom:data', [addedElements]);
   }, [currentPageMapElements]);
 

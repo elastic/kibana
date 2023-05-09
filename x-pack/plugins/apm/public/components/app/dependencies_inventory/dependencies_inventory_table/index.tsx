@@ -84,6 +84,7 @@ export function DependenciesInventoryTable() {
   const cy = useContext(CytoscapeContext);
   useEffect(() => {
     const addedNodes = cy.add([...(dependencyNodes ?? [])]);
+    cy.elements().unselect();
     cy.trigger('custom:data', [addedNodes]);
   }, [dependencyNodes]);
 
