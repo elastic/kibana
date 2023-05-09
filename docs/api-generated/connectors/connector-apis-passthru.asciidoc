@@ -19,6 +19,7 @@ Any modifications made to this file will be overwritten.
   <h4><a href="#Connectors">Connectors</a></h4>
   <ul>
   <li><a href="#createConnector"><code><span class="http-method">post</span> /s/{spaceId}/api/actions/connector</code></a></li>
+  <li><a href="#createConnectorId"><code><span class="http-method">post</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#deleteConnector"><code><span class="http-method">delete</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnector"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnectorTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector_types</code></a></li>
@@ -46,9 +47,75 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">spaceId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">id (required)</div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated. default: null </div>
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Create_connector_request_body_properties <a href="#Create_connector_request_body_properties">Create_connector_request_body_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#connector_response_properties">connector_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#connector_response_properties">connector_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#Unauthorized_response">Unauthorized_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createConnectorId"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></pre></div>
+    <div class="method-summary">Creates a connector. (<span class="nickname">createConnectorId</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">connectorId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
