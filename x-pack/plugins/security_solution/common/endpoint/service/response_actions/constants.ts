@@ -118,7 +118,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
 >({
   isolate: 'canIsolateHost',
   release: 'canUnIsolateHost',
-  execute: 'canWriteFileOperations',
+  execute: 'canWriteExecuteOperations',
   'get-file': 'canWriteFileOperations',
   upload: 'canWriteFileOperations',
   processes: 'canGetRunningProcesses',
