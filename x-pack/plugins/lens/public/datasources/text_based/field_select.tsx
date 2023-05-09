@@ -39,7 +39,7 @@ export function FieldSelect({
         const dataType = field?.meta?.type as DataType;
         return {
           compatible: field.compatible ? 1 : 0,
-          exists: true,
+          // exists: true,
           label: field.name,
           value: {
             type: 'field' as FieldOptionValue['type'],

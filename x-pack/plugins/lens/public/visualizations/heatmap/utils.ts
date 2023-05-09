@@ -17,7 +17,7 @@ export function getSafePaletteParams(
   accessor: string | undefined,
   activePalette?: HeatmapVisualizationState['palette']
 ) {
-  if (currentData == null || accessor == null) {
+  if (accessor == null) {
     return { displayStops: [], activePalette };
   }
   const finalActivePalette: Palette = activePalette ?? {

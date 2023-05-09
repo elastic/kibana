@@ -110,8 +110,10 @@ import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/emb
 import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
+  TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
+import { getConfigPanel } from './app_plugin/shared/config_panel_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
@@ -212,6 +214,14 @@ export interface LensPublicStart {
    */
   SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
   /**
+   * React component which can be used to embed a Lens Visualization Config Panel Component.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  ConfigPanelComponentApi: () => Promise<ConfigPanelComponent>;
+  /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
    *
@@ -253,6 +263,15 @@ export type LensSuggestionsApi = (
   dataViews: DataView,
   excludedVisualizations?: string[]
 ) => Suggestion[] | undefined;
+
+export type ConfigPanelComponent = React.ComponentType<{
+  attributes: TypedLensByValueInput['attributes'];
+  dataView: DataView;
+  updateVisualizationState: (state: unknown) => void;
+  updateDatasourceState: (state: unknown) => void;
+  updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
+  setIsFlyoutVisible: (flag: boolean) => void;
+}>;
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
@@ -638,6 +657,16 @@ export class LensPlugin {
             });
           },
         };
+      },
+      ConfigPanelComponentApi: async () => {
+        if (!this.editorFrameService) {
+          this.initDependenciesForApi();
+        }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
+        return getConfigPanel(core, startDependencies, visualizationMap, datasourceMap);
       },
     };
   }

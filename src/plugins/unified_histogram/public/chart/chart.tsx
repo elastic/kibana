@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState, useEffect, useCallback } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -15,11 +15,11 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  // EuiFlyout,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Suggestion } from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, Suggestion } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
@@ -112,6 +112,9 @@ export function Chart({
   onBrushEnd,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [ConfigPanel, setConfigPanel] = useState<JSX.Element | null>(null);
+  const [suggestion, setSuggestion] = useState(currentSuggestion);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -162,7 +165,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
-    currentSuggestion,
+    currentSuggestion: suggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -202,18 +205,78 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
-        suggestion: currentSuggestion,
+        suggestion,
       }),
-    [
-      breakdown?.field,
-      chart?.timeInterval,
-      chart?.title,
-      currentSuggestion,
-      dataView,
-      filters,
-      query,
-    ]
+    [breakdown?.field, chart?.timeInterval, chart?.title, suggestion, dataView, filters, query]
   );
+  const updateVisualizationState = useCallback(
+    (state) => {
+      const updatedSuggestion = {
+        ...suggestion,
+        visualizationState: state,
+      } as Suggestion;
+      setSuggestion(updatedSuggestion);
+    },
+    [suggestion]
+  );
+
+  const updateDatasourceState = useCallback(
+    (state) => {
+      const updatedSuggestion = {
+        ...suggestion,
+        datasourceState: state,
+      } as Suggestion;
+      setSuggestion(updatedSuggestion);
+    },
+    [suggestion]
+  );
+
+  const updateAll = useCallback(
+    (datasourceState, visualizationState) => {
+      const updatedSuggestion = {
+        ...suggestion,
+        datasourceState,
+        visualizationState,
+      } as Suggestion;
+      setSuggestion(updatedSuggestion);
+    },
+    [suggestion]
+  );
+
+  useEffect(() => {
+    if (isPlainRecord) {
+      setSuggestion(currentSuggestion);
+    }
+  }, [currentSuggestion, isPlainRecord]);
+
+  useEffect(() => {
+    async function fetchLensConfigComponent() {
+      const Component = await services.lens.ConfigPanelComponentApi();
+      const panel = (
+        <Component
+          attributes={lensAttributesContext.attributes}
+          dataView={dataView}
+          updateVisualizationState={updateVisualizationState}
+          updateDatasourceState={updateDatasourceState}
+          updateAll={updateAll}
+          setIsFlyoutVisible={setIsFlyoutVisible}
+        />
+      );
+      setConfigPanel(panel);
+    }
+    if (isPlainRecord && !isFlyoutVisible) {
+      fetchLensConfigComponent();
+    }
+  }, [
+    lensAttributesContext.attributes,
+    services.lens,
+    dataView,
+    updateVisualizationState,
+    updateDatasourceState,
+    updateAll,
+    isPlainRecord,
+    isFlyoutVisible,
+  ]);
 
   const onEditVisualization = useEditVisualization({
     services,
@@ -223,6 +286,17 @@ export function Chart({
   });
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
+  // const panel = ConfigPanel && (
+  //   <ConfigPanel
+  //     attributes={lensAttributesContext.attributes}
+  //     dataView={dataView}
+  //     updateVisualizationState={updateVisualizationState}
+  //     updateDatasourceState={updateDatasourceState}
+  //     updateAll={updateAll}
+  //     setIsFlyoutVisible={setIsFlyoutVisible}
+  //     isFlyoutVisible={isFlyoutVisible}
+  //   />
+  // );
 
   return (
     <EuiFlexGroup
@@ -264,16 +338,16 @@ export function Chart({
                     />
                   </EuiFlexItem>
                 )}
-                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                {chartVisible && suggestion && allSuggestions && allSuggestions?.length > 1 && (
                   <EuiFlexItem css={breakdownFieldSelectorItemCss}>
                     <SuggestionSelector
                       suggestions={allSuggestions}
-                      activeSuggestion={currentSuggestion}
+                      activeSuggestion={suggestion}
                       onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
                 )}
-                {onEditVisualization && (
+                {onEditVisualization && !isPlainRecord && (
                   <EuiFlexItem grow={false} css={chartToolButtonCss}>
                     <EuiToolTip
                       content={i18n.translate('unifiedHistogram.editVisualizationButton', {
@@ -293,23 +367,42 @@ export function Chart({
                   </EuiFlexItem>
                 )}
                 {isPlainRecord && (
-                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                    <EuiToolTip
-                      content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
-                        defaultMessage: 'Save visualization',
-                      })}
-                    >
-                      <EuiButtonIcon
-                        size="xs"
-                        iconType="save"
-                        onClick={() => setIsSaveModalVisible(true)}
-                        data-test-subj="unifiedHistogramSaveVisualization"
-                        aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                  <>
+                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
                           defaultMessage: 'Save visualization',
                         })}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="save"
+                          onClick={() => setIsSaveModalVisible(true)}
+                          data-test-subj="unifiedHistogramSaveVisualization"
+                          aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
+                            defaultMessage: 'Save visualization',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                      <EuiToolTip
+                        content={i18n.translate('unifiedHistogram.editVisualizationButton', {
+                          defaultMessage: 'Edit visualization',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="pencil"
+                          onClick={() => setIsFlyoutVisible(true)}
+                          data-test-subj="unifiedHistogramEditFlyoutVisualization"
+                          aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
+                            defaultMessage: 'Edit visualization',
+                          })}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </>
                 )}
                 <EuiFlexItem grow={false} css={chartToolButtonCss}>
                   <EuiPopover
@@ -382,6 +475,7 @@ export function Chart({
           onClose={() => setIsSaveModalVisible(false)}
         />
       )}
+      {isFlyoutVisible && ConfigPanel}
     </EuiFlexGroup>
   );
 }

@@ -45,6 +45,7 @@ export function FlyoutContainer({
   isFullscreen,
   panelRef,
   children,
+  enableBackButton,
 }: {
   isOpen: boolean;
   handleClose: () => boolean;
@@ -52,6 +53,7 @@ export function FlyoutContainer({
   groupLabel: string;
   isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
+  enableBackButton?: boolean;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
@@ -104,6 +106,20 @@ export function FlyoutContainer({
         >
           <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              {enableBackButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-PalettePanelContainerBack"
+                    className="lnsPalettePanelContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="sortLeft"
+                    aria-label={i18n.translate('xpack.lens.table.palettePanelContainer.back', {
+                      defaultMessage: 'Back',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={true}>
                 <EuiTitle size="xs">
                   <h2
@@ -119,19 +135,20 @@ export function FlyoutContainer({
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  data-test-subj="lns-indexPattern-dimensionContainerBack"
-                  className="lnsDimensionContainer__backIcon"
-                  onClick={closeFlyout}
-                  iconType="cross"
-                  aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
-                    defaultMessage: 'Close configuration',
-                  })}
-                />
-              </EuiFlexItem>
+              {!enableBackButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-dimensionContainerBack"
+                    className="lnsDimensionContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="cross"
+                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                      defaultMessage: 'Close configuration',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 

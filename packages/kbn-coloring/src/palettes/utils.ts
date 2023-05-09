@@ -154,8 +154,8 @@ export function getDataMinMax(
   rangeType: CustomPaletteParams['rangeType'] | undefined,
   dataBounds: DataBounds
 ) {
-  const dataMin = rangeType === 'number' ? dataBounds.min : DEFAULT_MIN_STOP;
-  const dataMax = rangeType === 'number' ? dataBounds.max : DEFAULT_MAX_STOP;
+  const dataMin = rangeType === 'number' ? dataBounds?.min : DEFAULT_MIN_STOP;
+  const dataMax = rangeType === 'number' ? dataBounds?.max : DEFAULT_MAX_STOP;
   return { min: dataMin, max: dataMax };
 }
 
