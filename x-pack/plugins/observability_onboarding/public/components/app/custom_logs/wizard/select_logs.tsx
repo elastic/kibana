@@ -45,6 +45,18 @@ export function SelectLogs() {
           defaultMessage: 'What logs do you want to collect?',
         }
       )}
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButton color="ghost" fill onClick={onBack}>
+              {i18n.translate('xpack.observability_onboarding.steps.back', {
+                defaultMessage: 'Back',
+              })}
+            </EuiButton>,
+            <></>,
+          ]}
+        />
+      }
     >
       <StepPanelContent>
         <EuiFlexGroup>
@@ -187,16 +199,6 @@ export function SelectLogs() {
           </EuiLink>
         </LogsTypeSection>
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="ghost" fill onClick={onBack}>
-            {i18n.translate('xpack.observability_onboarding.steps.back', {
-              defaultMessage: 'Back',
-            })}
-          </EuiButton>,
-          <></>,
-        ]}
-      />
     </StepPanel>
   );
 }

@@ -951,7 +951,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_response_properties_servicenow"><code>connector_response_properties_servicenow</code> - Connector response properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#connector_response_properties_servicenow_itom"><code>connector_response_properties_servicenow_itom</code> - Connector response properties for a ServiceNow ITOM connector</a></li>
     <li><a href="#connector_response_properties_servicenow_sir"><code>connector_response_properties_servicenow_sir</code> - Connector response properties for a ServiceNow SecOps connector</a></li>
-    <li><a href="#connector_response_properties_slack"><code>connector_response_properties_slack</code> - Connector response properties for a Slack connector</a></li>
+    <li><a href="#connector_response_properties_slack_api"><code>connector_response_properties_slack_api</code> - Connector response properties for a Slack connector</a></li>
+    <li><a href="#connector_response_properties_slack_webhook"><code>connector_response_properties_slack_webhook</code> - Connector response properties for a Slack connector</a></li>
     <li><a href="#connector_response_properties_swimlane"><code>connector_response_properties_swimlane</code> - Connector response properties for a Swimlane connector</a></li>
     <li><a href="#connector_response_properties_teams"><code>connector_response_properties_teams</code> - Connector response properties for a Microsoft Teams connector</a></li>
     <li><a href="#connector_response_properties_tines"><code>connector_response_properties_tines</code> - Connector response properties for a Tines connector</a></li>
@@ -1015,6 +1016,9 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
     <li><a href="#secrets_properties_resilient"><code>secrets_properties_resilient</code> - Connector secrets properties for IBM Resilient connector</a></li>
     <li><a href="#secrets_properties_servicenow"><code>secrets_properties_servicenow</code> - Connector secrets properties for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors</a></li>
+    <li><a href="#secrets_properties_slack"><code>secrets_properties_slack</code> - Connector secrets properties for a Slack connector</a></li>
+    <li><a href="#secrets_properties_slack_oneOf"><code>secrets_properties_slack_oneOf</code> - </a></li>
+    <li><a href="#secrets_properties_slack_oneOf_1"><code>secrets_properties_slack_oneOf_1</code> - </a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
@@ -1025,6 +1029,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_serverlog"><code>update_connector_request_serverlog</code> - Update server log connector request</a></li>
     <li><a href="#update_connector_request_servicenow"><code>update_connector_request_servicenow</code> - Update ServiceNow ITSM connector or ServiceNow SecOps request</a></li>
     <li><a href="#update_connector_request_servicenow_itom"><code>update_connector_request_servicenow_itom</code> - Create ServiceNow ITOM connector request</a></li>
+    <li><a href="#update_connector_request_slack"><code>update_connector_request_slack</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
   </ol>
 
@@ -1543,7 +1548,21 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="connector_response_properties_slack"><code>connector_response_properties_slack</code> - Connector response properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="connector_response_properties_slack_api"><code>connector_response_properties_slack_api</code> - Connector response properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.slack_api</div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
+<div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
+<div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_response_properties_slack_webhook"><code>connector_response_properties_slack_webhook</code> - Connector response properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
@@ -1773,7 +1792,7 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.slack</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.slack</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_slack">secrets_properties_slack</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2221,6 +2240,28 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_slack"><code>secrets_properties_slack</code> - Connector secrets properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.slack</code>.</div>
+    <div class="field-items">
+      <div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Slack bot user OAuth token. </div>
+<div class="param">webhookUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Slack webhook url. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="secrets_properties_slack_oneOf"><code>secrets_properties_slack_oneOf</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Slack bot user OAuth token. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="secrets_properties_slack_oneOf_1"><code>secrets_properties_slack_oneOf_1</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">webhookUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The Slack webhook url. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.swimlane</code>.</div>
     <div class="field-items">
@@ -2303,6 +2344,17 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_servicenow_itom">config_properties_servicenow_itom</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_servicenow">secrets_properties_servicenow</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_slack"><code>update_connector_request_slack</code> - Update Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">web_api</div><div class="param-enum">webhook</div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_slack">secrets_properties_slack</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

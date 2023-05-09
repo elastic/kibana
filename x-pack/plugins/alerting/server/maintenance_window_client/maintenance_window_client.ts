@@ -71,6 +71,6 @@ export class MaintenanceWindowClient {
     archive(this.context, params);
   public finish = (params: FinishParams): Promise<MaintenanceWindow> =>
     finish(this.context, params);
-  public getActiveMaintenanceWindows = (params: ActiveParams): Promise<MaintenanceWindow[]> =>
+  public getActiveMaintenanceWindows = (params?: ActiveParams): Promise<MaintenanceWindow[]> =>
     getActiveMaintenanceWindows(this.context, params);
 }

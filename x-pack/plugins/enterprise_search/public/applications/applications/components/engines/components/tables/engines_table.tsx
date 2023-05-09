@@ -66,7 +66,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       render: (name: string) => (
         <EuiLinkTo
           data-test-subj="engine-link"
-          data-telemetry-id="entSearchContent-engines-table-viewEngine"
+          data-telemetry-id="entSearchApplications-table-viewEngine"
           to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
         >
           {name}
@@ -95,7 +95,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           size="s"
           className="engineListTableFlyoutButton"
           data-test-subj="engineListTableIndicesFlyoutButton"
-          data-telemetry-id="entSearchContent-engines-table-viewEngineIndices"
+          data-telemetry-id="entSearchApplications-table-viewEngineIndices"
           onClick={() => viewEngineIndices(engine.name)}
         >
           <FormattedMessage
@@ -151,7 +151,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
             onDelete(engine);
             sendEnterpriseSearchTelemetry({
               action: 'clicked',
-              metric: 'entSearchContent-engines-table-deleteEngine',
+              metric: 'entSearchApplications-table-deleteEngine',
             });
           },
         },

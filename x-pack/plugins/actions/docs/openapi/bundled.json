@@ -318,6 +318,9 @@
                     "$ref": "#/components/schemas/update_connector_request_servicenow_itom"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_slack"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_swimlane"
                   }
                 ]
@@ -1948,8 +1951,32 @@
       "secrets_properties_slack": {
         "title": "Connector secrets properties for a Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
-        "type": "object",
-        "additionalProperties": true
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "token"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "The Slack bot user OAuth token."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "webhookUrl"
+            ],
+            "properties": {
+              "webhookUrl": {
+                "type": "string",
+                "description": "The Slack webhook url."
+              }
+            }
+          }
+        ]
       },
       "create_connector_request_slack": {
         "title": "Create Slack connector request",
@@ -3345,6 +3372,30 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
+          }
+        }
+      },
+      "update_connector_request_slack": {
+        "title": "Update Slack connector request",
+        "type": "object",
+        "required": [
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "config": {
+            "type": "string",
+            "enum": [
+              "web_api",
+              "webhook"
+            ]
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_slack"
           }
         }
       },

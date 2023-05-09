@@ -16,7 +16,7 @@ export const MESSAGE_REQUIRED = i18n.translate(
 export const CHANNEL_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack.error.requiredSlackChannel',
   {
-    defaultMessage: 'Selected channel is required.',
+    defaultMessage: 'Channel is required.',
   }
 );
 export const TOKEN_LABEL = i18n.translate(
@@ -31,7 +31,7 @@ export const WEB_API = i18n.translate('xpack.stackConnectors.components.slack.we
 export const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.slack.selectMessageText',
   {
-    defaultMessage: 'Send a message to a Slack channel or user.',
+    defaultMessage: 'Send messages to Slack channels.',
   }
 );
 export const ACTION_TYPE_TITLE = i18n.translate(

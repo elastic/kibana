@@ -832,8 +832,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
+              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"

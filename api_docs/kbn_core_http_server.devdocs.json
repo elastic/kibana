@@ -4063,42 +4063,10 @@
                 ]
               }
             ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-http-server",
-        "id": "def-common.IRouterWithVersion",
-        "type": "Interface",
-        "tags": [],
-        "label": "IRouterWithVersion",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouterWithVersion",
-            "text": "IRouterWithVersion"
           },
-          "<Context> extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
-          "<Context>"
-        ],
-        "path": "packages/core/http/core-http-server/src/router/router.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
           {
             "parentPluginId": "@kbn/core-http-server",
-            "id": "def-common.IRouterWithVersion.versioned",
+            "id": "def-common.IRouter.versioned",
             "type": "Object",
             "tags": [
               "experimental"

@@ -34,10 +34,10 @@ export interface ActiveParams {
 
 export async function getActiveMaintenanceWindows(
   context: MaintenanceWindowClientContext,
-  params: ActiveParams
+  params?: ActiveParams
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
-  const { start, interval } = params;
+  const { start, interval } = params || {};
 
   const startDate = start ? new Date(start) : new Date();
   const duration = interval ? parseDuration(interval) : 0;

@@ -15,7 +15,7 @@ export const EngineHeaderDocsAction: React.FC = () => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem>
       <EuiButtonEmpty
-        data-telemetry-id="entSearchContent-engines-engineHeader-documentationLink"
+        data-telemetry-id="entSearchApplications-engineHeader-documentationLink"
         data-test-subj="engine-documentation-link"
         href={docLinks.enterpriseSearchEngines}
         target="_blank"

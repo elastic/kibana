@@ -302,6 +302,7 @@ export interface DocLinks {
       value_lists: string;
     };
     readonly privileges: string;
+    readonly manageDetectionRules: string;
   };
   readonly query: {
     readonly eql: string;
