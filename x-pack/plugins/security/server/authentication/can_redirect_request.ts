@@ -11,7 +11,6 @@ import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
 
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_VERSION_HEADER = 'kbn-version';
-const X_ELASTIC_INTERNAL_ORIGIN_REQUEST = 'x-elastic-internal-origin';
 
 /**
  * Checks whether we can reply to the request with redirect response. We can do that
@@ -23,13 +22,12 @@ export function canRedirectRequest(request: KibanaRequest) {
   const route = request.route;
   const hasVersionHeader = headers.hasOwnProperty(KIBANA_VERSION_HEADER);
   const hasXsrfHeader = headers.hasOwnProperty(KIBANA_XSRF_HEADER);
-  const hasIternalOriginHeader = headers.hasOwnProperty(X_ELASTIC_INTERNAL_ORIGIN_REQUEST);
 
   const isApiRoute =
     route.options.tags.includes(ROUTE_TAG_API) ||
     route.path.startsWith('/api/') ||
     route.path.startsWith('/internal/');
-  const isAjaxRequest = hasVersionHeader || hasXsrfHeader || hasIternalOriginHeader;
+  const isAjaxRequest = hasVersionHeader || hasXsrfHeader;
 
   return !isAjaxRequest && (!isApiRoute || route.options.tags.includes(ROUTE_TAG_CAN_REDIRECT));
 }

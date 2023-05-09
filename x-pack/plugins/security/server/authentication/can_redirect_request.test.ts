@@ -11,7 +11,7 @@ import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
 import { canRedirectRequest } from './can_redirect_request';
 
 describe('can_redirect_request', () => {
-  it('returns true if request does not have either a kbn-version or kbn-xsrf header', () => {
+  it('returns true if request does not have either a kbn-version or kbn-xsrf header or x-elastic-internal-origin', () => {
     expect(canRedirectRequest(httpServerMock.createKibanaRequest())).toBe(true);
   });
 
@@ -26,12 +26,12 @@ describe('can_redirect_request', () => {
     expect(canRedirectRequest(request)).toBe(false);
   });
 
-  it('returns false if request has a x-elastic-internal-origin header', () => {
+  it('returns true if request has a x-elastic-internal-origin header', () => {
     const request = httpServerMock.createKibanaRequest({
       headers: { 'x-elastic-internal-origin': 'something' },
     });
 
-    expect(canRedirectRequest(request)).toBe(false);
+    expect(canRedirectRequest(request)).toBe(true);
   });
 
   it('returns false for api routes', () => {
