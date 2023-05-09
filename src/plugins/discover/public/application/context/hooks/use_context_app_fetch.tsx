@@ -23,6 +23,7 @@ import { AppState } from '../services/context_state';
 import { getFirstSortableField } from '../utils/sorting';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../../types';
+import { getEsQuerySort } from '../utils/get_es_query_sort';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -91,10 +92,12 @@ export function useContextAppFetch({
 
     try {
       setState({ anchorStatus: { value: LoadingStatus.LOADING } });
-      const sort = [
-        { [dataView.timeFieldName!]: SortDirection.desc },
-        { [tieBreakerField]: SortDirection.desc },
-      ];
+      const sort = getEsQuerySort(
+        dataView.timeFieldName!,
+        tieBreakerField,
+        SortDirection.desc,
+        dataView.isTimeNanosBased()
+      );
       const anchor = await fetchAnchor(anchorId, dataView, searchSource, sort, useNewFieldsApi);
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;

@@ -38,6 +38,7 @@ export function getSortForSearchSource(
         [timeFieldName]: {
           order: sortPair[timeFieldName],
           numeric_type: 'date_nanos',
+          format: 'strict_date_optional_time_nanos',
         },
       } as EsQuerySortValue;
     }

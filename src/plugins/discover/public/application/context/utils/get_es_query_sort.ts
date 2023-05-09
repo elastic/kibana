@@ -14,19 +14,24 @@ import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
  * @param timeField
  * @param tieBreakerField
  * @param sortDir
- * @param nanos
+ * @param isTimeNanosBased
  */
 export function getEsQuerySort(
   timeField: string,
   tieBreakerField: string,
   sortDir: SortDirection,
-  nanos?: string
+  isTimeNanosBased: boolean
 ): [EsQuerySortValue, EsQuerySortValue] {
   return [
     {
       [timeField]: {
         order: sortDir,
-        format: nanos ? 'strict_date_optional_time_nanos' : 'strict_date_optional_time',
+        ...(isTimeNanosBased
+          ? {
+              format: 'strict_date_optional_time_nanos',
+              numeric_type: 'date_nanos',
+            }
+          : { format: 'strict_date_optional_time' }),
       },
     },
     { [tieBreakerField]: sortDir },

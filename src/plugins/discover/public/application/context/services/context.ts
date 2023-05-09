@@ -73,16 +73,14 @@ export async function fetchSurroundingDocs(
       break;
     }
 
-    const searchAfter = getEsQuerySearchAfter(
-      type,
-      documents,
-      timeField,
-      anchor,
-      nanos,
-      useNewFieldsApi
-    );
+    const searchAfter = getEsQuerySearchAfter(type, documents, timeField, anchor);
 
-    const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
+    const sort = getEsQuerySort(
+      timeField,
+      tieBreakerField,
+      sortDirToApply,
+      dataView.isTimeNanosBased()
+    );
 
     const hits = await fetchHitsInInterval(
       searchSource,
