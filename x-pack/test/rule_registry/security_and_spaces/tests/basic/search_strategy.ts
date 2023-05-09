@@ -173,6 +173,37 @@ export default ({ getService }: FtrProviderContext) => {
           `The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
       });
+
+      it('should be able to handle runtime fields on alerts from siem rules', async () => {
+        const runtimeFieldValue = 'hello world';
+        const runtimeFieldKey = 'hello_world';
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAllEsRead.username,
+            password: obsOnlySpacesAllEsRead.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          options: {
+            featureIds: [AlertConsumers.SIEM],
+            runtimeMappings: {
+              [runtimeFieldKey]: {
+                type: 'keyword',
+                script: {
+                  source: `emit('${runtimeFieldValue}')`,
+                },
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+        expect(result.rawResponse.hits.total).to.eql(1);
+        const runtimeFields = result.rawResponse.hits.hits.map(
+          (hit) => hit.fields?.[runtimeFieldKey]
+        );
+        expect(runtimeFields.every((field) => field === runtimeFieldValue));
+      });
     });
 
     describe('apm', () => {

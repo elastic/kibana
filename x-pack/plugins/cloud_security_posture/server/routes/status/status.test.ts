@@ -248,6 +248,22 @@ describe('calculateIntegrationStatus for vul_mgmt', () => {
       [VULN_MGMT_POLICY_TEMPLATE]
     );
 
+    expect(statusCode).toMatch('waiting_for_results');
+  });
+
+  it('Verify status when there are installed policies, healthy agents and no vul_mgmt findings and been more than 1 hour', async () => {
+    const statusCode = calculateIntegrationStatus(
+      VULN_MGMT_POLICY_TEMPLATE,
+      {
+        latest: 'empty',
+        stream: 'empty',
+        score: 'empty',
+      },
+      1,
+      61,
+      [VULN_MGMT_POLICY_TEMPLATE]
+    );
+
     expect(statusCode).toMatch('index-timeout');
   });
 

@@ -31,7 +31,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
       <EuiToolTip
         content={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButton.mlPermissions.disabledTooltip',
-          { defaultMessage: 'You do not have permission to Machine Learning on this cluster.' }
+          { defaultMessage: 'You do not have permission to use Machine Learning on this cluster.' }
         )}
       >
         <AddButton ingestionMethod={ingestionMethod} disabled />
