@@ -47,7 +47,8 @@ interface SpecialWord {
 
 // const WORD = `\b\w+\b`;
 // const NOTSPACE = `\S+`;
-// const DATA = `.*?`;
+const DATA = `.*?`;
+const GREEDYDATA = `.*`;
 const INT = `(?:[+-]?(?:[0-9]+))`;
 // (?:(?<![0-9.+-])(?=([+-]?(?:(?:[0-9]+(?:\.[0-9]+)?)|(?:\.[0-9]+))))\1)
 // const BASE10NUM = `(?<![0-9.+-])(?=([+-]?(?:(?:[0-9]+(?:\.[0-9]+)?)|(?:\.[0-9]+))))\\1`;
@@ -309,6 +310,10 @@ function processLine(
           return `(${TIMESTAMP_ISO8601})`;
         case 'LOGLEVEL':
           return `(${LOGLEVEL})`;
+        case 'DATA':
+          return `(${DATA})`;
+        case 'GREEDYDATA':
+          return `(${GREEDYDATA})`;
         // case 'HTTPDATE':
         //   return `(${HTTPDATE})`;
         // case 'WORD':
