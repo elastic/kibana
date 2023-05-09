@@ -75,7 +75,6 @@ import {
   type ISavedObjectsSecurityExtension,
   type ISavedObjectsSpacesExtension,
   type CheckAuthorizationResult,
-  type AuthorizationTypeMap,
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
   type AuthorizeBulkGetObject,
@@ -91,13 +90,11 @@ import {
 } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsSerializer,
-  SavedObjectsTypeValidator,
   decodeRequestVersion,
   encodeVersion,
   encodeHitVersion,
   getRootPropertiesObjects,
   LEGACY_URL_ALIAS_TYPE,
-  getIndexForType,
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -140,6 +137,14 @@ import type {
   ExpectedBulkDeleteMultiNamespaceDocsParams,
   ObjectToDeleteAliasesFor,
 } from './repository_bulk_delete_internal_types';
+import {
+  CommonHelper,
+  EncryptionHelper,
+  ValidationHelper,
+  PreflightCheckHelper,
+  type PreflightCheckNamespacesResult,
+} from './helpers';
+import { isFoundGetResponse, getSavedObjectNamespaces } from './utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -161,35 +166,6 @@ export const DEFAULT_RETRY_COUNT = 3;
 
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 
-/**
- * @internal
- */
-interface PreflightCheckNamespacesParams {
-  /** The object type to fetch */
-  type: string;
-  /** The object ID to fetch */
-  id: string;
-  /** The current space */
-  namespace: string | undefined;
-  /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
-  initialNamespaces?: string[];
-}
-
-/**
- * @internal
- */
-interface PreflightCheckNamespacesResult {
-  /** If the object exists, and whether or not it exists in the current space */
-  checkResult: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
-  /**
-   * What namespace(s) the object should exist in, if it needs to be created; practically speaking, this will never be undefined if
-   * checkResult == not_found or checkResult == found_in_namespace
-   */
-  savedObjectNamespaces?: string[];
-  /** The source of the raw document, if the object already exists */
-  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
-}
-
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
 }
@@ -204,17 +180,19 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
  */
 export class SavedObjectsRepository implements ISavedObjectsRepository {
   private _migrator: IKibanaMigrator;
-  private _index: string;
   private _mappings: IndexMapping;
   private _registry: ISavedObjectTypeRegistry;
   private _allowedTypes: string[];
-  private typeValidatorMap: Record<string, SavedObjectsTypeValidator> = {};
   private readonly client: RepositoryEsClient;
   private readonly _encryptionExtension?: ISavedObjectsEncryptionExtension;
   private readonly _securityExtension?: ISavedObjectsSecurityExtension;
   private readonly _spacesExtension?: ISavedObjectsSpacesExtension;
   private _serializer: SavedObjectsSerializer;
   private _logger: Logger;
+  private commonHelper: CommonHelper;
+  private encryptionHelper: EncryptionHelper;
+  private validationHelper: ValidationHelper;
+  private preflightCheckHelper: PreflightCheckHelper;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
@@ -275,27 +253,42 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       extensions,
     } = options;
 
-    // It's important that we migrate documents / mark them as up-to-date
-    // prior to writing them to the index. Otherwise, we'll cause unnecessary
-    // index migrations to run at Kibana startup, and those will probably fail
-    // due to invalidly versioned documents in the index.
-    //
-    // The migrator performs double-duty, and validates the documents prior
-    // to returning them.
-    this._migrator = migrator;
-    this._index = index;
-    this._mappings = mappings;
-    this._registry = typeRegistry;
-    this.client = createRepositoryEsClient(client);
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
+
+    this._migrator = migrator;
+    this._mappings = mappings;
+    this._registry = typeRegistry;
+    this.client = createRepositoryEsClient(client);
     this._allowedTypes = allowedTypes;
     this._serializer = serializer;
     this._logger = logger;
     this._encryptionExtension = extensions?.encryptionExtension;
     this._securityExtension = extensions?.securityExtension;
     this._spacesExtension = extensions?.spacesExtension;
+    this.commonHelper = new CommonHelper({
+      spaceExtension: extensions?.spacesExtension,
+      defaultIndex: index,
+      kibanaVersion: migrator.kibanaVersion,
+      registry: typeRegistry,
+    });
+    this.encryptionHelper = new EncryptionHelper({
+      encryptionExtension: extensions?.encryptionExtension,
+      securityExtension: extensions?.securityExtension,
+    });
+    this.validationHelper = new ValidationHelper({
+      registry: typeRegistry,
+      logger,
+      kibanaVersion: migrator.kibanaVersion,
+    });
+    this.preflightCheckHelper = new PreflightCheckHelper({
+      getIndexForType: this.commonHelper.getIndexForType.bind(this.commonHelper),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+      serializer,
+      registry: typeRegistry,
+      client: this.client,
+    });
   }
 
   /**
@@ -323,8 +316,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
     const id = this.getValidId(type, options.id, options.version, options.overwrite);
-    this.validateInitialNamespaces(type, initialNamespaces);
-    this.validateOriginId(type, options);
+    this.validationHelper.validateInitialNamespaces(type, initialNamespaces);
+    this.validationHelper.validateOriginId(type, options);
 
     const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
@@ -383,7 +376,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       originId,
-      attributes: await this.optionallyEncryptAttributes(
+      attributes: await this.encryptionHelper.optionallyEncryptAttributes(
         type,
         id,
         savedObjectNamespace, // if single namespace type, this is the first in initialNamespaces. If multi-namespace type this is options.namespace/current namespace.
@@ -404,7 +397,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
      * migration to fail, but it's the best we can do without devising a way to run validations
      * inside the migration algorithm itself.
      */
-    this.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
+    this.validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
@@ -427,7 +420,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
     }
 
-    return this.optionallyDecryptAndRedactSingleResult(
+    return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
       this._rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),
       authorizationResult?.typeMap,
       attributes
@@ -469,8 +462,8 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       } else {
         try {
           id = this.getValidId(type, requestId, version, overwrite);
-          this.validateInitialNamespaces(type, initialNamespaces);
-          this.validateOriginId(type, object);
+          this.validationHelper.validateInitialNamespaces(type, initialNamespaces);
+          this.validationHelper.validateOriginId(type, object);
         } catch (e) {
           error = e;
         }
@@ -605,7 +598,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         const migrated = this._migrator.migrateDocument({
           id: object.id,
           type: object.type,
-          attributes: await this.optionallyEncryptAttributes(
+          attributes: await this.encryptionHelper.optionallyEncryptAttributes(
             object.type,
             object.id,
             savedObjectNamespace, // only used for multi-namespace object types
@@ -630,7 +623,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
          * inside the migration algorithm itself.
          */
         try {
-          this.validateObjectForCreate(object.type, migrated);
+          this.validationHelper.validateObjectForCreate(object.type, migrated);
         } catch (error) {
           return {
             tag: 'Left',
@@ -697,7 +690,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         );
       }),
     };
-    return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap, objects);
+    return this.encryptionHelper.optionallyDecryptAndRedactBulkResult(
+      result,
+      authorizationResult?.typeMap,
+      objects
+    );
   }
 
   /**
@@ -825,7 +822,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     if (this._registry.isMultiNamespace(type)) {
       // note: this check throws an error if the object is found but does not exist in this namespace
-      preflightResult = await this.preflightCheckNamespaces({
+      preflightResult = await this.preflightCheckHelper.preflightCheckNamespaces({
         type,
         id,
         namespace,
@@ -1493,7 +1490,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }),
     });
 
-    return this.optionallyDecryptAndRedactBulkResult(
+    return this.encryptionHelper.optionallyDecryptAndRedactBulkResult(
       result,
       redactTypeMap ?? authorizationResult?.typeMap // If the redact type map is valid, use that one; otherwise, fall back to the authorization check
     );
@@ -1544,7 +1541,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
         } else {
           try {
-            this.validateObjectNamespaces(type, id, object.namespaces);
+            this.validationHelper.validateObjectNamespaces(type, id, object.namespaces);
           } catch (e) {
             error = e;
           }
@@ -1664,7 +1661,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       objects: authObjects,
     });
 
-    return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap);
+    return this.encryptionHelper.optionallyDecryptAndRedactBulkResult(
+      result,
+      authorizationResult?.typeMap
+    );
   }
 
   /**
@@ -1751,7 +1751,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       migrationVersionCompatibility,
     });
 
-    return this.optionallyDecryptAndRedactSingleResult(result, authorizationResult?.typeMap);
+    return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
+      result,
+      authorizationResult?.typeMap
+    );
   }
 
   /**
@@ -1810,7 +1813,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     let preflightResult: PreflightCheckNamespacesResult | undefined;
     if (this._registry.isMultiNamespace(type)) {
-      preflightResult = await this.preflightCheckNamespaces({
+      preflightResult = await this.preflightCheckHelper.preflightCheckNamespaces({
         type,
         id,
         namespace,
@@ -1834,7 +1837,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
       // This takes an extra round trip to Elasticsearch, but this won't happen often.
       // TODO: improve performance by combining these into a single preflight check
-      await this.preflightCheckForUpsertAliasConflict(type, id, namespace);
+      await this.preflightCheckHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
     }
     const time = getCurrentTime();
 
@@ -1856,7 +1859,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: {
-          ...(await this.optionallyEncryptAttributes(type, id, namespace, upsert)),
+          ...(await this.encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
         },
         updated_at: time,
       });
@@ -1864,7 +1867,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     const doc = {
-      [type]: await this.optionallyEncryptAttributes(type, id, namespace, attributes),
+      [type]: await this.encryptionHelper.optionallyEncryptAttributes(
+        type,
+        id,
+        namespace,
+        attributes
+      ),
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     };
@@ -1913,7 +1921,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       attributes,
     } as SavedObject<T>;
 
-    return this.optionallyDecryptAndRedactSingleResult(
+    return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
       result,
       authorizationResult?.typeMap,
       attributes
@@ -2169,7 +2177,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
             {
               doc: {
                 ...documentToSave,
-                [type]: await this.optionallyEncryptAttributes(
+                [type]: await this.encryptionHelper.optionallyEncryptAttributes(
                   type,
                   id,
                   objectNamespace || namespace,
@@ -2230,7 +2238,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }),
     };
 
-    return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap, objects);
+    return this.encryptionHelper.optionallyDecryptAndRedactBulkResult(
+      result,
+      authorizationResult?.typeMap,
+      objects
+    );
   }
 
   /**
@@ -2385,7 +2397,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       savedObjectNamespace = namespace;
     } else if (this._registry.isMultiNamespace(type)) {
       // note: this check throws an error if the object is found but does not exist in this namespace
-      const preflightResult = await this.preflightCheckNamespaces({
+      const preflightResult = await this.preflightCheckHelper.preflightCheckNamespaces({
         type,
         id,
         namespace,
@@ -2398,7 +2410,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
         // This takes an extra round trip to Elasticsearch, but this won't happen often.
         // TODO: improve performance by combining these into a single preflight check
-        await this.preflightCheckForUpsertAliasConflict(type, id, namespace);
+        await this.preflightCheckHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
       }
 
       savedObjectNamespaces = preflightResult.savedObjectNamespaces;
@@ -2590,35 +2602,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    * {@inheritDoc ISavedObjectsRepository.getCurrentNamespace}
    */
   getCurrentNamespace(namespace?: string) {
-    if (this._spacesExtension) {
-      return this._spacesExtension.getCurrentNamespace(namespace);
-    }
-    return normalizeNamespace(namespace);
+    return this.commonHelper.getCurrentNamespace(namespace);
   }
 
-  /**
-   * Returns index specified by the given type or the default index
-   *
-   * @param type - the type
-   */
   private getIndexForType(type: string) {
-    return getIndexForType({
-      type,
-      defaultIndex: this._index,
-      typeRegistry: this._registry,
-      kibanaVersion: this._migrator.kibanaVersion,
-    });
+    return this.commonHelper.getIndexForType(type);
   }
 
-  /**
-   * Returns an array of indices as specified in `this._registry` for each of the
-   * given `types`. If any of the types don't have an associated index, the
-   * default index `this._index` will be included.
-   *
-   * @param types The types whose indices should be retrieved
-   */
   private getIndicesForTypes(types: string[]) {
-    return unique(types.map((t) => this.getIndexForType(t)));
+    return this.commonHelper.getIndicesForTypes(types);
   }
 
   private _rawToSavedObject<T = unknown>(
@@ -2640,159 +2632,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
   private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace: string | undefined) {
     return rawDocExistsInNamespace(this._registry, raw, namespace);
-  }
-
-  /**
-   * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
-   */
-  private async preflightCheckNamespaces({
-    type,
-    id,
-    namespace,
-    initialNamespaces,
-  }: PreflightCheckNamespacesParams): Promise<PreflightCheckNamespacesResult> {
-    if (!this._registry.isMultiNamespace(type)) {
-      throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
-    }
-
-    const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
-      {
-        id: this._serializer.generateRawId(undefined, type, id),
-        index: this.getIndexForType(type),
-      },
-      {
-        ignore: [404],
-        meta: true,
-      }
-    );
-
-    const namespaces = initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)];
-
-    const indexFound = statusCode !== 404;
-    if (indexFound && isFoundGetResponse(body)) {
-      if (!this.rawDocExistsInNamespaces(body, namespaces)) {
-        return { checkResult: 'found_outside_namespace' };
-      }
-      return {
-        checkResult: 'found_in_namespace',
-        savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace, body),
-        rawDocSource: body,
-      };
-    } else if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      // checking if the 404 is from Elasticsearch
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-    return {
-      checkResult: 'not_found',
-      savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace),
-    };
-  }
-
-  /**
-   * Pre-flight check to ensure that an upsert which would create a new object does not result in an alias conflict.
-   */
-  private async preflightCheckForUpsertAliasConflict(
-    type: string,
-    id: string,
-    namespace: string | undefined
-  ) {
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    const [{ error }] = await preflightCheckForCreate({
-      registry: this._registry,
-      client: this.client,
-      serializer: this._serializer,
-      getIndexForType: this.getIndexForType.bind(this),
-      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
-      objects: [{ type, id, namespaces: [namespaceString] }],
-    });
-    if (error?.type === 'aliasConflict') {
-      throw SavedObjectsErrorHelpers.createConflictError(type, id);
-    }
-    // any other error from this check does not matter
-  }
-
-  /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */
-  private validateInitialNamespaces(type: string, initialNamespaces: string[] | undefined) {
-    if (!initialNamespaces) {
-      return;
-    }
-
-    if (this._registry.isNamespaceAgnostic(type)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"initialNamespaces" cannot be used on space-agnostic types'
-      );
-    } else if (!initialNamespaces.length) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"initialNamespaces" must be a non-empty array of strings'
-      );
-    } else if (
-      !this._registry.isShareable(type) &&
-      (initialNamespaces.length > 1 || initialNamespaces.includes(ALL_NAMESPACES_STRING))
-    ) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"initialNamespaces" can only specify a single space when used with space-isolated types'
-      );
-    }
-  }
-
-  /** The object-specific `namespaces` field (bulkGet) is used to check if an object exists in any of a given number of spaces. */
-  private validateObjectNamespaces(type: string, id: string, namespaces: string[] | undefined) {
-    if (!namespaces) {
-      return;
-    }
-
-    if (this._registry.isNamespaceAgnostic(type)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"namespaces" cannot be used on space-agnostic types'
-      );
-    } else if (!namespaces.length) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    } else if (
-      !this._registry.isShareable(type) &&
-      (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))
-    ) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"namespaces" can only specify a single space when used with space-isolated types'
-      );
-    }
-  }
-
-  /** Validate a migrated doc against the registered saved object type's schema. */
-  private validateObjectForCreate(type: string, doc: SavedObjectSanitizedDoc) {
-    if (!this._registry.getType(type)) {
-      return;
-    }
-    const validator = this.getTypeValidator(type);
-    try {
-      validator.validate(doc, this._migrator.kibanaVersion);
-    } catch (error) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
-    }
-  }
-
-  private getTypeValidator(type: string): SavedObjectsTypeValidator {
-    if (!this.typeValidatorMap[type]) {
-      const savedObjectType = this._registry.getType(type);
-      this.typeValidatorMap[type] = new SavedObjectsTypeValidator({
-        logger: this._logger.get('type-validator'),
-        type,
-        validationMap: savedObjectType!.schemas ?? {},
-        defaultVersion: this._migrator.kibanaVersion,
-      });
-    }
-    return this.typeValidatorMap[type]!;
-  }
-
-  /** This is used when objects are created. */
-  private validateOriginId(type: string, objectOrOptions: { originId?: string }) {
-    if (
-      Object.keys(objectOrOptions).includes('originId') &&
-      !this._registry.isMultiNamespace(type)
-    ) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"originId" can only be set for multi-namespace object types'
-      );
-    }
   }
 
   /**
@@ -2823,101 +2662,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
     return id;
   }
-
-  private async optionallyEncryptAttributes<T>(
-    type: string,
-    id: string,
-    namespaceOrNamespaces: string | string[] | undefined,
-    attributes: T
-  ): Promise<T> {
-    if (!this._encryptionExtension?.isEncryptableType(type)) {
-      return attributes;
-    }
-    const namespace = Array.isArray(namespaceOrNamespaces)
-      ? namespaceOrNamespaces[0]
-      : namespaceOrNamespaces;
-    const descriptor = { type, id, namespace };
-    return this._encryptionExtension.encryptAttributes(
-      descriptor,
-      attributes as Record<string, unknown>
-    ) as unknown as T;
-  }
-
-  private async optionallyDecryptAndRedactSingleResult<T, A extends string>(
-    object: SavedObject<T>,
-    typeMap: AuthorizationTypeMap<A> | undefined,
-    originalAttributes?: T
-  ) {
-    if (this._encryptionExtension?.isEncryptableType(object.type)) {
-      object = await this._encryptionExtension.decryptOrStripResponseAttributes(
-        object,
-        originalAttributes
-      );
-    }
-    if (typeMap) {
-      return this._securityExtension!.redactNamespaces({ typeMap, savedObject: object });
-    }
-    return object;
-  }
-
-  private async optionallyDecryptAndRedactBulkResult<
-    T,
-    R extends { saved_objects: Array<SavedObject<T>> },
-    A extends string,
-    O extends Array<{ attributes: T }>
-  >(response: R, typeMap: AuthorizationTypeMap<A> | undefined, originalObjects?: O) {
-    const modifiedObjects = await Promise.all(
-      response.saved_objects.map(async (object, index) => {
-        if (object.error) {
-          // If the bulk operation failed, the object will not have an attributes field at all, it will have an error field instead.
-          // In this case, don't attempt to decrypt, just return the object.
-          return object;
-        }
-        const originalAttributes = originalObjects?.[index].attributes;
-        return await this.optionallyDecryptAndRedactSingleResult(
-          object,
-          typeMap,
-          originalAttributes
-        );
-      })
-    );
-    return { ...response, saved_objects: modifiedObjects };
-  }
-}
-
-/**
- * Returns a string array of namespaces for a given saved object. If the saved object is undefined, the result is an array that contains the
- * current namespace. Value may be undefined if an existing saved object has no namespaces attribute; this should not happen in normal
- * operations, but it is possible if the Elasticsearch document is manually modified.
- *
- * @param namespace The current namespace.
- * @param document Optional existing saved object that was obtained in a preflight operation.
- */
-function getSavedObjectNamespaces(
-  namespace?: string,
-  document?: SavedObjectsRawDoc
-): string[] | undefined {
-  if (document) {
-    return document._source?.namespaces;
-  }
-  return [SavedObjectsUtils.namespaceIdToString(namespace)];
 }
 
 /**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.
  */
 const errorContent = (error: DecoratedError) => error.output.payload;
-
-const unique = (array: string[]) => [...new Set(array)];
-
-/**
- * Type and type guard function for converting a possibly not existent doc to an existent doc.
- */
-type GetResponseFound<TDocument = unknown> = estypes.GetResponse<TDocument> &
-  Required<
-    Pick<estypes.GetResponse<TDocument>, '_primary_term' | '_seq_no' | '_version' | '_source'>
-  >;
-
-const isFoundGetResponse = <TDocument = unknown>(
-  doc: estypes.GetResponse<TDocument>
-): doc is GetResponseFound<TDocument> => doc.found;

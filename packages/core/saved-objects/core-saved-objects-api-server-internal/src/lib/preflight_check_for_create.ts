@@ -10,6 +10,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   type ISavedObjectTypeRegistry,
+  type ISavedObjectsSerializer,
   type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
@@ -19,7 +20,6 @@ import {
   LEGACY_URL_ALIAS_TYPE,
   getObjectKey,
   type LegacyUrlAlias,
-  type SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { type Either, rawDocExistsInNamespaces } from './internal_utils';
@@ -56,7 +56,7 @@ export interface PreflightCheckForCreateObject {
 export interface PreflightCheckForCreateParams {
   registry: ISavedObjectTypeRegistry;
   client: RepositoryEsClient;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   createPointInTimeFinder: CreatePointInTimeFinderFn;
   objects: PreflightCheckForCreateObject[];
@@ -250,7 +250,7 @@ async function optionallyFindAliases(
 
 async function bulkGetObjectsAndAliases(
   client: RepositoryEsClient,
-  serializer: SavedObjectsSerializer,
+  serializer: ISavedObjectsSerializer,
   getIndexForType: (type: string) => string,
   objectsAndAliasesToBulkGet: Array<ParsedObject & { checkAliases: boolean }>
 ) {
