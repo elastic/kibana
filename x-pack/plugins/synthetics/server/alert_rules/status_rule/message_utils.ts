@@ -17,6 +17,7 @@ import {
   URL_FULL,
   ERROR_MESSAGE,
   AGENT_NAME,
+  STATE_ID,
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
@@ -31,6 +32,7 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
+  [STATE_ID]: monitorSummary.stateId,
   'location.id': monitorSummary.locationId,
   configId: monitorSummary.configId,
 });
@@ -52,6 +54,7 @@ export const getMonitorSummary = (
       defaultMessage: 'browser',
     }),
   };
+  const stateId = monitorInfo.state?.id || null;
 
   return {
     checkedAt,
@@ -65,6 +68,7 @@ export const getMonitorSummary = (
     locationName: monitorInfo.observer?.geo?.name!,
     hostName: monitorInfo.agent?.name!,
     status: statusMessage,
+    stateId,
     [ALERT_REASON_MSG]: getReasonMessage({
       name: monitorName,
       location: observerLocation,

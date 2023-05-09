@@ -16,7 +16,7 @@ import {
   SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { getSyntheticsMonitorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
+import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 
@@ -102,21 +102,16 @@ export const getAlertDetailsUrl = (
 
 export const getRelativeViewInAppUrl = ({
   configId,
+  stateId,
   locationId,
-  errorStartedAt,
-  dateRangeEnd = 'now',
 }: {
   configId: string;
+  stateId: string;
   locationId: string;
-  errorStartedAt: string;
-  dateRangeEnd?: string;
 }) => {
-  const dateRangeStart = moment(errorStartedAt).subtract('5', 'minutes').toISOString();
-
-  const relativeViewInAppUrl = getSyntheticsMonitorRouteFromMonitorId({
+  const relativeViewInAppUrl = getSyntheticsErrorRouteFromMonitorId({
     configId,
-    dateRangeEnd,
-    dateRangeStart,
+    stateId,
     locationId,
   });
 
@@ -216,7 +211,9 @@ export const setRecoveredAlertsContext = ({
       const { idWithLocation, configId, locationId, errorStartedAt } = state;
       const upConfig = upConfigs[idWithLocation];
       isUp = Boolean(upConfig) || false;
-      const upTimestamp = upConfig.ping['@timestamp'];
+      const ping = upConfig.ping;
+      const stateId = ping.state?.ends?.id;
+      const upTimestamp = ping['@timestamp'];
       const checkedAt = moment(upTimestamp).format('HH:MM:SS on DD/MM/YYYY');
       const duration = getErrorDuration(moment(errorStartedAt), moment(upTimestamp));
       recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
@@ -237,16 +234,12 @@ export const setRecoveredAlertsContext = ({
             },
           });
 
-      const dateRangeEnd = moment(upTimestamp).add('5', 'minutes').toISOString();
-
-      const relativeViewInAppUrl = getRelativeViewInAppUrl({
-        configId,
-        locationId,
-        errorStartedAt,
-        dateRangeEnd,
-      });
-
-      if (basePath && spaceId && relativeViewInAppUrl) {
+      if (basePath && spaceId && stateId) {
+        const relativeViewInAppUrl = getRelativeViewInAppUrl({
+          configId,
+          locationId,
+          stateId,
+        });
         linkMessage = getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl);
       }
     }

@@ -103,16 +103,21 @@ export const registerSyntheticsStatusCheckRule = (
         const alertState = alert.getState() as SyntheticsMonitorStatusAlertState;
         const errorStartedAt: string = alertState.errorStartedAt || ping['@timestamp'];
 
-        const relativeViewInAppUrl = getRelativeViewInAppUrl({
-          configId,
-          errorStartedAt,
-          locationId,
-        });
+        let relativeViewInAppUrl = '';
+        if (monitorSummary.stateId) {
+          relativeViewInAppUrl = getRelativeViewInAppUrl({
+            configId,
+            stateId: monitorSummary.stateId,
+            locationId,
+          });
+        }
 
         const context = {
           ...monitorSummary,
           errorStartedAt,
-          linkMessage: getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl),
+          linkMessage: monitorSummary.stateId
+            ? getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl)
+            : '',
           [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
         };
 
