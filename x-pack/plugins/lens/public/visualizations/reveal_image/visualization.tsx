@@ -10,7 +10,6 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { fromExpression } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';

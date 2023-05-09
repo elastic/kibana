@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Origin,
-  RevealImageState as RevealImageStateOriginal,
-} from '@kbn/expression-reveal-image-plugin/common';
+import type { RevealImageState as RevealImageStateOriginal } from '@kbn/expression-reveal-image-plugin/common';
 import type { LayerType } from '../../../common/types';
 
 export const LENS_REVEAL_IMAGE_ID = 'lnsRevealImage';
