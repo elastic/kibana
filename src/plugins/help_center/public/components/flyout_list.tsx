@@ -188,9 +188,7 @@ export const HelpCenterFlyout = (
 
               <EuiTabs>{renderTabs()}</EuiTabs>
               <EuiSpacer size="l" />
-
-              {selectedTabContent}
-
+              <div style={{ width: '100%' }}>{selectedTabContent}</div>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="s">

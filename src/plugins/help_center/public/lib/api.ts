@@ -113,6 +113,7 @@ export function getApi(
                 ...link,
                 linkType: 'discuss',
               } as ChromeHelpExtensionMenuDiscussLink);
+              break;
             }
             default:
               break;

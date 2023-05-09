@@ -36,6 +36,8 @@ export const HelpMenu = React.memo(() => {
         },
         {
           linkType: 'discuss',
+          title: 'Discuss',
+          iconType: 'discuss',
           href: 'https://discuss.elastic.co/c/security',
           target: '_blank',
           rel: 'noopener',
