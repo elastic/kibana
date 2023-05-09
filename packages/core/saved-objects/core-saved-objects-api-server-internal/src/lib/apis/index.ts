@@ -7,3 +7,4 @@
  */
 
 export { performCreate } from './create';
+export { performBulkCreate } from './bulk_create';

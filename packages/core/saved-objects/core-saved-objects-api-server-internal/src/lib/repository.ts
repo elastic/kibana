@@ -113,6 +113,7 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
+  errorContent,
   type Either,
   isLeft,
   isRight,
@@ -146,7 +147,7 @@ import {
 } from './helpers';
 import { isFoundGetResponse, getSavedObjectNamespaces } from './utils';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from './constants';
-import { performCreate } from './apis';
+import { performCreate, performBulkCreate } from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -339,266 +340,20 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const {
-      migrationVersionCompatibility,
-      overwrite = false,
-      refresh = DEFAULT_REFRESH_SETTING,
-      managed: optionsManaged,
-    } = options;
-    const time = getCurrentTime();
-
-    let preflightCheckIndexCounter = 0;
-    type ExpectedResult = Either<
-      { type: string; id?: string; error: Payload },
+    return performBulkCreate(
       {
-        method: 'index' | 'create';
-        object: SavedObjectsBulkCreateObject & { id: string };
-        preflightCheckIndex?: number;
+        objects,
+        options,
+      },
+      {
+        client: this.client,
+        extensions: this.extensions,
+        helpers: this.helpers,
+        allowedTypes: this._allowedTypes,
+        registry: this._registry,
+        serializer: this._serializer,
+        migrator: this._migrator,
       }
-    >;
-    const expectedResults = objects.map<ExpectedResult>((object) => {
-      const { type, id: requestId, initialNamespaces, version, managed } = object;
-      let error: DecoratedError | undefined;
-      let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
-      const objectManaged = managed;
-      if (!this._allowedTypes.includes(type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-      } else {
-        try {
-          id = this.getValidId(type, requestId, version, overwrite);
-          this.validationHelper.validateInitialNamespaces(type, initialNamespaces);
-          this.validationHelper.validateOriginId(type, object);
-        } catch (e) {
-          error = e;
-        }
-      }
-
-      if (error) {
-        return {
-          tag: 'Left',
-          value: { id: requestId, type, error: errorContent(error) },
-        };
-      }
-
-      const method = requestId && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = requestId && this._registry.isMultiNamespace(type);
-
-      return {
-        tag: 'Right',
-        value: {
-          method,
-          object: {
-            ...object,
-            id,
-            managed: setManaged({ optionsManaged, objectManaged }),
-          },
-          ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
-        },
-      };
-    });
-
-    const validObjects = expectedResults.filter(isRight);
-    if (validObjects.length === 0) {
-      // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
-      return {
-        // Technically the returned array should only contain SavedObject results, but for errors this is not true (we cast to 'unknown' below)
-        saved_objects: expectedResults.map<SavedObject<T>>(
-          ({ value }) => value as unknown as SavedObject<T>
-        ),
-      };
-    }
-
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    const preflightCheckObjects = validObjects
-      .filter(({ value }) => value.preflightCheckIndex !== undefined)
-      .map<PreflightCheckForCreateObject>(({ value }) => {
-        const { type, id, initialNamespaces } = value.object;
-        const namespaces = initialNamespaces ?? [namespaceString];
-        return { type, id, overwrite, namespaces };
-      });
-    const preflightCheckResponse = await preflightCheckForCreate({
-      registry: this._registry,
-      client: this.client,
-      serializer: this._serializer,
-      getIndexForType: this.getIndexForType.bind(this),
-      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
-      objects: preflightCheckObjects,
-    });
-
-    const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
-      const { object, preflightCheckIndex: index } = element.value;
-      const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
-      return {
-        type: object.type,
-        id: object.id,
-        initialNamespaces: object.initialNamespaces,
-        existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
-      };
-    });
-
-    const authorizationResult = await this._securityExtension?.authorizeBulkCreate({
-      namespace,
-      objects: authObjects,
-    });
-
-    let bulkRequestIndexCounter = 0;
-    const bulkCreateParams: object[] = [];
-    type ExpectedBulkResult = Either<
-      { type: string; id?: string; error: Payload },
-      { esRequestIndex: number; requestedId: string; rawMigratedDoc: SavedObjectsRawDoc }
-    >;
-    const expectedBulkResults = await Promise.all(
-      expectedResults.map<Promise<ExpectedBulkResult>>(async (expectedBulkGetResult) => {
-        if (isLeft(expectedBulkGetResult)) {
-          return expectedBulkGetResult;
-        }
-
-        let savedObjectNamespace: string | undefined;
-        let savedObjectNamespaces: string[] | undefined;
-        let existingOriginId: string | undefined;
-        let versionProperties;
-        const {
-          preflightCheckIndex,
-          object: { initialNamespaces, version, ...object },
-          method,
-        } = expectedBulkGetResult.value;
-        if (preflightCheckIndex !== undefined) {
-          const preflightResult = preflightCheckResponse[preflightCheckIndex];
-          const { type, id, existingDocument, error } = preflightResult;
-          if (error) {
-            const { metadata } = error;
-            return {
-              tag: 'Left',
-              value: {
-                id,
-                type,
-                error: {
-                  ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                  ...(metadata && { metadata }),
-                },
-              },
-            };
-          }
-          savedObjectNamespaces =
-            initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
-          versionProperties = getExpectedVersionProperties(version);
-          existingOriginId = existingDocument?._source?.originId;
-        } else {
-          if (this._registry.isSingleNamespace(object.type)) {
-            savedObjectNamespace = initialNamespaces
-              ? normalizeNamespace(initialNamespaces[0])
-              : namespace;
-          } else if (this._registry.isMultiNamespace(object.type)) {
-            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
-          }
-          versionProperties = getExpectedVersionProperties(version);
-        }
-
-        // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
-        // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
-        const originId = Object.keys(object).includes('originId')
-          ? object.originId
-          : existingOriginId;
-        const migrated = this._migrator.migrateDocument({
-          id: object.id,
-          type: object.type,
-          attributes: await this.encryptionHelper.optionallyEncryptAttributes(
-            object.type,
-            object.id,
-            savedObjectNamespace, // only used for multi-namespace object types
-            object.attributes
-          ),
-          migrationVersion: object.migrationVersion,
-          coreMigrationVersion: object.coreMigrationVersion,
-          typeMigrationVersion: object.typeMigrationVersion,
-          ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-          ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-          managed: setManaged({ optionsManaged, objectManaged: object.managed }),
-          updated_at: time,
-          created_at: time,
-          references: object.references || [],
-          originId,
-        }) as SavedObjectSanitizedDoc<T>;
-
-        /**
-         * If a validation has been registered for this type, we run it against the migrated attributes.
-         * This is an imperfect solution because malformed attributes could have already caused the
-         * migration to fail, but it's the best we can do without devising a way to run validations
-         * inside the migration algorithm itself.
-         */
-        try {
-          this.validationHelper.validateObjectForCreate(object.type, migrated);
-        } catch (error) {
-          return {
-            tag: 'Left',
-            value: {
-              id: object.id,
-              type: object.type,
-              error,
-            },
-          };
-        }
-
-        const expectedResult = {
-          esRequestIndex: bulkRequestIndexCounter++,
-          requestedId: object.id,
-          rawMigratedDoc: this._serializer.savedObjectToRaw(migrated),
-        };
-
-        bulkCreateParams.push(
-          {
-            [method]: {
-              _id: expectedResult.rawMigratedDoc._id,
-              _index: this.getIndexForType(object.type),
-              ...(overwrite && versionProperties),
-            },
-          },
-          expectedResult.rawMigratedDoc._source
-        );
-
-        return { tag: 'Right', value: expectedResult };
-      })
-    );
-
-    const bulkResponse = bulkCreateParams.length
-      ? await this.client.bulk({
-          refresh,
-          require_alias: true,
-          body: bulkCreateParams,
-        })
-      : undefined;
-
-    const result = {
-      saved_objects: expectedBulkResults.map((expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return expectedResult.value as any;
-        }
-
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
-
-        const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
-        if (error) {
-          return { type: rawMigratedDoc._source.type, id: requestedId, error };
-        }
-
-        // When method == 'index' the bulkResponse doesn't include the indexed
-        // _source so we return rawMigratedDoc but have to spread the latest
-        // _seq_no and _primary_term values from the rawResponse.
-        return this._rawToSavedObject(
-          {
-            ...rawMigratedDoc,
-            ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
-          },
-          { migrationVersionCompatibility }
-        );
-      }),
-    };
-    return this.encryptionHelper.optionallyDecryptAndRedactBulkResult(
-      result,
-      authorizationResult?.typeMap,
-      objects
     );
   }
 
@@ -2538,18 +2293,4 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace: string | undefined) {
     return rawDocExistsInNamespace(this._registry, raw, namespace);
   }
-
-  private getValidId(
-    type: string,
-    id: string | undefined,
-    version: string | undefined,
-    overwrite: boolean | undefined
-  ) {
-    return this.commonHelper.getValidId(type, id, version, overwrite);
-  }
 }
-
-/**
- * Extracts the contents of a decorated error to return the attributes for bulk operations.
- */
-const errorContent = (error: DecoratedError) => error.output.payload;

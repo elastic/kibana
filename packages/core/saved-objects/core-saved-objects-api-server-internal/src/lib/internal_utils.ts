@@ -14,6 +14,7 @@ import {
   type SavedObject,
   SavedObjectsErrorHelpers,
   type SavedObjectsRawDocParseOptions,
+  type DecoratedError,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -295,3 +296,8 @@ export function setManaged({
 }): boolean {
   return optionsManaged ?? objectManaged ?? false;
 }
+
+/**
+ * Extracts the contents of a decorated error to return the attributes for bulk operations.
+ */
+export const errorContent = (error: DecoratedError) => error.output.payload;
