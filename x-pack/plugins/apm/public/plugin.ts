@@ -279,17 +279,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: ObservabilityTriggerId.ApmErrorContextMenu,
     });
 
-    pluginSetupDeps.uiActions.addTriggerAction(
-      ObservabilityTriggerId.ApmErrorContextMenu,
-      {
-        id: 'my-test-action',
-        getDisplayName: () => 'My external action',
-        execute: async (context) => {
-          console.log(context);
-        },
-      }
-    );
-
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {

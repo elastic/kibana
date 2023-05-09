@@ -73,15 +73,6 @@ export class Plugin implements InfraClientPluginClass {
       id: ObservabilityTriggerId.LogEntryContextMenu,
     });
 
-    // demo, will remove before merging
-    pluginsSetup.uiActions.addTriggerAction(ObservabilityTriggerId.LogEntryContextMenu, {
-      id: 'my-test',
-      getDisplayName: () => 'My external action',
-      execute: async (context) => {
-        console.log('executed', context);
-      },
-    });
-
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createInventoryMetricRuleType()
     );
