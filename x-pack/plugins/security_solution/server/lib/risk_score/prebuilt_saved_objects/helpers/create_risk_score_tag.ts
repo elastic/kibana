@@ -54,7 +54,7 @@ export const createRiskScoreTag = async ({
       [savedObjectTemplate]: {
         success: false,
         error: i18n.translate(
-          'xpack.securitySolution.riskScore.savedObjects.failedToCreateTagTitle',
+          'xpack.securitySolution.riskScore.savedObjects.failedToFindTagTitle',
           {
             values: { savedObjectTemplate, tagName },
             defaultMessage: `Failed to import saved objects: {savedObjectTemplate} were not created as failed to find the tag: {tagName}`,

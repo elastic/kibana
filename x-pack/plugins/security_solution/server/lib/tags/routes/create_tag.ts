@@ -55,7 +55,7 @@ export const createTagRoute = (
         return siemResponse.error({
           statusCode: error.statusCode ?? 500,
           body: i18n.translate(
-            'xpack.securitySolution.dashboards.getSecuritySolutionTagsErrorTitle',
+            'xpack.securitySolution.dashboards.createSecuritySolutionTagErrorTitle',
             {
               values: { tagName, message: error.message },
               defaultMessage: `Failed to create {tagName} tag - {message}`,
