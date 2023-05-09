@@ -22,21 +22,21 @@ const anyRecord = z.record(
   z.any({ description: 'Allow any valid, primitive value or object here' })
 );
 
-const soObject = z.record(z.string(), soAttribute.or(anyRecord.default({}))).default({});
+const soObject = z.record(z.string(), soAttribute.or(anyRecord.default({})));
 
 export const bodySchema = z.object({
   name: nonEmptyString,
   connector_type_id: nonEmptyString,
-  config: soObject,
-  secrets: soObject,
+  config: soObject.default({}),
+  secrets: soObject.default({}),
 });
 
 const response = z.object({
   id: nonEmptyString,
   name: nonEmptyString,
   actionTypeId: z.string().optional(),
-  config: soObject,
-  secrets: soObject,
+  config: soObject.default({}),
+  secrets: soObject.default({}),
 });
 
 const createConnectorParams = z
