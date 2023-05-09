@@ -92,11 +92,14 @@ export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershi
   Array.isArray((result as ClaimOwnershipResult).docs);
 
 interface TaskClaimingBatches {
-  skipped: string[];
-  singleConcurrency: string[];
+  excluded: string[];
   byCost: {
     [cost: number]: string[];
   };
+  byConcurrency: Array<{
+    taskType: string;
+    concurrency: number;
+  }>;
 }
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
@@ -137,30 +140,27 @@ export class TaskClaiming {
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
     const result: TaskClaimingBatches = {
-      singleConcurrency: [],
-      skipped: [],
+      excluded: [],
       byCost: {},
+      byConcurrency: [],
     };
 
     for (const taskTypeDef of definitions.getAllDefinitions()) {
-      if (taskTypeDef.maxConcurrency === 1) {
-        result.singleConcurrency.push(taskTypeDef.type);
-      } else if (taskTypeDef.maxConcurrency === 0) {
-        result.skipped.push(taskTypeDef.type);
-      } else if (!taskTypeDef.maxConcurrency || taskTypeDef.maxConcurrency > 1) {
+      if (this.isTaskTypeExcluded(taskTypeDef.type)) {
+        // Task type is configured by kibana.yml to be excluded
+        result.excluded.push(taskTypeDef.type);
+      } else if (typeof taskTypeDef.maxConcurrency === 'number') {
+        // A Kibana instance should only run a given task type X at a time
+        result.byConcurrency.push({
+          taskType: taskTypeDef.type,
+          concurrency: taskTypeDef.maxConcurrency,
+        });
+      } else {
         const cost = this.shareWorkers ? taskTypeDef.workerCost : 1;
         result.byCost[cost] = result.byCost[cost]
           ? result.byCost[cost].concat(taskTypeDef.type)
           : [taskTypeDef.type];
       }
-    }
-
-    if (result.skipped.length) {
-      this.logger.info(
-        `Task Manager will never claim tasks of the following types as their "maxConcurrency" is set to 0: ${result.skipped.join(
-          ', '
-        )}`
-      );
     }
 
     return result;
@@ -202,19 +202,25 @@ export class TaskClaiming {
     const taskCostGroups = Object.keys(this.taskClaimingBatchesByType.byCost)
       .map((cost) => parseFloat(cost))
       .sort();
-    // TODO: Missing code about unrecognized tasks
+
     try {
       const results = await Promise.all([
-        // TODO: Skip ones that are still running
-        ...this.taskClaimingBatchesByType.singleConcurrency.map((type) =>
-          this.searchForTasks({ size: 1, taskTypes: [type] })
-        ),
+        ...this.taskClaimingBatchesByType.byConcurrency
+          .map((taskDef) => {
+            const capacity = this.getCapacity(taskDef.taskType);
+            if (capacity > 0) {
+              return this.searchForTasks({ size: capacity, taskTypes: [taskDef.taskType] });
+            }
+          })
+          .filter((p): p is Promise<ConcreteTaskInstance[]> => !!p),
         ...taskCostGroups.map((cost) =>
           this.searchForTasks({
             size: Math.floor(initialCapacity / cost),
             taskTypes: this.taskClaimingBatchesByType.byCost[cost],
           })
         ),
+        // TODO: Optimize so a dedicated query isn't necessary
+        this.searchForTasks({ size: initialCapacity, taskTypes: this.unusedTypes }),
       ]);
 
       // Calculate capacity again in case more capacity opened up since the search queries started
@@ -238,8 +244,8 @@ export class TaskClaiming {
               updates.ownerId = this.taskStore.taskManagerId;
               updates.retryAt = claimOwnershipUntil;
             }
-            docsToUpdate.push({ ...doc, ...updates });
 
+            docsToUpdate.push({ ...doc, ...updates });
             availableCapacity -= this.definitions.get(doc.taskType).workerCost;
           }
         }
@@ -290,17 +296,13 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: SearchForTasksOpts): Promise<ConcreteTaskInstance[]> {
-    const taskTypesToClaim = this.definitions
-      .getAllTypes()
-      .filter((type) => taskTypes.includes(type) && !this.isTaskTypeExcluded(type));
-
     const queryForScheduledTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      tasksOfType(taskTypesToClaim)
+      tasksOfType(taskTypes)
     );
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];

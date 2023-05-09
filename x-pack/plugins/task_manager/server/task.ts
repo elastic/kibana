@@ -135,7 +135,7 @@ export const taskDefinitionSchema = schema.object(
      */
     maxConcurrency: schema.maybe(
       schema.number({
-        min: 0,
+        min: 1,
       })
     ),
     workerCost: schema.number({

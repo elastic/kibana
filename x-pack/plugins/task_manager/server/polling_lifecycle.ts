@@ -132,7 +132,17 @@ export class TaskPollingLifecycle {
       definitions,
       unusedTypes,
       logger: this.logger,
-      getCapacity: () => this.pool.availableWorkers,
+      getCapacity: (taskType?: string) =>
+        taskType && this.definitions.get(taskType)?.maxConcurrency
+          ? Math.max(
+              Math.min(
+                this.pool.availableWorkers,
+                this.definitions.get(taskType)!.maxConcurrency! -
+                  this.pool.getOccupiedWorkersByType(taskType)
+              ),
+              0
+            )
+          : this.pool.availableWorkers,
       shareWorkers: config.share_workers,
     });
     // pipe taskClaiming events into the lifecycle event stream
