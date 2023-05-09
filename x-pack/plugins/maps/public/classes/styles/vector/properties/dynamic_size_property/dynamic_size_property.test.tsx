@@ -11,13 +11,10 @@ jest.mock('../../components/vector_style_editor', () => ({
   },
 }));
 
-jest.mock('../../components/legend/marker_size_legend', () => ({
+jest.mock('../../components/legend/size', () => ({
   MarkerSizeLegend: () => {
     return <div>mockMarkerSizeLegend</div>;
   },
-}));
-
-jest.mock('../../components/legend/ordinal_legend', () => ({
   OrdinalLegend: () => {
     return <div>mockMarkerSizeLegend</div>;
   },
