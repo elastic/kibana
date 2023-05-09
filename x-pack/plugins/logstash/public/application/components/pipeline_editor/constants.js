@@ -46,7 +46,7 @@ export const PIPELINE_EDITOR = {
         defaultMessage: 'ECS 8.x (aligns with Elastic Stack 8.x)',
       }),
       value: 'v8',
-    }
+    },
   ],
   QUEUE_TYPES: [
     {

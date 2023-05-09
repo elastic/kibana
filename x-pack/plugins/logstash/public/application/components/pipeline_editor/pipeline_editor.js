@@ -184,7 +184,7 @@ class PipelineEditorUi extends React.Component {
   };
 
   handleEcsChange = (value) => {
-    this.handleSettingChange('pipeline.ecs_compatibility', (isEmpty(value) ? null : value));
+    this.handleSettingChange('pipeline.ecs_compatibility', isEmpty(value) ? null : value);
   };
 
   handleSettingChange = (settingName, value) => {
@@ -374,7 +374,7 @@ class PipelineEditorUi extends React.Component {
           >
             <EuiSelect
               data-test-subj="inputECSCompatibility"
-              onChange={ (e) => this.handleEcsChange(e.target.value) }
+              onChange={(e) => this.handleEcsChange(e.target.value)}
               options={PIPELINE_EDITOR.ECS_COMPATIBILITIES}
               value={this.state.pipeline.settings['pipeline.ecs_compatibility']}
             />
