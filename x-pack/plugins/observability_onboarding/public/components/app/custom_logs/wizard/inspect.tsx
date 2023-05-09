@@ -17,7 +17,18 @@ import { useWizard } from '.';
 export function Inspect() {
   const { goBack, getState, getPath, getUsage } = useWizard();
   return (
-    <StepPanel title="Inspect wizard">
+    <StepPanel
+      title="Inspect wizard"
+      panelFooter={
+        <StepPanelFooter
+          items={[
+            <EuiButton color="ghost" fill onClick={goBack}>
+              Back
+            </EuiButton>,
+          ]}
+        />
+      }
+    >
       <StepPanelContent>
         <EuiTitle size="s">
           <h3>State</h3>
@@ -34,13 +45,6 @@ export function Inspect() {
         </EuiTitle>
         <pre>{JSON.stringify(getUsage(), null, 4)}</pre>
       </StepPanelContent>
-      <StepPanelFooter
-        items={[
-          <EuiButton color="ghost" fill onClick={goBack}>
-            Back
-          </EuiButton>,
-        ]}
-      />
     </StepPanel>
   );
 }

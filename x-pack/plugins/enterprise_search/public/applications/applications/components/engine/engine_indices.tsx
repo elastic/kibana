@@ -70,7 +70,7 @@ export const EngineIndices: React.FC = () => {
       setConfirmRemoveIndex(index.name);
       sendEnterpriseSearchTelemetry({
         action: 'clicked',
-        metric: 'entSearchContent-engines-indices-removeIndex',
+        metric: 'entSearchApplications-indices-removeIndex',
       });
     },
     type: 'icon',
@@ -225,7 +225,7 @@ export const EngineIndices: React.FC = () => {
             setConfirmRemoveIndex(null);
             sendEnterpriseSearchTelemetry({
               action: 'clicked',
-              metric: 'entSearchContent-engines-indices-removeIndexConfirm',
+              metric: 'entSearchApplications-indices-removeIndexConfirm',
             });
           }}
           title={i18n.translate(
