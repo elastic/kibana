@@ -27,6 +27,7 @@ import type {
   PackageUsageStats,
   PackagePolicySOAttributes,
   Installable,
+  PackageDataStreamTypes,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -151,7 +152,7 @@ export async function getPackages(
 
 export async function getInstalledPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  type?: 'logs' | 'metrics' | 'traces';
+  type?: PackageDataStreamTypes;
   nameQuery?: string;
   pageAfter?: SortResults;
   pageSize: number;
@@ -219,7 +220,6 @@ export async function getInstalledPackages(options: {
       });
 
     return {
-      // icons: string; // TODO: implement
       name,
       version,
       status: installStatus,

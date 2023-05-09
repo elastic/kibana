@@ -7,11 +7,13 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { PackageDataStreamTypes } from '../../../../common/types';
+
 import { dataStreamService } from '../../data_streams';
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
-  type?: 'logs' | 'metrics' | 'traces';
+  type?: PackageDataStreamTypes;
   datasetQuery?: string;
   sortDirection: 'asc' | 'desc';
   uncategorisedOnly: boolean;
