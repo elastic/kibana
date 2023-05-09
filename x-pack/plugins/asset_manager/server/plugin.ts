@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
+  config as ElasticsearchBaseConfig,
   Plugin,
   CoreSetup,
   RequestHandlerContext,
@@ -15,19 +16,28 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
+
 import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
-export interface AssetManagerConfig {
-  alphaEnabled?: boolean;
-}
+
+const configSchema = schema.object({
+  alphaEnabled: schema.maybe(schema.boolean()),
+  implicitCollection: schema.maybe(
+    schema.object({
+      enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+      interval: schema.maybe(schema.duration({ defaultValue: '5m' })),
+      input: ElasticsearchBaseConfig.elasticsearch.schema,
+    })
+  ),
+});
+
+export type AssetManagerConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
-  schema: schema.object({
-    alphaEnabled: schema.maybe(schema.boolean()),
-  }),
+  schema: configSchema,
 };
 
 export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
@@ -50,6 +60,12 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
 
     const router = core.http.createRouter();
     setupRoutes<RequestHandlerContext>({ router });
+
+    if (this.config.implicitCollection?.enabled) {
+      this.logger.info(
+        `Implicit collection set to run every ${this.config.implicitCollection.interval}`
+      );
+    }
 
     return {};
   }
