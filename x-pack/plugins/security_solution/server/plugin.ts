@@ -130,10 +130,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
-    const serverConfig = createConfig(context);
-
     this.pluginContext = context;
-    this.config = serverConfig;
+    this.config = createConfig(context);
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
 
@@ -147,9 +145,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
-      get serverConfig() {
-        return serverConfig;
-      },
       experimentalFeatures: this.config.experimentalFeatures,
     };
   }
