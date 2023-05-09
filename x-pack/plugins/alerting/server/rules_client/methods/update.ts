@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import type { ShouldIncrementRevision } from './bulk_edit';
 import {
@@ -15,6 +15,8 @@ import {
   RuleTypeParams,
   RuleNotifyWhenType,
   IntervalSchedule,
+  AlertingAuditLogOperation,
+  AlertingAuditSubject,
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -166,6 +168,16 @@ async function updateWithOCC<Params extends RuleTypeParams>(
       }
     })(),
   ]);
+
+  await context.alertingAudit?.log({
+    operation: AlertingAuditLogOperation.UPDATE,
+    subject: AlertingAuditSubject.RULE,
+    subjectId: id,
+    data: {
+      old: omit(alertSavedObject.attributes, ['monitoring', 'lastRun', 'executionStatus']),
+      new: omit(updateResult, ['monitoring', 'lastRun', 'executionStatus']),
+    },
+  });
 
   return updateResult;
 }

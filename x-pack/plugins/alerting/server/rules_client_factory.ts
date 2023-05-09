@@ -21,6 +21,8 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { AlertingAuditClientFactory } from './audit/client/alerting_audit_client_factory';
+import { AlertingAudit } from './audit/alerting_audit';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -40,6 +42,8 @@ export interface RulesClientFactoryOpts {
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  alertingAuditClientFactory: AlertingAuditClientFactory;
+  alertingAudit: AlertingAudit;
 }
 
 export class RulesClientFactory {
@@ -58,6 +62,8 @@ export class RulesClientFactory {
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
+  private alertingAuditClientFactory!: AlertingAuditClientFactory;
+  private alertingAudit!: AlertingAudit;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -78,11 +84,18 @@ export class RulesClientFactory {
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
+    this.alertingAuditClientFactory = options.alertingAuditClientFactory;
+    this.alertingAudit = options.alertingAudit;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
     const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
+
+    this.alertingAudit.setContext({
+      client: this.alertingAuditClientFactory.create(request),
+      request,
+    });
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
@@ -104,6 +117,7 @@ export class RulesClientFactory {
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      alertingAudit: this.alertingAudit,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

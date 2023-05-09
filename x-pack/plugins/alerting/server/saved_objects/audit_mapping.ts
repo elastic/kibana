@@ -10,10 +10,19 @@ import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 export const auditMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    timestamp: {
+    '@timestamp': {
       type: 'date',
     },
-    type: {
+    operation: {
+      type: 'keyword',
+    },
+    user: {
+      type: 'keyword',
+    },
+    subject: {
+      type: 'keyword',
+    },
+    subjectId: {
       type: 'keyword',
     },
   },

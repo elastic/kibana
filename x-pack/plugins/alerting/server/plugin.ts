@@ -55,6 +55,8 @@ import {
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { AlertingAudit } from './audit/alerting_audit';
+import { AlertingAuditClientFactory } from './audit/client/alerting_audit_client_factory';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -88,12 +90,8 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
-import {
-  AlertsService,
-  type PublicFrameworkAlertsService,
-  type InitializationPromise,
-  errorResult,
-} from './alerts_service';
+import type { PublicFrameworkAlertsService, InitializationPromise } from './alerts_service';
+import { AlertsService, errorResult } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 
@@ -191,6 +189,7 @@ export class AlertingPlugin {
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
+  private readonly alertingAuditClientFactory: AlertingAuditClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -200,6 +199,7 @@ export class AlertingPlugin {
   private inMemoryMetrics: InMemoryMetrics;
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
+  private alertingAudit: AlertingAudit | null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -210,10 +210,12 @@ export class AlertingPlugin {
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
+    this.alertingAuditClientFactory = new AlertingAuditClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
+    this.alertingAudit = null;
   }
 
   public setup(
@@ -419,9 +421,14 @@ export class AlertingPlugin {
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
       maintenanceWindowClientFactory,
+      alertingAuditClientFactory,
       security,
       licenseState,
     } = this;
+
+    this.alertingAudit = new AlertingAudit({
+      securityPluginStart: plugins.security,
+    });
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
@@ -448,6 +455,11 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
+    alertingAuditClientFactory.initialize({
+      logger: this.logger,
+      savedObjectsService: core.savedObjects,
+    });
+
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       logger,
@@ -465,6 +477,8 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      alertingAuditClientFactory,
+      alertingAudit: this.alertingAudit,
     });
 
     rulesSettingsClientFactory.initialize({

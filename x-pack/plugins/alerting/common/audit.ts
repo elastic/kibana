@@ -6,3 +6,27 @@
  */
 
 export const ALERTING_AUDIT_SAVED_OBJECT_TYPE = 'audit';
+
+export enum AlertingAuditLogOperation {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  GET = 'get',
+}
+
+export enum AlertingAuditSubject {
+  RULE = 'rule',
+}
+
+export interface AlertingAuditLog {
+  id: string;
+  '@timestamp': string;
+  user: string;
+  operation: AlertingAuditLogOperation;
+  subject: string;
+  subjectId: string;
+}
+
+export interface AlertingAuditSOAttributes {
+  operation: string;
+}
