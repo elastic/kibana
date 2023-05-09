@@ -200,6 +200,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const commonHelper = new CommonHelper({
       spaceExtension: extensions?.spacesExtension,
+      encryptionExtension: extensions?.encryptionExtension,
       defaultIndex: index,
       kibanaVersion: migrator.kibanaVersion,
       registry: typeRegistry,
