@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiButtonProps,
   EuiContextMenu,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
@@ -19,17 +25,22 @@ import {
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 
-import { useBoolean } from '../../hooks/use_boolean';
+import { i18n } from '@kbn/i18n';
 
 import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
+  INTEGRATION_PANEL_ID,
   POPOVER_ID,
   selectViewLabel,
   uncategorizedLabel,
+  UNCATEGORIZED_STREAMS_PANEL_ID,
 } from './constants';
 import { getPopoverButtonStyles } from './data_stream_selector.utils';
 
+import { useBoolean } from '../../hooks/use_boolean';
+
+import type { DataStream, Integration } from '../../../common/integrations';
 export interface DataStreamSelectorProps {
   title: string;
   integrations: any[];
@@ -37,6 +48,13 @@ export interface DataStreamSelectorProps {
   onStreamSelected: (dataStream: any) => Promise<void>;
   onUncategorizedClick: () => void;
 }
+
+type CurrentPanelId =
+  | typeof INTEGRATION_PANEL_ID
+  | typeof UNCATEGORIZED_STREAMS_PANEL_ID
+  | `integration-${string}`;
+
+type StreamSelectionHandler = (stream: DataStream) => void;
 
 export function DataStreamSelector({
   title,
@@ -48,66 +66,50 @@ export function DataStreamSelector({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
-  const handleStreamSelection = (dataStream) => {
-    onStreamSelected(dataStream).then(closePopover);
-  };
+  const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
 
-  const { items: integrationItems, panels: integrationPanels } = useMemo(
-    () =>
-      buildItemsTree({
-        type: 'integration',
-        list: integrations,
-        onStreamSelected: handleStreamSelection,
-      }),
-    [integrations]
-  );
+  const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
+    const handleStreamSelection: StreamSelectionHandler = (dataStream) => {
+      onStreamSelected(dataStream).then(closePopover);
+    };
 
-  const { items: uncategorizedStreamsItems, panels: uncategorizedStreamsPanels } = useMemo(
-    () =>
-      buildItemsTree({
-        type: 'uncategorizedStreams',
-        list: uncategorizedStreams,
-        onStreamSelected: handleStreamSelection,
-      }),
-    [uncategorizedStreams]
-  );
+    return buildIntegrationsTree({
+      list: integrations,
+      onItemClick: setCurrentPanel,
+      onStreamSelected: handleStreamSelection,
+    });
+  }, [closePopover, integrations, onStreamSelected]);
 
   const panels = [
     {
-      id: 0,
+      id: INTEGRATION_PANEL_ID,
+      title: integrationsLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
       items: [
         {
-          name: integrationsLabel,
-          panel: 1,
-        },
-        {
           name: uncategorizedLabel,
           onClick: onUncategorizedClick,
-          panel: 2,
+          panel: UNCATEGORIZED_STREAMS_PANEL_ID,
         },
+        ...integrationItems,
       ],
     },
     {
-      id: 1,
-      title: integrationsLabel,
-      width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: integrationItems,
-    },
-    {
-      id: 2,
+      id: UNCATEGORIZED_STREAMS_PANEL_ID,
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: uncategorizedStreamsItems,
+      items: uncategorizedStreams.map((stream) => ({
+        name: stream.name,
+        onClick: () => onStreamSelected(stream),
+      })),
     },
     ...integrationPanels,
-    ...uncategorizedStreamsPanels,
   ];
 
   const contextPanelItems = [
-    <SearchControls />,
-    <EuiHorizontalRule margin="none" />,
-    <EuiContextMenu initialPanelId={0} panels={panels} />,
+    // <SearchControls />,
+    <EuiHorizontalRule key="sep" margin="none" />,
+    <EuiContextMenu key="integrations-menu" initialPanelId={currentPanel} panels={panels} />,
   ];
 
   const button = (
@@ -153,47 +155,90 @@ const DataStreamButton = ({
   );
 };
 
-const SearchControls = () => {
-  return <EuiContextMenuItem>Here goes the search</EuiContextMenuItem>;
-  // return (
-  //   <EuiFlexGroup
-  //     gutterSize="xs"
-  //     direction="row"
-  //     justifyContent="spaceBetween"
-  //     alignItems="center"
-  //     responsive={false}
-  //   >
-  //     <EuiFlexItem>{search}</EuiFlexItem>
+type SearchStrategy = 'integrations' | 'integrationsStreams' | 'uncategorizedStreams';
 
-  //     <EuiFlexItem grow={false}>
-  //       <EuiButtonGroup
-  //         isIconOnly
-  //         buttonSize="compressed"
-  //         options={sortOrderOptions}
-  //         legend={strings.editorAndPopover.getSortDirectionLegend()}
-  //         idSelected={sortingService.direction}
-  //         onChange={onChangeSortDirection}
-  //       />
-  //     </EuiFlexItem>
-  //   </EuiFlexGroup>
-  // );
+interface SearchControlsProps {
+  strategy: SearchStrategy;
+}
+
+const SearchControls = ({ strategy }: SearchControlsProps) => {
+  /**
+   * TODO: implement 3 different search strategies
+   * - Search integrations: API request
+   * - Search integrations streams: in memory sorting
+   * - Search uncategorized streams: API request
+   */
+  const { search, searchByText, sortByDirection, isSearching } = useSearch(strategy);
+
+  return (
+    <EuiContextMenuItem disabled css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}>
+      <EuiFlexGroup gutterSize="xs" responsive={false}>
+        <EuiFlexItem>
+          <EuiFieldSearch compressed incremental onChange={searchByText} isLoading={isSearching} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            isIconOnly
+            buttonSize="compressed"
+            options={[
+              {
+                id: 'asc',
+                iconType: 'sortAscending',
+                label: 'Ascending',
+              },
+              {
+                id: 'desc',
+                iconType: 'sortDescending',
+                label: 'Descending',
+              },
+            ]}
+            legend={i18n.translate('xpack.observabilityLogs.dataStreamSelector.sortDirections', {
+              defaultMessage: 'Sort directions',
+            })}
+            idSelected={search.sortingDirection}
+            onChange={sortByDirection}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiContextMenuItem>
+  );
 };
 
-const buildItemsTree = ({ type, list, onStreamSelected }) => {
-  const items = list.map((entry) => ({
-    name: entry.name,
-    icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" />,
-    panel: `${type}-${entry.name}`,
-  }));
+interface IntegrationsTree {
+  items: EuiContextMenuPanelItemDescriptor[];
+  panels: EuiContextMenuPanelDescriptor[];
+}
 
-  const panels = list.map((entry) => ({
-    id: `${type}-${entry.name}`,
-    title: entry.name,
-    items: entry.dataStreams.map((stream) => ({
-      name: stream.name,
-      onClick: () => onStreamSelected(stream),
-    })),
-  }));
+interface IntegrationsTreeParams {
+  list: Integration[];
+  onItemClick: (id: CurrentPanelId) => void;
+  onStreamSelected: StreamSelectionHandler;
+}
 
-  return { items, panels };
+const buildIntegrationsTree = ({ list, onItemClick, onStreamSelected }: IntegrationsTreeParams) => {
+  return list.reduce(
+    (res: IntegrationsTree, entry) => {
+      const entryId: CurrentPanelId = `integration-${entry.name}`;
+
+      res.items.push({
+        name: entry.name,
+        onClick: () => onItemClick(entryId),
+        icon: <PackageIcon packageName={entry.name} version={entry.version} size="m" />,
+        panel: entryId,
+      });
+
+      res.panels.push({
+        id: entryId,
+        title: entry.name,
+        width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+        items: entry.dataStreams.map((stream) => ({
+          name: stream.name,
+          onClick: () => onStreamSelected(stream),
+        })),
+      });
+
+      return res;
+    },
+    { items: [], panels: [] }
+  );
 };
