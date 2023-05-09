@@ -243,6 +243,7 @@ export class TaskClaiming {
                 updates.scheduledAt = doc.runAt;
               }
 
+              // TODO: We should be able to set them directly to running at this point
               updates.status = TaskStatus.Claiming;
               updates.ownerId = this.taskStore.taskManagerId;
               updates.retryAt = claimOwnershipUntil;
