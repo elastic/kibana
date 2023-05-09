@@ -39,6 +39,12 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 const rootDir = Path.join(__dirname, '../../..');
 const apm = initApm(process.argv, rootDir, false, 'build_api_docs_cli');
 
+async function endTransactionWithFailure(transaction: any) {
+  transaction?.setOutcome('failure');
+  transaction?.end();
+  await apm.flush();
+}
+
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
@@ -53,6 +59,7 @@ export function runBuildApiDocsCli() {
           : (flags.plugin as string[] | undefined);
 
       if (pluginFilter && !isStringArray(pluginFilter)) {
+        await endTransactionWithFailure(transaction);
         throw createFlagError('expected --plugin must only contain strings');
       }
 
@@ -62,6 +69,7 @@ export function runBuildApiDocsCli() {
           stats.find((s) => s !== 'any' && s !== 'comments' && s !== 'exports')) ||
         (stats && !isStringArray(stats))
       ) {
+        await endTransactionWithFailure(transaction);
         throw createFlagError(
           'expected --stats must only contain `any`, `comments` and/or `exports`'
         );
@@ -83,6 +91,7 @@ export function runBuildApiDocsCli() {
       const plugins = findPlugins(stats && pluginFilter ? pluginFilter : undefined);
 
       if (Array.isArray(pluginFilter) && pluginFilter.length !== plugins.length) {
+        await endTransactionWithFailure(transaction);
         throw createFlagError('expected --plugin was not found');
       }
 
@@ -165,16 +174,16 @@ export function runBuildApiDocsCli() {
         spanApiStatsForPlugin?.end();
       }
 
-      const spanWritePluginDirectoryDoc = transaction?.startSpan(
-        'build_api_docs.writePluginDirectoryDoc',
-        'write'
-      );
-
       if (!stats) {
-        await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
-      }
+        const spanWritePluginDirectoryDoc = transaction?.startSpan(
+          'build_api_docs.writePluginDirectoryDoc',
+          'write'
+        );
 
-      spanWritePluginDirectoryDoc?.end();
+        await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+
+        spanWritePluginDirectoryDoc?.end();
+      }
 
       for (const plugin of plugins) {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
