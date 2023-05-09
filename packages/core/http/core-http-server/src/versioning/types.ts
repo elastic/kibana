@@ -155,12 +155,16 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
+interface ZodEsque<V> {
+  _output: V;
+}
+
 /**
  * We accept three different types of validation for maximum flexibility and to enable
  * teams to decide when or if they would like to opt into OAS spec generation for their
  * public routes via zod.
  */
-export type VersionedSpecValidation<V> = z.ZodType<V> | RouteValidationFunction<V> | Type<V>;
+export type VersionedSpecValidation<V> = ZodEsque<V> | RouteValidationFunction<V> | Type<V>;
 
 /** @experimental */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<
