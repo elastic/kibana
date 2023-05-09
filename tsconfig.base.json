@@ -130,6 +130,8 @@
       "@kbn/cli-dev-mode/*": ["packages/kbn-cli-dev-mode/*"],
       "@kbn/cloud-chat-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat"],
       "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
+      "@kbn/cloud-collaboration-plugin": ["x-pack/plugins/cloud_integrations/cloud_collaboration"],
+      "@kbn/cloud-collaboration-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_collaboration/*"],
       "@kbn/cloud-data-migration-plugin": ["x-pack/plugins/cloud_integrations/cloud_data_migration"],
       "@kbn/cloud-data-migration-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_data_migration/*"],
       "@kbn/cloud-defend-plugin": ["x-pack/plugins/cloud_defend"],
@@ -1456,8 +1458,12 @@
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"],
-      "resize-observer-polyfill": ["typings/resize-observer-polyfill"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ],
+      "resize-observer-polyfill": [
+        "typings/resize-observer-polyfill"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

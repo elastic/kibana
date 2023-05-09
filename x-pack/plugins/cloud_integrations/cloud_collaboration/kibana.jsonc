@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-collaboration-plugin",
+  "owner": "@elastic/platform-onboarding",
+  "description": "A plugin for Cloud environments that enables real-time collaboration.",
+  "plugin": {
+    "id": "cloudCollaboration",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "collaboration"
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "optionalPlugins": [
+      "security"
+    ]
+  }
+}

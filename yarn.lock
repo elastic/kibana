@@ -1302,6 +1302,33 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
+"@cord-sdk/components@0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@cord-sdk/components/-/components-0.0.39.tgz#5d8d86b50454deb469c74be233ecac672d6cc371"
+  integrity sha512-VTAMtSdTILS7qQQNF93bWXcBCvdMADS1wBTHWsxpaTg8F5XMjYbtNj3P3SpdObCga5gB56PTGJbdso8OYe8zng==
+  dependencies:
+    "@cord-sdk/types" "0.0.39"
+
+"@cord-sdk/react@^0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@cord-sdk/react/-/react-0.0.39.tgz#17cec4e0bbb63ed5517bec3ec9ba57d107390713"
+  integrity sha512-l7BlUK4A3mbgut6J0da4Q6DntWrMb3fO/4jqJDhrGr4N5npE03p+zxqNO+mk1w/LuV5YRwd0Axykh0VsHsxKbw==
+  dependencies:
+    "@cord-sdk/components" "0.0.39"
+    "@cord-sdk/types" "0.0.39"
+
+"@cord-sdk/server@^0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@cord-sdk/server/-/server-0.0.39.tgz#04736f48ad9edb969b8b915c72377e1d42eb544c"
+  integrity sha512-D9cO68oZvkiNAwysa9NkRA+/G5MeEWDJQkpy9DwNNYdXjnpFuVdrp0+/uY8Y0JuMSIvZyUjdgZ2/5DrqVVec0w==
+  dependencies:
+    jsonwebtoken "^9.0.0"
+
+"@cord-sdk/types@0.0.39":
+  version "0.0.39"
+  resolved "https://registry.yarnpkg.com/@cord-sdk/types/-/types-0.0.39.tgz#fe5d991234aa97380b76fa6ee10358097be744c5"
+  integrity sha512-io4YDcCzvWbfE4+9i+0zpq9hJ/CAeSFrk1iCbFV6RrVnRclv1RVLPaFWRNMY8k96lxdZGBsMqv0H+Kwe6F1XEA==
+
 "@cspotcode/source-map-support@^0.8.0", "@cspotcode/source-map-support@^0.8.1":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz#00629c35a688e05a88b1cda684fb9d5e73f000a1"
@@ -2995,6 +3022,10 @@
   uid ""
 
 "@kbn/cloud-chat-plugin@link:x-pack/plugins/cloud_integrations/cloud_chat":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cloud-collaboration-plugin@link:x-pack/plugins/cloud_integrations/cloud_collaboration":
   version "0.0.0"
   uid ""
 

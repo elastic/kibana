@@ -88,6 +88,8 @@
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
     "@babel/runtime": "^7.21.0",
+    "@cord-sdk/react": "^0.0.39",
+    "@cord-sdk/server": "^0.0.39",
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
     "@dnd-kit/utilities": "^2.0.0",
@@ -167,6 +169,7 @@
     "@kbn/chart-icons": "link:packages/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/plugins/charts",
     "@kbn/cloud-chat-plugin": "link:x-pack/plugins/cloud_integrations/cloud_chat",
+    "@kbn/cloud-collaboration-plugin": "link:x-pack/plugins/cloud_integrations/cloud_collaboration",
     "@kbn/cloud-data-migration-plugin": "link:x-pack/plugins/cloud_integrations/cloud_data_migration",
     "@kbn/cloud-defend-plugin": "link:x-pack/plugins/cloud_defend",
     "@kbn/cloud-experiments-plugin": "link:x-pack/plugins/cloud_integrations/cloud_experiments",

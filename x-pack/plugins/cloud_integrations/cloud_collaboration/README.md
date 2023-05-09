@@ -1,0 +1,6 @@
+# cloudCollaboration
+
+A Kibana plugin
+
+---
+
