@@ -18,17 +18,17 @@ export default async function* customReporterGeneratorFn(source) {
       case 'test:fail':
         yield `test ${event.data.name} failed\n`;
         break;
-      case 'test:plan':
-        callback(null, 'test plan');
-        break;
-      case 'test:diagnostic':
-        callback(null, event.data.message);
-        break;
-      case 'test:coverage': {
-        const { totalLineCount } = event.data.summary.totals;
-        callback(null, `total line count: ${totalLineCount}\n`);
-        break;
-      }
+      // case 'test:plan':
+      //   callback(null, 'test plan');
+      //   break;
+      // case 'test:diagnostic':
+      //   callback(null, event.data.message);
+      //   break;
+      // case 'test:coverage': {
+      //   const { totalLineCount } = event.data.summary.totals;
+      //   callback(null, `total line count: ${totalLineCount}\n`);
+      //   break;
+      // }
     }
   }
 }

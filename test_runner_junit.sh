@@ -19,3 +19,4 @@ node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-jun
 #npx junit2json target/junit/tap.xml | jq
 ls -R "$tgt"
 popd > /dev/null
+npx junit2json target/junit/tap.xml | jq
