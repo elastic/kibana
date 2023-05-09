@@ -627,23 +627,15 @@
               },
               {
                 "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
+              },
+              {
+                "plugin": "discover",
                 "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_discover_state.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
               },
               {
                 "plugin": "fileUpload",
@@ -712,6 +704,14 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/mount_management_section.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core-plugins-browser-internal",
