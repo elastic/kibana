@@ -59,7 +59,7 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-
+import { getVisualizationInspectorViewDescription } from './inspector_views/visualization';
 import type { SecurityAppStore } from './common/store/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -198,6 +198,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const store = await this.store(coreStart, startPlugins, subPlugins);
         const services = await startServices(params);
         await this.registerActions(store, params.history, services);
+        plugins.inspector.registerView(getVisualizationInspectorViewDescription());
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();

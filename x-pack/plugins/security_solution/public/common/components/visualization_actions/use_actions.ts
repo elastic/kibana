@@ -30,13 +30,14 @@ export const useActions = ({
   timeRange: { from: string; to: string };
   withActions?: boolean;
 }) => {
-  const { lens } = useKibana().services;
+  const { lens, inspector } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
   const [defaultActions, setDefaultActions] = useState([
     'inspect',
     'addToNewCase',
     'addToExistingCase',
     'openInLens',
+    'inspectVisualization',
   ]);
 
   useEffect(() => {
@@ -106,6 +107,17 @@ export const useActions = ({
           return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
         }
 
+        if (action === 'inspectVisualization') {
+          return [
+            ...acc,
+            getInspectVisualizationAction({
+              callback: () => {
+                inspector.open({});
+              },
+            }),
+          ];
+        }
+
         return acc;
       }, []),
     [
@@ -116,6 +128,7 @@ export const useActions = ({
       onAddToNewCaseClicked,
       isAddToNewCaseDisabled,
       onOpenInLens,
+      inspector,
     ]
   );
 
@@ -223,5 +236,32 @@ const getAddToExistingCaseAction = ({
     },
     disabled,
     order: 2,
+  };
+};
+
+const getInspectVisualizationAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
+  return {
+    id: 'inspectVisualization',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return 'Inspect Visualization';
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'inspect';
+    },
+    type: 'actionButton',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+    },
+    disabled,
+    order: 10,
   };
 };
