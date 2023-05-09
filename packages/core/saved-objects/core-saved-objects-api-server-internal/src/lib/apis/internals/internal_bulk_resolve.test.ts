@@ -24,7 +24,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
-import { normalizeNamespace } from './internal_utils';
+import { normalizeNamespace } from '../../internal_utils';
 import {
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
@@ -36,8 +36,8 @@ import {
   enforceError,
   setupAuthorizeAndRedactInternalBulkResolveFailure,
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
-} from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+} from '../../../test_helpers/repository.test.common';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';

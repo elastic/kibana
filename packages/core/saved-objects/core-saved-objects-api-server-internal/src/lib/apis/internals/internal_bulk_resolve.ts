@@ -45,8 +45,8 @@ import {
   type Right,
   isLeft,
   isRight,
-} from './internal_utils';
-import type { RepositoryEsClient } from './repository_es_client';
+} from '../../internal_utils';
+import type { RepositoryEsClient } from '../../repository_es_client';
 
 const MAX_CONCURRENT_RESOLVE = 10;
 
