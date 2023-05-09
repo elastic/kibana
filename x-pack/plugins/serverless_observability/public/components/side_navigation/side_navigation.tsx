@@ -13,7 +13,22 @@ export function ObservabilitySideNavigation() {
     <SolutionNav
       items={[
         {
-          id: 'signals',
+          id: 'services-infra',
+          name: undefined,
+          items: [
+            {
+              id: 'services',
+              name: 'Services',
+            },
+            {
+              id: 'infra',
+              name: 'Infrastructure',
+            },
+          ],
+        },
+
+        {
+          id: 'alerts-cases-slos',
           name: undefined,
           items: [
             {
@@ -36,8 +51,8 @@ export function ObservabilitySideNavigation() {
           name: 'Signals',
           items: [
             {
-              id: 'tracing',
-              name: 'Tracing',
+              id: 'traces',
+              name: 'Traces',
             },
             {
               id: 'logs',
