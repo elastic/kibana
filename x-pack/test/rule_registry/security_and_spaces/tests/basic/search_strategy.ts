@@ -189,6 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
             runtimeMappings: {
