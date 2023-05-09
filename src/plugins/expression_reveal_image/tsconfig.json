@@ -16,6 +16,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
+    "@kbn/visualizations-plugin",
   ],
   "exclude": [
     "target/**/*",
