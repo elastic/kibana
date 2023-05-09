@@ -32,6 +32,7 @@ junitReport() {
   node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$tgt"
   ls -R "$tgt"
   popd
+  echo '--- Junit Xml to JSON'
   npx junit2json target/junit/tap.xml | jq
 }
 echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
