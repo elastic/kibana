@@ -7,7 +7,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  config as ElasticsearchBaseConfig,
   Plugin,
   CoreSetup,
   RequestHandlerContext,
@@ -30,7 +29,16 @@ const configSchema = schema.object({
     schema.object({
       enabled: schema.maybe(schema.boolean({ defaultValue: true })),
       interval: schema.duration({ defaultValue: '5m' }),
-      input: ElasticsearchBaseConfig.elasticsearch.schema,
+      input: schema.object({
+        hosts: schema.string(),
+        username: schema.string(),
+        password: schema.string(),
+      }),
+      output: schema.object({
+        hosts: schema.string(),
+        username: schema.string(),
+        password: schema.string(),
+      }),
     })
   ),
 });
@@ -43,6 +51,7 @@ export const config: PluginConfigDescriptor<AssetManagerConfig> = {
 
 export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
   private context: PluginInitializerContext<AssetManagerConfig>;
+  private implicitCollectionTimer?: NodeJS.Timeout;
   public config: AssetManagerConfig;
   public logger: Logger;
 
@@ -64,17 +73,6 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
     const router = core.http.createRouter();
     setupRoutes<RequestHandlerContext>({ router });
 
-    if (this.config.implicitCollection?.enabled) {
-      this.logger.info(
-        `Implicit collection set to run every ${this.config.implicitCollection.interval}`
-      );
-
-      runImplicitCollection({
-        intervalMs: this.config.implicitCollection.interval.asMilliseconds(),
-        logger: this.context.logger.get('implicit_collection'),
-      });
-    }
-
     return {};
   }
 
@@ -90,7 +88,40 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
       template: assetsIndexTemplateConfig,
       logger: this.logger,
     });
+
+    if (this.config.implicitCollection?.enabled) {
+      this.logger.info(
+        `Implicit collection set to run every ${this.config.implicitCollection.interval}`
+      );
+
+      const inputClient = core.elasticsearch.createClient(
+        'asset_manager.implicit_collection.reader',
+        {
+          hosts: [this.config.implicitCollection.input.hosts],
+          username: this.config.implicitCollection.input.username,
+          password: this.config.implicitCollection.input.password,
+        }
+      ).asInternalUser;
+
+      const outputClient = core.elasticsearch.createClient(
+        'asset_manager.implicit_collection.writer',
+        {
+          hosts: [this.config.implicitCollection.output.hosts],
+          username: this.config.implicitCollection.output.username,
+          password: this.config.implicitCollection.output.password,
+        }
+      ).asInternalUser;
+
+      this.implicitCollectionTimer = runImplicitCollection({
+        inputClient,
+        outputClient,
+        intervalMs: this.config.implicitCollection.interval.asMilliseconds(),
+        logger: this.context.logger.get('implicit_collection'),
+      });
+    }
   }
 
-  public stop() {}
+  public stop() {
+    clearInterval(this.implicitCollectionTimer);
+  }
 }
