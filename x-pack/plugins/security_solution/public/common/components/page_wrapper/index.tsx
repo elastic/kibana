@@ -12,6 +12,7 @@ import type { CommonProps } from '@elastic/eui';
 
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { AppGlobalStyle } from '../page';
+import { AssistantOverlay } from '../../../security_assistant/assistant_overlay/assistant_overlay';
 
 const Wrapper = styled.div`
   &.securitySolutionWrapper--fullHeight {
@@ -57,6 +58,7 @@ const SecuritySolutionPageWrapperComponent: React.FC<
     <Wrapper className={classes} style={style} {...otherProps}>
       {children}
       <AppGlobalStyle />
+      <AssistantOverlay />
     </Wrapper>
   );
 };
