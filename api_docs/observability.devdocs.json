@@ -5377,6 +5377,26 @@
         },
         "<",
         "RulesLocatorParams",
+        ">; ruleDetailsLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "RuleDetailsLocatorParams",
+        ">; sloDetailsLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "SloDetailsLocatorParams",
         ">; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -13357,6 +13377,21 @@
         "description": [],
         "signature": [
           "\"RULES_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.sloDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_LOCATOR\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
