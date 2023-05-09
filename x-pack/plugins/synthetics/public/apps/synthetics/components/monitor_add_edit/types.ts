@@ -66,7 +66,7 @@ export type FormConfig = MonitorFields & {
 export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   fieldKey: keyof FormConfig;
   component: React.ComponentType<any>;
-  label?: string;
+  label?: string | React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
   hidden?: (depenencies: unknown[]) => boolean;

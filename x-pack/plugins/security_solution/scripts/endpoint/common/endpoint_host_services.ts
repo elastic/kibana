@@ -264,3 +264,18 @@ const enrollHostWithFleet = async ({
     agentId: agent.id,
   };
 };
+
+export async function getEndpointHosts(): Promise<
+  Array<{ name: string; state: string; ipv4: string; image: string }>
+> {
+  const output = await execa('multipass', ['list', '--format', 'json']);
+  return JSON.parse(output.stdout).list;
+}
+
+export function stopEndpointHost(hostName: string) {
+  return execa('multipass', ['stop', hostName]);
+}
+
+export function startEndpointHost(hostName: string) {
+  return execa('multipass', ['start', hostName]);
+}

@@ -5,11 +5,81 @@
     "functions": [
       {
         "parentPluginId": "savedSearch",
+        "id": "def-public.getNewSavedSearch",
+        "type": "Function",
+        "tags": [],
+        "label": "getNewSavedSearch",
+        "description": [
+          "\n\nReturns a new saved search\nUsed when e.g. Discover is opened without a saved search id"
+        ],
+        "signature": [
+          "({ search, }: { search: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-public.ISearchStart",
+            "text": "ISearchStart"
+          },
+          "; }) => ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "public",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-public.SavedSearch",
+            "text": "SavedSearch"
+          }
+        ],
+        "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-public.getNewSavedSearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  search,\n}",
+            "description": [],
+            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedSearch",
+                "id": "def-public.getNewSavedSearch.$1.search",
+                "type": "Object",
+                "tags": [],
+                "label": "search",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "public",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-public.ISearchStart",
+                    "text": "ISearchStart"
+                  }
+                ],
+                "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
         "id": "def-public.getSavedSearch",
         "type": "Function",
         "tags": [],
         "label": "getSavedSearch",
-        "description": [],
+        "description": [
+          "\nReturns a persisted or a new saved search"
+        ],
         "signature": [
           "(savedSearchId: string | undefined, dependencies: GetSavedSearchDependencies) => Promise<",
           {
@@ -31,7 +101,9 @@
             "type": "string",
             "tags": [],
             "label": "savedSearchId",
-            "description": [],
+            "description": [
+              "- when undefined a new saved search is returned"
+            ],
             "signature": [
               "string | undefined"
             ],
