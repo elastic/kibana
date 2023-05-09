@@ -138,7 +138,7 @@ export function getExploratoryViewEmbeddable(
                 {...embedProps}
                 dataViewState={dataViews}
                 lens={lens}
-                lensFormulaHelper={lensHelper.formula}
+                lensFormulaHelper={lensHelper?.formula}
                 searchSessionId={services.data.search.session.getSessionId()}
                 onLoad={onLensLoaded}
               />

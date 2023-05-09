@@ -587,31 +587,7 @@
               },
               {
                 "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
-              },
-              {
-                "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/visualize_app/utils/get_visualization_instance.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/utils/get_visualization_instance.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/utils/get_visualization_instance.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
               },
               {
                 "plugin": "visualizations",
@@ -627,14 +603,6 @@
               },
               {
                 "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
-              },
-              {
-                "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
               },
               {
@@ -655,27 +623,19 @@
               },
               {
                 "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
+                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.ts"
               },
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_discover_state.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
               },
               {
                 "plugin": "fileUpload",
@@ -688,50 +648,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_delete_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_delete_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
               },
               {
                 "plugin": "fleet",
@@ -788,6 +704,14 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/mount_management_section.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_saved_search_container.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core-plugins-browser-internal",

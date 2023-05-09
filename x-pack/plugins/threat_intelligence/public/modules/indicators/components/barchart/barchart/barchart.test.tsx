@@ -12,6 +12,7 @@ import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { IndicatorsBarChart } from '.';
 import { ChartSeries } from '../../../services';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -45,7 +46,10 @@ describe('<IndicatorsBarChart />', () => {
       min: moment(validDate),
       max: moment(validDate).add(1, 'days'),
     };
-    const mockField: string = 'threat.indicator.ip';
+    const mockField: EuiComboBoxOptionOption<string> = {
+      label: 'threat.indicator.ip',
+      value: 'ip',
+    };
 
     const component = render(
       <TestProvidersComponent>

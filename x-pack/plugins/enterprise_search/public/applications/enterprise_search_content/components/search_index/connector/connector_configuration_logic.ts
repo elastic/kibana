@@ -73,6 +73,7 @@ export interface ConfigEntry {
   type: FieldType;
   ui_restrictions: string[];
   validation_errors: string[];
+  validations?: string[];
   value: string | number | boolean | null;
 }
 
@@ -155,7 +156,7 @@ function validIntInput(value: string | number | boolean | null): boolean {
   // reject non integers (including x.0 floats), but don't validate if empty
   return (value !== null || value !== '') &&
     (isNaN(Number(value)) ||
-      !Number.isSafeInteger(value) ||
+      !Number.isSafeInteger(Number(value)) ||
       ensureStringType(value).indexOf('.') >= 0)
     ? false
     : true;
@@ -328,6 +329,7 @@ export const ConnectorConfigurationLogic = kea<
             type,
             // eslint-disable-next-line @typescript-eslint/naming-convention
             ui_restrictions,
+            validations,
             value,
           }
         ) => ({
@@ -344,6 +346,7 @@ export const ConnectorConfigurationLogic = kea<
             tooltip,
             type,
             ui_restrictions,
+            validations: validations ?? [],
             value: ensureCorrectTyping(type, value),
           },
         }),

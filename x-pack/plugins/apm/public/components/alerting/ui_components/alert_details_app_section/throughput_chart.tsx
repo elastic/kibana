@@ -17,16 +17,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -40,7 +39,6 @@ function ThroughputChart({
   end,
   comparisonChartTheme,
   comparisonEnabled,
-  latencyMaxY,
   offset,
   timeZone,
 }: {
@@ -51,7 +49,6 @@ function ThroughputChart({
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
   comparisonEnabled: boolean;
-  latencyMaxY: number;
   offset: string;
   timeZone: string;
 }) {
@@ -118,8 +115,6 @@ function ThroughputChart({
       : []),
   ];
 
-  const latencyFormatter = getDurationFormatter(latencyMaxY);
-
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -154,7 +149,7 @@ function ThroughputChart({
           fetchStatus={statusThroughput}
           customTheme={comparisonChartTheme}
           timeseries={timeseriesThroughput}
-          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+          yLabelFormat={asExactTransactionRate}
           timeZone={timeZone}
         />
       </EuiPanel>

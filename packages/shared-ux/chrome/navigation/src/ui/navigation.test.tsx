@@ -8,8 +8,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { getServicesMock } from '../../mocks/src/jest';
-import { PlatformConfigSet, SolutionProperties } from '../../types';
+import { ChromeNavigationNodeViewModel, PlatformConfigSet } from '../../types';
 import { Platform } from '../model';
 import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
@@ -19,17 +20,21 @@ describe('<Navigation />', () => {
 
   const homeHref = '#';
   let platformSections: PlatformConfigSet | undefined;
-  let solutions: SolutionProperties[];
+  let solutions: ChromeNavigationNodeViewModel[];
 
   beforeEach(() => {
     platformSections = { analytics: {}, ml: {}, devTools: {}, management: {} };
-    solutions = [{ id: 'navigation_testing', name: 'Navigation testing', icon: 'gear' }];
+    solutions = [{ id: 'navigation_testing', title: 'Navigation testing', icon: 'gear' }];
   });
 
   test('renders the header logo and top-level navigation buckets', async () => {
-    const { findByTestId, findByText } = render(
+    const { findByTestId, findByText, queryByTestId } = render(
       <NavigationProvider {...services} navIsOpen={true}>
-        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
+        <Navigation
+          platformConfig={platformSections}
+          navigationTree={solutions}
+          homeHref={homeHref}
+        />
       </NavigationProvider>
     );
 
@@ -41,6 +46,8 @@ describe('<Navigation />', () => {
     expect(await findByTestId('nav-bucket-ml')).toBeVisible();
     expect(await findByTestId('nav-bucket-devTools')).toBeVisible();
     expect(await findByTestId('nav-bucket-management')).toBeVisible();
+
+    expect(queryByTestId('nav-bucket-recentlyAccessed')).not.toBeInTheDocument();
   });
 
   test('includes link to deployments', async () => {
@@ -48,7 +55,7 @@ describe('<Navigation />', () => {
       <NavigationProvider {...services} navIsOpen={true}>
         <Navigation
           platformConfig={platformSections}
-          solutions={solutions}
+          navigationTree={solutions}
           homeHref={homeHref}
           linkToCloud="deployments"
         />
@@ -68,7 +75,11 @@ describe('<Navigation />', () => {
 
     const { findByTestId, queryByTestId } = render(
       <NavigationProvider {...services} navIsOpen={true}>
-        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
+        <Navigation
+          platformConfig={platformSections}
+          navigationTree={solutions}
+          homeHref={homeHref}
+        />
       </NavigationProvider>
     );
 
@@ -83,15 +94,15 @@ describe('<Navigation />', () => {
     solutions[0].items = [
       {
         id: 'root',
-        name: '',
+        title: '',
         items: [
           {
             id: 'city',
-            name: 'City',
+            title: 'City',
           },
           {
             id: 'town',
-            name: 'Town',
+            title: 'Town',
           },
         ],
       },
@@ -101,7 +112,7 @@ describe('<Navigation />', () => {
       <NavigationProvider {...services} navIsOpen={true}>
         <Navigation
           platformConfig={platformSections}
-          solutions={solutions}
+          navigationTree={solutions}
           homeHref={homeHref}
           activeNavItemId="navigation_testing.root.city"
         />
@@ -114,14 +125,57 @@ describe('<Navigation />', () => {
   });
 
   test('shows loading state', async () => {
-    services.loadingCount = 5;
+    services.loadingCount$ = new BehaviorSubject(5);
 
     const { findByTestId } = render(
       <NavigationProvider {...services} navIsOpen={true}>
-        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
+        <Navigation
+          platformConfig={platformSections}
+          navigationTree={solutions}
+          homeHref={homeHref}
+        />
       </NavigationProvider>
     );
 
     expect(await findByTestId('nav-header-loading-spinner')).toBeVisible();
+  });
+
+  describe('recent items', () => {
+    const recentlyAccessed = [
+      { id: 'dashboard:234', label: 'Recently Accessed Test Item', link: '/app/dashboard/234' },
+    ];
+
+    test('shows recent items', async () => {
+      services.recentlyAccessed$ = new BehaviorSubject(recentlyAccessed);
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} navIsOpen={true}>
+          <Navigation
+            platformConfig={platformSections}
+            navigationTree={solutions}
+            homeHref={homeHref}
+          />
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+    });
+
+    test('shows no recent items container when items are filtered', async () => {
+      services.recentlyAccessed$ = new BehaviorSubject(recentlyAccessed);
+
+      const { queryByTestId } = render(
+        <NavigationProvider {...services} navIsOpen={true}>
+          <Navigation
+            platformConfig={platformSections}
+            navigationTree={solutions}
+            homeHref={homeHref}
+            recentlyAccessedFilter={() => []}
+          />
+        </NavigationProvider>
+      );
+
+      expect(queryByTestId('nav-bucket-recentlyAccessed')).not.toBeInTheDocument();
+    });
   });
 });

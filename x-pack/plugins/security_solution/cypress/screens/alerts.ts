@@ -171,3 +171,9 @@ export const LEGEND_ACTIONS = {
   FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
+
+export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+
+export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+
+export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';
