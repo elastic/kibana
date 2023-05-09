@@ -18,7 +18,6 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'running-processes',
   'get-file',
   'execute',
-  'upload',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
@@ -37,7 +36,6 @@ export const ENDPOINT_CAPABILITIES = [
   'running_processes',
   'get_file',
   'execute',
-  'upload_file',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
@@ -54,7 +52,6 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'processes',
   'get-file',
   'execute',
-  'upload',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
@@ -77,7 +74,6 @@ export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseCon
     processes: 'writeProcessOperations',
     'get-file': 'writeFileOperations',
     execute: 'writeExecuteOperations',
-    upload: 'writeFileOperations',
   });
 
 export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -90,7 +86,6 @@ export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze
   'running-processes': 'processes',
   'kill-process': 'kill-process',
   'suspend-process': 'suspend-process',
-  upload: 'upload',
 });
 
 // 4 hrs in seconds
