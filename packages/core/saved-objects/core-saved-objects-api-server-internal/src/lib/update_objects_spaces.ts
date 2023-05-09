@@ -39,7 +39,7 @@ import {
   isLeft,
   isRight,
 } from './internal_utils';
-import { DEFAULT_REFRESH_SETTING } from './repository';
+import { DEFAULT_REFRESH_SETTING } from './constants';
 import type { RepositoryEsClient } from './repository_es_client';
 import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';

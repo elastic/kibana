@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { BulkResolveError } from '@kbn/core-saved-objects-server';
@@ -54,8 +53,6 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  type SavedObjectSanitizedDoc,
-  type SavedObjectsRawDocSource,
   type ISavedObjectTypeRegistry,
   type SavedObjectsExtensions,
   type ISavedObjectsEncryptionExtension,
@@ -63,17 +60,15 @@ import {
   type ISavedObjectsSpacesExtension,
   type SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
-  encodeHitVersion,
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { internalBulkResolve, isBulkResolveError } from './internal_bulk_resolve';
-import { getCurrentTime, normalizeNamespace, errorContent } from './internal_utils';
+import { errorContent } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
 import {
@@ -84,7 +79,6 @@ import {
   PreflightCheckHelper,
   SerializerHelper,
 } from './helpers';
-import { DEFAULT_REFRESH_SETTING } from './constants';
 import {
   type ApiExecutionContext,
   performCreate,
@@ -100,6 +94,8 @@ import {
   performBulkUpdate,
   performRemoveReferencesTo,
   performOpenPointInTime,
+  incrementCounterInternal,
+  performIncrementCounter,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -580,173 +576,29 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
-    options?: SavedObjectsIncrementCounterOptions<T>
+    options: SavedObjectsIncrementCounterOptions<T> = {}
   ) {
-    // This is not exposed on the SOC, there are no authorization or audit logging checks
-    if (typeof type !== 'string') {
-      throw new Error('"type" argument must be a string');
-    }
-
-    const isArrayOfCounterFields =
-      Array.isArray(counterFields) &&
-      counterFields.every(
-        (field) =>
-          typeof field === 'string' || (isObject(field) && typeof field.fieldName === 'string')
-      );
-
-    if (!isArrayOfCounterFields) {
-      throw new Error(
-        '"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>'
-      );
-    }
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-    }
-
-    return this.incrementCounterInternal<T>(type, id, counterFields, options);
+    return await performIncrementCounter(
+      {
+        type,
+        id,
+        counterFields,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
-  /** @internal incrementCounter function that is used internally and bypasses validation checks. */
-  private async incrementCounterInternal<T = unknown>(
+  async incrementCounterInternal<T = unknown>(
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options: SavedObjectsIncrementCounterOptions<T> = {}
-  ): Promise<SavedObject<T>> {
-    const {
-      migrationVersion,
-      typeMigrationVersion,
-      refresh = DEFAULT_REFRESH_SETTING,
-      initialize = false,
-      upsertAttributes,
-      managed,
-    } = options;
-
-    if (!id) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
-    }
-
-    const normalizedCounterFields = counterFields.map((counterField) => {
-      /**
-       * no counterField configs provided, instead a field name string was passed.
-       * ie `incrementCounter(so_type, id, ['my_field_name'])`
-       * Using the default of incrementing by 1
-       */
-      if (typeof counterField === 'string') {
-        return {
-          fieldName: counterField,
-          incrementBy: initialize ? 0 : 1,
-        };
-      }
-
-      const { incrementBy = 1, fieldName } = counterField;
-
-      return {
-        fieldName,
-        incrementBy: initialize ? 0 : incrementBy,
-      };
-    });
-    const namespace = normalizeNamespace(options.namespace);
-
-    const time = getCurrentTime();
-    let savedObjectNamespace;
-    let savedObjectNamespaces: string[] | undefined;
-
-    if (this._registry.isSingleNamespace(type) && namespace) {
-      savedObjectNamespace = namespace;
-    } else if (this._registry.isMultiNamespace(type)) {
-      // note: this check throws an error if the object is found but does not exist in this namespace
-      const preflightResult = await this.preflightCheckHelper.preflightCheckNamespaces({
-        type,
-        id,
-        namespace,
-      });
-      if (preflightResult.checkResult === 'found_outside_namespace') {
-        throw SavedObjectsErrorHelpers.createConflictError(type, id);
-      }
-
-      if (preflightResult.checkResult === 'not_found') {
-        // If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
-        // This takes an extra round trip to Elasticsearch, but this won't happen often.
-        // TODO: improve performance by combining these into a single preflight check
-        await this.preflightCheckHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
-      }
-
-      savedObjectNamespaces = preflightResult.savedObjectNamespaces;
-    }
-
-    // attributes: { [counterFieldName]: incrementBy },
-    const migrated = this._migrator.migrateDocument({
-      id,
-      type,
-      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: {
-        ...(upsertAttributes ?? {}),
-        ...normalizedCounterFields.reduce((acc, counterField) => {
-          const { fieldName, incrementBy } = counterField;
-          acc[fieldName] = incrementBy;
-          return acc;
-        }, {} as Record<string, number>),
-      },
-      migrationVersion,
-      typeMigrationVersion,
-      managed,
-      updated_at: time,
-    });
-
-    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
-
-    const body = await this.client.update<unknown, unknown, SavedObjectsRawDocSource>({
-      id: raw._id,
-      index: this.getIndexForType(type),
-      refresh,
-      require_alias: true,
-      _source: true,
-      body: {
-        script: {
-          source: `
-              for (int i = 0; i < params.counterFieldNames.length; i++) {
-                def counterFieldName = params.counterFieldNames[i];
-                def count = params.counts[i];
-
-                if (ctx._source[params.type][counterFieldName] == null) {
-                  ctx._source[params.type][counterFieldName] = count;
-                }
-                else {
-                  ctx._source[params.type][counterFieldName] += count;
-                }
-              }
-              ctx._source.updated_at = params.time;
-            `,
-          lang: 'painless',
-          params: {
-            counts: normalizedCounterFields.map(
-              (normalizedCounterField) => normalizedCounterField.incrementBy
-            ),
-            counterFieldNames: normalizedCounterFields.map(
-              (normalizedCounterField) => normalizedCounterField.fieldName
-            ),
-            time,
-            type,
-          },
-        },
-        upsert: raw._source,
-      },
-    });
-
-    const { originId } = body.get?._source ?? {};
-    return {
-      id,
-      type,
-      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      ...(originId && { originId }),
-      updated_at: time,
-      references: body.get?._source.references ?? [],
-      version: encodeHitVersion(body),
-      attributes: body.get?._source[type],
-      ...(managed && { managed }),
-    };
+  ) {
+    return incrementCounterInternal<T>(
+      { type, id, counterFields, options },
+      this.apiExecutionContext
+    );
   }
 
   /**
