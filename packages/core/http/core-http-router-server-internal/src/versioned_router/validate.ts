@@ -15,6 +15,7 @@ import {
 import { z, extractErrorMessage } from '@kbn/zod';
 import type { ApiVersion } from '@kbn/core-http-server';
 import { instanceofZodType } from '@kbn/zod';
+import type { Type } from '@kbn/config-schema';
 import { RouteValidator } from '../validator';
 
 function makeValidationFunction(schema: z.ZodTypeAny): RouteValidationFunction<unknown> {
@@ -30,8 +31,12 @@ function makeValidationFunction(schema: z.ZodTypeAny): RouteValidationFunction<u
   };
 }
 
-function getValidator(handler?: VersionedSpecValidation) {
-  return instanceofZodType(handler) ? makeValidationFunction(handler) : handler;
+function getValidator(
+  handler?: VersionedSpecValidation
+): RouteValidationFunction<unknown> | Type<unknown> | undefined {
+  return instanceofZodType(handler)
+    ? makeValidationFunction(handler)
+    : (handler as RouteValidationFunction<unknown> | Type<unknown> | undefined);
 }
 
 /** Will throw if any of the validation checks fail */

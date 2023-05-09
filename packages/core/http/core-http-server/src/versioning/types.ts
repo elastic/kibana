@@ -163,7 +163,10 @@ interface ZodEsque<V> {
  * teams to decide when or if they would like to opt into OAS spec generation for their
  * public routes via zod.
  */
-export type VersionedSpecValidation<V> = ZodEsque<V> | RouteValidationFunction<V> | Type<V>;
+export type VersionedSpecValidation<V = unknown> =
+  | ZodEsque<V>
+  | RouteValidationFunction<V>
+  | Type<V>;
 
 /** @experimental */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<
