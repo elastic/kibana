@@ -156,7 +156,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
-  const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
+  const { isLoadingEngineSchema, schemaFields, hasSchemaConflicts } = useValues(EngineViewLogic);
   const { fetchEngineSchema } = useActions(EngineViewLogic);
 
   const [isFilterByPopoverOpen, setIsFilterByPopoverOpen] = useState<boolean>(false);
@@ -346,6 +346,31 @@ export const EngineSchema: React.FC = () => {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
+        {hasSchemaConflicts && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.title',
+              { defaultMessage: 'Potential field mapping issues found' }
+            )}
+            iconType="error"
+            color="danger"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.description"
+                defaultMessage="Schema field type conflicts can be resolved by navigating to the source index directly and updating the field type of the conflicting field(s) to match that of the other source indices."
+              />
+            </p>
+            {!onlyShowConflicts && (
+              <EuiButton color="danger" fill onClick={toggleOnlyShowConflicts}>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.applications.schema.conflictsCallOut.button"
+                  defaultMessage="View conflicts"
+                />
+              </EuiButton>
+            )}
+          </EuiCallOut>
+        )}
         <EuiFlexGroup>
           <EuiSwitch
             label={i18n.translate(
