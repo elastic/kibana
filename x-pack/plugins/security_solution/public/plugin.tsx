@@ -311,7 +311,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerAppLinks(core, plugins);
 
     return {
-      navLinks$,
+      getNavLinks$: () => navLinks$,
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
     };

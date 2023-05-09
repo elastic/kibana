@@ -145,7 +145,7 @@ export interface PluginSetup {
 }
 
 export interface PluginStart {
-  navLinks$: Observable<NavigationLink[]>;
+  getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
 }
 

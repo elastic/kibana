@@ -41,7 +41,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('renders case options in the overflow menu', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+        });
+
         await retry.try(async () => {
           await observability.alerts.addToCase.getAddToExistingCaseSelectorOrFail();
           await observability.alerts.addToCase.getAddToNewCaseSelectorOrFail();
@@ -60,7 +63,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('opens a modal when Add to existing case is clicked', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+        });
 
         await retry.try(async () => {
           await observability.alerts.addToCase.addToExistingCaseButtonClick();
@@ -85,7 +90,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('does not render case options in the overflow menu', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.common.openActionsMenuForRow(0);
+        });
         await retry.try(async () => {
           await observability.alerts.addToCase.missingAddToExistingCaseSelectorOrFail();
           await observability.alerts.addToCase.missingAddToNewCaseSelectorOrFail();

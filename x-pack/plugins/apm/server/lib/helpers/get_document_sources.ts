@@ -5,11 +5,50 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ApmDataSource } from '../../../common/data_source';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from './create_es_client/document_type';
+import { TRANSACTION_DURATION_SUMMARY } from '../../../common/es_fields/apm';
+import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+
+const getRequest = ({
+  documentType,
+  rollupInterval,
+  filters,
+}: {
+  documentType: ApmDocumentType;
+  rollupInterval: RollupInterval;
+  filters: estypes.QueryDslQueryContainer[];
+}) => {
+  const searchParams = {
+    apm: {
+      sources: [
+        {
+          documentType,
+          rollupInterval,
+        },
+      ],
+    },
+    body: {
+      track_total_hits: 1,
+      size: 0,
+      terminate_after: 1,
+    },
+  };
+  return {
+    ...searchParams,
+    body: {
+      ...searchParams.body,
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+    },
+  };
+};
 
 export async function getDocumentSources({
   apmEventClient,
@@ -44,52 +83,71 @@ export async function getDocumentSources({
         ? docTypeConfig.rollupIntervals
         : [RollupInterval.OneMinute]
     ).flatMap((rollupInterval) => {
-      const searchParams = {
-        apm: {
-          sources: [
+      return {
+        documentType,
+        rollupInterval,
+        meta: {
+          checkSummaryFieldExists: false,
+        },
+        before: getRequest({
+          documentType,
+          rollupInterval,
+          filters: [...kql, ...beforeRange],
+        }),
+        current: getRequest({
+          documentType,
+          rollupInterval,
+          filters: [...kql, ...currentRange],
+        }),
+      };
+    });
+  });
+
+  const sourcesToCheckWithSummary = [
+    ApmDocumentType.TransactionMetric as const,
+  ].flatMap((documentType) => {
+    const docTypeConfig = getConfigForDocumentType(documentType);
+
+    return (
+      enableContinuousRollups
+        ? docTypeConfig.rollupIntervals
+        : [RollupInterval.OneMinute]
+    ).flatMap((rollupInterval) => {
+      const summaryExistsFilter = {
+        bool: {
+          filter: [
             {
-              documentType,
-              rollupInterval,
+              exists: {
+                field: TRANSACTION_DURATION_SUMMARY,
+              },
             },
           ],
-        },
-        body: {
-          track_total_hits: 1,
-          size: 0,
-          terminate_after: 1,
         },
       };
 
       return {
         documentType,
         rollupInterval,
-        before: {
-          ...searchParams,
-          body: {
-            ...searchParams.body,
-            query: {
-              bool: {
-                filter: [...kql, ...beforeRange],
-              },
-            },
-          },
+        meta: {
+          checkSummaryFieldExists: true,
         },
-        current: {
-          ...searchParams,
-          body: {
-            ...searchParams.body,
-            query: {
-              bool: {
-                filter: [...kql, ...currentRange],
-              },
-            },
-          },
-        },
+        before: getRequest({
+          documentType,
+          rollupInterval,
+          filters: [...kql, ...beforeRange, summaryExistsFilter],
+        }),
+        current: getRequest({
+          documentType,
+          rollupInterval,
+          filters: [...kql, ...currentRange, summaryExistsFilter],
+        }),
       };
     });
   });
 
-  const allSearches = sourcesToCheck.flatMap(({ before, current }) => [
+  const allSourcesToCheck = [...sourcesToCheck, ...sourcesToCheckWithSummary];
+
+  const allSearches = allSourcesToCheck.flatMap(({ before, current }) => [
     before,
     current,
   ]);
@@ -98,43 +156,71 @@ export async function getDocumentSources({
     await apmEventClient.msearch('get_document_availability', ...allSearches)
   ).responses;
 
-  const checkedSources = sourcesToCheck.map((source, index) => {
+  const checkedSources = allSourcesToCheck.map((source, index) => {
+    const { documentType, rollupInterval } = source;
     const responseBefore = allResponses[index * 2];
     const responseAfter = allResponses[index * 2 + 1];
-    const { documentType, rollupInterval } = source;
 
-    const hasDataBefore = responseBefore.hits.total.value > 0;
-    const hasDataAfter = responseAfter.hits.total.value > 0;
+    const hasDocBefore = responseBefore.hits.total.value > 0;
+    const hasDocAfter = responseAfter.hits.total.value > 0;
 
     return {
       documentType,
       rollupInterval,
-      hasDataBefore,
-      hasDataAfter,
+      hasDocBefore,
+      hasDocAfter,
+      checkSummaryFieldExists: source.meta.checkSummaryFieldExists,
     };
   });
 
-  const hasAnyDataBefore = checkedSources.some(
-    (source) => source.hasDataBefore
+  const hasAnySourceDocBefore = checkedSources.some(
+    (source) => source.hasDocBefore
   );
 
-  const sources: Array<ApmDataSource & { hasDocs: boolean }> =
-    checkedSources.map((source) => {
-      const { documentType, hasDataAfter, hasDataBefore, rollupInterval } =
-        source;
+  const sourcesWithHasDocs = checkedSources.map((checkedSource) => {
+    const {
+      documentType,
+      hasDocAfter,
+      hasDocBefore,
+      rollupInterval,
+      checkSummaryFieldExists,
+    } = checkedSource;
 
-      const hasData = hasDataBefore || hasDataAfter;
+    const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
+    // If there is any data before, we require that data is available before
+    // this time range to mark this source as available. If we don't do that,
+    // users that upgrade to a version that starts generating service tx metrics
+    // will see a mostly empty screen for a while after upgrading.
+    // If we only check before, users with a new deployment will use raw transaction
+    // events.
+    const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
+    return {
+      documentType,
+      rollupInterval,
+      checkSummaryFieldExists,
+      hasDocs,
+    };
+  });
 
+  const sources: TimeRangeMetadata['sources'] = sourcesWithHasDocs
+    .filter((source) => !source.checkSummaryFieldExists)
+    .map((checkedSource) => {
+      const { documentType, hasDocs, rollupInterval } = checkedSource;
       return {
         documentType,
         rollupInterval,
-        // If there is any data before, we require that data is available before
-        // this time range to mark this source as available. If we don't do that,
-        // users that upgrade to a version that starts generating service tx metrics
-        // will see a mostly empty screen for a while after upgrading.
-        // If we only check before, users with a new deployment will use raw transaction
-        // events.
-        hasDocs: hasAnyDataBefore ? hasDataBefore : hasData,
+        hasDocs,
+        hasDurationSummaryField:
+          documentType === ApmDocumentType.ServiceTransactionMetric ||
+          Boolean(
+            sourcesWithHasDocs.find((eSource) => {
+              return (
+                eSource.documentType === documentType &&
+                eSource.rollupInterval === rollupInterval &&
+                eSource.checkSummaryFieldExists
+              );
+            })?.hasDocs
+          ),
       };
     });
 
@@ -142,5 +228,6 @@ export async function getDocumentSources({
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
     hasDocs: true,
+    hasDurationSummaryField: false,
   });
 }

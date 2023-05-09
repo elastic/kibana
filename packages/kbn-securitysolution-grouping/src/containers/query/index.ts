@@ -119,9 +119,11 @@ export const getGroupingQuery = ({
 /**
  * Parses the grouping query response to add the isNullGroup
  * flag to the buckets and to format the bucket keys
- * @param buckets buckets returned from the grouping query
+ * @param selectedGroup from the grouping query
+ * @param aggs aggs returned from the grouping query
  */
 export const parseGroupingQuery = <T>(
+  selectedGroup: string,
   aggs?: GroupingAggregation<T>
 ): GroupingAggregation<T> | {} => {
   if (!aggs) {
@@ -138,11 +140,13 @@ export const parseGroupingQuery = <T>(
       ? {
           ...group,
           key: [group.key[0]],
+          selectedGroup,
           key_as_string: group.key[0],
         }
       : {
           ...group,
           key: [emptyValue],
+          selectedGroup,
           key_as_string: emptyValue,
           isNullGroup: true,
         };

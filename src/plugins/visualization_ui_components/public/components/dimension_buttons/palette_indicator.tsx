@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
-import { AccessorConfig } from './types';
+import type { AccessorConfig } from './types';
 
 export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorConfig }) {
   if (accessorConfig.triggerIconType !== 'colorBy' || !accessorConfig.palette) return null;

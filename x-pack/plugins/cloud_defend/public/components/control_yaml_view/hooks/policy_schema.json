@@ -81,10 +81,10 @@
           "required": ["kubernetesNamespace"]
         },
         {
-          "required": ["kubernetesResourceLabel"]
+          "required": ["kubernetesPodLabel"]
         },
         {
-          "required": ["kubernetesResourceName"]
+          "required": ["kubernetesPodName"]
         },
         {
           "required": ["targetFilePath"]
@@ -157,7 +157,7 @@
             "type": "string"
           }
         },
-        "kubernetesResourceLabel": {
+        "kubernetesPodLabel": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -165,7 +165,7 @@
             "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
-        "kubernetesResourceName": {
+        "kubernetesPodName": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -229,10 +229,10 @@
           "required": ["kubernetesNamespace"]
         },
         {
-          "required": ["kubernetesResourceLabel"]
+          "required": ["kubernetesPodLabel"]
         },
         {
-          "required": ["kubernetesResourceName"]
+          "required": ["kubernetesPodName"]
         },
         {
           "required": ["processExecutable"]
@@ -299,7 +299,7 @@
             "type": "string"
           }
         },
-        "kubernetesResourceLabel": {
+        "kubernetesPodLabel": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -307,7 +307,7 @@
             "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
-        "kubernetesResourceName": {
+        "kubernetesPodName": {
           "type": "array",
           "minItems": 1,
           "items": {

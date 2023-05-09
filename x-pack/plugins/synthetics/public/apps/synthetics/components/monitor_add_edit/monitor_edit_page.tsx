@@ -99,6 +99,7 @@ export const MonitorEditPage: React.FC = () => {
         <MonitorDetailsLinkPortal
           configId={data?.attributes[ConfigKey.CONFIG_ID]}
           name={data?.attributes.name}
+          updateUrl={false}
         />
       </MonitorForm>
     </>

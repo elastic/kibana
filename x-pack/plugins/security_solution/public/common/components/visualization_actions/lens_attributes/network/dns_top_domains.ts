@@ -36,6 +36,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: false,
         },
+        valuesInLegend: true,
         tickLabelsVisibilitySettings: {
           x: true,
           yLeft: true,
