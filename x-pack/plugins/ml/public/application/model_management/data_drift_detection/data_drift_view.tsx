@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { Chart, Settings, BarSeries, ScaleType, Position, Axis } from '@elastic/charts';
+import React, { useMemo } from 'react';
 import {
-  EuiLink,
+  AreaSeries,
+  Chart,
+  CurveType,
+  Settings,
+  BarSeries,
+  ScaleType,
+  Position,
+  Axis,
+} from '@elastic/charts';
+import {
   EuiSpacer,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -17,6 +25,8 @@ import {
   EuiSuggestionProps,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { getProcessedFields } from '../../components/data_grid';
+import { useFetchEsRequest } from '../../hooks/use_data_search';
 
 // Select reference data view
 const sampleDataViews = [
@@ -39,7 +49,7 @@ export const ReferenceDataViewSelector = () => {
   };
 
   return (
-    <div>
+    <div css={{ display: 'flex', flexDirection: 'row' }}>
       <EuiFormRow label="Select reference data view" id={idPrefix}>
         <EuiSuggest
           fullWidth
@@ -147,8 +157,90 @@ export const ProductionDistribution = () => {
   );
 };
 
+const ExampleChart = ({ data }: { data: any }) => {
+  const chartData = data ?? [
+    { x: 0, g: 'reference', y: 1 },
+    { x: 0, g: 'production', y: 2 },
+    { x: 1, g: 'reference', y: 2 },
+    { x: 1, g: 'production', y: 3 },
+    { x: 2, g: 'reference', y: 3 },
+    { x: 2, g: 'production', y: 4 },
+    { x: 3, g: 'reference', y: 4 },
+    { x: 3, g: 'production', y: 5 },
+  ];
+
+  return (
+    <Chart>
+      <Settings showLegend showLegendExtra legendPosition={Position.Right} />
+      <Axis id="bottom" position={Position.Bottom} title="Bottom axis" />
+      <Axis
+        id="left2"
+        title="Left axis"
+        position={Position.Left}
+        tickFormat={(d: any) => Number(d).toFixed(2)}
+      />
+      <BarSeries
+        id="data-drift-viz"
+        name="Simple bar series"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        splitSeriesAccessors={['g']}
+        data={chartData}
+      />
+    </Chart>
+  );
+};
 // Data drift view
 export const DataDriftView = () => {
+  // @TODO: Example request - replace with real request
+  const esSearchRequest = {
+    index: '*',
+    body: {
+      fields: ['*'],
+      _source: false,
+      query: {
+        match_all: {},
+      },
+      size: 5,
+    },
+  };
+  const result = useFetchEsRequest(esSearchRequest);
+
+  console.log(`--@@useFetchEsRequest result`, result);
+
+  const dataFromResult = useMemo(() => {
+    if (!result.data) {
+      return [];
+    }
+    // @TODO: Need to reformat ES results data response into something meaningful for plotting data
+    // getProcessedFields() is a helper function to strip array values from "fields"
+    // { agent.name: ["js-base"],  agent.version: ["2.2.0"] } =>  { agent.name: "js-base",  agent.version: "2.2.0" }
+    const data = result.data.hits.hits.map((h) => getProcessedFields(h.fields ?? {}));
+    return data;
+  }, [result]);
+
+  console.log(`--@@dataFromResult`, dataFromResult);
+
+  return (
+    <div>
+      <ReferenceDataViewSelector />
+      <ProductionDataViewSelector />
+
+      <DataDriftOverviewTable />
+      <EuiSpacer size="m" />
+
+      <div css={{ width: '100%', height: 300 }}>
+        {/* @TODO: dataFromResult is being passed as chartData as an example
+         it needs to be formatted correctly */}
+        <ExampleChart chartData={dataFromResult} />
+      </div>
+    </div>
+  );
+};
+
+export const OverlapDistributionComparison = () => {
   const BARCHART_1Y1G = [
     { x: 0, g: 'reference', y: 1 },
     { x: 0, g: 'production', y: 2 },
@@ -160,48 +252,20 @@ export const DataDriftView = () => {
     { x: 3, g: 'production', y: 5 },
   ];
   return (
-    <div>
-      <EuiSpacer size="m" />
-
-      <div>
-        <EuiLink
-          href="https://elastic.github.io/eui/#/tabular-content/tables#a-basic-table"
-          target="_blank"
-        >
-          Add EuiBasicTable below here
-        </EuiLink>
-      </div>
-      <EuiSpacer size="m" />
-
-      <div style={{ width: '100%', height: 500 }}>
-        <EuiLink
-          href="https://elastic.github.io/elastic-charts/?path=/story/bar-chart--bar-chart-1-y-1-g&globals=theme:light"
-          target="_blank"
-        >
-          Example chart to be integrated into above table
-        </EuiLink>
-        <Chart>
-          <Settings showLegend showLegendExtra legendPosition={Position.Right} />
-          <Axis id="bottom" position={Position.Bottom} title="Bottom axis" showOverlappingTicks />
-          <Axis
-            id="left2"
-            title="Left axis"
-            position={Position.Left}
-            tickFormat={(d: any) => Number(d).toFixed(2)}
-          />
-          <BarSeries
-            id="data-drift-viz"
-            name="Simple bar series"
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            splitSeriesAccessors={['g']}
-            data={BARCHART_1Y1G}
-          />
-        </Chart>
-      </div>
-    </div>
+    <Chart>
+      <Settings showLegend={false} />
+      <AreaSeries
+        id="data-drift-viz"
+        name="Simple bar series"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        splitSeriesAccessors={['g']}
+        data={BARCHART_1Y1G}
+        curve={CurveType.CURVE_STEP_AFTER}
+      />
+    </Chart>
   );
 };
 
@@ -288,7 +352,11 @@ export const DataDriftOverviewTable = () => {
       'data-test-subj': 'mlDataDriftOverviewTableReferenceDistribution',
       sortable: false,
       render: () => {
-        return <ReferenceDistribution />;
+        return (
+          <div css={{ width: 100, height: 40 }}>
+            <ReferenceDistribution />
+          </div>
+        );
       },
     },
     {
@@ -297,7 +365,24 @@ export const DataDriftOverviewTable = () => {
       'data-test-subj': 'mlDataDriftOverviewTableProductionDistribution',
       sortable: false,
       render: () => {
-        return <ProductionDistribution />;
+        return (
+          <div css={{ width: 100, height: 40 }}>
+            <ProductionDistribution />
+          </div>
+        );
+      },
+    },
+    {
+      field: 'comparisonDistribution',
+      name: 'Comparison',
+      'data-test-subj': 'mlDataDriftOverviewTableProductionDistribution',
+      sortable: false,
+      render: () => {
+        return (
+          <div css={{ width: 100, height: 40 }}>
+            <OverlapDistributionComparison />
+          </div>
+        );
       },
     },
   ];
