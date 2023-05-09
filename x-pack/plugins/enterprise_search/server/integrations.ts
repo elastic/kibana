@@ -713,7 +713,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Confluence Cloud & Server',
       }),
       description: i18n.translate(
-        'xpack.enterpriseSearchintegrations.connectors.confluenceDescription',
+        'xpack.enterpriseSearch.integrations.connectors.confluenceDescription',
         {
           defaultMessage:
             'Search over your content on Confluence Cloud & Server with Enterprise Search.',
@@ -738,9 +738,12 @@ export const registerEnterpriseSearchIntegrations = (
       title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.jiraTitle', {
         defaultMessage: 'Jira Cloud & Server',
       }),
-      description: i18n.translate('xpack.enterpriseSearchintegrations.connectors.jiraDescription', {
-        defaultMessage: 'Search over your content on Jira Cloud & Server with Enterprise Search.',
-      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.jiraDescription',
+        {
+          defaultMessage: 'Search over your content on Jira Cloud & Server with Enterprise Search.',
+        }
+      ),
       categories: ['enterprise_search', 'elastic_stack', 'custom'],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index/connector?service_type=jira',
@@ -761,7 +764,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Sharepoint Online & Server',
       }),
       description: i18n.translate(
-        'xpack.enterpriseSearchintegrations.connectors.sharepointDescription',
+        'xpack.enterpriseSearch.integrations.connectors.sharepointDescription',
         {
           defaultMessage:
             'Search over your content on Sharepoint Online & Server with Enterprise Search.',
