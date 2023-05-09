@@ -6,7 +6,14 @@
  */
 
 import React, { useState, VFC } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBoxOptionOption,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
+import moment from 'moment';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
 import { AddToTimelineContextMenu } from '../../../../timeline';
@@ -27,7 +34,7 @@ export interface IndicatorBarchartLegendActionProps {
   /**
    * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimelineContextMenu} to populate the timeline.
    */
-  field: string;
+  field: EuiComboBoxOptionOption<string>;
 }
 
 export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionProps> = ({
@@ -36,11 +43,31 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
+  const group = field.value === 'date' ? moment(data).toISOString() : data;
   const popoverItems = [
-    <FilterInContextMenu data={data} field={field} data-test-subj={FILTER_IN_BUTTON_TEST_ID} />,
-    <FilterOutContextMenu data={data} field={field} data-test-subj={FILTER_OUT_BUTTON_TEST_ID} />,
-    <AddToTimelineContextMenu data={data} field={field} data-test-subj={TIMELINE_BUTTON_TEST_ID} />,
-    <CopyToClipboardContextMenu value={data} data-test-subj={COPY_TO_CLIPBOARD_BUTTON_TEST_ID} />,
+    <FilterInContextMenu
+      key={FILTER_IN_BUTTON_TEST_ID}
+      data={group}
+      field={field.label}
+      data-test-subj={FILTER_IN_BUTTON_TEST_ID}
+    />,
+    <FilterOutContextMenu
+      key={FILTER_OUT_BUTTON_TEST_ID}
+      data={group}
+      field={field.label}
+      data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
+    />,
+    <AddToTimelineContextMenu
+      key={TIMELINE_BUTTON_TEST_ID}
+      data={group}
+      field={field.label}
+      data-test-subj={TIMELINE_BUTTON_TEST_ID}
+    />,
+    <CopyToClipboardContextMenu
+      key={COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
+      value={group}
+      data-test-subj={COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
+    />,
   ];
 
   return (
