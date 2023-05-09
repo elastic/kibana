@@ -125,6 +125,8 @@ export const createStartServicesMock = (
         getIdsWithTitle: jest.fn(),
         get: jest.fn(),
         getIndexPattern: jest.fn(),
+        getFieldsForWildcard: jest.fn(),
+        getRuntimeMappings: jest.fn(),
       },
       query: {
         ...data.query,

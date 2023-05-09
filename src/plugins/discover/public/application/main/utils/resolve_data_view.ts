@@ -7,14 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  DataView,
-  DataViewListItem,
-  DataViewsContract,
-  DataViewSpec,
-} from '@kbn/data-views-plugin/public';
-import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { ToastsStart } from '@kbn/core/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverInternalStateContainer } from '../services/discover_internal_state_container';
+import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
   /**
    * List of existing data views
@@ -37,13 +34,19 @@ interface DataViewData {
 /**
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
-export async function loadDataView(
-  dataViews: DataViewsContract,
-  config: IUiSettingsClient,
-  id?: string,
-  dataViewSpec?: DataViewSpec
-): Promise<DataViewData> {
-  const dataViewList = await dataViews.getIdsWithTitle();
+export async function loadDataView({
+  id,
+  dataViewSpec,
+  services,
+  dataViewList,
+}: {
+  id?: string;
+  dataViewSpec?: DataViewSpec;
+  services: DiscoverServices;
+  dataViewList: DataViewListItem[];
+}): Promise<DataViewData> {
+  const { dataViews } = services;
+
   let fetchId: string | undefined = id;
 
   /**
@@ -97,25 +100,26 @@ export async function loadDataView(
     // we can be certain that the data view exists due to an earlier hasData check
     loaded: fetchedDataView || defaultDataView!,
     stateVal: fetchId,
-    stateValFound: !!fetchId && !!fetchedDataView,
+    stateValFound: Boolean(fetchId) && Boolean(fetchedDataView),
   };
 }
 
 /**
- * Function used in the discover controller to message the user about the state of the current
- * data view
+ * Check if the given data view is valid, provide a fallback if it doesn't exist
+ * And message the user in this case with toast notifications
  */
 export function resolveDataView(
   ip: DataViewData,
-  searchSource: ISearchSource,
+  savedSearch: SavedSearch | undefined,
   toastNotifications: ToastsStart,
   isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
-  const ownDataView = searchSource.getOwnField('index');
+  const ownDataView = savedSearch?.searchSource.getField('index');
 
   if (ownDataView && !stateVal) {
+    // the given saved search has its own data view, and no data view was specified in the URL
     return ownDataView;
   }
 
@@ -128,6 +132,7 @@ export function resolveDataView(
     });
 
     if (ownDataView) {
+      // the given data view in the URL was not found, but the saved search has its own data view
       toastNotifications.addWarning({
         title: warningTitle,
         text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
@@ -159,3 +164,39 @@ export function resolveDataView(
 
   return loadedDataView;
 }
+
+export const loadAndResolveDataView = async (
+  {
+    id,
+    dataViewSpec,
+    savedSearch,
+    isTextBasedQuery,
+  }: {
+    id?: string;
+    dataViewSpec?: DataViewSpec;
+    savedSearch?: SavedSearch;
+    isTextBasedQuery?: boolean;
+  },
+  {
+    internalStateContainer,
+    services,
+  }: { internalStateContainer: DiscoverInternalStateContainer; services: DiscoverServices }
+) => {
+  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const adHocDataView = adHocDataViews.find((dataView) => dataView.id === id);
+  if (adHocDataView) return { fallback: false, dataView: adHocDataView };
+
+  const nextDataViewData = await loadDataView({
+    services,
+    id,
+    dataViewSpec,
+    dataViewList: savedDataViews,
+  });
+  const nextDataView = resolveDataView(
+    nextDataViewData,
+    savedSearch,
+    services.toastNotifications,
+    isTextBasedQuery
+  );
+  return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
+};

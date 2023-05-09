@@ -68,7 +68,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
             fill
             iconType="plusInCircle"
             data-test-subj="enterprise-search-content-engines-creation-button"
-            data-telemetry-id="entSearchContent-engines-list-createEngine"
+            data-telemetry-id="entSearchApplications-list-createEngine"
             isDisabled={disabled}
             onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
           >
@@ -174,9 +174,9 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
                 documentationUrl: (
                   <EuiLink
                     data-test-subj="engines-documentation-link"
-                    href={docLinks.enterpriseSearchEngines}
+                    href={docLinks.searchApplications}
                     target="_blank"
-                    data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
+                    data-telemetry-id="entSearchApplications-documentation-viewDocumentaion"
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.searchApplications.documentation',
