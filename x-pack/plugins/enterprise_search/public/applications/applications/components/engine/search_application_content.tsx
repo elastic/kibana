@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -147,7 +147,12 @@ export const SearchApplicationContent = () => {
           },
           {
             isSelected: contentTabId === SearchApplicationContentTabs.SCHEMA,
-            label: SCHEMA_TAB_TITLE,
+            label: (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                {SCHEMA_TAB_TITLE}
+              </EuiFlexGroup>
+            ),
             onClick: onTabClick(SearchApplicationContentTabs.SCHEMA),
           },
         ],
