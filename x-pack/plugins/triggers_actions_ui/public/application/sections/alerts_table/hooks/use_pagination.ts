@@ -77,12 +77,18 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
 
   useEffect(() => {
     setPagination((prevPagination) => {
-      if (prevPagination.pageIndex !== pageIndex && prevPagination.pageSize !== pageSize) {
-        return { pageIndex, pageSize };
-      } else if (prevPagination.pageIndex !== pageIndex && prevPagination.pageSize === pageSize) {
-        return { ...prevPagination, pageIndex };
-      } else if (prevPagination.pageIndex === pageIndex && prevPagination.pageSize !== pageSize) {
-        return { ...prevPagination, pageSize };
+      const newPagination = { ...prevPagination };
+      let updated = false;
+      if (prevPagination.pageIndex !== pageIndex) {
+        updated = true;
+        newPagination.pageIndex = pageIndex;
+      }
+      if (prevPagination.pageSize !== pageSize) {
+        updated = true;
+        newPagination.pageSize = pageSize;
+      }
+      if (updated === true) {
+        return newPagination;
       }
       return prevPagination;
     });
