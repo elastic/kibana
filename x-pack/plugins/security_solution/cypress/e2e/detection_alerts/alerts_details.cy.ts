@@ -16,19 +16,41 @@ import {
   TABLE_ROWS,
 } from '../../screens/alerts_details';
 import { closeAlertFlyout, expandFirstAlert } from '../../tasks/alerts';
-import { filterBy, openJsonView, openTable } from '../../tasks/alerts_details';
+import { changeAlertStatusTo, filterBy, openJsonView, openTable } from '../../tasks/alerts_details';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-import { getUnmappedRule } from '../../objects/rule';
+import { getNewRule, getUnmappedRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { tablePageSelector } from '../../screens/table_pagination';
+import { ALERTS_TABLE_COUNT } from '../../screens/timeline';
+import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../helpers/common';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 
 describe('Alert details flyout', () => {
+  describe('Basic functions', () => {
+    before(() => {
+      cleanKibana();
+      login();
+      createRule(getNewRule());
+      visitWithoutDateRange(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlert();
+    });
+
+    it('should update the table when status of the alert is updated', () => {
+      cy.get(ALERTS_TABLE_COUNT).should('have.text', '2 alerts');
+      cy.get(ALERT_SUMMARY_SEVERITY_DONUT_CHART).should('contain.text', '2alerts');
+      expandFirstAlert();
+      changeAlertStatusTo('acknowledged');
+      cy.get(ALERTS_TABLE_COUNT).should('have.text', '1 alert');
+      cy.get(ALERT_SUMMARY_SEVERITY_DONUT_CHART).should('contain.text', '1alert');
+    });
+  });
+
   describe('With unmapped fields', { testIsolation: false }, () => {
     before(() => {
       cleanKibana();
