@@ -10,10 +10,7 @@ import { isObject } from 'lodash';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
-  isSupportedEsServer,
-  isNotFoundFromUnsupportedServer,
-} from '@kbn/core-elasticsearch-server-internal';
+import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import type { BulkResolveError } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
@@ -60,7 +57,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import {
   type SavedObjectSanitizedDoc,
-  type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
   type ISavedObjectTypeRegistry,
   type SavedObjectsExtensions,
@@ -79,14 +75,8 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
-import { getSearchDsl } from './search_dsl';
 import { internalBulkResolve, isBulkResolveError } from './internal_bulk_resolve';
-import {
-  getCurrentTime,
-  normalizeNamespace,
-  rawDocExistsInNamespace,
-  errorContent,
-} from './internal_utils';
+import { getCurrentTime, normalizeNamespace, errorContent } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
 import {
@@ -111,6 +101,7 @@ import {
   performGet,
   performUpdate,
   performBulkUpdate,
+  performRemoveReferencesTo,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -574,65 +565,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     id: string,
     options: SavedObjectsRemoveReferencesToOptions = {}
   ): Promise<SavedObjectsRemoveReferencesToResponse> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const { refresh = true } = options;
-
-    await this._securityExtension?.authorizeRemoveReferences({ namespace, object: { type, id } });
-
-    const allTypes = this._registry.getAllTypes().map((t) => t.name);
-
-    // we need to target all SO indices as all types of objects may have references to the given SO.
-    const targetIndices = this.getIndicesForTypes(allTypes);
-
-    const { body, statusCode, headers } = await this.client.updateByQuery(
+    return await performRemoveReferencesTo(
       {
-        index: targetIndices,
-        refresh,
-        body: {
-          script: {
-            source: `
-              if (ctx._source.containsKey('references')) {
-                def items_to_remove = [];
-                for (item in ctx._source.references) {
-                  if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
-                    items_to_remove.add(item);
-                  }
-                }
-                ctx._source.references.removeAll(items_to_remove);
-              }
-            `,
-            params: {
-              type,
-              id,
-            },
-            lang: 'painless',
-          },
-          conflicts: 'proceed',
-          ...getSearchDsl(this._mappings, this._registry, {
-            namespaces: namespace ? [namespace] : undefined,
-            type: allTypes,
-            hasReference: { type, id },
-          }),
-        },
-      },
-      { ignore: [404], meta: true }
-    );
-    // fail fast if we can't verify a 404 is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-    }
-
-    if (body.failures?.length) {
-      throw SavedObjectsErrorHelpers.createConflictError(
         type,
         id,
-        `${body.failures.length} references could not be removed`
-      );
-    }
-
-    return {
-      updated: body.updated!,
-    };
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**
