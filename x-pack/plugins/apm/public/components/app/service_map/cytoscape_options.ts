@@ -304,6 +304,7 @@ export const getCytoscapeOptions = (
   isTraceExplorerEnabled: boolean
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
+  selectionType: 'single',
   maxZoom: 3,
   minZoom: 0.2,
   style: getStyle(theme, isTraceExplorerEnabled),

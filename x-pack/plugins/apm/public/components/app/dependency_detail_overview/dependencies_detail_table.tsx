@@ -122,6 +122,7 @@ export function DependenciesDetailTable() {
       ...(dependencyNodes ?? []),
       ...(dependencyEdges ?? []),
     ]);
+    cy.elements().unselect();
     cy.$id(`>${dependencyName}`).select();
     cy.trigger('custom:data', [addedElements]);
   }, [dependencyName, dependencyNodes, dependencyEdges]);

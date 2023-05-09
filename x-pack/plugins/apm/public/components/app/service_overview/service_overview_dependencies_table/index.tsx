@@ -146,6 +146,7 @@ export function ServiceOverviewDependenciesTable({
       ...(dependencyNodes ?? []),
       ...(dependencyEdges ?? []),
     ]);
+    cy.elements().unselect();
     cy.$id(serviceName).select();
     cy.trigger('custom:data', [addedElements]);
   }, [serviceName, agentName, dependencyNodes, dependencyEdges]);
