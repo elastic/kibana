@@ -44,6 +44,8 @@ export function ConfigureLogs() {
     wizardState.customConfigurations
   );
 
+  const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
+
   function onBack() {
     goBack();
   }
@@ -52,7 +54,7 @@ export function ConfigureLogs() {
     setState({
       ...getState(),
       datasetName,
-      logFilePaths,
+      logFilePaths: logFilePaths.filter((filepath) => !!filepath),
       namespace,
       customConfigurations,
     });
@@ -101,7 +103,9 @@ export function ConfigureLogs() {
               color="primary"
               fill
               onClick={onContinue}
-              isDisabled={!logFilePaths?.[0] || !datasetName || !namespace}
+              isDisabled={
+                logFilePathNotConfigured || !datasetName || !namespace
+              }
             >
               {i18n.translate('xpack.observability_onboarding.steps.continue', {
                 defaultMessage: 'Continue',
