@@ -28,7 +28,7 @@ export const SecurityConnectorFeatureId = 'siem';
 export const GeneralConnectorFeatureId = 'siem';
 
 const compatibilityGeneral = i18n.translate(
-  'xpack.actions.availableConnectorFeatures.compatibility.alertingRules',
+  'xpack.actions.availableConnectorFeatures.compatibility.general',
   {
     defaultMessage: 'General',
   }

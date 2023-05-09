@@ -140,6 +140,7 @@ export async function executor(
   const { body: data } = params;
 
   const axiosInstance = axios.create();
+  const responseSettings = configurationUtilities.getResponseSettings();
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
@@ -149,7 +150,10 @@ export async function executor(
       logger,
       headers: { Authorization: `Bearer ${secrets.apiKey}`, ['content-type']: 'application/json' },
       data,
-      configurationUtilities,
+      configurationUtilities: {
+        ...configurationUtilities,
+        getResponseSettings: () => ({ ...responseSettings, timeout: 300000 }),
+      },
     })
   );
 
