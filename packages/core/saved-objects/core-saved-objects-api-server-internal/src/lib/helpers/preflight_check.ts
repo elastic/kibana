@@ -17,7 +17,10 @@ import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-sa
 import { rawDocExistsInNamespaces } from '../internal_utils';
 import { getSavedObjectNamespaces } from '../utils/namespaces';
 import { GetResponseFound, isFoundGetResponse } from '../utils/es_responses';
-import { preflightCheckForCreate } from '../preflight_check_for_create';
+import {
+  preflightCheckForCreate,
+  PreflightCheckForCreateObject,
+} from '../preflight_check_for_create';
 import type { RepositoryEsClient } from '../repository_es_client';
 
 export class PreflightCheckHelper {
@@ -45,6 +48,17 @@ export class PreflightCheckHelper {
     this.client = client;
     this.getIndexForType = getIndexForType;
     this.createPointInTimeFinder = createPointInTimeFinder;
+  }
+
+  public async preflightCheckForCreate(objects: PreflightCheckForCreateObject[]) {
+    return await preflightCheckForCreate({
+      objects,
+      registry: this.registry,
+      client: this.client,
+      serializer: this.serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+    });
   }
 
   /**

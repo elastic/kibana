@@ -9,29 +9,36 @@
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSpacesExtension,
+  ISavedObjectsEncryptionExtension,
 } from '@kbn/core-saved-objects-server';
 import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { normalizeNamespace } from '../internal_utils';
 
 export class CommonHelper {
   private registry: ISavedObjectTypeRegistry;
   private spaceExtension?: ISavedObjectsSpacesExtension;
+  private encryptionExtension?: ISavedObjectsEncryptionExtension;
   private defaultIndex: string;
   private kibanaVersion: string;
 
   constructor({
     registry,
     spaceExtension,
+    encryptionExtension,
     kibanaVersion,
     defaultIndex,
   }: {
     registry: ISavedObjectTypeRegistry;
     spaceExtension?: ISavedObjectsSpacesExtension;
+    encryptionExtension?: ISavedObjectsEncryptionExtension;
     defaultIndex: string;
     kibanaVersion: string;
   }) {
     this.registry = registry;
     this.spaceExtension = spaceExtension;
+    this.encryptionExtension = encryptionExtension;
     this.kibanaVersion = kibanaVersion;
     this.defaultIndex = defaultIndex;
   }
@@ -69,6 +76,35 @@ export class CommonHelper {
       return this.spaceExtension.getCurrentNamespace(namespace);
     }
     return normalizeNamespace(namespace);
+  }
+
+  /**
+   * Saved objects with encrypted attributes should have IDs that are hard to guess, especially since IDs are part of the AAD used during
+   * encryption, that's why we control them within this function and don't allow consumers to specify their own IDs directly for encryptable
+   * types unless overwriting the original document.
+   */
+  public getValidId(
+    type: string,
+    id: string | undefined,
+    version: string | undefined,
+    overwrite: boolean | undefined
+  ) {
+    if (!this.encryptionExtension?.isEncryptableType(type)) {
+      return id || SavedObjectsUtils.generateId();
+    }
+    if (!id) {
+      return SavedObjectsUtils.generateId();
+    }
+    // only allow a specified ID if we're overwriting an existing ESO with a Version
+    // this helps us ensure that the document really was previously created using ESO
+    // and not being used to get around the specified ID limitation
+    const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
+    if (!canSpecifyID) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
+      );
+    }
+    return id;
   }
 }
 

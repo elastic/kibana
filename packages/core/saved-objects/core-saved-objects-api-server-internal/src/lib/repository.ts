@@ -90,7 +90,6 @@ import {
 } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsSerializer,
-  decodeRequestVersion,
   encodeVersion,
   encodeHitVersion,
   getRootPropertiesObjects,
@@ -124,7 +123,6 @@ import { updateObjectsSpaces } from './update_objects_spaces';
 import {
   preflightCheckForCreate,
   type PreflightCheckForCreateObject,
-  type PreflightCheckForCreateResult,
 } from './preflight_check_for_create';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 import type {
@@ -138,13 +136,17 @@ import type {
   ObjectToDeleteAliasesFor,
 } from './repository_bulk_delete_internal_types';
 import {
+  RepositoryHelpers,
   CommonHelper,
   EncryptionHelper,
   ValidationHelper,
   PreflightCheckHelper,
+  SerializerHelper,
   type PreflightCheckNamespacesResult,
 } from './helpers';
 import { isFoundGetResponse, getSavedObjectNamespaces } from './utils';
+import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from './constants';
+import { performCreate } from './apis';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -160,9 +162,6 @@ export interface SavedObjectsRepositoryOptions {
   logger: Logger;
   extensions?: SavedObjectsExtensions;
 }
-
-export const DEFAULT_REFRESH_SETTING = 'wait_for';
-export const DEFAULT_RETRY_COUNT = 3;
 
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 
@@ -193,6 +192,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private encryptionHelper: EncryptionHelper;
   private validationHelper: ValidationHelper;
   private preflightCheckHelper: PreflightCheckHelper;
+  private serializerHelper: SerializerHelper;
+
+  private readonly extensions: SavedObjectsExtensions;
+  private readonly helpers: RepositoryHelpers;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
@@ -250,7 +253,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       migrator,
       allowedTypes = [],
       logger,
-      extensions,
+      extensions = {},
     } = options;
 
     if (allowedTypes.length === 0) {
@@ -264,9 +267,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     this._allowedTypes = allowedTypes;
     this._serializer = serializer;
     this._logger = logger;
-    this._encryptionExtension = extensions?.encryptionExtension;
-    this._securityExtension = extensions?.securityExtension;
-    this._spacesExtension = extensions?.spacesExtension;
+    this.extensions = extensions;
+    this._encryptionExtension = extensions.encryptionExtension;
+    this._securityExtension = extensions.securityExtension;
+    this._spacesExtension = extensions.spacesExtension;
     this.commonHelper = new CommonHelper({
       spaceExtension: extensions?.spacesExtension,
       defaultIndex: index,
@@ -289,6 +293,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       registry: typeRegistry,
       client: this.client,
     });
+    this.serializerHelper = new SerializerHelper({
+      registry: typeRegistry,
+      serializer,
+    });
+    this.helpers = {
+      common: this.commonHelper,
+      preflight: this.preflightCheckHelper,
+      validation: this.validationHelper,
+      encryption: this.encryptionHelper,
+      serializer: this.serializerHelper,
+    };
   }
 
   /**
@@ -299,131 +314,21 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    const {
-      migrationVersion,
-      coreMigrationVersion,
-      typeMigrationVersion,
-      managed,
-      overwrite = false,
-      references = [],
-      refresh = DEFAULT_REFRESH_SETTING,
-      initialNamespaces,
-      version,
-    } = options;
-    const { migrationVersionCompatibility } = options;
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
-    }
-    const id = this.getValidId(type, options.id, options.version, options.overwrite);
-    this.validationHelper.validateInitialNamespaces(type, initialNamespaces);
-    this.validationHelper.validateOriginId(type, options);
-
-    const time = getCurrentTime();
-    let savedObjectNamespace: string | undefined;
-    let savedObjectNamespaces: string[] | undefined;
-    let existingOriginId: string | undefined;
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-
-    let preflightResult: PreflightCheckForCreateResult | undefined;
-    if (this._registry.isSingleNamespace(type)) {
-      savedObjectNamespace = initialNamespaces
-        ? normalizeNamespace(initialNamespaces[0])
-        : namespace;
-    } else if (this._registry.isMultiNamespace(type)) {
-      if (options.id) {
-        // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
-        // note: this check throws an error if the object is found but does not exist in this namespace
-        preflightResult = (
-          await preflightCheckForCreate({
-            registry: this._registry,
-            client: this.client,
-            serializer: this._serializer,
-            getIndexForType: this.getIndexForType.bind(this),
-            createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
-            objects: [{ type, id, overwrite, namespaces: initialNamespaces ?? [namespaceString] }],
-          })
-        )[0];
-      }
-      savedObjectNamespaces =
-        initialNamespaces || getSavedObjectNamespaces(namespace, preflightResult?.existingDocument);
-      existingOriginId = preflightResult?.existingDocument?._source?.originId;
-    }
-
-    const authorizationResult = await this._securityExtension?.authorizeCreate({
-      namespace,
-      object: {
+    return performCreate(
+      {
         type,
-        id,
-        initialNamespaces,
-        existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+        attributes,
+        options,
       },
-    });
-
-    if (preflightResult?.error) {
-      // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
-      throw SavedObjectsErrorHelpers.createConflictError(type, id);
-    }
-
-    // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
-    // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
-    const originId = Object.keys(options).includes('originId')
-      ? options.originId
-      : existingOriginId;
-    const migrated = this._migrator.migrateDocument({
-      id,
-      type,
-      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      originId,
-      attributes: await this.encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        savedObjectNamespace, // if single namespace type, this is the first in initialNamespaces. If multi-namespace type this is options.namespace/current namespace.
-        attributes
-      ),
-      migrationVersion,
-      coreMigrationVersion,
-      typeMigrationVersion,
-      managed: setManaged({ optionsManaged: managed }),
-      created_at: time,
-      updated_at: time,
-      ...(Array.isArray(references) && { references }),
-    });
-
-    /**
-     * If a validation has been registered for this type, we run it against the migrated attributes.
-     * This is an imperfect solution because malformed attributes could have already caused the
-     * migration to fail, but it's the best we can do without devising a way to run validations
-     * inside the migration algorithm itself.
-     */
-    this.validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
-
-    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
-
-    const requestParams = {
-      id: raw._id,
-      index: this.getIndexForType(type),
-      refresh,
-      body: raw._source,
-      ...(overwrite && version ? decodeRequestVersion(version) : {}),
-      require_alias: true,
-    };
-
-    const { body, statusCode, headers } =
-      id && overwrite
-        ? await this.client.index(requestParams, { meta: true })
-        : await this.client.create(requestParams, { meta: true });
-
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
-    }
-
-    return this.encryptionHelper.optionallyDecryptAndRedactSingleResult(
-      this._rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),
-      authorizationResult?.typeMap,
-      attributes
+      {
+        client: this.client,
+        extensions: this.extensions,
+        helpers: this.helpers,
+        allowedTypes: this._allowedTypes,
+        registry: this._registry,
+        serializer: this._serializer,
+        migrator: this._migrator,
+      }
     );
   }
 
@@ -2634,33 +2539,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     return rawDocExistsInNamespace(this._registry, raw, namespace);
   }
 
-  /**
-   * Saved objects with encrypted attributes should have IDs that are hard to guess, especially since IDs are part of the AAD used during
-   * encryption, that's why we control them within this function and don't allow consumers to specify their own IDs directly for encryptable
-   * types unless overwriting the original document.
-   */
   private getValidId(
     type: string,
     id: string | undefined,
     version: string | undefined,
     overwrite: boolean | undefined
   ) {
-    if (!this._encryptionExtension?.isEncryptableType(type)) {
-      return id || SavedObjectsUtils.generateId();
-    }
-    if (!id) {
-      return SavedObjectsUtils.generateId();
-    }
-    // only allow a specified ID if we're overwriting an existing ESO with a Version
-    // this helps us ensure that the document really was previously created using ESO
-    // and not being used to get around the specified ID limitation
-    const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
-    if (!canSpecifyID) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
-      );
-    }
-    return id;
+    return this.commonHelper.getValidId(type, id, version, overwrite);
   }
 }
 
