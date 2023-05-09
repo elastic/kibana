@@ -213,7 +213,8 @@ Machine Learning::
 * Adds log pattern analysis in Discover {kibana-pull}153449[#153449]
 
 Management::
-Adds support for global settings {kibana-pull}148975[#148975]
+* Adds support for global settings {kibana-pull}148975[#148975]
+* Adds Custom Branding settings to Global settings {kibana-pull}150080[#150080]
 
 Maps::
 Adds map.emsUrl to docker env variables {kibana-pull}153441[#153441]
