@@ -20,5 +20,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/ui-theme",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
   ]
 }

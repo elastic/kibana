@@ -523,6 +523,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           entity_id: sessionEntryLeader,
           name: 'fake entry',
           pid: Math.floor(Math.random() * 1000),
+          start: [new Date(0).toISOString()],
         },
         session_leader: {
           entity_id: sessionEntryLeader,
@@ -988,6 +989,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           entity_id: sessionEntryLeader,
           name: 'fake entry',
           pid: Math.floor(Math.random() * 1000),
+          start: [new Date(0).toISOString()],
         },
         session_leader: {
           entity_id: sessionEntryLeader,

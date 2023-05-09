@@ -15,6 +15,7 @@ export {
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
   saveSavedSearch,
+  getNewSavedSearch,
 } from './services/saved_searches';
 export { VIEW_MODE } from '../common';
 

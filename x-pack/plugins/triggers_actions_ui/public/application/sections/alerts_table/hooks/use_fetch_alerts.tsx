@@ -18,6 +18,7 @@ import type {
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
 import type {
+  MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
@@ -35,6 +36,7 @@ export interface FetchAlertsArgs {
     pageIndex: number;
     pageSize: number;
   };
+  runtimeMappings?: MappingRuntimeFields;
   sort: SortCombinations[];
   skip: boolean;
 }
@@ -144,6 +146,7 @@ export type UseFetchAlerts = ({
   fields,
   query,
   pagination,
+  runtimeMappings,
   skip,
   sort,
 }: FetchAlertsArgs) => [boolean, FetchAlertResp];
@@ -152,6 +155,7 @@ const useFetchAlerts = ({
   fields,
   query,
   pagination,
+  runtimeMappings,
   skip,
   sort,
 }: FetchAlertsArgs): [boolean, FetchAlertResp] => {
@@ -284,6 +288,7 @@ const useFetchAlerts = ({
       fields,
       pagination,
       query,
+      runtimeMappings,
       sort,
     };
     if (
@@ -295,7 +300,7 @@ const useFetchAlerts = ({
         request: newAlertRequest,
       });
     }
-  }, [featureIds, fields, pagination, query, sort]);
+  }, [featureIds, fields, pagination, query, sort, runtimeMappings]);
 
   useEffect(() => {
     if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {

@@ -599,7 +599,7 @@
               "determines the behavior of the KQL bar"
             ],
             "signature": [
-              "\"filter\" | \"search\""
+              "\"search\" | \"filter\""
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
             "deprecated": false,
@@ -1362,12 +1362,13 @@
       "children": [
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.navLinks$",
-          "type": "Object",
+          "id": "def-public.PluginStart.getNavLinks$",
+          "type": "Function",
           "tags": [],
-          "label": "navLinks$",
+          "label": "getNavLinks$",
           "description": [],
           "signature": [
+            "() => ",
             "Observable",
             "<",
             "NavigationLink",
@@ -1375,7 +1376,9 @@
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "securitySolution",
