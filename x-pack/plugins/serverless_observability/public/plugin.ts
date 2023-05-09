@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { getObservabilitySideNavComponent } from './components/side_navigation';
 import {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
@@ -25,8 +26,10 @@ export class ServerlessObservabilityPlugin
 
   public start(
     _core: CoreStart,
-    { observabilityShared }: ServerlessObservabilityPluginStartDependencies
+    _setupDeps: ServerlessObservabilityPluginStartDependencies
   ): ServerlessObservabilityPluginStart {
+    const { serverless, observabilityShared } = _setupDeps;
+    serverless.setSideNavComponent(getObservabilitySideNavComponent(_core, _setupDeps));
     observabilityShared.setIsSidebarEnabled(false);
     return {};
   }

@@ -7,15 +7,8 @@
     "id": "serverlessObservability",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "serverless",
-      "observability"
-    ],
-    "requiredPlugins": [
-      "serverless",
-      "observabilityShared"
-    ],
+    "configPath": ["xpack", "serverless", "observability"],
+    "requiredPlugins": ["serverless", "observabilityShared", "kibanaReact"],
     "optionalPlugins": [],
     "requiredBundles": []
   }
