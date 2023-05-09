@@ -45,7 +45,7 @@ import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { ReportingConfigType } from './config';
+import { createConfig, ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -119,7 +119,7 @@ export class ReportingCore {
     this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
     this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
-    this.config = context.config.get<ReportingConfigType>();
+    this.config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
 
     this.getContract = () => ({
       usesUiCapabilities: () => syncConfig.roles.enabled === false,
