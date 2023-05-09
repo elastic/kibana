@@ -27,7 +27,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.resourceInstaller.ensureCommonResourcesInstalled();
-    await this.repository.save(slo);
+    await this.repository.save(slo, { throwOnConflict: true });
 
     let sloTransformId;
     try {

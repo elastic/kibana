@@ -15,7 +15,7 @@ import { sloSchema } from '@kbn/slo-schema';
 
 import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SLONotFound } from '../../errors';
+import { SLOIdConflict, SLONotFound } from '../../errors';
 
 type ObjectValues<T> = T[keyof T];
 
@@ -56,7 +56,7 @@ export interface Paginated<T> {
 }
 
 export interface SLORepository {
-  save(slo: SLO): Promise<SLO>;
+  save(slo: SLO, options?: { throwOnConflict: boolean }): Promise<SLO>;
   findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
@@ -66,7 +66,7 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
 
-  async save(slo: SLO): Promise<SLO> {
+  async save(slo: SLO, options = { throwOnConflict: false }): Promise<SLO> {
     let existingSavedObjectId;
     const findResponse = await this.soClient.find<StoredSLO>({
       type: SO_SLO_TYPE,
@@ -75,6 +75,10 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       filter: `slo.attributes.id:(${slo.id})`,
     });
     if (findResponse.total === 1) {
+      if (options.throwOnConflict) {
+        throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
+      }
+
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
