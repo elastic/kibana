@@ -15,11 +15,11 @@ export const GlobalContent = () => {
   const { helpFetchResults } = useContext(HelpCenterContext);
   return (
     <>
-      {(helpFetchResults?.global ?? []).map((link) => {
+      {(helpFetchResults?.global ?? []).map((link, i) => {
         const { content: text, href, image, description } = link;
 
         return (
-          <EuiPanel>
+          <EuiPanel key={`documentation-card-${i}`}>
             <EuiFlexGroup
               alignItems="center"
               responsive={true}
@@ -41,18 +41,6 @@ export const GlobalContent = () => {
                 <EuiImage size="fill" src={image} alt="" />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* <EuiSplitPanel.Inner paddingSize="l" grow={true}>
-              <EuiText>
-                <h2>{text}</h2>
-                <p>{description}</p>
-                <EuiButton target="_blank" color="primary" fill href={href}>
-                  Get started!
-                </EuiButton>
-              </EuiText>
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner grow={false}>
-              <EuiImage size="l" src={image} alt="" />
-            </EuiSplitPanel.Inner> */}
           </EuiPanel>
         );
       })}

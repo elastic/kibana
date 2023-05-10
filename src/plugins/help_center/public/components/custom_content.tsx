@@ -6,30 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
-import { IntlProvider } from 'react-intl';
 
-export const CustomContentTab = () => {
-  const { helpFetchResults: helpLinks } = useContext(HelpCenterContext);
+export const CustomContent = () => {
+  const { helpFetchResults } = useContext(HelpCenterContext);
   const domNode = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (helpLinks?.helpExtension) {
-      const { content } = helpLinks.helpExtension;
-
-      if (content && domNode.current) {
-        content(domNode.current, { hideHelpMenu: () => {} });
+    console.log('here');
+    if (domNode.current) {
+      if (helpFetchResults?.custom) {
+        helpFetchResults.custom(domNode.current, { hideHelpMenu: () => {} });
+      } else {
+        ReactDOM.unmountComponentAtNode(domNode.current);
       }
     }
-  }, [domNode, helpLinks?.helpExtension]);
+  }, [domNode, helpFetchResults]);
 
   return (
     <>
-      <IntlProvider>
-        <div ref={domNode} />
-      </IntlProvider>
+      <div ref={domNode} />
     </>
   );
 };

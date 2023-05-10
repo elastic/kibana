@@ -152,7 +152,7 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(<KeyboardShortcutsDoc />, domNode);
+      ReactDOM.render(<KeyboardShortcutsDoc onClose={() => {}} />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

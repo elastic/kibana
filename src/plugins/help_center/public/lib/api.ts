@@ -126,6 +126,7 @@ export function getApi(
         global: globalHelpExtensionMenuLinks.sort((a, b) => b.priority - a.priority),
         documentation: documentationLinks.sort((a, b) => b.priority - a.priority),
         contact: contactLinks,
+        custom: helpExtension?.content,
       };
     })
   );

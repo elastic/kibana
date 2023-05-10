@@ -34,6 +34,7 @@ import { HelpCenterContext } from './help_center_header_nav_button';
 import { DocumentationCards } from './documentation_cards';
 import { Contact } from './contact';
 import { GlobalContent } from './global_content';
+import { CustomContent } from './custom_content';
 
 export const HelpCenterFlyout = (
   props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }
@@ -63,6 +64,8 @@ export const HelpCenterFlyout = (
             // filters={filters}
             // onChange={onChange}
             />
+            <EuiSpacer size="m" />
+            <CustomContent />
             <EuiSpacer size="m" />
             <DocumentationCards />
             <EuiSpacer size="m" />
