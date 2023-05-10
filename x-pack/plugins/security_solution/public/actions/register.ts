@@ -43,12 +43,12 @@ export const registerUIActions = (
   history: History,
   services: StartServices
 ) => {
-  registerLensActions(store, services);
-  registerDiscoverActions(store, services);
+  registerLensEmbeddableActions(store, services);
+  registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
 };
 
-const registerLensActions = (store: SecurityAppStore, services: StartServices) => {
+const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
   const { uiActions } = services;
 
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
@@ -58,22 +58,22 @@ const registerLensActions = (store: SecurityAppStore, services: StartServices) =
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 };
 
-const registerDiscoverActions = (store: SecurityAppStore, services: StartServices) => {
+const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
   const { uiActions } = services;
 
-  const discoverCellActionsFactories: DiscoverCellActions = {
+  const DiscoverCellActionsFactories: DiscoverCellActions = {
     filterIn: createFilterInDiscoverCellActionFactory({ store, services }),
     filterOut: createFilterOutDiscoverCellActionFactory({ store, services }),
     addToTimeline: createAddToTimelineDiscoverCellActionFactory({ store, services }),
     copyToClipboard: createCopyToClipboardDiscoverCellActionFactory({ services }),
   };
 
-  const registerDiscoverCellActionsTrigger = (
+  const addDiscoverEmbeddableCellActions = (
     triggerId: string,
     actionsOrder: DiscoverCellActionName[]
   ) => {
     actionsOrder.forEach((actionName, order) => {
-      const actionFactory = discoverCellActionsFactories[actionName];
+      const actionFactory = DiscoverCellActionsFactories[actionName];
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
@@ -82,7 +82,8 @@ const registerDiscoverActions = (store: SecurityAppStore, services: StartService
     });
   };
 
-  registerDiscoverCellActionsTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID, [
+  // this trigger is already registered by discover search embeddable
+  addDiscoverEmbeddableCellActions(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -122,7 +123,6 @@ const registerCellActions = (
     });
   };
 
-  // register triggers with actions
   registerCellActionsTrigger(SecurityCellActionsTrigger.DEFAULT, [
     'filterIn',
     'filterOut',

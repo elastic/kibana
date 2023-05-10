@@ -33,7 +33,7 @@ import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ServicesContextProvider } from '../../../services_provider';
 import { DiscoverServices } from '../../../../build_services';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -127,11 +127,11 @@ async function mountComponent(
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <ServicesContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
         <DiscoverLayout {...props} />
       </DiscoverMainProvider>
-    </KibanaContextProvider>,
+    </ServicesContextProvider>,
     mountOptions
   );
 
