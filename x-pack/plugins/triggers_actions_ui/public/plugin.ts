@@ -341,6 +341,33 @@ export class Plugin
   }
 
   public start(): TriggersAndActionsUIPublicPluginStart {
+    const { alertsTableConfigurationRegistry } = this;
+    alertsTableConfigurationRegistry.register({
+      id: 'preview',
+      columns: [
+        {
+          id: '@timestamp',
+          displayAsText: 'Last updated',
+          initialWidth: 250,
+        },
+        {
+          id: 'kibana.alert.context.reason',
+          displayAsText: 'Reason',
+        },
+        {
+          id: 'kibana.alert.status',
+          displayAsText: 'Status',
+          initialWidth: 100,
+        },
+      ],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+          },
+        },
+      ],
+    });
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,

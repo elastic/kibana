@@ -71,11 +71,11 @@ export const previewRuleRoute = ({ router, licenseState }: RouteOptions) => {
           const rule = req.body;
 
           try {
-            const previewUuid = await rulesClient.preview({
+            const data = await rulesClient.preview({
               data: rewriteBodyReq(rule),
             });
             return res.ok({
-              body: previewUuid,
+              body: data,
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

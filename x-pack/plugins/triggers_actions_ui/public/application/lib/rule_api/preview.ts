@@ -6,7 +6,7 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteResponseCase } from '@kbn/actions-plugin/common';
-import { RuleUpdates } from '../../../types';
+import { RuleAction, RuleUpdates } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 type RuleCreateBody = Omit<
@@ -39,14 +39,20 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   })),
 });
 
+export interface PreviewResults {
+  uuid: string;
+  alerts: any[];
+  actions: RuleAction[];
+}
+
 export async function previewRule({
   http,
   rule,
 }: {
   http: HttpSetup;
   rule: RuleCreateBody;
-}): Promise<string> {
-  return await http.post<string>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/_preview`, {
+}): Promise<PreviewResults> {
+  return await http.post<PreviewResults>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/_preview`, {
     body: JSON.stringify(rewriteBodyRequest(rule)),
   });
 }

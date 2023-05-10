@@ -15,7 +15,7 @@ import { type PublicFrameworkAlertsService } from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
 import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
-import type { Dataset, IndexOptions } from './index_options';
+import { Dataset, type IndexOptions } from './index_options';
 import { type IResourceInstaller, ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
@@ -118,6 +118,18 @@ export class RuleDataService implements IRuleDataService {
       pluginStop$: options.pluginStop$,
     });
 
+    this.indicesByFeatureId.set('alerts', [
+      new IndexInfo({
+        indexOptions: {
+          feature: 'alerts' as ValidFeatureId,
+          registrationContext: 'preview',
+          dataset: Dataset.alerts,
+          componentTemplateRefs: [],
+          componentTemplates: [],
+        },
+        kibanaVersion: '8.9.0',
+      }),
+    ]);
     this.installCommonResources = Promise.resolve(right('ok'));
     this.isInitialized = false;
   }

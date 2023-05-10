@@ -37,6 +37,12 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const alertsClient = await racContext.getAlertsClient();
         const { featureIds = [] } = request.query;
 
+        if (featureIds === 'alerts') {
+          return response.ok({
+            body: {},
+          });
+        }
+
         const indices = await alertsClient.getAuthorizedAlertsIndices(
           Array.isArray(featureIds) ? featureIds : [featureIds]
         );

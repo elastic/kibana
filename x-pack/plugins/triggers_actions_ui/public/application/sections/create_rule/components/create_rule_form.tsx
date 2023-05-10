@@ -22,6 +22,7 @@ import {
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_EXECUTION_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import {
   TriggersActionsUiConfig,
@@ -32,6 +33,7 @@ import {
   IErrorObject,
   RuleUpdates,
   RuleTypeModel,
+  AlertsTableConfigurationRegistry,
 } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { InitialRule, InitialRuleReducer, ruleReducer } from '../../rule_form/rule_reducer';
@@ -43,6 +45,9 @@ import { getInitialInterval } from '../../rule_form/get_initial_interval';
 import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import { getRuleWithInvalidatedFields } from '../../../lib/value_validators';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { previewRule } from '../../../lib/rule_api/preview';
+import AlertsTableState, { AlertsTableStateProps } from '../../alerts_table/alerts_table_state';
+import { TypeRegistry } from '../../../type_registry';
 
 interface CreateRuleFormProps<MetaData = Record<string, any>> {
   consumer: string;
@@ -100,6 +105,8 @@ export const CreateRuleForm = ({
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
+  const [hasPreviewAlertData, setHasPreviewAlertData] = useState<boolean>(false);
+  const [alertsTableQuery, setAlertsTableQuery] = useState<any>(null);
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -110,9 +117,19 @@ export const CreateRuleForm = ({
 
   const {
     http,
+    alertsTableConfigurationRegistry,
     notifications: { toasts },
     application: { navigateToApp },
   } = useKibana().services;
+
+  const alertStateProps: Omit<AlertsTableStateProps, 'query'> = {
+    id: 'preview',
+    configurationId: 'preview',
+    alertsTableConfigurationRegistry:
+      alertsTableConfigurationRegistry as TypeRegistry<AlertsTableConfigurationRegistry>,
+    featureIds: ['alerts'],
+    showExpandToDetails: true,
+  };
 
   useEffect(() => {
     (async () => {
@@ -311,7 +328,37 @@ export const CreateRuleForm = ({
                     iconType="refresh"
                     onClick={async () => {
                       setIsLoadingPreview(true);
-                      await previewRule({ http, rule: rule as RuleUpdates });
+                      const result = await previewRule({ http, rule: rule as RuleUpdates });
+
+                      if (result.alerts.length > 0) {
+                        setHasPreviewAlertData(true);
+                        setAlertsTableQuery({
+                          bool: {
+                            filter: [
+                              {
+                                term: {
+                                  [ALERT_RULE_EXECUTION_UUID]: result.uuid,
+                                },
+                              },
+                              {
+                                bool: {
+                                  must_not: [
+                                    {
+                                      term: {
+                                        [ALERT_STATUS]: 'preview-complete',
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        });
+                      } else {
+                        setHasPreviewAlertData(false);
+                      }
+
+                      console.log(result);
                       setIsLoadingPreview(false);
                     }}
                     color="primary"
@@ -319,6 +366,11 @@ export const CreateRuleForm = ({
                     data-test-subj="previewSubmitButton"
                   />
                   {isLoadingPreview ? <CenterJustifiedSpinner /> : null}
+                  {hasPreviewAlertData && alertsTableQuery ? (
+                    <>
+                      <AlertsTableState {...alertStateProps} query={alertsTableQuery} />
+                    </>
+                  ) : null}
                 </EuiResizablePanel>
               </>
             );

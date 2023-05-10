@@ -6,7 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
-import { trim, truncate } from 'lodash';
+import { flatMap, trim, truncate } from 'lodash';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS,
@@ -17,11 +17,9 @@ import { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/typesWithBody
 import { Logger } from '@kbn/logging';
 import { Rule, RuleAction, RuleExecutionStatuses } from '../../types';
 import { validateRuleTypeParams } from '../../lib';
-import { validateActions } from '../lib';
 import { apiKeyAsAlertAttributes } from '../common';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
 import { PREVIEW_COMPLETE_STATUS } from '../../alerts_client/preview_alerts_client';
-import { injectActionParams } from '../../task_runner/inject_action_params';
 import {
   transformSummaryActionParams,
   transformActionParams,
@@ -53,10 +51,16 @@ export interface PreviewOptions {
   > & { actions: NormalizedAlertAction[] };
 }
 
+export interface PreviewResults {
+  uuid: string;
+  alerts: any[];
+  actions: RuleAction[];
+}
+
 export async function preview(
   context: RulesClientContext,
   { data }: PreviewOptions
-): Promise<string> {
+): Promise<PreviewResults> {
   const alertsClient = await context.alertsService?.createPreviewAlertsClient({
     logger: context.logger,
   });
@@ -156,8 +160,6 @@ export async function preview(
     },
   });
 
-  console.log(`alertDocs ${JSON.stringify(alertDocs)}`);
-
   // Fill in the action message with the data
   const actionsToPreview = await injectConnectorType(context, data.actions ?? []);
 
@@ -178,77 +180,75 @@ export async function preview(
     },
     revision: 0,
   };
-  console.log(`actions ${JSON.stringify(actionsToPreview)}`);
-  actionsToPreview.forEach((action: RuleAction) => {
-    if (action.frequency?.summary === true) {
-      const actionToRun = {
-        ...action,
-        params: transformSummaryActionParams({
-          alerts: {
-            new: {
-              count: alertDocs.length,
-              data: alertDocs,
-            },
-            ongoing: {
-              count: 0,
-              data: [],
-            },
-            recovered: {
-              count: 0,
-              data: [],
-            },
-            all: {
-              count: alertDocs.length,
-              data: alertDocs,
-            },
-          },
-          rule,
-          ruleTypeId: ruleType.id,
-          actionId: action.id,
-          actionParams: action.params,
-          spaceId: context.spaceId,
-          actionsPlugin: context.actionsPlugin,
-          actionTypeId: action.actionTypeId,
-          kibanaBaseUrl: context.kibanaBaseUrl,
-          ruleUrl: buildRuleUrl(context, ruleType, rule),
-        }),
-      };
 
-      console.log(`summaryactionToRun - ${JSON.stringify(actionToRun)}`);
-    } else {
-      const previewedActions = alertDocs.map((alertHit: any) => {
-        const alert = alertHit._source;
+  const previewActions = flatMap(
+    actionsToPreview.map((action: RuleAction) => {
+      if (action.frequency?.summary === true) {
         return {
           ...action,
-          params: transformActionParams({
-            actionsPlugin: context.actionsPlugin,
-            alertId: temporaryRuleId,
-            alertType: ruleType.id,
-            actionTypeId: action.actionTypeId,
-            alertName: data.name,
-            spaceId: context.spaceId,
-            tags: data.tags,
-            alertInstanceId: alert.kibana.alert.instance.id,
-            alertUuid: alert.kibana.alert.uuid,
-            alertActionGroup: alert.kibana.alert.action_group,
-            alertActionGroupName: ruleTypeActionGroups!.get(alert.kibana.alert.action_group)!,
-            context: alert.kibana.alert.context,
+          params: transformSummaryActionParams({
+            alerts: {
+              new: {
+                count: alertDocs.length,
+                data: alertDocs,
+              },
+              ongoing: {
+                count: 0,
+                data: [],
+              },
+              recovered: {
+                count: 0,
+                data: [],
+              },
+              all: {
+                count: alertDocs.length,
+                data: alertDocs,
+              },
+            },
+            rule,
+            ruleTypeId: ruleType.id,
             actionId: action.id,
-            state: alert.kibana.alert.state,
-            kibanaBaseUrl: context.kibanaBaseUrl,
-            alertParams: data.params,
             actionParams: action.params,
-            flapping: alert.kibana.alert.flapping,
+            spaceId: context.spaceId,
+            actionsPlugin: context.actionsPlugin,
+            actionTypeId: action.actionTypeId,
+            kibanaBaseUrl: context.kibanaBaseUrl,
             ruleUrl: buildRuleUrl(context, ruleType, rule),
           }),
         };
-      });
+      } else {
+        return alertDocs.map((alertHit: any) => {
+          const alert = alertHit._source;
+          return {
+            ...action,
+            params: transformActionParams({
+              actionsPlugin: context.actionsPlugin,
+              alertId: temporaryRuleId,
+              alertType: ruleType.id,
+              actionTypeId: action.actionTypeId,
+              alertName: data.name,
+              spaceId: context.spaceId,
+              tags: data.tags,
+              alertInstanceId: alert.kibana.alert.instance.id,
+              alertUuid: alert.kibana.alert.uuid,
+              alertActionGroup: alert.kibana.alert.action_group,
+              alertActionGroupName: ruleTypeActionGroups!.get(alert.kibana.alert.action_group)!,
+              context: alert.kibana.alert.context,
+              actionId: action.id,
+              state: alert.kibana.alert.state,
+              kibanaBaseUrl: context.kibanaBaseUrl,
+              alertParams: data.params,
+              actionParams: action.params,
+              flapping: alert.kibana.alert.flapping,
+              ruleUrl: buildRuleUrl(context, ruleType, rule),
+            }),
+          };
+        });
+      }
+    })
+  );
 
-      console.log(`previewedActions - ${JSON.stringify(previewedActions)}`);
-    }
-  });
-
-  return executionUuid;
+  return { uuid: executionUuid, alerts: alertDocs, actions: previewActions };
 }
 
 const MAX_ATTEMPTS = 10;
