@@ -63,6 +63,7 @@ export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
   startedAt: Date | null;
+  retryAt: Date | null;
   definition: TaskDefinition;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
@@ -251,6 +252,13 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get startedAt() {
     return this.instance.task.startedAt;
+  }
+
+  /**
+   * Gets the retryAt of the current task to run
+   */
+  public get retryAt() {
+    return this.instance.task.retryAt;
   }
 
   /**

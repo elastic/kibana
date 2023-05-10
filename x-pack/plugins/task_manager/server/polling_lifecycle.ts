@@ -120,6 +120,7 @@ export class TaskPollingLifecycle {
 
     this.pool = new TaskPool({
       logger,
+      maxQueuedTasks: config.max_queued_tasks,
       maxWorkers$: maxWorkersConfiguration$,
     });
     this.pool.load.subscribe(emitEvent);

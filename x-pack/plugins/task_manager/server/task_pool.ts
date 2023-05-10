@@ -20,6 +20,7 @@ import { TaskManagerStat } from './task_events';
 interface Opts {
   maxWorkers$: Observable<number>;
   logger: Logger;
+  maxQueuedTasks: number;
 }
 
 export enum TaskPoolRunResult {
@@ -39,7 +40,7 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private maxBufferedTasks: number = 250;
+  private maxQueuedTasks: number;
   private maxWorkers: number = 0;
   private tasksInQueue: TaskRunner[] = [];
   private tasksRunning: TaskRunner[] = [];
@@ -56,6 +57,7 @@ export class TaskPool {
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
+    this.maxQueuedTasks = opts.maxQueuedTasks;
     opts.maxWorkers$.subscribe((maxWorkers) => {
       this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
       this.maxWorkers = maxWorkers;
@@ -85,7 +87,8 @@ export class TaskPool {
     // this ensures that we don't end up with a queue of hung tasks causing both
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
-    return this.maxBufferedTasks - this.tasksInQueue.length;
+    this.cleanupExpiredTasksFromQueue();
+    return this.maxQueuedTasks - this.tasksInQueue.length;
   }
 
   /**
@@ -110,6 +113,8 @@ export class TaskPool {
   }
 
   private moveTasksToRunningFromQueue() {
+    this.cleanupExpiredTasksFromQueue();
+
     // Move tasks from tasksInQueue to tasksRunning
     const tasksToRun =
       this.availableWorkers > 0 ? this.tasksInQueue.splice(0, this.availableWorkers) : [];
@@ -135,6 +140,17 @@ export class TaskPool {
         })
       );
     })();
+  }
+
+  private cleanupExpiredTasksFromQueue() {
+    this.tasksInQueue.forEach((task) => {
+      if (task.retryAt) {
+        if (howManyMsUntilOwnershipClaimExpires(task.retryAt) < 0) {
+          const index = this.tasksInQueue.indexOf(task);
+          this.tasksInQueue.splice(index, 1);
+        }
+      }
+    });
   }
 
   /**
@@ -251,4 +267,8 @@ function durationAsString(duration: Duration): string {
     padStart(`${value}`, 2, '0')
   );
   return `${m}m ${s}s`;
+}
+
+function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
+  return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
 }

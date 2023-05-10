@@ -136,6 +136,7 @@ export const configSchema = schema.object(
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
+    max_queued_tasks: schema.number({ defaultValue: 0, min: 0, max: 100 }),
   },
   {
     validate: (config) => {
