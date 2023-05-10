@@ -100,13 +100,48 @@ describe('AllCasesListGeneric', () => {
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   let appMockRenderer: AppMockRenderer;
 
   beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+
     mockKibana();
     const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   beforeEach(() => {
@@ -712,7 +747,9 @@ describe('AllCasesListGeneric', () => {
       it('Renders bulk action', async () => {
         appMockRenderer.render(<AllCasesList />);
 
-        expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+        await waitFor(() => {
+          expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+        });
 
         userEvent.click(screen.getByTestId('checkboxSelectAll'));
         expect(screen.getByText('Bulk actions')).toBeInTheDocument();
@@ -727,7 +764,9 @@ describe('AllCasesListGeneric', () => {
         async (status) => {
           appMockRenderer.render(<AllCasesList />);
 
-          expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+          await waitFor(() => {
+            expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+          });
 
           userEvent.click(screen.getByTestId('checkboxSelectAll'));
 
@@ -766,7 +805,9 @@ describe('AllCasesListGeneric', () => {
       ])('Bulk update severity: %s', async (severity) => {
         appMockRenderer.render(<AllCasesList />);
 
-        expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+        await waitFor(() => {
+          expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+        });
 
         userEvent.click(screen.getByTestId('checkboxSelectAll'));
 
@@ -799,7 +840,9 @@ describe('AllCasesListGeneric', () => {
       it('Bulk delete', async () => {
         appMockRenderer.render(<AllCasesList />);
 
-        expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+        await waitFor(() => {
+          expect(screen.getByTestId('cases-table')).toBeInTheDocument();
+        });
 
         userEvent.click(screen.getByTestId('checkboxSelectAll'));
 
