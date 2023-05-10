@@ -6,6 +6,16 @@
 }
 
 
+.image {
+  img {
+    display: inline;
+    margin: 0px;
+    overflow-clip-margin: content-box;
+    vertical-align: middle;
+  }
+}
+
+
 /**** REACT RESIZABLE STUFF */
 
 .react-resizable {
