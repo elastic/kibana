@@ -356,17 +356,24 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
-export const CasesBulkGetRequestRt = rt.intersection([
-  rt.type({
-    ids: rt.array(rt.string),
-  }),
-  rt.partial({
-    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
-  }),
-]);
+export const CasesBulkGetRequestRt = rt.type({
+  ids: rt.array(rt.string),
+});
+
+export const CasesBulkGetResponseFieldsRt = rt.type({
+  id: rt.string,
+  description: rt.string,
+  title: rt.string,
+  owner: rt.string,
+  version: rt.string,
+  totalComments: rt.number,
+  status: CaseStatusRt,
+  created_at: rt.string,
+  created_by: UserRt,
+});
 
 export const CasesBulkGetResponseRt = rt.type({
-  cases: CasesRt,
+  cases: rt.array(CasesBulkGetResponseFieldsRt),
   errors: rt.array(
     rt.type({
       error: rt.string,
@@ -402,15 +409,3 @@ export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
 
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
-export type CasesBulkGetRequestCertainFields<Field extends keyof Case = keyof Case> = Omit<
-  CasesBulkGetRequest,
-  'fields'
-> & {
-  fields?: Field[];
-};
-export type CasesBulkGetResponseCertainFields<Field extends keyof Case = keyof Case> = Omit<
-  CasesBulkGetResponse,
-  'cases'
-> & {
-  cases: Array<Pick<Case, Field | 'id' | 'version' | 'owner'>>;
-};

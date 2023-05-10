@@ -171,14 +171,16 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
   ];
 
-  const chartPreview = (
+  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
+  const showChartPreview = false;
+  const chartPreview = showChartPreview ? (
     <ChartPreview
       series={[{ data: data?.errorRateChartPreview ?? [] }]}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
       uiSettings={services.uiSettings}
     />
-  );
+  ) : null;
 
   const groupAlertsBy = (
     <>
