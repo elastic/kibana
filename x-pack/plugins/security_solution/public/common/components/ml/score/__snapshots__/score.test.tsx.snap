@@ -6,6 +6,7 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
     Object {
       "aggregatable": true,
       "name": "process.name",
+      "searchable": true,
       "type": "keyword",
       "value": "du",
     }
@@ -24,6 +25,7 @@ exports[`draggable_score renders correctly against snapshot when the index is no
     Object {
       "aggregatable": true,
       "name": "process.name",
+      "searchable": true,
       "type": "keyword",
       "value": "du",
     }

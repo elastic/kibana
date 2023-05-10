@@ -24,7 +24,7 @@ describe('createFilterOutAction', () => {
   const filterOutActionFactory = createFilterOutActionFactory({ filterManager: mockFilterManager });
   const filterOutAction = filterOutActionFactory({ id: 'testAction' });
   const context = makeActionContext({
-    field: { name: fieldName, value, type: 'text' },
+    field: { name: fieldName, value, type: 'text', searchable: true, aggregatable: true },
   });
 
   beforeEach(() => {

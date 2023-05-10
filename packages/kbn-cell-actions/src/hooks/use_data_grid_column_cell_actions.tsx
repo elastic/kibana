@@ -21,7 +21,7 @@ import type {
 } from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
-interface BulkField extends CellActionField {
+interface BulkField extends Omit<CellActionField, 'value'> {
   /**
    * Array containing all the values of the field in the visible page, indexed by rowIndex
    */
@@ -102,11 +102,11 @@ const createColumnCellAction = ({
     const buttonRef = useRef<HTMLAnchorElement | null>(null);
 
     const actionContext: CellActionExecutionContext = useMemo(() => {
-      const { values } = field;
+      const { values, ...rest } = field;
       // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
       const value = values[rowIndex % values.length];
       return {
-        field: { ...field, value },
+        field: { ...rest, value },
         trigger: { id: triggerId },
         nodeRef,
         metadata,

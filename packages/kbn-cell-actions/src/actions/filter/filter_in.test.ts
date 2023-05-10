@@ -26,7 +26,7 @@ describe('createFilterInActionFactory', () => {
   });
   const filterInAction = filterInActionFactory({ id: 'testAction' });
   const context = makeActionContext({
-    field: { name: fieldName, value, type: 'text' },
+    field: { name: fieldName, value, type: 'text', searchable: true, aggregatable: true },
   });
 
   beforeEach(() => {

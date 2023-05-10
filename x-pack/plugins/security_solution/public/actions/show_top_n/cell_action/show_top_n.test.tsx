@@ -40,7 +40,13 @@ describe('createShowTopNCellActionFactory', () => {
   const showTopNAction = showTopNActionFactory({ id: 'testAction' });
 
   const context = {
-    field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
+    field: {
+      name: 'user.name',
+      value: 'the-value',
+      type: 'keyword',
+      aggregatable: true,
+      searchable: true,
+    },
     trigger: { id: 'trigger' },
     nodeRef: {
       current: element,
@@ -65,9 +71,12 @@ describe('createShowTopNCellActionFactory', () => {
       expect(await showTopNAction.isCompatible(context)).toEqual(true);
     });
 
-    it('should return false if field type does not support aggregations', async () => {
+    it('should return false if field esType does not support aggregations', async () => {
       expect(
-        await showTopNAction.isCompatible({ ...context, field: { ...context.field, type: 'text' } })
+        await showTopNAction.isCompatible({
+          ...context,
+          field: { ...context.field, esTypes: ['text'] },
+        })
       ).toEqual(false);
     });
 

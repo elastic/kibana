@@ -6,6 +6,7 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
     Object {
       "aggregatable": true,
       "name": "entity-name",
+      "searchable": true,
       "type": "keyword",
       "value": "entity-value",
     }
