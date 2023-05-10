@@ -52,7 +52,7 @@ export const ErrorCallout = ({
     <EuiEmptyPrompt
       iconType="error"
       color="danger"
-      title={<h2>{titleOverride ? titleOverride : errorContent.title}</h2>}
+      title={<h2>{title}</h2>}
       data-test-subj="hostsViewErrorCallout"
       body={
         <>
@@ -104,7 +104,7 @@ const getErrorContent = (error: Error): { title: string; body: JSX.Element } => 
         <>
           <FormattedMessage
             id="xpack.infra.hostsViewPage.error.kqlErrorMessage"
-            defaultMessage="We can't show any results because we couldn't apply your query."
+            defaultMessage="We can't show any results because we couldn't apply your filter."
           />
           <EuiSpacer size="s" />
           <EuiCodeBlock transparentBackground paddingSize="s">
