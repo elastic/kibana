@@ -13,7 +13,10 @@ import {
   Indicator,
 } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { InvestigateInTimelineContextMenu, InvestigateInTimelineButtonIcon } from '.';
+import {
+  InvestigateInTimelineContextMenu,
+  InvestigateInTimelineButtonIcon,
+} from './investigate_in_timeline';
 import { EMPTY_VALUE } from '../../../../common/constants';
 
 describe('<InvestigateInTimeline />', () => {

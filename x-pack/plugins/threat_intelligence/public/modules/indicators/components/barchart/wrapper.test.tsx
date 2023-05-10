@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { CHART_UPDATE_PROGRESS_TEST_ID, IndicatorsBarChartWrapper } from '.';
+import { CHART_UPDATE_PROGRESS_TEST_ID, IndicatorsBarChartWrapper } from './wrapper';
 import moment from 'moment';
 
 jest.mock('../../../query_bar/hooks/use_filters');

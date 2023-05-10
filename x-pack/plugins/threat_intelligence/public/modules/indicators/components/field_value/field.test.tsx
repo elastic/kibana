@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { IndicatorFieldValue } from '.';
+import { IndicatorFieldValue } from './field_value';
 import {
   generateMockIndicator,
   generateMockIndicatorWithTlp,

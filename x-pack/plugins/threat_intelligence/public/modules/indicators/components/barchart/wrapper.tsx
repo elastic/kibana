@@ -20,8 +20,8 @@ import { TimeRange } from '@kbn/es-query';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFieldSelector } from './field_selector';
-import { IndicatorsBarChart } from './barchart';
+import { IndicatorsFieldSelector } from './field_selector/field_selector';
+import { IndicatorsBarChart } from './barchart/barchart';
 import { ChartSeries } from '../../services';
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
