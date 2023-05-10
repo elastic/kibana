@@ -86,6 +86,7 @@ const getUsersColumns = (
               idPrefix: `users-table-${name}-name`,
               render: (item) => <UserDetailsLink userName={item} />,
               aggregatable: true,
+              searchable: true,
               fieldType: 'keyword',
             })
           : getOrEmptyTagFromValue(name),
@@ -111,6 +112,7 @@ const getUsersColumns = (
               values: [domain],
               idPrefix: `users-table-${domain}-domain`,
               aggregatable: true,
+              searchable: true,
               fieldType: 'keyword',
             })
           : getOrEmptyTagFromValue(domain),

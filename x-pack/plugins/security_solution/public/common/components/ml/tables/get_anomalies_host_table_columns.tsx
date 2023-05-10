@@ -38,6 +38,7 @@ export const getAnomaliesHostTableColumns = (
           anomaliesByHost.anomaly
         )}-hostName`,
         aggregatable: true,
+        searchable: true,
         fieldType: 'keyword',
         render: (item) => <HostDetailsLink hostName={item} />,
       }),

@@ -125,6 +125,7 @@ export const getNetworkTopNFlowColumns = (
           fieldName: domainAttr,
           fieldType: 'keyword',
           aggregatable: true,
+          searchable: true,
           idPrefix: id,
           displayCount: 1,
         });
@@ -149,6 +150,7 @@ export const getNetworkTopNFlowColumns = (
                 fieldName: `${flowTarget}.as.organization.name`,
                 fieldType: 'keyword',
                 aggregatable: true,
+                searchable: true,
                 idPrefix: `${id}-name`,
               })}
 
@@ -161,6 +163,7 @@ export const getNetworkTopNFlowColumns = (
                   idPrefix: `${id}-number`,
                   fieldType: 'keyword',
                   aggregatable: true,
+                  searchable: true,
                 })}
               </>
             )}

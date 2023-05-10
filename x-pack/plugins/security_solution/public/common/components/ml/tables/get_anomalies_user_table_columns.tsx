@@ -39,6 +39,7 @@ export const getAnomaliesUserTableColumns = (
           anomaliesByUser.anomaly
         )}-userName`,
         aggregatable: true,
+        searchable: true,
         fieldType: 'keyword',
         render: (item) => <UserDetailsLink userName={item} />,
       }),

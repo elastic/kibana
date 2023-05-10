@@ -32,6 +32,7 @@ describe('Table Helpers', () => {
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
         aggregatable: false,
+        searchable: true,
       });
 
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -45,6 +46,7 @@ describe('Table Helpers', () => {
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
         aggregatable: false,
+        searchable: true,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
 
@@ -57,6 +59,7 @@ describe('Table Helpers', () => {
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
         aggregatable: false,
+        searchable: true,
         displayCount: 0,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -70,6 +73,7 @@ describe('Table Helpers', () => {
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
         aggregatable: false,
+        searchable: true,
         render: renderer,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -83,6 +87,7 @@ describe('Table Helpers', () => {
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
         aggregatable: false,
+        searchable: true,
       });
       const { container } = render(<TestProviders>{rowItems}</TestProviders>);
       expect(container.textContent).toBe(getEmptyValue());
@@ -94,6 +99,7 @@ describe('Table Helpers', () => {
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
         aggregatable: false,
+        searchable: true,
         displayCount: 2,
       });
       const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);

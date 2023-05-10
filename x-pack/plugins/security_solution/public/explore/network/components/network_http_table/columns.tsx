@@ -40,6 +40,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-methods-${path}`),
             fieldType: 'keyword',
             aggregatable: true,
+            searchable: true,
             displayCount: 3,
           })
         : getEmptyTagValue();
@@ -55,6 +56,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-domains-${path}`),
             fieldType: 'keyword',
             aggregatable: true,
+            searchable: true,
           })
         : getEmptyTagValue(),
   },
@@ -69,6 +71,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-path-${path}`),
             fieldType: 'keyword',
             aggregatable: true,
+            searchable: true,
           })
         : getEmptyTagValue(),
   },
@@ -82,6 +85,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-statuses-${path}`),
             fieldType: 'keyword',
             aggregatable: true,
+            searchable: true,
             displayCount: 3,
           })
         : getEmptyTagValue(),
@@ -96,6 +100,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-lastHost-${path}`),
             fieldType: 'keyword',
             aggregatable: true,
+            searchable: true,
           })
         : getEmptyTagValue(),
   },
@@ -109,6 +114,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp-${path}`),
             fieldType: 'keyword',
             aggregatable: true,
+            searchable: true,
             render: () => <NetworkDetailsLink ip={lastSourceIp} />,
           })
         : getEmptyTagValue(),
