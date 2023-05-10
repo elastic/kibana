@@ -18,7 +18,7 @@ import {
   SavedObjectsIncrementCounterField,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
-import { getCurrentTime, normalizeNamespace } from '../../internal_utils';
+import { getCurrentTime, normalizeNamespace } from '../utils';
 import { ApiExecutionContext } from '../types';
 
 export interface PerformIncrementCounterInternalParams<T = unknown> {

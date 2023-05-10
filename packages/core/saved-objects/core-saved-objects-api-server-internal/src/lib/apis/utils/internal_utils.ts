@@ -9,11 +9,11 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Payload } from '@hapi/boom';
 import {
+  SavedObjectsErrorHelpers,
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
   type SavedObject,
-  SavedObjectsErrorHelpers,
   type SavedObjectsRawDocParseOptions,
   type DecoratedError,
 } from '@kbn/core-saved-objects-server';
@@ -22,41 +22,6 @@ import {
   decodeRequestVersion,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-
-/**
- * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern is used for internal repository operations.
- * @internal
- */
-export type Either<L = unknown, R = L> = Left<L> | Right<R>;
-
-/**
- * Left part of discriminated union ({@link Either}).
- * @internal
- */
-export interface Left<L> {
-  tag: 'Left';
-  value: L;
-}
-
-/**
- * Right part of discriminated union ({@link Either}).
- * @internal
- */
-export interface Right<R> {
-  tag: 'Right';
-  value: R;
-}
-
-/**
- * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
- * @internal
- */
-export const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => either.tag === 'Left';
-/**
- * Type guard for right part of discriminated union ({@link Right}, {@link Either}).
- * @internal
- */
-export const isRight = <L, R>(either: Either<L, R>): either is Right<R> => either.tag === 'Right';
 
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.

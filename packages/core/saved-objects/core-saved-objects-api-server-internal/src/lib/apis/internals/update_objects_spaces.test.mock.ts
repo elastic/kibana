@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type * as InternalUtils from './internal_utils';
-import type { deleteLegacyUrlAliases } from './legacy_url_aliases';
+import type * as InternalUtils from '../utils/internal_utils';
+import type { deleteLegacyUrlAliases } from '../../legacy_url_aliases';
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['getBulkOperationError']
@@ -19,8 +19,8 @@ export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
   typeof InternalUtils['rawDocExistsInNamespace']
 >;
 
-jest.mock('./internal_utils', () => {
-  const actual = jest.requireActual('./internal_utils');
+jest.mock('../utils/internal_utils', () => {
+  const actual = jest.requireActual('../utils/internal_utils');
   return {
     ...actual,
     getBulkOperationError: mockGetBulkOperationError,
@@ -32,6 +32,6 @@ jest.mock('./internal_utils', () => {
 export const mockDeleteLegacyUrlAliases = jest.fn() as jest.MockedFunction<
   typeof deleteLegacyUrlAliases
 >;
-jest.mock('./legacy_url_aliases', () => ({
+jest.mock('../../legacy_url_aliases', () => ({
   deleteLegacyUrlAliases: mockDeleteLegacyUrlAliases,
 }));

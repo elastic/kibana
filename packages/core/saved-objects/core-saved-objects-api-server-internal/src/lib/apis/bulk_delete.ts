@@ -28,7 +28,7 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
   isRight,
-} from '../internal_utils';
+} from './utils';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from '../legacy_url_aliases';
 import {

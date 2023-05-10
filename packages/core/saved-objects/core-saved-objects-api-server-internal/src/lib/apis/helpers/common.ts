@@ -14,8 +14,8 @@ import type {
 import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { normalizeNamespace } from '../internal_utils';
-import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
+import { normalizeNamespace } from '../utils';
+import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 
 export class CommonHelper {
   private registry: ISavedObjectTypeRegistry;

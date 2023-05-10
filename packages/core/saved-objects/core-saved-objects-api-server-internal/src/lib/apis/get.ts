@@ -13,8 +13,7 @@ import {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
-import { getSavedObjectFromSource, rawDocExistsInNamespace } from '../internal_utils';
-import { isFoundGetResponse } from '../utils';
+import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformGetParams {

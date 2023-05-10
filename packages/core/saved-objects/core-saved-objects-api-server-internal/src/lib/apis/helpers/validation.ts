@@ -9,7 +9,10 @@
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { SavedObjectsTypeValidator } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectSanitizedDoc, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 
 export class ValidationHelper {

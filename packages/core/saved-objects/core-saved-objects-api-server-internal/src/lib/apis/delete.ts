@@ -11,10 +11,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
-import { getExpectedVersionProperties } from '../internal_utils';
-import { PreflightCheckNamespacesResult } from '../helpers';
-import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from '../legacy_url_aliases';
+import { getExpectedVersionProperties } from './utils';
+import { PreflightCheckNamespacesResult } from './helpers';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformDeleteParams<T = unknown> {
   type: string;

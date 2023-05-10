@@ -7,8 +7,8 @@
  */
 
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
-import { savedObjectsPointInTimeFinderMock } from '../../mocks/point_in_time_finder.mock';
+import { savedObjectsPointInTimeFinderMock } from '../../../mocks/point_in_time_finder.mock';
+import { CreatePointInTimeFinderFn, PointInTimeFinder } from '../../point_in_time_finder';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
 import { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 

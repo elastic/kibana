@@ -32,9 +32,9 @@ import {
   normalizeNamespace,
   setManaged,
   errorContent,
-} from '../internal_utils';
-import { getSavedObjectNamespaces } from '../utils';
-import { PreflightCheckForCreateObject } from '../preflight_check_for_create';
+} from './utils';
+import { getSavedObjectNamespaces } from './utils';
+import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
 import { ApiExecutionContext } from './types';
 
 export interface PerformBulkCreateParams<T = unknown> {

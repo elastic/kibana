@@ -25,7 +25,7 @@ import {
   isRight,
   isMgetDoc,
   rawDocExistsInNamespace,
-} from '../internal_utils';
+} from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformCheckConflictsParams<T = unknown> {

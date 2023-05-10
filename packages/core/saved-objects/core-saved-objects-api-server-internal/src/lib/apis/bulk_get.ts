@@ -28,7 +28,7 @@ import {
   isLeft,
   isRight,
   rawDocExistsInNamespaces,
-} from '../internal_utils';
+} from './utils';
 import { ApiExecutionContext } from './types';
 import { includedFields } from '../included_fields';
 

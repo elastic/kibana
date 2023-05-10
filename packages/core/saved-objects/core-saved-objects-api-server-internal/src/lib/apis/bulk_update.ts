@@ -24,7 +24,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
-  Either,
+  type Either,
   errorContent,
   getBulkOperationError,
   getCurrentTime,
@@ -33,7 +33,7 @@ import {
   isMgetDoc,
   isRight,
   rawDocExistsInNamespace,
-} from '../internal_utils';
+} from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {

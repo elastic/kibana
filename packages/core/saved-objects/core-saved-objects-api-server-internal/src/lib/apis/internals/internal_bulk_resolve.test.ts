@@ -24,7 +24,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
-import { normalizeNamespace } from '../../internal_utils';
+import { normalizeNamespace } from '../utils';
 import {
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,

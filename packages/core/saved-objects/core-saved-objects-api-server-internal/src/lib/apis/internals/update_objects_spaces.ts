@@ -36,11 +36,13 @@ import {
   type Either,
   isLeft,
   isRight,
-} from './internal_utils';
-import { DEFAULT_REFRESH_SETTING } from './constants';
-import type { RepositoryEsClient } from './repository_es_client';
-import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
-import { deleteLegacyUrlAliases } from './legacy_url_aliases';
+} from '../utils';
+import { DEFAULT_REFRESH_SETTING } from '../../constants';
+import type { RepositoryEsClient } from '../../repository_es_client';
+import {
+  deleteLegacyUrlAliases,
+  type DeleteLegacyUrlAliasesParams,
+} from '../../legacy_url_aliases';
 
 /**
  * Parameters for the updateObjectsSpaces function.

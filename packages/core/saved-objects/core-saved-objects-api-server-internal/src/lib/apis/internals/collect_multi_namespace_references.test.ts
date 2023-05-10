@@ -24,13 +24,13 @@ import {
   type CollectMultiNamespaceReferencesParams,
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
+import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import {
   enforceError,
   setupAuthorizeAndRedactMultiNamespaceReferenencesFailure,
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
-} from '../test_helpers/repository.test.common';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+} from '../../../test_helpers/repository.test.common';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 import {
   type ISavedObjectsSecurityExtension,
   SavedObjectsErrorHelpers,

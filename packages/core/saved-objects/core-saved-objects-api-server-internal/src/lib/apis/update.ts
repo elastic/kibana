@@ -20,9 +20,9 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
-import { getCurrentTime, getExpectedVersionProperties } from '../internal_utils';
+import { getCurrentTime, getExpectedVersionProperties } from './utils';
 import { ApiExecutionContext } from './types';
-import { PreflightCheckNamespacesResult } from '../helpers';
+import { PreflightCheckNamespacesResult } from './helpers';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
