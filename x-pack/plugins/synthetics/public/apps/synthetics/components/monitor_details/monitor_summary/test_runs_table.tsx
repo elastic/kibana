@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
-import { ExpandRowColumn } from '../../test_now_mode/simple/ping_list/columns/expand_row';
+import {
+  ExpandRowColumn,
+  toggleDetails,
+} from '../../test_now_mode/simple/ping_list/columns/expand_row';
 import { useExpandedPingList } from '../../test_now_mode/simple/ping_list/use_ping_expanded';
 import { THUMBNAIL_SCREENSHOT_SIZE_MOBILE } from '../../common/screenshot/screenshot_size';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
@@ -158,6 +161,17 @@ export const TestRunsTable = ({
         ),
       },
     },
+    ...(!isBrowserMonitor
+      ? [
+          {
+            align: 'left',
+            field: 'monitor.ip',
+            name: i18n.translate('xpack.synthetics.pingList.ipAddressColumnLabel', {
+              defaultMessage: 'IP',
+            }),
+          },
+        ]
+      : []),
     {
       align: 'left',
       valign: 'middle',
@@ -211,9 +225,6 @@ export const TestRunsTable = ({
   ] as Array<EuiBasicTableColumn<Ping>>;
 
   const getRowProps = (item: Ping) => {
-    if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
-      return {};
-    }
     return {
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
@@ -224,13 +235,17 @@ export const TestRunsTable = ({
           targetElem.tagName !== 'path' &&
           !targetElem.parentElement?.classList.contains('euiLink')
         ) {
-          history.push(
-            getTestRunDetailRelativeLink({
-              monitorId,
-              checkGroup: item.monitor.check_group,
-              locationId: selectedLocation?.id,
-            })
-          );
+          if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+            toggleDetails(item, expandedRows, setExpandedRows);
+          } else {
+            history.push(
+              getTestRunDetailRelativeLink({
+                monitorId,
+                checkGroup: item.monitor.check_group,
+                locationId: selectedLocation?.id,
+              })
+            );
+          }
         }
       },
     };
