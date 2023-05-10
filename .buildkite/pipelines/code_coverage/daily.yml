@@ -70,4 +70,4 @@ steps:
     label: 'Use Junit Reporter'
     agents:
       queue: n2-4-spot
-    timeout_in_minutes: 10
+    timeout_in_minutes: 30
