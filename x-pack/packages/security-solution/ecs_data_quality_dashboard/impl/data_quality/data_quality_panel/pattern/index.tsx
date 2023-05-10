@@ -120,7 +120,7 @@ const PatternComponent: React.FC<Props> = ({
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
 
-  const { error: statsError, loading: loadingStats, stats } = useStats(pattern);
+  const { error: statsError, loading: loadingStats, stats, refetchStats } = useStats(pattern);
   const { error: ilmExplainError, loading: loadingIlmExplain, ilmExplain } = useIlmExplain(pattern);
 
   const loading = useMemo(
@@ -132,6 +132,17 @@ const PatternComponent: React.FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+
+  const onInValidValueUpdateCallback = useCallback(
+    (indexName: string) => {
+      const abortController = new AbortController();
+
+      refetchStats(abortController);
+
+      // setItemIdToExpandedRowMap({}); // collapse the selected index
+    },
+    [refetchStats]
+  );
 
   const toggleExpanded = useCallback(
     (indexName: string) => {
@@ -155,6 +166,7 @@ const PatternComponent: React.FC<Props> = ({
                 patternRollup={patternRollup}
                 theme={theme}
                 updatePatternRollup={updatePatternRollup}
+                onInValidValueUpdateCallback={onInValidValueUpdateCallback}
               />
             </IndexPropertiesContainer>
           ),
@@ -169,6 +181,7 @@ const PatternComponent: React.FC<Props> = ({
       getGroupByFieldsOnClick,
       ilmExplain,
       itemIdToExpandedRowMap,
+      onInValidValueUpdateCallback,
       openCreateCaseFlyout,
       pattern,
       patternRollup,

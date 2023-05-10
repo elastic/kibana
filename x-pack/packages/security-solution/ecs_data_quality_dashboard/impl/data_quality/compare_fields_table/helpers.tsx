@@ -17,6 +17,7 @@ import * as i18n from './translations';
 import type {
   AllowedValue,
   EnrichedFieldMetadata,
+  OnInValidValueUpdateCallback,
   UnallowedValueCount,
   UnallowedValueDoc,
   UnallowedValueDocTableItems,
@@ -95,9 +96,9 @@ export const getEcsCompliantTableColumns = (): Array<
   },
 ];
 
-export const getIncompatibleValuesTableColumns = (): Array<
-  EuiTableFieldDataColumnType<EnrichedFieldMetadata>
-> => [
+export const getIncompatibleValuesTableColumns = (
+  onInValidValueUpdateCallback?: () => void
+): Array<EuiTableFieldDataColumnType<EnrichedFieldMetadata>> => [
   {
     field: 'indexFieldName',
     name: i18n.FIELD,
@@ -133,6 +134,7 @@ export const getIncompatibleValuesTableColumns = (): Array<
         indexInvalidDocs={indexInvalidDocs}
         indexFieldName={record.indexFieldName}
         allowedValues={record.allowed_values}
+        onInValidValueUpdateCallback={onInValidValueUpdateCallback}
       />
     ),
     sortable: false,
@@ -148,9 +150,9 @@ export const getIncompatibleValuesTableColumns = (): Array<
   },
 ];
 
-export const getIncompatibleDocsTableColumns = (): Array<
-  EuiTableFieldDataColumnType<UnallowedValueDocTableItems>
-> => [
+export const getIncompatibleDocsTableColumns = (
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback
+): Array<EuiTableFieldDataColumnType<UnallowedValueDocTableItems>> => [
   // {
   //   field: 'indexFieldName',
   //   name: i18n.FIELD,
@@ -188,8 +190,11 @@ export const getIncompatibleDocsTableColumns = (): Array<
     render: (updatedFieldValues, record) => (
       <IndexInvalidValueDropdown
         allowedValues={record.allowedValues}
-        indexInvalidValue={updatedFieldValues}
+        id={record._id}
         indexFieldName={record.indexFieldName}
+        indexInvalidValue={updatedFieldValues}
+        indexName={record._index}
+        onInValidValueUpdateCallback={onInValidValueUpdateCallback}
       />
     ),
   },

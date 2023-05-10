@@ -73,6 +73,7 @@ export const getTabs = ({
   setSelectedTabId,
   stats,
   theme,
+  onInValidValueUpdateCallback,
 }: {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
@@ -101,6 +102,7 @@ export const getTabs = ({
   setSelectedTabId: (tabId: string) => void;
   stats: Record<string, IndicesStatsIndicesStats> | null;
   theme: Theme;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
 }) => [
   {
     content: (
@@ -144,6 +146,7 @@ export const getTabs = ({
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}
         sizeInBytes={getSizeInBytes({ indexName, stats })}
+        onInValidValueUpdateCallback={onInValidValueUpdateCallback}
       />
     ),
     id: INCOMPATIBLE_TAB_ID,

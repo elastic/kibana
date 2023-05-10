@@ -10,7 +10,7 @@ import { EuiInMemoryTable, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import * as i18n from './translations';
-import type { EnrichedFieldMetadata } from '../types';
+import type { EnrichedFieldMetadata, OnInValidValueUpdateCallback } from '../types';
 
 const search: Search = {
   box: {
@@ -22,16 +22,23 @@ const search: Search = {
 
 interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
-  getTableColumns: () => Array<EuiTableFieldDataColumnType<EnrichedFieldMetadata>>;
+  getTableColumns: (
+    onInValidValueUpdateCallback?: OnInValidValueUpdateCallback
+  ) => Array<EuiTableFieldDataColumnType<EnrichedFieldMetadata>>;
   title: string;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
 }
 
 const CompareFieldsTableComponent: React.FC<Props> = ({
   enrichedFieldMetadata,
   getTableColumns,
   title,
+  onInValidValueUpdateCallback,
 }) => {
-  const columns = useMemo(() => getTableColumns(), [getTableColumns]);
+  const columns = useMemo(
+    () => getTableColumns(onInValidValueUpdateCallback),
+    [getTableColumns, onInValidValueUpdateCallback]
+  );
 
   return (
     <>

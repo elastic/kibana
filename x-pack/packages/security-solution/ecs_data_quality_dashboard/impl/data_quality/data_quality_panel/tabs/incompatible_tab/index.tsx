@@ -48,6 +48,7 @@ interface Props {
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
   sizeInBytes: number | undefined;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
 }
 
 const IncompatibleTabComponent: React.FC<Props> = ({
@@ -62,6 +63,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
+  onInValidValueUpdateCallback,
 }) => {
   const body = useMemo(() => <EmptyPromptBody body={i18n.INCOMPATIBLE_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.INCOMPATIBLE_EMPTY_TITLE} />, []);
@@ -156,6 +158,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
                   enrichedFieldMetadata={incompatibleValues}
                   getTableColumns={getIncompatibleValuesTableColumns}
                   title={INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE(indexName)}
+                  onInValidValueUpdateCallback={onInValidValueUpdateCallback}
                 />
               </>
             )}

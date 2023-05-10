@@ -9,25 +9,24 @@ import { useEffect, useState } from 'react';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { updateUnallowedValues } from './helpers';
 
-export const useUpdateUnallowedValues = ({
-  requestItems,
-}: {
+export const useUpdateUnallowedValues = (
   requestItems: Array<{
     id: string;
     indexFieldName: string;
     indexName: string;
     value: string;
-  }>;
-}) => {
+  }>
+) => {
   const { httpFetch } = useDataQualityContext();
   const [result, setResult] = useState<unknown[] | null>(null);
   const [error, setError] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (requestItems.length === 0) {
       return;
     }
+    setLoading(true);
 
     const abortController = new AbortController();
 

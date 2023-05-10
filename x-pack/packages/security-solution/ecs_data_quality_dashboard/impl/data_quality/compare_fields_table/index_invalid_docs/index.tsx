@@ -7,19 +7,21 @@
 import React, { useMemo, useState } from 'react';
 import { EuiInMemoryTable, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { getIncompatibleDocsTableColumns, getIncompatibleDocsTableRows } from '../helpers';
-import { AllowedValue, UnallowedValueDoc } from '../../types';
+import { AllowedValue, OnInValidValueUpdateCallback, UnallowedValueDoc } from '../../types';
+import { useUpdateUnallowedValues } from '../../use_update_unallowed_values';
 
 const IndexInvalidDocsComponent: React.FC<{
   indexInvalidDocs: UnallowedValueDoc[];
   indexFieldName: string;
   allowedValues: AllowedValue[] | undefined;
-}> = ({ indexInvalidDocs, indexFieldName, allowedValues }) => {
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
+}> = ({ indexInvalidDocs, indexFieldName, allowedValues, onInValidValueUpdateCallback }) => {
   const indexInvalidValues = getIncompatibleDocsTableRows({
     indexInvalidDocs,
     indexFieldName,
     allowedValues,
   });
-  const columns = getIncompatibleDocsTableColumns();
+  const columns = getIncompatibleDocsTableColumns(onInValidValueUpdateCallback);
   return <EuiInMemoryTable items={indexInvalidValues} columns={columns} />;
 };
 
@@ -28,12 +30,42 @@ export const IndexInvalidDocs = React.memo(IndexInvalidDocsComponent);
 
 const IndexInvalidValueDropdownComponent: React.FC<{
   allowedValues: AllowedValue[] | undefined;
+  id: string;
   indexFieldName: string;
   indexInvalidValue: string;
-}> = ({ indexFieldName, allowedValues, indexInvalidValue }) => {
+  indexName: string;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
+}> = ({
+  indexFieldName,
+  allowedValues,
+  id,
+  indexName,
+  indexInvalidValue,
+  onInValidValueUpdateCallback,
+}) => {
   const [value, setValue] = useState(indexInvalidValue);
+  const [requestItems, setRequestItems] = useState<
+    Array<{
+      id: string;
+      indexFieldName: string;
+      indexName: string;
+      value: string;
+    }>
+  >([]);
+  const { error, result, loading } = useUpdateUnallowedValues(requestItems);
   const onChange = (e) => {
     setValue(e.target.value);
+    if (e.target.value !== indexInvalidValue) {
+      setRequestItems([
+        {
+          id,
+          indexFieldName,
+          indexName,
+          value: e.target.value,
+        },
+      ]);
+      onInValidValueUpdateCallback?.(indexName);
+    }
   };
   const options = useMemo(
     () =>
@@ -53,6 +85,7 @@ const IndexInvalidValueDropdownComponent: React.FC<{
       options={options}
       value={value}
       onChange={(e) => onChange(e)}
+      disabled={loading}
     />
   );
 };

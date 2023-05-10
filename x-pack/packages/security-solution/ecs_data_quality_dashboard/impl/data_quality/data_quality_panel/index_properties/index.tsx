@@ -32,7 +32,13 @@ import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import type {
+  EcsMetadata,
+  IlmPhase,
+  OnInValidValueUpdateCallback,
+  PartitionedFieldMetadata,
+  PatternRollup,
+} from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
@@ -71,6 +77,7 @@ export interface Props {
   patternRollup: PatternRollup | undefined;
   theme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
 }
 
 const IndexPropertiesComponent: React.FC<Props> = ({
@@ -87,6 +94,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   patternRollup,
   theme,
   updatePatternRollup,
+  onInValidValueUpdateCallback,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
 
@@ -153,6 +161,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         setSelectedTabId,
         stats: patternRollup?.stats ?? null,
         theme,
+        onInValidValueUpdateCallback,
       }),
     [
       addSuccessToast,
@@ -169,6 +178,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
+      onInValidValueUpdateCallback,
     ]
   );
 
