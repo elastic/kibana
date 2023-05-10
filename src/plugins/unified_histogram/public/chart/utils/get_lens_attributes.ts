@@ -182,11 +182,12 @@ export const getLensAttributes = ({
         },
       };
   const attributes = {
-    title:
-      title ??
-      i18n.translate('unifiedHistogram.lensTitle', {
-        defaultMessage: 'Edit visualization',
-      }),
+    title: suggestion
+      ? suggestion.title
+      : title ??
+        i18n.translate('unifiedHistogram.lensTitle', {
+          defaultMessage: 'Edit visualization',
+        }),
     references: [
       {
         id: dataView.id ?? '',

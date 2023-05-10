@@ -23,11 +23,8 @@ import {
   EuiFocusTrap,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-// import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components/public';
 import { DataViewsState } from '../../state_management';
 import { getResolvedDateRange } from '../../utils';
@@ -35,61 +32,32 @@ import { getResolvedDateRange } from '../../utils';
 import type { ActiveDimensionState } from '../../editor_frame_service/editor_frame/config_panel/types';
 import { DimensionContainer } from '../../editor_frame_service/editor_frame/config_panel/dimension_container';
 import { LayerSettings } from '../../editor_frame_service/editor_frame/config_panel/layer_settings';
-// import { ConfigPanelWrapper } from '../../editor_frame_service/editor_frame/config_panel/config_panel';
-// import { LayerPanel } from '../../editor_frame_service/editor_frame/config_panel/layer_panel';
-// import { DraggableDimensionButton } from '../../editor_frame_service/editor_frame/config_panel/buttons/draggable_dimension_button';
 import { EmptyDimensionButton } from '../../editor_frame_service/editor_frame/config_panel/buttons/empty_dimension_button';
-
 import { NativeRenderer } from '../../native_renderer';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { DatasourceMap, VisualizationMap, DatasourceLayers } from '../../types';
 import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
-// import { FlyoutContainer } from '../../editor_frame_service/editor_frame/config_pane/flyout_container';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 
-// const LayerPanels = React.lazy(
-//   () => import('../../editor_frame_service/editor_frame/config_panel/config_panel')
-// );
-
-// function LoadingSpinnerWithOverlay() {
-//   return (
-//     <EuiOverlayMask>
-//       <EuiLoadingSpinner />
-//     </EuiOverlayMask>
-//   );
-// }
-
-// const LensConfigPanelLazy = (
-//   props: ConfigPanelWrapperProps & {
-//     activeVisualization: Visualization;
-//   }
-// ) => {
-//   return (
-//     <Suspense fallback={<LoadingSpinnerWithOverlay />}>
-//       <LayerPanels {...props} />
-//     </Suspense>
-//   );
-// };
-// function fromExcludedClickTarget(event: Event) {
-//   for (
-//     let node: HTMLElement | null = event.target as HTMLElement;
-//     node !== null;
-//     node = node!.parentElement
-//   ) {
-//     if (
-//       node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS) ||
-//       node.classList!.contains('euiBody-hasPortalContent') ||
-//       node.getAttribute('data-euiportal') === 'true'
-//     ) {
-//       return true;
-//     }
-//   }
-//   return false;
-// }
+function fromExcludedClickTarget(event: Event) {
+  for (
+    let node: HTMLElement | null = event.target as HTMLElement;
+    node !== null;
+    node = node!.parentElement
+  ) {
+    if (
+      node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS) ||
+      node.classList!.contains('euiBody-hasPortalContent') ||
+      node.getAttribute('data-euiportal') === 'true'
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 const initialActiveDimensionState = {
   isNew: false,
 };
-
-// let activeDimensionBackup: ActiveDimensionState = initialActiveDimensionState;
 
 export function getConfigPanel(
   coreStart: CoreStart,
@@ -106,7 +74,6 @@ export function getConfigPanel(
     const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
       initialActiveDimensionState
     );
-    // const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
     const [attributes, setAttributes] = useState(props.attributes);
 
     const updateVisualizationState = useCallback(
@@ -142,7 +109,6 @@ export function getConfigPanel(
       },
       [attributes, props]
     );
-    // console.dir(attributes);
 
     const updateAll = useCallback(
       (newState, newVisualizationState) => {
@@ -320,6 +286,9 @@ export function getConfigPanel(
             disabled={false}
             clickOutsideDisables={false}
             onClickOutside={(event) => {
+              if (fromExcludedClickTarget(event)) {
+                return;
+              }
               closeFlyout();
             }}
             onEscapeKey={closeFlyout}
@@ -327,8 +296,10 @@ export function getConfigPanel(
             <EuiFlyout
               type="push"
               ownFocus
-              onClose={() => props.setIsFlyoutVisible?.(false)}
-              aria-labelledby="Edit Lens configuration"
+              onClose={closeFlyout}
+              aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+                defaultMessage: 'Edit configuration',
+              })}
               size="s"
             >
               {children}
@@ -340,12 +311,16 @@ export function getConfigPanel(
       }
     };
 
-    const context = (
+    const content = (
       <>
         {!activeDimension?.activeId && (
           <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
             <EuiTitle size="xs">
-              <h2 id="Edit Lens configuration"> Edit Lens configuration</h2>
+              <h2 id="Edit Lens configuration">
+                {i18n.translate('xpack.lens.config.editLabel', {
+                  defaultMessage: 'Edit configuration',
+                })}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
         )}
@@ -360,7 +335,6 @@ export function getConfigPanel(
                   setState: (payload) => {
                     updateVisualizationState(payload);
                     setActiveDimension(initialActiveDimensionState);
-                    // activeDimensionBackup = initialActiveDimensionState;
                   },
                 }}
               />
@@ -479,7 +453,6 @@ export function getConfigPanel(
                                 }}
                                 onRemoveClick={(id: string) => {
                                   removeDimension({ columnId: id, layerId });
-                                  // removeButtonRef(id);
                                 }}
                                 message={undefined}
                               >
@@ -508,31 +481,6 @@ export function getConfigPanel(
                           })}
                         </>
                       ) : null}
-
-                      {group.fakeFinalAccessor && (
-                        <div
-                          className="lnsLayerPanel__dimension domDragDrop-isDraggable"
-                          css={css`
-                            cursor: default !important;
-                            border-color: transparent !important;
-                            margin-top: ${group.accessors.length ? 8 : 0}px !important;
-                            background-color: ${euiThemeVars.euiColorLightShade} !important;
-                            box-shadow: none !important;
-                          `}
-                        >
-                          <EuiText
-                            size="s"
-                            className="lnsLayerPanel__triggerText"
-                            data-test-subj="lns-fakeDimension"
-                            color={'subdued'}
-                          >
-                            <span className="lnsLayerPanel__triggerTextLabel">
-                              {group.fakeFinalAccessor.label}
-                            </span>
-                          </EuiText>
-                        </div>
-                      )}
-
                       {group.supportsMoreColumns ? (
                         <EmptyDimensionButton
                           activeVisualization={activeVisualization}
@@ -569,11 +517,6 @@ export function getConfigPanel(
                               activeId: id,
                               isNew: !group.supportStaticValue && Boolean(layerDatasource),
                             });
-                            // activeDimensionBackup = {
-                            //   activeGroup: group,
-                            //   activeId: id,
-                            //   isNew: !group.supportStaticValue && Boolean(layerDatasource),
-                            // };
                           }}
                           indexPatterns={dataViews.indexPatterns}
                           onDrop={() => {}}
@@ -715,6 +658,6 @@ export function getConfigPanel(
       </>
     );
 
-    return getWrapper(context);
+    return getWrapper(content);
   };
 }
