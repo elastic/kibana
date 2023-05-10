@@ -30,7 +30,6 @@ import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
 import type { ActionConnector, CaseConnector } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
-import { ConnectorFieldsForm } from '../connectors/fields_form';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
@@ -38,7 +37,9 @@ import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { PushButton } from './push_button';
 import { PushCallouts } from './push_callouts';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
-import { ConnectorFieldsPreviewForm } from '../connectors/fields_previer_form';
+import { ConnectorsForm, FormState } from './connectors_form';
+import { ConnectorFieldsForm } from '../connectors/fields_form';
+import { ConnectorFieldsPreviewForm } from '../connectors/fields_preview_form';
 
 export interface EditConnectorProps {
   caseData: CaseUI;
@@ -47,6 +48,14 @@ export interface EditConnectorProps {
   isLoading: boolean;
   onSubmit: (connector: CaseConnector, onError: () => void, onSuccess: () => void) => void;
 }
+
+const fieldsInitialFormState = {
+  isValid: true,
+  validate: async () => true,
+  getData: () => ({
+    whatever: null,
+  }),
+};
 
 export const EditConnector = React.memo(
   ({
@@ -64,20 +73,22 @@ export const EditConnector = React.memo(
     const [isEdit, setIsEdit] = useState(false);
 
     const { form } = useForm({
-      defaultValue: { connectorId: caseConnectorId, fields: caseConnectorFields },
+      defaultValue: { connectorId: caseConnectorId },
       options: { stripEmptyFields: false },
     });
+
     const { actions } = useApplicationCapabilities();
     const actionsReadCapabilities = actions.read;
 
     const { submit } = form;
-    const [{ connectorId: currentConnectorId }] = useFormData<{
+    const [formData] = useFormData<{
       connectorId: string;
     }>({ form });
 
+    const currentConnectorId = formData.connectorId;
     const currentConnector = caseConnectors[currentConnectorId] ?? null;
     const currentActionConnector = getConnectorById(currentConnectorId, supportedActionConnectors);
-    const currentConnectorFields = caseConnectors[currentConnectorId]?.fields ?? {};
+    const currentConnectorFields = caseConnectors[currentConnectorId]?.fields;
 
     /**
      *  only enable the save button if changes were made to the previous selected
@@ -93,23 +104,29 @@ export const EditConnector = React.memo(
       (!isDefaultNoneConnectorSelected && currentConnector?.id !== caseConnectorId) ||
       !deepEqual(currentConnectorFields, caseConnectorFields);
 
+    const [formState, setFormState] = useState<FormState>(fieldsInitialFormState);
+
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
+      const areFieldsValid = formState.isValid ?? (await formState.validate());
+      console.log('areFieldsValid', areFieldsValid);
+      console.log('Form data', formState.getData());
+      console.log('newData', newData);
 
-      if (isValid && newData.connectorId) {
-        const connector = getConnectorById(newData.connectorId, supportedActionConnectors);
-        const connectorToUpdate = connector
-          ? normalizeActionConnector(connector)
-          : getNoneConnector();
+      // if (isValid && newData.connectorId) {
+      //   const connector = getConnectorById(newData.connectorId, supportedActionConnectors);
+      //   const connectorToUpdate = connector
+      //     ? normalizeActionConnector(connector)
+      //     : getNoneConnector();
 
-        const connectorWithFields = {
-          ...connectorToUpdate,
-          fields: newData.fields,
-        } as CaseConnector;
+      //   const connectorWithFields = {
+      //     ...connectorToUpdate,
+      //     // fields: newData.fields,
+      //   } as CaseConnector;
 
-        onSubmit(connectorWithFields, noop, noop);
-        setIsEdit(false);
-      }
+      //   onSubmit(connectorWithFields, noop, noop);
+      //   setIsEdit(false);
+      // }
     }, [submit, supportedActionConnectors, onSubmit]);
 
     const onEditClick = useCallback(() => setIsEdit(true), []);
@@ -187,11 +204,11 @@ export const EditConnector = React.memo(
                 />
               </EuiFlexItem>
             )}
-            <Form form={form}>
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="none" direction="row">
-                    <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="none" direction="row">
+                  <EuiFlexItem>
+                    <Form form={form}>
                       <UseField
                         path="connectorId"
                         config={connectorIdConfig}
@@ -206,26 +223,31 @@ export const EditConnector = React.memo(
                           isLoading,
                         }}
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-                  {!isEdit && !actionsReadCapabilities && (
-                    <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
-                      <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
-                    </EuiText>
-                  )}
-                  {isEdit ? (
-                    <ConnectorFieldsForm connector={currentActionConnector} />
-                  ) : (
-                    <ConnectorFieldsPreviewForm
-                      connector={currentActionConnector}
-                      fields={currentConnectorFields}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Form>
+                    </Form>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
+                {!isEdit && !actionsReadCapabilities && (
+                  <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
+                    <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+                  </EuiText>
+                )}
+                {!isEdit ? (
+                  <ConnectorFieldsPreviewForm
+                    connector={currentActionConnector}
+                    fields={currentConnectorFields}
+                  />
+                ) : (
+                  <ConnectorsForm
+                    key={currentConnectorId}
+                    currentActionConnector={currentActionConnector}
+                    currentConnectorFields={currentConnectorFields}
+                    onChange={setFormState}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {isEdit && (
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
