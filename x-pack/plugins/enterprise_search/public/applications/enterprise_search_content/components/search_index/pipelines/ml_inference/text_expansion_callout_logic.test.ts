@@ -28,6 +28,7 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
+  isModelRunningSingleThreaded: false,
   isModelStarted: false,
   isPollingTextExpansionModelActive: false,
   isStartButtonDisabled: false,
@@ -135,6 +136,9 @@ describe('TextExpansionCalloutLogic', () => {
       const data = {
         deploymentState: MlModelDeploymentState.Downloading,
         modelId: 'mock-model-id',
+        allocationCount: 1,
+        nodeAllocationCount: 1,
+        threadsPerAllocation: 1,
       };
 
       it('starts polling when the model is downloading and polling is not active', () => {
@@ -170,6 +174,9 @@ describe('TextExpansionCalloutLogic', () => {
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess({
           deploymentState: MlModelDeploymentState.Downloaded,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
 
         expect(TextExpansionCalloutLogic.actions.stopPollingTextExpansionModel).toHaveBeenCalled();
@@ -291,6 +298,9 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(true);
       });
@@ -298,6 +308,9 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Started,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(false);
       });
@@ -308,6 +321,9 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Downloaded,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(true);
       });
@@ -315,6 +331,9 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(false);
       });
@@ -325,6 +344,9 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(true);
       });
@@ -332,6 +354,9 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: 'mock-model-id',
+          allocationCount: 1,
+          nodeAllocationCount: 1,
+          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(false);
       });

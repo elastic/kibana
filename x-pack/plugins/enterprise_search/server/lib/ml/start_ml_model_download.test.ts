@@ -50,9 +50,11 @@ describe('startMlModelDownload', () => {
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
         modelId: knownModelName,
+        allocationCount: 1,
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
+        threadsPerAllocation: 1,
       })
     );
 
@@ -71,18 +73,22 @@ describe('startMlModelDownload', () => {
         Promise.resolve({
           deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: knownModelName,
+          allocationCount: 1,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       )
       .mockReturnValueOnce(
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Downloading,
           modelId: knownModelName,
+          allocationCount: 1,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       );
 

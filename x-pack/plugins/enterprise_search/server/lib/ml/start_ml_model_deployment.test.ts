@@ -51,9 +51,11 @@ describe('startMlModelDeployment', () => {
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
         modelId: productionModelName,
+        allocationCount: 1,
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
+        threadsPerAllocation: 1,
       })
     );
 
@@ -70,9 +72,11 @@ describe('startMlModelDeployment', () => {
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
         modelId: snapshotModelName,
+        allocationCount: 1,
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
+        threadsPerAllocation: 1,
       })
     );
 
@@ -91,18 +95,22 @@ describe('startMlModelDeployment', () => {
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Downloaded,
           modelId: productionModelName,
+          allocationCount: 1,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       )
       .mockReturnValueOnce(
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Starting,
           modelId: productionModelName,
+          allocationCount: 1,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
+          threadsPerAllocation: 1,
         })
       );
     mockTrainedModelsProvider.startTrainedModelDeployment.mockImplementation(async () => {});
