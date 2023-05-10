@@ -778,6 +778,14 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
       });
 
+      it('should NOT allow to pass non-valid fields query parameter', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: ['foobar'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
       // This test ensures that the user is not allowed to define the namespaces query param
       // so she cannot search across spaces
       it('should NOT allow to pass a namespaces query parameter', async () => {
