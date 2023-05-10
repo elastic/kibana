@@ -54,11 +54,11 @@ export const getGroupingQuery = ({
     groupByField: {
       type: 'keyword',
       script: {
-        source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueValue}') } else { emit(doc['${groupByField}'].join('${uniqueValue}'))}`,
+        source:
+          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
         params: {
-          // this does nothing for our query, but we need it to know what group is
-          // selected in the query to store in `queriedGroup` on the security solution to prevent a little race condition
           selectedGroup: groupByField,
+          uniqueValue,
         },
       },
     },
