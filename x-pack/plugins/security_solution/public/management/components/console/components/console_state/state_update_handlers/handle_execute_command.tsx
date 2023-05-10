@@ -344,7 +344,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 break;
 
               case 'truthy':
-                if (typeof argValue !== 'number' && !argValue) {
+                if (!argValue) {
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 }
                 break;
