@@ -9,7 +9,7 @@
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
 import './style.scss';
-import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
+import React, { Fragment, Ref, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyoutProps,
   EuiTitle,
@@ -27,6 +27,7 @@ import {
   useEuiTheme,
   EuiButtonIcon,
   EuiText,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -35,13 +36,14 @@ import { DocumentationCards } from './documentation_cards';
 import { Contact } from './contact';
 import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
+import ReactDOM from 'react-dom';
 
 export const HelpCenterFlyout = (
-  props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }
+  props: Partial<EuiFlyoutProps> & { headerRef: HTMLElement; showPlainSpinner: boolean }
 ) => {
   const { setFlyoutVisible, kibanaVersion } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-  const { showPlainSpinner, ...rest } = props;
+  const { showPlainSpinner, headerRef, ...rest } = props;
 
   const euiThemeContext = useEuiTheme();
   const euiTheme = euiThemeContext.euiTheme;
@@ -112,37 +114,37 @@ export const HelpCenterFlyout = (
       </EuiTab>
     ));
   };
-
-  return (
-    <EuiPortal>
-      <div
+  console.log('RENDER', headerRef);
+  return headerRef ? (
+    <EuiPortal insert={{ sibling: headerRef, position: 'before' }}>
+      <EuiFocusTrap
         css={css`
-          width: 100%;
-          height: calc(100% - 96px);
-          position: fixed;
-          top: 96px;
-          left: 0px;
-          padding: 20px;
-          z-index: 1000;
+          height: 1px;
+          position: absolute;
+          top: -1;
+          overflow: visible;
         `}
       >
-        <Draggable handle=".handle" bounds="parent" positionOffset={{ x: 0, y: 0 }}>
+        <Draggable
+          handle=".handle"
+          bounds="#kibana-body"
+          // positionOffset={{ x: 0, y: 20 }}
+          defaultPosition={{ x: headerRef.clientWidth - 425, y: 45 }}
+          css={css`
+            z-index: 1000;
+          `}
+        >
           <ResizableBox
             width={400}
             height={400}
             css={css`
-              position: absolute;
-              top: 0px;
-              left: calc(100% - 400px);
-
-              min-height: 100px;
-              max-height: 100%;
-              max-width: 100%;
+              z-index: 1000;
             `}
           >
             <EuiPanel
               paddingSize="l"
               css={css`
+                z-index: 1000;
                 width: 100%;
                 height: 100%;
 
@@ -163,6 +165,7 @@ export const HelpCenterFlyout = (
                 aria-label="Help"
                 display={'fill'}
                 css={css`
+                  z-index: 1000;
                   position: fixed;
                   top: -30px;
                   left: 0px;
@@ -182,6 +185,7 @@ export const HelpCenterFlyout = (
                 display={'fill'}
                 onClick={closeFlyout}
                 css={css`
+                  z-index: 1000;
                   position: fixed;
                   top: -30px;
                   right: 0px;
@@ -213,7 +217,9 @@ export const HelpCenterFlyout = (
             </EuiPanel>
           </ResizableBox>
         </Draggable>
-      </div>
+      </EuiFocusTrap>
     </EuiPortal>
+  ) : (
+    <></>
   );
 };

@@ -32,6 +32,13 @@ export interface Props {
 export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [helpFetchResult, setHelpFetchResult] = useState<void | FetchResult | null>(null);
+  const [topNav, setTopNav] = useState<HTMLElement>();
+
+  useEffect(() => {
+    setTopNav(document.querySelectorAll<HTMLElement>('#kibana-body')[0]);
+    // console.log(topNav);
+  }, []);
+
   const hasCustomBranding = useObservable(hasCustomBranding$, false);
   const kibanaVersion = helpCenterApi.kibanaVersion;
   useEffect(() => {
@@ -49,6 +56,8 @@ export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props
   const showFlyout = useCallback(() => {
     setFlyoutVisible(!flyoutVisible);
   }, [flyoutVisible]);
+
+  console.log(topNav);
 
   return (
     <HelpCenterContext.Provider
@@ -70,8 +79,9 @@ export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props
         >
           <EuiIcon type="help" size="m" />
         </EuiHeaderSectionItemButton>
-        {flyoutVisible ? (
+        {flyoutVisible && topNav ? (
           <HelpCenterFlyout
+            headerRef={topNav}
             focusTrapProps={{ shards: [buttonRef] }}
             showPlainSpinner={hasCustomBranding}
           />
