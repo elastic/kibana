@@ -68,7 +68,7 @@ export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!addToTimelineProps) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -104,7 +104,7 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
   if (!fieldAndValueValid(key, value)) {
-    return <></>;
+    return null;
   }
 
   const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
@@ -163,7 +163,7 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
   if (!fieldAndValueValid(key, value)) {
-    return <></>;
+    return null;
   }
 
   const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
@@ -214,7 +214,7 @@ export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!addToTimelineProps) {
-    return <></>;
+    return null;
   }
   addToTimelineProps.Component = Component;
 
