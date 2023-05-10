@@ -87,7 +87,9 @@ describe('useCreateAttachments', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'createAttachments').mockRejectedValue(new Error('usePostCase: Test error'));
+    jest
+      .spyOn(api, 'createAttachments')
+      .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 
     const { waitForNextUpdate, result } = renderHook(() => useCreateAttachments(), {
       wrapper: appMockRender.AppWrapper,
