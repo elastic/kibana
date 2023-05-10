@@ -19,6 +19,7 @@ const ruleActionSchema = schema.object({
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),
+  chainAfter: schema.maybe(schema.string()),
   frequency: schema.maybe(
     schema.object({
       summary: schema.boolean(),

@@ -17,6 +17,8 @@ import {
   FakeRawRequest,
   SavedObjectReference,
   ISavedObjectsRepository,
+  SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -43,6 +45,7 @@ import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_sav
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import { ActionTypeDisabledError } from './errors';
+import { ExecutionEnqueuer } from '../create_execute_function';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -51,6 +54,8 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   savedObjectsRepository: ISavedObjectsRepository;
+  executionEnqueuer: ExecutionEnqueuer<void>;
+  getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
 }
 
 export class TaskRunnerFactory {
@@ -84,6 +89,8 @@ export class TaskRunnerFactory {
       spaceIdToNamespace,
       basePathService,
       savedObjectsRepository,
+      executionEnqueuer,
+      getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
     const taskInfo = {
@@ -106,6 +113,7 @@ export class TaskRunnerFactory {
             consumer,
             source,
             relatedSavedObjects,
+            chainnedActions,
           },
           references,
         } = await getActionTaskParams(
@@ -151,6 +159,12 @@ export class TaskRunnerFactory {
             new Error(executorResult.message),
             executorResult.retry as boolean | Date
           );
+        } else if (chainnedActions) {
+          // Continue the chain
+          const promises = chainnedActions.map((action) => {
+            return executionEnqueuer(getUnsecuredSavedObjectsClient(request), action);
+          });
+          await Promise.all(promises);
         }
       },
       cancel: async () => {

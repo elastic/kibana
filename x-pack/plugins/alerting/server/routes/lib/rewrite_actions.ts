@@ -15,20 +15,23 @@ export const rewriteActionsReq = (
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
-    return {
-      ...action,
-      ...(frequency
-        ? {
-            frequency: {
-              ...omit(frequency, 'notify_when'),
-              notifyWhen: frequency.notify_when,
-            },
-          }
-        : {}),
-      ...(alertsFilter ? { alertsFilter } : {}),
-    };
-  });
+  return actions.map(
+    ({ frequency, alerts_filter: alertsFilter, chain_after: chainAfter, ...action }) => {
+      return {
+        ...action,
+        ...(frequency
+          ? {
+              frequency: {
+                ...omit(frequency, 'notify_when'),
+                notifyWhen: frequency.notify_when,
+              },
+            }
+          : {}),
+        ...(chainAfter ? { chainAfter } : {}),
+        ...(alertsFilter ? { alertsFilter } : {}),
+      };
+    }
+  );
 };
 
 export const rewriteActionsRes = (actions?: RuleAction[]) => {
@@ -37,10 +40,11 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
     notify_when: notifyWhen,
   });
   if (!actions) return [];
-  return actions.map(({ actionTypeId, frequency, alertsFilter, ...action }) => ({
+  return actions.map(({ actionTypeId, frequency, alertsFilter, chainAfter, ...action }) => ({
     ...action,
     connector_type_id: actionTypeId,
     ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+    ...(chainAfter ? { chain_after: chainAfter } : {}),
     ...(alertsFilter
       ? {
           alerts_filter: alertsFilter,

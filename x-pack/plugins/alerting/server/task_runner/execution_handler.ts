@@ -255,7 +255,7 @@ export class ExecutionHandler<
               recovered: summarizedAlerts.recovered.count,
             },
           });
-        } else {
+        } else if (!action.chainAfter) {
           const executableAlert = alert!;
           const actionToRun = {
             ...action,
@@ -465,7 +465,7 @@ export class ExecutionHandler<
     } = this;
 
     const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-    return {
+    const result = {
       id: action.id,
       params: action.params,
       spaceId,
@@ -484,6 +484,18 @@ export class ExecutionHandler<
           typeId: this.ruleType.id,
         },
       ],
+    };
+    return {
+      ...result,
+      chainnedActions: this.rule.actions
+        .filter((a) => a.chainAfter === action.uuid)
+        .map((a) => ({
+          ...result,
+          id: a.id,
+          params: a.params,
+          // TODO: Recursion
+          chainnedActions: [],
+        })),
     };
   }
 

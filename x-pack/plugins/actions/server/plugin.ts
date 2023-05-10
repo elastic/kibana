@@ -504,6 +504,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
+      executionEnqueuer: createExecutionEnqueuerFunction({
+        taskManager: plugins.taskManager,
+        actionTypeRegistry: actionTypeRegistry!,
+        isESOCanEncrypt: isESOCanEncrypt!,
+        preconfiguredActions,
+      }),
+      getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
+        this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       savedObjectsRepository: core.savedObjects.createInternalRepository([
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

@@ -27,6 +27,7 @@ export const actionsSchema = schema.arrayOf(
       })
     ),
     uuid: schema.maybe(schema.string()),
+    chain_after: schema.maybe(schema.string()),
     alerts_filter: schema.maybe(
       schema.object({
         query: schema.maybe(

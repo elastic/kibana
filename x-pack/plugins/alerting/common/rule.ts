@@ -109,6 +109,7 @@ export interface RuleAction {
   group: string;
   id: string;
   actionTypeId: string;
+  chainAfter?: string;
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;

@@ -30,6 +30,7 @@ export interface ExecuteOptions
   spaceId: string;
   apiKey: string | null;
   executionId: string;
+  chainnedActions: ExecuteOptions[];
 }
 
 interface ActionTaskParams
@@ -70,6 +71,7 @@ export function createExecutionEnqueuerFunction({
       source,
       apiKey,
       executionId,
+      chainnedActions,
       relatedSavedObjects,
     }: ExecuteOptions
   ) {
@@ -115,6 +117,11 @@ export function createExecutionEnqueuerFunction({
         apiKey,
         executionId,
         consumer,
+        chainnedActions: chainnedActions.map((a) => ({
+          ...a,
+          actionId: id,
+          ...(source ? { source: source.type } : {}),
+        })),
         relatedSavedObjects: relatedSavedObjectWithRefs,
         ...(source ? { source: source.type } : {}),
       },
@@ -202,6 +209,7 @@ export function createBulkExecutionEnqueuerFunction({
           apiKey: actionToExecute.apiKey,
           executionId: actionToExecute.executionId,
           consumer: actionToExecute.consumer,
+          chainnedActions: actionToExecute.chainnedActions,
           relatedSavedObjects: relatedSavedObjectWithRefs,
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },

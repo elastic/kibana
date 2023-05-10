@@ -58,23 +58,26 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    ...(frequency
-      ? {
-          frequency: {
-            summary: frequency.summary,
-            notify_when: frequency.notifyWhen,
-            throttle: frequency.throttle,
-          },
-        }
-      : {}),
-    ...(uuid && { uuid }),
-    ...(alertsFilter && { alerts_filter: alertsFilter }),
-  })),
+  actions: actions.map(
+    ({ group, id, actionTypeId, params, frequency, uuid, chainAfter, alertsFilter }) => ({
+      group,
+      id,
+      params,
+      connector_type_id: actionTypeId,
+      ...(frequency
+        ? {
+            frequency: {
+              summary: frequency.summary,
+              notify_when: frequency.notifyWhen,
+              throttle: frequency.throttle,
+            },
+          }
+        : {}),
+      ...(uuid && { uuid }),
+      ...(chainAfter && { chain_after: chainAfter }),
+      ...(alertsFilter && { alerts_filter: alertsFilter }),
+    })
+  ),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),

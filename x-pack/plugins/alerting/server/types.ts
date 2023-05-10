@@ -300,6 +300,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
   group: string;
   actionRef: string;
+  chainAfter?: string;
   actionTypeId: string;
   params: RuleActionParams;
   frequency?: {
