@@ -9,12 +9,11 @@ import { secondsToCronFormatter } from '../formatting_utils';
 import { ICMPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
-import { stringToJsonFormatter } from '../formatting_utils';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 
 export const icmpFormatters: ICMPFormatMap = {
-  [ConfigKey.HOSTS]: stringToJsonFormatter,
+  [ConfigKey.HOSTS]: null,
   [ConfigKey.WAIT]: secondsToCronFormatter,
   [ConfigKey.MODE]: null,
   [ConfigKey.IPV4]: null,
