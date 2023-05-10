@@ -18,8 +18,8 @@ export const plugin = () => {
 export type {
   ObservabilityPageTemplateProps,
   LazyObservabilityPageTemplateProps,
+  NavigationSection,
 } from './components/page_template/page_template';
-
 export type { NavigationEntry } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
 export { useObservabilityTourContext } from './components/tour';
@@ -34,6 +34,8 @@ export {
 } from './components/section/section';
 export type { SectionLinkProps } from './components/section/section';
 
+export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_view_lazy';
+
 export {
   observabilityFeatureId,
   observabilityAppId,
@@ -41,9 +43,10 @@ export {
   sloFeatureId,
 } from '../common';
 
-export { useTheme } from './hooks/use_theme';
 export { InspectorContextProvider } from './contexts/inspector/inspector_context';
 export { useInspectorContext } from './contexts/inspector/use_inspector_context';
+
+export { useTheme } from './hooks/use_theme';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export { useKibanaSpace } from './hooks/use_kibana_space';
