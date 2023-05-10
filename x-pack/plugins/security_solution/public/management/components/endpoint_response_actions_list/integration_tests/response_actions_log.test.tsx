@@ -796,10 +796,6 @@ describe('Response actions history', () => {
       let action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>;
 
       beforeEach(async () => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: getEndpointAuthzInitialStateMock(),
-        });
-
         action = new EndpointActionGenerator().generateActionDetails<
           ResponseActionUploadOutputContent,
           ResponseActionUploadParameters
@@ -816,15 +812,6 @@ describe('Response actions history', () => {
           ...getBaseMockedActionList(),
           data: actionListApiResponse,
         });
-
-        mockUseGetActionDetails = {
-          isFetching: false,
-          isFetched: true,
-          error: null,
-          data: {
-            data: action,
-          },
-        };
       });
 
       it('should display pending output if action is not complete yet', () => {
