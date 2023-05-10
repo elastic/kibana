@@ -27,7 +27,7 @@ describe('AnalyticsCollectionExplorerTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    setMockValues({ items: [], selectedTable: ExploreTables.TopClicked });
+    setMockValues({ items: [], selectedTable: ExploreTables.Clicked });
     setMockActions(mockActions);
   });
 
@@ -46,7 +46,7 @@ describe('AnalyticsCollectionExplorerTable', () => {
   it('should call setSelectedTable when click on a tab', () => {
     const tabs = shallow(<AnalyticsCollectionExplorerTable />).find('EuiTab');
 
-    expect(tabs.length).toBe(4);
+    expect(tabs.length).toBe(5);
 
     tabs.at(2).simulate('click');
     expect(mockActions.setSelectedTable).toHaveBeenCalledWith(ExploreTables.WorsePerformers, {

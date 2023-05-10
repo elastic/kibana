@@ -13,9 +13,10 @@ import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
   ADD_CONTROLS,
   ADD_CONTROLS_MAX_LIMIT,
-  DISCARD_CHANGES,
   PENDING_CHANGES_REMINDER,
+  SAVE_CHANGES,
 } from './translations';
+import { TEST_IDS } from './constants';
 
 interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;
@@ -29,10 +30,11 @@ export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
         size="s"
         iconSize="m"
         display="base"
-        data-test-subj={'filter-group__add-control'}
+        aria-label={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}
+        data-test-subj={TEST_IDS.ADD_CONTROL}
         onClick={onClick}
         {...rest}
-        iconType={'plusInCircle'}
+        iconType="plusInCircle"
       />
     </EuiToolTip>
   );
@@ -54,12 +56,13 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
     <EuiPopover
       button={
         <EuiButtonIcon
+          aria-label={SAVE_CHANGES}
           size="s"
           iconSize="m"
           display="base"
-          color={'primary'}
-          iconType={'save'}
-          data-test-subj={'filter-group__save'}
+          color="primary"
+          iconType="save"
+          data-test-subj={TEST_IDS.SAVE_CONTROL}
           onClick={onClick}
           onFocus={openPendingChangesPopover}
           onBlur={closePendingChangesPopover}
@@ -69,36 +72,16 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
         />
       }
       isOpen={pendingChangesPopoverOpen}
-      anchorPosition={'upCenter'}
+      anchorPosition="upCenter"
       panelPaddingSize="none"
       closePopover={closePendingChangesPopover}
       panelProps={{
-        'data-test-subj': 'filter-group__save-popover',
+        'data-test-subj': TEST_IDS.SAVE_CHANGE_POPOVER,
       }}
     >
       <div style={{ maxWidth: '200px' }}>
         <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" size="s" />
       </div>
     </EuiPopover>
-  );
-};
-
-interface DiscardChangesProps {
-  onClick: () => void;
-}
-
-export const DiscardChanges: FC<DiscardChangesProps> = ({ onClick }) => {
-  return (
-    <EuiToolTip content={DISCARD_CHANGES} position="top" display="block">
-      <EuiButtonIcon
-        size="s"
-        iconSize="m"
-        display="base"
-        color="danger"
-        iconType={'minusInCircle'}
-        data-test-subj={'filter-group__discard'}
-        onClick={onClick}
-      />
-    </EuiToolTip>
   );
 };

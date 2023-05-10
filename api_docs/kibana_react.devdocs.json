@@ -1393,6 +1393,18 @@
             "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
           },
           {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
+          },
+          {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
           },

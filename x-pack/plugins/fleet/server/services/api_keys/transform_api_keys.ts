@@ -96,7 +96,6 @@ export async function generateTransformSecondaryAuthHeaders({
         role_descriptors: {},
       }
     );
-
     logger.debug(`Created api_key name: ${name}`);
     let encodedApiKey: TransformAPIKey['encoded'] | null = null;
 

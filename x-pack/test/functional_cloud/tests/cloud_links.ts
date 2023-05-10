@@ -30,10 +30,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('The button "Setup guides" is loaded', async () => {
-      expect(await find.byCssSelector('[data-test-subj="guideButtonRedirect"]')).to.not.be(null);
-      const cloudLink = await find.byLinkText('Setup guides');
-      expect(cloudLink).to.not.be(null);
+    describe('Guided onboarding', () => {
+      it('The button "Setup guides" is loaded', async () => {
+        expect(await find.byCssSelector('[data-test-subj="guideButtonRedirect"]')).to.not.be(null);
+        const cloudLink = await find.byLinkText('Setup guides');
+        expect(cloudLink).to.not.be(null);
+      });
+
+      it('The help link "Setup guides" is added', async () => {
+        await PageObjects.common.clickAndValidate(
+          'helpMenuButton',
+          'cloudOnboardingSetupGuideLink'
+        );
+        expect(
+          await find.byCssSelector('[data-test-subj="cloudOnboardingSetupGuideLink"]')
+        ).to.not.be(null);
+      });
     });
 
     it('"Manage this deployment" is appended to the nav list', async () => {

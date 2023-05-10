@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
@@ -39,6 +39,7 @@ import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/compone
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -134,10 +135,13 @@ export const getTableColumns: GetTableColumns = ({
 export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexName }) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID);
+  const { filterQuery } = useGlobalFilterQuery();
+
   const { items, isLoading, updatedAt } = useRuleAlertsItems({
     signalIndexName,
     queryId: DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID,
     skip: !toggleStatus,
+    filterQuery,
   });
 
   const openAlertsPageWithFilter = useNavigateToAlertsPageWithFilters();
@@ -153,8 +157,12 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   const navigateToAlerts = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.alerts });
-  }, [navigateTo]);
+    openAlertsPageWithFilter({
+      title: i18n.OPEN_IN_ALERTS_TITLE_STATUS,
+      selectedOptions: ['open'],
+      fieldName: ALERT_WORKFLOW_STATUS,
+    });
+  }, [openAlertsPageWithFilter]);
 
   const columns = useMemo(
     () => getTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage }),

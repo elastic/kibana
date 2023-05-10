@@ -80,7 +80,6 @@ export interface UsageStats {
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
-  'discover:showLegacyFieldTopValues': boolean;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -142,6 +141,7 @@ export interface UsageStats {
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
   'metrics:allowCheckingForFailedShards': boolean;
+  'observability:syntheticsThrottlingEnabled': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;

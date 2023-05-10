@@ -7,12 +7,15 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   ConnectorConfiguration,
   ConnectorStatus,
   Dependency,
   DependencyLookup,
   DisplayType,
+  FieldType,
   SelectOption,
 } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
@@ -59,6 +62,7 @@ export interface ConfigEntry {
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
   display: DisplayType;
+  is_valid: boolean;
   key: string;
   label: string;
   options: SelectOption[];
@@ -66,7 +70,10 @@ export interface ConfigEntry {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  type: FieldType;
   ui_restrictions: string[];
+  validation_errors: string[];
+  validations?: string[];
   value: string | number | boolean | null;
 }
 
@@ -86,7 +93,9 @@ function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): Co
     .map(
       (key) =>
         ({
+          is_valid: true,
           key,
+          validation_errors: [],
           ...config[key],
         } as ConfigEntry)
     )
@@ -114,18 +123,70 @@ function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): Co
 
   return sortedConfig.filter(
     (configEntry) =>
-      configEntry.ui_restrictions.length <= 0 &&
+      (configEntry.ui_restrictions ?? []).length <= 0 &&
       dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
   );
 }
 
-export function ensureStringType(value: string | number | boolean | null): string {
-  return String(value);
+function validateConnectorConfiguration(config: ConfigEntry[]): ConfigEntry[] {
+  return config.map((configEntry) => {
+    const label = configEntry.label;
+
+    configEntry.validation_errors = [];
+
+    if (configEntry.type === FieldType.INTEGER && !validIntInput(configEntry.value)) {
+      configEntry.validation_errors.push(
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.config.invalidInteger',
+          {
+            defaultMessage: '{label} must be an integer.',
+            values: { label },
+          }
+        )
+      );
+    }
+
+    configEntry.is_valid = configEntry.validation_errors.length <= 0;
+
+    return configEntry;
+  });
 }
 
-export function ensureNumberType(value: string | number | boolean | null): number {
-  const numberValue = Number(value);
-  return isNaN(numberValue) ? 0 : numberValue;
+function validIntInput(value: string | number | boolean | null): boolean {
+  // reject non integers (including x.0 floats), but don't validate if empty
+  return (value !== null || value !== '') &&
+    (isNaN(Number(value)) ||
+      !Number.isSafeInteger(Number(value)) ||
+      ensureStringType(value).indexOf('.') >= 0)
+    ? false
+    : true;
+}
+
+function ensureCorrectTyping(
+  type: FieldType,
+  value: string | number | boolean | null
+): string | number | boolean | null {
+  switch (type) {
+    case FieldType.INTEGER:
+      return validIntInput(value) ? ensureIntType(value) : value;
+    case FieldType.BOOLEAN:
+      return ensureBooleanType(value);
+    default:
+      return ensureStringType(value);
+  }
+}
+
+export function ensureStringType(value: string | number | boolean | null): string {
+  return value !== null ? String(value) : '';
+}
+
+export function ensureIntType(value: string | number | boolean | null): number | null {
+  // int is null-safe to prevent empty values from becoming zeroes
+  if (value === null || value === '') {
+    return null;
+  }
+
+  return parseInt(String(value), 10);
 }
 
 export function ensureBooleanType(value: string | number | boolean | null): boolean {
@@ -136,6 +197,10 @@ export function dependenciesSatisfied(
   dependencies: Dependency[],
   dependencyLookup: DependencyLookup
 ): boolean {
+  if (!dependencies) {
+    return true;
+  }
+
   for (const dependency of dependencies) {
     if (dependency.value !== dependencyLookup[dependency.field]) {
       return false;
@@ -265,8 +330,10 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            type,
             // eslint-disable-next-line @typescript-eslint/naming-convention
             ui_restrictions,
+            validations,
             value,
           }
         ) => ({
@@ -281,8 +348,10 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            type,
             ui_restrictions,
-            value,
+            validations: validations ?? [],
+            value: ensureCorrectTyping(type, value),
           },
         }),
         setLocalConfigState: (_, { configState }) => configState,
@@ -303,7 +372,10 @@ export const ConnectorConfigurationLogic = kea<
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) => sortAndFilterConnectorConfiguration(configState),
+      (configState) => {
+        const config = sortAndFilterConnectorConfiguration(configState);
+        return validateConnectorConfiguration(config);
+      },
     ],
   }),
 });

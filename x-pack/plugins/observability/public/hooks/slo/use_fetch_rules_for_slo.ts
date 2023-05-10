@@ -77,8 +77,9 @@ export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResp
           // ignore error for retrieving slos
         }
       },
-      enabled: Boolean(sloIds),
+      enabled: Boolean(sloIds?.length),
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
     }
   );
 

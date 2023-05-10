@@ -30,6 +30,7 @@ describe('Stage: init', () => {
     retryDelay: 0,
     retryCount: 0,
     logs: [],
+    skipDocumentMigration: false,
     ...parts,
   });
 
@@ -38,7 +39,7 @@ describe('Stage: init', () => {
       aliases: {},
       mappings: {
         properties: {},
-        _meta: { mappingVersions: { foo: 1, bar: 1 } },
+        _meta: { mappingVersions: { foo: '10.1.0', bar: '10.1.0' } },
       },
       settings: {},
     },
@@ -184,7 +185,7 @@ describe('Stage: init', () => {
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
           additiveMappingChanges: { someToken: {} },
-          newIndexCreation: false,
+          skipDocumentMigration: false,
         })
       );
     });
@@ -200,7 +201,7 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: greater`,
+        `INIT: mapping version check result: greater`,
       ]);
     });
   });
@@ -223,7 +224,7 @@ describe('Stage: init', () => {
           controlState: 'UPDATE_ALIASES',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
-          newIndexCreation: false,
+          skipDocumentMigration: false,
         })
       );
     });
@@ -245,7 +246,7 @@ describe('Stage: init', () => {
           controlState: 'INDEX_STATE_UPDATE_DONE',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
-          newIndexCreation: false,
+          skipDocumentMigration: false,
         })
       );
     });
@@ -261,13 +262,13 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: equal`,
+        `INIT: mapping version check result: equal`,
       ]);
     });
   });
 
   describe('when checkVersionCompatibility returns `lesser`', () => {
-    it('INIT -> FATAL', () => {
+    it('INIT -> INDEX_STATE_UPDATE_DONE', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -280,8 +281,7 @@ describe('Stage: init', () => {
 
       expect(newState).toEqual(
         expect.objectContaining({
-          controlState: 'FATAL',
-          reason: 'Downgrading model version is currently unsupported',
+          controlState: 'INDEX_STATE_UPDATE_DONE',
         })
       );
     });
@@ -297,7 +297,7 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: lesser`,
+        `INIT: mapping version check result: lesser`,
       ]);
     });
   });
@@ -333,7 +333,7 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: conflict`,
+        `INIT: mapping version check result: conflict`,
       ]);
     });
   });

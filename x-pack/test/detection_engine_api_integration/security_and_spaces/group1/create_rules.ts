@@ -123,11 +123,14 @@ export default ({ getService }: FtrProviderContext) => {
          this pops up again elsewhere.
         */
         it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-          const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(simpleRule)
+            .send(rule)
             .expect(200);
 
           await waitForRuleSuccess({ supertest, log, id: body.id });
@@ -161,11 +164,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
-          const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send(simpleRule)
+            .send(rule)
             .expect(200);
 
           await waitForRuleSuccess({ supertest, log, id: body.id });

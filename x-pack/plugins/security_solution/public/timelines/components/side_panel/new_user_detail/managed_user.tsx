@@ -29,6 +29,7 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import type { ManagedUserData } from './types';
 import { INSTALL_INTEGRATION_HREF, MANAGED_USER_QUERY_ID, ONE_WEEK_IN_HOURS } from './constants';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
+import { useAppUrl } from '../../../../common/lib/kibana';
 
 export const ManagedUser = ({
   managedUser,
@@ -49,8 +50,14 @@ export const ManagedUser = ({
     () => getManagedUserTableColumns(contextID, isDraggable),
     [isDraggable, contextID]
   );
+  const { getAppUrl } = useAppUrl();
 
-  if (!managedUser.isIntegrationEnabled) {
+  const installedIntegrationHref = useMemo(
+    () => getAppUrl({ appId: 'integrations', path: INSTALL_INTEGRATION_HREF }),
+    [getAppUrl]
+  );
+
+  if (!managedUser.isLoading && !managedUser.isIntegrationEnabled) {
     return (
       <>
         <EuiTitle size="s">
@@ -62,7 +69,7 @@ export const ManagedUser = ({
             title={<h2>{i18n.NO_ACTIVE_INTEGRATION_TITLE}</h2>}
             body={<p>{i18n.NO_ACTIVE_INTEGRATION_TEXT}</p>}
             actions={
-              <EuiButton fill href={INSTALL_INTEGRATION_HREF}>
+              <EuiButton fill href={installedIntegrationHref}>
                 {i18n.ADD_EXTERNAL_INTEGRATION_BUTTON}
               </EuiButton>
             }

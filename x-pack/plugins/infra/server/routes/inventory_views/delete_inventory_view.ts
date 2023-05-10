@@ -27,7 +27,7 @@ export const initDeleteInventoryViewRoute = ({
     },
     async (_requestContext, request, response) => {
       const { params } = request;
-      const { inventoryViews } = (await getStartServices())[2];
+      const [, , { inventoryViews }] = await getStartServices();
       const inventoryViewsClient = inventoryViews.getScopedClient(request);
 
       try {

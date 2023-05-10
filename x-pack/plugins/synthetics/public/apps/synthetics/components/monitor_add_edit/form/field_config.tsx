@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {
+  EuiIcon,
   EuiCode,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
@@ -420,7 +421,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
         onChange: (updatedValues: FormLocation[]) => {
-          setValue(ConfigKey.LOCATIONS, updatedValues, {
+          const valuesToSave = updatedValues.map(({ id, label, isServiceManaged }) => ({
+            id,
+            label,
+            isServiceManaged,
+          }));
+          setValue(ConfigKey.LOCATIONS, valuesToSave, {
             shouldValidate: Boolean(formState.submitCount > 0),
           });
         },
@@ -1153,9 +1159,26 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
     component: ThrottlingWrapper,
-    label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
-      defaultMessage: 'Connection profile',
-    }),
+    label: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
+        defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
+        values={{
+          icon: <EuiIcon type="alert" color="warning" size="s" />,
+          link: (
+            <EuiLink
+              data-test-subj="syntheticsFIELDNoticeLink"
+              href={'https://github.com/elastic/synthetics/blob/main/THROTTLING.md'}
+              target="_blank"
+            >
+              {i18n.translate('xpack.synthetics.monitorConfig.throttlingDisabled.link', {
+                defaultMessage: 'notice',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
     required: true,
     controlled: true,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {

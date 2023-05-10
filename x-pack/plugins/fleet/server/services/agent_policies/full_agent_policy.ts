@@ -190,7 +190,7 @@ export async function getFullAgentPolicy(
     const publicKey = await messageSigningService.getPublicKey();
 
     fullAgentPolicy.agent.protection = {
-      enabled: true,
+      enabled: false,
       uninstall_token_hash: '',
       signing_key: publicKey,
     };

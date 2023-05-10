@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { arraysToEqual } from '../../../common/lib/validation';
 import {
   postCommentUserReq,
   postCommentAlertReq,
@@ -32,8 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/154640
-  describe.skip('push_case', () => {
+  describe('push_case', () => {
     describe('incident recorder server', () => {
       const actionsRemover = new ActionsRemover(supertest);
       let serviceNowSimulatorURL: string = '';
@@ -114,6 +114,14 @@ export default ({ getService }: FtrProviderContext): void => {
           Boolean(request.work_notes)
         );
 
+        const allWorkNotes = allCommentRequests.map((request) => request.work_notes);
+        const expectedNotes = [
+          'This is a cool comment\n\nAdded by elastic.',
+          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
+          'Released host host-name with comment: comment text\n\nAdded by elastic.',
+          'Elastic Alerts attached to the case: 3',
+        ];
+
         /**
          * For each of these comments a request is made:
          * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
@@ -122,21 +130,9 @@ export default ({ getService }: FtrProviderContext): void => {
          */
         expect(allCommentRequests.length).be(4);
 
-        // User comment: postCommentUserReq
-        expect(allCommentRequests[0].work_notes).eql('This is a cool comment\n\nAdded by elastic.');
-
-        // Isolate host comment: postCommentActionsReq
-        expect(allCommentRequests[1].work_notes).eql(
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.'
-        );
-
-        // Unisolate host comment: postCommentActionsReleaseReq
-        expect(allCommentRequests[2].work_notes).eql(
-          'Released host host-name with comment: comment text\n\nAdded by elastic.'
-        );
-
-        // Total alerts
-        expect(allCommentRequests[3].work_notes).eql('Elastic Alerts attached to the case: 3');
+        // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
+        // there specific order in the results
+        expect(arraysToEqual(allWorkNotes, expectedNotes)).to.be(true);
       });
     });
   });

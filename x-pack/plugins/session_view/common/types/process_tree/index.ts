@@ -193,6 +193,7 @@ export interface ProcessEvent {
     kind?: EventKind;
     category?: string | string[];
     action?: EventAction | EventAction[];
+    type?: string | string[];
     id?: string;
   };
   file?: {
@@ -289,6 +290,7 @@ export interface ProcessEventCloud {
   };
   project?: {
     id?: string;
+    name?: string;
   };
   provider?: string;
   region?: string;

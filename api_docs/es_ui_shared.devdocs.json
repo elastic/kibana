@@ -363,7 +363,7 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,

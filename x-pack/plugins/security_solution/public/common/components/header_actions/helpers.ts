@@ -50,3 +50,23 @@ export const getActionsColumnWidth = (actionButtonCount: number): number => {
 
   return contentWidth + leftRightCellPadding;
 };
+
+// Currently both logs-endpoint.events.process* and logs-cloud_defend.process* are valid sources for session data.
+// To avoid cross cluster searches, the original index of the event is used to infer the index to find data for the
+// rest of the session.
+export const getSessionViewProcessIndex = (eventIndex?: string | null) => {
+  if (!eventIndex) {
+    return;
+  }
+
+  const match = eventIndex.match(/([a-z0-9_-]+:)?\.ds-logs-(endpoint|cloud_defend)/i);
+  const cluster = match?.[1];
+  const clusterStr = cluster ? `${cluster}` : '';
+  const service = match?.[2];
+
+  if (service === 'endpoint') {
+    return `${clusterStr}logs-endpoint.events.process*`;
+  } else if (service === 'cloud_defend') {
+    return `${clusterStr}logs-cloud_defend.process*`;
+  }
+};

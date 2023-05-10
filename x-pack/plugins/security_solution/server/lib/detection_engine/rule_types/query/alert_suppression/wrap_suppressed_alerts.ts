@@ -8,7 +8,6 @@
 import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
-  ALERT_UUID,
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
@@ -27,7 +26,7 @@ import type { SignalSource } from '../../types';
 import { buildBulkBody } from '../../factories/utils/build_bulk_body';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 
-export interface SuppressionBuckets {
+export interface SuppressionBucket {
   event: estypes.SearchHit<SignalSource>;
   count: number;
   start: Date;
@@ -56,8 +55,9 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage,
   alertTimestampOverride,
   ruleExecutionLogger,
+  publicBaseUrl,
 }: {
-  suppressionBuckets: SuppressionBuckets[];
+  suppressionBuckets: SuppressionBucket[];
   spaceId: string;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -65,6 +65,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
@@ -91,8 +92,11 @@ export const wrapSuppressedAlerts = ({
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
-      ruleExecutionLogger
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
     );
+
     return {
       _id: id,
       _index: '',
@@ -102,7 +106,6 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_START]: bucket.start,
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
-        [ALERT_UUID]: id,
         [ALERT_INSTANCE_ID]: instanceId,
       },
     };

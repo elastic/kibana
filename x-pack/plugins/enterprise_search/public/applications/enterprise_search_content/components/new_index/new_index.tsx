@@ -7,23 +7,18 @@
 
 import React, { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import { useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
 import { ProductFeatures } from '../../../../../common/types';
 
-import { CONTINUE_BUTTON_LABEL } from '../../../shared/constants';
-
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { NEW_INDEX_METHOD_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -34,20 +29,16 @@ import { NewIndexCard } from './new_index_card';
 const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_METHOD_IDS[] => {
   return [
     ...(productFeatures.hasWebCrawler ? [INGESTION_METHOD_IDS.CRAWLER] : []),
-    INGESTION_METHOD_IDS.API,
     ...(productFeatures.hasConnectors ? [INGESTION_METHOD_IDS.CONNECTOR] : []),
+    INGESTION_METHOD_IDS.API,
   ];
 };
 
 export const NewIndex: React.FC = () => {
-  const { search } = useLocation();
-  const { method } = parseQueryParams(search);
   const { capabilities, productFeatures } = useValues(KibanaLogic);
   const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
 
-  const [selectedMethod, setSelectedMethod] = useState<string>(
-    Array.isArray(method) ? method[0] : method ?? INGESTION_METHOD_IDS.CRAWLER
-  );
+  const [selectedMethod, setSelectedMethod] = useState<string>('');
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -78,6 +69,13 @@ export const NewIndex: React.FC = () => {
                     type={type}
                     onSelect={() => {
                       setSelectedMethod(type);
+                      if (type === INGESTION_METHOD_IDS.CONNECTOR) {
+                        KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                      } else {
+                        KibanaLogic.values.navigateToUrl(
+                          generateEncodedPath(NEW_INDEX_METHOD_PATH, { type })
+                        );
+                      }
                     }}
                     isSelected={selectedMethod === type}
                   />
@@ -85,46 +83,15 @@ export const NewIndex: React.FC = () => {
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                {capabilities.navLinks.integrations && (
-                  <>
-                    <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink',
-                        {
-                          defaultMessage: 'View additional integrations',
-                        }
-                      )}
-                    </EuiLinkTo>
-                  </>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  disabled={
-                    !Object.values(INGESTION_METHOD_IDS as Record<string, string>).includes(
-                      selectedMethod
-                    )
-                  }
-                  fill
-                  onClick={() => {
-                    if (selectedMethod === INGESTION_METHOD_IDS.CONNECTOR) {
-                      KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
-                    } else {
-                      KibanaLogic.values.navigateToUrl(
-                        generateEncodedPath(NEW_INDEX_METHOD_PATH, { type: selectedMethod })
-                      );
-                    }
-                  }}
-                >
-                  {CONTINUE_BUTTON_LABEL}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {capabilities.navLinks.integrations && (
+            <EuiFlexItem>
+              <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
+                {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                  defaultMessage: 'View additional integrations',
+                })}
+              </EuiLinkTo>
+            </EuiFlexItem>
+          )}
         </>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>

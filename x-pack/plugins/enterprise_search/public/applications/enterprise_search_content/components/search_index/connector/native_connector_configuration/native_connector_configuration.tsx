@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
+import { CONNECTOR_ICONS } from '../../../../../shared/icons/connector_icons';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
@@ -31,6 +32,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescription } from '../connector_name_and_description/connector_name_and_description';
 import { NATIVE_CONNECTORS } from '../constants';
 
+import { ConvertConnector } from './convert_connector';
 import { NativeConnectorAdvancedConfiguration } from './native_connector_advanced_configuration';
 import { NativeConnectorConfigurationConfig } from './native_connector_configuration_config';
 import { ResearchConfiguration } from './research_configuration';
@@ -44,11 +46,18 @@ export const NativeConnectorConfiguration: React.FC = () => {
 
   const nativeConnector = NATIVE_CONNECTORS.find(
     (connector) => connector.serviceType === index.connector.service_type
-  );
-
-  if (!nativeConnector) {
-    return <></>;
-  }
+  ) || {
+    docsUrl: '',
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.custom,
+    iconPath: 'custom.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: [],
+    name: index.connector.name,
+    serviceType: index.connector.service_type ?? '',
+  };
 
   const hasDescription = !!index.connector.description;
   const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
@@ -70,7 +79,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
               )}
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
-                  <h3>{nativeConnector.name}</h3>
+                  <h3>{nativeConnector?.name ?? index.connector.name}</h3>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -201,6 +210,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     )}
                   </EuiLink>
                 </EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder hasShadow={false}>
+                <ConvertConnector />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>

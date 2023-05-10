@@ -168,3 +168,26 @@ test('fails if nested union type fail', () => {
      - [1]: expected value of type [number] but got [string]"
   `);
 });
+
+describe('#extendsDeep', () => {
+  const type = schema.oneOf([schema.object({ foo: schema.string() })]);
+
+  test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+    const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+    const result = allowSchema.validate({ foo: 'test', bar: 'test' });
+    expect(result).toEqual({ foo: 'test', bar: 'test' });
+  });
+
+  test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+    const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+    const result = ignoreSchema.validate({ foo: 'test', bar: 'test' });
+    expect(result).toEqual({ foo: 'test' });
+  });
+
+  test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+    const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
+    expect(() =>
+      forbidSchema.validate({ foo: 'test', bar: 'test' })
+    ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+  });
+});

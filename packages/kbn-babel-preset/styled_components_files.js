@@ -12,9 +12,10 @@ module.exports = {
    * Used by `kbn-babel-preset` and `kbn-eslint-config`.
    */
   USES_STYLED_COMPONENTS: [
-    /packages[\/\\](kbn-ui-shared-deps-(npm|src)|kbn-ecs-data-quality-dashboard)[\/\\]/,
+    /packages[\/\\]kbn-ui-shared-deps-(npm|src)[\/\\]/,
     /src[\/\\]plugins[\/\\](kibana_react)[\/\\]/,
     /x-pack[\/\\]plugins[\/\\](apm|beats_management|cases|fleet|infra|lists|observability|observability_shared|exploratory_view|osquery|security_solution|timelines|synthetics|ux)[\/\\]/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
+    /x-pack[\/\\]packages[\/\\]security-solution[\/\\]ecs_data_quality_dashboard[\/\\]/,
   ],
 };

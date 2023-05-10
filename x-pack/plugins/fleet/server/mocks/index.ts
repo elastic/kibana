@@ -63,7 +63,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {} as ExperimentalFeatures,
+    experimentalFeatures: { diagnosticFileUploadEnabled: true } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -167,5 +167,7 @@ export function createMessageSigningServiceMock() {
     generateKeyPair: jest.fn(),
     sign: jest.fn(),
     getPublicKey: jest.fn(),
+    removeKeyPair: jest.fn(),
+    rotateKeyPair: jest.fn(),
   };
 }

@@ -206,4 +206,19 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(onDuplicate.mock.calls).toHaveLength(1);
     expect(onDuplicate.mock.calls[0][0]).toEqual(mockResponse);
   });
+
+  it('shows an error if no actions specified', async () => {
+    const { getByTestId, getByText, rerender } = render(<WrappedComponent />);
+
+    const checkBox = getByTestId('cloud-defend-chkalertaction');
+    if (checkBox) {
+      userEvent.click(checkBox);
+    }
+
+    const updatedResponse = onChange.mock.calls[0][0];
+    rerender(<WrappedComponent response={updatedResponse} />);
+
+    expect(getByText(i18n.errorActionRequired)).toBeTruthy();
+    expect(updatedResponse.hasErrors).toBeTruthy();
+  });
 });

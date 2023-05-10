@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { getDataTypeIndices } from '../../../../utils/observability_data_views';
 import { AppDataType } from '../types';
 import { ExploratoryEmbeddableProps } from '../../../..';
