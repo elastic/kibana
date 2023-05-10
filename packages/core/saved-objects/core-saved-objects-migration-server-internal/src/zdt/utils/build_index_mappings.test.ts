@@ -14,8 +14,8 @@ const getTestTypes = () => {
     name: 'foo',
     switchToModelVersionAt: '8.7.0',
     modelVersions: {
-      1: { modelChange: { type: 'expansion' } },
-      2: { modelChange: { type: 'expansion' } },
+      1: { changes: [] },
+      2: { changes: [] },
     },
     mappings: { properties: { fooField: { type: 'text' } } },
   });
@@ -23,7 +23,7 @@ const getTestTypes = () => {
     name: 'bar',
     switchToModelVersionAt: '8.7.0',
     modelVersions: {
-      1: { modelChange: { type: 'expansion' } },
+      1: { changes: [] },
     },
     mappings: { properties: { barField: { type: 'text' } } },
   });
@@ -31,9 +31,9 @@ const getTestTypes = () => {
     name: 'dolly',
     switchToModelVersionAt: '8.7.0',
     modelVersions: () => ({
-      1: { modelChange: { type: 'expansion' } },
-      2: { modelChange: { type: 'expansion' } },
-      3: { modelChange: { type: 'expansion' } },
+      1: { changes: [] },
+      2: { changes: [] },
+      3: { changes: [] },
     }),
     mappings: { properties: { dollyField: { type: 'text' } } },
   });
