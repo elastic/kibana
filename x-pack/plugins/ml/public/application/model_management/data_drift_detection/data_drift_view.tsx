@@ -195,7 +195,12 @@ const DataDriftChart = ({ data }: { data: any }) => {
 };
 // Data drift view
 export const DataDriftView = () => {
-  const result = useFetchDataDriftResult([{ field: 'numeric_unchangeable', type: 'numeric' }]);
+  const result = useFetchDataDriftResult([
+    { field: 'numeric_unchangeable', type: 'numeric' },
+    { field: 'numeric_changeable', type: 'numeric' },
+    { field: 'categoric_unchangeable', type: 'categoric' },
+    { field: 'categoric_changeable', type: 'categoric' },
+  ]);
 
   // @TODO: Format data for dataFromResult and use it in table and charts
   const dataFromResult = useMemo(() => {
@@ -223,6 +228,7 @@ export const DataDriftView = () => {
     console.log(`--@@result.buckets`, formattedData);
     return formattedData;
   }, [result]);
+  console.log(`dataFromResult`, dataFromResult);
 
   return (
     <div>
@@ -230,7 +236,7 @@ export const DataDriftView = () => {
       <ProductionDataViewSelector />
       <EuiSpacer size="m" />
 
-      <DataDriftOverviewTable />
+      <DataDriftOverviewTable data={dataFromResult} />
     </div>
   );
 };
@@ -275,31 +281,36 @@ interface Feature {
 const features: Feature[] = [
   {
     featureName: 'numeric_unchangeable',
-    featureType: 'number',
+    featureType: 'numeric',
     driftDetected: false,
     similarityTestPValue: 0.25,
   },
   {
     featureName: 'numeric_changeable',
-    featureType: 'number',
+    featureType: 'numeric',
     driftDetected: true,
     similarityTestPValue: 0.00001,
   },
   {
-    featureName: 'categorial_unchangeable',
-    featureType: 'categorical',
+    featureName: 'categoric_unchangeable',
+    featureType: 'categoric',
     driftDetected: false,
     similarityTestPValue: 0.25,
   },
   {
-    featureName: 'categorical_changeable',
-    featureType: 'categorical',
+    featureName: 'categoric_changeable',
+    featureType: 'categoric',
     driftDetected: true,
     similarityTestPValue: 0.00001,
   },
 ];
 
-export const DataDriftOverviewTable = () => {
+export const DataDriftOverviewTable = (data) => {
+  console.log('DataDriftOverviewTable data ', data);
+  // if data is an empty array return
+  if (data.data.length == 0) {
+    return null;
+  }
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
       align: 'left',
@@ -359,9 +370,16 @@ export const DataDriftOverviewTable = () => {
       'data-test-subj': 'mlDataDriftOverviewTableSimilarityTestPValue',
       sortable: true,
       textOnly: true,
-      render: (similarityTestPValue: number) => {
-        return <span>{similarityTestPValue}</span>;
+      render: (similarityTestPValue: number, feature: Feature) => {
+        return (
+          <span>
+            {feature.featureType === 'numeric' ? data.data[feature.featureName].pValue : 'unknown'}
+          </span>
+        );
       },
+      // render: (similarityTestPValue: number) => {
+      //   return <span>{similarityTestPValue}</span>;
+      // },
     },
     {
       field: 'referenceDistribution',
