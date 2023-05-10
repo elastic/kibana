@@ -71,10 +71,13 @@ interface CreateActionMetadata {
 
 export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
-  createAction: (
+  createAction: <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
     payload: CreateActionPayload,
     metadata: CreateActionMetadata
-  ) => Promise<ActionDetails>;
+  ) => Promise<ActionDetails<TOutputContent, TParameters>>;
 }
 
 export const actionCreateService = (
