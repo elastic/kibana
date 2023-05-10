@@ -57,7 +57,6 @@ jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../common/lib/kibana');
@@ -365,8 +364,6 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      // ID removed for options dropdown here:
-      // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
       expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
 
       await waitForComponentToUpdate();
@@ -461,8 +458,7 @@ describe('Create case', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/143408
-  describe.skip('Step 2 - Connector Fields', () => {
+  describe('Step 2 - Connector Fields', () => {
     it(`should submit and push to resilient connector`, async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
@@ -537,7 +533,7 @@ describe('Create case', () => {
     });
   });
 
-  it(`should call afterCaseCreated`, async () => {
+  it('should call afterCaseCreated', async () => {
     useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       data: connectorsMock,
@@ -556,10 +552,10 @@ describe('Create case', () => {
     userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
     userEvent.click(screen.getByTestId('create-case-submit'));
@@ -689,10 +685,10 @@ describe('Create case', () => {
     userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dropdown-connector-jira-1')).toBeInTheDocument();
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-jira-1'), undefined, {
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
 

@@ -325,6 +325,7 @@ describe('CaseViewPage', () => {
         }}
       />
     );
+
     userEvent.click(result.getByTestId('connector-edit').querySelector('button')!);
     userEvent.click(result.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();

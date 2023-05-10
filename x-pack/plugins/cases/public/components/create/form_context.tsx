@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { isEmpty } from 'lodash';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -14,7 +15,7 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/api';
+import type { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
 import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
@@ -47,6 +48,25 @@ interface Props {
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
+
+const formSerializer = (data: FormProps): FormProps => {
+  if (data.fields) {
+    const serializedFields = Object.entries(data.fields).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: isEmpty(value) ? null : value,
+      }),
+      {}
+    );
+
+    return {
+      ...data,
+      fields: serializedFields as ConnectorTypeFields['fields'],
+    };
+  }
+
+  return data;
+};
 
 export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
@@ -138,6 +158,7 @@ export const FormContext: React.FC<Props> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,
+    serializer: formSerializer,
   });
 
   const childrenWithExtraProp = useMemo(

@@ -39,7 +39,7 @@ const ConnectorFieldsFormPreviewComponent: React.FC<Props> = ({ connector, field
         >
           {' '}
           <div data-test-subj={'connector-fields-preview'}>
-            <PreviewComponent connector={connector} fields={fields} />
+            <PreviewComponent connector={connector} fields={fields} key={connector.id} />
           </div>
         </Suspense>
       ) : null}

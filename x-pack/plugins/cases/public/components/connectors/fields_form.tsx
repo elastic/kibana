@@ -37,7 +37,7 @@ const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector }) => {
           }
         >
           <div data-test-subj={'connector-fields'}>
-            <FieldsComponent connector={connector} />
+            <FieldsComponent connector={connector} key={connector.id} />
           </div>
         </Suspense>
       ) : null}
