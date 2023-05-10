@@ -64,7 +64,7 @@ export const useDataSearch = () => {
 const percents = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95];
 
 export const useFetchDataDriftResult = (
-  fields: Array<{ field: string; type: 'numeric' | 'categorical' }>
+  fields: Array<{ field: string; type: 'numeric' | 'categoric' }>
 ) => {
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<
@@ -91,29 +91,61 @@ export const useFetchDataDriftResult = (
       const referenceIndex = 'baseline';
       const productionIndex = 'drifted';
       try {
-        const percentilesResp: SearchResponseBody<
+        const baselineRequest = {
+          index: referenceIndex,
+          body: {
+            size: 0,
+            aggs: {
+              // @TODO: Should add more fields here
+              // numeric_unchangeable_percentiles: {
+              //   percentiles: {
+              //     field: 'numeric_unchangeable',
+              //     percents,
+              //   },
+              // },
+            },
+          },
+        };
+        // for each field with type "numeric", add a percentiles agg to the request
+        for (const { field, type } of fields) {
+          // if the field is numeric, add a percentiles and stats aggregations to the request
+          if (type === 'numeric') {
+            baselineRequest.body.aggs[`${field}_percentiles`] = {
+              percentiles: {
+                field: field,
+                percents: percents,
+              },
+            };
+            baselineRequest.body.aggs[`${field}_stats`] = {
+              stats: {
+                field: field
+              }
+            };
+          }
+          // if the field is categorical, add a terms aggregation to the request
+          if (type === 'categoric') {
+            baselineRequest.body.aggs[`${field}_terms`] = {
+              terms: {
+                field: field,
+                size: 100 // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+              }
+            };
+          }
+        }
+
+        console.log(baselineRequest);
+
+        const baselineResponse: SearchResponseBody<
           unknown,
           Record<string, AggregationsPercentilesAggregateBase>
         > = await dataSearch(
-          {
-            index: referenceIndex,
-            body: {
-              size: 0,
-              aggs: {
-                // @TODO: Should add more fields here
-                numeric_unchangeable_percentiles: {
-                  percentiles: {
-                    field: 'numeric_unchangeable',
-                    percents,
-                  },
-                },
-              },
-            },
-          },
+          baselineRequest,
           signal
         );
 
-        if (!percentilesResp.aggregations) {
+        console.log(baselineResponse);
+
+        if (!baselineResponse.aggregations) {
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
@@ -121,20 +153,78 @@ export const useFetchDataDriftResult = (
           });
           return;
         }
-        const percentiles = Object.values(
-          percentilesResp.aggregations.numeric_unchangeable_percentiles?.values
-        );
-        // Result is
-        const ranges: Array<{ from?: number; to?: number }> = [];
-        percentiles.forEach((val: number, idx) => {
-          if (idx === 0) {
-            ranges.push({ to: val });
-          } else if (idx === percentiles.length - 1) {
-            ranges.push({ from: val });
-          } else {
-            ranges.push({ from: percentiles[idx - 1], to: val });
+
+        const driftedRequest = {
+          index: productionIndex,
+          body: {
+            size: 0,
+            aggs: {
+              // numeric_unchangeable_ranges: {
+              //   range: {
+              //     field: 'numeric_unchangeable',
+              //     ranges,
+              //   },
+              // },
+              // _ks_test_: {
+              //   bucket_count_ks_test: {
+              //     buckets_path: 'numeric_unchangeable_ranges>_count',
+              //     alternative: 'two_sided',
+              //   },
+              // },
+            },
+          },
+        };
+
+        // retrieve p-values for each numeric field
+        for (const { field, type } of fields) {
+          if (type === 'numeric') {
+            // create ranges based on percentiles
+            const percentiles = Object.values(
+              baselineResponse.aggregations.numeric_unchangeable_percentiles?.values
+            );
+            // Result is
+            const ranges: Array<{ from?: number; to?: number }> = [];
+            percentiles.forEach((val: number, idx) => {
+              if (idx === 0) {
+                ranges.push({ to: val });
+              } else if (idx === percentiles.length - 1) {
+                ranges.push({ from: val });
+              } else {
+                ranges.push({ from: percentiles[idx - 1], to: val });
+              }
+            });
+            // add range and bucket_count_ks_test to the request
+            driftedRequest.body.aggs[`${field}_ranges`] = {
+              range: {
+                field: field,
+                ranges
+              }
+            }
+            driftedRequest.body.aggs[`${field}_ks_test`] = {
+              bucket_count_ks_test: {
+                buckets_path: `${field}_ranges>_count`,
+                alternative: 'two_sided'
+              }
+            }
+            // add stats aggregation to the request
+            driftedRequest.body.aggs[`${field}_stats`] = {
+              stats: {
+                field: field
+              }
+            };
           }
-        });
+          // if feature is categoric perform terms aggregation
+          if (type === 'categoric') {
+            driftedRequest.body.aggs[`${field}_terms`] = {
+              terms: {
+                field: field,
+                size: 100 // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+              }
+            };
+          }
+        }
+
+        console.log("Drifted request", driftedRequest);
 
         const driftedResp: SearchResponseBody<
           unknown,
@@ -143,28 +233,11 @@ export const useFetchDataDriftResult = (
             ExclusiveUnion<{ two_sided: number }, AggregationsMultiBucketAggregateBase>
           >
         > = await dataSearch(
-          {
-            index: productionIndex,
-            body: {
-              size: 0,
-              aggs: {
-                numeric_unchangeable_ranges: {
-                  range: {
-                    field: 'numeric_unchangeable',
-                    ranges,
-                  },
-                },
-                _ks_test_: {
-                  bucket_count_ks_test: {
-                    buckets_path: 'numeric_unchangeable_ranges>_count',
-                    alternative: 'two_sided',
-                  },
-                },
-              },
-            },
-          },
+          driftedRequest,
           signal
         );
+
+        console.log("Drifted response", driftedResp);
 
         if (!driftedResp.aggregations) {
           setResult({
@@ -175,10 +248,118 @@ export const useFetchDataDriftResult = (
           return;
         }
 
-        const data = {
-          driftedPValue: driftedResp.aggregations._ks_test_.two_sided,
-          buckets: driftedResp.aggregations.numeric_unchangeable_ranges.buckets,
+        const referenceHistogramRequest = {
+          index: referenceIndex,
+          body: {
+            size: 0,
+            aggs: {
+
+            },
+          },
         };
+
+        const productionHistogramRequest = {
+          index: productionIndex,
+          body: {
+            size: 0,
+            aggs: {
+
+            },
+          },
+        };
+
+        for (const { field, type } of fields) {
+          // add histogram aggregation with min and max from baseline
+          if (type === 'numeric') {
+            const numBins = 10;
+            const min = baselineResponse.aggregations[`${field}_stats`].min;
+            const max = baselineResponse.aggregations[`${field}_stats`].max;
+            const interval = (max - min) / numBins;
+            referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
+              histogram: {
+                field: field,
+                interval: interval,
+                hard_bounds: {
+                  min: min,
+                  max: max
+                }
+              }
+            }
+            productionHistogramRequest.body.aggs[`${field}_histogram`] = {
+              histogram: {
+                field: field,
+                interval: interval,
+                hard_bounds: {
+                  min: min,
+                  max: max
+                }
+              }
+            }
+          }
+        }
+
+        console.log("Reference histogram request", referenceHistogramRequest);
+        console.log("Production histogram request", productionHistogramRequest);
+
+        const productionHistogramResponse = await dataSearch(
+          productionHistogramRequest,
+          signal
+        );
+
+        console.log("Production histogram response", productionHistogramResponse);
+
+        if (!productionHistogramResponse.aggregations) {
+          setResult({
+            data: undefined,
+            status: FETCH_STATUS.FAILURE,
+            error: `Unable to fetch histogram data from ${productionIndex}`,
+          });
+          return;
+        }
+
+        const referenceHistogramResponse = await dataSearch(
+          referenceHistogramRequest,
+          signal
+        );
+
+        console.log("Reference histogram response", referenceHistogramResponse);
+
+        if (!referenceHistogramResponse.aggregations) {
+          setResult({
+            data: undefined,
+            status: FETCH_STATUS.FAILURE,
+            error: `Unable to fetch histogram data from ${referenceIndex}`,
+          });
+          return;
+        }
+
+
+        // retrieve aggregation results from driftedResp for different fields and add to data
+        console.log("Populating data");
+        const data = {};
+        for (const { field, type } of fields) {
+          if (type === 'numeric') {
+            data[field] = {
+              pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
+              //   histogram: driftedResp.aggregations[`${field}_histogram`].buckets,
+            }
+          }
+          // if (type === 'categoric') {
+          //   data[field] = {
+          //     driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
+          //     driftedSumOtherDocCount: driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
+          //     baselineTerm: baselineResponse.aggregations[`${field}_terms`].buckets,
+          //     baselineSumOtherDocCount: baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
+          //   }
+          // }
+        }
+
+        console.log("Parsed data", data);
+
+        // const data = {
+        //   driftedPValue: driftedResp.aggregations._ks_test_.two_sided,
+        //   buckets: driftedResp.aggregations.numeric_unchangeable_ranges.buckets,
+        // };
         setResult({
           data,
           status: FETCH_STATUS.SUCCESS,
