@@ -13,6 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
+import { SecuritySoutionUserSettingsProvider } from '../common/user_settings/user_settings_provider';
 
 export const renderApp = ({
   element,
@@ -28,25 +29,27 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   render(
-    <SecurityApp
-      history={history}
-      onAppLeave={onAppLeave}
-      services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
-      store={store}
-      theme$={theme$}
-    >
-      <ApplicationUsageTrackingProvider>
-        <Switch>
-          {subPluginRoutes.map((route, index) => {
-            return <Route key={`route-${index}`} {...route} />;
-          })}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Switch>
-      </ApplicationUsageTrackingProvider>
-    </SecurityApp>,
+    <SecuritySoutionUserSettingsProvider>
+      <SecurityApp
+        history={history}
+        onAppLeave={onAppLeave}
+        services={services}
+        setHeaderActionMenu={setHeaderActionMenu}
+        store={store}
+        theme$={theme$}
+      >
+        <ApplicationUsageTrackingProvider>
+          <Switch>
+            {subPluginRoutes.map((route, index) => {
+              return <Route key={`route-${index}`} {...route} />;
+            })}
+            <Route>
+              <NotFoundPage />
+            </Route>
+          </Switch>
+        </ApplicationUsageTrackingProvider>
+      </SecurityApp>
+    </SecuritySoutionUserSettingsProvider>,
     element
   );
   return () => {

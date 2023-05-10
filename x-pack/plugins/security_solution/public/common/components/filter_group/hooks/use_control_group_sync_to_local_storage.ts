@@ -7,12 +7,14 @@
 
 import type { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
+import { isEqual } from 'lodash';
 
 interface UseControlGroupSyncToLocalStorageArgs {
   storageKey: string;
   shouldSync: boolean;
+  saveHandler?: (controlGroupInput: ControlGroupInput) => void;
 }
 
 type UseControlGroupSyncToLocalStorage = (args: UseControlGroupSyncToLocalStorageArgs) => {
@@ -24,6 +26,7 @@ type UseControlGroupSyncToLocalStorage = (args: UseControlGroupSyncToLocalStorag
 export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorage = ({
   storageKey,
   shouldSync,
+  saveHandler,
 }) => {
   const storage = useRef<Storage>(new Storage(localStorage));
 
@@ -31,15 +34,22 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
     () => (storage.current.get(storageKey) as ControlGroupInput) ?? undefined
   );
 
+  const getStoredControlGroupInput = useCallback(() => {
+    const val = (storage.current.get(storageKey) as ControlGroupInput) ?? undefined;
+    console.log({ storageKey, val });
+    return val;
+  }, [storageKey]);
+
   useEffect(() => {
-    if (shouldSync && controlGroupInput) {
+    if (
+      shouldSync &&
+      controlGroupInput &&
+      !isEqual(controlGroupInput, getStoredControlGroupInput())
+    ) {
+      if (saveHandler) saveHandler(controlGroupInput);
       storage.current.set(storageKey, controlGroupInput);
     }
-  }, [shouldSync, controlGroupInput, storageKey]);
-
-  const getStoredControlGroupInput = () => {
-    return (storage.current.get(storageKey) as ControlGroupInput) ?? undefined;
-  };
+  }, [shouldSync, controlGroupInput, storageKey, saveHandler, getStoredControlGroupInput]);
 
   return {
     controlGroupInput,

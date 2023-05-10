@@ -31,6 +31,8 @@ export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'data
 export type FilterGroupHandler = ControlGroupContainer;
 
 export type FilterGroupProps = {
+  uniqueControlId?: string;
+  onSave?: (controlGroupInput: ControlGroupInput) => void;
   dataViewId: string | null;
   onFilterChange?: (newFilters: Filter[]) => void;
   initialControls: Array<FilterItemObj & { persist?: boolean }>;

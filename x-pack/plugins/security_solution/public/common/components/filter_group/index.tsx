@@ -71,6 +71,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     initialControls,
     spaceId,
     onInit,
+    onSave,
+    uniqueControlId = 'default',
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -79,9 +81,11 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
   const localStoragePageFilterKey = useMemo(
-    () => `${APP_ID}.${spaceId}.${URL_PARAM_KEY.pageFilter}`,
-    [spaceId]
+    () => `${APP_ID}.${spaceId}.${uniqueControlId}.${URL_PARAM_KEY.pageFilter}`,
+    [spaceId, uniqueControlId]
   );
+
+  console.log({localStoragePageFilterKey})
 
   const currentFiltersRef = useRef<Filter[]>();
 
@@ -105,6 +109,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   } = useControlGroupSyncToLocalStorage({
     storageKey: localStoragePageFilterKey,
     shouldSync: isViewMode,
+    saveHandler: onSave,
   });
 
   const [initialUrlParam, setInitialUrlParam] = useState<FilterItemObj[]>();

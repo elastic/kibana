@@ -84,6 +84,8 @@ import { GroupedAlertsTable } from '../../components/alerts_table/alerts_groupin
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
+import { StatefulTemplateSwitcher } from './stateful_template_switcher';
+import { useTemplates } from '../../components/templates/use_templates';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -105,6 +107,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
+
+  const {activeTemplate} = useTemplates()
 
   const isTableLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
@@ -355,6 +359,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           onFilterChange={pageFiltersUpdateHandler}
           filters={topLevelFilters}
           query={query}
+          activeTemplateId={activeTemplate}
           timeRange={{
             from,
             to,
@@ -366,6 +371,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ),
     [
       topLevelFilters,
+      activeTemplate,
       arePageFiltersEnabled,
       dataViewId,
       statusFilter,
@@ -452,14 +458,21 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           >
             <Display show={!globalFullScreen}>
               <HeaderPage title={i18n.PAGE_TITLE}>
-                <SecuritySolutionLinkButton
-                  onClick={goToRules}
-                  deepLinkId={SecurityPageName.rules}
-                  data-test-subj="manage-alert-detection-rules"
-                  fill
-                >
-                  {i18n.BUTTON_MANAGE_RULES}
-                </SecuritySolutionLinkButton>
+                <EuiFlexGroup gutterSize="m" justifyContent="center" alignItems="center">
+                  <EuiFlexItem>
+                    <StatefulTemplateSwitcher />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <SecuritySolutionLinkButton
+                      onClick={goToRules}
+                      deepLinkId={SecurityPageName.rules}
+                      data-test-subj="manage-alert-detection-rules"
+                      fill
+                    >
+                      {i18n.BUTTON_MANAGE_RULES}
+                    </SecuritySolutionLinkButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </HeaderPage>
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="l" />

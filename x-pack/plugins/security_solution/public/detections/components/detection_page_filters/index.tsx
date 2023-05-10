@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
+import { ComponentProps, useMemo } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
@@ -14,13 +14,70 @@ import { FilterGroupLoading } from '../../../common/components/filter_group/load
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { FilterGroup } from '../../../common/components/filter_group';
+import { useSecuritySolutionUserSettings } from '../../../common/user_settings/use_security_solution_user_settings';
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
 
-type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls'>;
+type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls' | 'onSave'> & {
+  activeTemplateId?: string;
+};
+
+const GET_USER_SETTING_ID = (uniqueId: string) => {
+  return `detection-page-filterSet.${uniqueId}`;
+};
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
-  const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;
+  const {
+    dataViewId,
+    onFilterChange,
+    activeTemplateId = 'defaultTemplate',
+    ...restFilterItemGroupProps
+  } = props;
 
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
+
+  const { getUserSetting, setUserSettings } = useSecuritySolutionUserSettings();
+  const controlsBasedonTemplate = useMemo(() => {
+    const templateFilters = getUserSetting<ControlGroupInput>(
+      'alertsPage',
+      GET_USER_SETTING_ID(activeTemplateId)
+    );
+
+    if (!templateFilters) return DEFAULT_DETECTION_PAGE_FILTERS;
+
+    const savedFilterControls = Object.values(templateFilters?.panels ?? {}).sort(
+      (a, b) => a.order - b.order
+    );
+
+    const sanitizedControls =
+      savedFilterControls && savedFilterControls.length > 0
+        ? savedFilterControls
+        : DEFAULT_DETECTION_PAGE_FILTERS;
+
+    console.log({ sanitizedControls, savedFilterControls });
+
+    return sanitizedControls;
+  }, [activeTemplateId, getUserSetting]);
+
+  console.log({ controlsBasedonTemplate });
+
+  const [initialFilterControls, setInitialFilterControls] = useState(controlsBasedonTemplate);
+
+  useEffect(() => {
+    setLoadingPageFilters(true);
+    // get Latest Template based alert page filters settings
+
+    setTimeout(() => {
+      setLoadingPageFilters(false);
+    }, 1000);
+  }, [activeTemplateId]);
+
+  const handleFilterSetSave = useCallback(
+    (controlGroupInput: ControlGroupInput) => {
+      console.log('saving Setting', controlGroupInput);
+      setUserSettings('alertsPage', GET_USER_SETTING_ID(activeTemplateId), controlGroupInput);
+    },
+    [setUserSettings, activeTemplateId]
+  );
 
   const {
     services: { dataViews: dataViewService },
@@ -45,8 +102,6 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
       setLoadingPageFilters(false);
     })();
   }, [dataViewId, dataViewService]);
-
-  const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
 
   const filterChangesHandler = useCallback(
     (newFilters: Filter[]) => {
@@ -78,9 +133,11 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
   return (
     <FilterGroup
+      onSave={handleFilterSetSave}
+      uniqueControlId={activeTemplateId}
       dataViewId={dataViewId}
       onFilterChange={filterChangesHandler}
-      initialControls={initialFilterControls}
+      initialControls={controlsBasedonTemplate}
       {...restFilterItemGroupProps}
     />
   );
