@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHeaderLink,
-  EuiHeaderLinks,
-} from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -52,19 +47,6 @@ export function ApmHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       {isLabsButtonEnabled && <Labs />}
-      <EuiHeaderLink
-        color="text"
-        href={apmHref('/storage-explorer')}
-        data-test-subj="apmStorageExplorerHeaderLink"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-              defaultMessage: 'Storage Explorer',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHeaderLink>
       {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
