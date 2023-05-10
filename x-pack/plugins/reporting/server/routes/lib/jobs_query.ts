@@ -18,7 +18,6 @@ import type { ReportingUser } from '../../types';
 import type { Payload } from './get_document_payload';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
-const refresh: estypes.Refresh = 'wait_for';
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
@@ -208,7 +207,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
-        const query = { id, index: deleteIndex, refresh };
+
+        // TODO: Use refresh=false.
+        // Using `wait_for` helps avoid users seeing recently-deleted reports temporarily flashing back in the
+        // job listing.
+        const query = { id, index: deleteIndex, refresh: 'wait_for' as const };
 
         return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
