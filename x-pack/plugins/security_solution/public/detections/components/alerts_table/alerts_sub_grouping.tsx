@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -193,13 +193,22 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
+  const queriedGroup = useRef<string | null>(null);
+
   const aggs = useMemo(
-    () => parseGroupingQuery(alertsGroupsData?.aggregations),
-    [alertsGroupsData]
+    // queriedGroup because `selectedGroup` updates before the query response
+    () =>
+      parseGroupingQuery(
+        // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
+        queriedGroup.current === null ? selectedGroup : queriedGroup.current,
+        alertsGroupsData?.aggregations
+      ),
+    [alertsGroupsData?.aggregations, selectedGroup]
   );
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
+      queriedGroup.current = queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '';
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);

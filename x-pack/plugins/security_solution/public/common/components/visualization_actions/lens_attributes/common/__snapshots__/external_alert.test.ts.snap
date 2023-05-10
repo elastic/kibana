@@ -190,6 +190,11 @@ Object {
       "query": "host.name: *",
     },
     "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
       "layers": Array [
         Object {
           "accessors": Array [
@@ -206,11 +211,13 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
-        "position": "left",
+        "legendSize": "xlarge",
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

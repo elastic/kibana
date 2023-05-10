@@ -350,65 +350,6 @@ export const ConnectorConfiguration: React.FC = () => {
                       )}
                     </EuiLink>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://discuss.elastic.co/c/enterprise-search/84"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.getHelp.label',
-                        {
-                          defaultMessage: 'Get help',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://github.com/elastic/connectors-python/issues"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.issue.label',
-                        {
-                          defaultMessage: 'File an issue',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLinkTo to={'/app/integrations/browse'} shouldNotCreateHref>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.dontSeeIntegration.label',
-                        {
-                          defaultMessage: 'Don’t see the integration you’re looking for?',
-                        }
-                      )}
-                    </EuiLinkTo>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink
-                      href="https://docs.elastic.co/search-ui/tutorials/workplace-search"
-                      target="_blank"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.searchUI.label',
-                        {
-                          defaultMessage: 'Use Search UI for Workplace Search',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiLink href="https://www.elastic.co/kibana/feedback" target="_blank">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
-                        {
-                          defaultMessage: 'Connector feedback',
-                        }
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
                   {docsUrl && (
                     <EuiFlexItem>
                       <EuiLink href={docsUrl} target="_blank">

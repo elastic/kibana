@@ -55,6 +55,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -116,6 +121,8 @@ import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;
@@ -129,6 +136,7 @@ export interface LensPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -153,6 +161,7 @@ export interface LensPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
   docLinks: DocLinksStart;
   share?: SharePluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export interface LensPublicSetup {
@@ -279,6 +288,7 @@ export class LensPlugin {
       usageCollection,
       uiActionsEnhanced,
       share,
+      contentManagement,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -359,6 +369,16 @@ export class LensPlugin {
         application: () => startServices().core.application,
       })
     );
+
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('xpack.lens.content.name', {
+        defaultMessage: 'Lens Visualization',
+      }),
+    });
 
     setupExpressions(
       expressions,

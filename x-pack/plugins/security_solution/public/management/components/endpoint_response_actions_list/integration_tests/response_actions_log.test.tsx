@@ -118,8 +118,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
 
-jest.mock('../../../../common/experimental_features_service');
-
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
@@ -917,6 +915,7 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions when opened', () => {
+      mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -934,6 +933,7 @@ describe('Response actions history', () => {
         'processes',
         'get-file',
         'execute',
+        'upload',
       ]);
     });
 

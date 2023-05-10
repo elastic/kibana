@@ -30,7 +30,7 @@ import {
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
 export const ML_INFERENCE_PREFIX = 'ml.inference.';
-export const ELSER_MODEL_ID = '.elser_model_1_SNAPSHOT';
+export const ELSER_MODEL_ID = '.elser_model_1';
 
 export interface MlInferencePipelineParams {
   description?: string;
