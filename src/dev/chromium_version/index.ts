@@ -7,30 +7,31 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import cheerio from 'cheerio';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-
-type PuppeteerRelease = string;
-type ChromiumRevision = string;
-type ChromiumCommit = string;
-
-// We forked the Puppeteer node module for Kibana,
-// So we need to translate OUR version to the official Puppeteer Release
-const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
-  '5.4.1-patch.1': '5.4.1',
-};
+import {
+  type ChromeVersion,
+  type ChromiumCommit,
+  type ChromiumDashVersionType,
+  ChromiumDashVersionSchema,
+  forkCompatibilityMap,
+  PuppeteerPackageSchema,
+  type PuppeteerPackageType,
+  type PuppeteerRelease,
+} from './util';
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
-  const puppeteerPackageJson = JSON.parse(
+  const { version }: PuppeteerPackageType = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
   );
-  const { version } = puppeteerPackageJson;
+
+  PuppeteerPackageSchema.validate({ version });
+
   if (version == null) {
     throw new Error(
       'Could not get the Puppeteer version! Check node_modules/puppteer/package.json'
@@ -42,11 +43,11 @@ async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   return puppeteerRelease;
 }
 
-async function getChromiumRevision(
+async function getChromeVersion(
   kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
-): Promise<ChromiumRevision> {
-  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/packages/puppeteer-core/src/revisions.ts`;
+): Promise<ChromeVersion> {
+  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/puppeteer-v${kibanaPuppeteerVersion}/packages/puppeteer-core/src/revisions.ts`;
   let body: string;
   try {
     log.info(`Fetching code from Puppeteer source: ${url}`);
@@ -57,58 +58,51 @@ async function getChromiumRevision(
     throw new Error(`Could not fetch ${url}. Check the URL in a browser and try again.`);
   }
 
-  let revision: ChromiumRevision | undefined;
+  let version: ChromeVersion | undefined;
   const lines = body.split('\n');
   let cursor = lines.length;
   while (--cursor >= 0) {
-    // look for the line of code matching `  chromium: '0123456',`
-    const test = lines[cursor].match(/^\s+chromium: '(\S+)',$/);
+    // look for the line of code matching `  chrome: '113.0.5672.63',`
+    const test = lines[cursor].match(/^\s+chrome: '(\S+)',$/);
     if (test != null) {
-      log.debug(`Parsed revision from source text: \`${lines[cursor]}\``);
-      [, revision] = test;
+      log.debug(`Parsed Chrome version from source text: \`${lines[cursor]}\``);
+      [, version] = test;
       break;
     }
   }
 
-  if (revision == null) {
+  if (version == null) {
     throw new Error(
-      `Could not find a Chromium revision listed in Puppeteer source! Check ${url} in a browser`
+      `Could not find a Chrome version listed in Puppeteer source! Check ${url} in a browser`
     );
   }
 
-  log.info(`Found Chromium revision ${revision} from Puppeteer ${kibanaPuppeteerVersion}`);
-  return revision;
+  log.info(`Found Chrome version ${version} from Puppeteer ${kibanaPuppeteerVersion}`);
+  return version;
 }
 
-async function getChromiumCommit(
-  revision: ChromiumRevision,
-  log: ToolingLog
-): Promise<ChromiumCommit> {
-  const url = `https://crrev.com/${revision}`;
+async function getChromiumCommit(version: ChromeVersion, log: ToolingLog): Promise<ChromiumCommit> {
+  const url = `https://chromiumdash.appspot.com/fetch_version?version=${version}`;
   log.info(`Fetching ${url}`);
-  const pageText = await fetch(url);
-  const $ = cheerio.load(await pageText.text());
+  const fetchResponse = await fetch(url);
+  const chromeJson: ChromiumDashVersionType = await fetchResponse.json();
 
-  // get the commit from the page title
-  let commit: ChromiumCommit | null = null;
-  const matches = $('title')
-    .text()
-    .match(/\S{40}/);
-  if (matches != null) {
-    log.debug(`Parsed commit hash from page title: \`${$('title').text()}\``);
-    [commit] = matches;
-  }
+  const {
+    chromium_main_branch_position: revision,
+    hashes: { chromium: commit },
+  } = chromeJson;
+
+  ChromiumDashVersionSchema.validate({
+    chromium_main_branch_position: revision,
+    hashes: { chromium: commit },
+  });
 
   if (commit == null) {
     throw new Error(`Could not find a Chromium commit! Check ${url} in a browser.`);
   }
 
-  const baseUrl = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots';
-
-  log.info(`Found Chromium commit ${commit} from revision ${revision}.`);
-  log.info(`Mac x64 download:     ${baseUrl}/Mac/${revision}/chrome-mac.zip`);
-  log.info(`Mac ARM download:     ${baseUrl}/Mac_Arm/${revision}/chrome-mac.zip`);
-  log.info(`Windows x64 download: ${baseUrl}/Win/${revision}/chrome-win.zip`);
+  log.info(`Found Chromium revision ${revision} from version ${version}.`);
+  log.info(`Found Chromium commit   ${commit} from revision ${revision}.`);
   return commit;
 }
 
@@ -127,8 +121,8 @@ run(
         puppeteerVersion = await getPuppeteerRelease(log);
       }
 
-      const chromiumRevision = await getChromiumRevision(puppeteerVersion, log);
-      await getChromiumCommit(chromiumRevision, log);
+      const chromeVersion = await getChromeVersion(puppeteerVersion, log);
+      await getChromiumCommit(chromeVersion, log);
     } catch (err) {
       log.error(err);
     }
