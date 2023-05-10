@@ -239,3 +239,17 @@ export const ResponseActionBodySchema = schema.oneOf([
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
 ]);
+
+export const UploadActionRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+
+    parameters: schema.object({
+      overwrite: schema.maybe(schema.boolean()),
+    }),
+
+    file: schema.stream(),
+  }),
+};
+
+export type UploadActionRequestBody = TypeOf<typeof UploadActionRequestSchema.body>;
