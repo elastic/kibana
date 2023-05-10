@@ -13,7 +13,7 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/expect",
     "@kbn/test",
+    "@kbn/serverless/test",
   ]
 }
