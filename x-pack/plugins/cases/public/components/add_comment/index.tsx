@@ -123,10 +123,11 @@ export const AddComment = React.memo(
             {
               onSuccess: (theCase) => {
                 onCommentPosted(theCase);
-                reset({ defaultValue: {} });
               },
             }
           );
+
+          reset({ defaultValue: {} });
         }
 
         removeItemFromSessionStorage(draftStorageKey);
