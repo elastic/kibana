@@ -111,11 +111,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns some data for both periods', async () => {
-          expect(Object.keys(mobiledetailedStatisticResponse.currentPeriod)).to.be.eql(
-            SERVICE_VERSIONS
+          expect(Object.keys(mobiledetailedStatisticResponse.currentPeriod).sort()).to.be.eql(
+            SERVICE_VERSIONS.sort()
           );
-          expect(Object.keys(mobiledetailedStatisticResponse.previousPeriod)).to.be.eql(
-            SERVICE_VERSIONS
+          expect(Object.keys(mobiledetailedStatisticResponse.previousPeriod).sort()).to.be.eql(
+            SERVICE_VERSIONS.sort()
           );
         });
 
