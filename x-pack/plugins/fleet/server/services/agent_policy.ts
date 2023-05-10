@@ -65,6 +65,7 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
   PackagePolicyRestrictionRelatedError,
+  FleetUnauthorizedError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -87,6 +88,7 @@ import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
+import { licenseService } from './license';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -227,6 +229,8 @@ class AgentPolicyService {
       id: options.id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
+
+    this.checkTamperProtectionLicense(agentPolicy);
 
     await this.requireUniqueName(soClient, agentPolicy);
 
@@ -470,6 +474,8 @@ class AgentPolicyService {
     if (!existingAgentPolicy) {
       throw new Error('Agent policy not found');
     }
+
+    this.checkTamperProtectionLicense(agentPolicy);
 
     if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
@@ -1128,6 +1134,12 @@ class AgentPolicyService {
       inactivityTimeout: parseInt(inactivityTimeout, 10),
       policyIds: policies.map((policy) => policy.id),
     }));
+  }
+
+  private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
+    if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
+      throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
+    }
   }
 }
 
