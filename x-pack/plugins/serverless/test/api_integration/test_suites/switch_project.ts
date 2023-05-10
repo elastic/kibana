@@ -8,18 +8,18 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const serverlessCommonApi = getService('serverlessCommonApi');
+  const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
   describe('switch_project', function () {
     it('rejects request with invalid body', async () => {
       const { body, status } = await supertest
         .post(`/internal/serverless/switch_project`)
-        .set(serverlessCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .send({ invalid: 'body' });
 
       // in a non-serverless environment this would return a 404
-      serverlessCommonApi.assertResponseStatusCode(400, status, body);
+      svlCommonApi.assertResponseStatusCode(400, status, body);
     });
   });
 }

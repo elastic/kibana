@@ -169,6 +169,7 @@ export function OverviewPage() {
         rightSideGroupProps: {
           responsive: true,
         },
+        'data-test-subj': 'obltOverviewPageHeader',
       }}
     >
       <HeaderMenu />
@@ -178,7 +179,7 @@ export function OverviewPage() {
         onViewDetailsClick={() => setIsDataAssistantFlyoutVisible(true)}
       />
 
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="obltOverviewAlerts">
         <EuiFlexItem>
           <SectionContainer
             title={i18n.translate('xpack.observability.overview.alerts.title', {

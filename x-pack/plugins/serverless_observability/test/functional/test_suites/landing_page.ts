@@ -8,13 +8,13 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const svlCommonPage = getPageObject('svlCommonPage');
-  const svlCommonNavigation = getService('svlCommonNavigation');
+  const svlObltOverviewPage = getPageObject('svlObltOverviewPage');
+  const svlObltNavigation = getService('svlObltNavigation');
 
-  describe('home page', function () {
-    it('has project header', async () => {
-      await svlCommonNavigation.navigateToKibanaHome();
-      await svlCommonPage.assertProjectHeaderExists();
+  describe('landing page', function () {
+    it('has alerts section', async () => {
+      await svlObltNavigation.navigateToLandingPage();
+      await svlObltOverviewPage.assertAlertsSectionExists();
     });
   });
 }

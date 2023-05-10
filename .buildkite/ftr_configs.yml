@@ -81,6 +81,10 @@ disabled:
   - x-pack/plugins/serverless/test/functional/test_suites/config.ts
   - x-pack/plugins/serverless/test/api_integration/config.base.ts
   - x-pack/plugins/serverless/test/api_integration/test_suites/config.ts
+  - x-pack/plugins/serverless_observability/test/functional/config.base.ts
+  - x-pack/plugins/serverless_observability/test/functional/test_suites/config.ts
+  - x-pack/plugins/serverless_observability/test/api_integration/config.base.ts
+  - x-pack/plugins/serverless_observability/test/api_integration/test_suites/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:

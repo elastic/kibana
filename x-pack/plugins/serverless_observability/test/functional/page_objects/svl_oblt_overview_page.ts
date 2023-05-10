@@ -7,12 +7,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function ServerlessCommonPageProvider({ getService }: FtrProviderContext) {
+export function SvlObltOverviewPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertProjectHeaderExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+    async assertAlertsSectionExists() {
+      await testSubjects.existOrFail('obltOverviewAlerts');
     },
   };
 }

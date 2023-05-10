@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { services as xpackFunctionalServices } from '../../../../../test/functional/services';
-
-import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
+import { services as coreServerlessApiServices } from '@kbn/serverless/test/api_integration/services';
 
 export const services = {
-  ...xpackFunctionalServices,
-
-  svlCommonNavigation: SvlCommonNavigationServiceProvider,
+  ...coreServerlessApiServices, // includes API integration services from x-pack/test/api_integration
 };

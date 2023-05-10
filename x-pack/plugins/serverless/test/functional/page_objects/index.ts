@@ -7,10 +7,10 @@
 
 import { pageObjects as xpackFunctionalPageObjects } from '../../../../../test/functional/page_objects';
 
-import { ServerlessCommonPageProvider } from './serverless_common_page';
+import { SvlCommonPageProvider } from './svl_common_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
 
-  serverlessCommon: ServerlessCommonPageProvider,
+  svlCommonPage: SvlCommonPageProvider,
 };

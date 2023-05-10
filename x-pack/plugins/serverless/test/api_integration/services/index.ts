@@ -7,10 +7,10 @@
 
 import { services as xpackApiIntegrationServices } from '../../../../../test/api_integration/services';
 
-import { ServerlessCommonApiServiceProvider } from './serverless_common_api';
+import { SvlCommonApiServiceProvider } from './svl_common_api';
 
 export const services = {
   ...xpackApiIntegrationServices,
 
-  serverlessCommonApi: ServerlessCommonApiServiceProvider,
+  svlCommonApi: SvlCommonApiServiceProvider,
 };

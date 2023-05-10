@@ -13,7 +13,7 @@ const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-export function ServerlessCommonApiServiceProvider({}: FtrProviderContext) {
+export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
   return {
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;

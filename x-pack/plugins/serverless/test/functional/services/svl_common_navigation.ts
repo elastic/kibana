@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function ServerlessNavigationServiceProvider({
+export function SvlCommonNavigationServiceProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
