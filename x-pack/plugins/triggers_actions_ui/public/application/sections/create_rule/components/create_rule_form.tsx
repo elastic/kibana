@@ -19,10 +19,11 @@ import {
   EuiSuperUpdateButton,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_EXECUTION_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import {
   TriggersActionsUiConfig,
@@ -34,7 +35,13 @@ import {
   RuleUpdates,
   RuleTypeModel,
   AlertsTableConfigurationRegistry,
+  ActionConnector,
+  ActionTypeIndex,
 } from '../../../../types';
+import {
+  loadActionTypes,
+  loadAllActions as loadConnectors,
+} from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { InitialRule, InitialRuleReducer, ruleReducer } from '../../rule_form/rule_reducer';
 import { DEFAULT_RULE_INTERVAL } from '../../../constants';
@@ -46,8 +53,9 @@ import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import { getRuleWithInvalidatedFields } from '../../../lib/value_validators';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { previewRule } from '../../../lib/rule_api/preview';
-import AlertsTableState, { AlertsTableStateProps } from '../../alerts_table/alerts_table_state';
+import AlertsTableState from '../../alerts_table/alerts_table_state';
 import { TypeRegistry } from '../../../type_registry';
+import { ActionTypePreview } from '../../action_connector_form/action_type_preview';
 
 interface CreateRuleFormProps<MetaData = Record<string, any>> {
   consumer: string;
@@ -103,9 +111,12 @@ export const CreateRuleForm = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
+  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
+  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
   const [hasPreviewAlertData, setHasPreviewAlertData] = useState<boolean>(false);
+  const [previewActionData, setPreviewActionData] = useState<RuleAction[]>([]);
   const [alertsTableQuery, setAlertsTableQuery] = useState<any>(null);
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -122,20 +133,55 @@ export const CreateRuleForm = ({
     application: { navigateToApp },
   } = useKibana().services;
 
-  const alertStateProps: Omit<AlertsTableStateProps, 'query'> = {
-    id: 'preview',
-    configurationId: 'preview',
-    alertsTableConfigurationRegistry:
-      alertsTableConfigurationRegistry as TypeRegistry<AlertsTableConfigurationRegistry>,
-    featureIds: ['alerts'],
-    showExpandToDetails: true,
-  };
-
   useEffect(() => {
     (async () => {
       setConfig(await triggersActionsUiConfig({ http }));
     })();
   }, [http]);
+
+  // load connector types
+  useEffect(() => {
+    (async () => {
+      try {
+        const registeredActionTypes = (
+          await loadActionTypes({ http, featureId: AlertingConnectorFeatureId })
+        ).sort((a, b) => a.name.localeCompare(b.name));
+        const index: ActionTypeIndex = {};
+        for (const actionTypeItem of registeredActionTypes) {
+          index[actionTypeItem.id] = actionTypeItem;
+        }
+        setActionTypesIndex(index);
+      } catch (e) {
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadConnectorTypesMessage',
+            { defaultMessage: 'Unable to load connector types' }
+          ),
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // load connectors
+  useEffect(() => {
+    (async () => {
+      try {
+        const loadedConnectors = await loadConnectors({ http });
+        setConnectors(loadedConnectors.filter((connector) => !connector.isMissingSecrets));
+      } catch (e) {
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.actionForm.unableToLoadActionsMessage',
+            {
+              defaultMessage: 'Unable to load connectors',
+            }
+          ),
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (ruleTypeId) {
@@ -318,8 +364,8 @@ export const CreateRuleForm = ({
                   <EuiSpacer size="s" />
                   <EuiText color="subdued">
                     <p>
-                      Preview the current configuration of your rule. Refresh to see an updated
-                      preview.
+                      Preview the alerts that would be detected with the current configuration of
+                      your rule.
                     </p>
                   </EuiText>
                   <EuiSpacer size="s" />
@@ -358,7 +404,7 @@ export const CreateRuleForm = ({
                         setHasPreviewAlertData(false);
                       }
 
-                      console.log(result);
+                      setPreviewActionData(result.actions ?? []);
                       setIsLoadingPreview(false);
                     }}
                     color="primary"
@@ -368,7 +414,46 @@ export const CreateRuleForm = ({
                   {isLoadingPreview ? <CenterJustifiedSpinner /> : null}
                   {hasPreviewAlertData && alertsTableQuery ? (
                     <>
-                      <AlertsTableState {...alertStateProps} query={alertsTableQuery} />
+                      <AlertsTableState
+                        id={'preview'}
+                        configurationId={'preview'}
+                        alertsTableConfigurationRegistry={
+                          alertsTableConfigurationRegistry as TypeRegistry<AlertsTableConfigurationRegistry>
+                        }
+                        featureIds={['alerts']}
+                        showExpandToDetails={true}
+                        query={alertsTableQuery}
+                      />
+                      <EuiSpacer size="m" />
+                    </>
+                  ) : null}
+                  {actionTypesIndex && previewActionData.length > 0 ? (
+                    <>
+                      <EuiTitle size="s">
+                        <h3>Action preview</h3>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <EuiText color="subdued">
+                        <p>The following notifications would have been sent</p>
+                      </EuiText>
+                      <EuiSpacer size="m" />
+                      {previewActionData.map((previewAction: RuleAction, index: number) => {
+                        const actionConnector = connectors.find(
+                          (field) => field.id === previewAction.id
+                        );
+
+                        return (
+                          <ActionTypePreview
+                            actionItem={previewAction}
+                            actionConnector={actionConnector!}
+                            index={index}
+                            key={`action-preview-action-at-${index}`}
+                            actionTypesIndex={actionTypesIndex}
+                            connectors={connectors}
+                            actionTypeRegistry={actionTypeRegistry}
+                          />
+                        );
+                      })}
                     </>
                   ) : null}
                 </EuiResizablePanel>
