@@ -11,6 +11,9 @@ export type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from './plugin';
+export const plugin = () => {
+  return new ObservabilitySharedPlugin();
+};
 
 export type {
   ObservabilityPageTemplateProps,
@@ -19,12 +22,17 @@ export type {
 
 export type { NavigationEntry } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
-
 export { useObservabilityTourContext } from './components/tour';
-
-export const plugin = () => {
-  return new ObservabilitySharedPlugin();
-};
+export { ActionMenu } from './components/action_menu/action_menu';
+export {
+  Section,
+  SectionLink,
+  SectionLinks,
+  SectionSpacer,
+  SectionSubtitle,
+  SectionTitle,
+} from './components/section/section';
+export type { SectionLinkProps } from './components/section/section';
 
 export {
   observabilityFeatureId,

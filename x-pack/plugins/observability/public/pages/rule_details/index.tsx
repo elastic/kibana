@@ -43,7 +43,7 @@ import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 

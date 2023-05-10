@@ -42,23 +42,8 @@ export const plugin: PluginInitializer<
   return new Plugin(initializerContext);
 };
 
-export * from './components/shared/action_menu';
-
-export type { UXMetrics } from './components/shared/core_web_vitals';
+export type { UXMetrics } from './components/core_web_vitals/core_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
-
-export {
-  getCoreVitalsComponent,
-  HeaderMenuPortal,
-  FieldValueSuggestions,
-  FieldValueSelection,
-  FilterValueLabel,
-  DatePicker,
-  LoadWhenInView,
-  ObservabilityAlertSearchBar,
-} from './components/shared';
-
-export type { LazyObservabilityPageTemplateProps } from './components/shared';
 
 export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
 export {
@@ -68,7 +53,9 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
-export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
+export { DatePicker } from './pages/overview/components/date_picker/date_picker';
+export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
+export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 
@@ -107,6 +94,5 @@ export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
 export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
 
-export type { NavigationSection } from './services/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';

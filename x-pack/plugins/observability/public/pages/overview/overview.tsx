@@ -14,13 +14,13 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 
 import type { ObservabilityAppServices } from '../../application/types';
 import { LoadingObservability } from '../../components/loading_observability';
-import { HeaderActions } from './components/header_actions';
+import { HeaderActions } from './components/header_actions/header_actions';
 import { DataAssistantFlyout } from './components/data_assistant_flyout';
-import { EmptySections } from './components/empty_sections';
-import { HeaderMenu } from './components/header_menu';
+import { EmptySections } from './components/sections/empty/empty_sections';
+import { HeaderMenu } from './components/header_menu/header_menu';
 import { Resources } from './components/resources';
-import { NewsFeed } from './components/news_feed';
-import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
+import { NewsFeed } from './components/news_feed/news_feed';
+import { ObservabilityStatusProgress } from './components/observability_status/observability_status_progress';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
 import { paths } from '../../config/paths';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -30,14 +30,14 @@ import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { getNewsFeed } from '../../services/get_news_feed';
+import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useOverviewMetrics } from './helpers/use_overview_metrics';
-import { SectionContainer } from '../../components/app/section';
+import { SectionContainer } from './components/sections/section_container';
 import { DataSections } from './components/data_sections';
 
 const ALERTS_PER_PAGE = 10;

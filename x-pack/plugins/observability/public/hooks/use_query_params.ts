@@ -8,9 +8,9 @@
 import { useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
 import { parse } from 'query-string';
+import { TimePickerTimeDefaults } from '@kbn/observability-shared-plugin/public/types';
 import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
 import { getAbsoluteTime } from '../utils/date';
-import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
 const getParsedParams = (search: string) => {
   return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
