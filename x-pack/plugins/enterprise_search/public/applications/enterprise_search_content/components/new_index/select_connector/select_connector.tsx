@@ -123,13 +123,13 @@ export const SelectConnector: React.FC = () => {
                   <br />
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.description.selfManaged.text"
-                    defaultMessage="For advanced use cases, {connectorsClient} connectors on your own infrastructure, customize existing connectors, or build your own using our connector framework and clients. {learnMore}"
+                    defaultMessage="For advanced use cases, deploy {connectorsClient} on your own infrastructure, to customize existing connectors, or build your own using our connector framework and clients. {learnMore}"
                     values={{
                       connectorsClient: (
                         <b>
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.indices.selectConnector.callout.description.connectorsClient',
-                            { defaultMessage: 'connectors client' }
+                            { defaultMessage: 'connector clients' }
                           )}
                         </b>
                       ),
