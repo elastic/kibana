@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
 
 import { HttpError } from '../../../../../../../common/types/api';
 
@@ -214,12 +214,18 @@ describe('TextExpansionCallOut', () => {
 
   describe('ModelStarted', () => {
     it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isDismissable />);
+      const wrapper = shallow(<ModelStarted dismiss={() => {}} isCompact={false} isDismissable />);
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isDismissable={false} />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable={false} />
+      );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
+    });
+    it('does not render description if it is set to compact', () => {
+      const wrapper = shallow(<ModelStarted dismiss={() => {}} isCompact isDismissable />);
+      expect(wrapper.find(EuiText).length).toBe(1); // Title only
     });
   });
 });

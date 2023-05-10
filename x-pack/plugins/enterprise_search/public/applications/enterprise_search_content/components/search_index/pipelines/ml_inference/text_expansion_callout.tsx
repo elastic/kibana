@@ -37,6 +37,7 @@ import { TextExpansionErrors } from './text_expansion_errors';
 export interface TextExpansionCallOutState {
   dismiss: () => void;
   ingestionMethod: string;
+  isCompact: boolean;
   isCreateButtonDisabled: boolean;
   isDismissable: boolean;
   isStartButtonDisabled: boolean;
@@ -44,6 +45,7 @@ export interface TextExpansionCallOutState {
 }
 
 export interface TextExpansionCallOutProps {
+  isCompact?: boolean;
   isDismissable?: boolean;
 }
 
@@ -298,8 +300,9 @@ export const ModelDeployed = ({
 
 export const ModelStarted = ({
   dismiss,
+  isCompact,
   isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isCompact' | 'isDismissable'>) => (
   <EuiCallOut color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
@@ -310,10 +313,15 @@ export const ModelStarted = ({
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">
               <h3>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
-                  { defaultMessage: 'Your ELSER model has started.' }
-                )}
+                {isCompact
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
+                      { defaultMessage: 'Your ELSER model is running.' }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
+                      { defaultMessage: 'Your ELSER model has started.' }
+                    )}
               </h3>
             </EuiText>
           </EuiFlexItem>
@@ -324,22 +332,24 @@ export const ModelStarted = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiText size="s">
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
-              { defaultMessage: 'Enjoy the power of ELSER in your custom Inference pipeline.' }
-            )}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
+      {!isCompact && (
+        <EuiFlexItem grow>
+          <EuiText size="s">
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
+                { defaultMessage: 'Enjoy the power of ELSER in your custom Inference pipeline.' }
+              )}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   </EuiCallOut>
 );
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
-  const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
+  const { dismiss, isCompact, isDismissable, show } = useTextExpansionCallOutData(props);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createTextExpansionModelError,
@@ -374,7 +384,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
       />
     );
   } else if (isModelStarted) {
-    return <ModelStarted dismiss={dismiss} isDismissable={isDismissable} />;
+    return <ModelStarted dismiss={dismiss} isCompact={isCompact} isDismissable={isDismissable} />;
   }
 
   return (
