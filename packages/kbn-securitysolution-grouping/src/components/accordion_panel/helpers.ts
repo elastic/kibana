@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const createGroupFilter = (selectedGroup: string, values?: string[] | null) => {
-  console.log('values', { values, selectedGroup });
-  return values != null && values.length > 0 && selectedGroup
+export const createGroupFilter = (selectedGroup: string, values?: string[] | null) =>
+  values != null && values.length > 0 && selectedGroup
     ? values.map((query) => ({
         meta: {
           alias: null,
@@ -29,7 +28,6 @@ export const createGroupFilter = (selectedGroup: string, values?: string[] | nul
         },
       }))
     : [];
-};
 
 export const getNullGroupFilter = (selectedGroup: string) => [
   {

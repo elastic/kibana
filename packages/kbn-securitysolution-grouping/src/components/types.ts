@@ -17,6 +17,8 @@ export const NONE_GROUP_KEY = 'none';
 export type RawBucket<T> = GenericBuckets & T;
 
 export type GroupingBucket<T> = RawBucket<T> & {
+  key: string[];
+  key_as_string: string;
   selectedGroup: string;
   isNullGroup?: boolean;
 };

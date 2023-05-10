@@ -82,12 +82,12 @@ const GroupPanelComponent = <T,>({
       lastForceState.current = 'open';
     }
   }, [onGroupClose, forceState, selectedGroup]);
-  const groupFieldValue = useMemo<{ asString?: null | string; asArray: null | string[] }>(
+  const groupFieldValue = useMemo<{ asString: string | null; asArray: string[] | null }>(
     () =>
       groupBucket.selectedGroup === selectedGroup
         ? {
             asString: groupBucket.key_as_string,
-            asArray: Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+            asArray: groupBucket.key,
           }
         : { asString: null, asArray: null },
     [groupBucket.key, groupBucket.key_as_string, groupBucket.selectedGroup, selectedGroup]

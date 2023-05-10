@@ -124,8 +124,6 @@ export const parseGroupingQuery = <T>(
   }
   const groupByFields = aggs?.groupByFields?.buckets?.map((group) => {
     const emptyValue = getEmptyValue();
-    // If the keys are different means that the `missing` values of the multi_terms aggregation have been applied, we use the default empty string.
-    // If the keys are equal means the `missing` values have not been applied, they are stored values.
     if (group.key === uniqueValue) {
       return {
         ...group,
