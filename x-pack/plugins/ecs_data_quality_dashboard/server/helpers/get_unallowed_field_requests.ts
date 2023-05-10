@@ -64,5 +64,4 @@ export const getMSearchRequestBody = ({
     },
   },
   runtime_mappings: {},
-  size: 0,
 });

@@ -9,10 +9,11 @@ import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
-import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
+import type { UnallowedValueCount, UnallowedValueRequestItem, UnallowedValueDoc } from '../types';
 
 export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
+  unallowedValuesDocs: Record<string, UnallowedValueDoc[]> | null;
   error: string | null;
   loading: boolean;
 }
@@ -28,6 +29,11 @@ export const useUnallowedValues = ({
     string,
     UnallowedValueCount[]
   > | null>(null);
+  const [unallowedValuesDocs, setUnallowedValuesDocs] = useState<Record<
+    string,
+    UnallowedValueDoc[]
+  > | null>(null);
+
   const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -48,13 +54,14 @@ export const useUnallowedValues = ({
           requestItems,
         });
 
-        const unallowedValuesMap = getUnallowedValues({
+        const { buckets: unallowedValuesMap, docs: unallowedValuesDocuments } = getUnallowedValues({
           requestItems,
           searchResults,
         });
 
         if (!abortController.signal.aborted) {
           setUnallowedValues(unallowedValuesMap);
+          setUnallowedValuesDocs(unallowedValuesDocuments);
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
@@ -74,5 +81,5 @@ export const useUnallowedValues = ({
     };
   }, [httpFetch, indexName, requestItems, setError]);
 
-  return { unallowedValues, error, loading };
+  return { unallowedValues, unallowedValuesDocs, error, loading };
 };

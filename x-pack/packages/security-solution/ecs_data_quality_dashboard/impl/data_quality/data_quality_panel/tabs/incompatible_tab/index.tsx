@@ -73,6 +73,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
     () => getIncompatibleValues(partitionedFieldMetadata.incompatible),
     [partitionedFieldMetadata.incompatible]
   );
+
   const markdownComments: string[] = useMemo(
     () =>
       getAllIncompatibleMarkdownComments({

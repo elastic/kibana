@@ -122,6 +122,7 @@ export const getAllIncompatibleMarkdownComments = ({
 }): string[] => {
   const incompatibleMappings = getIncompatibleMappings(partitionedFieldMetadata.incompatible);
   const incompatibleValues = getIncompatibleValues(partitionedFieldMetadata.incompatible);
+
   const fieldsInSameFamily = getIncompatiableFieldsInSameFamilyCount(
     partitionedFieldMetadata.incompatible
   );

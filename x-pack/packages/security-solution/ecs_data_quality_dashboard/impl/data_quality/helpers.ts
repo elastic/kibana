@@ -24,6 +24,7 @@ import type {
   PartitionedFieldMetadataStats,
   PatternRollup,
   UnallowedValueCount,
+  UnallowedValueDoc,
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
@@ -164,13 +165,16 @@ export const getEnrichedFieldMetadata = ({
   ecsMetadata,
   fieldMetadata,
   unallowedValues,
+  unallowedValuesDocs,
 }: {
   ecsMetadata: Record<string, EcsMetadata>;
   fieldMetadata: FieldType;
   unallowedValues: Record<string, UnallowedValueCount[]>;
+  unallowedValuesDocs: Record<string, UnallowedValueDoc[]>;
 }): EnrichedFieldMetadata => {
   const { field, type } = fieldMetadata;
   const indexInvalidValues = unallowedValues[field] ?? [];
+  const indexInvalidDocs = unallowedValuesDocs[field] ?? [];
 
   if (has(fieldMetadata.field, ecsMetadata)) {
     const ecsExpectedType = ecsMetadata[field].type;
@@ -183,6 +187,7 @@ export const getEnrichedFieldMetadata = ({
       indexFieldName: field,
       indexFieldType: type,
       indexInvalidValues,
+      indexInvalidDocs,
       hasEcsMetadata: true,
       isEcsCompliant,
       isInSameFamily,
@@ -192,6 +197,7 @@ export const getEnrichedFieldMetadata = ({
       indexFieldName: field,
       indexFieldType: type,
       indexInvalidValues,
+      indexInvalidDocs,
       hasEcsMetadata: false,
       isEcsCompliant: false,
       isInSameFamily: false, // custom fields are never in the same family
@@ -205,6 +211,7 @@ export const getMissingTimestampFieldMetadata = (): EnrichedFieldMetadata => ({
   indexFieldName: '@timestamp',
   indexFieldType: '-',
   indexInvalidValues: [],
+  indexInvalidDocs: [],
   isEcsCompliant: false,
   isInSameFamily: false, // `date` is not a member of any families
   type: 'date',

@@ -49,6 +49,13 @@ export const DOCUMENT_VALUES_ACTUAL = i18n.translate(
   }
 );
 
+export const DOCUMENTS_ACTUAL = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.documentActualColumn',
+  {
+    defaultMessage: 'Documents (actual)',
+  }
+);
+
 export const INDEX_MAPPING_TYPE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.indexMappingTypeColumn',
   {
@@ -74,5 +81,12 @@ export const SEARCH_FIELDS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.searchFieldsPlaceholder',
   {
     defaultMessage: 'Search fields',
+  }
+);
+
+export const CURRENT_VALUE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.currentValueColumn',
+  {
+    defaultMessage: 'Current value',
   }
 );

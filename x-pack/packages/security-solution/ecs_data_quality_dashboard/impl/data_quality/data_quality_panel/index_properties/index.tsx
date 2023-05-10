@@ -103,6 +103,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     error: unallowedValuesError,
     loading: loadingUnallowedValues,
     unallowedValues,
+    unallowedValuesDocs,
   } = useUnallowedValues({ indexName, requestItems });
 
   const mappingsProperties = useMemo(
@@ -121,8 +122,9 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         loadingMappings,
         mappingsProperties,
         unallowedValues,
+        unallowedValuesDocs,
       }),
-    [loadingMappings, mappingsProperties, unallowedValues]
+    [loadingMappings, mappingsProperties, unallowedValues, unallowedValuesDocs]
   );
 
   const { disabled: addToNewCaseDisabled, onAddToNewCase } = useAddToNewCase({
