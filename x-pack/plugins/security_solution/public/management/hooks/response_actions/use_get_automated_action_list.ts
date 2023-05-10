@@ -10,6 +10,7 @@ import { lastValueFrom, of } from 'rxjs';
 
 import { mergeMap } from 'rxjs/operators';
 
+import { compact, map } from 'lodash';
 import type { PaginationInputPaginated } from '../../../../common/search_strategy/security_solution/response_actions/common';
 import { Direction } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
@@ -58,7 +59,7 @@ export const useGetAutomatedActionList = (
 
       return {
         ...responseData,
-        items: responseData.edges.map((edge) => edge._source),
+        items: compact(map(responseData.edges, (edge) => edge._source)),
       };
     },
     {

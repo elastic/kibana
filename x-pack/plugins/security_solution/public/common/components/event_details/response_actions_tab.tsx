@@ -7,19 +7,11 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { map } from 'lodash';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
-import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
-import { useKibana } from '../../lib/kibana';
-import {
-  useGetAutomatedActionList,
-  useGetAutomatedActionResponseList,
-} from '../../../management/hooks/response_actions/use_get_automated_action_list';
+import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
@@ -38,9 +30,6 @@ export const useResponseActionsTab = ({
   ecsData?: Ecs;
   rawEventData: RawEventData;
 }) => {
-  const {
-    services: { osquery, application },
-  } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
   const expandedEventFieldsObject = rawEventData
@@ -60,7 +49,6 @@ export const useResponseActionsTab = ({
     { skip: shouldEarlyReturn }
   );
 
-  const { OsqueryResult } = osquery;
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
   const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
@@ -68,33 +56,6 @@ export const useResponseActionsTab = ({
   if (shouldEarlyReturn || !responseActions?.length) {
     return;
   }
-
-  const canReadOsquery = !!application?.capabilities?.osquery?.read;
-
-  const renderItems = () => {
-    return map(automatedList?.items, (item) => {
-      if (item && 'input_type' in item && item?.input_type === 'osquery') {
-        const actionId = item.action_id;
-        const queryId = item.queries[0].id;
-        const startDate = item['@timestamp'];
-
-        return (
-          <OsqueryResult
-            key={actionId}
-            actionId={actionId}
-            queryId={queryId}
-            startDate={startDate}
-            ruleName={ruleName}
-            ecsData={ecsData}
-            canReadOsquery={canReadOsquery}
-          />
-        );
-      }
-      if (item && 'EndpointActions' in item && item?.EndpointActions.input_type === 'endpoint') {
-        return <EndpointResponseActionResults action={item} ruleName={ruleName?.[0]} />;
-      }
-    });
-  };
 
   return {
     id: EventsViewType.responseActionsView,
@@ -109,54 +70,15 @@ export const useResponseActionsTab = ({
       <>
         <EuiSpacer size="s" />
         <TabContentWrapper data-test-subj="responseActonsViewWrapper">
-          {isFetched && totalItemCount ? renderItems() : null}
+          {isFetched && totalItemCount && automatedList?.items.length ? (
+            <ResponseActionsResults
+              actions={automatedList.items}
+              ruleName={ruleName}
+              ecsData={ecsData}
+            />
+          ) : null}
         </TabContentWrapper>
       </>
     ),
   };
-};
-
-interface EndpointResponseActionResultsProps {
-  action: LogsEndpointAction;
-  ruleName?: string;
-}
-
-const EndpointResponseActionResults = ({
-  action,
-  ruleName,
-}: EndpointResponseActionResultsProps) => {
-  const { action_id: actionId, expiration } = action.EndpointActions;
-  const { data: responseData } = useGetAutomatedActionResponseList({ actionId, expiration });
-
-  const eventText = getCommentText(action.EndpointActions.data.command);
-  return (
-    <EuiComment
-      username={ruleName}
-      timestamp={<FormattedRelative value={action['@timestamp']} />}
-      event={eventText}
-      data-test-subj={'endpoint-results-comment'}
-    >
-      <ActionsLogExpandedTray
-        action={
-          {
-            ...action.EndpointActions.data,
-            ...(action.error ? { errors: [action.error.message] } : {}),
-            startedAt: action['@timestamp'],
-            ...responseData,
-            // Did not type this strictly, because we're still waiting for UI, but this component will not be used in the long run
-          } as unknown as ActionDetails
-        }
-      />
-    </EuiComment>
-  );
-};
-
-const getCommentText = (command: ResponseActionsApiCommandNames) => {
-  if (command === 'isolate') {
-    return i18n.ENDPOINT_COMMANDS.isolated;
-  }
-  if (command === 'unisolate') {
-    return i18n.ENDPOINT_COMMANDS.released;
-  }
-  return `executed command ${command}`;
 };
