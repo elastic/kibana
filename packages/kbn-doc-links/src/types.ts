@@ -116,7 +116,9 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsConfluence: string;
     readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
@@ -124,6 +126,7 @@ export interface DocLinks {
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
+    readonly connectorsSharepoint: string;
     readonly connectorsWorkplaceSearch: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -140,6 +143,8 @@ export interface DocLinks {
     readonly machineLearningStart: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
+    readonly searchApplications: string;
+    readonly searchTemplates: string;
     readonly start: string;
     readonly syncRules: string;
     readonly troubleshootSetup: string;
@@ -281,6 +286,7 @@ export interface DocLinks {
     readonly networkMap: string;
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
+    readonly configureAlertSuppression: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
@@ -388,6 +394,7 @@ export interface DocLinks {
     serviceNowSIRAction: string;
     setupPrerequisites: string;
     slackAction: string;
+    slackApiAction: string;
     teamsAction: string;
     connectors: string;
   }>;
@@ -508,5 +515,8 @@ export interface DocLinks {
   readonly searchUI: {
     readonly appSearch: string;
     readonly elasticsearch: string;
+  };
+  readonly synthetics: {
+    readonly featureRoles: string;
   };
 }

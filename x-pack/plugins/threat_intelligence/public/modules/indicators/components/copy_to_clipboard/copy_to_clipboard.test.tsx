@@ -11,7 +11,7 @@ import {
   CopyToClipboardButtonEmpty,
   CopyToClipboardButtonIcon,
   CopyToClipboardContextMenu,
-} from '.';
+} from './copy_to_clipboard';
 
 const mockValue: string = 'Text copied';
 

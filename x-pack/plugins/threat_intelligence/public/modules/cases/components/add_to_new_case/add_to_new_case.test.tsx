@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaContext } from '../../../../hooks';
+import { KibanaContext } from '../../../../hooks/use_kibana';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';

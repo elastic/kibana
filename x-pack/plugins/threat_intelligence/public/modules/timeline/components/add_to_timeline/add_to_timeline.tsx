@@ -15,12 +15,15 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { generateDataProvider } from '../../utils';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators';
+import { generateDataProvider } from '../../utils/data_provider';
+import {
+  fieldAndValueValid,
+  getIndicatorFieldAndValue,
+} from '../../../indicators/utils/field_value';
 import { Indicator } from '../../../../../common/types/indicator';
-import { useKibana } from '../../../../hooks';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useStyles } from './styles';
-import { useAddToTimeline } from '../../hooks';
+import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
 
 const ICON_TYPE = 'timeline';
