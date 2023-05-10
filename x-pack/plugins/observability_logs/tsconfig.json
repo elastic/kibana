@@ -12,6 +12,7 @@
     "@kbn/fleet-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/io-ts-utils",
+    "@kbn/infra-plugin",
   ],
   "exclude": ["target/**/*"]
 }
