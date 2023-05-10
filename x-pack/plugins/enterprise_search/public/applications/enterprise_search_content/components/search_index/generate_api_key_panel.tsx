@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../shared/doc_links';
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
 import { SettingsLogic } from '../settings/settings_logic';
@@ -93,7 +94,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                                 defaultMessage="Generate an API key and read the {documentation} about posting documents to the Elasticsearch API endpoint. Use Elastic  {clients} for streamlined integration."
                                 values={{
                                   clients: (
-                                    <EuiLink href="" external>
+                                    <EuiLink href={docLinks.clientsGuide} external>
                                       {i18n.translate(
                                         'xpack.enterpriseSearch.content.overview.documentExample.description.clientsLink',
                                         { defaultMessage: 'programming language clients' }
@@ -101,7 +102,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                                     </EuiLink>
                                   ),
                                   documentation: (
-                                    <EuiLink href="" external>
+                                    <EuiLink href={docLinks.indexApi} external>
                                       {i18n.translate(
                                         'xpack.enterpriseSearch.content.overview.documentExample.description.documentationLink',
                                         { defaultMessage: 'documentation' }
