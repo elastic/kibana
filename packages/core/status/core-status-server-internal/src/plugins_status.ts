@@ -370,6 +370,6 @@ export class PluginsStatusService {
   }
 }
 
-let calls = 0;
-let cached = 0;
+const calls = 0;
+const cached = 0;
 const processed = new Set<PluginName>();
