@@ -10,15 +10,26 @@ import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { EuiFlexItem } from '@elastic/eui';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FilterGroupLoading } from '../../../common/components/filter_group/loading';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { FilterGroup } from '../../../common/components/filter_group';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
-type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls'>;
+type FilterItemSetProps = Omit<
+  ComponentProps<typeof FilterGroup>,
+  'initialControls' | 'dataViewId'
+>;
+
+const DATA_VIEW_NAME = 'SECURITY_SOLUTION_AD_HOC_ALERTS_DATA_VIEW';
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
-  const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;
+  const { onFilterChange, ...restFilterItemGroupProps } = props;
+
+  const {
+    indexPattern: { title },
+  } = useSourcererDataView(SourcererScopeName.detections);
 
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
 
@@ -32,19 +43,30 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
     // applicable to `alert` page as new alert mappings are added when first alert
     // is encountered
     (async () => {
-      const dataView = await dataViewService.get(dataViewId ?? '');
-      if (!dataView) return;
+      const localDataViewId = title;
+      let dataView;
+      try {
+        dataView = await dataViewService.get(localDataViewId ?? '');
+      } catch (error) {
+        // creates an adhoc dataview if it does not already exists just for alert index
+        dataView = await dataViewService.create({
+          id: DATA_VIEW_NAME,
+          name: DATA_VIEW_NAME,
+          title: localDataViewId,
+          allowNoIndex: true,
+        });
+      }
       for (const filter of DEFAULT_DETECTION_PAGE_FILTERS) {
         const fieldExists = dataView.getFieldByName(filter.fieldName);
         if (!fieldExists) {
-          dataViewService.clearInstanceCache(dataViewId ?? '');
+          dataViewService.clearInstanceCache(localDataViewId ?? '');
           setLoadingPageFilters(false);
           return;
         }
       }
       setLoadingPageFilters(false);
     })();
-  }, [dataViewId, dataViewService]);
+  }, [title, dataViewService]);
 
   const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
 
@@ -78,7 +100,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
   return (
     <FilterGroup
-      dataViewId={dataViewId}
+      dataViewId={DATA_VIEW_NAME}
       onFilterChange={filterChangesHandler}
       initialControls={initialFilterControls}
       {...restFilterItemGroupProps}

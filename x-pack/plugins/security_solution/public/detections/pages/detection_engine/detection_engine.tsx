@@ -351,7 +351,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         </EuiFlexGroup>
       ) : (
         <DetectionPageFilterSet
-          dataViewId={dataViewId}
           onFilterChange={pageFiltersUpdateHandler}
           filters={topLevelFilters}
           query={query}
@@ -367,7 +366,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [
       topLevelFilters,
       arePageFiltersEnabled,
-      dataViewId,
       statusFilter,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
