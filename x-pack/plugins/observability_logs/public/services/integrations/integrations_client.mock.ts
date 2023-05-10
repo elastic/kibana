@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'observabilityLogs';
-export const PLUGIN_NAME = 'observabilityLogs';
+import { IIntegrationsClient } from './types';
 
-/**
- * Exporting versioned APIs types
- */
-export * from './latest';
-export * as integrationsV1 from './integrations/v1';
+export const createIntegrationsClientMock = (): jest.Mocked<IIntegrationsClient> => ({
+  findIntegrations: jest.fn(),
+});

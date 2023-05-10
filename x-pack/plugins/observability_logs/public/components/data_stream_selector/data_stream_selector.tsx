@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -19,7 +19,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiPanel,
   EuiPopover,
+  EuiSkeletonLoading,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
@@ -46,8 +51,15 @@ export interface DataStreamSelectorProps {
   title: string;
   integrations: any[];
   uncategorizedStreams: any[];
-  onStreamSelected: (dataStream: any) => Promise<void>;
+  isSearching: boolean;
+  isLoadingIntegrations: boolean;
+  isLoadingUncategorizedStreams: boolean;
+  /* Triggered when a search or sorting is performed */
+  onSearch: () => void;
+  /* Triggered when the uncategorized streams entry is selected */
   onUncategorizedClick: () => void;
+  /* Triggered when a data stream entry is selected */
+  onStreamSelected: (dataStream: any) => Promise<void>;
 }
 
 type CurrentPanelId =
@@ -61,6 +73,10 @@ export function DataStreamSelector({
   title,
   integrations,
   uncategorizedStreams,
+  isSearching,
+  isLoadingIntegrations,
+  isLoadingUncategorizedStreams,
+  onSearch,
   onStreamSelected,
   onUncategorizedClick,
 }: DataStreamSelectorProps) {
@@ -69,40 +85,50 @@ export function DataStreamSelector({
 
   const [currentPanel, setCurrentPanel] = useState<CurrentPanelId>(INTEGRATION_PANEL_ID);
 
-  const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    const handleStreamSelection: StreamSelectionHandler = (dataStream) => {
-      onStreamSelected(dataStream).then(closePopover);
-    };
+  const handleStreamSelection = useCallback<StreamSelectionHandler>(
+    (dataStream) => {
+      onStreamSelected(dataStream);
+      closePopover();
+    },
+    [closePopover, onStreamSelected]
+  );
 
-    return buildIntegrationsTree({
+  const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
+    const { items, panels } = buildIntegrationsTree({
       list: integrations,
       onItemClick: setCurrentPanel,
       onStreamSelected: handleStreamSelection,
     });
-  }, [closePopover, integrations, onStreamSelected]);
+
+    const uncategorizedStreamsItem = {
+      name: uncategorizedLabel,
+      onClick: onUncategorizedClick,
+      panel: UNCATEGORIZED_STREAMS_PANEL_ID,
+    };
+
+    return {
+      items: [uncategorizedStreamsItem, ...items],
+      panels,
+    };
+  }, [integrations, handleStreamSelection, onUncategorizedClick]);
 
   const panels = [
     {
       id: INTEGRATION_PANEL_ID,
       title: integrationsLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: [
-        {
-          name: uncategorizedLabel,
-          onClick: onUncategorizedClick,
-          panel: UNCATEGORIZED_STREAMS_PANEL_ID,
-        },
-        ...integrationItems,
-      ],
+      items: integrationItems,
     },
     {
       id: UNCATEGORIZED_STREAMS_PANEL_ID,
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: uncategorizedStreams.map((stream) => ({
-        name: stream.name,
-        onClick: () => onStreamSelected(stream),
-      })),
+      items: isLoadingUncategorizedStreams
+        ? []
+        : uncategorizedStreams.map((stream) => ({
+            name: stream.name,
+            onClick: () => handleStreamSelection(stream),
+          })),
     },
     ...integrationPanels,
   ];
@@ -123,15 +149,17 @@ export function DataStreamSelector({
       {...(isMobile && { display: 'block' })}
       buffer={8}
     >
-      <EuiContextMenuPanel title={selectViewLabel} onTransitionComplete={console.log}>
-        <SearchControls />
+      <EuiContextMenuPanel title={selectViewLabel}>
+        <SearchControls isSearching={isSearching} onSearch={onSearch} />
         <EuiHorizontalRule margin="none" />
-        <EuiContextMenu
-          initialPanelId={currentPanel}
-          panels={panels}
-          className="eui-yScroll"
-          css={contextMenuStyles}
-        />
+        <ContextMenuSkeleton isLoading={isLoadingIntegrations}>
+          <EuiContextMenu
+            initialPanelId={currentPanel}
+            panels={panels}
+            className="eui-yScroll"
+            css={contextMenuStyles}
+          />
+        </ContextMenuSkeleton>
       </EuiContextMenuPanel>
     </EuiPopover>
   );
@@ -150,10 +178,11 @@ const DataStreamButton = (props: DataStreamButtonProps) => {
 type SearchStrategy = 'integrations' | 'integrationsStreams' | 'uncategorizedStreams';
 
 interface SearchControlsProps {
-  strategy: SearchStrategy;
+  isSearching: boolean;
+  onSearch: () => void;
 }
 
-const SearchControls = ({ strategy }: SearchControlsProps) => {
+const SearchControls = ({ isSearching, onSearch }: SearchControlsProps) => {
   /**
    * TODO: implement 3 different search strategies
    * - Search integrations: API request
@@ -169,6 +198,7 @@ const SearchControls = ({ strategy }: SearchControlsProps) => {
           <EuiFieldSearch
             compressed
             incremental
+            isLoading={isSearching}
             // onChange={searchByText} isLoading={isSearching}
           />
         </EuiFlexItem>
@@ -195,6 +225,28 @@ const SearchControls = ({ strategy }: SearchControlsProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>
+  );
+};
+
+const ContextMenuSkeleton = ({ children, isLoading }) => {
+  return (
+    <EuiSkeletonLoading
+      isLoading={isLoading}
+      contentAriaLabel={integrationsLabel}
+      loadingContent={
+        <EuiPanel>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiSkeletonTitle size="xs" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSkeletonText lines={5} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      }
+      loadedContent={children}
+    />
   );
 };
 

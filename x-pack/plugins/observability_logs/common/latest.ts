@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'observabilityLogs';
-export const PLUGIN_NAME = 'observabilityLogs';
-
-/**
- * Exporting versioned APIs types
- */
-export * from './latest';
-export * as integrationsV1 from './integrations/v1';
+export * from './integrations/v1';
