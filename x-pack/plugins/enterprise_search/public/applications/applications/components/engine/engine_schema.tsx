@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -44,8 +44,6 @@ import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-
-import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
 
@@ -154,10 +152,8 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 };
 
 export const EngineSchema: React.FC = () => {
-  const { engineName } = useValues(EngineIndicesLogic);
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const { isLoadingEngineSchema, schemaFields, hasSchemaConflicts } = useValues(EngineViewLogic);
-  const { fetchEngineSchema } = useActions(EngineViewLogic);
 
   const [isFilterByPopoverOpen, setIsFilterByPopoverOpen] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
@@ -200,10 +196,6 @@ export const EngineSchema: React.FC = () => {
   const totalConflictsHiddenByTypeFilters = onlyShowConflicts
     ? schemaFieldsMaybeWithConflicts.length - filteredSchemaFields.length
     : 0;
-
-  useEffect(() => {
-    fetchEngineSchema({ engineName });
-  }, [engineName]);
 
   const toggleDetails = (schemaField: SchemaField) => {
     const newItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };

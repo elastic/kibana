@@ -79,6 +79,9 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       actions.closeDeleteEngineModal();
       KibanaLogic.values.navigateToUrl(ENGINES_PATH);
     },
+    fetchEngine: ({ engineName }) => {
+      actions.fetchEngineSchema({ engineName });
+    },
   }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],
   reducers: () => ({
