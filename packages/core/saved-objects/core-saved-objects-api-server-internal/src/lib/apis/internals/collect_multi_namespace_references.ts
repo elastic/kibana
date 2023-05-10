@@ -26,7 +26,11 @@ import { findLegacyUrlAliases } from '../../legacy_url_aliases';
 import { getRootFields } from '../../included_fields';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
-import { findSharedOriginObjects, getSavedObjectFromSource, rawDocExistsInNamespace } from '../utils';
+import {
+  findSharedOriginObjects,
+  getSavedObjectFromSource,
+  rawDocExistsInNamespace,
+} from '../utils';
 
 /**
  * When we collect an object's outbound references, we will only go a maximum of this many levels deep before we throw an error.

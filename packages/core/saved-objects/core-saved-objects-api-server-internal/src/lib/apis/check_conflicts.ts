@@ -18,14 +18,7 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsCheckConflictsResponse,
 } from '@kbn/core-saved-objects-api-server';
-import {
-  Either,
-  errorContent,
-  isLeft,
-  isRight,
-  isMgetDoc,
-  rawDocExistsInNamespace,
-} from './utils';
+import { Either, errorContent, isLeft, isRight, isMgetDoc, rawDocExistsInNamespace } from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformCheckConflictsParams<T = unknown> {
