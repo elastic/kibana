@@ -16,8 +16,8 @@ import {
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
-  UXMetrics,
 } from '@kbn/observability-plugin/public';
+import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   coreWebVitalsQuery,
   transformCoreWebVitalsResponse,

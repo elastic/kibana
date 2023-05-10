@@ -76,7 +76,6 @@ const mockTimeRange = {
   to: '2022-02-16T15:59:59.999Z',
 };
 const mockOwner = 'securitySolution';
-const mockAppId = 'securitySolutionUI';
 const mockDataViews = {} as DataViewState;
 const mockReportType = 'kpi-over-time';
 const mockTitle = 'mockTitle';
@@ -106,7 +105,6 @@ describe('Embeddable', () => {
   it('renders title', async () => {
     const { container, getByText } = render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -124,7 +122,6 @@ describe('Embeddable', () => {
   it('renders no title if it is not given', async () => {
     const { container } = render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -142,7 +139,6 @@ describe('Embeddable', () => {
   it('renders lens component', () => {
     const { container } = render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -177,7 +173,6 @@ describe('Embeddable', () => {
   it('renders AddToCaseAction', () => {
     render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -190,7 +185,6 @@ describe('Embeddable', () => {
     );
 
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].timeRange).toEqual(mockTimeRange);
-    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].appId).toEqual(mockAppId);
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].lensAttributes).toEqual(mockLensAttrs);
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].owner).toEqual(mockOwner);
   });

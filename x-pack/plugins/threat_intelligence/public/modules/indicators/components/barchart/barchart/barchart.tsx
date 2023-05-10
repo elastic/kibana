@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { IndicatorBarchartLegendAction } from '../legend_action';
+import { IndicatorBarchartLegendAction } from '../legend_action/legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../../common/utils/dates';
 import type { ChartSeries } from '../../../services';
 
