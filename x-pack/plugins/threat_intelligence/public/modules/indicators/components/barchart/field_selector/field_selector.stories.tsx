@@ -10,7 +10,7 @@ import { Story } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
-import { IndicatorsFieldSelector } from '.';
+import { IndicatorsFieldSelector } from './field_selector';
 
 const mockIndexPattern: DataView = {
   fields: [

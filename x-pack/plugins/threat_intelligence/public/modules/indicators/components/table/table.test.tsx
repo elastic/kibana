@@ -7,7 +7,7 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsTable, IndicatorsTableProps } from '.';
+import { IndicatorsTable, IndicatorsTableProps } from './table';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_TEST_ID } from './components/open_flyout_button/test_ids';

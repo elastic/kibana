@@ -10,7 +10,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { IndicatorsBarChart } from '.';
+import { IndicatorsBarChart } from './barchart';
 import { ChartSeries } from '../../../services';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 

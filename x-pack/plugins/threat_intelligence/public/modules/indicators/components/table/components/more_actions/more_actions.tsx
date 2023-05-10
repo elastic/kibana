@@ -13,7 +13,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { AddToBlockListContextMenu } from '../../../../../block_list/components/add_to_block_list';
+import { AddToBlockListContextMenu } from '../../../../../block_list/components/add_to_block_list/add_to_block_list';
 import { AddToNewCase } from '../../../../../cases/components/add_to_new_case/add_to_new_case';
 import { AddToExistingCase } from '../../../../../cases/components/add_to_existing_case/add_to_existing_case';
 import { Indicator } from '../../../../../../../common/types/indicator';

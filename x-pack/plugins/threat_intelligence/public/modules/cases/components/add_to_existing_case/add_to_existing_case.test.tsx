@@ -11,7 +11,7 @@ import { AddToExistingCase } from './add_to_existing_case';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { KibanaContext } from '../../../../hooks';
+import { KibanaContext } from '../../../../hooks/use_kibana';
 
 const indicator: Indicator = generateMockFileIndicator();
 const onClick = () => window.alert('clicked');
