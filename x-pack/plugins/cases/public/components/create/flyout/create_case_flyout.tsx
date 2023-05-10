@@ -21,7 +21,7 @@ import type { CaseAttachmentsWithoutOwner } from '../../../types';
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   onClose?: () => void;
   onSuccess?: (theCase: CaseUI) => void;
