@@ -208,7 +208,6 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
 
-        // TODO: Use refresh=false.
         // Using `wait_for` helps avoid users seeing recently-deleted reports temporarily flashing back in the
         // job listing.
         const query = { id, index: deleteIndex, refresh: 'wait_for' as const };

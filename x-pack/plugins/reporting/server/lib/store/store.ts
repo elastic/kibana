@@ -22,7 +22,6 @@ import { MIGRATION_VERSION } from './report';
 
 type UpdateResponse<T> = estypes.UpdateResponse<T>;
 type IndexResponse = estypes.IndexResponse;
-const refresh: estypes.Refresh = 'wait_for';
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -154,14 +153,11 @@ export class ReportingStore {
     }
   }
 
-  /*
-   * Called from addReport, which handles any errors
-   */
   private async indexReport(report: Report): Promise<IndexResponse> {
     const doc = {
       index: report._index!,
       id: report._id,
-      refresh,
+      refresh: false,
       body: {
         ...report.toReportSource(),
         ...sourceDoc({
@@ -293,7 +289,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -332,7 +328,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -367,7 +363,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
@@ -394,7 +390,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh,
+        refresh: false,
         body: { doc },
       });
     } catch (err) {
