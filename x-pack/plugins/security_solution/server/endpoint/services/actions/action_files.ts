@@ -296,13 +296,13 @@ export const setFileActionId = async (
   action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>
 ): Promise<UploadedFile> => {
   assert(
-    action.parameters?.file.file_id,
-    `Action [${action.id}] has no 'parameters.file.file_id' defined. Unable to set action id on file record`
+    action.parameters?.file_id,
+    `Action [${action.id}] has no 'parameters.file_id' defined. Unable to set action id on file metadata record`
   );
 
   const fileClient = getFileClient(esClient, logger);
   const file = await fileClient.get<UploadFileInternalStorageMeta>({
-    id: action.parameters?.file.file_id,
+    id: action.parameters?.file_id,
   });
 
   await file.update({

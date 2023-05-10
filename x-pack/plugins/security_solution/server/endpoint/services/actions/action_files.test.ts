@@ -251,10 +251,10 @@ describe('Action Files service', () => {
     });
 
     it('should throw an error no `action.parameters.file.file_id` defined', async () => {
-      action.parameters!.file.file_id = '';
+      action.parameters!.file_id = '';
 
       await expect(setFileActionId(esClientMock, loggerMock, action)).rejects.toThrow(
-        "Action [123] has no 'parameters.file.file_id' defined. Unable to set action id on file record"
+        "Action [123] has no 'parameters.file_id' defined. Unable to set action id on file record"
       );
     });
   });
