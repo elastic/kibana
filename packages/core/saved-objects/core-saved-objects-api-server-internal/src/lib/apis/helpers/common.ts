@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSpacesExtension,
@@ -16,6 +17,8 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { normalizeNamespace } from '../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
+
+export type ICommonHelper = PublicMethodsOf<CommonHelper>;
 
 export class CommonHelper {
   private registry: ISavedObjectTypeRegistry;

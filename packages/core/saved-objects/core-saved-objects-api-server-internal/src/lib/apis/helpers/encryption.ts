@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   AuthorizationTypeMap,
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
 } from '@kbn/core-saved-objects-server';
+
+export type IEncryptionHelper = PublicMethodsOf<EncryptionHelper>;
 
 export class EncryptionHelper {
   private securityExtension?: ISavedObjectsSecurityExtension;

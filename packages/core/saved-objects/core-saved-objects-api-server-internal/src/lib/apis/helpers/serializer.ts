@@ -7,6 +7,7 @@
  */
 
 import { omit } from 'lodash';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
@@ -17,6 +18,8 @@ import {
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
+
+export type ISerializerHelper = PublicMethodsOf<SerializerHelper>;
 
 export class SerializerHelper {
   private registry: ISavedObjectTypeRegistry;

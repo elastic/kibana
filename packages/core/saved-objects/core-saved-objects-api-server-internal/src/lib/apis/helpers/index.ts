@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CommonHelper } from './common';
-import type { EncryptionHelper } from './encryption';
-import type { ValidationHelper } from './validation';
-import type { PreflightCheckHelper } from './preflight_check';
-import type { SerializerHelper } from './serializer';
+import type { ICommonHelper } from './common';
+import type { IEncryptionHelper } from './encryption';
+import type { IValidationHelper } from './validation';
+import type { IPreflightCheckHelper } from './preflight_check';
+import type { ISerializerHelper } from './serializer';
 
 export { CommonHelper } from './common';
 export { EncryptionHelper } from './encryption';
@@ -23,9 +23,9 @@ export {
 } from './preflight_check';
 
 export interface RepositoryHelpers {
-  common: CommonHelper;
-  encryption: EncryptionHelper;
-  validation: ValidationHelper;
-  preflight: PreflightCheckHelper;
-  serializer: SerializerHelper;
+  common: ICommonHelper;
+  encryption: IEncryptionHelper;
+  validation: IValidationHelper;
+  preflight: IPreflightCheckHelper;
+  serializer: ISerializerHelper;
 }

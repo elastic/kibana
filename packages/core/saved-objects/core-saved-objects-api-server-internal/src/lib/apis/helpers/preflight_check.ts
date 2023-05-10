@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   ISavedObjectTypeRegistry,
@@ -27,6 +28,8 @@ import {
   preflightCheckForCreate,
   PreflightCheckForCreateObject,
 } from '../internals/preflight_check_for_create';
+
+export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;
 
 export class PreflightCheckHelper {
   private registry: ISavedObjectTypeRegistry;

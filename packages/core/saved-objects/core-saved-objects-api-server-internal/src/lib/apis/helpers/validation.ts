@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { SavedObjectsTypeValidator } from '@kbn/core-saved-objects-base-server-internal';
@@ -14,6 +15,8 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+
+export type IValidationHelper = PublicMethodsOf<ValidationHelper>;
 
 export class ValidationHelper {
   private registry: ISavedObjectTypeRegistry;
