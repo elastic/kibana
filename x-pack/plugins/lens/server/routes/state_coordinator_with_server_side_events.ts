@@ -80,9 +80,12 @@ export const setupStateCoordinatorServer = () => {
   });
 
   function broadcastPatches() {
-    clients.forEach((client) =>
-      client.response.write(`data: ${JSON.stringify(getPatchesForClient(client))}\n\n`)
-    );
+    clients.forEach((client) => {
+      const patchesForClient = getPatchesForClient(client);
+      if (patchesForClient.length) {
+        client.response.write(`data: ${JSON.stringify(patchesForClient)}\n\n`);
+      }
+    });
   }
 
   app.post(STATE_PATCH_API_PATH, (request, response, next) => {

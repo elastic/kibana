@@ -34,6 +34,7 @@ export class StateCoordinator {
   }
 
   public static async listen() {
+    return; // uncomment to enable state coordination
     const { visId, sessionId } = StateCoordinator;
     if (!visId || !sessionId) return;
     // let patches: Patch[] = [];
