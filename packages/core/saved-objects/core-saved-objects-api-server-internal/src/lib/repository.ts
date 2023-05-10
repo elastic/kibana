@@ -94,6 +94,10 @@ import {
   performCollectMultiNamespaceReferences,
 } from './apis';
 
+/**
+ * Constructor options for {@link SavedObjectsRepository}
+ * @internal
+ */
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
@@ -107,31 +111,29 @@ export interface SavedObjectsRepositoryOptions {
 }
 
 /**
- * Saved Objects Respositiry - the client entry point for saved object manipulation.
+ * Saved Objects Repository - the client entry point for all saved object manipulation.
  *
  * The SOR calls the Elasticsearch client and leverages extension implementations to
  * support spaces, security, and encryption features.
  *
- * @public
+ * @internal
  */
 export class SavedObjectsRepository implements ISavedObjectsRepository {
-  private _migrator: IKibanaMigrator;
-  private _mappings: IndexMapping;
-  private _registry: ISavedObjectTypeRegistry;
-  private _allowedTypes: string[];
+  private readonly migrator: IKibanaMigrator;
+  private readonly mappings: IndexMapping;
+  private readonly registry: ISavedObjectTypeRegistry;
+  private readonly allowedTypes: string[];
   private readonly client: RepositoryEsClient;
-  private _serializer: SavedObjectsSerializer;
-  private _logger: Logger;
-
-  private apiExecutionContext: ApiExecutionContext;
+  private readonly serializer: SavedObjectsSerializer;
+  private readonly logger: Logger;
+  private readonly apiExecutionContext: ApiExecutionContext;
   private readonly extensions: SavedObjectsExtensions;
   private readonly helpers: RepositoryHelpers;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
    *
-   * @internalRemarks
-   * Tests are located in ./repository_create_repository.test.ts
+   * @internalRemarks Tests are located in ./repository_create_repository.test.ts
    *
    * @internal
    */
@@ -189,13 +191,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw new Error('Empty or missing types for saved object repository!');
     }
 
-    this._migrator = migrator;
-    this._mappings = mappings;
-    this._registry = typeRegistry;
+    this.migrator = migrator;
+    this.mappings = mappings;
+    this.registry = typeRegistry;
     this.client = createRepositoryEsClient(client);
-    this._allowedTypes = allowedTypes;
-    this._serializer = serializer;
-    this._logger = logger;
+    this.allowedTypes = allowedTypes;
+    this.serializer = serializer;
+    this.logger = logger;
     this.extensions = extensions;
 
     const commonHelper = new CommonHelper({
@@ -237,12 +239,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       client: this.client,
       extensions: this.extensions,
       helpers: this.helpers,
-      allowedTypes: this._allowedTypes,
-      registry: this._registry,
-      serializer: this._serializer,
-      migrator: this._migrator,
-      mappings: this._mappings,
-      logger: this._logger,
+      allowedTypes: this.allowedTypes,
+      registry: this.registry,
+      serializer: this.serializer,
+      migrator: this.migrator,
+      mappings: this.mappings,
+      logger: this.logger,
     };
   }
 
@@ -581,7 +583,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     internalOptions?: SavedObjectsFindInternalOptions
   ): ISavedObjectsPointInTimeFinder<T, A> {
     return new PointInTimeFinder(findOptions, {
-      logger: this._logger,
+      logger: this.logger,
       client: this,
       ...dependencies,
       internalOptions,
