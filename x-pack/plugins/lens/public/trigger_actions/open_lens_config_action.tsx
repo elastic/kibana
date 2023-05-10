@@ -53,7 +53,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
   }
 
   public getIconType() {
-    return 'pencil';
+    return 'lensApp';
   }
 
   public async isCompatible({ embeddable }: Context) {
@@ -68,7 +68,6 @@ export class ConfigureInLensPanelAction implements Action<Context> {
 
     // send the overlay ref to the root embeddable if it is capable of tracking overlays
     const rootEmbeddable = embeddable.getRoot();
-    // console.log(rootEmbeddable);
     const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
     const ConfigPanel = await embeddable.openConfingPanel(this.startDependencies);
     const handle = this.overlays.openFlyout(
@@ -80,6 +79,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
           if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
+        outsideClickCloses: true,
       }
     );
     overlayTracker?.openOverlay(handle);

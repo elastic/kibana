@@ -209,40 +209,6 @@ export function Chart({
       }),
     [breakdown?.field, chart?.timeInterval, chart?.title, suggestion, dataView, filters, query]
   );
-  // const updateVisualizationState = useCallback(
-  //   (state) => {
-  //     const updatedSuggestion = {
-  //       ...suggestion,
-  //       visualizationState: state,
-  //     } as Suggestion;
-  //     setSuggestion(updatedSuggestion);
-  //   },
-  //   [suggestion]
-  // );
-
-  // const updateDatasourceState = useCallback(
-  //   (state) => {
-  //     const updatedSuggestion = {
-  //       ...suggestion,
-  //       datasourceState: state,
-  //     } as Suggestion;
-  //     setSuggestion(updatedSuggestion);
-  //   },
-  //   [suggestion]
-  // );
-
-  // const updateAll = useCallback(
-  //   (datasourceState, visualizationState) => {
-  //     const updatedSuggestion = {
-  //       ...suggestion,
-  //       datasourceState,
-  //       visualizationState,
-  //     } as Suggestion;
-  //     setSuggestion(updatedSuggestion);
-  //   },
-  //   [suggestion]
-  // );
-
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
       const updatedSuggestion = {
@@ -470,6 +436,7 @@ export function Chart({
           initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
+          isSaveable={false}
         />
       )}
       {isFlyoutVisible && ConfigPanel}
