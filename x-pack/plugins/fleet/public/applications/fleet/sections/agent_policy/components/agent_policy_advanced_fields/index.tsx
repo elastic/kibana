@@ -104,7 +104,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 
   const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
-  // rename this to match with gergo's for readability
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
 
   return (
