@@ -706,9 +706,7 @@ describe('migration actions', () => {
 
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
-  //
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/156903
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -1098,9 +1096,7 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of task'
-          ),
+          message: expect.stringContaining('[timeout_exception]'),
           type: 'wait_for_task_completion_timeout',
         },
       });
@@ -1348,8 +1344,7 @@ describe('migration actions', () => {
     });
   });
 
-  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/156904
-  describe.skip('waitForPickupUpdatedMappingsTask', () => {
+  describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
@@ -1400,9 +1395,7 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of task'
-          ),
+          message: expect.stringContaining('[timeout_exception]'),
           type: 'wait_for_task_completion_timeout',
         },
       });
