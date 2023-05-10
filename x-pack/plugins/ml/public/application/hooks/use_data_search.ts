@@ -197,7 +197,6 @@ export const useFetchDataDriftResult = (
     return () => {
       controller.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dataSearch, fields]);
   return result;
 };
