@@ -111,16 +111,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns some data for both periods', async () => {
-          expect(Object.keys(mobiledetailedStatisticResponse.currentPeriod)).to.be.eql([
-            '2.3',
-            '1.1',
-            '1.2',
-          ]);
-          expect(Object.keys(mobiledetailedStatisticResponse.previousPeriod)).to.be.eql([
-            '2.3',
-            '1.1',
-            '1.2',
-          ]);
+          expect(Object.keys(mobiledetailedStatisticResponse.currentPeriod)).to.be.eql(
+            SERVICE_VERSIONS
+          );
+          expect(Object.keys(mobiledetailedStatisticResponse.previousPeriod)).to.be.eql(
+            SERVICE_VERSIONS
+          );
         });
 
         it('returns same number of buckets for both periods', () => {

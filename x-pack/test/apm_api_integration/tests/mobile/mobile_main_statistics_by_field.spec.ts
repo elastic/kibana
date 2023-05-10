@@ -14,6 +14,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 const GALAXY_DURATION = 500;
 const HUAWEI_DURATION = 20;
 const TRANSACTIONS_COUNT = 3;
+const SERVICE_VERSIONS = ['1.0', '2.0'];
+const OS_VERSIONS = ['10', '11'];
 // we generate 3 transactions per each mobile device
 // timerange 15min, interval 5m, rate 1
 function calculateLatency(duration: number) {
@@ -40,7 +42,7 @@ async function generateData({
       environment: 'production',
       agentName: 'android/java',
     })
-    .mobileDevice({ serviceVersion: '1.0' })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[0] })
     .deviceInfo({
       manufacturer: 'Samsung',
       modelIdentifier: 'SM-G973F',
@@ -48,7 +50,7 @@ async function generateData({
     })
     .osInfo({
       osType: 'android',
-      osVersion: '10',
+      osVersion: OS_VERSIONS[0],
       osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
       runtimeVersion: '2.1.0',
     })
@@ -70,7 +72,7 @@ async function generateData({
       environment: 'production',
       agentName: 'android/java',
     })
-    .mobileDevice({ serviceVersion: '2.0' })
+    .mobileDevice({ serviceVersion: SERVICE_VERSIONS[1] })
     .deviceInfo({
       manufacturer: 'Huawei',
       modelIdentifier: 'HUAWEI P2-0000',
@@ -78,7 +80,7 @@ async function generateData({
     })
     .osInfo({
       osType: 'android',
-      osVersion: '11',
+      osVersion: OS_VERSIONS[1],
       osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
       runtimeVersion: '2.1.0',
     })
@@ -201,7 +203,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(['1.0', '2.0']);
+        expect(fieldValues).to.be.eql(SERVICE_VERSIONS);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
 
@@ -219,7 +221,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(['10', '11']);
+        expect(fieldValues).to.be.eql(OS_VERSIONS);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
 
