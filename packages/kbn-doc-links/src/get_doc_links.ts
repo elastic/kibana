@@ -380,6 +380,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
