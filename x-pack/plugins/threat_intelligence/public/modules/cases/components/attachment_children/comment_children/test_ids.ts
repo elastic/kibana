@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './table';
+export const LOADING_LOGO_TEST_ID = 'tiCasesLoadingLogo';

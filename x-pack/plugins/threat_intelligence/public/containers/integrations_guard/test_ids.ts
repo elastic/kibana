@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './integrations_guard';
+export const LOADING_LOGO_TEST_ID = 'tiIndicatorsLoadingLogo';

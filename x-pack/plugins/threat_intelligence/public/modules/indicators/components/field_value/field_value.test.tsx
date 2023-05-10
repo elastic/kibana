@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { IndicatorFieldValue } from '.';
+import { IndicatorFieldValue } from './field_value';
 import {
   generateMockIndicator,
   generateMockIndicatorWithTlp,
@@ -25,7 +25,11 @@ describe('<IndicatorField />', () => {
     const { asFragment } = render(
       <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
     );
-    expect(asFragment()).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        0.0.0.0
+      </DocumentFragment>
+    `);
   });
 
   it(`should return ${EMPTY_VALUE}`, () => {
@@ -33,7 +37,11 @@ describe('<IndicatorField />', () => {
     const { asFragment } = render(
       <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
     );
-    expect(asFragment()).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        -
+      </DocumentFragment>
+    `);
   });
 
   it('should return date-formatted value', () => {
@@ -43,7 +51,11 @@ describe('<IndicatorField />', () => {
         <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
       </TestProvidersComponent>
     );
-    expect(asFragment()).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        Dec 31, 2021 @ 20:01:01.000
+      </DocumentFragment>
+    `);
   });
 
   it('should render tlp marking badge', () => {
@@ -53,6 +65,24 @@ describe('<IndicatorField />', () => {
         <IndicatorFieldValue indicator={generateMockIndicatorWithTlp()} field={mockField} />
       </TestProvidersComponent>
     );
-    expect(asFragment()).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        <span
+          class="euiBadge emotion-euiBadge"
+          style="background-color: rgb(189, 39, 30); color: rgb(255, 255, 255);"
+          title="Red"
+        >
+          <span
+            class="euiBadge__content emotion-euiBadge__content"
+          >
+            <span
+              class="euiBadge__text emotion-euiBadge__text"
+            >
+              Red
+            </span>
+          </span>
+        </span>
+      </DocumentFragment>
+    `);
   });
 });

@@ -421,7 +421,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
         onChange: (updatedValues: FormLocation[]) => {
-          setValue(ConfigKey.LOCATIONS, updatedValues, {
+          const valuesToSave = updatedValues.map(({ id, label, isServiceManaged }) => ({
+            id,
+            label,
+            isServiceManaged,
+          }));
+          setValue(ConfigKey.LOCATIONS, valuesToSave, {
             shouldValidate: Boolean(formState.submitCount > 0),
           });
         },
