@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { getSavedObjectNamespaces } from './namespaces';
 export { isFoundGetResponse, type GetResponseFound } from './es_responses';
 export { findSharedOriginObjects } from './find_shared_origin_objects';
 export {
@@ -20,6 +19,7 @@ export {
   getSavedObjectFromSource,
   setManaged,
   normalizeNamespace,
+  getSavedObjectNamespaces,
   type GetSavedObjectFromSourceOptions,
 } from './internal_utils';
 export { type Left, type Either, type Right, isLeft, isRight } from './either';

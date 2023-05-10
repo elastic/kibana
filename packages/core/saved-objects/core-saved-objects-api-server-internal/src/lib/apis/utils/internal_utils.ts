@@ -264,6 +264,24 @@ export function setManaged({
 }
 
 /**
+ * Returns a string array of namespaces for a given saved object. If the saved object is undefined, the result is an array that contains the
+ * current namespace. Value may be undefined if an existing saved object has no namespaces attribute; this should not happen in normal
+ * operations, but it is possible if the Elasticsearch document is manually modified.
+ *
+ * @param namespace The current namespace.
+ * @param document Optional existing saved object that was obtained in a preflight operation.
+ */
+export function getSavedObjectNamespaces(
+  namespace?: string,
+  document?: SavedObjectsRawDoc
+): string[] | undefined {
+  if (document) {
+    return document._source?.namespaces;
+  }
+  return [SavedObjectsUtils.namespaceIdToString(namespace)];
+}
+
+/**
  * Extracts the contents of a decorated error to return the attributes for bulk operations.
  */
 export const errorContent = (error: DecoratedError) => error.output.payload;
