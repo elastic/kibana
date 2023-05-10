@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreTheme } from '@kbn/core/public';
-import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
+import { EuiButton, EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,7 @@ import {
 } from '../state_management';
 import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
+import { StateCoordinator } from '../state_management/state_coordinator';
 
 const container = document.createElement('div');
 let isMenuOpen = false;
@@ -65,6 +66,9 @@ export function SettingsMenu({
       <EuiPopoverTitle>
         <FormattedMessage id="xpack.lens.settings.title" defaultMessage="Lens settings" />
       </EuiPopoverTitle>
+      <EuiButton onClick={() => StateCoordinator.clearVisualizationPatches()}>
+        Clear current changes
+      </EuiButton>
       <EuiSwitch
         label={i18n.translate('xpack.lens.settings.autoApply', {
           defaultMessage: 'Auto-apply visualization changes',

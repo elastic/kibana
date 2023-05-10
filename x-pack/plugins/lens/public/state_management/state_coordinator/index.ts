@@ -12,11 +12,11 @@ import { STATE_PATCH_API_PATH } from '../../../common/constants';
 type Listener = (patches: Patch[]) => void;
 
 export class StateCoordinator {
-  private static _instance: StateCoordinator;
   private static http?: HttpSetup;
   private static visId?: string;
   private static sessionId?: string;
   private static POLLING_INTERVAL = 1000;
+  private static listeners: Listener[] = [];
 
   public static setHTTP(http: HttpSetup) {
     this.http = http;
@@ -45,31 +45,37 @@ export class StateCoordinator {
       ).patches;
     }
 
-    console.log(patches);
+    StateCoordinator.listeners.forEach((listener) => patches.length && listener(patches));
 
     setTimeout(() => this.runPoll(), POLLING_INTERVAL);
   }
 
   private constructor() {}
 
-  public static get instance() {
-    if (!this._instance) {
-      this._instance = new StateCoordinator();
-    }
-
-    return this._instance;
+  public static registerPatchListener(listener: Listener) {
+    StateCoordinator.listeners.push(listener);
   }
 
-  registerPatchListener(listener: Listener) {
-    this.listeners.push(listener);
-  }
-
-  public sendPatch(patch: Patch) {
-    const { http, visId, sessionId } = StateCoordinator;
+  public static clearVisualizationPatches() {
+    const { http, visId } = StateCoordinator;
     if (!http || !visId) return;
 
+    return http.delete(STATE_PATCH_API_PATH, {
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      query: {
+        visId,
+      },
+    });
+  }
+
+  public static sendPatch(patch: Patch) {
+    const { http, visId, sessionId } = StateCoordinator;
+    if (!http || !visId || !sessionId) return;
+
     http.post(STATE_PATCH_API_PATH, {
-      method: 'POST',
       cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json',

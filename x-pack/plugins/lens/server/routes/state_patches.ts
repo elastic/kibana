@@ -65,4 +65,20 @@ export async function statePatches(router: IRouter) {
       });
     }
   );
+
+  router.delete(
+    {
+      path: STATE_PATCH_API_PATH,
+      validate: {
+        query: schema.object({
+          visId: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      delete patches[req.query.visId];
+
+      return res.ok();
+    }
+  );
 }

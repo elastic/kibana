@@ -20,7 +20,7 @@ export const stateHistoryMiddleware =
       const forwardPatch = compare(prevState, newState);
       const backwardPatch = compare(newState, prevState);
 
-      StateCoordinator.instance.sendPatch(forwardPatch);
+      StateCoordinator.sendPatch(forwardPatch);
 
       next(recordUndoableStateChange({ patch: backwardPatch }));
     } else {

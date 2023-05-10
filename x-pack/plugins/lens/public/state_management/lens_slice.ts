@@ -244,6 +244,7 @@ export const recordUndoableStateChange = createAction<{
   patch: Patch;
 }>('lens/recordUndoableStateChange');
 export const undo = createAction('lens/undo');
+export const applyPatches = createAction<{ patches: Patch[] }>('lens/applyPatches');
 
 export const lensActions = {
   setState,
@@ -279,6 +280,7 @@ export const lensActions = {
   syncLinkedDimensions,
   recordUndoableStateChange,
   undo,
+  applyPatches,
 };
 export const undoRedoActions = [
   updateDatasourceState,
@@ -1243,6 +1245,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             undoableOperationHistory: history.slice(0, history.length - 1),
           }
         : currentState;
+    },
+    [applyPatches.type]: (_state, { payload: { patches } }: { payload: { patches: Patch[] } }) => {
+      let newState = current(_state);
+      patches.forEach((patch) => {
+        newState = applyPatch(newState, patch, false, false).newDocument;
+      });
+      return newState;
     },
   });
 };

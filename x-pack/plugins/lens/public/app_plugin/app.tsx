@@ -32,6 +32,7 @@ import {
   updateDatasourceState,
   selectActiveDatasourceId,
   selectFrameDatasourceAPI,
+  applyPatches,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -46,6 +47,7 @@ import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
 } from './get_application_user_messages';
+import { StateCoordinator } from '../state_management/state_coordinator';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -103,6 +105,13 @@ export function App({
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
+
+  useEffect(() => {
+    StateCoordinator.registerPatchListener((patches) => {
+      console.log(patches);
+      dispatch(applyPatches({ patches }));
+    });
+  }, [dispatch]);
 
   const {
     persistedDoc,
