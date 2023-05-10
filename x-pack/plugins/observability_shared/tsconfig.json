@@ -23,6 +23,12 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/data-plugin",
+    "@kbn/es-types",
+    "@kbn/spaces-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/datemath",
   ],
   "exclude": ["target/**/*"]
 }
