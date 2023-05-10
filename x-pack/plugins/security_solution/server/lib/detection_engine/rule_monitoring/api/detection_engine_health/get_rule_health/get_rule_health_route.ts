@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type { GetRuleHealthResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type {
+  GetRuleHealthRequest,
+  GetRuleHealthResponse,
+  HealthResponseMetadata,
+} from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   GET_RULE_HEALTH_URL,
   GetRuleHealthRequestBody,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { fetchRuleById } from './fetch_rule_by_id';
+import { validateGetRuleHealthRequest } from './validate_get_rule_health_request';
 
 /**
  * Get health overview of a rule. Scope: a given detection rule in the current Kibana space.
@@ -34,14 +41,32 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       },
     },
     async (context, request, response) => {
-      const { body } = request;
       const siemResponse = buildSiemResponse(response);
 
       try {
+        const params = validateGetRuleHealthRequest(request.body);
+
         const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
+        const soClient = ctx.core.savedObjects.client;
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+
+        const fetchRuleResult = await fetchRuleById(rulesClient, params.ruleId);
+        if (fetchRuleResult.error) {
+          return siemResponse.error({
+            body: fetchRuleResult.error.message,
+            statusCode: fetchRuleResult.error.statusCode,
+          });
+        }
+
+        const rule = fetchRuleResult.value;
 
         const responseBody: GetRuleHealthResponse = {
-          foo: 'bar',
+          meta: createRuleHealthMetadata(params),
+          rule,
+          last_execution: {} as any,
+          execution_stats: {} as any,
+          execution_history: {} as any,
         };
 
         return response.ok({ body: responseBody });
@@ -54,4 +79,17 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       }
     }
   );
+};
+
+const createRuleHealthMetadata = (params: GetRuleHealthRequest): HealthResponseMetadata => {
+  const requestReceivedAt = moment(params.requestReceivedAt);
+  const responseGeneratedAt = moment().utc();
+  const processingTime = moment.duration(responseGeneratedAt.diff(requestReceivedAt));
+
+  return {
+    request_received_at: requestReceivedAt.toISOString(),
+    response_generated_at: responseGeneratedAt.toISOString(),
+    processing_time_ms: processingTime.asMilliseconds(),
+    interval: params.interval,
+  };
 };

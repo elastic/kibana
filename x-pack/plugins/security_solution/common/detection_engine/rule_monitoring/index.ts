@@ -12,6 +12,8 @@ export * from './api/rule_execution_logs/get_rule_execution_events_schemas';
 export * from './api/rule_execution_logs/get_rule_execution_results_schemas';
 export * from './api/urls';
 
+export * from './model/detection_engine_health/health_interval';
+export * from './model/detection_engine_health/health_response_metadata';
 export * from './model/execution_event';
 export * from './model/execution_metrics';
 export * from './model/execution_result';
