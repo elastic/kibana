@@ -31,6 +31,8 @@ export const makeActionContext = (
     name: 'fieldName',
     type: 'keyword',
     value: 'some value',
+    searchable: true,
+    aggregatable: true,
   },
   nodeRef: {} as MutableRefObject<HTMLElement>,
   metadata: undefined,

@@ -12,6 +12,7 @@ import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { head } from 'lodash/fp';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
@@ -46,7 +47,7 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
     getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
     isCompatible: async ({ field }) =>
       fieldHasCellActions(field.name) &&
-      !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
+      !UNSUPPORTED_FIELD_TYPES.includes(head(field.esTypes) ?? '') &&
       !!field.aggregatable,
     execute: async (context) => {
       if (!context.nodeRef.current) return;

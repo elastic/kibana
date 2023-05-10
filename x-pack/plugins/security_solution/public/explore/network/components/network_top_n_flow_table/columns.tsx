@@ -77,6 +77,7 @@ export const getNetworkTopNFlowColumns = (
                 value: ip,
                 type: 'keyword',
                 aggregatable: true,
+                searchable: true,
               }}
             >
               <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
@@ -94,6 +95,7 @@ export const getNetworkTopNFlowColumns = (
                   value: geo,
                   type: 'keyword',
                   aggregatable: true,
+                  searchable: true,
                 }}
               >
                 {' '}

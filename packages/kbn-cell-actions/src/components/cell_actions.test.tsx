@@ -11,9 +11,16 @@ import React from 'react';
 import { CellActions } from './cell_actions';
 import { CellActionsMode } from '../constants';
 import { CellActionsProvider } from '../context/cell_actions_context';
+import { CellActionField } from '../types';
 
 const TRIGGER_ID = 'test-trigger-id';
-const FIELD = { name: 'name', value: '123', type: 'text' };
+const FIELD: CellActionField = {
+  name: 'name',
+  value: '123',
+  type: 'text',
+  searchable: true,
+  aggregatable: true,
+};
 
 jest.mock('./hover_actions_popover', () => ({
   HoverActionsPopover: jest.fn((props) => (

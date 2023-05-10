@@ -27,6 +27,7 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
+import { browserFieldToFieldSpec } from '../../../types';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -78,10 +79,8 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
       !data
         ? null
         : {
-            name: data.field,
             value,
-            type: data.type,
-            aggregatable: browserField?.aggregatable,
+            ...browserFieldToFieldSpec(browserField, data),
           },
     [browserField, data, value]
   );

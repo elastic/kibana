@@ -32,6 +32,7 @@ export const ScoreComponent = ({
         value: score.entityValue,
         type: 'keyword',
         aggregatable: true,
+        searchable: true,
       }}
       triggerId={SecurityCellActionsTrigger.DEFAULT}
       visibleCellActions={5}

@@ -17,6 +17,7 @@ import type { EventFieldsData } from './types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
+import { browserFieldToFieldSpec } from '../../types';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -37,6 +38,7 @@ export const getFieldFromBrowserField = memoizeOne(
     get(browserFields, keys),
   (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
 );
+
 export const getColumns = ({
   browserFields,
   eventId,
@@ -75,10 +77,8 @@ export const getColumns = ({
             return (
               <SecurityCellActions
                 field={{
-                  name: data.field,
                   value: values,
-                  type: data.type,
-                  aggregatable: fieldFromBrowserField?.aggregatable,
+                  ...browserFieldToFieldSpec(fieldFromBrowserField, data),
                 }}
                 triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
                 mode={CellActionsMode.INLINE}

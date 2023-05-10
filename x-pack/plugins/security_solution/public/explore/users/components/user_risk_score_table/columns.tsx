@@ -50,6 +50,7 @@ export const getUserRiskScoreColumns = ({
               value: userName,
               type: 'keyword',
               aggregatable: true,
+              searchable: true,
             }}
             metadata={{
               telemetry: CELL_ACTIONS_TELEMETRY,

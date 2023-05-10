@@ -10,6 +10,7 @@ import type {
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
@@ -20,30 +21,8 @@ export interface CellActionsProviderProps {
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
 }
 
-export interface CellActionField {
-  /**
-   * Field name.
-   * Example: 'host.name'
-   */
-  name: string;
-  /**
-   * Field type.
-   * Example: 'keyword'
-   */
-  type: string;
-  /**
-   * Field value.
-   * Example: 'My-Laptop'
-   */
+export interface CellActionField extends FieldSpec {
   value: string | string[] | null | undefined;
-  /**
-   * When true the field supports aggregations.
-   *
-   * It defaults to false.
-   *
-   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
-   */
-  aggregatable?: boolean;
 }
 
 type Metadata = Record<string, unknown>;

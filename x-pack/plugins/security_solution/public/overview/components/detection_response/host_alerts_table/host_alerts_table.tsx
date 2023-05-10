@@ -157,6 +157,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
           value: hostName,
           type: 'keyword',
           aggregatable: true,
+          searchable: true,
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -185,6 +186,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             value: hostName,
             type: 'keyword',
             aggregatable: true,
+            searchable: true,
           }}
           mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -217,6 +219,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             value: hostName,
             type: 'keyword',
             aggregatable: true,
+            searchable: true,
           }}
           mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -248,6 +251,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             value: hostName,
             type: 'keyword',
             aggregatable: true,
+            searchable: true,
           }}
           mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
@@ -279,6 +283,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             value: hostName,
             type: 'keyword',
             aggregatable: true,
+            searchable: true,
           }}
           mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

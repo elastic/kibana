@@ -64,6 +64,8 @@ export const getAlertsTypeTableColumns = (
                       name: 'event.type',
                       value: 'denied',
                       type: 'keyword',
+                      searchable: true,
+                      aggregatable: true,
                     }}
                     metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
                   >

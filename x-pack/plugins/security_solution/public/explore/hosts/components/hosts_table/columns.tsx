@@ -46,6 +46,7 @@ export const getHostsColumns = (
                 name: 'host.name',
                 value: hostName[0],
                 type: 'keyword',
+                searchable: true,
                 aggregatable: true,
               }}
             >
@@ -104,6 +105,8 @@ export const getHostsColumns = (
                 name: 'host.os.name',
                 value: hostOsName[0],
                 type: 'keyword',
+                searchable: true,
+                aggregatable: true,
               }}
             >
               {hostOsName}
@@ -131,6 +134,8 @@ export const getHostsColumns = (
                 name: 'host.os.version',
                 value: hostOsVersion[0],
                 type: 'keyword',
+                searchable: true,
+                aggregatable: true,
               }}
             >
               {hostOsVersion}

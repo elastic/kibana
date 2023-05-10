@@ -182,7 +182,13 @@ const NetworkDetailsComponent: React.FC = () => {
               }
               title={
                 <SecurityCellActions
-                  field={{ type: 'ip', value: ip, name: `${flowTarget}.ip` }}
+                  field={{
+                    type: 'ip',
+                    value: ip,
+                    name: `${flowTarget}.ip`,
+                    aggregatable: true,
+                    searchable: true,
+                  }}
                   mode={CellActionsMode.HOVER_DOWN}
                   visibleCellActions={5}
                   triggerId={SecurityCellActionsTrigger.DEFAULT}

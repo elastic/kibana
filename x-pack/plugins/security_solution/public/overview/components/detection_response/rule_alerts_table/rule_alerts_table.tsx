@@ -105,6 +105,7 @@ export const getTableColumns: GetTableColumns = ({
           value: name,
           type: 'keyword',
           aggregatable: true,
+          searchable: true,
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}

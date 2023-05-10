@@ -46,6 +46,7 @@ export const getHostRiskScoreColumns = ({
               name: 'host.name',
               value: hostName,
               type: 'keyword',
+              searchable: true,
               aggregatable: true,
             }}
             metadata={{

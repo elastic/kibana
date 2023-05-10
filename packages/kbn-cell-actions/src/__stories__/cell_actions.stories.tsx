@@ -12,11 +12,17 @@ import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';
 import { CellActionsMode } from '../constants';
-import type { CellActionsProps } from '../types';
+import type { CellActionField, CellActionsProps } from '../types';
 
 const TRIGGER_ID = 'testTriggerId';
 
-const FIELD = { name: 'name', value: '123', type: 'text' };
+const FIELD: CellActionField = {
+  name: 'name',
+  value: '123',
+  type: 'text',
+  searchable: true,
+  aggregatable: true,
+};
 
 const getCompatibleActions = () =>
   Promise.resolve([
