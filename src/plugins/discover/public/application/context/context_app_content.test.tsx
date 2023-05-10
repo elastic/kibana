@@ -15,11 +15,15 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
 import { dataViewMock } from '../../__mocks__/data_view';
-import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ServicesContextProvider } from '../services_provider';
 import { buildDataTableRecord } from '../../utils/build_data_record';
+
+const MockDiscoverGrid = () => <></>;
+jest.mock('../../components/discover_grid/discover_grid', () => ({
+  DiscoverGrid: jest.fn(() => <MockDiscoverGrid />),
+}));
 
 describe('ContextAppContent test', () => {
   const mountComponent = ({
@@ -74,9 +78,9 @@ describe('ContextAppContent test', () => {
     } as unknown as ContextAppContentProps;
 
     return mountWithIntl(
-      <KibanaContextProvider services={discoverServiceMock}>
+      <ServicesContextProvider services={discoverServiceMock}>
         <ContextAppContent {...props} />
-      </KibanaContextProvider>
+      </ServicesContextProvider>
     );
   };
 
@@ -97,6 +101,6 @@ describe('ContextAppContent test', () => {
 
   it('should render discover grid correctly', () => {
     const component = mountComponent({ isLegacy: false });
-    expect(component.find(DiscoverGrid).length).toBe(1);
+    expect(component.find(MockDiscoverGrid).length).toBe(1);
   });
 });

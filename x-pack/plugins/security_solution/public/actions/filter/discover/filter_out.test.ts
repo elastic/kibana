@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -13,37 +12,36 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
-import { createFilterOutCellActionFactory } from './filter_out';
+import { createFilterOutDiscoverCellActionFactory } from './filter_out';
 import type { SecurityCellActionExecutionContext } from '../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { TimelineId } from '../../../../common/types';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { BehaviorSubject } from 'rxjs';
+import { APP_UI_ID } from '../../../../common';
 
 const services = createStartServicesMock();
-const mockFilterManager = services.data.query.filterManager;
+const mockGlobalFilterManager = services.data.query.filterManager;
 
-const mockState = {
-  ...mockGlobalState,
-  timeline: {
-    ...mockGlobalState.timeline,
-    timelineById: {
-      ...mockGlobalState.timeline.timelineById,
-      [TimelineId.active]: {
-        ...mockGlobalState.timeline.timelineById[TimelineId.active],
-        filterManager: createFilterManagerMock(),
-      },
-    },
-  },
-};
+const currentAppIdSubject$ = new BehaviorSubject<string>(APP_UI_ID);
+services.application.currentAppId$ = currentAppIdSubject$.asObservable();
+
+jest.mock('@kbn/ui-actions-plugin/public', () => ({
+  ...jest.requireActual('@kbn/ui-actions-plugin/public'),
+  addFilterIn: () => {},
+  addFilterOut: () => {},
+}));
 
 const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-describe('createFilterOutCellActionFactory', () => {
-  const filterOutActionFactory = createFilterOutCellActionFactory({ store: mockStore, services });
-  const filterOutAction = filterOutActionFactory({ id: 'testAction' });
+describe('createFilterOutDiscoverCellActionFactory', () => {
+  const createFilterOutCellAction = createFilterOutDiscoverCellActionFactory({
+    store: mockStore,
+    services,
+  });
+  const filterOutAction = createFilterOutCellAction({ id: 'testAction' });
 
   beforeEach(() => {
+    currentAppIdSubject$.next(APP_UI_ID);
     jest.clearAllMocks();
   });
 
@@ -63,6 +61,12 @@ describe('createFilterOutCellActionFactory', () => {
     it('should return true if everything is okay', async () => {
       expect(await filterOutAction.isCompatible(context)).toEqual(true);
     });
+
+    it('should return false if not in security', async () => {
+      currentAppIdSubject$.next('not-security');
+      expect(await filterOutAction.isCompatible(context)).toEqual(false);
+    });
+
     it('should return false if field not allowed', async () => {
       expect(
         await filterOutAction.isCompatible({
@@ -73,33 +77,10 @@ describe('createFilterOutCellActionFactory', () => {
     });
   });
 
-  describe('generic scope execution', () => {
-    const dataTableContext = {
-      ...context,
-      metadata: { scopeId: TableId.alertsOnAlertsPage },
-    } as SecurityCellActionExecutionContext;
-
+  describe('execution', () => {
     it('should execute using generic filterManager', async () => {
-      await filterOutAction.execute(dataTableContext);
-      expect(mockFilterManager.addFilters).toHaveBeenCalled();
-      expect(
-        mockState.timeline.timelineById[TimelineId.active].filterManager?.addFilters
-      ).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('timeline scope execution', () => {
-    const timelineContext = {
-      ...context,
-      metadata: { scopeId: TimelineId.active },
-    } as SecurityCellActionExecutionContext;
-
-    it('should execute using timeline filterManager', async () => {
-      await filterOutAction.execute(timelineContext);
-      expect(
-        mockState.timeline.timelineById[TimelineId.active].filterManager?.addFilters
-      ).toHaveBeenCalled();
-      expect(mockFilterManager.addFilters).not.toHaveBeenCalled();
+      await filterOutAction.execute(context);
+      expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
     });
   });
 });

@@ -14,7 +14,7 @@ import { esHits } from '../../__mocks__/es_hits';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ServicesContextProvider } from '../../application/services_provider';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { getDocId } from '../../utils/get_doc_id';
@@ -49,14 +49,19 @@ function getProps() {
   };
 }
 
-function getComponent(props: DiscoverGridProps = getProps()) {
+async function getComponent(props: DiscoverGridProps = getProps()) {
   const Proxy = (innerProps: DiscoverGridProps) => (
-    <KibanaContextProvider services={discoverServiceMock}>
+    <ServicesContextProvider services={discoverServiceMock}>
       <DiscoverGrid {...innerProps} />
-    </KibanaContextProvider>
+    </ServicesContextProvider>
   );
 
-  return mountWithIntl(<Proxy {...props} />);
+  const component = mountWithIntl(<Proxy {...props} />);
+  await act(async () => {
+    // needed by cell actions to complete async loading
+    component.update();
+  });
+  return component;
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
@@ -91,8 +96,8 @@ async function toggleDocSelection(
 describe('DiscoverGrid', () => {
   describe('Document selection', () => {
     let component: ReactWrapper<DiscoverGridProps>;
-    beforeEach(() => {
-      component = getComponent();
+    beforeEach(async () => {
+      component = await getComponent();
     });
 
     test('no documents are selected initially', async () => {
@@ -178,8 +183,8 @@ describe('DiscoverGrid', () => {
   });
 
   describe('edit field button', () => {
-    it('should render the edit field button if onFieldEdited is provided', () => {
-      const component = getComponent({
+    it('should render the edit field button if onFieldEdited is provided', async () => {
+      const component = await getComponent({
         ...getProps(),
         columns: ['message'],
         onFieldEdited: jest.fn(),
@@ -194,8 +199,8 @@ describe('DiscoverGrid', () => {
       expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
     });
 
-    it('should not render the edit field button if onFieldEdited is not provided', () => {
-      const component = getComponent({
+    it('should not render the edit field button if onFieldEdited is not provided', async () => {
+      const component = await getComponent({
         ...getProps(),
         columns: ['message'],
       });
