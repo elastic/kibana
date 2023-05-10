@@ -123,7 +123,7 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { addSuccess, addWarning } = useAppToasts();
+  const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const {
     data: { dataViews },
@@ -335,8 +335,6 @@ const CreateRulePageComponent: React.FC = () => {
 
   const copyConfigurations = useCallback(
     (rule: Rule) => {
-      addWarning(`Copy "${activeStep}" configurations"`);
-
       const {
         aboutRuleData: aboutStepData,
         defineRuleData: defineStepData,
@@ -356,7 +354,7 @@ const CreateRulePageComponent: React.FC = () => {
         setActionsRuleData(actionsStepData);
       }
     },
-    [activeStep, addWarning]
+    [activeStep]
   );
 
   const getAccordionType = useCallback(
