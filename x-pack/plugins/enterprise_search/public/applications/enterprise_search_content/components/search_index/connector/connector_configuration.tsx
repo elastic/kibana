@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
@@ -377,6 +378,9 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <BetaConnectorCallout />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

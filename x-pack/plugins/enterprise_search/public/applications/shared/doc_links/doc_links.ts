@@ -62,12 +62,14 @@ class DocLinks {
   public cloudIndexManagement: string;
   public connectors: string;
   public connectorsAzureBlobStorage: string;
+  public connectorsClients: string;
   public connectorsConfluence: string;
   public connectorsGoogleCloudStorage: string;
   public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
+  public connectorsNative: string;
   public connectorsNetworkDrive: string;
   public connectorsOracle: string;
   public connectorsPostgreSQL: string;
@@ -197,11 +199,13 @@ class DocLinks {
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
     this.connectorsConfluence = '';
+    this.connectorsClients = '';
     this.connectorsGoogleCloudStorage = '';
     this.connectorsJira = '';
     this.connectorsMicrosoftSQL = '';
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
+    this.connectorsNative = '';
     this.connectorsNetworkDrive = '';
     this.connectorsOracle = '';
     this.connectorsPostgreSQL = '';
@@ -332,12 +336,14 @@ class DocLinks {
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
+    this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
+    this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;

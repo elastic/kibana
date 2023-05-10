@@ -23,8 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { BetaConnectorCallout } from '../../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../../shared/doc_links';
-
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
@@ -207,6 +207,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder hasShadow={false}>
                 <ConvertConnector />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder hasShadow={false}>
+                <BetaConnectorCallout />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>

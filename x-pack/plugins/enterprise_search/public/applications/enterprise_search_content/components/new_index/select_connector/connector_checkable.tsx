@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { BETA_LABEL } from '../../../../shared/constants';
+import { BETA_LABEL, NATIVE_LABEL } from '../../../../shared/constants';
 
 export type ConnectorCheckableProps = Omit<
   EuiCheckableCardProps,
@@ -31,6 +31,7 @@ export type ConnectorCheckableProps = Omit<
   icon: string;
   isBeta: boolean;
   isTechPreview: boolean;
+  showNativeBadge: boolean;
   name: string;
   serviceType: string;
 };
@@ -40,6 +41,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   icon,
   isBeta,
   isTechPreview,
+  showNativeBadge,
   name,
   serviceType,
   ...props
@@ -67,7 +69,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       name={name}
       value={serviceType}
     >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="xs">
         {documentationUrl && (
           <EuiFlexItem grow={false}>
             <EuiLink target="_blank" href={documentationUrl}>
@@ -78,6 +80,13 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                 }
               )}
             </EuiLink>
+          </EuiFlexItem>
+        )}
+        {showNativeBadge && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <EuiText size="xs">{NATIVE_LABEL}</EuiText>
+            </EuiBadge>
           </EuiFlexItem>
         )}
         {isBeta && (

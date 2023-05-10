@@ -116,12 +116,14 @@ export interface DocLinks {
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsAzureBlobStorage: string;
+    readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
+    readonly connectorsNative: string;
     readonly connectorsNetworkDrive: string;
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
