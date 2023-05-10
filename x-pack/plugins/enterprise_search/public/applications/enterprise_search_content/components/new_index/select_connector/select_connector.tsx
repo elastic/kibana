@@ -102,7 +102,7 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.description.textcloud"
-                    defaultMessage="Use {native} connectors out of the box on Elastic cloud. {learnMore}"
+                    defaultMessage="{native} are available directly within Elastic Cloud deployments. No additional infrastructure is required. Self-managed deployments must deploy the connector service to run native connectors. {learnMore}"
                     values={{
                       learnMore: (
                         <EuiLink target="_blank" href={docLinks.connectorsNative}>
@@ -113,7 +113,7 @@ export const SelectConnector: React.FC = () => {
                         <b>
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.indices.selectConnector.callout.description.native',
-                            { defaultMessage: 'native' }
+                            { defaultMessage: 'Native connectors' }
                           )}
                         </b>
                       ),
