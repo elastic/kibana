@@ -27,8 +27,8 @@ testAndReport() {
 
   echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
 #  node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-#  node --test-reporter=./lifecycle_gen.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-  node --test-reporter=./lifecycle_stream.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+  node --test-reporter=./lifecycle_gen.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+#  node --test-reporter=./lifecycle_stream.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
 #  node --test-reporter spec --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
 #  node --test-reporter spec --test
 
