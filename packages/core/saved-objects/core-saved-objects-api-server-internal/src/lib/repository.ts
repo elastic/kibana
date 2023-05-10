@@ -148,18 +148,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     /** The injectedConstructor is only used for unit testing */
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
+    const mappings = migrator.getActiveMappings();
+    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
+    const serializer = new SavedObjectsSerializer(typeRegistry);
+    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
+    const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
     const missingTypeMappings = includedHiddenTypes.filter((type) => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
         `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`
       );
     }
-
-    const mappings = migrator.getActiveMappings();
-    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
-    const serializer = new SavedObjectsSerializer(typeRegistry);
-    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
-    const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
 
     return new injectedConstructor({
       index: indexName,
