@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import { CopyRuleConfigurationsPopover } from '../../../../detection_engine/rule_creation_ui/pages/copy_configs';
 
@@ -17,6 +18,8 @@ interface StepPanelProps {
   children: React.ReactNode;
   loading: boolean;
   title?: string;
+  ruleId?: string;
+  ruleType?: Type;
   copyConfigurations?: (rule: Rule) => void;
 }
 
@@ -30,6 +33,8 @@ const StepPanelComponent: React.FC<StepPanelProps> = ({
   children,
   loading,
   title,
+  ruleId,
+  ruleType,
   copyConfigurations,
 }) => (
   <MyPanel hasBorder>
@@ -44,7 +49,11 @@ const StepPanelComponent: React.FC<StepPanelProps> = ({
     {title && copyConfigurations && (
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <HeaderSection title={title} />
-        <CopyRuleConfigurationsPopover copyConfigurations={copyConfigurations} />
+        <CopyRuleConfigurationsPopover
+          copyConfigurations={copyConfigurations}
+          ruleType={ruleType}
+          ruleId={ruleId}
+        />
       </EuiFlexGroup>
     )}
     {children}

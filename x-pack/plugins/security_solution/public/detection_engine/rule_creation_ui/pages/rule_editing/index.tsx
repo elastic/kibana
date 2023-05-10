@@ -252,6 +252,8 @@ const EditRulePageComponent: FC = () => {
               loading={loading || isSavedQueryLoading}
               title={ruleI18n.DEFINITION}
               copyConfigurations={copyConfigurations}
+              ruleType={rule?.type}
+              ruleId={rule?.id}
             >
               {defineStepDataWithSavedQuery != null && !isSavedQueryLoading && (
                 <StepDefineRule
@@ -285,6 +287,7 @@ const EditRulePageComponent: FC = () => {
               loading={loading}
               title={ruleI18n.ABOUT}
               copyConfigurations={copyConfigurations}
+              ruleId={rule?.id}
             >
               {aboutStep.data != null && defineStep.data != null && (
                 <StepAboutRule
@@ -314,6 +317,7 @@ const EditRulePageComponent: FC = () => {
               loading={loading}
               title={ruleI18n.SCHEDULE}
               copyConfigurations={copyConfigurations}
+              ruleId={rule?.id}
             >
               {scheduleStep.data != null && (
                 <StepScheduleRule

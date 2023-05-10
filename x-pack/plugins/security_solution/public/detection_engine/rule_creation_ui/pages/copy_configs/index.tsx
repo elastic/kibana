@@ -9,11 +9,13 @@ import React, { useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSkeletonText,
 } from '@elastic/eui';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import type { Rule } from '../../../rule_management/logic/types';
@@ -21,6 +23,8 @@ import type { Rule } from '../../../rule_management/logic/types';
 const TAGS_POPOVER_WIDTH = 274;
 
 interface Props {
+  ruleId?: string;
+  ruleType?: Type;
   copyConfigurations: (rule: Rule) => void;
 }
 
@@ -29,7 +33,11 @@ interface Props {
  *
  * @param onSelectedTagsChanged change listener to be notified when tag selection changes
  */
-const CopyRuleConfigurationsPopoverComponent = ({ copyConfigurations }: Props) => {
+const CopyRuleConfigurationsPopoverComponent = ({
+  ruleId,
+  ruleType,
+  copyConfigurations,
+}: Props) => {
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     filterOptions: {
       filter: '',
@@ -45,14 +53,16 @@ const CopyRuleConfigurationsPopoverComponent = ({ copyConfigurations }: Props) =
   });
 
   const selectableOptions = useMemo(() => {
-    return rules.map(
+    const filteredRules = rules.filter((rule) => !ruleType || rule.type === ruleType);
+    return filteredRules.map(
       (rule) =>
         ({
           label: rule.name,
           data: rule,
+          append: rule.id === ruleId && <EuiIcon type="refresh" size="s" />,
         } as EuiSelectableOption)
     );
-  }, [rules]);
+  }, [ruleId, ruleType, rules]);
 
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
 

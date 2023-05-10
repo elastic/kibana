@@ -59,8 +59,10 @@ export const stepActionsDefaultValue: ActionsStepRule = {
 const GhostFormField = () => <></>;
 
 const DisplayActionsHeader = ({
+  ruleId,
   copyConfigurations,
 }: {
+  ruleId?: string;
   copyConfigurations?: (rule: Rule) => void;
 }) => {
   return (
@@ -75,7 +77,7 @@ const DisplayActionsHeader = ({
           </h4>
         </EuiTitle>
         {copyConfigurations && (
-          <CopyRuleConfigurationsPopover copyConfigurations={copyConfigurations} />
+          <CopyRuleConfigurationsPopover copyConfigurations={copyConfigurations} ruleId={ruleId} />
         )}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
@@ -193,7 +195,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
       <>
-        <DisplayActionsHeader copyConfigurations={copyConfigurations} />
+        <DisplayActionsHeader copyConfigurations={copyConfigurations} ruleId={ruleId} />
         {ruleId && <RuleSnoozeSection ruleId={ruleId} />}
         {displayActionsOptions}
         {responseActionsEnabled && displayResponseActionsOptions}
