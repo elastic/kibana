@@ -33,7 +33,7 @@ testAndReport() {
   npx junit2json target/junit/tap.xml | jq
 }
 upload() {
-  buildkite-agent artifact upload "${TGT}/*"
+  buildkite-agent artifact upload "target/junit/*.xml"
 }
 
 while getopts b:i:r:u: flag; do
