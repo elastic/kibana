@@ -135,4 +135,65 @@ describe('Policy Details', () => {
       cy.getByTestSubj('ransomwareUserNotificationCheckbox').should('be.checked');
     });
   });
+
+  describe('Advanced settings', () => {
+    it('should show empty text inputs except for some settings', () => {
+      const settingsWithDefaultValues = [
+        'mac.advanced.capture_env_vars',
+        'linux.advanced.capture_env_vars',
+      ];
+
+      cy.getByTestSubj('advancedPolicyButton').click();
+
+      cy.getByTestSubj('advancedPolicyPanel')
+        .children()
+        .each(($child) => {
+          const settingName = $child.find('label').text();
+
+          if (settingsWithDefaultValues.includes(settingName)) {
+            cy.wrap($child).find('input').should('not.have.value', '');
+          } else {
+            cy.wrap($child).find('input').should('have.value', '');
+          }
+        });
+    });
+
+    it('should add advanced settings to policy yaml only when they are set', () => {
+      // Initially config should only contain the two default entries
+      yieldPolicyConfig().then((policyConfig) => {
+        expect(policyConfig.linux.advanced).to.have.keys(['capture_env_vars']);
+        expect(policyConfig.mac.advanced).to.have.keys(['capture_env_vars']);
+        expect(policyConfig.windows.advanced).to.equal(undefined);
+      });
+
+      // Set agent.connection_delay entry for every OS
+      cy.getByTestSubj('advancedPolicyButton').click();
+      cy.getByTestSubj('advancedPolicyPanel')
+        .children()
+        .each(($child) => {
+          const settingName = $child.find('label').text();
+
+          if (settingName.includes('.agent.connection_delay')) {
+            cy.wrap($child).find('input').type('66');
+          }
+        });
+      savePolicyForm();
+
+      // Validate yaml
+      yieldPolicyConfig().then((policyConfig) => {
+        expect(policyConfig.linux.advanced).to.have.keys(['capture_env_vars', 'agent']);
+        expect(policyConfig.linux.advanced).to.have.deep.property('agent', {
+          connection_delay: '66',
+        });
+        expect(policyConfig.mac.advanced).to.have.keys(['capture_env_vars', 'agent']);
+        expect(policyConfig.mac.advanced).to.have.deep.property('agent', {
+          connection_delay: '66',
+        });
+        expect(policyConfig.windows.advanced).to.have.keys(['agent']);
+        expect(policyConfig.windows.advanced).to.have.deep.property('agent', {
+          connection_delay: '66',
+        });
+      });
+    });
+  });
 });
