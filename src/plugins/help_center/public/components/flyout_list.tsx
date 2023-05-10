@@ -190,7 +190,7 @@ export const HelpCenterFlyout = (
                 `}
               />
 
-              <EuiTitle size="s">
+              <EuiTitle size="m">
                 <h2 id="flyoutSmallTitle">
                   <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
                 </h2>

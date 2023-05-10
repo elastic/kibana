@@ -8,7 +8,16 @@
 
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { EuiIcon, EuiCard, EuiSpacer, EuiText, EuiAccordion } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiCard,
+  EuiSpacer,
+  EuiText,
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
 import { css } from '@emotion/react';
@@ -31,7 +40,7 @@ export const DocumentationCards = () => {
             ?.getElementsByClassName('part')?.[0];
           if (content) {
             content
-              .querySelectorAll('.edit_me, .vidyard-player-embed, br')
+              .querySelectorAll('.edit_me, .vidyard-player-embed, br, h1')
               .forEach((e) => e.remove());
             content.querySelectorAll('img').forEach((e) => {
               const src = e.getAttribute('src') ?? '';
@@ -58,17 +67,32 @@ export const DocumentationCards = () => {
         return (
           <EuiAccordion
             id={`documentation-${i}`}
+            className="euiAccordionForm"
+            buttonClassName="euiAccordionForm__button"
             buttonContent={
-              <EuiCard
-                css={css`
-                  margin-block-end: 0;
-                `}
-                layout={'horizontal'}
-                icon={<EuiIcon size="xl" type={doc.iconType ?? 'document'} />}
-                title={`Visit the ${doc.title} documentation`}
-                target="_blank"
-                titleSize="xs"
-              />
+              <div>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={doc.iconType ?? 'document'} size="m" />
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h3>{doc.title}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+              // <EuiCard
+              //   css={css`
+              //     margin-block-end: 0;
+              //   `}
+              //   layout={'horizontal'}
+              //   icon={<EuiIcon size="xl" type={doc.iconType ?? 'document'} />}
+              //   title={`Visit the ${doc.title} documentation`}
+              //   target="_blank"
+              //   titleSize="xs"
+              // />
             }
           >
             <EuiText>
