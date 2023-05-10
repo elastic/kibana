@@ -73,6 +73,19 @@ describe('SLOs Welcome Page', () => {
         useFetchSloListMock.mockReturnValue({ isLoading: false, emptySloList });
       });
 
+      it('disables the create slo button when no write capabilities', async () => {
+        useCapabilitiesMock.mockReturnValue({
+          hasWriteCapabilities: false,
+          hasReadCapabilities: true,
+        });
+
+        render(<SlosWelcomePage />);
+        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+
+        const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
+        expect(createNewSloButton).toBeDisabled();
+      });
+
       it('should display the welcome message with a Create new SLO button which should navigate to the SLO Creation page', async () => {
         render(<SlosWelcomePage />);
         expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
