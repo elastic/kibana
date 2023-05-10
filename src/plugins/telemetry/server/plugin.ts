@@ -169,7 +169,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.config$
       .pipe(
         map(({ labels }) => labels),
-        tap((labels) => apm.addLabels(labels))
+        tap((labels) =>
+          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
+        )
       )
       .subscribe(telemetryLabels$);
 
