@@ -43,6 +43,8 @@ export const plugin: PluginInitializer<
 };
 
 export type { UXMetrics } from './components/core_web_vitals/core_vitals';
+export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_web_vitals_lazy';
+
 export { DatePickerContextProvider } from './context/date_picker_context';
 
 export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
