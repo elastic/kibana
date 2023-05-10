@@ -16,7 +16,7 @@ import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
-import { combineQueries, getFieldEsTypes } from '../../../common/lib/kuery';
+import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
@@ -141,16 +141,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const selectedGroupEsTypes = useMemo(
-    () => getFieldEsTypes(selectedGroup, browserFields),
-    [selectedGroup, browserFields]
-  );
+  const uniqueNullValue = useMemo(() => `UniqueNullValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
-      selectedGroupEsTypes,
+      uniqueNullValue,
       from,
       runtimeMappings,
       to,
@@ -164,8 +161,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     pageSize,
     runtimeMappings,
     selectedGroup,
-    selectedGroupEsTypes,
     to,
+    uniqueNullValue,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -201,9 +198,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       parseGroupingQuery(
         // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
         queriedGroup.current === null ? selectedGroup : queriedGroup.current,
+        uniqueNullValue,
         alertsGroupsData?.aggregations
       ),
-    [alertsGroupsData?.aggregations, selectedGroup]
+    [alertsGroupsData?.aggregations, selectedGroup, uniqueNullValue]
   );
 
   useEffect(() => {

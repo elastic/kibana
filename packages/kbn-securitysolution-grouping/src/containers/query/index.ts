@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getEmptyValue, getFieldTypeMissingValues } from './helpers';
+import { getEmptyValue } from './helpers';
 import { GroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
@@ -26,11 +26,11 @@ export const MAX_QUERY_SIZE = 10000;
  * @param rootAggregations Top level aggregations to get the groups number or overall groups metrics.
  * Array of {@link NamedAggregation}
  * @param runtimeMappings mappings of runtime fields [see runtimeMappings]{@link GroupingQueryArgs.runtimeMappings}
- * @param selectedGroupEsTypes array of selected group types
  * @param size number of grouping results per page
  * @param sort add one or more sorts on specific fields
  * @param statsAggregations group level aggregations which correspond to {@link GroupStatsRenderer} configuration
  * @param to ending timestamp
+ * @param uniqueNullValue unique value to represent null values
  *
  * @returns query dsl {@link GroupingQuery}
  */
@@ -42,32 +42,26 @@ export const getGroupingQuery = ({
   pageNumber,
   rootAggregations,
   runtimeMappings,
-  selectedGroupEsTypes,
   size = DEFAULT_GROUP_BY_FIELD_SIZE,
   sort,
   statsAggregations,
   to,
+  uniqueNullValue,
 }: GroupingQueryArgs): GroupingQuery => ({
   size: 0,
+  runtime_mappings: {
+    ...runtimeMappings,
+    join_field: {
+      type: 'keyword',
+      script: {
+        source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueNullValue}') } else { emit(doc['${groupByField}'].join(','))}`,
+      },
+    },
+  },
   aggs: {
     groupByFields: {
-      multi_terms: {
-        terms: [
-          // by looking up multiple missing values, we can ensure we're not overwriting an existing group with the default value
-          {
-            field: groupByField,
-            // the AggregationsMultiTermLookup type is wrong in the elasticsearch node package
-            // when this issues is resolved, we can remove these ts expect errors
-            // https://github.com/elastic/elasticsearch/issues/95628
-            // @ts-expect-error
-            missing: getFieldTypeMissingValues(selectedGroupEsTypes)[0],
-          },
-          {
-            field: groupByField,
-            // @ts-expect-error
-            missing: getFieldTypeMissingValues(selectedGroupEsTypes)[1],
-          },
-        ],
+      terms: {
+        field: 'join_field',
         size: MAX_QUERY_SIZE,
       },
       aggs: {
@@ -84,13 +78,7 @@ export const getGroupingQuery = ({
       },
     },
 
-    unitsCountWithoutNull: { value_count: { field: groupByField } },
-    unitsCount: {
-      value_count: {
-        field: groupByField,
-        missing: getFieldTypeMissingValues(selectedGroupEsTypes)[0],
-      },
-    },
+    unitsCount: { value_count: { field: 'join_field' } },
     groupsCount: { cardinality: { field: groupByField } },
 
     ...(rootAggregations
@@ -112,7 +100,6 @@ export const getGroupingQuery = ({
       ],
     },
   },
-  runtime_mappings: runtimeMappings,
   _source: false,
 });
 
@@ -124,31 +111,30 @@ export const getGroupingQuery = ({
  */
 export const parseGroupingQuery = <T>(
   selectedGroup: string,
+  uniqueNullValue: string,
   aggs?: GroupingAggregation<T>
 ): GroupingAggregation<T> | {} => {
   if (!aggs) {
     return {};
   }
   const groupByFields = aggs?.groupByFields?.buckets?.map((group) => {
-    if (!Array.isArray(group.key)) {
-      return group;
-    }
+    console.log('group', group);
     const emptyValue = getEmptyValue();
     // If the keys are different means that the `missing` values of the multi_terms aggregation have been applied, we use the default empty string.
     // If the keys are equal means the `missing` values have not been applied, they are stored values.
-    return group.key[0] === group.key[1]
+    return group.key[0] === uniqueNullValue
       ? {
-          ...group,
-          key: [group.key[0]],
-          selectedGroup,
-          key_as_string: group.key[0],
-        }
-      : {
           ...group,
           key: [emptyValue],
           selectedGroup,
           key_as_string: emptyValue,
           isNullGroup: true,
+        }
+      : {
+          ...group,
+          key: [group.key],
+          selectedGroup,
+          key_as_string: group.key,
         };
   });
 

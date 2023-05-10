@@ -28,7 +28,7 @@ export interface GroupingQueryArgs {
   runtimeMappings?: MappingRuntimeFields;
   additionalAggregationsRoot?: NamedAggregation[];
   pageNumber?: number;
-  selectedGroupEsTypes: string[];
+  uniqueNullValue: string;
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   statsAggregations?: NamedAggregation[];
@@ -38,7 +38,7 @@ export interface GroupingQueryArgs {
 export interface MainAggregation extends NamedAggregation {
   groupByFields: {
     aggs: NamedAggregation;
-    multi_terms: estypes.AggregationsAggregationContainer['multi_terms'];
+    terms: estypes.AggregationsAggregationContainer['terms'];
   };
 }
 

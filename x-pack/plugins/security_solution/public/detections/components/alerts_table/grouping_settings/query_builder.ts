@@ -19,7 +19,7 @@ interface AlertsGroupingQueryParams {
   pageSize: number;
   runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
-  selectedGroupEsTypes: string[];
+  uniqueNullValue: string;
   to: string;
 }
 
@@ -30,7 +30,7 @@ export const getAlertsGroupingQuery = ({
   pageSize,
   runtimeMappings,
   selectedGroup,
-  selectedGroupEsTypes,
+  uniqueNullValue,
   to,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
@@ -42,7 +42,7 @@ export const getAlertsGroupingQuery = ({
       : [],
     pageNumber: pageIndex * pageSize,
     runtimeMappings,
-    selectedGroupEsTypes,
+    uniqueNullValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
     to,
