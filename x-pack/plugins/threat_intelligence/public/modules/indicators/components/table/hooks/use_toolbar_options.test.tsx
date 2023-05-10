@@ -7,7 +7,7 @@
 
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { renderHook } from '@testing-library/react-hooks';
-import { useToolbarOptions } from '.';
+import { useToolbarOptions } from './use_toolbar_options';
 
 describe('useToolbarOptions()', () => {
   it('should return correct value for 0 indicators total', () => {
@@ -25,7 +25,37 @@ describe('useToolbarOptions()', () => {
       { wrapper: TestProvidersComponent }
     );
 
-    expect(result.result.current).toMatchSnapshot();
+    expect(result.result.current.additionalControls.left).toMatchInlineSnapshot(`
+      Object {
+        "append": <IndicatorsFieldBrowser
+          browserFields={Object {}}
+          columnIds={Array []}
+          onResetColumns={[Function]}
+          onToggleColumn={[Function]}
+        />,
+        "prepend": <EuiText
+          size="xs"
+          style={
+            Object {
+              "display": "inline",
+            }
+          }
+        >
+          <React.Fragment>
+            -
+          </React.Fragment>
+        </EuiText>,
+      }
+    `);
+    expect(result.result.current.additionalControls.right).toMatchInlineSnapshot(`
+      <EuiButtonIcon
+        aria-label="Inspect"
+        data-test-subj="tiIndicatorsGridInspect"
+        iconType="inspect"
+        onClick={[Function]}
+        title="Inspect"
+      />
+    `);
   });
 
   it('should return correct value for 25 indicators total', () => {
@@ -43,7 +73,44 @@ describe('useToolbarOptions()', () => {
       { wrapper: TestProvidersComponent }
     );
 
-    expect(result.result.current).toMatchSnapshot();
+    expect(result.result.current.additionalControls.left).toMatchInlineSnapshot(`
+      Object {
+        "append": <IndicatorsFieldBrowser
+          browserFields={Object {}}
+          columnIds={Array []}
+          onResetColumns={[Function]}
+          onToggleColumn={[Function]}
+        />,
+        "prepend": <EuiText
+          size="xs"
+          style={
+            Object {
+              "display": "inline",
+            }
+          }
+        >
+          <React.Fragment>
+            Showing 
+            1
+            -
+            25
+             of
+             
+            25
+             indicators
+          </React.Fragment>
+        </EuiText>,
+      }
+    `);
+    expect(result.result.current.additionalControls.right).toMatchInlineSnapshot(`
+      <EuiButtonIcon
+        aria-label="Inspect"
+        data-test-subj="tiIndicatorsGridInspect"
+        iconType="inspect"
+        onClick={[Function]}
+        title="Inspect"
+      />
+    `);
   });
 
   it('should return correct value for 50 indicators total', () => {
@@ -61,6 +128,43 @@ describe('useToolbarOptions()', () => {
       { wrapper: TestProvidersComponent }
     );
 
-    expect(result.result.current).toMatchSnapshot();
+    expect(result.result.current.additionalControls.left).toMatchInlineSnapshot(`
+      Object {
+        "append": <IndicatorsFieldBrowser
+          browserFields={Object {}}
+          columnIds={Array []}
+          onResetColumns={[Function]}
+          onToggleColumn={[Function]}
+        />,
+        "prepend": <EuiText
+          size="xs"
+          style={
+            Object {
+              "display": "inline",
+            }
+          }
+        >
+          <React.Fragment>
+            Showing 
+            26
+            -
+            50
+             of
+             
+            50
+             indicators
+          </React.Fragment>
+        </EuiText>,
+      }
+    `);
+    expect(result.result.current.additionalControls.right).toMatchInlineSnapshot(`
+      <EuiButtonIcon
+        aria-label="Inspect"
+        data-test-subj="tiIndicatorsGridInspect"
+        iconType="inspect"
+        onClick={[Function]}
+        title="Inspect"
+      />
+    `);
   });
 });
