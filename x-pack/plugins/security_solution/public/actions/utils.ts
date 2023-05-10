@@ -6,7 +6,6 @@
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE, type ISearchEmbeddable } from '@kbn/discover-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
 import { APP_UI_ID } from '../../common/constants';
 
@@ -24,12 +23,6 @@ export const isInSecurityApp = (currentAppId?: string): boolean => {
 
 export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {
   return embeddable.type === LENS_EMBEDDABLE_TYPE;
-};
-
-export const isDiscoverSearchEmbeddable = (
-  embeddable: IEmbeddable
-): embeddable is ISearchEmbeddable => {
-  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 };
 
 export const fieldHasCellActions = (field?: string): boolean => {

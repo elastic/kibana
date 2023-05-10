@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { createCopyToClipboardActionFactory as genericCreateCopyToClipboardActionFactory } from '@kbn/cell-actions';
+import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
 import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import type { StartServices } from '../../../types';
-import type { SecurityCellAction } from '../../types';
-import { SecurityCellActionType } from '../../constants';
+import { createCopyToClipboardCellActionFactory } from '../cell_action/copy_to_clipboard';
 
 export const createCopyToClipboardDiscoverCellActionFactory = ({
   services,
 }: {
   services: StartServices;
-}) => {
-  const { notifications, application } = services;
+}): CellActionFactory<CellAction> => {
+  const { application } = services;
 
   let currentAppId: string | undefined;
   application.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
 
-  const genericCopyToClipboardActionFactory = genericCreateCopyToClipboardActionFactory({
-    notifications,
+  const genericCopyToClipboardActionFactory = createCopyToClipboardCellActionFactory({
+    services,
   });
-  return genericCopyToClipboardActionFactory.combine<SecurityCellAction>({
-    type: SecurityCellActionType.COPY,
+
+  return genericCopyToClipboardActionFactory.combine<CellAction>({
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
   });

@@ -16,7 +16,7 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock } from '../../../../__mocks__/data_view';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ServicesContextProvider } from '../../../services_provider';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
@@ -47,11 +47,11 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   };
 
   return mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <ServicesContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
         <DiscoverDocuments {...props} />
       </DiscoverMainProvider>
-    </KibanaContextProvider>
+    </ServicesContextProvider>
   );
 }
 

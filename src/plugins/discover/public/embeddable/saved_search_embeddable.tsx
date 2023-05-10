@@ -604,9 +604,9 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public async reload(forceFetch = true) {
+  public reload(forceFetch = true) {
     if (this.searchProps) {
-      await this.load(this.searchProps, forceFetch);
+      this.load(this.searchProps, forceFetch);
     }
   }
 
