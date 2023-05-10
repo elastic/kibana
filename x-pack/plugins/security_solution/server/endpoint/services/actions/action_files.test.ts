@@ -254,7 +254,7 @@ describe('Action Files service', () => {
       action.parameters!.file_id = '';
 
       await expect(setFileActionId(esClientMock, loggerMock, action)).rejects.toThrow(
-        "Action [123] has no 'parameters.file_id' defined. Unable to set action id on file record"
+        "Action [123] has no 'parameters.file_id' defined. Unable to set action id on file metadata record"
       );
     });
   });
