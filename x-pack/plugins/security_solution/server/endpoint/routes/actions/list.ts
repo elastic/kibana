@@ -41,17 +41,20 @@ export function registerActionListRoutes(
       actionListHandler(endpointContext)
     )
   );
+
   // TODO: This route is a temporary solution until we decide on how RBAC should look like for Actions in Alerts
-  router.get(
-    {
-      path: BASE_ENDPOINT_ACTION_ALERTS_ROUTE,
-      validate: EndpointActionListRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      {},
-      endpointContext.logFactory.get('endpointActionList'),
-      actionListHandler(endpointContext)
-    )
-  );
+  if (endpointContext.experimentalFeatures.endpointResponseActionsEnabled) {
+    router.get(
+      {
+        path: BASE_ENDPOINT_ACTION_ALERTS_ROUTE,
+        validate: EndpointActionListRequestSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        {},
+        endpointContext.logFactory.get('endpointActionList'),
+        actionListHandler(endpointContext)
+      )
+    );
+  }
 }
