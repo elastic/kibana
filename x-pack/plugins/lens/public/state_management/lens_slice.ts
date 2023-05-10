@@ -21,7 +21,13 @@ import type {
   DatasourceMap,
 } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
+import type {
+  DataViewsState,
+  LensAppState,
+  LensStoreDeps,
+  StateChangeOperation,
+  VisualizationState,
+} from './types';
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType, Patch } from '../../common/types';
@@ -51,7 +57,7 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
   },
-  undoableOperationHistory: [],
+  changeHistory: [],
 };
 
 export const getPreloadedState = ({
@@ -240,10 +246,11 @@ export const removeDimension = createAction<{
   columnId: string;
   datasourceId?: string;
 }>('lens/removeDimension');
-export const recordUndoableStateChange = createAction<{
-  patch: Patch;
-}>('lens/recordUndoableStateChange');
+export const recordReversibleStateChange = createAction<{
+  change: StateChangeOperation;
+}>('lens/recordReversibleStateChange');
 export const undo = createAction('lens/undo');
+export const redo = createAction('lens/redo');
 export const applyPatches = createAction<{ patches: Patch[] }>('lens/applyPatches');
 
 export const lensActions = {
@@ -278,10 +285,11 @@ export const lensActions = {
   changeIndexPattern,
   removeDimension,
   syncLinkedDimensions,
-  recordUndoableStateChange,
+  recordReversibleStateChange,
   undo,
   applyPatches,
 };
+
 export const undoRedoActions = [
   updateDatasourceState,
   updateVisualizationState,
@@ -339,6 +347,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [setChangesApplied.type]: (state, { payload: applied }) => {
       state.changesApplied = applied;
     },
+
     [updateState.type]: (
       state,
       {
@@ -1223,26 +1232,37 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
       );
     },
-    [recordUndoableStateChange.type]: (
+    [recordReversibleStateChange.type]: (
       state,
       {
-        payload: { patch },
+        payload: { change },
       }: {
         payload: {
-          patch: Patch;
+          change: StateChangeOperation;
         };
       }
     ) => {
-      state.undoableOperationHistory.push(patch);
+      state.changeHistory.push(change);
     },
+    // [redo.type]: (_state) => {
+    //   const currentState = current(_state);
+    //   const history = currentState.redoableOperationHistory;
+    //   const patch = history[history.length - 1];
+    //   return patch
+    //     ? {
+    //         ...applyPatch(currentState, patch, false, false).newDocument,
+    //         redoableOperationHistory: history.slice(0, history.length - 1),
+    //       }
+    //     : currentState;
+    // },
     [undo.type]: (_state) => {
       const currentState = current(_state);
-      const history = currentState.undoableOperationHistory;
-      const patch = history[history.length - 1];
+      const history = currentState.changeHistory;
+      const patch = history[history.length - 1]?.backward;
       return patch
         ? {
             ...applyPatch(currentState, patch, false, false).newDocument,
-            undoableOperationHistory: history.slice(0, history.length - 1),
+            changeHistory: history.slice(0, history.length - 1),
           }
         : currentState;
     },

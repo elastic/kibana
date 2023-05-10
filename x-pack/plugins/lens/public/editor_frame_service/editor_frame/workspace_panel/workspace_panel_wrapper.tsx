@@ -146,7 +146,7 @@ export function WorkspacePanelWrapper({
 
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    disabled={canUndo}
+                    disabled={!canUndo}
                     fill
                     className={
                       'lnsWorkspacePanelWrapper__applyButton ' +

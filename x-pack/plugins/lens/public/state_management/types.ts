@@ -54,6 +54,12 @@ export interface EditorFrameState extends PreviewState {
   changesApplied?: boolean;
   isFullscreenDatasource?: boolean;
 }
+
+export interface StateChangeOperation {
+  forward: Patch;
+  backward: Patch;
+}
+
 export interface LensAppState extends EditorFrameState {
   persistedDoc?: Document;
 
@@ -71,7 +77,7 @@ export interface LensAppState extends EditorFrameState {
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsStateInStateStore;
 
-  undoableOperationHistory: Patch[];
+  changeHistory: StateChangeOperation[];
 }
 
 export type DispatchSetState = (state: Partial<LensAppState>) => {
