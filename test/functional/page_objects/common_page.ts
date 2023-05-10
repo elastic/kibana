@@ -393,13 +393,13 @@ export class CommonPageObject extends FtrService {
   }
 
   async isChromeVisible() {
-    const chromeShown = await this.testSubjects.exists('kibanaChrome');
+    const chromeShown = await this.testSubjects.exists('kbnAppWrapper visibleChrome');
     return chromeShown;
   }
 
   async isChromeHidden() {
-    const chromeShown = await this.testSubjects.exists('kibanaChrome');
-    return !chromeShown;
+    const chromeHidden = await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
+    return chromeHidden;
   }
 
   async waitForTopNavToBeVisible() {
