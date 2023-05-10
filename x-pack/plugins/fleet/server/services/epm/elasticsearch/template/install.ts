@@ -322,9 +322,9 @@ export function buildComponentTemplates(params: {
           ...templateSettings.index,
           ...(pipelineName ? { default_pipeline: pipelineName } : {}),
           mapping: {
-            ...templateSettings.index?.mapping,
+            ...templateSettings?.mapping,
             total_fields: {
-              ...templateSettings.index?.mapping?.total_fields,
+              ...templateSettings?.mapping?.total_fields,
               limit: '10000',
             },
           },
