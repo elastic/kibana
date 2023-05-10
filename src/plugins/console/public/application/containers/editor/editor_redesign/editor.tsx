@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -22,17 +22,38 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { JsonEditor } from '@kbn/es-ui-shared-plugin/public';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '@kbn/es-ui-shared-plugin/public';
+import { useServicesContext } from '../../../contexts';
+import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
 
+interface Request {
+  method: 'get' | 'post' | 'put';
+  url: string;
+  body: any;
+}
 export const Editor = () => {
+  const [request, setRequest] = useState<Request>({
+    method: 'get',
+    url: '_search',
+    body: {
+      query: {
+        match_all: {},
+      },
+    },
+  });
+  const updateBody: OnJsonEditorUpdateHandler = useCallback((state) => {
+    if (state.isValid) {
+      setRequest((prevRequest) => {
+        return { ...prevRequest, body: state.data.format() };
+      });
+    }
+  }, []);
   const methods: EuiSelectOption[] = [
     { value: 'get', text: 'GET' },
     { value: 'post', text: 'POST' },
+    { value: 'put', text: 'PUT' },
   ];
   const [isPopoverOpen, setPopover] = useState(false);
-  const requestActionsButtonId = useGeneratedHtmlId({
-    prefix: 'console-editor-request-actions',
-  });
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -42,6 +63,23 @@ export const Editor = () => {
     setPopover(false);
   };
 
+  const requestActionsButtonId = useGeneratedHtmlId({
+    prefix: 'console-editor-request-actions',
+  });
+
+  const {
+    services: { http },
+  } = useServicesContext();
+
+  const sendRequestButtonHandler = async () => {
+    const results = await sendRequest({
+      http,
+      requests: [
+        { url: request.url, method: request.method, data: [JSON.stringify(request.body)] },
+      ],
+    });
+    console.log({ results });
+  };
   const requestActions = [
     <EuiContextMenuItem key="copy-as-curl" onClick={closePopover}>
       Copy as cURL
@@ -61,20 +99,34 @@ export const Editor = () => {
             <EuiSelect
               id="console-editor-method-input"
               options={methods}
-              value="get"
-              onChange={(e) => {}}
+              value={request.method}
+              onChange={(e) => {
+                setRequest((prevRequest) => {
+                  return { ...prevRequest, method: e.target.value as Request['method'] };
+                });
+              }}
               aria-label="Use aria labels when no actual label is in use"
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow label="URL" fullWidth>
-            <EuiFieldText fullWidth />
+            <EuiFieldText
+              fullWidth
+              value={request.url}
+              onChange={(e) => {
+                setRequest((prevRequest) => {
+                  return { ...prevRequest, url: e.target.value };
+                });
+              }}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace display="center">
-            <EuiButton iconType="play">Send</EuiButton>
+            <EuiButton iconType="play" onClick={sendRequestButtonHandler}>
+              Send
+            </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -103,8 +155,8 @@ export const Editor = () => {
       <EuiSpacer />
       <JsonEditor
         label="Request body"
-        onUpdate={() => {}}
-        value={JSON.stringify({ test: 'test' })}
+        onUpdate={updateBody}
+        defaultValue={request.body}
         codeEditorProps={{
           height: '300px',
         }}
