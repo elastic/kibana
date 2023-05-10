@@ -23,10 +23,15 @@ shutdown() {
 testAndReport() {
   trap "shutdown" EXIT
 
-  echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
   pushd packages/kbn-test/new_test_runner >/dev/null
 
-  node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+  echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
+#  node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+#  node --test-reporter=./lifecycle_gen.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+  node --test-reporter=./lifecycle_stream.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+#  node --test-reporter spec --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+#  node --test-reporter spec --test
+
   popd >/dev/null
 
   echo '--- Junit Xml to JSON'
@@ -45,8 +50,6 @@ while getopts b:i:r:u: flag; do
   *) ;;
   esac
 done
-echo "### install: ${install}"
-echo "### report: ${report}"
 
 if [ "${boot}" == "true" ]; then boot; fi
 if [ "${install}" == "true" ]; then install; fi

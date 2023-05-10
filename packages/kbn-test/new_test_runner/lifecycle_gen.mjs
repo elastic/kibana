@@ -6,29 +6,32 @@
  * Side Public License, v 1.
  */
 
-export default async function* customReporterGeneratorFn(source) {
+export default async function* customReporter(source) {
   for await (const event of source) {
     switch (event.type) {
       case 'test:start':
-        yield `test ${event.data.name} started\n`;
+        yield `A test named: ${event.data.name} started\n`;
         break;
       case 'test:pass':
-        yield `test ${event.data.name} passed\n`;
+        yield `A test named: ${event.data.name} passed\n`;
         break;
       case 'test:fail':
-        yield `test ${event.data.name} failed\n`;
+        yield `A test named: ${event.data.name} failed\n`;
         break;
-      // case 'test:plan':
-      //   callback(null, 'test plan');
-      //   break;
-      // case 'test:diagnostic':
-      //   callback(null, event.data.message);
-      //   break;
-      // case 'test:coverage': {
-      //   const { totalLineCount } = event.data.summary.totals;
-      //   callback(null, `total line count: ${totalLineCount}\n`);
-      //   break;
-      // }
+      case 'test:plan':
+        console.log(`\n### event: \n${JSON.stringify(event, null, 2)}`);
+        yield 'test plan';
+        break;
+      case 'test:diagnostic':
+        yield `${event.data.message}\n`;
+        break;
+      case 'test:coverage': {
+        const { totalLineCount } = event.data.summary.totals;
+        yield `total line count: ${totalLineCount}\n`;
+        break;
+      }
+      default:
+        console.log(`\n### on default, event: \n${JSON.stringify(event, null, 2)}`);
     }
   }
 }
