@@ -225,6 +225,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggleRowState}
+            data-test-subj="expandRow"
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}

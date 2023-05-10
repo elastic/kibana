@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import useAsync from 'react-use/lib/useAsync';
@@ -87,7 +95,7 @@ export const ControlEditor = ({
     controls: { getControlFactory },
   } = pluginServices.getServices();
   const [defaultTitle, setDefaultTitle] = useState<string>();
-  const [currentTitle, setCurrentTitle] = useState(title);
+  const [currentTitle, setCurrentTitle] = useState(title ?? '');
   const [currentWidth, setCurrentWidth] = useState(width);
   const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
@@ -120,6 +128,7 @@ export const ControlEditor = ({
   });
 
   const {
+    loading: dataViewLoading,
     value: { selectedDataView, fieldRegistry } = {
       selectedDataView: undefined,
       fieldRegistry: undefined,
@@ -140,12 +149,12 @@ export const ControlEditor = ({
     () => setControlEditorValid(Boolean(selectedField) && Boolean(selectedDataView)),
     [selectedField, setControlEditorValid, selectedDataView]
   );
+
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);
   const CustomSettings =
     factory && (factory as IEditableControlFactory).controlEditorOptionsComponent;
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -178,25 +187,28 @@ export const ControlEditor = ({
               selectableProps={{ isLoading: dataViewListLoading }}
             />
           </EuiFormRow>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
-            <FieldPicker
-              filterPredicate={(field: DataViewField) => Boolean(fieldRegistry?.[field.name])}
-              selectedFieldName={selectedField}
-              dataView={selectedDataView}
-              onSelectField={(field) => {
-                onTypeEditorChange({
-                  fieldName: field.name,
-                });
-                const newDefaultTitle = field.displayName ?? field.name;
-                setDefaultTitle(newDefaultTitle);
-                setSelectedField(field.name);
-                if (!currentTitle || currentTitle === defaultTitle) {
-                  setCurrentTitle(newDefaultTitle);
-                  updateTitle(newDefaultTitle);
-                }
-              }}
-            />
-          </EuiFormRow>
+          {fieldRegistry && (
+            <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
+              <FieldPicker
+                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
+                selectedFieldName={selectedField}
+                dataView={selectedDataView}
+                onSelectField={(field) => {
+                  onTypeEditorChange({
+                    fieldName: field.name,
+                  });
+                  const newDefaultTitle = field.displayName ?? field.name;
+                  setDefaultTitle(newDefaultTitle);
+                  setSelectedField(field.name);
+                  if (!currentTitle || currentTitle === defaultTitle) {
+                    setCurrentTitle(newDefaultTitle);
+                    updateTitle(newDefaultTitle);
+                  }
+                }}
+                selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
             {factory ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -224,6 +236,7 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
+
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
             <>
               <EuiButtonGroup
@@ -258,7 +271,7 @@ export const ControlEditor = ({
               <CustomSettings
                 onChange={onTypeEditorChange}
                 initialInput={embeddable?.getInput()}
-                fieldType={fieldRegistry[selectedField].field.type}
+                fieldType={fieldRegistry?.[selectedField].field.type}
               />
             </EuiFormRow>
           )}

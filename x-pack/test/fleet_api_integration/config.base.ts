@@ -41,7 +41,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   ]);
 
   return {
-    testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
     dockerServers: defineDockerServersConfig({
       registry: {
@@ -55,9 +54,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
     }),
     services: xPackAPITestsConfig.get('services'),
-    junit: {
-      reportName: 'X-Pack EPM API Integration Tests',
-    },
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),

@@ -64,6 +64,15 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       body: {
         query: {
           bool: {
+            must_not: [
+              {
+                term: {
+                  'monitor.check_group': {
+                    value: journeySource.monitor.check_group,
+                  },
+                },
+              },
+            ],
             filter: [
               {
                 term: {
@@ -93,6 +102,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
         ...baseSiblingParams.body,
         query: {
           bool: {
+            must_not: baseSiblingParams.body.query.bool.must_not,
             filter: [
               ...baseSiblingParams.body.query.bool.filter,
               {
@@ -114,6 +124,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
         ...baseSiblingParams.body,
         query: {
           bool: {
+            must_not: baseSiblingParams.body.query.bool.must_not,
             filter: [
               ...baseSiblingParams.body.query.bool.filter,
               {
@@ -151,20 +162,6 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       ({ _source: summarySource }) => summarySource.synthetics?.type === 'heartbeat/summary'
     )?._source;
 
-    const previousInfo = previousJourney
-      ? {
-          checkGroup: previousJourney._source.monitor.check_group,
-          timestamp: previousJourney._source['@timestamp'],
-        }
-      : undefined;
-
-    const nextInfo = nextJourney
-      ? {
-          checkGroup: nextJourney._source.monitor.check_group,
-          timestamp: nextJourney._source['@timestamp'],
-        }
-      : undefined;
-
     return {
       timestamp: journeySource['@timestamp'],
       journey: { ...journeySource, _id: foundJourney._id },
@@ -175,10 +172,19 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             },
           }
         : {}),
-      previous: previousInfo,
-      next: nextInfo,
+      previous: filterNextPrevJourney(journeySource.monitor.check_group, previousJourney?._source),
+      next: filterNextPrevJourney(journeySource.monitor.check_group, nextJourney?._source),
     };
   } else {
     return null;
   }
+};
+
+const filterNextPrevJourney = (checkGroup: string, pingSource: DocumentSource) => {
+  return pingSource && pingSource.monitor.check_group !== checkGroup
+    ? {
+        checkGroup: pingSource.monitor.check_group,
+        timestamp: pingSource['@timestamp'],
+      }
+    : undefined;
 };

@@ -24,12 +24,12 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { useDebounce } from 'react-use';
 import { TableTitle } from '../../common/components/table_title';
 import { ParamsText } from './params_text';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
 
-export interface ListParamItem extends SyntheticsParam {
+export interface ListParamItem extends SyntheticsParamSO {
   id: string;
 }
 

@@ -26,6 +26,7 @@ import * as epmPackagesGet from './packages/get';
 import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
+import * as epmArchiveParse from './archive/parse';
 
 const testKeys = [
   'getInstallation',
@@ -33,6 +34,7 @@ const testKeys = [
   'fetchFindLatestPackage',
   'getPackage',
   'reinstallEsAssets',
+  'readBundledPackage',
 ];
 
 function getTest(
@@ -142,6 +144,23 @@ function getTest(
             name: 'package name',
           },
         ],
+      };
+      break;
+    case testKeys[5]:
+      const bundledPackage = { name: 'package name', version: '8.0.0', buffer: Buffer.from([]) };
+      test = {
+        method: mocks.packageClient.readBundledPackage.bind(mocks.packageClient),
+        args: [bundledPackage],
+        spy: jest.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
+        spyArgs: [bundledPackage.buffer, 'application/zip'],
+        spyResponse: {
+          packageInfo: { name: 'readBundledPackage test' },
+          paths: ['/some/test/path'],
+        },
+        expectedReturnValue: {
+          packageInfo: { name: 'readBundledPackage test' },
+          paths: ['/some/test/path'],
+        },
       };
       break;
     default:

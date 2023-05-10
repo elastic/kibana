@@ -8,8 +8,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.7.0 release.
+Review important information about the {kib} 8.7.x releases.
 
+* <<release-notes-8.7.1>>
 * <<release-notes-8.7.0>>
 //* <<release-notes-8.6.1>>
 //* <<release-notes-8.6.0>>
@@ -40,6 +41,76 @@ Review important information about the {kib} 8.7.0 release.
 //* <<release-notes-8.0.0-alpha2>>
 //* <<release-notes-8.0.0-alpha1>>
 --
+[[release-notes-8.7.1]]
+== {kib} 8.7.1
+
+Review the following information about the {kib} 8.7.1 release.
+
+[float]
+[[breaking-changes-8.7.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.7.1, review the breaking changes, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the {kib} 8.7.1 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in the previous release, check {kibana-ref-all}/8.7/release-notes-8.7.0.html#breaking-changes-8.7.0[8.7.0].
+
+[float]
+[[enhancement-v8.7.1]]
+=== Enhancement
+Fleet::
+The agent policy "Host name format" selector is now enabled by default {kibana-pull}154563[#154563]
+
+[float]
+[[fixes-v8.7.1]]
+=== Bug fixes
+APM::
+* Scoring is now applied by ES {kibana-pull}154627[#154627]
+* Fixes the APM Java Agent download link {kibana-pull}154023[#154023]
+* Improves the overflow message text {kibana-pull}153676[#153676]
+
+Canvas::
+* Disables the Edit in Lens action for the legacy savedVisualization function {kibana-pull}154656[#154656]
+* Fixes the home page redirect loop {kibana-pull}154568[#154568]
+* Fixes an issue where the image upload component was unable to load for image elements {kibana-pull}154385[#154385]
+
+Dashboard::
+Improves controls flyout performance for data views with a large number of fields {kibana-pull}154004[#154004]
+
+Discover::
+Fixes aborted request handling in the saved search embeddable {kibana-pull}153822[#153822]
+
+Elastic Security::
+For the Elastic Security 8.7.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Fixes an issue where the Advanced options toggle in the policy editor was always showing {kibana-pull}154612[#154612]
+* Fixes an issue where the warning icon was unable to display in 8.7 {kibana-pull}154119[#154119]
+* Adds updates to output logic {kibana-pull}153226[#153226]
+
+Infrastructure::
+Fixes the inventory table pagination navigation {kibana-pull}153849[#153849]
+
+Lens & Visualizations::
+Fixes the timezone that *Lens* uses in normalize by unit {kibana-pull}154472[#154472]
+
+Machine Learning::
+* Change point detection: Fixes applied filters and queries to the charts {kibana-pull}154707[#154707]
+* Change point detection: Fixes support for running over relative time range {kibana-pull}154313[#154313]
+* Reinstates cold and frozen tier filters for Linux and Windows security modules {kibana-pull}153222[#153222]
+
+Maps::
+Fixes an issue where geographic filters were unable to work when courier:ignoreFilterIfFieldNotInIndex was enabled {kibana-pull}153816[#153816]
+
+Monitoring::
+Fixes the CCR read_exceptions alert {kibana-pull}153888[#153888]
+
+Querying & Filtering::
+Fixes the ability to copy and paste the comma delimeter for multifields {kibana-pull}153772[#153772]
 
 [[release-notes-8.7.0]]
 == {kib} 8.7.0

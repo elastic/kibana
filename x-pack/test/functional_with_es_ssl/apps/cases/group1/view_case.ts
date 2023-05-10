@@ -272,16 +272,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved comment message when page is refreshed', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
-
-          await testSubjects.click('submit-comment');
-
-          await header.waitUntilLoadingHasFinished();
-
           await testSubjects.click('property-actions-user-action-ellipses');
 
           await header.waitUntilLoadingHasFinished();
@@ -298,6 +288,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await editCommentTextArea.focus();
           await editCommentTextArea.type('Edited comment');
+
+          await header.waitUntilLoadingHasFinished();
 
           await browser.refresh();
 
