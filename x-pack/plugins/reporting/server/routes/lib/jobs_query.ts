@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes, errors, TransportResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ReportingCore } from '../..';
@@ -20,10 +18,11 @@ import type { ReportingUser } from '../../types';
 import type { Payload } from './get_document_payload';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
+const refresh: estypes.Refresh = 'wait_for';
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
-function getSearchBody(body: estypes.SearchRequest['body']): estypes.SearchRequest['body'] {
+function getSearchBody(body: estypes.SearchRequest): estypes.SearchRequest {
   return {
     _source: {
       excludes: ['output.content', 'payload.headers'],
@@ -172,7 +171,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     },
 
     async getError(id) {
-      const body: estypes.SearchRequest['body'] = {
+      const body: estypes.SearchRequest = {
         _source: {
           includes: ['output.content', 'status'],
         },
@@ -209,7 +208,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
-        const query = { id, index: deleteIndex, refresh: true };
+        const query = { id, index: deleteIndex, refresh };
 
         return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
