@@ -50,6 +50,7 @@ export const createServerlessSearchSideNavComponent = (core: CoreStart) => () =>
         activeNavItemId={activeNavItemId}
         homeHref="/app/enterprise_search/content/setup_guide"
         linkToCloud="projects"
+        dataTestSubj="svlSearchSideNav"
       />
     </NavigationKibanaProvider>
   );

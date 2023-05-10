@@ -57,7 +57,7 @@ x-pack/plugins/
 
 ## Run tests
 Similar to how functional tests are run in `x-pack/test`, you can point the
-functional tests server and test runner to config files in this plugin test
+functional tests server and test runner to config files in this plugin's test
 directory, e.g. from the `x-pack` directory run:
 ```
 node scripts/functional_tests_server.js --config plugins/serverless/test/api_integration/test_suites/config.ts
