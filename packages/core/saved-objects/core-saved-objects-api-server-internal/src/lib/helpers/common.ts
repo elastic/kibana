@@ -15,6 +15,7 @@ import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { normalizeNamespace } from '../internal_utils';
+import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 
 export class CommonHelper {
   private registry: ISavedObjectTypeRegistry;
@@ -23,8 +24,11 @@ export class CommonHelper {
   private defaultIndex: string;
   private kibanaVersion: string;
 
+  public readonly createPointInTimeFinder: CreatePointInTimeFinderFn;
+
   constructor({
     registry,
+    createPointInTimeFinder,
     spaceExtension,
     encryptionExtension,
     kibanaVersion,
@@ -33,6 +37,7 @@ export class CommonHelper {
     registry: ISavedObjectTypeRegistry;
     spaceExtension?: ISavedObjectsSpacesExtension;
     encryptionExtension?: ISavedObjectsEncryptionExtension;
+    createPointInTimeFinder: CreatePointInTimeFinderFn;
     defaultIndex: string;
     kibanaVersion: string;
   }) {
@@ -41,6 +46,7 @@ export class CommonHelper {
     this.encryptionExtension = encryptionExtension;
     this.kibanaVersion = kibanaVersion;
     this.defaultIndex = defaultIndex;
+    this.createPointInTimeFinder = createPointInTimeFinder;
   }
 
   /**

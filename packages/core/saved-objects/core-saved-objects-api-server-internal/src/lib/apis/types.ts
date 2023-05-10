@@ -7,12 +7,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsExtensions,
-  type ISavedObjectsSerializer,
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsExtensions,
+  ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import { IKibanaMigrator, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IKibanaMigrator, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { RepositoryHelpers } from '../helpers';
 import type { RepositoryEsClient } from '../repository_es_client';
 

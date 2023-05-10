@@ -11,7 +11,6 @@ import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import { isRight, rawDocExistsInNamespaces } from '../internal_utils';
@@ -23,13 +22,14 @@ import {
 } from '../preflight_check_for_create';
 import type { RepositoryEsClient } from '../repository_es_client';
 import type { PreflightCheckForBulkDeleteParams } from '../repository_bulk_delete_internal_types';
+import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 
 export class PreflightCheckHelper {
   private registry: ISavedObjectTypeRegistry;
   private serializer: ISavedObjectsSerializer;
   private client: RepositoryEsClient;
   private getIndexForType: (type: string) => string;
-  private createPointInTimeFinder: ISavedObjectsRepository['createPointInTimeFinder'];
+  private createPointInTimeFinder: CreatePointInTimeFinderFn;
 
   constructor({
     registry,
@@ -42,7 +42,7 @@ export class PreflightCheckHelper {
     serializer: ISavedObjectsSerializer;
     client: RepositoryEsClient;
     getIndexForType: (type: string) => string;
-    createPointInTimeFinder: ISavedObjectsRepository['createPointInTimeFinder'];
+    createPointInTimeFinder: CreatePointInTimeFinderFn;
   }) {
     this.registry = registry;
     this.serializer = serializer;

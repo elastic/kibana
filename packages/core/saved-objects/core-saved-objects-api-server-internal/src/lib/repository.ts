@@ -39,6 +39,7 @@ import type {
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsClosePointInTimeOptions,
@@ -51,10 +52,10 @@ import type {
   SavedObjectsFindInternalOptions,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
-import {
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsExtensions,
-  type SavedObject,
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsExtensions,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -63,8 +64,6 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
-import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import { updateObjectsSpaces } from './update_objects_spaces';
 import {
   RepositoryHelpers,
   CommonHelper,
@@ -91,6 +90,8 @@ import {
   performIncrementCounter,
   performBulkResolve,
   performResolve,
+  performUpdateObjectsSpaces,
+  performCollectMultiNamespaceReferences,
 } from './apis';
 
 export interface SavedObjectsRepositoryOptions {
@@ -145,11 +146,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     /** The injectedConstructor is only used for unit testing */
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
-    const mappings = migrator.getActiveMappings();
-    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
-    const serializer = new SavedObjectsSerializer(typeRegistry);
-    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
-
     const missingTypeMappings = includedHiddenTypes.filter((type) => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
@@ -157,6 +153,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       );
     }
 
+    const mappings = migrator.getActiveMappings();
+    const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
+    const serializer = new SavedObjectsSerializer(typeRegistry);
+    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
     const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
 
     return new injectedConstructor({
@@ -201,6 +201,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const commonHelper = new CommonHelper({
       spaceExtension: extensions?.spacesExtension,
       encryptionExtension: extensions?.encryptionExtension,
+      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
       defaultIndex: index,
       kibanaVersion: migrator.kibanaVersion,
       registry: typeRegistry,
@@ -216,7 +217,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
     const preflightCheckHelper = new PreflightCheckHelper({
       getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
+      createPointInTimeFinder: commonHelper.createPointInTimeFinder.bind(commonHelper),
       serializer,
       registry: typeRegistry,
       client: this.client,
@@ -452,18 +453,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
     options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
   ) {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    return collectMultiNamespaceReferences({
-      registry: this._registry,
-      allowedTypes: this._allowedTypes,
-      client: this.client,
-      serializer: this._serializer,
-      getIndexForType: this.helpers.common.getIndexForType.bind(this.helpers.common),
-      createPointInTimeFinder: this.createPointInTimeFinder.bind(this),
-      securityExtension: this.extensions.securityExtension,
-      objects,
-      options: { ...options, namespace },
-    });
+    return await performCollectMultiNamespaceReferences(
+      {
+        objects,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**
@@ -474,22 +470,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     spacesToAdd: string[],
     spacesToRemove: string[],
     options: SavedObjectsUpdateObjectsSpacesOptions = {}
-  ) {
-    const namespace = this.getCurrentNamespace(options.namespace);
-    return updateObjectsSpaces({
-      mappings: this._mappings,
-      registry: this._registry,
-      allowedTypes: this._allowedTypes,
-      client: this.client,
-      serializer: this._serializer,
-      logger: this._logger,
-      getIndexForType: this.helpers.common.getIndexForType.bind(this.helpers.common),
-      securityExtension: this.extensions.securityExtension,
-      objects,
-      spacesToAdd,
-      spacesToRemove,
-      options: { ...options, namespace },
-    });
+  ): Promise<SavedObjectsUpdateObjectsSpacesResponse> {
+    return await performUpdateObjectsSpaces(
+      {
+        objects,
+        spacesToAdd,
+        spacesToRemove,
+        options,
+      },
+      this.apiExecutionContext
+    );
   }
 
   /**

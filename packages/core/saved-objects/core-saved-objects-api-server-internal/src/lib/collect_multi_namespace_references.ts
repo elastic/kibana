@@ -17,14 +17,11 @@ import {
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
   type SavedObject,
+  type ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
-  type SavedObjectsSerializer,
-  getObjectKey,
-  parseObjectKey,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
@@ -55,7 +52,7 @@ export interface CollectMultiNamespaceReferencesParams {
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
   client: RepositoryEsClient;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   createPointInTimeFinder: CreatePointInTimeFinderFn;
   securityExtension: ISavedObjectsSecurityExtension | undefined;

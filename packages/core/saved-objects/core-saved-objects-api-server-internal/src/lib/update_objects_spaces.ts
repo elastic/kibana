@@ -23,14 +23,12 @@ import type {
   AuthorizeObjectWithExistingSpaces,
   ISavedObjectsSecurityExtension,
   ISavedObjectTypeRegistry,
+  ISavedObjectsSerializer,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
-import type {
-  IndexMapping,
-  SavedObjectsSerializer,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -54,7 +52,7 @@ export interface UpdateObjectsSpacesParams {
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
   client: RepositoryEsClient;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
   logger: Logger;
   getIndexForType: (type: string) => string;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
