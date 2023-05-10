@@ -17,7 +17,7 @@ export const getSyntheticsErrorRouteFromMonitorId = ({
   locationId: string;
 }) =>
   format({
-    pathname: `/app/synthetics/monitor/${configId}/errors/${stateId}`,
+    pathname: encodeURI(`/app/synthetics/monitor/${configId}/errors/${stateId}`),
     query: {
       locationId,
     },

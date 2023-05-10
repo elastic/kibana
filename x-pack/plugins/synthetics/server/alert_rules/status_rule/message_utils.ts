@@ -112,7 +112,7 @@ export const getReasonMessage = ({
 };
 
 export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
-  defaultMessage: `down`,
+  defaultMessage: `Down`,
 });
 
 export const UNAVAILABLE_LABEL = i18n.translate(
