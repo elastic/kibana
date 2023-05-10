@@ -148,7 +148,7 @@ export const SelectConnector: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={3}>
             {CONNECTORS.map((connector) => (
-              <EuiFlexItem key={connector.serviceType}>
+              <EuiFlexItem key={connector.serviceType} grow>
                 <ConnectorCheckable
                   icon={connector.icon}
                   isBeta={connector.isBeta}

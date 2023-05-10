@@ -29,7 +29,7 @@ import { hasConfiguredConfiguration } from '../../../../utils/has_configured_con
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescription } from '../connector_name_and_description/connector_name_and_description';
-import { NATIVE_CONNECTORS } from '../constants';
+import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../constants';
 
 import { ConvertConnector } from './convert_connector';
 import { NativeConnectorAdvancedConfiguration } from './native_connector_advanced_configuration';
@@ -56,6 +56,13 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const hasConfiguredAdvanced = index.connector.last_synced || index.connector.scheduling.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
+
+  // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
+  const isBeta =
+    !index.connector.service_type ||
+    Boolean(
+      BETA_CONNECTORS.find(({ serviceType }) => serviceType === index.connector.service_type)
+    );
 
   return (
     <>
@@ -209,11 +216,13 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 <ConvertConnector />
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder hasShadow={false}>
-                <BetaConnectorCallout />
-              </EuiPanel>
-            </EuiFlexItem>
+            {isBeta ? (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder hasShadow={false}>
+                  <BetaConnectorCallout />
+                </EuiPanel>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
