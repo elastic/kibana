@@ -13,6 +13,7 @@ import {
   getIndexMappingsRoute,
   getIndexStatsRoute,
   getUnallowedFieldValuesRoute,
+  updateUnallowedFieldValuesRoute,
 } from './routes';
 
 export class EcsDataQualityDashboardPlugin
@@ -32,6 +33,7 @@ export class EcsDataQualityDashboardPlugin
     getIndexMappingsRoute(router);
     getIndexStatsRoute(router);
     getUnallowedFieldValuesRoute(router);
+    updateUnallowedFieldValuesRoute(router);
     getILMExplainRoute(router);
     return {};
   }

@@ -33,7 +33,7 @@ const IndexInvalidValueDropdownComponent: React.FC<{
 }> = ({ indexFieldName, allowedValues, indexInvalidValue }) => {
   const [value, setValue] = useState(indexInvalidValue);
   const onChange = (e) => {
-    setValue(e.target.name);
+    setValue(e.target.value);
   };
   const options = useMemo(
     () =>
