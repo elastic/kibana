@@ -30,6 +30,7 @@
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/guided-onboarding-plugin",
-    "@kbn/alerting-plugin"
+    "@kbn/alerting-plugin",
+    "@kbn/securitysolution-data-table"
   ]
 }

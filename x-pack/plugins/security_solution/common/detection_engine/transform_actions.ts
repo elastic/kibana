@@ -6,6 +6,8 @@
  */
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
+import type { NormalizedRuleAction } from './rule_management/api/rules/bulk_actions/request_schema';
 import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
@@ -43,6 +45,34 @@ export const transformAlertToRuleAction = ({
   action_type_id: actionTypeId,
   ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
+});
+
+export const transformNormalizedRuleToAlertAction = ({
+  group,
+  id,
+  params,
+  frequency,
+  alerts_filter: alertsFilter,
+}: NormalizedRuleAction): NormalizedAlertAction => ({
+  group,
+  id,
+  params,
+  ...(alertsFilter && { alertsFilter }),
+  ...(frequency && { frequency }),
+});
+
+export const transformAlertToNormalizedRuleAction = ({
+  group,
+  id,
+  params,
+  frequency,
+  alertsFilter,
+}: RuleAction): NormalizedRuleAction => ({
+  group,
+  id,
+  params,
+  ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(frequency && { frequency }),
 });
 
