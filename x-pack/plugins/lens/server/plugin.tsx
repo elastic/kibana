@@ -30,7 +30,8 @@ import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
-import { defineRoutes } from './routes';
+// import { defineRoutes } from './routes';
+import { setupStateCoordinatorServer } from './routes/state_coordinator_with_server_side_events';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -68,7 +69,8 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
   constructor() {}
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
-    defineRoutes(core.http);
+    // defineRoutes(core.http);
+    setupStateCoordinatorServer(); // had to cook my own server because of lack of server-sent event support in Core
 
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager

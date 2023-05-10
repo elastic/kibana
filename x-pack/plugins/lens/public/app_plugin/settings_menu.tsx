@@ -16,6 +16,7 @@ import { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
 import {
   disableAutoApply,
   enableAutoApply,
@@ -66,17 +67,22 @@ export function SettingsMenu({
       <EuiPopoverTitle>
         <FormattedMessage id="xpack.lens.settings.title" defaultMessage="Lens settings" />
       </EuiPopoverTitle>
-      <EuiButton onClick={() => StateCoordinator.clearVisualizationPatches()}>
-        Clear current changes
-      </EuiButton>
-      <EuiSwitch
-        label={i18n.translate('xpack.lens.settings.autoApply', {
-          defaultMessage: 'Auto-apply visualization changes',
-        })}
-        checked={autoApplyEnabled}
-        onChange={() => toggleAutoApply()}
-        data-test-subj="lnsToggleAutoApply"
-      />
+      <EuiFormRow>
+        <EuiButton onClick={() => StateCoordinator.clearVisualizationPatches()}>
+          Clear current changes
+        </EuiButton>
+      </EuiFormRow>
+
+      <EuiFormRow>
+        <EuiSwitch
+          label={i18n.translate('xpack.lens.settings.autoApply', {
+            defaultMessage: 'Auto-apply visualization changes',
+          })}
+          checked={autoApplyEnabled}
+          onChange={() => toggleAutoApply()}
+          data-test-subj="lnsToggleAutoApply"
+        />
+      </EuiFormRow>
     </EuiWrappingPopover>
   );
 }

@@ -11,11 +11,14 @@ import { STATE_PATCH_API_PATH } from '../../../common/constants';
 
 type Listener = (patches: Patch[]) => void;
 
+const CUSTOM_BASE_PATH = 'http://localhost:3000';
+const FETCH_URL = `${CUSTOM_BASE_PATH}${STATE_PATCH_API_PATH}`;
+
 export class StateCoordinator {
   private static http?: HttpSetup;
   private static visId?: string;
   private static sessionId?: string;
-  private static POLLING_INTERVAL = 1000;
+  // private static POLLING_INTERVAL = 1000;
   private static listeners: Listener[] = [];
 
   public static setHTTP(http: HttpSetup) {
@@ -30,24 +33,34 @@ export class StateCoordinator {
     this.sessionId = id;
   }
 
-  public static async runPoll() {
-    const { http, visId, sessionId, POLLING_INTERVAL } = StateCoordinator;
+  public static async listen() {
+    const { visId, sessionId } = StateCoordinator;
+    if (!visId || !sessionId) return;
+    // let patches: Patch[] = [];
+    // if (http && visId && sessionId) {
+    //   patches = (
+    //     await http.get<{ patches: Patch[] }>(STATE_PATCH_API_PATH, {
+    //       query: {
+    //         visId,
+    //         sessionId,
+    //       },
+    //     })
+    //   ).patches;
+    // }
+    // StateCoordinator.listeners.forEach((listener) => patches.length && listener(patches));
+    // setTimeout(() => this.runPoll(), POLLING_INTERVAL);
+    const eventSourceUrl = new URL(FETCH_URL);
+    eventSourceUrl.searchParams.set('visId', visId);
+    eventSourceUrl.searchParams.set('sessionId', sessionId);
 
-    let patches: Patch[] = [];
-    if (http && visId && sessionId) {
-      patches = (
-        await http.get<{ patches: Patch[] }>(STATE_PATCH_API_PATH, {
-          query: {
-            visId,
-            sessionId,
-          },
-        })
-      ).patches;
-    }
+    const events = new EventSource(eventSourceUrl);
 
-    StateCoordinator.listeners.forEach((listener) => patches.length && listener(patches));
+    events.onmessage = (event) => {
+      const patches: Patch[] = JSON.parse(event.data);
 
-    setTimeout(() => this.runPoll(), POLLING_INTERVAL);
+      console.log(patches);
+      StateCoordinator.listeners.forEach((listener) => patches.length && listener(patches));
+    };
   }
 
   private constructor() {}
@@ -72,19 +85,31 @@ export class StateCoordinator {
   }
 
   public static sendPatch(patch: Patch) {
-    const { http, visId, sessionId } = StateCoordinator;
-    if (!http || !visId || !sessionId) return;
+    const { visId, sessionId } = StateCoordinator;
+    if (!visId || !sessionId) return;
 
-    http.post(STATE_PATCH_API_PATH, {
+    fetch(FETCH_URL, {
+      method: 'POST',
       cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        patch,
-        visId,
-        sessionId,
-      }),
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify({ patch, visId, sessionId }),
     });
+
+    // Have to use fetch for now since we're using a custom server
+    // Core doesn't currently support server-sent events
+    // http.post(STATE_PATCH_API_PATH, {
+    //   cache: 'no-cache',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     patch,
+    //     visId,
+    //     sessionId,
+    //   }),
+    // });
   }
 }

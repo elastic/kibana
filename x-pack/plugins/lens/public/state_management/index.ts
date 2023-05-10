@@ -8,7 +8,6 @@
 import { configureStore, getDefaultMiddleware, PreloadedState } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { v4 } from 'uuid';
 import { makeLensReducer, lensActions } from './lens_slice';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
@@ -16,7 +15,6 @@ import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
 import { stateHistoryMiddleware } from './state_history';
-import { StateCoordinator } from './state_coordinator';
 export * from './types';
 export * from './selectors';
 
@@ -74,10 +72,6 @@ export const makeConfigureStore = (
       })
     );
   }
-
-  StateCoordinator.setHTTP(storeDeps.lensServices.http);
-  StateCoordinator.setSessionId(v4());
-  StateCoordinator.runPoll();
 
   return configureStore({
     reducer: {

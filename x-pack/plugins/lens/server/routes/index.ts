@@ -6,10 +6,10 @@
  */
 
 import { HttpServiceSetup } from '@kbn/core/server';
-import { statePatches } from './state_patches';
+import { stateCoordinator } from './state_coordinator';
 
 export function defineRoutes(http: HttpServiceSetup) {
   const router = http.createRouter();
 
-  statePatches(router);
+  stateCoordinator(router);
 }

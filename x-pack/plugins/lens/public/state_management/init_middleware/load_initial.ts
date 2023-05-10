@@ -9,8 +9,9 @@ import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { v4 } from 'uuid';
 import { setState, initEmpty, LensStoreDeps } from '..';
-import { disableAutoApply, getPreloadedState } from '../lens_slice';
+import { applyPatches, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
@@ -277,11 +278,6 @@ export function loadInitial(
             );
           }
 
-          if (doc.savedObjectId) {
-            // TODO - this only works for by reference
-            StateCoordinator.setVisId(doc.savedObjectId);
-          }
-
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
               ...stateMap,
@@ -354,6 +350,16 @@ export function loadInitial(
 
               if (autoApplyDisabled) {
                 store.dispatch(disableAutoApply());
+              }
+
+              if (doc.savedObjectId) {
+                // TODO - this only works for by reference
+                StateCoordinator.setVisId(doc.savedObjectId);
+                StateCoordinator.setSessionId(v4());
+                StateCoordinator.registerPatchListener((patches) => {
+                  store.dispatch(applyPatches({ patches }));
+                });
+                StateCoordinator.listen();
               }
             })
             .catch((e: { message: string }) =>

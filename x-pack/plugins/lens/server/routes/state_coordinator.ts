@@ -12,7 +12,7 @@ import { STATE_PATCH_API_PATH } from '../../common/constants';
 
 const patches: Record<string, Array<{ patch: Patch; sessionsReceived: Set<string> }>> = {};
 
-export async function statePatches(router: IRouter) {
+export async function stateCoordinator(router: IRouter) {
   router.post(
     {
       path: STATE_PATCH_API_PATH,
