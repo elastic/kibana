@@ -60,7 +60,7 @@ export const kpiHostAreaLensAttributes: LensAttributes = {
           xAccessor: '5eea817b-67b7-4268-8ecb-7688d1094721',
         },
       ],
-      legend: { isVisible: true, position: 'right' },
+      legend: { isVisible: false, position: 'right' },
       preferredSeriesType: 'area',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
