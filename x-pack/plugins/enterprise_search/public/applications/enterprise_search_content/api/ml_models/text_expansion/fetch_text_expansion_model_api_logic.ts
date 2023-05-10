@@ -13,6 +13,8 @@ export type FetchTextExpansionModelArgs = undefined;
 export interface FetchTextExpansionModelResponse {
   deploymentState: string;
   modelId: string;
+  nodeAllocationCount: number;
+  threadsPerAllocation: number;
 }
 
 export const fetchTextExpansionModelStatus = async () => {
