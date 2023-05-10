@@ -18,7 +18,7 @@
   "type": "doc",
   "value": {
     "id": "action:791a2ab1-784a-46ea-aa68-04c837e5da2d",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".jira",
@@ -61,7 +61,7 @@
   "type": "doc",
   "value": {
     "id": "action:949f909b-20a0-46e3-aadb-6a4d117bb592",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".webhook",
@@ -88,7 +88,7 @@
   "type": "doc",
   "value": {
     "id": "action:7434121e-045a-47d6-a0a6-0b6da752397a",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".webhook",
@@ -115,7 +115,7 @@
   "type": "doc",
   "value": {
     "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".email",
@@ -147,7 +147,7 @@
   "type": "doc",
   "value": {
     "id": "action:1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".email",
@@ -179,7 +179,7 @@
   "type": "doc",
   "value": {
     "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".email",
@@ -211,7 +211,7 @@
   "type": "doc",
   "value": {
     "id": "action:7d04bc30-c4c0-11ec-ae29-917aa31a5b75",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".servicenow-sir",
@@ -242,7 +242,7 @@
   "type": "doc",
   "value": {
     "id": "action:8a9331b0-c4c0-11ec-ae29-917aa31a5b75",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".servicenow-itom",
@@ -272,7 +272,7 @@
   "type": "doc",
   "value": {
     "id": "action:6d3a1250-c4c0-11ec-ae29-917aa31a5b75",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId" : ".servicenow",
