@@ -147,7 +147,7 @@ export const MONITOR_TYPE_CONFIG = {
           'Test a single page load including all objects on the page from a real web browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
     beta: false,
   },
@@ -165,7 +165,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -183,7 +183,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
@@ -201,7 +201,7 @@ export const MONITOR_TYPE_CONFIG = {
       defaultMessage:
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
     icon: 'online',
     beta: false,
   },
