@@ -341,25 +341,22 @@ export const useFetchDataDriftResult = (
           if (type === 'numeric') {
             data[field] = {
               pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
-              //   histogram: driftedResp.aggregations[`${field}_histogram`].buckets,
+              referenceHistogram: referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
+              productionHistogram: productionHistogramResponse.aggregations[`${field}_histogram`].buckets,
             }
           }
-          // if (type === 'categoric') {
-          //   data[field] = {
-          //     driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
-          //     driftedSumOtherDocCount: driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
-          //     baselineTerm: baselineResponse.aggregations[`${field}_terms`].buckets,
-          //     baselineSumOtherDocCount: baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
-          //   }
-          // }
+          if (type === 'categoric') {
+            data[field] = {
+              driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
+              driftedSumOtherDocCount: driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
+              baselineTerms: baselineResponse.aggregations[`${field}_terms`].buckets,
+              baselineSumOtherDocCount: baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
+            }
+          }
         }
 
         console.log("Parsed data", data);
 
-        // const data = {
-        //   driftedPValue: driftedResp.aggregations._ks_test_.two_sided,
-        //   buckets: driftedResp.aggregations.numeric_unchangeable_ranges.buckets,
-        // };
         setResult({
           data,
           status: FETCH_STATUS.SUCCESS,
