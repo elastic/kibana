@@ -39,7 +39,7 @@ export const activeMaintenanceWindowsRoute = (
           });
         }
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
-        const result = await maintenanceWindowClient.getActiveMaintenanceWindows({});
+        const result = await maintenanceWindowClient.getActiveMaintenanceWindows();
 
         return res.ok({
           body: result.map((maintenanceWindow) => rewriteMaintenanceWindowRes(maintenanceWindow)),
