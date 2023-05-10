@@ -52,7 +52,6 @@ export const HelpCenterFlyout = (
       {
         id: 'documentation',
         name: 'Documentation',
-        prepend: <EuiIcon type="documentation" />,
         content: (
           <>
             <EuiSearchBar
@@ -77,7 +76,6 @@ export const HelpCenterFlyout = (
       {
         id: 'talkToUs',
         name: 'Contact us',
-        prepend: <EuiIcon type="discuss" />,
         content: (
           <Fragment>
             <Contact />

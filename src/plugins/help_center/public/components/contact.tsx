@@ -7,7 +7,7 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiIcon, EuiCard } from '@elastic/eui';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
 export const Contact = () => {
@@ -17,16 +17,14 @@ export const Contact = () => {
       {(helpFetchResults?.contact ?? []).map((contact) => {
         return (
           <>
-            <EuiButtonEmpty
-              href={contact.href}
+            <EuiCard
+              layout={'horizontal'}
+              icon={<EuiIcon size="xl" type={contact.iconType ?? 'discuss'} />}
+              title={contact.title ?? ''}
               target="_blank"
-              size="s"
-              iconType={contact.iconType}
-              flush="left"
-              aria-label={contact.title}
-            >
-              {contact.title}
-            </EuiButtonEmpty>
+              href={contact.href}
+              titleSize="xs"
+            />
             <EuiSpacer size="s" />
           </>
         );
