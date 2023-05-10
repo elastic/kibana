@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
@@ -112,14 +113,16 @@ class InternalEngineTransporter implements Transporter {
 
 interface ConfigurationPopOverProps {
   engineName: string;
+  hasSchemaConflicts: boolean;
   setCloseConfiguration: () => void;
   showConfiguration: boolean;
 }
 
 const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   engineName,
-  showConfiguration,
+  hasSchemaConflicts,
   setCloseConfiguration,
+  showConfiguration,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { engineData } = useValues(EngineViewLogic);
@@ -184,7 +187,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiContextMenuItem>
           <EuiContextMenuItem
             key="Schema"
-            icon="kqlField"
+            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'kqlField'}
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -194,12 +197,20 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               )
             }
           >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema',
-              {
-                defaultMessage: 'Schema',
-              }
-            )}
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema"
+                defaultMessage="Schema"
+              />
+              {hasSchemaConflicts && (
+                <EuiText color="danger">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.SchemaConflict"
+                    defaultMessage="Conflict"
+                  />
+                </EuiText>
+              )}
+            </EuiFlexGroup>
           </EuiContextMenuItem>
 
           <EuiPanel color="transparent" paddingSize="s">
@@ -326,6 +337,7 @@ export const EngineSearchPreview: React.FC = () => {
           <>
             <ConfigurationPopover
               engineName={engineName}
+              hasSchemaConflicts={hasSchemaConflicts}
               showConfiguration={showConfigurationPopover}
               setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
             />
