@@ -123,7 +123,7 @@ export const MONITOR_TYPE_CONFIG = {
           'Navigate through multiple steps or pages to test key user flows from a real browser.',
       }
     ),
-    link: '#',
+    link: 'https://www.elastic.co/guide/en/observability/current/synthetics-journeys.html',
     icon: 'videoPlayer',
     beta: false,
   },
@@ -578,7 +578,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
+          href="https://www.elastic.co/guide/en/fleet/current/data-streams.html"
+          target="_blank"
+        >
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
