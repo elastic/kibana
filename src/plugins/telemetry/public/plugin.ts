@@ -21,7 +21,8 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
-import { of } from 'rxjs';
+import { BehaviorSubject, map, tap } from 'rxjs';
+import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute } from '../common/routes';
 import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
@@ -121,6 +122,7 @@ function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
+  private readonly telemetryLabels$: BehaviorSubject<TelemetryConfigLabels>;
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
@@ -129,6 +131,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get();
+    this.telemetryLabels$ = new BehaviorSubject<TelemetryConfigLabels>(this.config.labels);
   }
 
   public setup(
@@ -153,7 +156,14 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     analytics.registerContextProvider({
       name: 'telemetry labels',
-      context$: of({ labels: this.config.labels }),
+      context$: this.telemetryLabels$.pipe(
+        tap((labels) => {
+          // Hack to update the APM agent's labels.
+          // In the future we might want to expose APM as a core service to make reporting metrics much easier.
+          window.elasticApm?.addLabels(labels);
+        }),
+        map((labels) => ({ labels }))
+      ),
       schema: {
         labels: {
           type: 'pass_through',
@@ -277,9 +287,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       this.telemetryService.config = updatedConfig;
     }
 
-    // Hack to update the APM agent's labels.
-    // In the future we might want to expose APM as a core service to make reporting metrics much easier.
-    window.elasticApm?.addLabels(updatedConfig.labels as Record<string, LabelValue>);
+    this.telemetryLabels$.next(updatedConfig.labels);
 
     return updatedConfig;
   }
