@@ -94,6 +94,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   observability: 95000
+  observabilityLogs: 20000
   observabilityShared: 21266
   osquery: 107090
   painlessLab: 179748
