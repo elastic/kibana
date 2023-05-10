@@ -36,14 +36,14 @@ import {
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
 } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useStartServices, useConfig, useGetAgentPolicies } from '../../../../hooks';
+import { useStartServices, useConfig, useGetAgentPolicies, useLicense } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { policyHasFleetServer } from '../../../../services';
+import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
 
 import {
   useOutputOptions,
@@ -102,7 +102,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
-  const [isProtectedFlyoutOpen, setIsProtectedFlyoutOpen] = useState(false);
+  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+  const licenseService = useLicense();
+  // rename this to match with gergo's for readability
+  const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
 
   return (
     <>
@@ -122,7 +125,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
-        {isTamperingFlyoutOpen && console.log('hello i am open')}
+        {isUninstallCommandFlyoutOpen && (
+          <UninstallCommandFlyout
+            target="agent"
+            policyId={agentPolicy.id}
+            onClose={() => setIsUninstallCommandFlyoutOpen(false)}
+          />
+        )}
         <EuiFormRow
           fullWidth
           key="description"
@@ -289,41 +298,46 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={
-          <h4>
+      {agentTamperProtectionEnabled && licenseService.isPlatinum() && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.tamperingLabel"
+                defaultMessage="Agent tampering"
+              />
+            </h4>
+          }
+          description={
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.tamperingLabel"
-              defaultMessage="Agent tampering"
+              id="xpack.fleet.agentPolicyForm.tamperingDescription"
+              defaultMessage="some description"
             />
-          </h4>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.tamperingDescription"
-            defaultMessage="some description"
-          />
-        }
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
-            defaultMessage: 'Turn on agent tampering',
-          })}
-          checked={agentPolicy.is_protected ?? false}
-          onChange={(e) => updateAgentPolicy({ is_protected: e.target.checked })}
-        />
-        <EuiSpacer size="s" />
-        <EuiLink
-          onClick={() => {
-            setIsProtectedFlyoutOpen(true);
-          }}
-          disabled={agentPolicy.is_protected === false}
+          }
         >
-          {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-            defaultMessage: 'Get uninstall command',
-          })}
-        </EuiLink>
-      </EuiDescribedFormGroup>
+          <EuiSwitch
+            label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
+              defaultMessage: 'Turn on agent tampering',
+            })}
+            checked={agentPolicy.is_protected ?? false}
+            onChange={(e) => {
+              console.log('i am in the onchange', e.target.checked);
+              updateAgentPolicy({ is_protected: e.target.checked });
+            }}
+          />
+          <EuiSpacer size="s" />
+          <EuiLink
+            onClick={() => {
+              setIsUninstallCommandFlyoutOpen(true);
+            }}
+            disabled={agentPolicy.is_protected === false}
+          >
+            {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+              defaultMessage: 'Get uninstall command',
+            })}
+          </EuiLink>
+        </EuiDescribedFormGroup>
+      )}
       <EuiDescribedFormGroup
         title={
           <h4>
