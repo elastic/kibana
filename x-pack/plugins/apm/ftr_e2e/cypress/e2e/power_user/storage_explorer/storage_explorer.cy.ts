@@ -79,8 +79,8 @@ describe('Storage Explorer', () => {
 
     it('has a list of summary stats', () => {
       cy.contains('Total APM size');
-      cy.contains('Disk space used');
-      cy.contains('Incremental APM size');
+      cy.contains('Relative disk space used');
+      cy.contains('Delta in APM size');
       cy.contains('Daily data generation');
       cy.contains('Traces per minute');
       cy.contains('Number of services');
