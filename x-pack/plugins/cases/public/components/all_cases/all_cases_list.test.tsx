@@ -704,7 +704,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  describe('Actions', () => {
+  describe.each(Array(50).fill(null))('Actions', () => {
     const updateCasesSpy = jest.spyOn(api, 'updateCases');
     const deleteCasesSpy = jest.spyOn(api, 'deleteCases');
 
