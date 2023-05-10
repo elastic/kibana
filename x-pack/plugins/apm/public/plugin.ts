@@ -44,10 +44,10 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import {
   FetchDataParams,
-  METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import { METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
