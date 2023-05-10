@@ -37,6 +37,8 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /** A human-readable description of this route */
   description?: string;
+  /** A short human-readable summary of this route */
+  summary?: string;
 };
 
 /**
