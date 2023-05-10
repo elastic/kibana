@@ -241,12 +241,21 @@ export class PluginsStatusService {
    * @param {number} depth the minimum depth that we know for sure this plugin has
    */
   private calculateDepthRecursive(plugin: PluginName, depth: number): void {
+    // calls++;
+    if (processed.has(plugin)) {
+      // cached++;
+      // console.log(`calculateDepthRecursive:  ${cached} / ${calls}`);
+      return;
+    }
+
     const pluginData = this.pluginData[plugin];
     pluginData.depth = Math.max(pluginData.depth, depth);
     const newDepth = depth + 1;
     pluginData.reverseDependencies.forEach((revDep) =>
       this.calculateDepthRecursive(revDep, newDepth)
     );
+    processed.add(plugin);
+    // console.log(`calculateDepthRecursive:  ${cached} / ${calls}`);
   }
 
   /**
@@ -360,3 +369,7 @@ export class PluginsStatusService {
     this.pluginStatus$.next({ ...this.pluginStatus });
   }
 }
+
+let calls = 0;
+let cached = 0;
+const processed = new Set<PluginName>();

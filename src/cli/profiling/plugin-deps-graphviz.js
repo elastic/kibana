@@ -28,11 +28,9 @@ console.log(`# background plugins: ${backgroundPlugins.size} / ${plugins.length}
 console.log(`digraph plugins {`);
 
 for (const plugin of plugins) {
-  const label = `label="${plugin.pluginName}"`;
   if (!backgroundPlugins.has(plugin.pluginName)) continue;
-
-  const color = backgroundPlugins.has(plugin.pluginName) ? ` color="#FF0000"` : '';
-  console.log(`  _${plugin.pluginName} [${label}${color}];`);
+  const props = `label="${plugin.pluginName}" color="#FF0000" fontcolor="#00AF00"`;
+  console.log(`  _${plugin.pluginName} [${props}];`);
 }
 
 for (const plugin of plugins) {
@@ -40,12 +38,12 @@ for (const plugin of plugins) {
 
   for (const dep of plugin.requiredPlugins) {
     if (!backgroundPlugins.has(dep)) continue;
-    console.log(`  _${plugin.pluginName} -> _${dep};`);
+    console.log(`  _${plugin.pluginName} -> _${dep} [color="#3F3FFF"];`);
   }
 
   for (const dep of plugin.optionalPlugins) {
     if (!backgroundPlugins.has(dep)) continue;
-    console.log(`  _${plugin.pluginName} -> _${dep};`);
+    console.log(`  _${plugin.pluginName} -> _${dep} [color="#3F3FFF"];`);
   }
 }
 

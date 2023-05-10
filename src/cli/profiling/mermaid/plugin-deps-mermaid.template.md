@@ -1,16 +1,6 @@
-Sadly, many of these didn't end up rendering - was it too much for poor
-GitHub?  Anhoo, you can get the gist for how complex these can get by
-looking at some that did get rendered.
-
-However!  I installed a mermaid cli tool `npm install -g @mermaid-js/mermaid-cli`,
-copied the `plugin-deps-mermaid.md` file to the `mermaid` directory as
-`plugin-deps-mermaid.template.md`, then ran the following, which generated
-all the other files in that directory.  So, you should be able to view a
-"rendered-to-SVG" version of this markdown file in 
-[`.mermaid/plugin-deps-mermaid.md`](.mermaid/plugin-deps-mermaid.md)
 
 ```
-mmdc -i src/cli/profiling/mermaid/plugin-deps-mermaid.template.md -o src/cli/profiling/mermaid/plugin-deps-mermaid.md
+npx -p @mermaid-js/mermaid-cli mmdc -i src/cli/profiling/plugin-deps-mermaid.md -o src/cli/profiling/plugin-deps-mermaid.built.md
 ```
 
 # Kibana plugin dependency diagrams

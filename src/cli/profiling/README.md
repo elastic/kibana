@@ -29,8 +29,10 @@ background tasks only:
 yarn start --no-base-path '--node.roles=["background_tasks"]'
 ```
 
-_Note, I'm willing to live with a dev environment here, despite it no
-doubt being "slower" than running the final product._
+After getting all this set up, I did a build of Kibana via `yarn build`,
+and ran the result to get it's profile.  While faster than dev time, and
+only one profile generated instead of two, it didn't seem signifcantly
+different, so worked off the dev profiles for the most part.
 
 ## what to optimize???
 
@@ -91,18 +93,74 @@ For the second point - how would we prevent the code from being loaded -
 there are some points in the plugin service that will bypass loading
 plugins, if they aren't enabled, if pre-reqs aren't available, etc.  So
 that's how we could arrange to **NOT** load some plugins.  Modules and
-"packages" are another story though.  
-Hopefully starting with the "roots" that we need (only plugins that we
-want to load), only the modules and "packages" we'd need would also
-be loaded.
+"packages" are another story though.   Hopefully starting with the
+"roots" that we need (only plugins that we want to load), only the
+modules and "packages" we'd need would also be loaded.
 
 This could potentially save some time in the setup / start phases,
 but that's only 2 seconds out of the 13, so not going to be much bang
 for the buck in that approach.  Still, if we want to shave every,
 millisecond off, we'll want to do that.
 
-I generated some graphs of the dependencies:
+I generated some graphs of the 
+[dependencies of all plugins together](./plugin-deps-graphviz.md)
+and
+[dependencies of each plugins individually](./plugin-deps-mermaid.md)
 
-## load **much** less code, quicker
+In addition, as part of figuring out if plugins should be loaded, the
+plugin actually needs to be loaded, to get it's `config`
+entrypoint, as part of the processing in
+[`plugins_service.ts`](https://github.com/elastic/kibana/blob/main/packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts).
+But we don't want to `require()` things we don't need - chicken and 
+egg problem - we only can learn what we don't need to load by loading
+everything.
 
+I think that points to having some new startup flow that would
+enumerate "background_tasks" only plugins.  Could be part of the
+build?
+
+## load modules faster with snapshot blobs
+
+Perhaps there's some hope in 
+[node snapshot blobss](https://blog.logrocket.com/snapshot-flags-node-js-v18-8/).
+The idea would be to bundle all of Kibana into a single module ...gulp... and
+hope to restructure Kibana to a form where a snapshot can be saved - after
+reading modules, but before opening network connections.  
+
+Such snapshot blobs would be a way to greatly reduce 8s of module loading at
+Kibana's launch.
+
+Lots of if's.  Maybe the snapshot generated for Kibana would be enormous,
+even if it could have dead code removed.
+
+It's a node v18 feature, so we can't really play with it anyway
+
+## actual micro-performance problems
+
+Looking at the generated CPU profiles, there were a few outlier
+functions in terms of poor performance:
+
+- `loadJSONSpecInDir()` - 250ms - uses `fs.readFileSync()`
+  https://github.com/elastic/kibana/blob/51f6eeccefca5b927f96727be39181e0c4119275/src/plugins/console/server/services/spec_definitions_service.ts#L118-L143
+
+- `kbn-alerts-as-data-utils/src/field_maps/ecs_field_map.ts` - 200ms - don't reduce? memo-ize?
+  https://github.com/elastic/kibana/blob/main/packages/kbn-alerts-as-data-utils/src/field_maps/ecs_field_map.ts
+  This is only called once, as static code in the module.  Quick conversion of the `reduce()` to a `filter()`
+  and then `map()` went from 176ms to 4ms!
+
+- `calculateDepthRecursive()` - 187ms cumulative - memo-ize?
+  https://github.com/elastic/kibana/blob/51f6eeccefca5b927f96727be39181e0c4119275/packages/core/status/core-status-server-internal/src/plugins_status.ts#L243-L250
+  This is called 312 times, 273 times with a previous invoked plugin.
+
+- `DFS()` from npm prismjs - 400ms cumulative - looks like it's some kind
+  of initialization of language parsers or such (prism is a code formatting
+  library).  Looks like it takes 80ms per call, and is being called ~5 times.
+  Not sure if it's in production, but guessing it's not a dev feature.
+  Wonder if we can move this out of the start flow.  Wondering who might
+  need this in background tasks anyway?
+
+These can probably be fixed - the first may be a one-time startup thing, but the other two look
+memo-izable, and/or stop using `reduce()`.
+
+## green field
 
