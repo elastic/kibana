@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AddToBlockListContextMenu } from '.';
+import { AddToBlockListContextMenu } from './add_to_block_list';
 import { BlockListProvider } from '../../../indicators/containers/block_list_provider';
 import { SecuritySolutionContext } from '../../../../containers/security_solution_context';
 import { SecuritySolutionPluginContext } from '../../../..';

@@ -62,7 +62,9 @@ class DocLinks {
   public cloudIndexManagement: string;
   public connectors: string;
   public connectorsAzureBlobStorage: string;
+  public connectorsConfluence: string;
   public connectorsGoogleCloudStorage: string;
+  public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
@@ -70,6 +72,7 @@ class DocLinks {
   public connectorsOracle: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
+  public connectorsSharepoint: string;
   public connectorsWorkplaceSearch: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -193,7 +196,9 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
+    this.connectorsConfluence = '';
     this.connectorsGoogleCloudStorage = '';
+    this.connectorsJira = '';
     this.connectorsMicrosoftSQL = '';
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
@@ -201,6 +206,7 @@ class DocLinks {
     this.connectorsOracle = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
+    this.connectorsSharepoint = '';
     this.connectorsWorkplaceSearch = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -325,8 +331,10 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
+    this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
@@ -334,6 +342,7 @@ class DocLinks {
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
+    this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;

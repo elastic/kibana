@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { IndicatorsFieldSelector } from '.';
+import { IndicatorsFieldSelector } from './field_selector';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 const mockIndexPattern: DataView = {
