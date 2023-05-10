@@ -41,6 +41,7 @@ export interface SavedSearchAttributes {
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
+  sampleSize?: number;
   breakdownField?: string;
 }
 
@@ -72,5 +73,6 @@ export interface SavedSearch {
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
+  sampleSize?: number;
   breakdownField?: string;
 }

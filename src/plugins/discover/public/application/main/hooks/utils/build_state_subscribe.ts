@@ -49,12 +49,13 @@ export const buildStateSubscribe =
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } = appState.getPrevious();
+    const { hideChart, interval, breakdownField, sampleSize, sort, index } = appState.getPrevious();
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
     const chartIntervalChanged = nextState.interval !== interval;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
+    const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort);
     const dataViewChanged = !isEqual(nextState.index, index);
     let savedSearchDataView;
@@ -88,6 +89,7 @@ export const buildStateSubscribe =
       chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
+      sampleSizeChanged ||
       docTableSortChanged ||
       dataViewChanged
     ) {

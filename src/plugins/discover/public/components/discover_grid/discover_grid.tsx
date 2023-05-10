@@ -46,6 +46,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
+import { DiscoverGridSettingsPopover } from './discover_grid_settings_popover';
 import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
@@ -112,10 +113,6 @@ export interface DiscoverGridProps {
    */
   rows?: DataTableRecord[];
   /**
-   * The max size of the documents returned by Elasticsearch
-   */
-  sampleSize: number;
-  /**
    * Function to set the expanded document, which is displayed in a flyout
    */
   setExpandedDoc?: (doc?: DataTableRecord) => void;
@@ -180,6 +177,14 @@ export interface DiscoverGridProps {
    */
   onUpdateRowsPerPage?: (rowsPerPage: number) => void;
   /**
+   * The max size of the documents returned by Elasticsearch
+   */
+  sampleSizeState: number;
+  /**
+   * Update rows per page state
+   */
+  onUpdateSampleSize?: (sampleSize: number) => void;
+  /**
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
@@ -226,7 +231,6 @@ export const DiscoverGrid = ({
   onSetColumns,
   onSort,
   rows,
-  sampleSize,
   searchDescription,
   searchTitle,
   setExpandedDoc,
@@ -241,6 +245,8 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  sampleSizeState,
+  onUpdateSampleSize,
   isPlainRecord = false,
   rowsPerPageState,
   onUpdateRowsPerPage,
@@ -386,7 +392,7 @@ export const DiscoverGrid = ({
   /**
    * Render variables
    */
-  const showDisclaimer = rowCount === sampleSize && isOnLastPage;
+  const showDisclaimer = rowCount === sampleSizeState && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -482,17 +488,26 @@ export const DiscoverGrid = ({
   );
 
   const additionalControls = useMemo(
-    () =>
-      usedSelectedDocs.length ? (
-        <DiscoverGridDocumentToolbarBtn
-          isFilterActive={isFilterActive}
-          rows={rows!}
-          selectedDocs={usedSelectedDocs}
-          setSelectedDocs={setSelectedDocs}
-          setIsFilterActive={setIsFilterActive}
+    () => ({
+      left: {
+        append: usedSelectedDocs.length ? (
+          <DiscoverGridDocumentToolbarBtn
+            isFilterActive={isFilterActive}
+            rows={rows!}
+            selectedDocs={usedSelectedDocs}
+            setSelectedDocs={setSelectedDocs}
+            setIsFilterActive={setIsFilterActive}
+          />
+        ) : null,
+      },
+      right: onUpdateSampleSize ? (
+        <DiscoverGridSettingsPopover
+          sampleSize={sampleSizeState}
+          onChangeSampleSize={onUpdateSampleSize}
         />
       ) : null,
-    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
+    }),
+    [usedSelectedDocs, isFilterActive, rows, sampleSizeState, setIsFilterActive, onUpdateSampleSize]
   );
 
   const showDisplaySelector = useMemo(
@@ -621,7 +636,7 @@ export const DiscoverGrid = ({
               id="discover.gridSampleSize.limitDescription"
               defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
               values={{
-                sampleSize,
+                sampleSize: sampleSizeState,
               }}
             />
           </p>

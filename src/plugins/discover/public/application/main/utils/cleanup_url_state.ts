@@ -46,5 +46,13 @@ export function cleanupUrlState(appStateFromUrl: AppStateUrl): DiscoverAppState 
     delete appStateFromUrl.rowsPerPage;
   }
 
+  if (
+    appStateFromUrl?.sampleSize &&
+    !(typeof appStateFromUrl.sampleSize === 'number' && appStateFromUrl.sampleSize > 0)
+  ) {
+    // remove the param if it's invalid
+    delete appStateFromUrl.sampleSize;
+  }
+
   return appStateFromUrl as DiscoverAppState;
 }

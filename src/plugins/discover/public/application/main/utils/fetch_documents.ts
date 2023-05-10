@@ -20,9 +20,10 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
-  searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
+  const sampleSize = getAppState().sampleSize;
+  searchSource.setField('size', sampleSize || services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);

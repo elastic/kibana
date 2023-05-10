@@ -86,8 +86,8 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings } = services;
-  const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
-    (state) => {
+  const [query, sort, rowHeight, rowsPerPage, grid, columns, index, sampleSizeState] =
+    useAppStateSelector((state) => {
       return [
         state.query,
         state.sort,
@@ -96,9 +96,9 @@ function DiscoverDocumentsComponent({
         state.grid,
         state.columns,
         state.index,
+        state.sampleSize,
       ];
-    }
-  );
+    });
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -152,6 +152,13 @@ function DiscoverDocumentsComponent({
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
       stateContainer.appState.update({ rowsPerPage: nextRowsPerPage });
+    },
+    [stateContainer]
+  );
+
+  const onUpdateSampleSize = useCallback(
+    (newSampleSize: number) => {
+      stateContainer.appState.update({ sampleSize: newSampleSize });
     },
     [stateContainer]
   );
@@ -235,7 +242,6 @@ function DiscoverDocumentsComponent({
               isLoading={isDataLoading}
               rows={rows}
               sort={(sort as SortOrder[]) || []}
-              sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
               setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
@@ -254,6 +260,8 @@ function DiscoverDocumentsComponent({
               isPlainRecord={isPlainRecord}
               rowsPerPageState={rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
+              sampleSizeState={sampleSizeState || sampleSize}
+              onUpdateSampleSize={onUpdateSampleSize}
               onFieldEdited={onFieldEdited}
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}

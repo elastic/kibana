@@ -125,6 +125,10 @@ export interface DiscoverAppState {
    */
   rowsPerPage?: number;
   /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
    * Breakdown field of chart
    */
   breakdownField?: string;
