@@ -16,7 +16,6 @@ export const CustomContent = () => {
   const domNode = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('here');
     if (domNode.current) {
       if (helpFetchResults?.custom) {
         helpFetchResults.custom(domNode.current, { hideHelpMenu: () => {} });

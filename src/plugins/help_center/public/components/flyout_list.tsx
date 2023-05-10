@@ -166,7 +166,12 @@ export const HelpCenterFlyout = (
                   position: fixed;
                   top: -30px;
                   left: 0px;
-                  cursor: 'grabbing';
+                  &:hover {
+                    cursor: grab !important;
+                  }
+                  &:active {
+                    cursor: grabbing !important;
+                  }
                 `}
               />
 
