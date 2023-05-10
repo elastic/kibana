@@ -57,8 +57,6 @@ export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props
     setFlyoutVisible(!flyoutVisible);
   }, [flyoutVisible]);
 
-  console.log(topNav);
-
   return (
     <HelpCenterContext.Provider
       value={{

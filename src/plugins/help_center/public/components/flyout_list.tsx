@@ -9,7 +9,7 @@
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
 import './style.scss';
-import React, { Fragment, Ref, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
 import {
   EuiFlyoutProps,
   EuiTitle,
@@ -36,7 +36,6 @@ import { DocumentationCards } from './documentation_cards';
 import { Contact } from './contact';
 import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
-import ReactDOM from 'react-dom';
 
 export const HelpCenterFlyout = (
   props: Partial<EuiFlyoutProps> & { headerRef: HTMLElement; showPlainSpinner: boolean }
@@ -114,7 +113,7 @@ export const HelpCenterFlyout = (
       </EuiTab>
     ));
   };
-  console.log('RENDER', headerRef);
+
   return headerRef ? (
     <EuiPortal insert={{ sibling: headerRef, position: 'before' }}>
       <EuiFocusTrap
@@ -127,18 +126,24 @@ export const HelpCenterFlyout = (
       >
         <Draggable
           handle=".handle"
-          bounds="#kibana-body"
-          // positionOffset={{ x: 0, y: 20 }}
-          defaultPosition={{ x: headerRef.clientWidth - 425, y: 45 }}
+          bounds="#app-fixed-viewport"
+          positionOffset={{ x: 0, y: 96 }}
+          defaultPosition={{ x: headerRef.clientWidth - 425, y: -45 }}
           css={css`
             z-index: 1000;
+            position: fixed;
           `}
         >
           <ResizableBox
             width={400}
             height={400}
             css={css`
+              position: fixed !important;
               z-index: 1000;
+
+              min-height: 100px;
+              // max-height: 600px;
+              max-width: 100vw;
             `}
           >
             <EuiPanel
