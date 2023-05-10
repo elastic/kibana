@@ -97,7 +97,7 @@ export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze
   upload: 'upload',
 });
 
-export const CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
+export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
   Record<ConsoleResponseActionCommands, EndpointCapabilities>
 >({
   isolate: 'isolation',

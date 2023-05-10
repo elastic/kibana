@@ -35,7 +35,7 @@ import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
 import {
-  CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 
@@ -87,7 +87,7 @@ const capabilitiesAndPrivilegesValidator = (command: Command): true | string => 
   const privileges = command.commandDefinition.meta.privileges;
   const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
   const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+  const responderCapability = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
   let errorMessage = '';
   if (!responderCapability) {
     errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
@@ -149,7 +149,7 @@ export const getEndpointConsoleCommands = ({
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability =
-      CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
