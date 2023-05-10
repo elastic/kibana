@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 boot() {
   .buildkite/scripts/bootstrap.sh
 }
@@ -19,16 +18,16 @@ shutdown() {
   exit_code=$?
   echo "### Runner - Exit Code: ${exit_code}"
 
-#  exit $exit_code
+  #  exit $exit_code
 }
 testAndReport() {
   trap "shutdown" EXIT
 
   echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
-  pushd packages/kbn-test/new_test_runner > /dev/null
+  pushd packages/kbn-test/new_test_runner >/dev/null
 
   node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-  popd > /dev/null
+  popd >/dev/null
 
   echo '--- Junit Xml to JSON'
   npx junit2json target/junit/tap.xml | jq
@@ -37,8 +36,9 @@ upload() {
   buildkite-agent artifact upload "${TGT}/*"
 }
 
-while getopts i:r:u: flag; do
+while getopts b:i:r:u: flag; do
   case "${flag}" in
+  b) boot=${OPTARG} ;;
   i) install=${OPTARG} ;;
   r) report=${OPTARG} ;;
   u) upload=${OPTARG} ;;
@@ -48,7 +48,7 @@ done
 echo "### install: ${install}"
 echo "### report: ${report}"
 
-if [ "${install}" == "true" ]; then boot; fi
+if [ "${boot}" == "true" ]; then boot; fi
+if [ "${install}" == "true" ]; then install; fi
 if [ "${report}" == "true" ]; then testAndReport; fi
 if [ "${upload}" == "true" ]; then upload; fi
-
