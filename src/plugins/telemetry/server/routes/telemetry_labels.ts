@@ -47,8 +47,8 @@ export function registerTelemetryLabelsRoutes({
         },
       },
       async (context, req, res) => {
-        apm.addLabels(req.body);
         telemetryLabels$.next(req.body);
+        Object.entries(req.body).forEach(([key, value]) => apm.setGlobalLabel(key, value));
 
         return res.ok({ body: { ok: true } });
       }
