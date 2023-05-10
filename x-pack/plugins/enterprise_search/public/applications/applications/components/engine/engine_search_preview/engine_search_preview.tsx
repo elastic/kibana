@@ -283,7 +283,7 @@ export const EngineSearchPreview: React.FC = () => {
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
   // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
+  const { resultFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -296,10 +296,9 @@ export const EngineSearchPreview: React.FC = () => {
       hasA11yNotifications: true,
       searchQuery: {
         result_fields: resultFields,
-        search_fields: searchableFields,
       },
     };
-  }, [http, engineName, resultFields, searchableFields]);
+  }, [http, engineName, resultFields]);
 
   if (!engineData) return null;
 
