@@ -292,23 +292,6 @@ export const lensActions = {
   applyPatches,
 };
 
-export const undoRedoActions = [
-  updateDatasourceState,
-  updateVisualizationState,
-  insertLayer,
-  switchVisualization,
-  rollbackSuggestion,
-  submitSuggestion,
-  switchDatasource,
-  switchAndCleanDatasource,
-  removeLayers,
-  removeOrClearLayer,
-  addLayer,
-  cloneLayer,
-  setLayerDefaultDimension,
-  removeDimension,
-];
-
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;
   return createReducer<LensAppState>(initialState, {
@@ -1251,6 +1234,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const currentState = current(_state);
       const history = currentState.changes;
       const change = history[history.length - 1];
+
       return change
         ? {
             ...applyPatch(currentState, change.backward, false, false).newDocument,
@@ -1263,6 +1247,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const currentState = current(_state);
       const history = currentState.reversedChanges;
       const change = history[history.length - 1];
+
       return change
         ? {
             ...applyPatch(currentState, change.forward, false, false).newDocument,

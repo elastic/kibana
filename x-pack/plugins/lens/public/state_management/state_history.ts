@@ -7,28 +7,61 @@
 
 import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { compare } from 'fast-json-patch';
-import { recordReversibleStateChange, undoRedoActions } from './lens_slice';
+import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { recordReversibleStateChange } from './lens_slice';
 import { StateCoordinator } from './state_coordinator';
-import { StateChangeOperation } from './types';
+import { LensAppState, StateChangeOperation } from './types';
+import { initEmpty, redo, undo } from '.';
+
+const reversableStatePaths: Array<keyof LensAppState | string> = [
+  'visualization',
+  'datasourceStates.formBased.state',
+  'datasourceStates.textBased.state',
+  'query',
+  'filters',
+  'savedQuery',
+  'activeDatasourceId',
+];
+
+const onlyReversiblePaths = (state: LensAppState) => {
+  const ret = {};
+  reversableStatePaths.forEach((path) => set(ret, path, get(state, path)));
+  return ret;
+};
+
+const createReversibleStateChange = (prev: LensAppState, next: LensAppState) => {
+  const reversiblePrev = onlyReversiblePaths(prev);
+  const reversibleNext = onlyReversiblePaths(next);
+
+  const change: StateChangeOperation = {
+    forward: compare(reversiblePrev, reversibleNext),
+    backward: compare(reversibleNext, reversiblePrev),
+  };
+
+  return change.backward.length || change.forward.length ? change : undefined;
+};
 
 export const stateHistoryMiddleware =
   () => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
-    if (undoRedoActions.some((testAction) => testAction.match(action))) {
-      const prevState = store.getState().lens;
+    if (
+      [initEmpty, recordReversibleStateChange, undo, redo].some((testAction) =>
+        testAction.match(action)
+      )
+    ) {
+      return next(action);
+    }
 
-      next(action);
+    const prevState = store.getState().lens;
 
-      const newState = store.getState().lens;
+    next(action);
 
-      const change: StateChangeOperation = {
-        forward: compare(prevState, newState),
-        backward: compare(newState, prevState),
-      };
+    const nextState = store.getState().lens;
 
+    const change = createReversibleStateChange(prevState, nextState);
+
+    if (change) {
       next(recordReversibleStateChange({ change }));
-
       StateCoordinator.sendPatch(change.forward);
-    } else {
-      next(action);
     }
   };
