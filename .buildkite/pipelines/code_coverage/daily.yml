@@ -66,7 +66,7 @@ steps:
 #      queue: n2-4-spot
 #    timeout_in_minutes: 10
 #
-  - command: .buildkite/scripts/steps/nodejs_std_test_runner/junit_reporter.sh -i true -r true
+  - command: .buildkite/scripts/steps/nodejs_std_test_runner/junit_reporter.sh -i true -r true -u true
     label: 'Use Junit Reporter'
     agents:
       queue: n2-4-spot

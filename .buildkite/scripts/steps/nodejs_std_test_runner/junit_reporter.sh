@@ -14,16 +14,12 @@ install() {
   node --version
   npm --version
 }
-TGT=${TGT:-../../../target/junit}
+TGT=${TGT:-"../../../target/junit"}
 shutdown() {
   exit_code=$?
   echo "### Runner - Exit Code: ${exit_code}"
 
-  echo "### TGT: ${TGT}"
-  echo "### Contents of ${TGT}:"
-  ls -la "$TGT"
-
-  exit $exit_code
+#  exit $exit_code
 }
 testAndReport() {
   trap "shutdown" EXIT
@@ -37,11 +33,15 @@ testAndReport() {
   echo '--- Junit Xml to JSON'
   npx junit2json target/junit/tap.xml | jq
 }
+upload() {
+  buildkite-agent artifact upload "${TGT}/*"
+}
 
-while getopts i:r: flag; do
+while getopts i:r:u: flag; do
   case "${flag}" in
   i) install=${OPTARG} ;;
   r) report=${OPTARG} ;;
+  u) upload=${OPTARG} ;;
   *) ;;
   esac
 done
@@ -50,4 +50,5 @@ echo "### report: ${report}"
 
 if [ "${install}" == "true" ]; then boot; fi
 if [ "${report}" == "true" ]; then testAndReport; fi
+if [ "${upload}" == "true" ]; then upload; fi
 
