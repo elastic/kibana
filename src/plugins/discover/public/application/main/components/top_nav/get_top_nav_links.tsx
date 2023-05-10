@@ -158,7 +158,8 @@ export const getTopNavLinks = ({
       const sharingData = await getSharingData(
         savedSearch.searchSource,
         state.appState.getState(),
-        services
+        services,
+        isPlainRecord
       );
 
       services.share.toggleShareContextMenu({

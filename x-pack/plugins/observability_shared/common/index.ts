@@ -122,3 +122,5 @@ export {
   PROFILE_INUSE_OBJECTS,
   PROFILE_INUSE_SPACE,
 } from './elasticsearch_fieldnames';
+
+export { getInspectResponse } from './utils/get_inspect_response';
