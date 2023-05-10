@@ -28,8 +28,9 @@ export class ServerlessObservabilityPlugin
     _core: CoreStart,
     _setupDeps: ServerlessObservabilityPluginStartDependencies
   ): ServerlessObservabilityPluginStart {
-    const { serverless, observabilityShared } = _setupDeps;
-    serverless.setSideNavComponent(getObservabilitySideNavComponent(_core, _setupDeps));
+    const { observabilityShared } = _setupDeps;
+    _core.chrome.project.setSideNavComponent(getObservabilitySideNavComponent(_core));
+
     observabilityShared.setIsSidebarEnabled(false);
     return {};
   }
