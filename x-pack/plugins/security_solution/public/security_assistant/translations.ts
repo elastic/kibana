@@ -27,3 +27,51 @@ export const CHAT_COMPLETION_FETCH_FAILURE = i18n.translate(
     defaultMessage: 'An error occurred fetching chat completion.',
   }
 );
+
+// Settings
+export const SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settingsTitle',
+  {
+    defaultMessage: 'Assistant Settings',
+  }
+);
+export const SETTINGS_TEMPERATURE_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settings.temperatureTitle',
+  {
+    defaultMessage: 'Temperature',
+  }
+);
+export const SETTINGS_TEMPERATURE_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settings.temperatureHelpTextTitle',
+  {
+    defaultMessage:
+      'What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.',
+  }
+);
+
+export const SETTINGS_MODEL_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settings.modelTitle',
+  {
+    defaultMessage: 'Model',
+  }
+);
+export const SETTINGS_MODEL_HELP_TEXT_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settings.modelHelpTextTitle',
+  {
+    defaultMessage: 'ID of the model to use. ',
+  }
+);
+
+export const SETTINGS_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settings.promptTitle',
+  {
+    defaultMessage: 'System Prompt',
+  }
+);
+
+export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
+  'xpack.securitySolution.securityAssistant.settings.promptHelpTextTitle',
+  {
+    defaultMessage: 'Context provided before every conversations',
+  }
+);

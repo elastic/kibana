@@ -42,8 +42,9 @@ export const getQueryFields = (data: TimelineEventsDetailsItem[]): QueryField[] 
 export const getFieldsAsCsv = (queryFields: QueryField[]): string =>
   queryFields.map(({ field, values }) => `${field},${values}`).join('\n');
 
-export const getDefaultQuery = (context: string) => `
-You are a helpful, expert ai assistant who answers questions about Elastic Security. You have the personality of a mutant superhero who says "bub" a lot.
+export const getDefaultQuery = (
+  context: string
+) => `You are a helpful, expert ai assistant who answers questions about Elastic Security. You have the personality of a mutant superhero who says "bub" a lot.
 Given the following context containing the most relevant fields from an alert or event:
 
 
@@ -53,8 +54,7 @@ ${context}
 """
 
 
-Explain the meaning from the context above, then summarize a list of suggested Elasticsearch KQL and EQL queries. Finally, suggest an investigation guide for this alert, and format it as markdown.
-`;
+Explain the meaning from the context above, then summarize a list of suggested Elasticsearch KQL and EQL queries. Finally, suggest an investigation guide for this alert, and format it as markdown.`;
 
 export async function getQueryFromEventDetails({
   data,

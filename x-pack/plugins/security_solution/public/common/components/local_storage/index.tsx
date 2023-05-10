@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 
 import { APP_ID } from '../../../../common/constants';
 
@@ -23,7 +23,7 @@ export const useLocalStorage = <T,>({
   key,
   plugin = APP_ID,
   isInvalidDefault,
-}: Props<T>): [T, (value: T) => void] => {
+}: Props<T>): [T, (value: T) => void, Dispatch<SetStateAction<boolean>>] => {
   const { storage } = useKibana().services;
   const [initialized, setInitialized] = useState<boolean>(false);
   const [_value, _setValue] = useState<T>(defaultValue);
@@ -52,5 +52,5 @@ export const useLocalStorage = <T,>({
     }
   }, [initialized, readValueFromLocalStorage]);
 
-  return [_value, setValue];
+  return [_value, setValue, setInitialized];
 };

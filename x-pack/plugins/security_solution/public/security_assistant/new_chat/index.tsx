@@ -57,7 +57,7 @@ const NewChatComponent: React.FC<{
       panelPaddingSize="none"
     >
       <SecurityAssistantContainer>
-        <SecurityAssistant input={query} />
+        <SecurityAssistant input={query} localStorageKey={'alertSummary'} />
       </SecurityAssistantContainer>
     </EuiPopover>
   );
