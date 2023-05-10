@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
@@ -21,7 +22,6 @@ import { Variables } from '../variables';
 
 import {
   TopNavMenu,
-  WelcomePanel,
   HelpPanel,
   SomethingWentWrongCallout,
   NetworkRequestStatusBar,
@@ -33,7 +33,6 @@ import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
-import ReactDOM from 'react-dom';
 import { ConsoleDocumentation } from '../../components/console_documentation';
 
 export function Main() {

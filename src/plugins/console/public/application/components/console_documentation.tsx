@@ -9,16 +9,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiButton,
-  EuiText,
-  EuiFlyoutFooter,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiTitle, EuiText, EuiCode } from '@elastic/eui';
 import EditorExample from './editor_example';
 import * as examples from '../../../common/constants/welcome_panel';
 
