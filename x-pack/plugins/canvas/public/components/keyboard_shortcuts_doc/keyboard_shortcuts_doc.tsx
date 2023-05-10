@@ -7,16 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiDescriptionList,
-  EuiHorizontalRule,
-  EuiCode,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiHorizontalRule, EuiCode, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { keymap } from '../../lib/keymap';

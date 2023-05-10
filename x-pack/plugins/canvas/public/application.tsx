@@ -24,7 +24,6 @@ import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
-import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
 import { init as initStatsReporter } from './lib/ui_metric';
