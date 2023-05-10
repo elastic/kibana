@@ -112,23 +112,23 @@ export const useFetchDataDriftResult = (
           if (type === 'numeric') {
             baselineRequest.body.aggs[`${field}_percentiles`] = {
               percentiles: {
-                field: field,
-                percents: percents,
+                field,
+                percents,
               },
             };
             baselineRequest.body.aggs[`${field}_stats`] = {
               stats: {
-                field: field
-              }
+                field,
+              },
             };
           }
           // if the field is categorical, add a terms aggregation to the request
           if (type === 'categoric') {
             baselineRequest.body.aggs[`${field}_terms`] = {
               terms: {
-                field: field,
-                size: 100 // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
-              }
+                field,
+                size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+              },
             };
           }
         }
@@ -138,10 +138,7 @@ export const useFetchDataDriftResult = (
         const baselineResponse: SearchResponseBody<
           unknown,
           Record<string, AggregationsPercentilesAggregateBase>
-        > = await dataSearch(
-          baselineRequest,
-          signal
-        );
+        > = await dataSearch(baselineRequest, signal);
 
         console.log(baselineResponse);
 
@@ -196,35 +193,35 @@ export const useFetchDataDriftResult = (
             // add range and bucket_count_ks_test to the request
             driftedRequest.body.aggs[`${field}_ranges`] = {
               range: {
-                field: field,
-                ranges
-              }
-            }
+                field,
+                ranges,
+              },
+            };
             driftedRequest.body.aggs[`${field}_ks_test`] = {
               bucket_count_ks_test: {
                 buckets_path: `${field}_ranges>_count`,
-                alternative: 'two_sided'
-              }
-            }
+                alternative: 'two_sided',
+              },
+            };
             // add stats aggregation to the request
             driftedRequest.body.aggs[`${field}_stats`] = {
               stats: {
-                field: field
-              }
+                field,
+              },
             };
           }
           // if feature is categoric perform terms aggregation
           if (type === 'categoric') {
             driftedRequest.body.aggs[`${field}_terms`] = {
               terms: {
-                field: field,
-                size: 100 // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
-              }
+                field,
+                size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+              },
             };
           }
         }
 
-        console.log("Drifted request", driftedRequest);
+        console.log('Drifted request', driftedRequest);
 
         const driftedResp: SearchResponseBody<
           unknown,
@@ -232,12 +229,9 @@ export const useFetchDataDriftResult = (
             string,
             ExclusiveUnion<{ two_sided: number }, AggregationsMultiBucketAggregateBase>
           >
-        > = await dataSearch(
-          driftedRequest,
-          signal
-        );
+        > = await dataSearch(driftedRequest, signal);
 
-        console.log("Drifted response", driftedResp);
+        console.log('Drifted response', driftedResp);
 
         if (!driftedResp.aggregations) {
           setResult({
@@ -252,9 +246,7 @@ export const useFetchDataDriftResult = (
           index: referenceIndex,
           body: {
             size: 0,
-            aggs: {
-
-            },
+            aggs: {},
           },
         };
 
@@ -262,9 +254,7 @@ export const useFetchDataDriftResult = (
           index: productionIndex,
           body: {
             size: 0,
-            aggs: {
-
-            },
+            aggs: {},
           },
         };
 
@@ -277,36 +267,33 @@ export const useFetchDataDriftResult = (
             const interval = (max - min) / numBins;
             referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
               histogram: {
-                field: field,
-                interval: interval,
+                field,
+                interval,
                 hard_bounds: {
-                  min: min,
-                  max: max
-                }
-              }
-            }
+                  min,
+                  max,
+                },
+              },
+            };
             productionHistogramRequest.body.aggs[`${field}_histogram`] = {
               histogram: {
-                field: field,
-                interval: interval,
+                field,
+                interval,
                 hard_bounds: {
-                  min: min,
-                  max: max
-                }
-              }
-            }
+                  min,
+                  max,
+                },
+              },
+            };
           }
         }
 
-        console.log("Reference histogram request", referenceHistogramRequest);
-        console.log("Production histogram request", productionHistogramRequest);
+        console.log('Reference histogram request', referenceHistogramRequest);
+        console.log('Production histogram request', productionHistogramRequest);
 
-        const productionHistogramResponse = await dataSearch(
-          productionHistogramRequest,
-          signal
-        );
+        const productionHistogramResponse = await dataSearch(productionHistogramRequest, signal);
 
-        console.log("Production histogram response", productionHistogramResponse);
+        console.log('Production histogram response', productionHistogramResponse);
 
         if (!productionHistogramResponse.aggregations) {
           setResult({
@@ -317,12 +304,9 @@ export const useFetchDataDriftResult = (
           return;
         }
 
-        const referenceHistogramResponse = await dataSearch(
-          referenceHistogramRequest,
-          signal
-        );
+        const referenceHistogramResponse = await dataSearch(referenceHistogramRequest, signal);
 
-        console.log("Reference histogram response", referenceHistogramResponse);
+        console.log('Reference histogram response', referenceHistogramResponse);
 
         if (!referenceHistogramResponse.aggregations) {
           setResult({
@@ -333,29 +317,32 @@ export const useFetchDataDriftResult = (
           return;
         }
 
-
         // retrieve aggregation results from driftedResp for different fields and add to data
-        console.log("Populating data");
+        console.log('Populating data');
         const data = {};
         for (const { field, type } of fields) {
           if (type === 'numeric') {
             data[field] = {
               pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
-              referenceHistogram: referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
-              productionHistogram: productionHistogramResponse.aggregations[`${field}_histogram`].buckets,
-            }
+              referenceHistogram:
+                referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
+              productionHistogram:
+                productionHistogramResponse.aggregations[`${field}_histogram`].buckets,
+            };
           }
           if (type === 'categoric') {
             data[field] = {
               driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
-              driftedSumOtherDocCount: driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
+              driftedSumOtherDocCount:
+                driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
               baselineTerms: baselineResponse.aggregations[`${field}_terms`].buckets,
-              baselineSumOtherDocCount: baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
-            }
+              baselineSumOtherDocCount:
+                baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
+            };
           }
         }
 
-        console.log("Parsed data", data);
+        console.log('Parsed data', data);
 
         setResult({
           data,

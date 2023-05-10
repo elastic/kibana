@@ -195,8 +195,12 @@ const DataDriftChart = ({ data }: { data: any }) => {
 };
 // Data drift view
 export const DataDriftView = () => {
-  const result = useFetchDataDriftResult([{ field: 'numeric_unchangeable', type: 'numeric' }, { field: 'numeric_changeable', type: 'numeric' },
-{field: 'categoric_unchangeable', type: 'categoric'}, {field: 'categoric_changeable', type: 'categoric'}]);
+  const result = useFetchDataDriftResult([
+    { field: 'numeric_unchangeable', type: 'numeric' },
+    { field: 'numeric_changeable', type: 'numeric' },
+    { field: 'categoric_unchangeable', type: 'categoric' },
+    { field: 'categoric_changeable', type: 'categoric' },
+  ]);
 
   // @TODO: Format data for dataFromResult and use it in table and charts
   const dataFromResult = useMemo(() => {
@@ -232,7 +236,7 @@ export const DataDriftView = () => {
       <ProductionDataViewSelector />
       <EuiSpacer size="m" />
 
-      <DataDriftOverviewTable data={dataFromResult}/>
+      <DataDriftOverviewTable data={dataFromResult} />
     </div>
   );
 };
@@ -302,7 +306,7 @@ const features: Feature[] = [
 ];
 
 export const DataDriftOverviewTable = (data) => {
-  console.log("DataDriftOverviewTable data ", data);
+  console.log('DataDriftOverviewTable data ', data);
   // if data is an empty array return
   if (data.data.length == 0) {
     return null;
@@ -367,7 +371,11 @@ export const DataDriftOverviewTable = (data) => {
       sortable: true,
       textOnly: true,
       render: (similarityTestPValue: number, feature: Feature) => {
-        return <span>{(feature.featureType === 'numeric')?data.data[feature.featureName].pValue:'unknown'}</span>;
+        return (
+          <span>
+            {feature.featureType === 'numeric' ? data.data[feature.featureName].pValue : 'unknown'}
+          </span>
+        );
       },
       // render: (similarityTestPValue: number) => {
       //   return <span>{similarityTestPValue}</span>;
