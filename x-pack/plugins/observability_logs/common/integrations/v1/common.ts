@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'observabilityLogs';
-export const PLUGIN_NAME = 'observabilityLogs';
+export const INTEGRATIONS_URL = '/api/fleet/epm/packages/installed';
+export const getIntegrationsUrl = (search = {}) => {
+  const querySearch = new URLSearchParams(search).toString();
 
-/**
- * Exporting versioned APIs types
- */
-export * from './latest';
-export * as integrationsV1 from './integrations/v1';
+  return [INTEGRATIONS_URL, querySearch].filter(Boolean).join('/');
+};
