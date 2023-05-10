@@ -51,7 +51,7 @@ export const ResponseActionsResults = ({
           );
         }
         if (isEndpoint(action)) {
-          return <EndpointResponseActionResults action={action} ruleName={ruleName?.[0]} />;
+          return <EndpointResponseActionResults action={action} />;
         }
       })}
     </>

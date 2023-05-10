@@ -87,7 +87,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
 
-    if (errors) {
+    if (errors?.length) {
       return (
         // TODO: temporary solution, waiting for UI
         <>

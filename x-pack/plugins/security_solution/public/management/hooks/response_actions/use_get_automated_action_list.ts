@@ -73,7 +73,8 @@ export const useGetAutomatedActionResponseList = (
   query: EndpointAutomatedActionResponseRequestQuery
 ) => {
   const { data } = useKibana().services;
-  const { expiration, actionId } = query;
+  const { expiration, actionId, agent } = query;
+
   return useQuery(
     ['allResponsesResults', { actionId }],
     async () => {
@@ -98,34 +99,37 @@ export const useGetAutomatedActionResponseList = (
             mergeMap((val) => {
               const responded =
                 val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-              // TODO const pending = agent - responded; - I believe that we always have just one agent one
-              const pending = 1 - responded;
 
+              // We should get just one agent id, but just in case we get more than one, we'll use the length
+              const agents = Array.isArray(agent.id) ? agent.id : [agent.id];
+              const pending = agents.length - responded;
               const expired = !expiration ? true : new Date(expiration) < new Date();
               const isCompleted = expired || pending <= 0;
+
+              const aggsBuckets =
+                val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
+              const successful =
+                aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
 
               return of({
                 items: val.rawResponse.hits.hits,
                 action_id: actionId,
                 isCompleted,
+                wasSuccessful: responded === successful,
                 expired,
               });
             })
           )
       );
 
-      const action = responseData.items[0]._source;
+      const action = responseData.items[0]?._source;
 
       return {
-        id: actionId,
-        agents: [action?.agent.id],
-        command: action?.EndpointActions.data.command,
-        startedAt: action?.EndpointActions.started_at,
-        isCompleted: responseData.isCompleted,
         completedAt: action?.EndpointActions.completed_at,
         isExpired: responseData.expired,
-        comment: action?.EndpointActions.data.comment,
-        wasSuccessful: responseData.isCompleted,
+        wasSuccessful: responseData.wasSuccessful,
+        isCompleted: responseData.isCompleted,
+        outputs: action?.EndpointActions.data.output,
       };
     },
     {

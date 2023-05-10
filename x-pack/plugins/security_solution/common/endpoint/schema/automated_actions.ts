@@ -29,6 +29,9 @@ const AutomatedActionResponseRequestSchema = {
   query: schema.object({
     expiration: schema.string(),
     actionId: schema.string(),
+    agent: schema.object({
+      id: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+    }),
   }),
 };
 
