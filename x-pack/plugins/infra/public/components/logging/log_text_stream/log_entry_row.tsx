@@ -9,7 +9,7 @@ import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
