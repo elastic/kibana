@@ -50,7 +50,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SOURCE_INLINE]: null,
-  [ConfigKey.PARAMS]: (fields) => stringToObjectFormatter(fields[ConfigKey.PARAMS] || ''),
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.SYNTHETICS_ARGS]: (fields) => arrayFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: null,
