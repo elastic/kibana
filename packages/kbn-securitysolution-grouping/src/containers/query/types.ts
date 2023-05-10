@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  InlineScript,
+  Field,
+  MappingRuntimeField,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BoolQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -42,6 +46,12 @@ export interface MainAggregation extends NamedAggregation {
   };
 }
 
+export interface GroupingRuntimeField extends MappingRuntimeField {
+  script?: InlineScript;
+}
+
+type MappingRuntimeFields = Record<Field, GroupingRuntimeField>;
+
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
   aggs: MainAggregation;
   query: {
@@ -49,7 +59,7 @@ export interface GroupingQuery extends estypes.QueryDslQueryContainer {
       filter: Array<BoolAgg | RangeAgg>;
     };
   };
-  runtime_mappings: MappingRuntimeFields | undefined;
+  runtime_mappings: MappingRuntimeFields;
   size: number;
   _source: boolean;
 }

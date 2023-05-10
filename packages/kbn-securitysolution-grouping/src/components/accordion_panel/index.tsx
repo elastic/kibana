@@ -40,9 +40,11 @@ const DefaultGroupPanelRenderer = ({
 }) => (
   <div>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
         <EuiTitle size="xs" className="euiAccordionForm__title">
-          <h4 className="eui-textTruncate">{title}</h4>
+          <h4 className="eui-textTruncate" title={title}>
+            {title}
+          </h4>
         </EuiTitle>
       </EuiFlexItem>
       {isNullGroup && nullGroupMessage && (

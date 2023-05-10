@@ -141,7 +141,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const uniqueValue = useMemo(() => `UniqueNullValue-${uuidv4()}`, []);
+  // create a unique, but stable (across re-renders) value
+  const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
