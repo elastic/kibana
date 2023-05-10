@@ -32,15 +32,15 @@ export const DocumentationCards = () => {
       return await Promise.all(
         (helpFetchResults?.documentation ?? []).map(async (doc, i) => {
           const response = await fetch(doc.href);
+          console.log(doc.href);
           const data = await response.text();
 
-          const content = parser
-            .parseFromString(data, 'text/html')
-            .querySelector('div#content')
-            ?.getElementsByClassName('part')?.[0];
+          const content = parser.parseFromString(data, 'text/html').querySelector('div#content');
           if (content) {
             content
-              .querySelectorAll('.edit_me, .vidyard-player-embed, br, h1')
+              .querySelectorAll(
+                '.edit_me, .vidyard-player-embed, br, h1, div.breadcrumbs, div.navheader, div.navfooter'
+              )
               .forEach((e) => e.remove());
             content.querySelectorAll('img').forEach((e) => {
               const src = e.getAttribute('src') ?? '';
