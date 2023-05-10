@@ -19,6 +19,7 @@ export enum MlModelDeploymentState {
 export interface MlModelDeploymentStatus {
   deploymentState: MlModelDeploymentState;
   modelId: string;
+  allocationCount: number;
   nodeAllocationCount: number;
   startTime: number;
   targetAllocationCount: number;

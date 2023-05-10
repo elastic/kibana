@@ -263,7 +263,9 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelRunningSingleThreaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => data?.nodeAllocationCount * data?.threadsPerAllocation <= 1,
+      (data: FetchTextExpansionModelResponse) =>
+        // Running single threaded if model has max 1 deployment on 1 node with 1 thread
+        data?.allocationCount * data?.nodeAllocationCount * data?.threadsPerAllocation <= 1,
     ],
   }),
 });
