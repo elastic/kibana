@@ -30,7 +30,7 @@ export const MAX_QUERY_SIZE = 10000;
  * @param sort add one or more sorts on specific fields
  * @param statsAggregations group level aggregations which correspond to {@link GroupStatsRenderer} configuration
  * @param to ending timestamp
- * @param uniqueNullValue unique value to represent null values
+ * @param uniqueValue unique value to use for crazy query magic
  *
  * @returns query dsl {@link GroupingQuery}
  */
@@ -46,7 +46,7 @@ export const getGroupingQuery = ({
   sort,
   statsAggregations,
   to,
-  uniqueNullValue,
+  uniqueValue,
 }: GroupingQueryArgs): GroupingQuery => ({
   size: 0,
   runtime_mappings: {
@@ -54,8 +54,10 @@ export const getGroupingQuery = ({
     groupByField: {
       type: 'keyword',
       script: {
-        source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueNullValue}') } else { emit(doc['${groupByField}'].join('${uniqueNullValue}'))}`,
+        source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueValue}') } else { emit(doc['${groupByField}'].join('${uniqueValue}'))}`,
         params: {
+          // this does nothing for our query, but we need it to know what group is
+          // selected in the query to store in `queriedGroup` on the security solution to prevent a little race condition
           selectedGroup: groupByField,
         },
       },
@@ -114,7 +116,7 @@ export const getGroupingQuery = ({
  */
 export const parseGroupingQuery = <T>(
   selectedGroup: string,
-  uniqueNullValue: string,
+  uniqueValue: string,
   aggs?: GroupingAggregation<T>
 ): GroupingAggregation<T> | {} => {
   if (!aggs) {
@@ -124,7 +126,7 @@ export const parseGroupingQuery = <T>(
     const emptyValue = getEmptyValue();
     // If the keys are different means that the `missing` values of the multi_terms aggregation have been applied, we use the default empty string.
     // If the keys are equal means the `missing` values have not been applied, they are stored values.
-    if (group.key === uniqueNullValue) {
+    if (group.key === uniqueValue) {
       return {
         ...group,
         key: [emptyValue],
@@ -136,7 +138,7 @@ export const parseGroupingQuery = <T>(
     // doing isArray check for typescrupt
     // the key won't be an array, runtime fields cannot be multivalued
     const groupKey = Array.isArray(group.key) ? group.key[0] : group.key;
-    const valueAsArray = groupKey.split(uniqueNullValue);
+    const valueAsArray = groupKey.split(uniqueValue);
     return {
       ...group,
       key: valueAsArray,

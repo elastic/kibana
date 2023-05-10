@@ -28,7 +28,7 @@ export interface GroupingQueryArgs {
   runtimeMappings?: MappingRuntimeFields;
   additionalAggregationsRoot?: NamedAggregation[];
   pageNumber?: number;
-  uniqueNullValue: string;
+  uniqueValue: string;
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   statsAggregations?: NamedAggregation[];

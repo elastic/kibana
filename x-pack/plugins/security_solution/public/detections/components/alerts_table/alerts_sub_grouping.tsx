@@ -141,13 +141,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const uniqueNullValue = useMemo(() => `UniqueNullValue-${uuidv4()}`, []);
+  const uniqueValue = useMemo(() => `UniqueNullValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
-      uniqueNullValue,
+      uniqueValue,
       from,
       runtimeMappings,
       to,
@@ -162,7 +162,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     runtimeMappings,
     selectedGroup,
     to,
-    uniqueNullValue,
+    uniqueValue,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -198,10 +198,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       parseGroupingQuery(
         // fallback to selectedGroup if queriedGroup.current is null, this happens in tests
         queriedGroup.current === null ? selectedGroup : queriedGroup.current,
-        uniqueNullValue,
+        uniqueValue,
         alertsGroupsData?.aggregations
       ),
-    [alertsGroupsData?.aggregations, selectedGroup, uniqueNullValue]
+    [alertsGroupsData?.aggregations, selectedGroup, uniqueValue]
   );
 
   useEffect(() => {
