@@ -9,9 +9,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/utility-types",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }
