@@ -206,7 +206,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
-      queriedGroup.current = queryGroups?.aggs?.groupsCount?.cardinality?.field ?? '';
+      queriedGroup.current =
+        queryGroups?.runtime_mappings?.groupByField?.script?.params?.selectedGroup ?? '';
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
@@ -249,45 +250,43 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
-  return useMemo(() => {
-    console.log('getgroup data', {
-      ...alertsGroupsData?.aggregations,
-      ...aggs,
-    });
-    return getGrouping({
-      activePage: pageIndex,
-      data: {
-        ...alertsGroupsData?.aggregations,
-        ...aggs,
-      },
+  return useMemo(
+    () =>
+      getGrouping({
+        activePage: pageIndex,
+        data: {
+          ...alertsGroupsData?.aggregations,
+          ...aggs,
+        },
+        groupingLevel,
+        inspectButton: inspect,
+        isLoading: loading || isLoadingGroups,
+        itemsPerPage: pageSize,
+        onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
+        onChangeGroupsPage: (index) => setPageIndex(index),
+        renderChildComponent,
+        onGroupClose,
+        selectedGroup,
+        takeActionItems: getTakeActionItems,
+      }),
+    [
+      getGrouping,
+      pageIndex,
+      alertsGroupsData,
+      aggs,
       groupingLevel,
-      inspectButton: inspect,
-      isLoading: loading || isLoadingGroups,
-      itemsPerPage: pageSize,
-      onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
-      onChangeGroupsPage: (index) => setPageIndex(index),
+      inspect,
+      loading,
+      isLoadingGroups,
+      pageSize,
       renderChildComponent,
       onGroupClose,
       selectedGroup,
-      takeActionItems: getTakeActionItems,
-    });
-  }, [
-    getGrouping,
-    pageIndex,
-    alertsGroupsData,
-    aggs,
-    groupingLevel,
-    inspect,
-    loading,
-    isLoadingGroups,
-    pageSize,
-    renderChildComponent,
-    onGroupClose,
-    selectedGroup,
-    getTakeActionItems,
-    setPageSize,
-    setPageIndex,
-  ]);
+      getTakeActionItems,
+      setPageSize,
+      setPageIndex,
+    ]
+  );
 };
 
 export const GroupedSubLevel = React.memo(GroupedSubLevelComponent);

@@ -51,17 +51,20 @@ export const getGroupingQuery = ({
   size: 0,
   runtime_mappings: {
     ...runtimeMappings,
-    join_field: {
+    groupByField: {
       type: 'keyword',
       script: {
         source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueNullValue}') } else { emit(doc['${groupByField}'].join('${uniqueNullValue}'))}`,
+        params: {
+          selectedGroup: groupByField,
+        },
       },
     },
   },
   aggs: {
     groupByFields: {
       terms: {
-        field: 'join_field',
+        field: 'groupByField',
         size: MAX_QUERY_SIZE,
       },
       aggs: {
@@ -78,8 +81,8 @@ export const getGroupingQuery = ({
       },
     },
 
-    unitsCount: { value_count: { field: 'join_field' } },
-    groupsCount: { cardinality: { field: groupByField } },
+    unitsCount: { value_count: { field: 'groupByField' } },
+    groupsCount: { cardinality: { field: 'groupByField' } },
 
     ...(rootAggregations
       ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
