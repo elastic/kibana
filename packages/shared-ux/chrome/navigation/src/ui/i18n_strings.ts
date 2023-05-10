@@ -27,4 +27,10 @@ export const getI18nStrings = () => ({
       defaultMessage: 'My deployments',
     }
   ),
+  recentlyAccessed: i18n.translate(
+    'sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title',
+    {
+      defaultMessage: 'Recent',
+    }
+  ),
 });

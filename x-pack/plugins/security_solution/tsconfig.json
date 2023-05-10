@@ -157,6 +157,7 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
+    "@kbn/shared-ux-file-types"
   ]
 }
