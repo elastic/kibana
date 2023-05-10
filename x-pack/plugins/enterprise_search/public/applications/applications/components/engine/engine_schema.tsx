@@ -371,7 +371,7 @@ export const EngineSchema: React.FC = () => {
             )}
           </EuiCallOut>
         )}
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiSwitch
             label={i18n.translate(
               'xpack.enterpriseSearch.content.engine.schema.onlyShowConflicts',
