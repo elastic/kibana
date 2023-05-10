@@ -47,6 +47,7 @@ export const {
   setLayerDefaultDimension,
   removeDimension,
   undo,
+  redo,
   applyPatches,
 } = lensActions;
 

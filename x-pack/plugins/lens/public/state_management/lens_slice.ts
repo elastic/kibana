@@ -57,7 +57,8 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
   },
-  changeHistory: [],
+  changes: [],
+  reversedChanges: [],
 };
 
 export const getPreloadedState = ({
@@ -287,6 +288,7 @@ export const lensActions = {
   syncLinkedDimensions,
   recordReversibleStateChange,
   undo,
+  redo,
   applyPatches,
 };
 
@@ -1242,27 +1244,30 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
-      state.changeHistory.push(change);
+      state.changes.push(change);
+      state.reversedChanges = [];
     },
-    // [redo.type]: (_state) => {
-    //   const currentState = current(_state);
-    //   const history = currentState.redoableOperationHistory;
-    //   const patch = history[history.length - 1];
-    //   return patch
-    //     ? {
-    //         ...applyPatch(currentState, patch, false, false).newDocument,
-    //         redoableOperationHistory: history.slice(0, history.length - 1),
-    //       }
-    //     : currentState;
-    // },
     [undo.type]: (_state) => {
       const currentState = current(_state);
-      const history = currentState.changeHistory;
-      const patch = history[history.length - 1]?.backward;
-      return patch
+      const history = currentState.changes;
+      const change = history[history.length - 1];
+      return change
         ? {
-            ...applyPatch(currentState, patch, false, false).newDocument,
-            changeHistory: history.slice(0, history.length - 1),
+            ...applyPatch(currentState, change.backward, false, false).newDocument,
+            changes: history.slice(0, history.length - 1),
+            reversedChanges: [...currentState.reversedChanges, change],
+          }
+        : currentState;
+    },
+    [redo.type]: (_state) => {
+      const currentState = current(_state);
+      const history = currentState.reversedChanges;
+      const change = history[history.length - 1];
+      return change
+        ? {
+            ...applyPatch(currentState, change.forward, false, false).newDocument,
+            reversedChanges: history.slice(0, history.length - 1),
+            changes: [...currentState.reversedChanges, change],
           }
         : currentState;
     },

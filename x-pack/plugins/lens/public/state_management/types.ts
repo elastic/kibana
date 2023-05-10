@@ -77,7 +77,8 @@ export interface LensAppState extends EditorFrameState {
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsStateInStateStore;
 
-  changeHistory: StateChangeOperation[];
+  changes: StateChangeOperation[];
+  reversedChanges: StateChangeOperation[];
 }
 
 export type DispatchSetState = (state: Partial<LensAppState>) => {
