@@ -50,24 +50,7 @@ export interface TextExpansionCallOutProps {
   isDismissable?: boolean;
 }
 
-const FineTuneModelsButton: React.FC = () => (
-  <EuiButtonEmpty
-    iconSide="left"
-    iconType="wrench"
-    onClick={() =>
-      KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
-        shouldNotCreateHref: true,
-      })
-    }
-  >
-    {i18n.translate(
-      'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.fineTuneModelButton',
-      {
-        defaultMessage: 'Fine-tune performance',
-      }
-    )}
-  </EuiButtonEmpty>
-);
+const TRAINED_MODELS_PATH = '/app/ml/trained_models';
 
 export const TextExpansionDismissButton = ({
   dismiss,
@@ -83,6 +66,25 @@ export const TextExpansionDismissButton = ({
     />
   );
 };
+
+export const FineTuneModelsButton: React.FC = () => (
+  <EuiButtonEmpty
+    iconSide="left"
+    iconType="wrench"
+    onClick={() =>
+      KibanaLogic.values.navigateToUrl(TRAINED_MODELS_PATH, {
+        shouldNotCreateHref: true,
+      })
+    }
+  >
+    {i18n.translate(
+      'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.fineTuneModelButton',
+      {
+        defaultMessage: 'Fine-tune performance',
+      }
+    )}
+  </EuiButtonEmpty>
+);
 
 export const DeployModel = ({
   dismiss,
@@ -377,33 +379,22 @@ export const ModelStarted = ({
               </p>
             </EuiText>
           </EuiFlexItem>
-          {isSingleThreaded ? (
-            <EuiFlexItem>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="m"
-                alignItems="center"
-                justifyContent="flexStart"
-              >
-                <EuiFlexItem grow={false}>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="m"
+              alignItems="center"
+              justifyContent="flexStart"
+            >
+              <EuiFlexItem grow={false}>
+                {isSingleThreaded ? (
                   <FineTuneModelsButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="m"
-                alignItems="center"
-                justifyContent="flexStart"
-              >
-                <EuiFlexItem grow={false}>
+                ) : (
                   <EuiButtonEmpty
                     iconSide="left"
                     iconType="wrench"
                     onClick={() =>
-                      KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
+                      KibanaLogic.values.navigateToUrl(TRAINED_MODELS_PATH, {
                         shouldNotCreateHref: true,
                       })
                     }
@@ -415,10 +406,10 @@ export const ModelStarted = ({
                       }
                     )}
                   </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </>
       )}
     </EuiFlexGroup>
