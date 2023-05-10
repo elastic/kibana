@@ -49,6 +49,8 @@ export const {
   undo,
   redo,
   applyPatches,
+  beginReversibleOperation,
+  completeReversibleOperation,
 } = lensActions;
 
 export const makeConfigureStore = (

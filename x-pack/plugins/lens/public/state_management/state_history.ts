@@ -9,7 +9,11 @@ import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { compare } from 'fast-json-patch';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { recordReversibleStateChange } from './lens_slice';
+import {
+  beginReversibleOperation,
+  completeReversibleOperation,
+  recordReversibleStateChange,
+} from './lens_slice';
 import { StateCoordinator } from './state_coordinator';
 import { LensAppState, StateChangeOperation } from './types';
 import { initEmpty, redo, undo } from '.';
@@ -42,20 +46,10 @@ const createReversibleStateChange = (prev: LensAppState, next: LensAppState) => 
   return change.backward.length || change.forward.length ? change : undefined;
 };
 
-export const stateHistoryMiddleware =
-  () => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
-    if (
-      [initEmpty, recordReversibleStateChange, undo, redo].some((testAction) =>
-        testAction.match(action)
-      )
-    ) {
-      return next(action);
-    }
+let prevStateForExtendedOperation: LensAppState | undefined;
 
-    const prevState = store.getState().lens;
-
-    next(action);
-
+export const stateHistoryMiddleware = () => (store: MiddlewareAPI) => (next: Dispatch) => {
+  const completeChange = (prevState: LensAppState) => {
     const nextState = store.getState().lens;
 
     const change = createReversibleStateChange(prevState, nextState);
@@ -65,3 +59,36 @@ export const stateHistoryMiddleware =
       StateCoordinator.sendPatch(change.forward);
     }
   };
+
+  return (action: Action) => {
+    if (
+      [initEmpty, recordReversibleStateChange, undo, redo].some((testAction) =>
+        testAction.match(action)
+      )
+    ) {
+      return next(action);
+    }
+
+    if (beginReversibleOperation.match(action)) {
+      prevStateForExtendedOperation = store.getState().lens;
+    }
+
+    if (prevStateForExtendedOperation) {
+      next(action);
+
+      if (completeReversibleOperation.match(action)) {
+        completeChange(prevStateForExtendedOperation);
+        prevStateForExtendedOperation = undefined;
+      }
+    }
+
+    if (!prevStateForExtendedOperation) {
+      // default behavior if an extended operation isn't in progress
+      const prevState = store.getState().lens;
+
+      next(action);
+
+      completeChange(prevState);
+    }
+  };
+};

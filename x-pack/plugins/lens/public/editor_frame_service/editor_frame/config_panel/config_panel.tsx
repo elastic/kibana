@@ -118,6 +118,7 @@ export function LayerPanels(
         // which we don't want. The timeout lets user interaction have priority, then React updates.
 
         setTimeout(() => {
+          props.extendedUndoService.begin();
           dispatchLens(
             updateState({
               updater: (prevState) => {
@@ -148,9 +149,10 @@ export function LayerPanels(
               },
             })
           );
+          props.extendedUndoService.complete();
         }, 0);
       },
-    [dispatchLens]
+    [dispatchLens, props.extendedUndoService]
   );
 
   const toggleFullscreen = useMemo(

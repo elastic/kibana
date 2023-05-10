@@ -17,7 +17,13 @@ import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { AddUserMessages, EditorFrameInstance, UserMessage, UserMessagesGetter } from '../types';
+import {
+  AddUserMessages,
+  EditorFrameInstance,
+  ExtendedUndoableOperationService,
+  UserMessage,
+  UserMessagesGetter,
+} from '../types';
 import { Document } from '../persistence/saved_object_store';
 
 import {
@@ -32,6 +38,8 @@ import {
   updateDatasourceState,
   selectActiveDatasourceId,
   selectFrameDatasourceAPI,
+  beginReversibleOperation,
+  completeReversibleOperation,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -575,6 +583,14 @@ export function App({
     };
   };
 
+  const extendedUndoService: ExtendedUndoableOperationService = useMemo(
+    () => ({
+      begin: () => dispatch(beginReversibleOperation),
+      complete: () => dispatch(completeReversibleOperation),
+    }),
+    [dispatch]
+  );
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -620,6 +636,7 @@ export function App({
             indexPatternService={indexPatternService}
             getUserMessages={getUserMessages}
             addUserMessages={addUserMessages}
+            extendedUndoService={extendedUndoService}
           />
         )}
       </div>
@@ -691,6 +708,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   addUserMessages,
   lensInspector,
   indexPatternService,
+  extendedUndoService,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
@@ -698,6 +716,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
   indexPatternService: IndexPatternServiceAPI;
+  extendedUndoService: ExtendedUndoableOperationService;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
@@ -707,6 +726,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
       addUserMessages={addUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
+      extendedUndoService={extendedUndoService}
     />
   );
 });

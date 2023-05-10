@@ -116,6 +116,7 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
+  extendedUndoService: ExtendedUndoableOperationService;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
 }
@@ -668,7 +669,13 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   enableFormatSelector: boolean;
   dataSectionExtra?: React.ReactNode;
   formatSelectorOptions: FormatSelectorOptions | undefined;
+  extendedUndoService: ExtendedUndoableOperationService;
 };
+
+export interface ExtendedUndoableOperationService {
+  begin: () => void;
+  complete: () => void;
+}
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
 

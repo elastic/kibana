@@ -16,6 +16,7 @@ import {
   DatasourceMap,
   VisualizationMap,
   UserMessagesGetter,
+  ExtendedUndoableOperationService,
 } from '../../../types';
 
 export interface ConfigPanelWrapperProps {
@@ -26,6 +27,7 @@ export interface ConfigPanelWrapperProps {
   indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
   getUserMessages: UserMessagesGetter;
+  extendedUndoService: ExtendedUndoableOperationService;
 }
 
 export interface LayerPanelProps {

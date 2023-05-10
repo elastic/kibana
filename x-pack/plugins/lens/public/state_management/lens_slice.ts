@@ -252,6 +252,8 @@ export const recordReversibleStateChange = createAction<{
 }>('lens/recordReversibleStateChange');
 export const undo = createAction('lens/undo');
 export const redo = createAction('lens/redo');
+export const beginReversibleOperation = createAction('lens/beginReversibleOperation');
+export const completeReversibleOperation = createAction('lens/completeReversibleOperation');
 export const applyPatches = createAction<{ patches: Patch[] }>('lens/applyPatches');
 
 export const lensActions = {
@@ -290,6 +292,8 @@ export const lensActions = {
   undo,
   redo,
   applyPatches,
+  beginReversibleOperation,
+  completeReversibleOperation,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {

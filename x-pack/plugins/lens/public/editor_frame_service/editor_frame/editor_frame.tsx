@@ -17,6 +17,7 @@ import {
   Suggestion,
   UserMessagesGetter,
   AddUserMessages,
+  ExtendedUndoableOperationService,
 } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
@@ -50,6 +51,7 @@ export interface EditorFrameProps {
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
+  extendedUndoService: ExtendedUndoableOperationService;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -143,6 +145,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 uiActions={props.plugins.uiActions}
                 indexPatternService={props.indexPatternService}
                 getUserMessages={props.getUserMessages}
+                extendedUndoService={props.extendedUndoService}
               />
             </ErrorBoundary>
           )
