@@ -309,7 +309,7 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     try {
-      await this.savedObjectsRepository.delete('task', id);
+      await this.savedObjectsRepository.delete('task', id, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;

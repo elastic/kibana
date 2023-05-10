@@ -312,7 +312,8 @@ export class TaskClaiming {
     );
 
     try {
-      console.log('** Update by query w/ size:', size);
+      // TODO: Remove
+      console.log(new Date().toISOString(), '** Update by query w/ size:', size);
       const result = await this.taskStore.updateByQuery(
         {
           query,
