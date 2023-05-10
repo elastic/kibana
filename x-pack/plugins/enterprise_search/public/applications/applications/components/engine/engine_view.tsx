@@ -35,9 +35,14 @@ import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 
 export const EngineView: React.FC = () => {
-  const { fetchEngine, closeDeleteEngineModal, hasSchemaConflicts } = useActions(EngineViewLogic);
-  const { engineName, fetchEngineApiError, fetchEngineApiStatus, isDeleteModalVisible } =
-    useValues(EngineViewLogic);
+  const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
+  const {
+    engineName,
+    fetchEngineApiError,
+    fetchEngineApiStatus,
+    hasSchemaConflicts,
+    isDeleteModalVisible,
+  } = useValues(EngineViewLogic);
   const { tabId = EngineViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
