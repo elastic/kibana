@@ -19,10 +19,7 @@ import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import { LoadingState } from './components/loading_state';
 import { SetupContext } from './application/setup_context';
 
-const LazyEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
-const LazyCreatePolicy = lazy(
-  () => import('./components/fleet_extensions/policy_extension_create')
-);
+const LazyPolicyExtension = lazy(() => import('./components/fleet_extensions/policy_extension'));
 
 const RouterLazy = lazy(() => import('./application/router'));
 const Router = (props: CloudDefendRouterProps) => (
@@ -55,14 +52,8 @@ export class CloudDefendPlugin
   public start(core: CoreStart, plugins: CloudDefendPluginStartDeps): CloudDefendPluginStart {
     plugins.fleet.registerExtension({
       package: INTEGRATION_PACKAGE_NAME,
-      view: 'package-policy-create',
-      Component: LazyCreatePolicy,
-    });
-
-    plugins.fleet.registerExtension({
-      package: INTEGRATION_PACKAGE_NAME,
-      view: 'package-policy-edit',
-      Component: LazyEditPolicy,
+      view: 'package-policy-replace-define-step',
+      Component: LazyPolicyExtension,
     });
 
     const CloudDefendRouter = (props: CloudDefendRouterProps) => (

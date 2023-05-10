@@ -19,7 +19,7 @@ describe('<PolicySettings />', () => {
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
       <TestProvider>
-        <PolicySettings policy={policy} onChange={onChange} />;
+        <PolicySettings newPolicy={policy} onChange={onChange} />;
       </TestProvider>
     );
   };
