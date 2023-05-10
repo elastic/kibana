@@ -147,8 +147,11 @@ const extractAlertsHistory = (response: estypes.SearchResponse<Record<string, un
     histogramAgg.buckets as unknown as estypes.AggregationsDateHistogramBucketKeys[];
 
   const avgTimeToRecoverAgg = response?.aggregations
-    ?.avgTimeToRecoverUS as estypes.AggregationsAvgAggregate;
-  const avgTimeToRecoverUS = avgTimeToRecoverAgg.value || 0;
+    ?.avgTimeToRecoverUS as estypes.AggregationsFilterAggregate & {
+    recoveryTime: estypes.AggregationsCardinalityAggregate;
+  };
+
+  const avgTimeToRecoverUS = avgTimeToRecoverAgg.recoveryTime.value || 0;
 
   return {
     totalTriggeredAlerts,
