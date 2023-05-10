@@ -34,7 +34,7 @@ export const useUpdateCase = () => {
       );
     },
     {
-      mutationKey: casesMutationsKeys.pushCase,
+      mutationKey: casesMutationsKeys.updateCase,
       onSuccess: (response, request) => {
         refreshCaseViewPage();
         const successToaster = createUpdateSuccessToaster(
