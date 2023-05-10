@@ -21,7 +21,7 @@ import {
 } from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
-import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
+import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_template';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 
 export interface ResourceInstaller {
