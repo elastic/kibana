@@ -17,47 +17,43 @@ import {
   EuiFieldText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
 import { ControlSettings } from '../control_settings';
-import { OnChangeDeps } from '../../types';
+import { SettingsDeps, OnChangeDeps } from '../../types';
 
-export const PolicySettings = ({
-  newPolicy,
-  onChange,
-}: PackagePolicyReplaceDefineStepExtensionComponentProps) => {
+export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const [policyHasErrors, setPolicyHasErrors] = useState(false);
-  const controlInput = getInputFromPolicy(newPolicy, INPUT_CONTROL);
+  const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
   const controlEnabled = !!controlInput?.enabled;
   const onToggleEnabled = useCallback(
     (e) => {
       if (controlInput) {
         controlInput.enabled = e.target.checked;
 
-        onChange({ isValid: !policyHasErrors, updatedPolicy: { ...newPolicy } });
+        onChange({ isValid: !policyHasErrors, updatedPolicy: { ...policy } });
       }
     },
-    [controlInput, onChange, policyHasErrors, newPolicy]
+    [controlInput, onChange, policyHasErrors, policy]
   );
 
   const onNameChange = useCallback(
     (event: FormEvent<HTMLInputElement>) => {
       const name = event.currentTarget.value;
 
-      onChange({ isValid: !policyHasErrors, updatedPolicy: { ...newPolicy, name } });
+      onChange({ isValid: !policyHasErrors, updatedPolicy: { ...policy, name } });
     },
-    [onChange, policyHasErrors, newPolicy]
+    [onChange, policyHasErrors, policy]
   );
 
   const onDescriptionChange = useCallback(
     (event: FormEvent<HTMLTextAreaElement>) => {
       const description = event.currentTarget.value;
 
-      onChange({ isValid: !policyHasErrors, updatedPolicy: { ...newPolicy, description } });
+      onChange({ isValid: !policyHasErrors, updatedPolicy: { ...policy, description } });
     },
-    [onChange, policyHasErrors, newPolicy]
+    [onChange, policyHasErrors, policy]
   );
 
   const onPolicyChange = useCallback(
@@ -76,7 +72,7 @@ export const PolicySettings = ({
             <EuiFieldText
               fullWidth={true}
               name="name"
-              value={newPolicy.name}
+              value={policy.name}
               onChange={onNameChange}
               data-test-subj="cloud-defend-policy-name"
             />
@@ -85,7 +81,7 @@ export const PolicySettings = ({
             <EuiTextArea
               fullWidth={true}
               name="name"
-              value={newPolicy.description}
+              value={policy.description}
               onChange={onDescriptionChange}
               data-test-subj="cloud-defend-policy-description"
               compressed
@@ -111,7 +107,7 @@ export const PolicySettings = ({
       {controlEnabled && (
         <ControlSettings
           data-test-subj="cloud-defend-controlsettings"
-          policy={newPolicy}
+          policy={policy}
           onChange={onPolicyChange}
         />
       )}

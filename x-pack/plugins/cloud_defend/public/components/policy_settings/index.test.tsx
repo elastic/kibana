@@ -19,13 +19,43 @@ describe('<PolicySettings />', () => {
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
       <TestProvider>
-        <PolicySettings newPolicy={policy} onChange={onChange} />;
+        <PolicySettings policy={policy} onChange={onChange} />;
       </TestProvider>
     );
   };
 
   beforeEach(() => {
     onChange.mockClear();
+  });
+
+  it('allows user to set name of integration', () => {
+    const { getByTestId } = render(<WrappedComponent />);
+    const input = getByTestId('cloud-defend-policy-name');
+
+    if (input) {
+      userEvent.type(input, '1');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    const { updatedPolicy } = onChange.mock.calls[0][0];
+
+    expect(updatedPolicy.name).toEqual('some-cloud_defend-policy1');
+  });
+
+  it('allows user to set description of integration', () => {
+    const { getByTestId } = render(<WrappedComponent />);
+    const input = getByTestId('cloud-defend-policy-description');
+
+    if (input) {
+      userEvent.type(input, '1');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    const { updatedPolicy } = onChange.mock.calls[0][0];
+
+    expect(updatedPolicy.description).toEqual('1');
   });
 
   it('renders a checkbox to toggle BPF/LSM control mechanism', () => {
