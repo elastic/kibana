@@ -268,7 +268,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for "{{context.monitorName}}", {{context.locationName}} - {{context.monitorType}} monitor, is no longer active: {{context.recoveryReason}}.\nThe latest error received was: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}',
+            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
         },
       },
       {
@@ -378,7 +378,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for "{{context.monitorName}}", {{context.locationName}} - {{context.monitorType}} monitor, is no longer active: {{context.recoveryReason}}.\nThe latest error received was: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}',
+            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
         },
       },
       {
@@ -406,7 +406,7 @@ describe('Alert Actions factory', () => {
             eventAction: 'trigger',
             severity: 'error',
             summary:
-              '{{context.monitorName}} {{context.monitorType}} monitor is {{{context.status}}} from {{context.locationName}} at {{context.checkedAt}}.\nThe error received is: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}',
+              'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
@@ -433,7 +433,8 @@ describe('Alert Actions factory', () => {
             path: '',
             text: '',
           },
-          message: `The alert for "{{context.monitorName}}", {{context.locationName}} - {{context.monitorType}} monitor, is no longer active: {{context.recoveryReason}}.\nThe latest error received was: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}`,
+          message:
+            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
           subject:
             '{{context.monitorName}} ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
           to: ['test@email.com'],
@@ -449,7 +450,8 @@ describe('Alert Actions factory', () => {
             path: '',
             text: '',
           },
-          message: `"{{context.monitorName}}", {{context.locationName}} - {{context.monitorType}} monitor, is {{{context.status}}} at {{context.checkedAt}}.\nThe error received is: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}`,
+          message:
+            '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nChecked at: {{context.checkedAt}}\nFrom: {{context.locationName}}\nError received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
           subject:
             '{{context.monitorName}} ({{context.locationName}}) is Down - Elastic Synthetics',
           to: ['test@email.com'],

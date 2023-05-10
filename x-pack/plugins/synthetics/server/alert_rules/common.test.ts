@@ -10,6 +10,8 @@ import { updateState, setRecoveredAlertsContext } from './common';
 import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
 import { StaleDownConfig } from './status_rule/status_rule_executor';
 
+const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
 describe('updateState', () => {
   let spy: jest.SpyInstance<string, []>;
   jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
@@ -204,6 +206,11 @@ describe('setRecoveredAlertsContext', () => {
       location: '',
       ping: {
         '@timestamp': new Date().toISOString(),
+        state: {
+          ends: {
+            id: '123456',
+          },
+        },
       } as StaleDownConfig['ping'],
       timestamp: new Date().toISOString(),
     },
@@ -229,6 +236,9 @@ describe('setRecoveredAlertsContext', () => {
         location: 'location',
         ping: {
           '@timestamp': new Date().toISOString(),
+          state: {
+            id: '123456',
+          },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
@@ -241,6 +251,7 @@ describe('setRecoveredAlertsContext', () => {
       spaceId: 'default',
       staleDownConfigs,
       upConfigs: {},
+      dateFormat,
     });
     expect(setContext).toBeCalledWith({
       idWithLocation,
@@ -272,6 +283,9 @@ describe('setRecoveredAlertsContext', () => {
         location: 'location',
         ping: {
           '@timestamp': new Date().toISOString(),
+          state: {
+            id: '123456',
+          },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
@@ -284,6 +298,7 @@ describe('setRecoveredAlertsContext', () => {
       spaceId: 'default',
       staleDownConfigs,
       upConfigs: {},
+      dateFormat,
     });
     expect(setContext).toBeCalledWith({
       idWithLocation,
@@ -316,6 +331,9 @@ describe('setRecoveredAlertsContext', () => {
         status: 'down',
         location: 'location',
         ping: {
+          state: {
+            id: '123456',
+          },
           '@timestamp': new Date().toISOString(),
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
@@ -329,6 +347,7 @@ describe('setRecoveredAlertsContext', () => {
       spaceId: 'default',
       staleDownConfigs,
       upConfigs,
+      dateFormat,
     });
     expect(setContext).toBeCalledWith({
       configId: '12345-67891',
@@ -336,11 +355,11 @@ describe('setRecoveredAlertsContext', () => {
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
       status: 'up',
-      recoveryReason: 'The monitor returned to an Up state at 19:02:00 on 25/02/2023',
+      recoveryReason: 'The monitor returned to an Up state at Feb 25, 2023 @ 19:00:00.000',
       recoveryStatus: 'is now Up',
       locationId: 'us_west',
       linkMessage:
-        'Link: https://localhost:5601/app/synthetics/monitor/12345-67891/history?dateRangeEnd=foo%20date%20string&dateRangeStart=foo%20date%20string&locationId=us_west',
+        'Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
     });
   });
 });
