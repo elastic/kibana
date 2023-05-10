@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import {
   AreaSeries,
   Chart,
@@ -16,17 +16,18 @@ import {
   Axis,
 } from '@elastic/charts';
 import {
+  EuiButtonIcon,
   EuiSpacer,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
   EuiFormRow,
   EuiSuggest,
+  EuiScreenReaderOnly,
   EuiSuggestionProps,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { getProcessedFields } from '../../components/data_grid';
-import { useFetchEsRequest } from '../../hooks/use_data_search';
+import { useFetchDataDriftResult } from '../../hooks/use_data_search';
 
 // Select reference data view
 const sampleDataViews = [
@@ -157,7 +158,7 @@ export const ProductionDistribution = () => {
   );
 };
 
-const ExampleChart = ({ data }: { data: any }) => {
+const DataDriftChart = ({ data }: { data: any }) => {
   const chartData = data ?? [
     { x: 0, g: 'reference', y: 1 },
     { x: 0, g: 'production', y: 2 },
@@ -194,48 +195,42 @@ const ExampleChart = ({ data }: { data: any }) => {
 };
 // Data drift view
 export const DataDriftView = () => {
-  // @TODO: Example request - replace with real request
-  const esSearchRequest = {
-    index: '*',
-    body: {
-      fields: ['*'],
-      _source: false,
-      query: {
-        match_all: {},
-      },
-      size: 5,
-    },
-  };
-  const result = useFetchEsRequest(esSearchRequest);
+  const result = useFetchDataDriftResult([{ field: 'numeric_unchangeable', type: 'numeric' }]);
 
-  console.log(`--@@useFetchEsRequest result`, result);
-
+  // @TODO: Format data for dataFromResult and use it in table and charts
   const dataFromResult = useMemo(() => {
     if (!result.data) {
       return [];
     }
-    // @TODO: Need to reformat ES results data response into something meaningful for plotting data
-    // getProcessedFields() is a helper function to strip array values from "fields"
-    // { agent.name: ["js-base"],  agent.version: ["2.2.0"] } =>  { agent.name: "js-base",  agent.version: "2.2.0" }
-    const data = result.data.hits.hits.map((h) => getProcessedFields(h.fields ?? {}));
-    return data;
+    /*
+    @TODO: Need to reformat ES results data response into something meaningful for plotting data
+    Need to convert following `result.data` into something Elastic charts can understand:
+    [
+      {
+        key: '*--15.298196708301806',
+        to: -15.298196708301806,
+        doc_count: 79,
+      },
+      {
+        key: '-15.298196708301806--12.451967410117025',
+        from: -15.298196708301806,
+        to: -12.451967410117025,
+        doc_count: 50,
+      },
+    ];
+  */
+    const formattedData = result.data;
+    console.log(`--@@result.buckets`, formattedData);
+    return formattedData;
   }, [result]);
-
-  console.log(`--@@dataFromResult`, dataFromResult);
 
   return (
     <div>
       <ReferenceDataViewSelector />
       <ProductionDataViewSelector />
-
-      <DataDriftOverviewTable />
       <EuiSpacer size="m" />
 
-      <div css={{ width: '100%', height: 300 }}>
-        {/* @TODO: dataFromResult is being passed as chartData as an example
-         it needs to be formatted correctly */}
-        <ExampleChart chartData={dataFromResult} />
-      </div>
+      <DataDriftOverviewTable />
     </div>
   );
 };
@@ -306,6 +301,28 @@ const features: Feature[] = [
 
 export const DataDriftOverviewTable = () => {
   const columns: Array<EuiBasicTableColumn<Feature>> = [
+    {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>Expand rows</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (item: Feature) => {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={itemIdToExpandedRowMapValues[item.featureName] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
+    },
+
     {
       field: 'featureName',
       name: 'Feature name',
@@ -405,6 +422,26 @@ export const DataDriftOverviewTable = () => {
       textOnly: true,
     };
   };
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+
+  const toggleDetails = (item: Feature) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+    if (itemIdToExpandedRowMapValues[item.featureName]) {
+      delete itemIdToExpandedRowMapValues[item.featureName];
+    } else {
+      const { featureName, featureType, driftDetected, similarityTestPValue } = item;
+      // @TODO: Pass real chart data here for the expanded row/detail chart
+      itemIdToExpandedRowMapValues[item.featureName] = (
+        <div css={{ width: '100%', height: 200 }}>
+          <DataDriftChart />
+        </div>
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   return (
     <EuiBasicTable
@@ -414,6 +451,9 @@ export const DataDriftOverviewTable = () => {
       columns={columns}
       rowProps={getRowProps}
       cellProps={getCellProps}
+      itemId="featureName"
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      isExpandable={true}
     />
   );
 };
