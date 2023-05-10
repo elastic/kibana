@@ -158,13 +158,10 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     if (isUploadAction(action)) {
       return (
-        <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
+        <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
           <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
 
-          <EndpointUploadActionResult
-            action={action}
-            data-test-subj={getTestId('executeDetails')}
-          />
+          <EndpointUploadActionResult action={action} data-test-subj={getTestId('uploadOutput')} />
         </EuiFlexGroup>
       );
     }
