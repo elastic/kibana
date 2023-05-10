@@ -11,7 +11,7 @@ import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { buildDataViewMock, fields } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { ServicesContextProvider } from '../../application/services_provider';
@@ -19,6 +19,18 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { getDocId } from '../../utils/get_doc_id';
 import { EsHitRecord } from '../../types';
+
+const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
+jest.mock('@kbn/cell-actions', () => ({
+  ...jest.requireActual('@kbn/cell-actions'),
+  useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
+}));
+
+export const dataViewMock = buildDataViewMock({
+  name: 'the-data-view',
+  fields,
+  timeFieldName: '@timestamp',
+});
 
 function getProps() {
   const services = discoverServiceMock;
@@ -98,6 +110,7 @@ describe('DiscoverGrid', () => {
     let component: ReactWrapper<DiscoverGridProps>;
     beforeEach(async () => {
       component = await getComponent();
+      jest.clearAllMocks();
     });
 
     test('no documents are selected initially', async () => {
@@ -212,6 +225,50 @@ describe('DiscoverGrid', () => {
         true
       );
       expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
+    });
+  });
+
+  describe('cellActionsTriggerId', () => {
+    it('should call useDataGridColumnsCellActions with empty params when no cellActionsTriggerId is provided', async () => {
+      await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        onFieldEdited: jest.fn(),
+      });
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          triggerId: '',
+          fields: undefined,
+        })
+      );
+    });
+
+    it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
+      await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        onFieldEdited: jest.fn(),
+        cellActionsTriggerId: 'test',
+      });
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          triggerId: 'test',
+          fields: [
+            {
+              aggregatable: false,
+              name: '@timestamp',
+              type: 'keyword',
+              values: [[undefined], [undefined], [undefined], [undefined], [undefined]],
+            },
+            {
+              aggregatable: false,
+              name: 'message',
+              type: 'keyword',
+              values: [['test1'], [undefined], [undefined], [undefined], ['']],
+            },
+          ],
+        })
+      );
     });
   });
 });
