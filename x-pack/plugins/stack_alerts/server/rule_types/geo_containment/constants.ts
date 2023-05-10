@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { RegisterRuleTypesParams } from '../types';
-import { getRuleType } from './rule_type';
-
-export function register(params: RegisterRuleTypesParams) {
-  const { alerting, core } = params;
-  alerting.registerType(getRuleType(core));
-}
+export const ActionGroupId = 'Tracked entity contained';
+export const RecoveryActionGroupId = 'notGeoContained';
+export const GEO_CONTAINMENT_ID = '.geo-containment';

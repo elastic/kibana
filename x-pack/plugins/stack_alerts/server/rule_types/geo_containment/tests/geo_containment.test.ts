@@ -17,17 +17,16 @@ import {
   getGeoContainmentExecutor,
 } from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
-import type { GeoContainmentParams } from '../alert_type';
+import type { GeoContainmentRuleParams, GeoContainmentAlertInstanceState, GeoContainmentAlertInstanceContext } from '../types';
 
 const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
   create: (instanceId: string) => {
     const alertInstance = alertsMock.createAlertFactory.create<
-      GeoContainmentInstanceState,
-      GeoContainmentInstanceContext
+      GeoContainmentAlertInstanceState,
+      GeoContainmentAlertInstanceContext
     >();
     alertInstance.scheduleActions.mockImplementation(
-      (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
+      (actionGroupId: string, context?: GeoContainmentAlertInstanceContext) => {
         // Check subset of alert for comparison to expected results
         // @ts-ignore
         const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
@@ -507,7 +506,7 @@ describe('geo_containment', () => {
     const testAlertActionArr: unknown[] = [];
     const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
     const startedAt = new Date('2021-04-29T16:56:11.923Z');
-    const geoContainmentParams: GeoContainmentParams = {
+    const geoContainmentParams: GeoContainmentRuleParams = {
       index: 'testIndex',
       indexId: 'testIndexId',
       geoField: 'location',

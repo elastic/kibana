@@ -8,16 +8,16 @@
 import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import {
-  ActionGroupId,
-  GeoContainmentInstanceState,
+import { executeEsQueryFactory, OTHER_CATEGORY } from './es_query_builder';
+import { canSkipBoundariesFetch, getShapeFilters } from './get_shape_filters';
+import type {
+  GeoContainmentAlertInstanceState,
   GeoContainmentAlertType,
-  GeoContainmentInstanceContext,
-  GeoContainmentState,
-} from './alert_type';
+  GeoContainmentAlertInstanceContext,
+  GeoContainmentRuleState,
+} from './types';
 
-import { GEO_CONTAINMENT_ID } from './alert_type';
+import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 import { getAlertId, getContainedAlertContext, getRecoveredAlertContext } from './get_context';
 
 // Flatten agg results and get latest locations for each entity
@@ -25,7 +25,7 @@ export function transformResults(
   results: estypes.SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
-): Map<string, GeoContainmentInstanceState[]> {
+): Map<string, GeoContainmentAlertInstanceState[]> {
   if (!results) {
     return new Map();
   }
@@ -65,8 +65,8 @@ export function transformResults(
     // Get unique
     .reduce(
       (
-        accu: Map<string, GeoContainmentInstanceState[]>,
-        el: GeoContainmentInstanceState & { entityName: string }
+        accu: Map<string, GeoContainmentAlertInstanceState[]>,
+        el: GeoContainmentAlertInstanceState & { entityName: string }
       ) => {
         const { entityName, ...locationData } = el;
         if (entityName) {
@@ -83,24 +83,24 @@ export function transformResults(
 }
 
 export function getEntitiesAndGenerateAlerts(
-  prevLocationMap: Map<string, GeoContainmentInstanceState[]>,
-  currLocationMap: Map<string, GeoContainmentInstanceState[]>,
+  prevLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
+  currLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
   alertFactory: RuleExecutorServices<
-    GeoContainmentInstanceState,
-    GeoContainmentInstanceContext,
+    GeoContainmentAlertInstanceState,
+    GeoContainmentAlertInstanceContext,
     typeof ActionGroupId
   >['alertFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
   windowEnd: Date
 ): {
-  activeEntities: Map<string, GeoContainmentInstanceState[]>;
-  inactiveEntities: Map<string, GeoContainmentInstanceState[]>;
+  activeEntities: Map<string, GeoContainmentAlertInstanceState[]>;
+  inactiveEntities: Map<string, GeoContainmentAlertInstanceState[]>;
 } {
-  const activeEntities: Map<string, GeoContainmentInstanceState[]> = new Map([
+  const activeEntities: Map<string, GeoContainmentAlertInstanceState[]> = new Map([
     ...prevLocationMap,
     ...currLocationMap,
   ]);
-  const inactiveEntities: Map<string, GeoContainmentInstanceState[]> = new Map();
+  const inactiveEntities: Map<string, GeoContainmentAlertInstanceState[]> = new Map();
   activeEntities.forEach((containments, entityName) => {
     // Generate alerts
     containments.forEach((containment) => {
@@ -146,19 +146,17 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
     rule: { id: ruleId },
     state,
     logger,
-  }): Promise<{ state: GeoContainmentState }> {
-    const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
+  }): Promise<{ state: GeoContainmentRuleState }> {
+    const boundariesRequestMeta = {
+      geoField: params.geoField,
+      boundaryIndexTitle: params.boundaryIndexTitle,
+      boundaryGeoField: params.boundaryGeoField,
+      boundaryNameField: params.boundaryNameField,
+      boundaryIndexQuery: params.boundaryIndexQuery,
+    };
+    const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters && canSkipBoundariesFetch(boundariesRequestMeta, state.boundariesRequestMeta)
       ? state
-      : await getShapesFilters(
-          params.boundaryIndexTitle,
-          params.boundaryGeoField,
-          params.geoField,
-          services.scopedClusterClient.asCurrentUser,
-          logger,
-          ruleId,
-          params.boundaryNameField,
-          params.boundaryIndexQuery
-        );
+      : await getShapeFilters(boundariesRequestMeta, services.scopedClusterClient.asCurrentUser);
 
     const executeEsQuery = await executeEsQueryFactory(
       params,
@@ -180,15 +178,15 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
       currentIntervalResults = await executeEsQuery(windowStart, windowEnd);
     }
 
-    const currLocationMap: Map<string, GeoContainmentInstanceState[]> = transformResults(
+    const currLocationMap: Map<string, GeoContainmentAlertInstanceState[]> = transformResults(
       currentIntervalResults,
       params.dateField,
       params.geoField
     );
 
-    const prevLocationMap: Map<string, GeoContainmentInstanceState[]> = new Map([
+    const prevLocationMap: Map<string, GeoContainmentAlertInstanceState[]> = new Map([
       ...Object.entries(
-        (state.prevLocationMap as Record<string, GeoContainmentInstanceState[]>) || {}
+        (state.prevLocationMap as Record<string, GeoContainmentAlertInstanceState[]>) || {}
       ),
     ]);
     const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
@@ -219,6 +217,7 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
 
     return {
       state: {
+        boundariesRequestMeta,
         shapesFilters,
         shapesIdsNamesMap,
         prevLocationMap: Object.fromEntries(activeEntities),

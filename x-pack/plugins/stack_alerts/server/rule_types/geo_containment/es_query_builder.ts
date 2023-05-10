@@ -8,90 +8,11 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  luceneStringToDsl,
-  DataViewBase,
-  Query,
-} from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { getQueryDsl } from './utils';
 
 export const OTHER_CATEGORY = 'other';
-// Consider dynamically obtaining from config?
-const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
-
-interface BoundaryHit {
-  _index: string;
-  _id: string;
-  fields?: Record<string, unknown[]>;
-}
-
-export const getEsFormattedQuery = (query: Query, indexPattern?: DataViewBase) => {
-  let esFormattedQuery;
-
-  const queryLanguage = query.language;
-  if (queryLanguage === 'kuery') {
-    const ast = fromKueryExpression(query.query);
-    esFormattedQuery = toElasticsearchQuery(ast, indexPattern);
-  } else {
-    esFormattedQuery = luceneStringToDsl(query.query);
-  }
-  return esFormattedQuery;
-};
-
-export async function getShapesFilters(
-  boundaryIndexTitle: string,
-  boundaryGeoField: string,
-  geoField: string,
-  esClient: ElasticsearchClient,
-  log: Logger,
-  alertId: string,
-  boundaryNameField?: string,
-  boundaryIndexQuery?: Query
-) {
-  const filters: Record<string, unknown> = {};
-  const shapesIdsNamesMap: Record<string, unknown> = {};
-  // Get all shapes in index
-  const boundaryData = await esClient.search<Record<string, BoundaryHit>>({
-    index: boundaryIndexTitle,
-    body: {
-      size: MAX_SHAPES_QUERY_SIZE,
-      _source: false,
-      fields: boundaryNameField ? [boundaryNameField] : [],
-      ...(boundaryIndexQuery ? { query: getEsFormattedQuery(boundaryIndexQuery) } : {}),
-    },
-  });
-
-  for (let i = 0; i < boundaryData.hits.hits.length; i++) {
-    const boundaryHit: BoundaryHit = boundaryData.hits.hits[i];
-    filters[boundaryHit._id] = {
-      geo_shape: {
-        [geoField]: {
-          indexed_shape: {
-            index: boundaryHit._index,
-            id: boundaryHit._id,
-            path: boundaryGeoField,
-          },
-        },
-      },
-    };
-    if (
-      boundaryNameField &&
-      boundaryHit.fields &&
-      boundaryHit.fields[boundaryNameField] &&
-      boundaryHit.fields[boundaryNameField].length
-    ) {
-      // fields API always returns an array, grab first value
-      shapesIdsNamesMap[boundaryHit._id] = boundaryHit.fields[boundaryNameField][0];
-    }
-  }
-
-  return {
-    shapesFilters: filters,
-    shapesIdsNamesMap,
-  };
-}
 
 export async function executeEsQueryFactory(
   {
@@ -128,7 +49,7 @@ export async function executeEsQueryFactory(
         indexQuery.language === 'kuery'
           ? `(${dateField} >= "${gteEpochDateTime}" and ${dateField} < "${ltEpochDateTime}") and (${indexQuery.query})`
           : `(${dateField}:[${gteDateTime} TO ${ltDateTime}]) AND (${indexQuery.query})`;
-      esFormattedQuery = getEsFormattedQuery({
+      esFormattedQuery = getQueryDsl({
         query: dateRangeUpdatedQuery,
         language: indexQuery.language,
       });
