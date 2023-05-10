@@ -10,10 +10,12 @@ import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { SecurityAssistantProvider } from '../../security_assistant/security_assistant_context';
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -52,13 +54,17 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  */
 export const StorybookProviders: React.FC = ({ children }) => {
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+
   return (
     <I18nProvider>
       <KibanaReactContext.Provider>
         <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-              {children}
+              <SecurityAssistantProvider httpFetch={http.fetch}>
+                {children}
+              </SecurityAssistantProvider>
             </ThemeProvider>
           </ReduxStoreProvider>
         </CellActionsProvider>

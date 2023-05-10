@@ -146,3 +146,17 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
 });
+
+export const ALERT_SUMMARY_VIEW_CONTEXT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.contextDescription',
+  {
+    defaultMessage: 'Alert (summary view)',
+  }
+);
+
+export const ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.contextTooltip',
+  {
+    defaultMessage: 'Use this alert for context',
+  }
+);

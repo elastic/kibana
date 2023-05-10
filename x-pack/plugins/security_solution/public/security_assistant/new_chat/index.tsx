@@ -9,11 +9,8 @@ import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useToasts } from '../../common/lib/kibana';
-import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { SecurityAssistant } from '../security_assistant';
 import * as i18n from './translations';
-import { useSecurityAssistantQuery } from '../use_security_assistant_query';
 
 const SecurityAssistantContainer = styled.div`
   max-height: 1020px;
@@ -21,24 +18,12 @@ const SecurityAssistantContainer = styled.div`
 `;
 
 const NewChatComponent: React.FC<{
-  data: TimelineEventsDetailsItem[];
-}> = ({ data }) => {
-  const toasts = useToasts();
-  const [query, setQuery] = useState<string>('');
-
+  promptContextId: string;
+}> = ({ promptContextId }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const { getQuery } = useSecurityAssistantQuery({ data });
-
-  const onStartConversation = useCallback(async () => {
-    try {
-      setQuery(await getQuery());
-      setIsPopoverOpen((isOpen) => !isOpen);
-    } catch (error) {
-      toasts.addError(error, { title: i18n.ERROR_FETCHING_SECURITY_ASSISTANT_QUERY });
-    }
-  }, [getQuery, toasts]);
+  const onStartConversation = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
   const NewChatButton = useMemo(
     () => (
@@ -57,7 +42,7 @@ const NewChatComponent: React.FC<{
       panelPaddingSize="none"
     >
       <SecurityAssistantContainer>
-        <SecurityAssistant input={query} localStorageKey={'alertSummary'} />
+        <SecurityAssistant promptContextId={promptContextId} localStorageKey={'alertSummary'} />
       </SecurityAssistantContainer>
     </EuiPopover>
   );

@@ -16,13 +16,14 @@ import {
   EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ChangeEvent, useCallback, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import type { Cancelable } from 'lodash';
 import { debounce } from 'lodash';
-import { EqlOptionsSelected, FieldsEqlOptions } from '@kbn/timelines-plugin/common';
+import type { EqlOptionsSelected, FieldsEqlOptions } from '@kbn/timelines-plugin/common';
 import * as i18n from './translations';
-import { getDefaultQuery } from './use_security_assistant_query/helpers';
+import { getDefaultPrompt } from './prompt/helpers';
 
 export interface Props {
   optionsData?: {
@@ -40,7 +41,7 @@ const singleSelection = { asPlainText: true };
 
 const defaultOptionsData: Props['optionsData'] = {
   models: [{ label: 'text-davinci-003' }, { label: 'gpt-3.5-turbo' }, { label: 'gpt-4' }],
-  prompt: getDefaultQuery(''),
+  prompt: getDefaultPrompt(''),
   temperature: 0.2,
 };
 

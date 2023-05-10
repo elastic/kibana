@@ -16,6 +16,7 @@ import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -34,6 +35,7 @@ import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
+import { SecurityAssistantProvider } from '../../security_assistant/security_assistant_context';
 
 const state: State = mockGlobalState;
 
@@ -61,22 +63,26 @@ export const TestProvidersComponent: React.FC<Props> = ({
   cellActions = [],
 }) => {
   const queryClient = new QueryClient();
+  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <QueryClientProvider client={queryClient}>
-              <ExpandableFlyoutProvider>
-                <ConsoleManager>
-                  <CellActionsProvider
-                    getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                  >
-                    <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                  </CellActionsProvider>
-                </ConsoleManager>
-              </ExpandableFlyoutProvider>
-            </QueryClientProvider>
+            <SecurityAssistantProvider httpFetch={http.fetch}>
+              <QueryClientProvider client={queryClient}>
+                <ExpandableFlyoutProvider>
+                  <ConsoleManager>
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                    >
+                      <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                    </CellActionsProvider>
+                  </ConsoleManager>
+                </ExpandableFlyoutProvider>
+              </QueryClientProvider>
+            </SecurityAssistantProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>
@@ -93,28 +99,36 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
   cellActions = [],
-}) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <UserPrivilegesProvider
-            kibanaCapabilities={
-              {
-                siem: { show: true, crud: true },
-                [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
-              } as unknown as Capabilities
-            }
-          >
-            <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve(cellActions)}>
-              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-            </CellActionsProvider>
-          </UserPrivilegesProvider>
-        </ThemeProvider>
-      </ReduxStoreProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+}) => {
+  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <SecurityAssistantProvider httpFetch={http.fetch}>
+              <UserPrivilegesProvider
+                kibanaCapabilities={
+                  {
+                    siem: { show: true, crud: true },
+                    [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                  } as unknown as Capabilities
+                }
+              >
+                <CellActionsProvider
+                  getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                >
+                  <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                </CellActionsProvider>
+              </UserPrivilegesProvider>
+            </SecurityAssistantProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 export const TestProviders = React.memo(TestProvidersComponent);
 export const TestProvidersWithPrivileges = React.memo(TestProvidersWithPrivilegesComponent);

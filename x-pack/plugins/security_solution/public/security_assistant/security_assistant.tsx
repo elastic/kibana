@@ -30,6 +30,8 @@ import {
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 import styled from 'styled-components';
+import { css } from '@emotion/react';
+import useEvent from 'react-use/lib/useEvent';
 import * as i18n from './translations';
 
 import { fetchChatCompletion } from './api';
@@ -39,8 +41,9 @@ import { handleFileHash, handleOpenAlerts, isFileHash } from './helpers';
 import { SendToTimelineButton } from './send_to_timeline_button';
 import { useLocalStorage } from '../common/components/local_storage';
 import { SettingsPopover } from './settings_popover';
-import { css } from '@emotion/react';
-import useEvent from 'react-use/lib/useEvent';
+import type { PromptContext } from './prompt_context/types';
+import { useSecurityAssistantContext } from './security_assistant_context';
+import { ContextPills } from './context_pills';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -71,6 +74,7 @@ export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
 
 export interface SecurityAssistantProps {
   input?: string;
+  promptContextId?: string;
   autoSendInput?: boolean;
   localStorageEnabled?: boolean;
   localStorageKey?: string;
@@ -101,11 +105,13 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
   React.memo<SecurityAssistantProps>(
     ({
       input = '',
+      promptContextId = '',
       autoSendInput = false,
       showTitle = true,
       localStorageEnabled = true,
       localStorageKey = 'default',
     }) => {
+      const { promptContexts } = useSecurityAssistantContext();
       const { cases, uiSettings } = useKibana().services;
       const bottomRef = useRef<HTMLDivElement | null>(null);
       const [isLoading, setIsLoading] = useState(false);
@@ -113,7 +119,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
 
       useEffect(() => {
         setPromptText(input);
-        //TODO: Need to defer one render so promptText is set before sending message
+        // TODO: Need to defer one render so promptText is set before sending message
         if (autoSendInput) {
           handleSendMessage();
         }
@@ -264,12 +270,12 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       // Filter if no code block exists as to not make extra portals
       commentBlocks.filter((cb) => cb.querySelectorAll('.euiCodeBlock__code').length > 0);
 
-      let commentDetails: {
+      let commentDetails: Array<{
         commentBlock: Element;
         codeBlocks: Element[];
         codeBlockControls: Element[];
         dataProviders: DataProvider[];
-      }[] =
+      }> =
         chatHistory.length > 0
           ? commentBlocks.map((commentBlock) => {
               return {
@@ -309,6 +315,26 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
       // @ts-ignore-expect-error
       codeBlockContainers.forEach((e) => (e.style.minHeight = '75px'));
       ////
+
+      useEffect(() => {
+        if (chatHistory.length > 0) {
+          return;
+        }
+
+        const promptContext: PromptContext | undefined = promptContexts[promptContextId];
+        const getAutoRunPrompt = promptContext?.getAutoRunPrompt;
+
+        const autoRunOnOpen = async () => {
+          if (getAutoRunPrompt != null) {
+            const prompt = await getAutoRunPrompt();
+
+            setPromptText(prompt);
+            handleSendMessage();
+          }
+        };
+
+        autoRunOnOpen();
+      }, [chatHistory.length, promptContexts, promptContextId, handleSendMessage]);
 
       return (
         <EuiPanel>
@@ -384,6 +410,10 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
                 });
               }
             })}
+
+          <ContextPills promptContexts={promptContexts} />
+
+          <EuiSpacer />
 
           <CommentsContainer>
             <StyledCommentList

@@ -24,7 +24,7 @@ import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_c
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import type { State } from '../common/store';
-
+import { SecurityAssistantProvider } from '../security_assistant/security_assistant_context';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
@@ -50,6 +50,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const {
     i18n,
     application: { capabilities },
+    http,
     uiActions,
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -60,25 +61,27 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
-                <MlCapabilitiesProvider>
-                  <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                    <ManageUserInfo>
-                      <ReactQueryClientProvider>
-                        <CellActionsProvider
-                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                        >
-                          <PageRouter
-                            history={history}
-                            onAppLeave={onAppLeave}
-                            setHeaderActionMenu={setHeaderActionMenu}
+                <SecurityAssistantProvider httpFetch={http.fetch}>
+                  <MlCapabilitiesProvider>
+                    <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                      <ManageUserInfo>
+                        <ReactQueryClientProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                           >
-                            {children}
-                          </PageRouter>
-                        </CellActionsProvider>
-                      </ReactQueryClientProvider>
-                    </ManageUserInfo>
-                  </UserPrivilegesProvider>
-                </MlCapabilitiesProvider>
+                            <PageRouter
+                              history={history}
+                              onAppLeave={onAppLeave}
+                              setHeaderActionMenu={setHeaderActionMenu}
+                            >
+                              {children}
+                            </PageRouter>
+                          </CellActionsProvider>
+                        </ReactQueryClientProvider>
+                      </ManageUserInfo>
+                    </UserPrivilegesProvider>
+                  </MlCapabilitiesProvider>
+                </SecurityAssistantProvider>
               </EuiThemeProvider>
             </KibanaThemeProvider>
             <ErrorToastDispatcher />
