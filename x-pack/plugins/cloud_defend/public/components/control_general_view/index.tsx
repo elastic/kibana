@@ -295,7 +295,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
       }
 
       const updatedResponses: Response[] = JSON.parse(JSON.stringify(responses));
-      updatedResponses[index] = { ...updatedResponse };
+      updatedResponses[index] = JSON.parse(JSON.stringify(updatedResponse));
       onUpdateYaml(selectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]
