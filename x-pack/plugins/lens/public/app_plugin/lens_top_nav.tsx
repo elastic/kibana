@@ -12,7 +12,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import moment from 'moment';
@@ -959,10 +959,8 @@ export const LensTopNavMenu = ({
   ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const dataView = await dataViewsService.create({
-        title: pattern,
-      });
+    async (dataViewSpec: DataViewSpec) => {
+      const dataView = await dataViewsService.create(dataViewSpec);
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }

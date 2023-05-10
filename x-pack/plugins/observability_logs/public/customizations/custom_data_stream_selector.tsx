@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { DataStream } from '../../common/integrations';
 import { DataStreamSelector } from '../components/data_stream_selector';
 import { useDataView } from '../utils/internal_state_container_context';
 
@@ -18,8 +19,8 @@ export function CustomDataStreamSelector({ stateContainer }: Props) {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
 
-  const handleStreamSelection = async (dataStream) => {
-    return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream.title);
+  const handleStreamSelection = async (dataStream: DataStream) => {
+    return stateContainer.actions.onCreateDefaultAdHocDataView(dataStream);
   };
 
   return (

@@ -144,7 +144,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (pattern: string) => Promise<void>;
+    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -460,10 +460,8 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const onCreateDefaultAdHocDataView = async (pattern: string) => {
-    const newDataView = await services.dataViews.create({
-      title: pattern,
-    });
+  const onCreateDefaultAdHocDataView = async (dataViewSpec: DataViewSpec) => {
+    const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }

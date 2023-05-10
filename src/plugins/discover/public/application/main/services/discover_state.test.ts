@@ -590,7 +590,7 @@ describe('actions', () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
-    await state.actions.onCreateDefaultAdHocDataView('ad-hoc-test');
+    await state.actions.onCreateDefaultAdHocDataView({ title: 'ad-hoc-test' });
     expect(state.appState.getState().index).toBe('ad-hoc-id');
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();

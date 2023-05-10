@@ -29,3 +29,8 @@ export const uncategorizedLabel = i18n.translate(
   'xpack.observabilityLogs.dataStreamSelector.uncategorized',
   { defaultMessage: 'Uncategorized' }
 );
+
+export const sortDirectionsLabel = i18n.translate(
+  'xpack.observabilityLogs.dataStreamSelector.sortDirections',
+  { defaultMessage: 'Sort directions' }
+);

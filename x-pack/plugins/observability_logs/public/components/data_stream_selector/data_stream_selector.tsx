@@ -33,6 +33,7 @@ import {
   INTEGRATION_PANEL_ID,
   POPOVER_ID,
   selectViewLabel,
+  sortDirectionsLabel,
   uncategorizedLabel,
   UNCATEGORIZED_STREAMS_PANEL_ID,
 } from './constants';
@@ -106,18 +107,6 @@ export function DataStreamSelector({
     ...integrationPanels,
   ];
 
-  const contextPanelItems = [
-    <SearchControls />,
-    <EuiHorizontalRule key="sep" margin="none" />,
-    <EuiContextMenu
-      key="integrations-menu"
-      initialPanelId={currentPanel}
-      panels={panels}
-      className="eui-yScroll"
-      css={contextMenuStyles}
-    />,
-  ];
-
   const button = (
     <DataStreamButton onClick={togglePopover} fullWidth={isMobile}>
       {title}
@@ -134,7 +123,16 @@ export function DataStreamSelector({
       {...(isMobile && { display: 'block' })}
       buffer={8}
     >
-      <EuiContextMenuPanel title={selectViewLabel} items={contextPanelItems} />
+      <EuiContextMenuPanel title={selectViewLabel} onTransitionComplete={console.log}>
+        <SearchControls />
+        <EuiHorizontalRule margin="none" />
+        <EuiContextMenu
+          initialPanelId={currentPanel}
+          panels={panels}
+          className="eui-yScroll"
+          css={contextMenuStyles}
+        />
+      </EuiContextMenuPanel>
     </EuiPopover>
   );
 }
@@ -144,9 +142,7 @@ interface DataStreamButtonProps extends EuiButtonProps {
 }
 
 const DataStreamButton = (props: DataStreamButtonProps) => {
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
-
-  const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
+  const buttonStyles = getPopoverButtonStyles({ fullWidth: props.fullWidth });
 
   return <EuiButton css={buttonStyles} iconType="arrowDown" iconSide="right" {...props} />;
 };
@@ -192,9 +188,7 @@ const SearchControls = ({ strategy }: SearchControlsProps) => {
                 label: 'Descending',
               },
             ]}
-            legend={i18n.translate('xpack.observabilityLogs.dataStreamSelector.sortDirections', {
-              defaultMessage: 'Sort directions',
-            })}
+            legend={sortDirectionsLabel}
             // idSelected={search.sortingDirection}
             // onChange={sortByDirection}
           />

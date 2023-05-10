@@ -8,7 +8,7 @@
 
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from './dataview_list';
 import { IUnifiedSearchPluginServices } from '../types';
@@ -22,7 +22,7 @@ export interface DataViewSelectorProps {
   isTextBasedLangSelected: boolean;
   setPopoverIsOpen: (isOpen: boolean) => void;
   onChangeDataView: (dataViewId: string) => void;
-  onCreateDefaultAdHocDataView?: (pattern: string) => void;
+  onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
 }
 
 export const DataViewSelector = ({
