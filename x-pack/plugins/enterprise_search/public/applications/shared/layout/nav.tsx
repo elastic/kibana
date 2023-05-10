@@ -194,7 +194,7 @@ export const useEnterpriseSearchEngineNav = (
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
+            shouldShowActiveForSubroutes: false,
             to: enginePath,
           }),
           items: [
