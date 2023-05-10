@@ -72,7 +72,7 @@ describe('<ControlGeneralViewSelector />', () => {
 
   const mockProcessResponse: Response = {
     type: 'process',
-    match: [mockSelector3.name],
+    match: [mockProcessSelector.name],
     actions: ['alert', 'block'],
   };
 
