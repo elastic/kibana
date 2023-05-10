@@ -151,6 +151,7 @@ export const setRecoveredAlertsContext = ({
   staleDownConfigs,
   upConfigs,
   dateFormat,
+  tz,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
   basePath?: IBasePath;
@@ -159,6 +160,7 @@ export const setRecoveredAlertsContext = ({
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
+  tz: string;
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
   for (const alert of getRecoveredAlerts()) {
@@ -216,7 +218,7 @@ export const setRecoveredAlertsContext = ({
       const ping = upConfig.ping;
       const stateId = ping.state?.ends?.id;
       const upTimestamp = ping['@timestamp'];
-      const checkedAt = moment(upTimestamp).format(dateFormat);
+      const checkedAt = moment(upTimestamp).tz(tz).format(dateFormat);
       const duration = getErrorDuration(moment(errorStartedAt), moment(upTimestamp));
       recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
         defaultMessage: `is now Up`,

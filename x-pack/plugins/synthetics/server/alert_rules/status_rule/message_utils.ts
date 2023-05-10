@@ -42,11 +42,12 @@ export const getMonitorSummary = (
   statusMessage: string,
   locationId: string,
   configId: string,
-  dateFormat: string
+  dateFormat: string,
+  tz: string
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp']).format(dateFormat);
+  const checkedAt = moment(monitorInfo['@timestamp']).tz(tz).format(dateFormat);
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
     tcp: 'TCP',

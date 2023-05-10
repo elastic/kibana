@@ -80,6 +80,8 @@ export const registerSyntheticsStatusCheckRule = (
       } = services;
 
       const dateFormat = await uiSettingsClient.get('dateFormat');
+      const timezone = await uiSettingsClient.get('dateFormat:tz');
+      const tz = timezone === 'Browser' ? 'UTC' : timezone;
 
       const statusRule = new StatusRuleExecutor(
         previousStartedAt,
@@ -101,7 +103,8 @@ export const registerSyntheticsStatusCheckRule = (
           DOWN_LABEL,
           locationId,
           configId,
-          dateFormat
+          dateFormat,
+          tz
         );
         const alertId = getInstanceId(ping, idWithLocation);
         const alert = alertWithLifecycle({
@@ -150,6 +153,7 @@ export const registerSyntheticsStatusCheckRule = (
         staleDownConfigs,
         upConfigs,
         dateFormat,
+        tz,
       });
 
       return {

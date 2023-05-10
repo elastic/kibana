@@ -252,6 +252,7 @@ describe('setRecoveredAlertsContext', () => {
       staleDownConfigs,
       upConfigs: {},
       dateFormat,
+      tz: 'UTC',
     });
     expect(setContext).toBeCalledWith({
       idWithLocation,
@@ -299,6 +300,7 @@ describe('setRecoveredAlertsContext', () => {
       staleDownConfigs,
       upConfigs: {},
       dateFormat,
+      tz: 'UTC',
     });
     expect(setContext).toBeCalledWith({
       idWithLocation,
@@ -348,6 +350,7 @@ describe('setRecoveredAlertsContext', () => {
       staleDownConfigs,
       upConfigs,
       dateFormat,
+      tz: 'UTC',
     });
     expect(setContext).toBeCalledWith({
       configId: '12345-67891',
