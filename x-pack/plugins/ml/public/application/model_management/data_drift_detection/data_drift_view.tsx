@@ -27,7 +27,47 @@ import {
   EuiSuggestionProps,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { useFetchDataDriftResult } from '../../hooks/use_data_search';
+import { i18n } from '@kbn/i18n';
+import { isNumericDriftData, useFetchDataDriftResult } from '../../hooks/use_data_search';
+
+const NUMERIC_TYPE_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.numericLabel', {
+  defaultMessage: 'Numeric',
+});
+const CATEGORICAL_TYPE_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.categoricalLabel', {
+  defaultMessage: 'Categorical',
+});
+
+const UNKNOWN_PVALUE_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.unknownPValueLabel', {
+  defaultMessage: 'Unknown',
+});
+
+const REFERENCE_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.referenceLabel', {
+  defaultMessage: 'Reference',
+});
+
+const PRODUCTION_LABEL = i18n.translate('xpack.ml.trainedModels.driftData.productionLabel', {
+  defaultMessage: 'Production',
+});
+
+interface Histogram {
+  doc_count: 0;
+  key: string | number;
+}
+
+interface ComparisionHistogram extends Histogram {
+  g: string;
+}
+
+// Show the overview table
+interface Feature {
+  featureName: string;
+  featureType: string;
+  driftDetected: boolean;
+  similarityTestPValue: number;
+  productionHistogram: Histogram[];
+  referenceHistogram: Histogram[];
+  comparisonDistribution: ComparisionHistogram[];
+}
 
 // Select reference data view
 const sampleDataViews = [
@@ -110,66 +150,48 @@ export const ProductionDataViewSelector = () => {
 // };
 
 // Reference data numeric distribution
-export const ReferenceDistribution = () => {
-  const data1 = [
-    { x: 0, y: 2 },
-    { x: 1, y: 7 },
-    { x: 2, y: 3 },
-    { x: 3, y: 6 },
-  ];
-
+export const ReferenceDistribution = ({ data }: { data: Histogram[] }) => {
   return (
     <Chart>
       <Settings />
       <BarSeries
         id="reference-distr-viz"
-        name="Simple bar series"
+        name="Reference distribution"
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
-        data={data1}
+        xAccessor="key"
+        yAccessors={['doc_count']}
+        data={data}
       />
     </Chart>
   );
 };
 
 // Production data numeric distribution
-export const ProductionDistribution = () => {
-  const data1 = [
-    { x: 0, y: 2 },
-    { x: 1, y: 7 },
-    { x: 2, y: 3 },
-    { x: 3, y: 6 },
-  ];
-
+export const ProductionDistribution = ({ data }: { data: Histogram[] }) => {
   return (
     <Chart>
       <Settings />
       <BarSeries
         id="production-distr-viz"
+        name="Production distribution"
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
-        data={data1}
+        xAccessor="key"
+        yAccessors={['doc_count']}
+        data={data}
       />
     </Chart>
   );
 };
 
-const DataDriftChart = ({ data }: { data: any }) => {
-  const chartData = data ?? [
-    { x: 0, g: 'reference', y: 1 },
-    { x: 0, g: 'production', y: 2 },
-    { x: 1, g: 'reference', y: 2 },
-    { x: 1, g: 'production', y: 3 },
-    { x: 2, g: 'reference', y: 3 },
-    { x: 2, g: 'production', y: 4 },
-    { x: 3, g: 'reference', y: 4 },
-    { x: 3, g: 'production', y: 5 },
-  ];
-
+const DataDriftChart = ({
+  featureName,
+  data,
+}: {
+  featureName: string;
+  data: ComparisionHistogram[];
+}) => {
   return (
     <Chart>
       <Settings showLegend showLegendExtra legendPosition={Position.Right} />
@@ -182,13 +204,13 @@ const DataDriftChart = ({ data }: { data: any }) => {
       />
       <BarSeries
         id="data-drift-viz"
-        name="Simple bar series"
+        name={featureName}
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
+        xAccessor="key"
+        yAccessors={['doc_count']}
         splitSeriesAccessors={['g']}
-        data={chartData}
+        data={data}
       />
     </Chart>
   );
@@ -203,32 +225,42 @@ export const DataDriftView = () => {
   ]);
 
   // @TODO: Format data for dataFromResult and use it in table and charts
-  const dataFromResult = useMemo(() => {
+  const dataFromResult: Feature[] = useMemo(() => {
     if (!result.data) {
       return [];
     }
-    /*
-    @TODO: Need to reformat ES results data response into something meaningful for plotting data
-    Need to convert following `result.data` into something Elastic charts can understand:
-    [
-      {
-        key: '*--15.298196708301806',
-        to: -15.298196708301806,
-        doc_count: 79,
-      },
-      {
-        key: '-15.298196708301806--12.451967410117025',
-        from: -15.298196708301806,
-        to: -12.451967410117025,
-        doc_count: 50,
-      },
-    ];
-  */
-    const formattedData = result.data;
-    console.log(`--@@result.buckets`, formattedData);
-    return formattedData;
+    return Object.entries(result.data).map(([featureName, data], idx) => {
+      if (isNumericDriftData(data)) {
+        return {
+          featureName,
+          featureType: NUMERIC_TYPE_LABEL,
+          // @TODO: Update logic with threshold
+          driftDetected: true,
+          similarityTestPValue: data.pValue,
+          referenceHistogram: data.referenceHistogram ?? [],
+          productionHistogram: data.productionHistogram ?? [],
+          comparisonDistribution: [
+            ...data.referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+            ...data.productionHistogram.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+          ],
+        };
+      }
+      // @TODO: Update logic for what to show for categorical
+      return {
+        featureName,
+        featureType: CATEGORICAL_TYPE_LABEL,
+        driftDetected: true,
+        similarityTestPValue: 0,
+        // @TODO: Need to sort order for baseline terms and drifted terms for consistency?
+        referenceHistogram: data.baselineTerms ?? [],
+        productionHistogram: data.driftedTerms ?? [],
+        comparisonDistribution: [
+          ...data.baselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+          ...data.driftedTerms.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+        ],
+      };
+    });
   }, [result]);
-  console.log(`dataFromResult`, dataFromResult);
 
   return (
     <div>
@@ -241,76 +273,33 @@ export const DataDriftView = () => {
   );
 };
 
-export const OverlapDistributionComparison = () => {
-  const BARCHART_1Y1G = [
-    { x: 0, g: 'reference', y: 1 },
-    { x: 0, g: 'production', y: 2 },
-    { x: 1, g: 'reference', y: 2 },
-    { x: 1, g: 'production', y: 3 },
-    { x: 2, g: 'reference', y: 3 },
-    { x: 2, g: 'production', y: 4 },
-    { x: 3, g: 'reference', y: 4 },
-    { x: 3, g: 'production', y: 5 },
-  ];
+export const OverlapDistributionComparison = ({ data }: { data: ComparisionHistogram[] }) => {
   return (
     <Chart>
       <Settings showLegend={false} />
       <AreaSeries
         id="data-drift-viz"
-        name="Simple bar series"
+        name="Comparison distribution"
         xScaleType={ScaleType.Linear}
         yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
+        xAccessor="key"
+        yAccessors={['doc_count']}
         splitSeriesAccessors={['g']}
-        data={BARCHART_1Y1G}
+        data={data}
         curve={CurveType.CURVE_STEP_AFTER}
       />
     </Chart>
   );
 };
 
-// Show the overview table
-interface Feature {
-  featureName: string;
-  featureType: string;
-  driftDetected: boolean;
-  similarityTestPValue: number;
-}
-
-const features: Feature[] = [
-  {
-    featureName: 'numeric_unchangeable',
-    featureType: 'numeric',
-    driftDetected: false,
-    similarityTestPValue: 0.25,
-  },
-  {
-    featureName: 'numeric_changeable',
-    featureType: 'numeric',
-    driftDetected: true,
-    similarityTestPValue: 0.00001,
-  },
-  {
-    featureName: 'categoric_unchangeable',
-    featureType: 'categoric',
-    driftDetected: false,
-    similarityTestPValue: 0.25,
-  },
-  {
-    featureName: 'categoric_changeable',
-    featureType: 'categoric',
-    driftDetected: true,
-    similarityTestPValue: 0.00001,
-  },
-];
-
-export const DataDriftOverviewTable = (data) => {
+export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
   console.log('DataDriftOverviewTable data ', data);
   // if data is an empty array return
-  if (data.data.length == 0) {
+  if (data.length === 0) {
     return null;
   }
+
+  const features = data;
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
       align: 'left',
@@ -373,7 +362,10 @@ export const DataDriftOverviewTable = (data) => {
       render: (similarityTestPValue: number, feature: Feature) => {
         return (
           <span>
-            {feature.featureType === 'numeric' ? data.data[feature.featureName].pValue : 'unknown'}
+            {feature.featureType === NUMERIC_TYPE_LABEL
+              ? // @TODO: format this better
+                feature.similarityTestPValue
+              : UNKNOWN_PVALUE_LABEL}
           </span>
         );
       },
@@ -382,27 +374,27 @@ export const DataDriftOverviewTable = (data) => {
       // },
     },
     {
-      field: 'referenceDistribution',
+      field: 'referenceHistogram',
       name: 'Reference distribution',
       'data-test-subj': 'mlDataDriftOverviewTableReferenceDistribution',
       sortable: false,
-      render: () => {
+      render: (referenceHistogram: Feature['referenceHistogram']) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <ReferenceDistribution />
+            <ReferenceDistribution data={referenceHistogram} />
           </div>
         );
       },
     },
     {
-      field: 'productionDistribution',
+      field: 'productionHistogram',
       name: 'Production distribution',
       'data-test-subj': 'mlDataDriftOverviewTableProductionDistribution',
       sortable: false,
-      render: () => {
+      render: (productionDistribution: Feature['productionHistogram']) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <ProductionDistribution />
+            <ProductionDistribution data={productionDistribution} />
           </div>
         );
       },
@@ -412,10 +404,10 @@ export const DataDriftOverviewTable = (data) => {
       name: 'Comparison',
       'data-test-subj': 'mlDataDriftOverviewTableProductionDistribution',
       sortable: false,
-      render: () => {
+      render: (comparisonDistribution: Feature['comparisonDistribution']) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <OverlapDistributionComparison />
+            <OverlapDistributionComparison data={comparisonDistribution} />
           </div>
         );
       },
@@ -450,11 +442,10 @@ export const DataDriftOverviewTable = (data) => {
     if (itemIdToExpandedRowMapValues[item.featureName]) {
       delete itemIdToExpandedRowMapValues[item.featureName];
     } else {
-      const { featureName, featureType, driftDetected, similarityTestPValue } = item;
-      // @TODO: Pass real chart data here for the expanded row/detail chart
+      const { featureName, comparisonDistribution } = item;
       itemIdToExpandedRowMapValues[item.featureName] = (
         <div css={{ width: '100%', height: 200 }}>
-          <DataDriftChart />
+          <DataDriftChart featureName={featureName} data={comparisonDistribution} />
         </div>
       );
     }

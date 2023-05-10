@@ -9,13 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type {
-  AggregationsBuckets,
-  AggregationsMultiBucketAggregateBase,
-  AggregationsPercentilesAggregateBase,
-  SearchResponseBody,
-} from '@elastic/elasticsearch/lib/api/types';
-import { ExclusiveUnion } from '@elastic/eui';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana } from '../contexts/kibana';
 
 export enum FETCH_STATUS {
@@ -25,11 +20,38 @@ export enum FETCH_STATUS {
   NOT_INITIATED = 'not_initiated',
 }
 
+interface Histogram {
+  doc_count: 0;
+  key: string | number;
+}
+
 export interface Result<T extends unknown> {
   status: FETCH_STATUS;
   data?: T;
   error?: string;
 }
+
+interface NumericDriftData {
+  type: 'numeric';
+  pValue: number;
+  referenceHistogram: Histogram[];
+  productionHistogram: Histogram[];
+}
+interface CategoricalDriftData {
+  type: 'categoric';
+  driftedTerms: Histogram[];
+  driftedSumOtherDocCount: number;
+  baselineTerms: Histogram[];
+  baselineSumOtherDocCount: number;
+}
+
+export const isNumericDriftData = (arg: any): arg is NumericDriftData => {
+  return isPopulatedObject(arg, ['type']) && arg.type === 'numeric';
+};
+
+export const isCategoricalDriftData = (arg: any): arg is CategoricalDriftData => {
+  return isPopulatedObject(arg, ['type']) && arg.type === 'categoric';
+};
 
 export const useDataSearch = () => {
   const {
@@ -68,7 +90,7 @@ export const useFetchDataDriftResult = (
 ) => {
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<
-    Result<{ driftedPValue: number | undefined; buckets: AggregationsBuckets | undefined }>
+    Result<Record<string, NumericDriftData | CategoricalDriftData>>
   >({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
@@ -95,15 +117,7 @@ export const useFetchDataDriftResult = (
           index: referenceIndex,
           body: {
             size: 0,
-            aggs: {
-              // @TODO: Should add more fields here
-              // numeric_unchangeable_percentiles: {
-              //   percentiles: {
-              //     field: 'numeric_unchangeable',
-              //     percents,
-              //   },
-              // },
-            },
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
         // for each field with type "numeric", add a percentiles agg to the request
@@ -135,10 +149,7 @@ export const useFetchDataDriftResult = (
 
         console.log(baselineRequest);
 
-        const baselineResponse: SearchResponseBody<
-          unknown,
-          Record<string, AggregationsPercentilesAggregateBase>
-        > = await dataSearch(baselineRequest, signal);
+        const baselineResponse = await dataSearch(baselineRequest, signal);
 
         console.log(baselineResponse);
 
@@ -155,20 +166,7 @@ export const useFetchDataDriftResult = (
           index: productionIndex,
           body: {
             size: 0,
-            aggs: {
-              // numeric_unchangeable_ranges: {
-              //   range: {
-              //     field: 'numeric_unchangeable',
-              //     ranges,
-              //   },
-              // },
-              // _ks_test_: {
-              //   bucket_count_ks_test: {
-              //     buckets_path: 'numeric_unchangeable_ranges>_count',
-              //     alternative: 'two_sided',
-              //   },
-              // },
-            },
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
 
@@ -176,7 +174,7 @@ export const useFetchDataDriftResult = (
         for (const { field, type } of fields) {
           if (type === 'numeric') {
             // create ranges based on percentiles
-            const percentiles = Object.values(
+            const percentiles = Object.values<number>(
               baselineResponse.aggregations.numeric_unchangeable_percentiles?.values
             );
             // Result is
@@ -200,7 +198,7 @@ export const useFetchDataDriftResult = (
             driftedRequest.body.aggs[`${field}_ks_test`] = {
               bucket_count_ks_test: {
                 buckets_path: `${field}_ranges>_count`,
-                alternative: 'two_sided',
+                alternative: ['two_sided'],
               },
             };
             // add stats aggregation to the request
@@ -223,13 +221,7 @@ export const useFetchDataDriftResult = (
 
         console.log('Drifted request', driftedRequest);
 
-        const driftedResp: SearchResponseBody<
-          unknown,
-          Record<
-            string,
-            ExclusiveUnion<{ two_sided: number }, AggregationsMultiBucketAggregateBase>
-          >
-        > = await dataSearch(driftedRequest, signal);
+        const driftedResp = await dataSearch(driftedRequest, signal);
 
         console.log('Drifted response', driftedResp);
 
@@ -246,7 +238,7 @@ export const useFetchDataDriftResult = (
           index: referenceIndex,
           body: {
             size: 0,
-            aggs: {},
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
 
@@ -254,7 +246,7 @@ export const useFetchDataDriftResult = (
           index: productionIndex,
           body: {
             size: 0,
-            aggs: {},
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
           },
         };
 
@@ -319,10 +311,11 @@ export const useFetchDataDriftResult = (
 
         // retrieve aggregation results from driftedResp for different fields and add to data
         console.log('Populating data');
-        const data = {};
+        const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
         for (const { field, type } of fields) {
           if (type === 'numeric') {
             data[field] = {
+              type: 'numeric',
               pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
               referenceHistogram:
                 referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
@@ -332,6 +325,7 @@ export const useFetchDataDriftResult = (
           }
           if (type === 'categoric') {
             data[field] = {
+              type: 'categoric',
               driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
               driftedSumOtherDocCount:
                 driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
@@ -362,6 +356,6 @@ export const useFetchDataDriftResult = (
     return () => {
       controller.abort();
     };
-  }, [dataSearch, fields]);
+  }, [dataSearch, JSON.stringify(fields)]);
   return result;
 };
