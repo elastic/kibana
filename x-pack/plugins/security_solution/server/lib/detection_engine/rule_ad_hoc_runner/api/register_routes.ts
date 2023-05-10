@@ -13,27 +13,27 @@ import type { SetupPlugins, StartPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
 
-import { gapRunnerRoute } from './gap_runner/route';
+import { adHocRunnerRoute } from './ad_hoc_runner/route';
 
-export const registerGapRunnerRoutes = (
+export const registerAdHocRunnerRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient,
+  adHocRunnerDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
 ) => {
-  gapRunnerRoute(
+  adHocRunnerRoute(
     router,
     config,
     ml,
     security,
     ruleOptions,
     securityRuleTypeOptions,
-    previewRuleDataClient,
+    adHocRunnerDataClient,
     getStartServices,
     logger
   );

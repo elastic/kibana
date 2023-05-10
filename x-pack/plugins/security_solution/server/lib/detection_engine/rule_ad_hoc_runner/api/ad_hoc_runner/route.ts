@@ -19,14 +19,14 @@ import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/c
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
+import * as t from 'io-ts';
 import {
   DEFAULT_PREVIEW_INDEX,
-  DETECTION_ENGINE_RULES_GAP_RUNNER,
+  DETECTION_ENGINE_RULES_AD_HOC_RUNNER,
 } from '../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../common/detection_engine/rule_management';
+
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
 import type { RulePreviewLogs } from '../../../../../../common/detection_engine/rule_schema';
-import { previewRulesSchema } from '../../../../../../common/detection_engine/rule_schema';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -67,47 +67,38 @@ import { alertInstanceFactoryStub } from '../../../rule_preview/api/preview_rule
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
 
-export const gapRunnerRoute = async (
+export const adHocRunnerRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  gapRunnerDataClient: IRuleDataClient,
+  adHocRunnerDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
   logger: Logger
 ) => {
   router.post(
     {
-      path: DETECTION_ENGINE_RULES_GAP_RUNNER,
+      path: DETECTION_ENGINE_RULES_AD_HOC_RUNNER,
       validate: {
-        body: buildRouteValidation(previewRulesSchema),
+        body: buildRouteValidation(
+          t.type({
+            ruleId: t.string,
+            invocationCount: t.number,
+            timeframeEnd: t.string,
+          })
+        ),
       },
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
     async (context, request, response) => {
-      return response.ok({
-        body: {
-          logs: [
-            {
-              errors: [
-                'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
-              ],
-              warnings: [],
-              duration: 0,
-            },
-          ],
-        },
-      });
+      const rulesClient = (await context.alerting).getRulesClient();
+
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateCreateRuleProps(request.body);
       const coreContext = await context.core;
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
       try {
         const [, { data, security: securityService, share, dataViews }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
@@ -122,8 +113,10 @@ export const gapRunnerRoute = async (
           });
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body);
-        const previewRuleParams = internalRule.params;
+        const rule = await rulesClient.resolve({ id: request.body.ruleId });
+        const internalRule = convertCreateAPIToInternalSchema(rule.params);
+
+        const ruleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
           license: (await context.licensing).license,
@@ -131,7 +124,7 @@ export const gapRunnerRoute = async (
           request,
           savedObjectsClient,
         });
-        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(ruleParams.type));
 
         const listsContext = await context.lists;
         await listsContext?.getExceptionListClient().createEndpointList();
@@ -175,7 +168,7 @@ export const gapRunnerRoute = async (
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
-          ruleDataClient: gapRunnerDataClient,
+          ruleDataClient: adHocRunnerDataClient,
           ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
           isPreview: true,
         });
@@ -232,7 +225,7 @@ export const gapRunnerRoute = async (
 
           let previousStartedAt = null;
 
-          const rule = {
+          const ruleToExecute = {
             ...internalRule,
             id: previewId,
             createdAt: new Date(),
@@ -261,7 +254,7 @@ export const gapRunnerRoute = async (
               executionId: uuidv4(),
               params,
               previousStartedAt,
-              rule,
+              rule: ruleToExecute,
               services: {
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
@@ -313,7 +306,7 @@ export const gapRunnerRoute = async (
           }
         };
 
-        switch (previewRuleParams.type) {
+        switch (ruleParams.type) {
           case 'query':
             const queryAlertType = previewRuleTypeWrapper(
               createQueryAlertType({
@@ -326,7 +319,7 @@ export const gapRunnerRoute = async (
               queryAlertType.executor,
               queryAlertType.id,
               queryAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -350,7 +343,7 @@ export const gapRunnerRoute = async (
               savedQueryAlertType.executor,
               savedQueryAlertType.id,
               savedQueryAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -370,7 +363,7 @@ export const gapRunnerRoute = async (
               thresholdAlertType.executor,
               thresholdAlertType.id,
               thresholdAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -390,7 +383,7 @@ export const gapRunnerRoute = async (
               threatMatchAlertType.executor,
               threatMatchAlertType.id,
               threatMatchAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -408,7 +401,7 @@ export const gapRunnerRoute = async (
               eqlAlertType.executor,
               eqlAlertType.id,
               eqlAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -426,7 +419,7 @@ export const gapRunnerRoute = async (
               mlAlertType.executor,
               mlAlertType.id,
               mlAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -444,7 +437,7 @@ export const gapRunnerRoute = async (
               newTermsAlertType.executor,
               newTermsAlertType.id,
               newTermsAlertType.name,
-              previewRuleParams,
+              ruleParams,
               () => true,
               {
                 create: alertInstanceFactoryStub,
@@ -457,13 +450,13 @@ export const gapRunnerRoute = async (
             );
             break;
           default:
-            assertUnreachable(previewRuleParams);
+            assertUnreachable(ruleParams);
         }
 
         // Refreshes alias to ensure index is able to be read before returning
         await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
           {
-            index: gapRunnerDataClient.indexNameWithNamespace(spaceId),
+            index: adHocRunnerDataClient.indexNameWithNamespace(spaceId),
           },
           { ignore: [404] }
         );

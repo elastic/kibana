@@ -18,7 +18,7 @@ import { registerRuleExceptionsRoutes } from '../lib/detection_engine/rule_excep
 import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_management';
 import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monitoring';
 import { registerRulePreviewRoutes } from '../lib/detection_engine/rule_preview';
-import { registerGapRunnerRoutes } from '../lib/detection_engine/rule_gap_runner';
+import { registerAdHocRunnerRoutes } from '../lib/detection_engine/rule_ad_hoc_runner';
 
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
 import { readIndexRoute } from '../lib/detection_engine/routes/index/read_index_route';
@@ -110,7 +110,7 @@ export const initRoutes = (
     getStartServices,
     logger
   );
-  registerGapRunnerRoutes(
+  registerAdHocRunnerRoutes(
     router,
     config,
     ml,

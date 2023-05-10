@@ -458,7 +458,7 @@ export const convertCreateAPIToInternalSchema = (
 
   const alertActions = input.actions?.map(transformRuleToAlertAction) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
-
+  debugger;
   return {
     name: input.name,
     tags: input.tags ?? [],
