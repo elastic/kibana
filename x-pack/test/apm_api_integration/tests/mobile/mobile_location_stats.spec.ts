@@ -122,8 +122,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"2.3"`,
         });
 
-        expect(response.currentPeriod.mostSessions.value).to.eql(12);
-        expect(response.currentPeriod.mostRequests.value).to.eql(15);
+        expect(response.currentPeriod.mostSessions.value).to.eql(9);
+        expect(response.currentPeriod.mostRequests.value).to.eql(30);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -132,8 +132,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"2.3" and service.environment: "production"`,
         });
 
-        expect(response.currentPeriod.mostSessions.value).to.eql(12);
-        expect(response.currentPeriod.mostRequests.value).to.eql(15);
+        expect(response.currentPeriod.mostSessions.value).to.eql(9);
+        expect(response.currentPeriod.mostRequests.value).to.eql(30);
       });
     });
   });

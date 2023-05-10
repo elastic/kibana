@@ -7,7 +7,7 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
-export const SERVICE_VERSIONS = ['2.3', '1.1', '1.2'];
+export const SERVICE_VERSIONS = ['2.3', '1.2', '1.1'];
 
 export async function generateMobileData({
   start,
@@ -266,34 +266,6 @@ export async function generateMobileData({
                 .success()
                 .timestamp(10000 + timestamp + 250)
             ),
-          galaxy7
-            .transaction('Start View - View Appearing', 'Android Activity')
-            .errors(galaxy7.crash({ message: 'error' }).timestamp(timestamp))
-            .timestamp(timestamp)
-            .duration(20)
-            .success()
-            .children(
-              galaxy7
-                .span({
-                  spanName: 'onCreate',
-                  spanType: 'app',
-                  spanSubtype: 'external',
-                  'service.target.type': 'http',
-                  'span.destination.service.resource': 'external',
-                })
-                .duration(50)
-                .success()
-                .timestamp(timestamp + 20),
-              galaxy7
-                .httpSpan({
-                  spanName: 'GET backend:1234',
-                  httpMethod: 'GET',
-                  httpUrl: 'https://backend:1234/api/start',
-                })
-                .duration(800)
-                .success()
-                .timestamp(timestamp + 400)
-            ),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
             .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
@@ -313,6 +285,34 @@ export async function generateMobileData({
                 .success()
                 .timestamp(timestamp + 20),
               huaweiP2
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .success()
+                .timestamp(timestamp + 400)
+            ),
+          galaxy7
+            .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy7.crash({ message: 'error' }).timestamp(timestamp))
+            .timestamp(timestamp)
+            .duration(20)
+            .success()
+            .children(
+              galaxy7
+                .span({
+                  spanName: 'onCreate',
+                  spanType: 'app',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
+                })
+                .duration(50)
+                .success()
+                .timestamp(timestamp + 20),
+              galaxy7
                 .httpSpan({
                   spanName: 'GET backend:1234',
                   httpMethod: 'GET',
