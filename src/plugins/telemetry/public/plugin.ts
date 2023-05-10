@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ApmBase } from '@elastic/apm-rum';
 import type {
   Plugin,
   CoreStart,
@@ -79,6 +80,12 @@ export interface TelemetryPluginStart {
 interface TelemetryPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
   home?: HomePublicPluginSetup;
+}
+
+declare global {
+  interface Window {
+    elasticApm?: ApmBase;
+  }
 }
 
 /**
@@ -269,6 +276,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (this.telemetryService) {
       this.telemetryService.config = updatedConfig;
     }
+
+    // Hack to update the APM agent's labels.
+    // In the future we might want to expose APM as a core service to make reporting metrics much easier.
+    window.elasticApm?.addLabels(updatedConfig.labels as Record<string, LabelValue>);
+
     return updatedConfig;
   }
 
@@ -322,8 +334,13 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    * @private
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
-    const { allowChangingOptInStatus, optIn, sendUsageFrom, telemetryNotifyUserAboutOptInDefault } =
-      await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
+    const {
+      allowChangingOptInStatus,
+      optIn,
+      sendUsageFrom,
+      telemetryNotifyUserAboutOptInDefault,
+      labels,
+    } = await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
 
     return {
       ...this.config,
@@ -331,6 +348,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
+      labels,
       userCanChangeSettings: this.canUserChangeSettings,
     };
   }

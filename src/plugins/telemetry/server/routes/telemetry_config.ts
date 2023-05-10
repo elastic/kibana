@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type Observable, firstValueFrom } from 'rxjs';
+import { type Observable, firstValueFrom, Subject } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { TelemetryConfigType } from '../config';
 import { v2 } from '../../common/types';
@@ -18,18 +18,21 @@ import {
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
 } from '../telemetry_config';
+import { TelemetryConfigLabels } from '../config';
 
 interface RegisterTelemetryConfigRouteOptions {
   router: IRouter;
   config$: Observable<TelemetryConfigType>;
   currentKibanaVersion: string;
   savedObjectsInternalClient$: Observable<SavedObjectsClient>;
+  telemetryLabels$: Subject<TelemetryConfigLabels>;
 }
 export function registerTelemetryConfigRoutes({
   router,
   config$,
   currentKibanaVersion,
   savedObjectsInternalClient$,
+  telemetryLabels$,
 }: RegisterTelemetryConfigRouteOptions) {
   // GET to retrieve
   router.get(
@@ -70,6 +73,7 @@ export function registerTelemetryConfigRoutes({
         optIn,
         sendUsageFrom,
         telemetryNotifyUserAboutOptInDefault,
+        labels: await firstValueFrom(telemetryLabels$),
       };
 
       return res.ok({ body });
