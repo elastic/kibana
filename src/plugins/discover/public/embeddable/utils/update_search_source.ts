@@ -14,14 +14,15 @@ export const updateSearchSource = (
   searchSource: ISearchSource,
   dataView: DataView | undefined,
   sort: (SortOrder[] & string[][]) | undefined,
+  sampleSize: number | undefined,
   useNewFieldsApi: boolean,
   defaults: {
-    sampleSize: number;
+    defaultSampleSize: number;
     defaultSort: string;
   }
 ) => {
-  const { sampleSize, defaultSort } = defaults;
-  searchSource.setField('size', sampleSize);
+  const { defaultSampleSize, defaultSort } = defaults;
+  searchSource.setField('size', sampleSize || defaultSampleSize);
   searchSource.setField('sort', getSortForSearchSource(sort, dataView, defaultSort));
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');

@@ -27,6 +27,7 @@ export interface SearchInput extends EmbeddableInput {
   sort?: SortOrder[];
   rowHeight?: number;
   rowsPerPage?: number;
+  sampleSize?: number;
 }
 
 export interface SearchOutput extends EmbeddableOutput {

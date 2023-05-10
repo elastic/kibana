@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiRange, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
 
 export function DiscoverGridSettingsPopover({
   sampleSize,
@@ -18,6 +19,7 @@ export function DiscoverGridSettingsPopover({
   onChangeSampleSize: (sampleSize: number) => void;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [activeSampleSize, setActiveSampleSize] = useState<number>(sampleSize);
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((isOpen) => !isOpen);
@@ -27,14 +29,14 @@ export function DiscoverGridSettingsPopover({
     setIsPopoverOpen(false);
   }, []);
 
-  const onChangeSampleSizeInput = useCallback(
+  const onChangeActiveSampleSize = useCallback(
     (event) => {
       const newSampleSize = Number(event.target.value);
       if (newSampleSize > 0) {
-        onChangeSampleSize(newSampleSize);
+        setActiveSampleSize(newSampleSize);
       }
     },
-    [onChangeSampleSize]
+    [setActiveSampleSize]
   );
 
   const buttonLabel = i18n.translate('discover.grid.settingsPopover.buttonLabel', {
@@ -44,6 +46,18 @@ export function DiscoverGridSettingsPopover({
   const sampleSizeLabel = i18n.translate('discover.grid.settingsPopover.sampleSizeLabel', {
     defaultMessage: 'Sample size',
   });
+
+  useEffect(() => {
+    setActiveSampleSize(sampleSize); // reset local state
+  }, [sampleSize, setActiveSampleSize]);
+
+  useDebounce(
+    () => {
+      onChangeSampleSize(activeSampleSize);
+    },
+    300,
+    [activeSampleSize, onChangeSampleSize]
+  );
 
   return (
     <EuiPopover
@@ -74,8 +88,8 @@ export function DiscoverGridSettingsPopover({
           min={1}
           max={3000}
           step={1}
-          value={sampleSize}
-          onChange={onChangeSampleSizeInput}
+          value={activeSampleSize}
+          onChange={onChangeActiveSampleSize}
           data-test-subj="gridSettingsSampleSizeRange"
         />
       </EuiFormRow>

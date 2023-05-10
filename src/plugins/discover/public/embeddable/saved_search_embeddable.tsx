@@ -78,6 +78,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
+    onUpdateSampleSize?: (sampleSize?: number) => void;
   };
 
 export interface SearchEmbeddableConfig {
@@ -109,6 +110,7 @@ export class SavedSearchEmbeddable
   private prevQuery?: Query;
   private prevSort?: SortOrder[];
   private prevSearchSessionId?: string;
+  private prevSampleSize?: number;
   private searchProps?: SearchProps;
 
   private node?: HTMLElement;
@@ -191,9 +193,10 @@ export class SavedSearchEmbeddable
       searchSource,
       this.searchProps!.dataView,
       this.searchProps!.sort,
+      this.searchProps!.sampleSizeState,
       useNewFieldsApi,
       {
-        sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
+        defaultSampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
         defaultSort: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
     );
@@ -368,7 +371,6 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
-      sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
       onFilter: async (field, value, operator) => {
         let filters = generateFilters(
           this.filterManager,
@@ -398,6 +400,13 @@ export class SavedSearchEmbeddable
       rowsPerPageState: this.input.rowsPerPage || this.savedSearch.rowsPerPage,
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
+      },
+      sampleSizeState:
+        this.input.sampleSize ||
+        this.savedSearch.sampleSize ||
+        this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
+      onUpdateSampleSize: (sampleSize) => {
+        this.updateInput({ sampleSize });
       },
     };
 
@@ -441,6 +450,7 @@ export class SavedSearchEmbeddable
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(this.prevSort, this.input.sort) ||
+      this.prevSampleSize !== this.input.sampleSize ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
   }
@@ -451,6 +461,7 @@ export class SavedSearchEmbeddable
     }
     return (
       this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      this.input.sampleSize !== searchProps.sampleSizeState ||
       (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
     );
   }
@@ -476,6 +487,7 @@ export class SavedSearchEmbeddable
     searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
+    searchProps.sampleSizeState = this.input.sampleSize || this.savedSearch.sampleSize;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = this.savedSearch.id;
     if (forceFetch || isFetchRequired) {
@@ -492,6 +504,7 @@ export class SavedSearchEmbeddable
       this.prevTimeRange = this.getTimeRange();
       this.prevSearchSessionId = this.input.searchSessionId;
       this.prevSort = this.input.sort;
+      this.prevSampleSize = this.input.sampleSize;
       this.searchProps = searchProps;
       await this.fetch();
     } else if (this.searchProps && this.node) {
