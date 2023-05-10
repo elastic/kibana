@@ -158,14 +158,14 @@ export function Header({
                   <EuiHideFor sizes={['xs', 's']}>
                     <HeaderNavControls navControls$={observables.navControlsExtension$} />
                   </EuiHideFor>,
-                  <HeaderHelpMenu
-                    globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-                    helpExtension$={observables.helpExtension$}
-                    helpSupportUrl$={observables.helpSupportUrl$}
-                    kibanaDocLink={kibanaDocLink}
-                    kibanaVersion={kibanaVersion}
-                    navigateToUrl={application.navigateToUrl}
-                  />,
+                  // <HeaderHelpMenu
+                  //   globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+                  //   helpExtension$={observables.helpExtension$}
+                  //   helpSupportUrl$={observables.helpSupportUrl$}
+                  //   kibanaDocLink={kibanaDocLink}
+                  //   kibanaVersion={kibanaVersion}
+                  //   navigateToUrl={application.navigateToUrl}
+                  // />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
                 borders: 'none',
