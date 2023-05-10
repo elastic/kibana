@@ -188,10 +188,14 @@ export async function getFullAgentPolicy(
   const messageSigningService = appContextService.getMessageSigningService();
   if (messageSigningService && fullAgentPolicy.agent) {
     const publicKey = await messageSigningService.getPublicKey();
+    const tokenHash =
+      (await appContextService
+        .getUninstallTokenService()
+        ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
 
     fullAgentPolicy.agent.protection = {
       enabled: agentPolicy.is_protected,
-      uninstall_token_hash: '',
+      uninstall_token_hash: tokenHash,
       signing_key: publicKey,
     };
 

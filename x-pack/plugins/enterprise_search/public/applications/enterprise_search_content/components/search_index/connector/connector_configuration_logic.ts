@@ -123,7 +123,7 @@ function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): Co
 
   return sortedConfig.filter(
     (configEntry) =>
-      configEntry.ui_restrictions.length <= 0 &&
+      (configEntry.ui_restrictions ?? []).length <= 0 &&
       dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
   );
 }
@@ -197,6 +197,10 @@ export function dependenciesSatisfied(
   dependencies: Dependency[],
   dependencyLookup: DependencyLookup
 ): boolean {
+  if (!dependencies) {
+    return true;
+  }
+
   for (const dependency of dependencies) {
     if (dependency.value !== dependencyLookup[dependency.field]) {
       return false;

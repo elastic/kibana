@@ -1867,6 +1867,20 @@
     "dynamic": false,
     "properties": {}
   },
+  "fleet-uninstall-tokens": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "policy_id": {
+        "type": "keyword"
+      },
+      "token_plain": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
