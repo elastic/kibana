@@ -14,6 +14,9 @@ import {
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_RESOURCES_VERSION,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
 } from '../../assets/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
@@ -26,7 +29,7 @@ describe('resourceInstaller', () => {
 
       await installer.ensureCommonResourcesInstalled();
 
-      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
       expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({ name: SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME })
@@ -35,8 +38,20 @@ describe('resourceInstaller', () => {
         2,
         expect.objectContaining({ name: SLO_COMPONENT_TEMPLATE_SETTINGS_NAME })
       );
+      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ name: SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME })
+      );
+      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({ name: SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME })
+      );
+
       expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: SLO_INDEX_TEMPLATE_NAME })
+      );
+      expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: SLO_SUMMARY_INDEX_TEMPLATE_NAME })
       );
       expect(mockClusterClient.ingest.putPipeline).toHaveBeenCalledWith(
         expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })

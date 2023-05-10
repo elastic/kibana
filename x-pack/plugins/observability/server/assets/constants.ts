@@ -12,5 +12,10 @@ export const SLO_RESOURCES_VERSION = 1;
 export const SLO_INGEST_PIPELINE_NAME = `${SLO_INDEX_TEMPLATE_NAME}.monthly`;
 export const SLO_DESTINATION_INDEX_NAME = `${SLO_INDEX_TEMPLATE_NAME}-v${SLO_RESOURCES_VERSION}`;
 
+export const SLO_SUMMARY_INDEX_TEMPLATE_NAME = '.slo-observability.summary';
+export const SLO_SUMMARY_INDEX_NAME = `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}-default`;
+export const SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.summary-mappings';
+export const SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.summary-settings';
+
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;

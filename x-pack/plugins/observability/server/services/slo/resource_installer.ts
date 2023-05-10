@@ -18,11 +18,17 @@ import {
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_RESOURCES_VERSION,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
 } from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_template';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
+import { getSLOSummarySettingsTemplate } from '../../assets/component_templates/slo_summary_settings_template';
+import { getSLOSummaryMappingsTemplate } from '../../assets/component_templates/slo_summary_mappings_template';
+import { getSLOSummaryIndexTemplate } from '../../assets/index_templates/slo_summary_index_template';
 
 export interface ResourceInstaller {
   ensureCommonResourcesInstalled(): Promise<void>;
@@ -42,22 +48,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     }
 
     try {
-      await Promise.all([
-        this.createOrUpdateComponentTemplate(
-          getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME)
-        ),
-      ]);
-
-      await this.createOrUpdateIndexTemplate(
-        getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, `${SLO_INDEX_TEMPLATE_NAME}-*`, [
-          SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-          SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-        ])
-      );
-
+      await this.installSloIndexTemplate();
+      await this.installSloSummaryIndexTemplate();
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(
           SLO_INGEST_PIPELINE_NAME,
@@ -65,9 +57,46 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         )
       );
     } catch (err) {
-      this.logger.error(`Error installing resources shared for SLO - ${err.message}`);
+      this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
     }
+  }
+
+  async installSloIndexTemplate() {
+    await Promise.all([
+      this.createOrUpdateComponentTemplate(
+        getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)
+      ),
+      this.createOrUpdateComponentTemplate(
+        getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME)
+      ),
+    ]);
+
+    await this.createOrUpdateIndexTemplate(
+      getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, `${SLO_INDEX_TEMPLATE_NAME}-*`, [
+        SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+        SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
+      ])
+    );
+  }
+
+  async installSloSummaryIndexTemplate() {
+    await Promise.all([
+      this.createOrUpdateComponentTemplate(
+        getSLOSummaryMappingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME)
+      ),
+      this.createOrUpdateComponentTemplate(
+        getSLOSummarySettingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME)
+      ),
+    ]);
+
+    await this.createOrUpdateIndexTemplate(
+      getSLOSummaryIndexTemplate(
+        SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+        `${SLO_SUMMARY_INDEX_TEMPLATE_NAME}-*`,
+        [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME, SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME]
+      )
+    );
   }
 
   private getPipelinePrefix(version: number): string {
@@ -81,6 +110,10 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       name: SLO_INDEX_TEMPLATE_NAME,
     });
 
+    const summaryIndexTemplateExists = await this.esClient.indices.existsIndexTemplate({
+      name: SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+    });
+
     let ingestPipelineExists = false;
     try {
       const pipeline = await this.esClient.ingest.getPipeline({ id: SLO_INGEST_PIPELINE_NAME });
@@ -92,7 +125,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       return false;
     }
 
-    return indexTemplateExists && ingestPipelineExists;
+    return indexTemplateExists && summaryIndexTemplateExists && ingestPipelineExists;
   }
 
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {
