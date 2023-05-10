@@ -215,7 +215,9 @@ describe('TextExpansionCallOut', () => {
 
   describe('ModelStarted', () => {
     it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isCompact={false} isDismissable isSingleThreaded />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable isSingleThreaded />
+      );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
@@ -225,11 +227,15 @@ describe('TextExpansionCallOut', () => {
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
     });
     it('renders fine-tune button if the model is running single-threaded', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isCompact={false} isDismissable isSingleThreaded />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable isSingleThreaded />
+      );
       expect(wrapper.find(FineTuneModelsButton).length).toBe(1);
     });
     it('does not render description if it is set to compact', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isCompact isDismissable isSingleThreaded />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact isDismissable isSingleThreaded />
+      );
       expect(wrapper.find(EuiText).length).toBe(1); // Title only
     });
   });
