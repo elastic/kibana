@@ -1533,6 +1533,103 @@ describe('merge_all_fields_with_source', () => {
     });
   });
 
+  describe('mixed flattened and nested fields for the _source', () => {
+    test('merges fields into source if it is empty', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'email.headers': {},
+      };
+
+      const fields: SignalSourceHit['fields'] = {
+        'email.headers.x-test': ['from fields'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        email: {
+          headers: {
+            'x-test': 'from fields',
+          },
+        },
+        // there is leftover of the empty flattened object left out, since we can't create wildcard
+        // map of string based paths to array paths in buildFieldsKeyAsArrayMap
+        'email.headers': {},
+      });
+    });
+
+    test('merges fields into source if it is "undefined"', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'email.headers': { 'x-test': undefined },
+      };
+
+      const fields: SignalSourceHit['fields'] = {
+        'email.headers.x-test': ['from fields'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        'email.headers': {
+          'x-test': 'from fields',
+        },
+      });
+    });
+
+    test('merges and unboxes primitive fields into source', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'email.headers': { 'x-test': 'a' },
+      };
+
+      const fields: SignalSourceHit['fields'] = {
+        'email.headers.x-test': ['from fields'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        'email.headers': { 'x-test': 'from fields' },
+      });
+    });
+
+    test('merges primitive fields into source', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'email.headers': { 'x-test': 'a' },
+      };
+
+      const fields: SignalSourceHit['fields'] = {
+        'email.headers.x-test': ['b1', 'b2'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+        'email.headers': { 'x-test': ['b1', 'b2'] },
+      });
+    });
+
+    test('does not merge fields into source if source has nested fields', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
+      };
+
+      const fields: SignalSourceHit['fields'] = {
+        'a.b.c.d': ['5', '6'],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+    });
+
+    test('merges nested fields into source if source has nested fields', () => {
+      const _source: SignalSourceHit['_source'] = {
+        'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
+      };
+
+      const fields: SignalSourceHit['fields'] = {
+        'a.b.c': [{ d: '3 ' }, { d: '4' }],
+      };
+      const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+      const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+      expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(fields);
+    });
+  });
+
   /**
    * Small set of tests to ensure that ignore fields are wired up at the strategy level
    */

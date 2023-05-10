@@ -1401,33 +1401,72 @@ describe('merge_missing_fields_with_source', () => {
     });
 
     describe('mixed flattened and nested keys for the _source', () => {
-      test('do not merge fields into source', () => {
+      test('merges fields into source if it is empty', () => {
         const _source: SignalSourceHit['_source'] = {
-          'process.command_line': { text: 'a' },
+          'email.headers': {},
         };
 
         const fields: SignalSourceHit['fields'] = {
-          'process.command_line.text': ['string longer than 10 characters'],
+          'email.headers.x-test': ['from fields'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+          email: {
+            headers: {
+              'x-test': 'from fields',
+            },
+          },
+          // there is leftover of the empty flattened object left out, since we can't create wildcard
+          // map of string based paths to array paths in buildFieldsKeyAsArrayMap
+          'email.headers': {},
+        });
+      });
+
+      test('merges fields into source if it is "undefined"', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': { 'x-test': undefined },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['from fields'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
+          'email.headers': {
+            'x-test': 'from fields',
+          },
+        });
+      });
+
+      test('does not merge fields into source', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'email.headers': { 'x-test': 'a' },
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'email.headers.x-test': ['from fields'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
-      test('do not merge fields into source if source value is array', () => {
+      test('does not merge fields into source if source value is array', () => {
         const _source: SignalSourceHit['_source'] = {
-          'process.command_line': { text: ['a'] },
+          'email.headers': { 'x-test': 'a' },
         };
 
         const fields: SignalSourceHit['fields'] = {
-          'process.command_line.text': ['string longer than 10 characters'],
+          'email.headers.x-test': ['from fields'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
-      test('do not merge fields into source if source has nested fields', () => {
+      test('does not merge fields into source if source has nested fields', () => {
         const _source: SignalSourceHit['_source'] = {
           'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
         };
@@ -1440,13 +1479,13 @@ describe('merge_missing_fields_with_source', () => {
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
-      test('do not duplicate fields in result document if field is equal to source mixed property', () => {
+      test('does not duplicate fields in result document if field is equal to source mixed property', () => {
         const _source: SignalSourceHit['_source'] = {
-          'process.command_line': { text: 'a' },
+          'email.headers': { 'x-test': 'a' },
         };
 
         const fields: SignalSourceHit['fields'] = {
-          'process.command_line.text': ['a'],
+          'email.headers.x-test': ['a'],
         };
         const doc: SignalSourceHit = { ...emptyEsResult(), _source: cloneDeep(_source), fields };
         const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;

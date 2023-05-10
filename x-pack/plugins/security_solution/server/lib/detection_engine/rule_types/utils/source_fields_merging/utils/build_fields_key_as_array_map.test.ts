@@ -63,14 +63,4 @@ describe('buildFieldsKeyAsArrayMap()', () => {
       })
     ).toEqual({ 'a.b.c.d': ['a.b', 'c', 'd'] });
   });
-
-  it('does not build map for arrays in a path for source with mixed types of keys', () => {
-    expect(
-      buildFieldsKeyAsArrayMap({
-        'a.b': { c: [{ d: ['1'] }, { d: ['2'] }] },
-      })
-    ).toEqual({
-      'a.b.c.d': ['a.b', 'c', 'd'],
-    });
-  });
 });

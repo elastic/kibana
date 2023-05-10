@@ -36,7 +36,6 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
   const transformedSource = filteredEntries.reduce(
     (merged, [fieldsKeyAsString, fieldsValue]: [string, FieldsType]) => {
       const fieldsKey = fieldsKeyMap[fieldsKeyAsString] ?? fieldsKeyAsString;
-      //   console.log('fieldsKey', fieldsKey, JSON.stringify(fieldsKeyMap, null, 2));
       if (
         hasEarlyReturnConditions({
           fieldsValue,
@@ -77,7 +76,7 @@ const hasEarlyReturnConditions = ({
   merged,
 }: {
   fieldsValue: FieldsType;
-  fieldsKey: string[];
+  fieldsKey: string[] | string;
   merged: SignalSource;
 }) => {
   const valueInMergedDocument = get(fieldsKey, merged);
