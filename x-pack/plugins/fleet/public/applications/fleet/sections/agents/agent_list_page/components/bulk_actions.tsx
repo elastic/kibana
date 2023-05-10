@@ -24,7 +24,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
+import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
@@ -44,6 +44,7 @@ export interface Props {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
+  unselectableAgents: string[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -56,6 +57,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
   allTags,
   agentPolicies,
+  unselectableAgents,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -73,14 +75,32 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
 
+  // update the query removing the "unselectable" agents
+  const selectionQuery = useMemo(() => {
+    if (unselectableAgents) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${unselectableAgents
+        .map((id) => `"${id}"`)
+        .join(' or ')})`;
+      return `${currentQuery} and NOT (${excludedKuery})`;
+    } else {
+      return currentQuery;
+    }
+  }, [currentQuery, unselectableAgents]);
+
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
       : totalAgents > totalInactiveAgents;
   const totalActiveAgents = totalAgents - totalInactiveAgents;
-  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
-  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+
+  const agentCount =
+    selectionMode === 'manual'
+      ? selectedAgents.length
+      : totalActiveAgents - unselectableAgents?.length;
+
+  const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
+
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
