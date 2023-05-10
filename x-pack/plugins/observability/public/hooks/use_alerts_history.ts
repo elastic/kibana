@@ -16,12 +16,13 @@ import {
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { estypes } from '@elastic/elasticsearch';
 import { ObservabilityAppServices } from '../application/types';
+import { useKibana } from '../utils/kibana_react';
 
-interface Props {
+export interface Props {
   featureIds: ValidFeatureId[];
   ruleId: string;
   dateRange: {
@@ -30,13 +31,18 @@ interface Props {
   };
 }
 interface FetchAlertsHistory {
-  totalTriggeredAlerts: number;
-  histogramTriggeredAlerts: estypes.AggregationsDateHistogramBucketKeys[];
-  error?: string;
-  avgTimeToRecoverUS: number;
+  totalTriggeredAlerts?: number;
+  histogramTriggeredAlerts?: estypes.AggregationsDateHistogramBucketKeys[];
+  avgTimeToRecoverUS?: number;
 }
 
-export function useAlertsHistory({ featureIds, ruleId, dateRange }: Props) {
+export interface UseAlertsHistory extends FetchAlertsHistory {
+  loading: boolean;
+  error?: Error;
+  refetch: () => Promise<FetchAlertsHistory>;
+}
+
+export function useAlertsHistory({ featureIds, ruleId, dateRange }: Props): UseAlertsHistory {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const abortCtrlRef = useRef(new AbortController());
 
