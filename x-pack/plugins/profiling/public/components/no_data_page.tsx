@@ -39,6 +39,7 @@ export function NoDataPage({ subTitle }: { subTitle: string }) {
 
   const secretToken = data?.variables.secretToken;
   const collectionAgentHostPort = data?.variables.apmServerUrl.replace('https://', '');
+  const hostAgentVersion = 'v3';
 
   const tabs = [
     {
@@ -66,7 +67,7 @@ export function NoDataPage({ subTitle }: { subTitle: string }) {
               {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHostPort}" \\
---set "image.baseUrl=docker.elastic.co,image.repository=observability,image.name=profiling-agent" \\
+--set "version=${hostAgentVersion}" \\
 optimyze/pf-host-agent`}
             </EuiCodeBlock>
           ),
@@ -104,7 +105,7 @@ optimyze/pf-host-agent`}
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`docker run --name host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
 -v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
-docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
+docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-host-agent \\
 -project-id=1 -secret-token=${secretToken} \\
 -collection-agent=${collectionAgentHostPort}`}
             </EuiCodeBlock>
@@ -124,8 +125,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              wget -O pf-host-agent.tgz &quot;https://ela.st/pf-host-agent-amd64&quot; && tar xzf
-              pf-host-agent.tgz
+              {`wget -O pf-host-agent.tgz &quot;https://ela.st/pf-host-agent-amd64-${hostAgentVersion}&quot; && tar xzf pf-host-agent.tgz`}
             </EuiCodeBlock>
           ),
         },
@@ -163,8 +163,11 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right DEB package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
-              https://ela.st/pf-host-agent-linux
+            <EuiLink
+              target="_blank"
+              href={`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
+            >
+              {`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
             </EuiLink>
           ),
         },
@@ -213,8 +216,11 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right RPM package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
-              https://ela.st/pf-host-agent-linux
+            <EuiLink
+              target="_blank"
+              href={`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
+            >
+              {`https://ela.st/pf-host-agent-linux-${hostAgentVersion}`}
             </EuiLink>
           ),
         },
@@ -284,11 +290,17 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
         },
         {
           title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
-            defaultMessage: 'Run:',
+            defaultMessage:
+              'Fetch the symbols endpoint from the Cloud console, navigating in the Integrations Server section',
+          }),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step4', {
+            defaultMessage: 'Run the following command, replacing the placeholders between <>:',
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`./symbtool push-symbols executable --url <symb service IP> --api-key {} --help`}
+              {`./symbtool push-symbols executable --url <symbols endpoint> --api-key <api key> --help`}
             </EuiCodeBlock>
           ),
         },
