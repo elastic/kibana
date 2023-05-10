@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 
 import { upsertTemplate } from './lib/manage_index_templates';
-import { runImplicitCollection } from './lib/implicit_collection';
+import { startImplicitCollection } from './lib/implicit_collection';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 
@@ -51,7 +51,7 @@ export const config: PluginConfigDescriptor<AssetManagerConfig> = {
 
 export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
   private context: PluginInitializerContext<AssetManagerConfig>;
-  private implicitCollectionTimer?: NodeJS.Timeout;
+  private stopImplicitCollection?: () => void;
   public config: AssetManagerConfig;
   public logger: Logger;
 
@@ -112,7 +112,7 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
         }
       ).asInternalUser;
 
-      this.implicitCollectionTimer = runImplicitCollection({
+      this.stopImplicitCollection = startImplicitCollection({
         inputClient,
         outputClient,
         intervalMs: this.config.implicitCollection.interval.asMilliseconds(),
@@ -122,6 +122,6 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
   }
 
   public stop() {
-    clearInterval(this.implicitCollectionTimer);
+    this.stopImplicitCollection?.();
   }
 }

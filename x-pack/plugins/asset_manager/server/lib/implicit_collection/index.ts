@@ -22,18 +22,23 @@ interface ImplicitCollectionOptions {
   logger: Logger;
 }
 
-export function runImplicitCollection(options: ImplicitCollectionOptions): NodeJS.Timeout {
+export function startImplicitCollection(options: ImplicitCollectionOptions): () => void {
   const runner = new CollectorRunner(options);
   runner.registerCollector('containers', collectContainers);
   runner.registerCollector('hosts', collectHosts);
   runner.registerCollector('pods', collectPods);
   runner.registerCollector('services', collectServices);
 
-  return setInterval(async () => {
+  const timer = setInterval(async () => {
     options.logger.info('Starting execution');
     await runner.run();
     options.logger.info('Execution ended');
   }, options.intervalMs);
+
+  return () => {
+    options.logger.debug('Stopping periodic collection');
+    clearInterval(timer);
+  };
 }
 
 class CollectorRunner {
