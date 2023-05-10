@@ -76,7 +76,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
-  context$: AnalyticsClient['registerContextProvider'];
+  context$: AnalyticsClient;
 }
 
 export function Header({
@@ -119,7 +119,6 @@ export function Header({
         breadcrumbs$={observables.breadcrumbs$}
         customBranding$={customBranding$}
         appId$={application.currentAppId$}
-        context$={context$}
       />
       <SkipToMainContent />
 

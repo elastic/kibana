@@ -32,6 +32,8 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { SideNavComponent as ISideNavComponent } from '@kbn/core-chrome-browser';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { AnalyticsClient, IAnalyticsClient } from '@kbn/analytics-client/src/analytics_client';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -56,6 +58,7 @@ export interface StartDeps {
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
+  analyticsClient: AnalyticsServiceStart;
 }
 
 /** @internal */
@@ -68,8 +71,11 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
+  private analytics: IAnalyticsClient | undefined;
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor(private params) {
+    this.analytics = new AnalyticsClient(params);
+  }
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -156,7 +162,6 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
     const { customBranding$ } = customBranding;
-
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
       helpExtension$.next(undefined);
@@ -297,6 +302,7 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           customBranding$={customBranding$}
+          context$={this.analytics}
         />
       );
     };
