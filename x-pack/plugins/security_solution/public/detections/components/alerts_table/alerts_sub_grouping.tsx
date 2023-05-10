@@ -249,43 +249,45 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
-  return useMemo(
-    () =>
-      getGrouping({
-        activePage: pageIndex,
-        data: {
-          ...alertsGroupsData?.aggregations,
-          ...aggs,
-        },
-        groupingLevel,
-        inspectButton: inspect,
-        isLoading: loading || isLoadingGroups,
-        itemsPerPage: pageSize,
-        onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
-        onChangeGroupsPage: (index) => setPageIndex(index),
-        renderChildComponent,
-        onGroupClose,
-        selectedGroup,
-        takeActionItems: getTakeActionItems,
-      }),
-    [
-      getGrouping,
-      pageIndex,
-      alertsGroupsData,
-      aggs,
+  return useMemo(() => {
+    console.log('getgroup data', {
+      ...alertsGroupsData?.aggregations,
+      ...aggs,
+    });
+    return getGrouping({
+      activePage: pageIndex,
+      data: {
+        ...alertsGroupsData?.aggregations,
+        ...aggs,
+      },
       groupingLevel,
-      inspect,
-      loading,
-      isLoadingGroups,
-      pageSize,
+      inspectButton: inspect,
+      isLoading: loading || isLoadingGroups,
+      itemsPerPage: pageSize,
+      onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
+      onChangeGroupsPage: (index) => setPageIndex(index),
       renderChildComponent,
       onGroupClose,
       selectedGroup,
-      getTakeActionItems,
-      setPageSize,
-      setPageIndex,
-    ]
-  );
+      takeActionItems: getTakeActionItems,
+    });
+  }, [
+    getGrouping,
+    pageIndex,
+    alertsGroupsData,
+    aggs,
+    groupingLevel,
+    inspect,
+    loading,
+    isLoadingGroups,
+    pageSize,
+    renderChildComponent,
+    onGroupClose,
+    selectedGroup,
+    getTakeActionItems,
+    setPageSize,
+    setPageIndex,
+  ]);
 };
 
 export const GroupedSubLevel = React.memo(GroupedSubLevelComponent);

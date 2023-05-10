@@ -112,7 +112,10 @@ const GroupingComponent = <T,>({
                   groupFilter={
                     isNullGroup
                       ? getNullGroupFilter(selectedGroup)
-                      : createGroupFilter(selectedGroup, group)
+                      : createGroupFilter(
+                          selectedGroup,
+                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key]
+                        )
                   }
                   groupNumber={groupNumber}
                   statRenderers={

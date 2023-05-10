@@ -9,7 +9,6 @@
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { firstNonNullValue } from '../../helpers';
 import type { GroupingBucket } from '../types';
 import { createGroupFilter, getNullGroupFilter } from './helpers';
 
@@ -81,17 +80,23 @@ const GroupPanelComponent = <T,>({
       lastForceState.current = 'open';
     }
   }, [onGroupClose, forceState, selectedGroup]);
-  const groupFieldValue = useMemo(
-    () => (groupBucket.selectedGroup === selectedGroup ? firstNonNullValue(groupBucket.key) : null),
-    [groupBucket.key, groupBucket.selectedGroup, selectedGroup]
+  const groupFieldValue = useMemo<{ asString?: null | string; asArray: null | string[] }>(
+    () =>
+      groupBucket.selectedGroup === selectedGroup
+        ? {
+            asString: groupBucket.key_as_string,
+            asArray: Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+          }
+        : { asString: null, asArray: null },
+    [groupBucket.key, groupBucket.key_as_string, groupBucket.selectedGroup, selectedGroup]
   );
 
   const groupFilters = useMemo(
     () =>
       isNullGroup
         ? getNullGroupFilter(selectedGroup)
-        : createGroupFilter(selectedGroup, groupFieldValue),
-    [groupFieldValue, isNullGroup, selectedGroup]
+        : createGroupFilter(selectedGroup, groupFieldValue.asArray),
+    [groupFieldValue.asArray, isNullGroup, selectedGroup]
   );
 
   const onToggle = useCallback(
@@ -103,14 +108,14 @@ const GroupPanelComponent = <T,>({
     [groupBucket, onToggleGroup]
   );
 
-  return !groupFieldValue ? null : (
+  return !groupFieldValue.asString ? null : (
     <EuiAccordion
       buttonClassName={customAccordionButtonClassName}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
           {groupPanelRenderer ?? (
             <DefaultGroupPanelRenderer
-              title={groupFieldValue}
+              title={groupFieldValue.asString}
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
             />
@@ -123,7 +128,7 @@ const GroupPanelComponent = <T,>({
       extraAction={extraAction}
       forceState={forceState}
       isLoading={isLoading}
-      id={`group${groupingLevel}-${groupFieldValue}`}
+      id={`group${groupingLevel}-${groupFieldValue.asString}`}
       onToggle={onToggle}
       paddingSize="m"
     >

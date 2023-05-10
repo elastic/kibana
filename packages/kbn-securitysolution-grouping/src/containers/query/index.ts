@@ -54,7 +54,7 @@ export const getGroupingQuery = ({
     join_field: {
       type: 'keyword',
       script: {
-        source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueNullValue}') } else { emit(doc['${groupByField}'].join(','))}`,
+        source: `if (doc['${groupByField}'].size()==0) { emit('${uniqueNullValue}') } else { emit(doc['${groupByField}'].join('${uniqueNullValue}'))}`,
       },
     },
   },
@@ -118,34 +118,35 @@ export const parseGroupingQuery = <T>(
     return {};
   }
   const groupByFields = aggs?.groupByFields?.buckets?.map((group) => {
-    console.log('group', group);
     const emptyValue = getEmptyValue();
     // If the keys are different means that the `missing` values of the multi_terms aggregation have been applied, we use the default empty string.
     // If the keys are equal means the `missing` values have not been applied, they are stored values.
-    return group.key[0] === uniqueNullValue
-      ? {
-          ...group,
-          key: [emptyValue],
-          selectedGroup,
-          key_as_string: emptyValue,
-          isNullGroup: true,
-        }
-      : {
-          ...group,
-          key: [group.key],
-          selectedGroup,
-          key_as_string: group.key,
-        };
+    if (group.key === uniqueNullValue) {
+      return {
+        ...group,
+        key: [emptyValue],
+        selectedGroup,
+        key_as_string: emptyValue,
+        isNullGroup: true,
+      };
+    }
+    // doing isArray check for typescrupt
+    // the key won't be an array, runtime fields cannot be multivalued
+    const groupKey = Array.isArray(group.key) ? group.key[0] : group.key;
+    const valueAsArray = groupKey.split(uniqueNullValue);
+    return {
+      ...group,
+      key: valueAsArray,
+      selectedGroup,
+      key_as_string: valueAsArray.join(', '),
+    };
   });
 
   return {
     ...aggs,
     groupByFields: { buckets: groupByFields },
     groupsCount: {
-      value:
-        (aggs.unitsCount?.value !== aggs.unitsCountWithoutNull?.value
-          ? (aggs.groupsCount?.value ?? 0) + 1
-          : aggs.groupsCount?.value) ?? 0,
+      value: aggs.groupsCount?.value ?? 0,
     },
   };
 };

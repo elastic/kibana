@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-export const createGroupFilter = (selectedGroup: string, query?: string | null) =>
-  query && selectedGroup
-    ? [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: selectedGroup,
-            negate: false,
-            params: {
-              query,
-            },
-            type: 'phrase',
+export const createGroupFilter = (selectedGroup: string, values?: string[] | null) => {
+  console.log('values', { values, selectedGroup });
+  return values != null && values.length > 0 && selectedGroup
+    ? values.map((query) => ({
+        meta: {
+          alias: null,
+          disabled: false,
+          key: selectedGroup,
+          negate: false,
+          params: {
+            query,
           },
-          query: {
-            match_phrase: {
-              [selectedGroup]: {
-                query,
-              },
+          type: 'phrase',
+        },
+        query: {
+          match_phrase: {
+            [selectedGroup]: {
+              query,
             },
           },
         },
-      ]
+      }))
     : [];
+};
 
 export const getNullGroupFilter = (selectedGroup: string) => [
   {
