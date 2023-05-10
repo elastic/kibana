@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SECRETS_INDEX = '.secrets';
+export const SECRETS_INDEX = '.fleet-secrets';
