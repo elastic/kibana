@@ -61,7 +61,7 @@ export const FormContext: React.FC<Props> = ({
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { mutateAsync: postCase } = usePostCase();
   const { mutateAsync: createAttachments } = useCreateAttachments();
-  const { pushCaseToExternalService } = usePostPushToService();
+  const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
