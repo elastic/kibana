@@ -8,7 +8,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/public';
 
-const fields = [
+export const fields = [
   {
     name: '_source',
     type: '_source',
