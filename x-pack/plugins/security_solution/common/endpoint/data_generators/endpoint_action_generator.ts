@@ -138,7 +138,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         uploadOutput = {
           type: 'json',
           content: {
-            code: 'ra_upload_success',
+            code: 'ra_upload_file-success',
             path: '/disk1/file/saved/here',
             disk_free_space: 4825566125475,
           },

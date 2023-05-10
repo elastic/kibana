@@ -117,7 +117,7 @@ export const getActionFileUploadHandler = (
       // Update the file meta to include the action id, and if any errors (unlikely),
       // then just log them and still allow api to return success since the action has
       // already been created and potentially dispatched to Endpoint. Action ID is not
-      // need by the Endpoint or fleet-server's API, so no need to fail here
+      // needed by the Endpoint or fleet-server's API, so no need to fail here
       try {
         await setFileActionId(esClient, logger, data);
       } catch (e) {
