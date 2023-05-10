@@ -52,6 +52,98 @@ interface InputFieldProps {
   isEditPage?: boolean;
 }
 
+type InputComponentProps = InputFieldProps & {
+  isDirty: boolean;
+  setIsDirty: (isDirty: boolean) => void;
+  packageType?: string;
+  isInvalid: boolean;
+  fieldLabel: string;
+  fieldTestSelector: string;
+};
+
+export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps> = memo(
+  ({
+    varDef,
+    value,
+    onChange,
+    errors: varErrors,
+    forceShowErrors,
+    frozen,
+    packageType,
+    packageName,
+    datastreams = [],
+    isEditPage = false,
+  }) => {
+    const [isDirty, setIsDirty] = useState<boolean>(false);
+    const { required, type, title, name, description } = varDef;
+    const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
+    const errors = isInvalid ? varErrors : null;
+    const fieldLabel = title || name;
+    const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
+    // Boolean cannot be optional by default set to false
+    const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
+
+    let field: JSX.Element;
+
+    if (varDef.secret) {
+      field = (
+        <SecretInputField
+          varDef={varDef}
+          value={value}
+          onChange={onChange}
+          frozen={frozen}
+          packageName={packageName}
+          packageType={packageType}
+          datastreams={datastreams}
+          isEditPage={isEditPage}
+          isInvalid={isInvalid}
+          fieldLabel={fieldLabel}
+          fieldTestSelector={fieldTestSelector}
+          isDirty={isDirty}
+          setIsDirty={setIsDirty}
+        />
+      );
+    } else {
+      field = getInputComponent({
+        varDef,
+        value,
+        onChange,
+        frozen,
+        packageName,
+        packageType,
+        datastreams,
+        isEditPage,
+        isInvalid,
+        fieldLabel,
+        fieldTestSelector,
+        isDirty,
+        setIsDirty,
+      });
+    }
+
+    return (
+      <EuiFormRow
+        isInvalid={isInvalid}
+        error={errors}
+        label={fieldLabel}
+        labelAppend={
+          isOptional ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                defaultMessage="Optional"
+              />
+            </EuiText>
+          ) : null
+        }
+        helpText={description && <ReactMarkdown children={description} />}
+      >
+        {field}
+      </EuiFormRow>
+    );
+  }
+);
+
 function getInputComponent({
   varDef,
   value,
@@ -65,14 +157,7 @@ function getInputComponent({
   fieldLabel,
   fieldTestSelector,
   setIsDirty,
-}: InputFieldProps & {
-  isDirty: boolean;
-  setIsDirty: (isDirty: boolean) => void;
-  packageType?: string;
-  isInvalid: boolean;
-  fieldLabel: string;
-  fieldTestSelector: string;
-}) {
+}: InputComponentProps) {
   const { multi, type, name, options } = varDef;
   if (multi) {
     return (
@@ -221,14 +306,7 @@ function SecretInputField({
   fieldTestSelector,
   setIsDirty,
   isDirty,
-}: InputFieldProps & {
-  isDirty: boolean;
-  setIsDirty: (isDirty: boolean) => void;
-  packageType?: string;
-  isInvalid: boolean;
-  fieldLabel: string;
-  fieldTestSelector: string;
-}) {
+}: InputComponentProps) {
   const [editMode, setEditMode] = useState(isEditPage && !value);
   const valueOnFirstRender = useRef(value);
   const lowercaseTitle = varDef.title?.toLowerCase();
@@ -315,86 +393,3 @@ function SecretInputField({
 
   return field;
 }
-
-export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps> = memo(
-  ({
-    varDef,
-    value,
-    onChange,
-    errors: varErrors,
-    forceShowErrors,
-    frozen,
-    packageType,
-    packageName,
-    datastreams = [],
-    isEditPage = false,
-  }) => {
-    const [isDirty, setIsDirty] = useState<boolean>(false);
-    const { required, type, title, name, description } = varDef;
-    const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
-    const errors = isInvalid ? varErrors : null;
-    const fieldLabel = title || name;
-    const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
-    // Boolean cannot be optional by default set to false
-    const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
-
-    let field: JSX.Element;
-
-    if (varDef.secret) {
-      field = (
-        <SecretInputField
-          varDef={varDef}
-          value={value}
-          onChange={onChange}
-          frozen={frozen}
-          packageName={packageName}
-          packageType={packageType}
-          datastreams={datastreams}
-          isEditPage={isEditPage}
-          isInvalid={isInvalid}
-          fieldLabel={fieldLabel}
-          fieldTestSelector={fieldTestSelector}
-          isDirty={isDirty}
-          setIsDirty={setIsDirty}
-        />
-      );
-    } else {
-      field = getInputComponent({
-        varDef,
-        value,
-        onChange,
-        frozen,
-        packageName,
-        packageType,
-        datastreams,
-        isEditPage,
-        isInvalid,
-        fieldLabel,
-        fieldTestSelector,
-        isDirty,
-        setIsDirty,
-      });
-    }
-
-    return (
-      <EuiFormRow
-        isInvalid={isInvalid}
-        error={errors}
-        label={fieldLabel}
-        labelAppend={
-          isOptional ? (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-                defaultMessage="Optional"
-              />
-            </EuiText>
-          ) : null
-        }
-        helpText={description && <ReactMarkdown children={description} />}
-      >
-        {field}
-      </EuiFormRow>
-    );
-  }
-);
