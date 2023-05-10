@@ -15,17 +15,13 @@ import {
   GetAllCasesSelectorModalProps,
 } from '@kbn/cases-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import {
-  observabilityFeatureId,
-  observabilityAppId,
-} from '@kbn/observability-shared-plugin/public';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
+import { useGetUserCasesPermissions } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
-  appId?: 'securitySolutionUI' | 'observability';
   autoOpen?: boolean;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
   owner?: string;
@@ -34,7 +30,6 @@ export interface AddToCaseProps {
 }
 
 export function AddToCaseAction({
-  appId,
   autoOpen,
   lensAttributes,
   owner = observabilityFeatureId,
@@ -54,14 +49,14 @@ export function AddToCaseAction({
     (theCase) =>
       toMountPoint(
         <CaseToastText
-          linkUrl={getUrlForApp(appId ?? observabilityAppId, {
+          linkUrl={getUrlForApp(observabilityFeatureId, {
             deepLinkId: CasesDeepLinkId.cases,
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
         />,
         { theme$: theme?.theme$ }
       ),
-    [appId, getUrlForApp, theme?.theme$]
+    [getUrlForApp, theme?.theme$]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);
@@ -74,7 +69,7 @@ export function AddToCaseAction({
       from: absoluteFromDate?.toISOString() ?? '',
       to: absoluteToDate?.toISOString() ?? '',
     },
-    appId,
+    appId: observabilityFeatureId,
     owner,
   });
 
