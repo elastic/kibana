@@ -14,7 +14,7 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
@@ -59,6 +59,10 @@ interface PluginSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
+interface PluginStart {
+  alerting: PluginStartContract;
+}
+
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
 
@@ -67,7 +71,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: PluginSetup) {
+  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     const casesCapabilities = createCasesUICapabilities();
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
@@ -237,13 +241,16 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     registerRuleTypes(plugins.alerting, this.logger, ruleDataClient, core.http.basePath);
     registerSloUsageCollector(plugins.usageCollection);
 
-    registerRoutes({
-      core,
-      dependencies: {
-        ruleDataService,
-      },
-      logger: this.logger,
-      repository: getObservabilityServerRouteRepository(),
+    core.getStartServices().then(([coreStart, pluginStart]) => {
+      registerRoutes({
+        core,
+        dependencies: {
+          ruleDataService,
+          getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+        },
+        logger: this.logger,
+        repository: getObservabilityServerRouteRepository(),
+      });
     });
 
     /**

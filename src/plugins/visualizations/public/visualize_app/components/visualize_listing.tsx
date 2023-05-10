@@ -17,7 +17,7 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
@@ -160,13 +160,12 @@ export const VisualizeListing = () => {
         references,
         referencesToExclude,
       }: {
-        references?: SavedObjectsFindOptionsReference[];
-        referencesToExclude?: SavedObjectsFindOptionsReference[];
+        references?: SavedObjectReference[];
+        referencesToExclude?: SavedObjectReference[];
       } = {}
     ) => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(
-        savedObjects.client,
         getTypes(),
         searchTerm,
         listingLimit,
@@ -185,7 +184,7 @@ export const VisualizeListing = () => {
         };
       });
     },
-    [listingLimit, uiSettings, savedObjects.client]
+    [listingLimit, uiSettings]
   );
 
   const onContentEditorSave = useCallback(
@@ -201,11 +200,11 @@ export const VisualizeListing = () => {
             description: args.description ?? '',
             tags: args.tags,
           },
-          { savedObjectsClient: savedObjects.client, overlays, savedObjectsTagging }
+          { overlays, savedObjectsTagging }
         );
       }
     },
-    [overlays, savedObjects.client, savedObjectsTagging]
+    [overlays, savedObjectsTagging]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -228,7 +227,7 @@ export const VisualizeListing = () => {
                     false,
                     false,
                     () => {},
-                    { savedObjectsClient: savedObjects.client, overlays }
+                    { overlays }
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -247,7 +246,7 @@ export const VisualizeListing = () => {
         },
       ],
     }),
-    [overlays, savedObjects.client]
+    [overlays]
   );
 
   const deleteItems = useCallback(

@@ -23,7 +23,8 @@ export const fetchTextExpansionModelStatus = async () => {
 
 export const FetchTextExpansionModelApiLogic = createApiLogic(
   ['fetch_text_expansion_model_api_logic'],
-  fetchTextExpansionModelStatus
+  fetchTextExpansionModelStatus,
+  { showErrorFlash: false }
 );
 
 export type FetchTextExpansionModelApiLogicActions = Actions<

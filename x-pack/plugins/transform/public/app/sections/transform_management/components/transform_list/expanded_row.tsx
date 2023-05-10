@@ -240,6 +240,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
             checkpointing,
             ...(alertingRules.items ? [alertingRules] : []),
           ]}
+          dataTestSubj={'transformDetailsTabContent'}
         />
       ),
     },
@@ -252,7 +253,9 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
           defaultMessage: 'Stats',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={[stats]} />,
+      content: (
+        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
+      ),
     },
     {
       id: `transform-json-tab-${tabId}`,

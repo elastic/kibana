@@ -17,7 +17,7 @@ import {
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
 import type { RuleEventLogListProps } from './rule_event_log_list';
-import { AlertListItem } from './types';
+import { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 import {
@@ -41,7 +41,7 @@ type RuleProps = {
   readOnly: boolean;
   ruleSummary: RuleSummary;
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   numberOfExecutions: number;
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;

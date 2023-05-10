@@ -150,7 +150,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "uptime-synthetics-api-key": "599319bedbfa287e8761e1ba49d536417a33fa13",
         "url": "816fa15bfe460ce39108ed8095e60fdbfcc40f11",
         "usage-counters": "f478b2668be350f5bdc08d9e1cf6fbce0e079f61",
-        "visualization": "55530e57ffe86bfd7c2a2b50461398c1f7a99e95",
+        "visualization": "cee4d02c56af349054642c6744bf9c471c1ad941",
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
       }
     `);

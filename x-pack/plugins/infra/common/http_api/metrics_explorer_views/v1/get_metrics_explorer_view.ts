@@ -10,7 +10,3 @@ import * as rt from 'io-ts';
 export const getMetricsExplorerViewRequestParamsRT = rt.type({
   metricsExplorerViewId: rt.string,
 });
-
-export type GetMetricsExplorerViewRequestParams = rt.TypeOf<
-  typeof getMetricsExplorerViewRequestParamsRT
->;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const createGroupFilter = (selectedGroup: string, query?: string) =>
+export const createGroupFilter = (selectedGroup: string, query?: string | null) =>
   query && selectedGroup
     ? [
         {

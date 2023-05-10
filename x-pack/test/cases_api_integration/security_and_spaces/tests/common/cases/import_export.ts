@@ -10,14 +10,12 @@ import { join } from 'path';
 import { SavedObject } from '@kbn/core/server';
 import supertest from 'supertest';
 import {
-  CASES_URL,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
   AttributesTypeUser,
-  CommentsResponse,
   CaseAttributes,
   CasePostRequest,
   PushedUserAction,
@@ -39,6 +37,7 @@ import {
   createComment,
   findCases,
   getCaseUserActions,
+  findAttachments,
 } from '../../../../common/lib/api';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -102,10 +101,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(findResponse.cases[0].title).to.eql('A case to export');
       expect(findResponse.cases[0].description).to.eql('a description');
 
-      const { body: commentsResponse }: { body: CommentsResponse } = await supertestService
-        .get(`${CASES_URL}/${findResponse.cases[0].id}/comments/_find`)
-        .send()
-        .expect(200);
+      const commentsResponse = await findAttachments({
+        supertest: supertestService,
+        caseId: findResponse.cases[0].id,
+      });
 
       const comment = commentsResponse.comments[0] as unknown as AttributesTypeUser;
       expect(comment.comment).to.eql('A comment for my case');

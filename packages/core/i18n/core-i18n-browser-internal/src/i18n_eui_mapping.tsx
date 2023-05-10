@@ -778,6 +778,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFormControlLayoutDelimited.delimiterLabel': i18n.translate(
+      'core.euiFormControlLayoutDelimited.delimiterLabel',
+      {
+        defaultMessage: 'to',
+      }
+    ),
     'euiFullscreenSelector.fullscreenButton': i18n.translate(
       'core.euiFullscreenSelector.fullscreenButton',
       {

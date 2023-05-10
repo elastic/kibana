@@ -10,11 +10,10 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
+import { distinctUntilChanged, skip } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
-  getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
@@ -102,23 +101,6 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
         });
         if (Object.keys(newInput).length > 0) {
           this.controlGroup!.updateInput(newInput);
-        }
-      })
-  );
-
-  // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
-  this.subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
-      .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
-      .subscribe(() => {
-        if (!isControlGroupInputEqual()) {
-          if (!this.getInput().controlGroupInput) {
-            this.controlGroup!.updateInput(getDefaultControlGroupInput());
-            return;
-          }
-          this.controlGroup!.updateInput({
-            ...this.getInput().controlGroupInput,
-          });
         }
       })
   );

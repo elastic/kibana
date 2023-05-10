@@ -7,7 +7,7 @@
 
 import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../../../helpers';
@@ -67,7 +67,7 @@ const defaultProps: Props = {
 };
 
 describe('IndicesDetails', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
 
     render(
@@ -75,6 +75,8 @@ describe('IndicesDetails', () => {
         <IndicesDetails {...defaultProps} />
       </TestProviders>
     );
+
+    await waitFor(() => {});
   });
 
   describe('rendering patterns', () => {
