@@ -199,13 +199,13 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema"
+                id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.schema"
                 defaultMessage="Schema"
               />
               {hasSchemaConflicts && (
-                <EuiText color="danger">
+                <EuiText size="s" color="danger">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.SchemaConflict"
+                    id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.schemaConflict"
                     defaultMessage="Conflict"
                   />
                 </EuiText>
