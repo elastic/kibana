@@ -32,6 +32,7 @@ const agent: jest.Mocked<Agent> = {
   currentTransaction: null,
   startSpan: jest.fn(),
   currentSpan: null,
+  setGlobalLabel: jest.fn().mockReturnValue(true),
   setLabel: jest.fn().mockReturnValue(false),
   addLabels: jest.fn().mockReturnValue(false),
   setUserContext: jest.fn(),
