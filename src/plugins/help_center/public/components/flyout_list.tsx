@@ -129,17 +129,13 @@ export const HelpCenterFlyout = (
           bounds="#app-fixed-viewport"
           positionOffset={{ x: 0, y: 96 }}
           defaultPosition={{ x: headerRef.clientWidth - 425, y: -45 }}
-          css={css`
-            z-index: 1000;
-            position: fixed;
-          `}
         >
           <ResizableBox
             width={400}
             height={400}
             css={css`
               position: fixed !important;
-              z-index: 1000;
+              z-index: 6000;
 
               min-height: 100px;
               // max-height: 600px;
@@ -149,7 +145,6 @@ export const HelpCenterFlyout = (
             <EuiPanel
               paddingSize="l"
               css={css`
-                z-index: 1000;
                 width: 100%;
                 height: 100%;
 
