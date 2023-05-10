@@ -100,7 +100,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
             )}
             {isBeta && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" iconType="beaker">
+                <EuiBadge color="hollow">
                   <EuiText size="xs">{BETA_LABEL}</EuiText>
                 </EuiBadge>
               </EuiFlexItem>
