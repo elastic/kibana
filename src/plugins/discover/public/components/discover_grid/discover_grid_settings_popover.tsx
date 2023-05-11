@@ -11,6 +11,8 @@ import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiRange, EuiToolTip } from '@el
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
+const MAX_ALLOWED_SAMPLE_SIZE = 3000;
+
 export function DiscoverGridSettingsPopover({
   sampleSize,
   onChangeSampleSize,
@@ -39,7 +41,9 @@ export function DiscoverGridSettingsPopover({
       const newSampleSize = Number(event.target.value);
       if (newSampleSize > 0) {
         setActiveSampleSize(newSampleSize);
-        debouncedOnChangeSampleSize(newSampleSize);
+        if (newSampleSize <= MAX_ALLOWED_SAMPLE_SIZE) {
+          debouncedOnChangeSampleSize(newSampleSize);
+        }
       }
     },
     [setActiveSampleSize, debouncedOnChangeSampleSize]
@@ -84,7 +88,7 @@ export function DiscoverGridSettingsPopover({
           fullWidth
           showInput
           min={1}
-          max={3000}
+          max={MAX_ALLOWED_SAMPLE_SIZE}
           step={1}
           value={activeSampleSize}
           onChange={onChangeActiveSampleSize}
