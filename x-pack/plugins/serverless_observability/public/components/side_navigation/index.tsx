@@ -16,7 +16,6 @@ import React from 'react';
 // #TODO translate titles?
 const navItems: ChromeNavigationNodeViewModel[] = [
   {
-    title: '',
     id: 'services-infra',
     items: [
       { id: 'services', title: 'Services', href: '/app/apm/services' },
@@ -29,7 +28,6 @@ const navItems: ChromeNavigationNodeViewModel[] = [
   },
   {
     id: 'alerts-cases-slos',
-    title: '',
     items: [
       {
         id: 'alerts',
@@ -80,6 +78,17 @@ const navItems: ChromeNavigationNodeViewModel[] = [
       },
     ],
   },
+  {
+    id: 'on-boarding',
+    items: [
+      {
+        id: 'get-started',
+        title: 'Get started',
+        icon: 'launch',
+        href: '/app/observabilityOnboarding',
+      },
+    ],
+  },
 ];
 
 export const getObservabilitySideNavComponent = (core: CoreStart) => () => {
@@ -99,7 +108,7 @@ export const getObservabilitySideNavComponent = (core: CoreStart) => () => {
         activeNavItemId={activeNavItemId}
         homeHref="/app/enterprise_search/content/setup_guide"
         linkToCloud="projects"
-        platformConfig={{ analytics: { enabled: false }, ml: { enabled: true } }}
+        platformConfig={{ devTools: { enabled: false } }}
       />
     </NavigationKibanaProvider>
   );
