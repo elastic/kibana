@@ -1075,7 +1075,6 @@ export const significanceLevels = [
   0.95, 0.96, 0.97, 0.98, 0.99,
 ];
 
-
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (significanceLevel < 0.01) {
     return significanceLevel.toExponential(2);
@@ -1103,11 +1102,16 @@ const criticalTableLookup = (chi2Statistic: number, df: number) => {
   return significanceLevel;
 };
 
-export const computeChi2PValue = (normalizedBaselineTerms: Histogram[], normalizedDriftedTerms: Histogram[]) => {
+export const computeChi2PValue = (
+  normalizedBaselineTerms: Histogram[],
+  normalizedDriftedTerms: Histogram[]
+) => {
   // Get all unique keys from both arrays
   const allKeys: string[] = Array.from(
-    new Set([...normalizedBaselineTerms.map((term) => term.key.toString()),
-       ...normalizedDriftedTerms.map((term) => term.key.toString())])
+    new Set([
+      ...normalizedBaselineTerms.map((term) => term.key.toString()),
+      ...normalizedDriftedTerms.map((term) => term.key.toString()),
+    ])
   ).sort();
 
   // // Calculate the expected and observed frequencies for each key
@@ -1269,7 +1273,7 @@ const DataDriftChart = ({
       <BarSeries
         id="data-drift-viz"
         name={featureName}
-        xScaleType={(featureType==NUMERIC_TYPE_LABEL)?ScaleType.Linear:ScaleType.Ordinal}
+        xScaleType={featureType == NUMERIC_TYPE_LABEL ? ScaleType.Linear : ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['doc_count']}
@@ -1291,7 +1295,11 @@ const normalizeHistogram = (histogram: Histogram[]): Histogram[] => {
   return histogram;
 };
 
-const normalizeTerms = (terms: Histogram[], keys: string[], sumOtherDocCount: number): Histogram[] => {
+const normalizeTerms = (
+  terms: Histogram[],
+  keys: string[],
+  sumOtherDocCount: number
+): Histogram[] => {
   // Compute a total doc_count for all terms
   const totalDocCount: number = terms.reduce((acc, term) => acc + term.doc_count, sumOtherDocCount);
 
@@ -1328,7 +1336,6 @@ export const DataDriftView = () => {
     }
     return Object.entries(result.data).map(([featureName, data], idx) => {
       if (isNumericDriftData(data)) {
-
         // normalize data.referenceHistogram and data.productionHistogram to use frequencies instead of counts
         const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
         const productionHistogram: Histogram[] = normalizeHistogram(data.productionHistogram);
@@ -1357,8 +1364,16 @@ export const DataDriftView = () => {
       ).sort();
 
       // Normalize the baseline and drifted terms arrays
-      const normalizedBaselineTerms: Histogram[] = normalizeTerms(data.baselineTerms, allKeys, data.baselineSumOtherDocCount);
-      const normalizedDriftedTerms: Histogram[] = normalizeTerms(data.driftedTerms, allKeys, data.driftedSumOtherDocCount);
+      const normalizedBaselineTerms: Histogram[] = normalizeTerms(
+        data.baselineTerms,
+        allKeys,
+        data.baselineSumOtherDocCount
+      );
+      const normalizedDriftedTerms: Histogram[] = normalizeTerms(
+        data.driftedTerms,
+        allKeys,
+        data.driftedSumOtherDocCount
+      );
       const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
       return {
         featureName,
@@ -1549,7 +1564,11 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       const { featureName, comparisonDistribution } = item;
       itemIdToExpandedRowMapValues[item.featureName] = (
         <div css={{ width: '100%', height: 200 }}>
-          <DataDriftChart featureName={featureName} featureType={item.featureType} data={comparisonDistribution} />
+          <DataDriftChart
+            featureName={featureName}
+            featureType={item.featureType}
+            data={comparisonDistribution}
+          />
         </div>
       );
     }
