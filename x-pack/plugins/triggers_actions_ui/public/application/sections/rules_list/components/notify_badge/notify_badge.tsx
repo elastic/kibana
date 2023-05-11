@@ -15,6 +15,8 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextAlign,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -58,6 +60,31 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [snoozeSettings]
   );
 
+  function getTimeRemaining(endtime: Date) {
+    const duration = moment.duration(moment(endtime).diff(moment()));
+    const units = [
+      { name: 'year', value: duration.years() },
+      { name: 'month', value: duration.months() },
+      { name: 'week', value: duration.weeks() },
+      { name: 'day', value: duration.days() },
+      { name: 'hour', value: duration.hours() },
+      { name: 'minute', value: duration.minutes() },
+    ];
+    const nonZeroUnits = units.filter((unit) => unit.value !== 0);
+    const formattedUnits = nonZeroUnits.map((unit) => {
+      const formattedUnitName = unit.value === 1 ? unit.name : `${unit.name}s`;
+      return `${unit.value} ${formattedUnitName}`;
+    });
+    const lastUnit = formattedUnits.pop();
+    if (formattedUnits.length > 0) {
+      const joinedUnits = formattedUnits.join(', ');
+      return `${joinedUnits} and ${lastUnit}`;
+    }
+    return lastUnit;
+  }
+
+  const snoozeTimeLeft = isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined;
+
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -93,15 +120,34 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         }
       );
     }
-    if (isSnoozed) {
-      return i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
-        {
-          defaultMessage: 'Notifications snoozing for {snoozeTime}',
-          values: {
-            snoozeTime: moment(isSnoozedUntil).fromNow(true),
-          },
-        }
+    if (isSnoozed && snoozeTimeLeft) {
+      return (
+        <EuiToolTip
+          title={'Time Remaining'}
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <span>{snoozeTimeLeft}</span>
+              </EuiFlexItem>
+              <EuiSpacer />
+              <EuiFlexItem grow={false}>
+                <span>{isSnoozedUntil?.toString()}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <EuiTextAlign>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
+              {
+                defaultMessage: 'Notifications snoozing for {snoozeTime}',
+                values: {
+                  snoozeTime: moment(isSnoozedUntil).fromNow(true),
+                },
+              }
+            )}
+          </EuiTextAlign>
+        </EuiToolTip>
       );
     }
     if (showTooltipInline) {
@@ -117,9 +163,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     isSnoozedIndefinitely,
     isScheduled,
     isSnoozed,
-    isSnoozedUntil,
-    nextScheduledSnooze,
     showTooltipInline,
+    nextScheduledSnooze,
+    snoozeTimeLeft,
+    isSnoozedUntil,
   ]);
 
   const snoozedButton = useMemo(() => {
