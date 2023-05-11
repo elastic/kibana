@@ -202,7 +202,7 @@ describe('Response console', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
       openResponseConsoleFromEndpointList();
       // TODO: change this to fetch the agent log file
-      inputConsoleCommand('get-file --path /opt/Elastic/Endpoint/state/log/endpoint-000000.log');
+      inputConsoleCommand('get-file --path "/opt/Elastic/Endpoint/state/log/endpoint-000000.log"');
       submitCommand();
       waitForCommandToBeExecuted('get-file');
     });
