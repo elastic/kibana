@@ -138,7 +138,7 @@ export function ErrorSampleDetails({
         transaction,
       },
     });
-  }, []);
+  }, [error, transaction, uiActions]);
 
   if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
