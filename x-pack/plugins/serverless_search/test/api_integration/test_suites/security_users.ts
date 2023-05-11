@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
    * and should be replaced with something specific to the search project
    * once it modifies / adds / disables Kibana APIs.
    */
-  describe('security', function () {
+  describe('security/users', function () {
     it('rejects request to create user', async () => {
       const { body, status } = await supertest
         .post(`/internal/security/users/some_testuser`)

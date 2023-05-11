@@ -11,6 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless_search API', function () {
     this.tags(['serverless']);
 
-    loadTestFile(require.resolve('./security'));
+    loadTestFile(require.resolve('./security_users'));
   });
 }

@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlSearchNavigationServiceProvider({
+export function SvlSecNavigationServiceProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
@@ -19,7 +19,7 @@ export function SvlSearchNavigationServiceProvider({
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
-        // Currently, the search landing page app is missing.
+        // Currently, the security landing page app is missing.
         // Replace '~kbnAppWrapper' with a proper test subject of the landing
         // page once it exists.
         await testSubjects.existOrFail('~kbnAppWrapper', { timeout: 2000 });

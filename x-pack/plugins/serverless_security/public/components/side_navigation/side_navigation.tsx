@@ -39,6 +39,7 @@ export const SecuritySideNavigation: React.FC = () => {
         />
       }
       closeFlyoutButtonPosition={'inside'}
+      titleDataTestSubj="svlSecNavTitle"
     />
   );
 };

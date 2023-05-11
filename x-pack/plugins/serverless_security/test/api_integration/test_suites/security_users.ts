@@ -14,10 +14,10 @@ export default function ({ getService }: FtrProviderContext) {
   /*
    * This is a placeholder test to demonstrate usage.
    * This test case is actually already covered in the `serverless` plugin tests
-   * and should be replaced with something specific to the observability project
+   * and should be replaced with something specific to the security project
    * once it modifies / adds / disables Kibana APIs.
    */
-  describe('security', function () {
+  describe('security/users', function () {
     it('rejects request to create user', async () => {
       const { body, status } = await supertest
         .post(`/internal/security/users/some_testuser`)

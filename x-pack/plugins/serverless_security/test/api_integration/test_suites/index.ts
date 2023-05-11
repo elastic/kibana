@@ -8,10 +8,9 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless API', function () {
+  describe('serverless_security API', function () {
     this.tags(['serverless']);
 
-    loadTestFile(require.resolve('./switch_project'));
     loadTestFile(require.resolve('./security_users'));
   });
 }

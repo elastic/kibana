@@ -7,11 +7,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless API', function () {
-    this.tags(['serverless']);
+export function SvlSecLandingPageProvider({ getService }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
 
-    loadTestFile(require.resolve('./switch_project'));
-    loadTestFile(require.resolve('./security_users'));
-  });
+  return {
+    async assertSvlSecSideNavExists() {
+      await testSubjects.existOrFail('svlSecNavTitle');
+    },
+  };
 }
