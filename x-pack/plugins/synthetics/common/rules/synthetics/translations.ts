@@ -12,7 +12,7 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
-      defaultMessage: `"{monitorNameTruncated}" is {status} from {locationName}.\n\nDetails:\n\nMonitor name: {monitorName}  \n{monitorUrlLabel}: {monitorUrl}  \nMonitor type: {monitorType}  \nChecked at: {checkedAt}  \nFrom: {locationName}  \nError received: {lastErrorMessage}  \n{linkMessage}`,
+      defaultMessage: `"{monitorNameTruncated}" is {status} from {locationName}.\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationName}  \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
         monitorNameTruncated: '{{context.monitorNameTruncated}}',
@@ -54,7 +54,7 @@ export const SyntheticsMonitorStatusTranslations = {
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
-        'The alert for "{monitorNameTruncated}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\nMonitor name: {monitorName}  \n{monitorUrlLabel}: {monitorUrl}  \nMonitor type: {monitorType}  \nFrom: {locationName}  \n{linkMessage}',
+        'The alert for "{monitorNameTruncated}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}  \n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorNameTruncated: '{{context.monitorNameTruncated}}',

@@ -106,6 +106,7 @@ export const registerSyntheticsStatusCheckRule = (
           dateFormat,
           tz
         );
+
         const alert = alertWithLifecycle({
           id: alertId,
           fields: getMonitorAlertDocument(monitorSummary),

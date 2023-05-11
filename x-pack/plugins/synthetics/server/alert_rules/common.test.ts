@@ -24,15 +24,14 @@ describe('updateState', () => {
   });
 
   it('sets initial state values', () => {
-    spy.mockImplementation(() => 'foo date string');
     const result = updateState({} as SyntheticsCommonState, false);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "firstCheckedAt": "foo date string",
+        "firstCheckedAt": "2023-02-26T00:00:00.000Z",
         "firstTriggeredAt": undefined,
         "isTriggered": false,
-        "lastCheckedAt": "foo date string",
+        "lastCheckedAt": "2023-02-26T00:00:00.000Z",
         "lastResolvedAt": undefined,
         "lastTriggeredAt": undefined,
         "meta": Object {},
@@ -211,6 +210,9 @@ describe('setRecoveredAlertsContext', () => {
             id: '123456',
           },
         },
+        monitor: {
+          name: 'test-monitor',
+        },
       } as StaleDownConfig['ping'],
       timestamp: new Date().toISOString(),
     },
@@ -239,6 +241,9 @@ describe('setRecoveredAlertsContext', () => {
           state: {
             id: '123456',
           },
+          monitor: {
+            name: 'test-monitor',
+          },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
@@ -255,12 +260,21 @@ describe('setRecoveredAlertsContext', () => {
       tz: 'UTC',
     });
     expect(setContext).toBeCalledWith({
+      checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+      configId: '12345',
       idWithLocation,
       linkMessage: '',
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
       recoveryReason: 'the monitor has been deleted',
       recoveryStatus: 'has been deleted',
+      monitorNameTruncated: 'test-monitor',
+      monitorUrl: '(unavailable)',
+      monitorUrlLabel: 'URL',
+      reason:
+        'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+      stateId: '123456',
+      status: 'recovered',
     });
   });
 
@@ -287,6 +301,9 @@ describe('setRecoveredAlertsContext', () => {
           state: {
             id: '123456',
           },
+          monitor: {
+            name: 'test-monitor',
+          },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
@@ -303,12 +320,21 @@ describe('setRecoveredAlertsContext', () => {
       tz: 'UTC',
     });
     expect(setContext).toBeCalledWith({
+      configId: '12345',
+      checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+      monitorNameTruncated: 'test-monitor',
+      monitorUrl: '(unavailable)',
+      reason:
+        'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
       idWithLocation,
       linkMessage: '',
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
       recoveryReason: 'this location has been removed from the monitor',
       recoveryStatus: 'has recovered',
+      stateId: '123456',
+      status: 'recovered',
+      monitorUrlLabel: 'URL',
     });
   });
 
@@ -337,6 +363,9 @@ describe('setRecoveredAlertsContext', () => {
             id: '123456',
           },
           '@timestamp': new Date().toISOString(),
+          monitor: {
+            name: 'test-monitor',
+          },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
@@ -362,8 +391,15 @@ describe('setRecoveredAlertsContext', () => {
         'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
       recoveryStatus: 'is now up',
       locationId: 'us_west',
+      checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
       linkMessage:
-        'Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
+        '- Link: https://localhost:5601/app/synthetics/monitor/12345-67891/errors/123456?locationId=us_west',
+      monitorNameTruncated: 'test-monitor',
+      monitorUrl: '(unavailable)',
+      monitorUrlLabel: 'URL',
+      reason:
+        'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+      stateId: null,
     });
   });
 });

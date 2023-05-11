@@ -11,6 +11,7 @@ import { IBasePath } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
@@ -72,13 +73,13 @@ export const getFullViewInAppMessage = (
   const relativeLinkLabel = i18n.translate(
     'xpack.synthetics.alerts.monitorStatus.relativeLink.label',
     {
-      defaultMessage: `Relative link`,
+      defaultMessage: `- Relative link`,
     }
   );
   const absoluteLinkLabel = i18n.translate(
     'xpack.synthetics.alerts.monitorStatus.absoluteLink.label',
     {
-      defaultMessage: `Link`,
+      defaultMessage: `- Link`,
     }
   );
   if (basePath.publicBaseUrl) {
@@ -178,10 +179,21 @@ export const setRecoveredAlertsContext = ({
     );
     let isUp = false;
     let linkMessage = '';
+    let monitorSummary = {};
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
-      const { idWithLocation } = state;
+      const { idWithLocation, locationId } = state;
       const downConfig = staleDownConfigs[idWithLocation];
+      const { ping, configId } = downConfig;
+      monitorSummary = getMonitorSummary(
+        ping,
+        RECOVERED_LABEL,
+        locationId,
+        configId,
+        dateFormat,
+        tz
+      );
+
       if (downConfig.isDeleted) {
         recoveryStatus = i18n.translate(
           'xpack.synthetics.alerts.monitorStatus.deleteMonitor.status',
@@ -237,6 +249,14 @@ export const setRecoveredAlertsContext = ({
               checkedAt,
             },
           });
+      monitorSummary = getMonitorSummary(
+        ping,
+        RECOVERED_LABEL,
+        locationId,
+        configId,
+        dateFormat,
+        tz
+      );
 
       if (basePath && spaceId && stateId) {
         const relativeViewInAppUrl = getRelativeViewInAppUrl({
@@ -250,6 +270,7 @@ export const setRecoveredAlertsContext = ({
 
     alert.setContext({
       ...state,
+      ...monitorSummary,
       recoveryStatus,
       linkMessage,
       ...(isUp ? { status: 'up' } : {}),
@@ -260,3 +281,7 @@ export const setRecoveredAlertsContext = ({
     });
   }
 };
+
+export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
+  defaultMessage: 'recovered',
+});
