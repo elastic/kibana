@@ -14,14 +14,16 @@ import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/s
 import type {
   RuleExecutionResult,
   GetRuleExecutionResultsResponse,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
-import { RuleExecutionStatus } from '../../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../../../../../common/detection_engine/rule_monitoring';
 import type {
   ExecutionEventAggregationOptions,
   ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
 } from './types';
-import { EXECUTION_UUID_FIELD } from './types';
+import * as f from '../../event_log_fields';
+
+// TODO: https://github.com/elastic/kibana/issues/125642 Move the fields from this file to `event_log_fields.ts`
 
 // Base ECS fields
 const ACTION_FIELD = 'event.action';
@@ -104,13 +106,13 @@ export const getExecutionEventAggregation = ({
     // Total unique executions for given root filters
     totalExecutions: {
       cardinality: {
-        field: EXECUTION_UUID_FIELD,
+        field: f.RULE_EXECUTION_UUID,
       },
     },
     executionUuid: {
       // Bucket by execution UUID
       terms: {
-        field: EXECUTION_UUID_FIELD,
+        field: f.RULE_EXECUTION_UUID,
         size: maxExecutions,
         order: formatSortForTermsSort(sort),
       },

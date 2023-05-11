@@ -7,9 +7,6 @@
 
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import { buildSiemResponse } from '../../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
 import type {
   GetRuleHealthRequest,
@@ -17,9 +14,13 @@ import type {
   HealthResponseMetadata,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
-  GET_RULE_HEALTH_URL,
   GetRuleHealthRequestBody,
+  GET_RULE_HEALTH_URL,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../../routes/utils';
 import { fetchRuleById } from './fetch_rule_by_id';
 import { validateGetRuleHealthRequest } from './validate_get_rule_health_request';
 
@@ -46,8 +47,7 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       try {
         const params = validateGetRuleHealthRequest(request.body);
 
-        const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-        const soClient = ctx.core.savedObjects.client;
+        const ctx = await context.resolve(['alerting', 'securitySolution']);
         const rulesClient = ctx.alerting.getRulesClient();
         const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
 
@@ -61,12 +61,17 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
 
         const rule = fetchRuleResult.value;
 
+        const stats = await ruleExecutionLog.getExecutionStatsForRule({
+          ruleId: params.ruleId,
+          interval: params.interval,
+        });
+
         const responseBody: GetRuleHealthResponse = {
-          meta: createRuleHealthMetadata(params),
+          meta: getResponseMetadata(params),
           rule,
-          last_execution: {} as any,
-          execution_stats: {} as any,
-          execution_history: {} as any,
+          stats: stats.stats,
+          stats_history: stats.statsHistory,
+          debug: stats.debug,
         };
 
         return response.ok({ body: responseBody });
@@ -81,7 +86,7 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
   );
 };
 
-const createRuleHealthMetadata = (params: GetRuleHealthRequest): HealthResponseMetadata => {
+const getResponseMetadata = (params: GetRuleHealthRequest): HealthResponseMetadata => {
   const requestReceivedAt = moment(params.requestReceivedAt);
   const responseGeneratedAt = moment().utc();
   const processingTime = moment.duration(responseGeneratedAt.diff(requestReceivedAt));

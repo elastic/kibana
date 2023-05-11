@@ -7,6 +7,12 @@
 
 import { take, toString, truncate, uniq } from 'lodash';
 
+/**
+ * Useful for normalizing responses from Elasticsearch.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type RawData = any;
+
 // When we write rule execution status updates to saved objects or to event log,
 // we can write warning/failure messages as well. In some cases those messages
 // are built from N errors collected during the "big loop" of Detection Engine,

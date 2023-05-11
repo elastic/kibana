@@ -14,6 +14,8 @@ export * from './api/urls';
 
 export * from './model/detection_engine_health/health_interval';
 export * from './model/detection_engine_health/health_response_metadata';
+export * from './model/execution_stats/stats_history';
+export * from './model/execution_stats/stats';
 export * from './model/execution_event';
 export * from './model/execution_metrics';
 export * from './model/execution_result';

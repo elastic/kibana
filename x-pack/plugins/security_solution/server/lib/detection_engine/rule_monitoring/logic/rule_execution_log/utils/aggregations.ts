@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const RULE_SAVED_OBJECT_TYPE = 'alert';
-
-export const RULE_EXECUTION_LOG_PROVIDER = 'securitySolution.ruleExecution';
-
-export const ALERTING_PROVIDER = 'alerting';
+export const DEFAULT_PERCENTILES: number[] = [1, 5, 25, 50, 75, 95, 99];

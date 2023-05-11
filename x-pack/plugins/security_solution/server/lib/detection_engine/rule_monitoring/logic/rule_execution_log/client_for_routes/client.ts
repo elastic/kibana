@@ -18,6 +18,8 @@ import type { IEventLogReader } from '../event_log/event_log_reader';
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,
+  GetExecutionStatsForRuleArgs,
+  GetExecutionStatsForRuleResult,
   IRuleExecutionLogForRoutes,
 } from './client_interface';
 
@@ -54,6 +56,27 @@ export const createClientForRoutes = (
           return await eventLog.getExecutionResults(args);
         } catch (e) {
           const logMessage = 'Error getting aggregate execution results from event log';
+          const logReason = e instanceof Error ? e.message : String(e);
+          const logSuffix = `[rule id ${ruleId}]`;
+          const logMeta: ExtMeta = {
+            rule: { id: ruleId },
+          };
+
+          logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
+          throw e;
+        }
+      });
+    },
+
+    getExecutionStatsForRule: (
+      args: GetExecutionStatsForRuleArgs
+    ): Promise<GetExecutionStatsForRuleResult> => {
+      return withSecuritySpan('IRuleExecutionLogForRoutes.getExecutionStatsForRule', async () => {
+        const { ruleId } = args;
+        try {
+          return await eventLog.getExecutionStatsForRule(args);
+        } catch (e) {
+          const logMessage = 'Error calculating execution stats for rule based on event log';
           const logReason = e instanceof Error ? e.message : String(e);
           const logSuffix = `[rule id ${ruleId}]`;
           const logMeta: ExtMeta = {

@@ -6,13 +6,14 @@
  */
 
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
-import type { HealthInterval } from './health_interval';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Add JSDoc comments
 
-export interface HealthResponseMetadata {
-  request_received_at: IsoDateString;
-  response_generated_at: IsoDateString;
-  processing_time_ms: number;
-  interval: HealthInterval;
+export interface StatsHistory<TStats> {
+  buckets: Array<StatsBucket<TStats>>;
+}
+
+export interface StatsBucket<TStats> {
+  timestamp: IsoDateString;
+  stats: TStats;
 }

@@ -21,7 +21,6 @@ export const validateGetRuleHealthRequest = (
   return {
     ruleId: body.rule_id,
     interval,
-    verbose: body.verbose ?? false,
     requestReceivedAt: now.utc().toISOString(),
   };
 };
