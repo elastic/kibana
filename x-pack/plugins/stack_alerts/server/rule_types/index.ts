@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {  RegisterRuleTypesParams } from './types';
+import type { RegisterRuleTypesParams } from './types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';

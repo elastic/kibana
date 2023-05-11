@@ -134,10 +134,12 @@ export async function executeEsQueryFactory(
     try {
       esResult = await esClient.search(esQuery);
     } catch (err) {
-      throw new Error(i18n.translate('xpack.stackAlerts.geoContainment.entityContainmentFetchError', {
-        defaultMessage: 'Unable to fetch entity containment, error: {error}',
-        values: { error: err.message }
-      }));
+      throw new Error(
+        i18n.translate('xpack.stackAlerts.geoContainment.entityContainmentFetchError', {
+          defaultMessage: 'Unable to fetch entity containment, error: {error}',
+          values: { error: err.message },
+        })
+      );
     }
     return esResult;
   };

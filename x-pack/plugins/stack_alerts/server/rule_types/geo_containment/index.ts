@@ -6,9 +6,9 @@
  */
 
 import type { RegisterRuleTypesParams } from '../types';
-import {  getRuleType } from './rule_type';
+import { getRuleType } from './rule_type';
 
-export { GEO_CONTAINMENT_ID } from  './constants';
+export { GEO_CONTAINMENT_ID } from './constants';
 
 export function register(params: RegisterRuleTypesParams) {
   const { alerting } = params;

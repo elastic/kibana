@@ -25,13 +25,18 @@ describe('canSkipBoundariesFetch', () => {
   });
 
   test('should return false when boundaries query changes', () => {
-    expect(canSkipBoundariesFetch({
-      ...boundariesRequestMeta,
-      boundaryIndexQuery: {
-        language: 'kuery',
-        query: 'iso2 : CA',
-      },
-    }, { ...boundariesRequestMeta })).toBe(false);
+    expect(
+      canSkipBoundariesFetch(
+        {
+          ...boundariesRequestMeta,
+          boundaryIndexQuery: {
+            language: 'kuery',
+            query: 'iso2 : CA',
+          },
+        },
+        { ...boundariesRequestMeta }
+      )
+    ).toBe(false);
   });
 
   test('should return true when request meta is not changed', () => {
@@ -44,38 +49,38 @@ describe('getShapeFilters', () => {
     const mockEsClient = {
       search: () => {
         return {
-          hits:{
-            hits:[
+          hits: {
+            hits: [
               {
-                _index:"boundaries",
-                _id:"waFXH3kBi9P-_6qn8c8A",
+                _index: 'boundaries',
+                _id: 'waFXH3kBi9P-_6qn8c8A',
                 fields: {
-                  boundaryName: ['alpha']
-                }
+                  boundaryName: ['alpha'],
+                },
               },
               {
-                _index:"boundaries",
-                _id:"wqFXH3kBi9P-_6qn8c8A",
+                _index: 'boundaries',
+                _id: 'wqFXH3kBi9P-_6qn8c8A',
                 fields: {
-                  boundaryName: ['bravo']
-                }
+                  boundaryName: ['bravo'],
+                },
               },
               {
-                _index:"boundaries",
-                _id:"w6FXH3kBi9P-_6qn8c8A",
+                _index: 'boundaries',
+                _id: 'w6FXH3kBi9P-_6qn8c8A',
                 fields: {
-                  boundaryName: ['charlie']
-                }
+                  boundaryName: ['charlie'],
+                },
               },
-            ]
-          }
+            ],
+          },
         };
-      }
+      },
     } as unknown as ElasticsearchClient;
-    const { 
-      shapesFilters,
-      shapesIdsNamesMap
-    } = await getShapeFilters(boundariesRequestMeta, mockEsClient);
+    const { shapesFilters, shapesIdsNamesMap } = await getShapeFilters(
+      boundariesRequestMeta,
+      mockEsClient
+    );
     expect(shapesIdsNamesMap).toEqual({
       'waFXH3kBi9P-_6qn8c8A': 'alpha',
       'wqFXH3kBi9P-_6qn8c8A': 'bravo',
@@ -114,7 +119,7 @@ describe('getShapeFilters', () => {
             },
           },
         },
-      }
+      },
     });
   });
 
@@ -122,29 +127,25 @@ describe('getShapeFilters', () => {
     const mockEsClient = {
       search: () => {
         throw new Error('Simulated elasticsearch search error');
-      }
+      },
     } as unknown as ElasticsearchClient;
     expect(async () => {
-      await getShapeFilters(boundariesRequestMeta, mockEsClient)
-    })
-    .rejects
-    .toThrow();
+      await getShapeFilters(boundariesRequestMeta, mockEsClient);
+    }).rejects.toThrow();
   });
 
   test('should throw error if no results found', async () => {
     const mockEsClient = {
       search: () => {
         return {
-          hits:{
-            hits:[]
-          }
+          hits: {
+            hits: [],
+          },
         };
-      }
+      },
     } as unknown as ElasticsearchClient;
     expect(async () => {
-      await getShapeFilters(boundariesRequestMeta, mockEsClient)
-    })
-    .rejects
-    .toThrow();
+      await getShapeFilters(boundariesRequestMeta, mockEsClient);
+    }).rejects.toThrow();
   });
 });
