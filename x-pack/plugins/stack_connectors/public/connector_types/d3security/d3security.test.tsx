@@ -6,9 +6,9 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { registerConnectorTypes } from '../..';
+import { registerConnectorTypes } from '..';
 import { ActionTypeModel as ConnectorTypeModel} from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../../mocks';
+import { registrationServicesMock } from '../../mocks';
 
 const CONNECTOR_TYPE_ID = '.d3security';
 let connectorTypeModel: ConnectorTypeModel;

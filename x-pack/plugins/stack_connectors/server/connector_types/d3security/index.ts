@@ -3,8 +3,8 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { getRetryAfterIntervalFromHeaders } from '../../lib/http_response_retry_header';
-import { isOk, promiseResult, Result } from '../../lib/result_type';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { isOk, promiseResult, Result } from '../lib/result_type';
 import {  ActionType as ConnectorType,
           ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
           ActionTypeExecutorResult as ConnectorTypeExecutorResult,

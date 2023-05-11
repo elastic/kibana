@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { D3ActionParams } from '../../types';
+import { D3ActionParams } from '../types';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import {

@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import D3ParamsFields from './d3security_params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
-const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
+const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock(kibanaReactPath, () => {
   const original = jest.requireActual(kibanaReactPath);

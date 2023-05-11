@@ -9,7 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {  ActionTypeModel as ConnectorTypeModel,
           GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { D3ActionParams, D3Config, D3Secrets } from '../../types';
+import { D3ActionParams, D3Config, D3Secrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
   D3Config,

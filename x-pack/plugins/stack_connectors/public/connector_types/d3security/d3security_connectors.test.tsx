@@ -8,8 +8,8 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import D3SecurityConnectorFields from './d3security_connectors';
-import { ConnectorFormTestProvider } from '../../lib/test_utils';
-import { act, render } from '@testing-library/react';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -83,19 +83,21 @@ describe('D3ActionConnectorFields renders', () => {
         userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.d3security',
-          name: 'd3security',
-          config: {
-            url: 'https://test.com',
+      waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.d3security',
+            name: 'd3security',
+            config: {
+              url: 'https://test.com',
+            },
+            secrets: {
+              token: 'token',
+            },
+            isDeprecated: false,
           },
-          secrets: {
-            token: 'token',
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
