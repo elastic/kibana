@@ -13,7 +13,7 @@ import { TransformSettings } from '../../../assets/transform_templates/slo_trans
 import { SLO } from '../../../domain/models';
 
 export abstract class RollupTransformGenerator {
-  public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
+  public abstract generate(slo: SLO): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO) {
     return {

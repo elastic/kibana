@@ -20,7 +20,7 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   RollupTransformGenerator,
 } from './rollup_transform_generators';
-import { SLO, IndicatorTypes } from '../../domain/models';
+import { SLO } from '../../domain/models';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
@@ -136,13 +136,13 @@ describe('TransformManager', () => {
 });
 
 class DummyTransformGenerator extends RollupTransformGenerator {
-  getTransformParams(slo: SLO): TransformPutTransformRequest {
+  generate(slo: SLO): TransformPutTransformRequest {
     return {} as TransformPutTransformRequest;
   }
 }
 
 class FailTransformGenerator extends RollupTransformGenerator {
-  getTransformParams(slo: SLO): TransformPutTransformRequest {
+  generate(slo: SLO): TransformPutTransformRequest {
     throw new Error('Some error');
   }
 }

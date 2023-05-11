@@ -19,7 +19,7 @@ import {
 import { KQLCustomIndicator, SLO } from '../../../domain/models';
 
 export class KQLCustomTransformGenerator extends RollupTransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public generate(slo: SLO): TransformPutTransformRequest {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }

@@ -24,7 +24,7 @@ import { Query } from './types';
 import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends RollupTransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public generate(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }

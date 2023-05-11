@@ -17,7 +17,7 @@ const generator = new ApmTransactionDurationTransformGenerator();
 describe('APM Transaction Duration Rollup Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = generator.generate(anSLO);
 
     expect(transform).toMatchSnapshot({
       transform_id: expect.any(String),
@@ -36,7 +36,7 @@ describe('APM Transaction Duration Rollup Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       indicator: createAPMTransactionDurationIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = generator.generate(anSLO);
 
     expect(transform).toMatchSnapshot({
       transform_id: expect.any(String),
@@ -53,7 +53,7 @@ describe('APM Transaction Duration Rollup Transform Generator', () => {
         transactionType: '*',
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = generator.generate(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -65,7 +65,7 @@ describe('APM Transaction Duration Rollup Transform Generator', () => {
         index,
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = generator.generate(anSLO);
 
     expect(transform.source.index).toEqual(index);
   });
@@ -77,7 +77,7 @@ describe('APM Transaction Duration Rollup Transform Generator', () => {
         filter,
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = generator.generate(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });

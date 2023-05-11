@@ -34,7 +34,7 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported SLI type: ${slo.indicator.type}`);
     }
 
-    const transformParams = rollupTransformGenerator.getTransformParams(slo);
+    const transformParams = rollupTransformGenerator.generate(slo);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,
