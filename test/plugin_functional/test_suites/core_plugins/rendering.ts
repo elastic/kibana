@@ -249,6 +249,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
     it('exposes plugin config settings to unauthenticated users', async () => {
       await navigateTo('/render/core?isAnonymousPage=true');
+      // ToDo: Inject delay?
       const injectedMetadata = await getInjectedMetadata();
       expect(injectedMetadata).to.not.be.empty();
       expect(injectedMetadata.uiPlugins).to.not.be.empty();
