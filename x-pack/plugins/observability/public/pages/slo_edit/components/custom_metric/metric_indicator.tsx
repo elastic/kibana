@@ -1,0 +1,232 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { CreateSLOInput, metricCustomIndicatorSchema } from '@kbn/slo-schema';
+import { range, first, xor } from 'lodash';
+import * as t from 'io-ts';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface MetricIndicatorProps {
+  type: 'good' | 'total';
+  indexFields: Field[] | undefined;
+  isLoadingIndex: boolean;
+  metricLabel: string;
+  equationLabel: string;
+}
+
+export const NEW_CUSTOM_METRIC = { id: 'A', aggregation: 'sum' as const, field: '' };
+const MAX_VARIABLES = 26;
+const CHAR_CODE_FOR_A = 65;
+const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
+const VAR_NAMES = range(CHAR_CODE_FOR_A, CHAR_CODE_FOR_Z).map((c) => String.fromCharCode(c));
+
+type MetricCustomIndicator = t.TypeOf<typeof metricCustomIndicatorSchema>;
+type MetricCustomMetricDef =
+  | MetricCustomIndicator['params']['good']
+  | MetricCustomIndicator['params']['total'];
+
+function createOptions(fields: Field[]): Option[] {
+  return fields
+    .map((field) => ({ label: field.name, value: field.name }))
+    .sort((a, b) => String(a.label).localeCompare(b.label));
+}
+
+function createEquationFromMetric(metrics: MetricCustomMetricDef['metrics']) {
+  return metrics.map((row) => row.id).join(' + ');
+}
+
+export function MetricIndicator({
+  type,
+  indexFields,
+  isLoadingIndex,
+  metricLabel,
+  equationLabel,
+}: MetricIndicatorProps) {
+  const { control, watch, setValue } = useFormContext<CreateSLOInput>();
+
+  const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
+
+  const metrics = useWatch({ control, name: `indicator.params.${type}.metrics` }) as
+    | MetricCustomMetricDef['metrics']
+    | undefined;
+
+  const disableAdd = metrics?.length === MAX_VARIABLES;
+  const disableDelete = metrics?.length === 1;
+
+  const setDefaultEquationIfUnchanged = (
+    previousMetrics: MetricCustomMetricDef['metrics'],
+    nextMetrics: MetricCustomMetricDef['metrics']
+  ) => {
+    const defaultEquation = createEquationFromMetric(previousMetrics);
+    const currentEquation = watch(`indicator.params.${type}.equation`);
+    if (defaultEquation === currentEquation) {
+      setValue(`indicator.params.${type}.equation`, createEquationFromMetric(nextMetrics));
+    }
+  };
+
+  const handleDeleteMetric = (id: string) => () => {
+    const previousMetrics = watch(
+      `indicator.params.${type}.metrics`
+    ) as MetricCustomMetricDef['metrics'];
+    const nextMetrics = previousMetrics.filter((row) => row.id !== id) ?? [NEW_CUSTOM_METRIC];
+    const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_CUSTOM_METRIC];
+    setDefaultEquationIfUnchanged(previousMetrics, finalMetrics);
+    setValue(`indicator.params.${type}.metrics`, finalMetrics);
+  };
+
+  const handleAddMetric = () => {
+    const previousMetrics = watch(
+      `indicator.params.${type}.metrics`
+    ) as MetricCustomMetricDef['metrics'];
+    const currentVars = previousMetrics.map((m) => m.id) ?? [];
+    const id = first(xor(VAR_NAMES, currentVars))!;
+    const nextMetrics = [...(previousMetrics || []), { ...NEW_CUSTOM_METRIC, id }];
+    setDefaultEquationIfUnchanged(previousMetrics, nextMetrics);
+    setValue(`indicator.params.${type}.metrics`, nextMetrics);
+  };
+
+  return (
+    <>
+      <EuiFlexItem>
+        {metrics?.map((metric, index) => (
+          <EuiFormRow fullWidth label={`${metricLabel} ${metric.id}`}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem>
+                <Controller
+                  name={`indicator.params.${type}.metrics.${index}.field`}
+                  shouldUnregister
+                  defaultValue=""
+                  rules={{ required: true }}
+                  control={control}
+                  render={({ field: { ref, ...field }, fieldState }) => (
+                    <EuiComboBox
+                      {...field}
+                      async
+                      fullWidth
+                      singleSelection={{ asPlainText: true }}
+                      prepend={i18n.translate(
+                        'xpack.observability.slo.sloEdit.sliType.customMetric.sumLabel',
+                        { defaultMessage: 'Sum of' }
+                      )}
+                      placeholder={i18n.translate(
+                        'xpack.observability.slo.sloEdit.sliType.customMetric.metricField.placeholder',
+                        { defaultMessage: 'Select a metric field' }
+                      )}
+                      aria-label={i18n.translate(
+                        'xpack.observability.slo.sloEdit.sliType.customMetric.metricField.placeholder',
+                        { defaultMessage: 'Select a metric field' }
+                      )}
+                      isInvalid={fieldState.invalid}
+                      isDisabled={!watch('indicator.params.index')}
+                      isLoading={!!watch('indicator.params.index') && isLoadingIndex}
+                      onChange={(selected: EuiComboBoxOptionOption[]) => {
+                        if (selected.length) {
+                          return field.onChange(selected[0].value);
+                        }
+                        field.onChange('');
+                      }}
+                      selectedOptions={
+                        !!watch('indicator.params.index') &&
+                        !!field.value &&
+                        metricFields.some((metricField) => metricField.name === field.value)
+                          ? [
+                              {
+                                value: field.value,
+                                label: field.value,
+                                'data-test-subj': `customMetricIndicatorFormMetricFieldSelectedValue`,
+                              },
+                            ]
+                          : []
+                      }
+                      options={createOptions(metricFields)}
+                    />
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={0}>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  style={{ marginBottom: '0.2em' }}
+                  onClick={handleDeleteMetric(metric.id)}
+                  disabled={disableDelete}
+                  title={i18n.translate(
+                    'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
+                    { defaultMessage: 'Delete metric' }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ))}
+        <EuiFlexGroup>
+          <EuiFlexItem grow={0}>
+            <EuiSpacer size="xs" />
+            <EuiButtonEmpty
+              data-test-subj="customMetricIndicatorAddMetricButton"
+              color={'primary'}
+              size="xs"
+              iconType={'plusInCircleFilled'}
+              onClick={handleAddMetric}
+              isDisabled={disableAdd}
+            >
+              <FormattedMessage
+                id="xpack.observability.slo.sloEdit.sliType.customMetric.addMetricLabel"
+                defaultMessage="Add metric"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          fullWidth
+          label={equationLabel}
+          helpText={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.equationHelpText',
+            { defaultMessage: 'Supports basic math equations' }
+          )}
+        >
+          <Controller
+            name={`indicator.params.${type}.equation`}
+            shouldUnregister
+            defaultValue=""
+            rules={{ required: true }}
+            control={control}
+            render={({ field: { ref, ...field }, fieldState }) => (
+              <EuiFieldText
+                {...field}
+                isInvalid={fieldState.invalid}
+                fullWidth
+                data-test-subj="o11yCustomMetricEquation"
+              />
+            )}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </>
+  );
+}

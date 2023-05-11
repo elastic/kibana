@@ -18,6 +18,7 @@ import {
   DurationUnit,
   Indicator,
   KQLCustomIndicator,
+  MetricCustomIndicator,
   SLO,
   StoredSLO,
 } from '../../../domain/models';
@@ -64,6 +65,29 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createMetricCustomIndicator = (
+  params: Partial<MetricCustomIndicator['params']> = {}
+): Indicator => ({
+  type: 'sli.metric.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      metrics: [
+        { id: 'A', aggregation: 'sum', field: 'total' },
+        { id: 'B', aggregation: 'sum', field: 'processed' },
+      ],
+      equation: 'A - B',
+    },
+    total: {
+      metrics: [{ id: 'A', aggregation: 'sum', field: 'total' }],
+      equation: 'A',
+    },
     timestampField: 'log_timestamp',
     ...params,
   },

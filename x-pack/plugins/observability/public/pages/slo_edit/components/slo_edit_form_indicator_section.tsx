@@ -8,17 +8,37 @@
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
-import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
 import { SLI_OPTIONS } from '../constants';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
 import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
+import {
+  CustomMetricIndicatorTypeForm,
+  NEW_CUSTOM_METRIC,
+} from './custom_metric/custom_metric_type_form';
 import { maxWidth } from './slo_edit_form';
 
 export function SloEditFormIndicatorSection() {
-  const { control, watch } = useFormContext<CreateSLOInput>();
+  const { control, watch, setValue } = useFormContext<CreateSLOInput>();
+
+  const indicator = useWatch({ control, name: 'indicator.type' });
+
+  // Set the defaults for the form when switching between different indicators
+  useEffect(() => {
+    if (indicator === 'sli.metric.custom') {
+      setValue('indicator.params.good.metrics', [NEW_CUSTOM_METRIC]);
+      setValue('indicator.params.good.equation', 'A');
+      setValue('indicator.params.total.metrics', [NEW_CUSTOM_METRIC]);
+      setValue('indicator.params.total.equation', 'A');
+    }
+    if (indicator === 'sli.kql.custom') {
+      setValue('indicator.params.good', '');
+      setValue('indicator.params.total', '');
+    }
+  }, [indicator, setValue]);
 
   const getIndicatorTypeForm = () => {
     switch (watch('indicator.type')) {
@@ -28,6 +48,8 @@ export function SloEditFormIndicatorSection() {
         return <ApmLatencyIndicatorTypeForm />;
       case 'sli.apm.transactionErrorRate':
         return <ApmAvailabilityIndicatorTypeForm />;
+      case 'sli.metric.custom':
+        return <CustomMetricIndicatorTypeForm />;
       default:
         return null;
     }
