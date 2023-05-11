@@ -58,6 +58,7 @@ import {
 } from './migrations/to_v8_6_0';
 import { migratePackagePolicyToV870 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
+import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
 
 /*
  * Saved object types and mappings
@@ -123,6 +124,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             enabled: { type: 'boolean' },
           },
         },
+        is_protected: { type: 'boolean' },
       },
     },
     migrations: {
@@ -130,6 +132,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '7.12.0': migrateAgentPolicyToV7120,
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
+      '8.9.0': migrateAgentPolicyToV890,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {

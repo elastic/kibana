@@ -936,6 +936,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         policy_id: 'abc123',
       },
     ],
+    is_protected: false,
   };
 
   it('should return hasChanged when a top-level policy field changes', () => {

@@ -34,6 +34,7 @@ export interface NewAgentPolicy {
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
+  is_protected?: boolean;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
@@ -45,6 +46,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_by: string;
   revision: number;
   agents?: number;
+  is_protected: boolean;
 }
 
 export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;

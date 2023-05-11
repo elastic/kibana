@@ -102,7 +102,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "index-pattern": "cd51191712081278c2af83d16552c3438ef83353",
         "infrastructure-monitoring-log-view": "8040108f02ef27419cff79077384379709d44bbc",
         "infrastructure-ui-source": "2311f7d0abe2a713aa71e30ee24f78828d4acfc1",
-        "ingest-agent-policies": "e5bb18f8c1d1106139e82fccb93fce01b21fde9b",
+        "ingest-agent-policies": "d9906923f595f6f3163672351ed3a46472eb280e",
         "ingest-download-sources": "95a15b6589ef46e75aca8f7e534c493f99cc3ccd",
         "ingest-outputs": "f5adeb3f6abc732a6067137e170578dbf1f58c62",
         "ingest-package-policies": "6dc1c9b80a8dc95fbc9c6d9b73dfc56a098eb440",
