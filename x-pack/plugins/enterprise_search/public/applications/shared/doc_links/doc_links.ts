@@ -35,6 +35,7 @@ class DocLinks {
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
   public behavioralAnalytics: string;
+  public behavioralAnalyticsCORS: string;
   public behavioralAnalyticsEvents: string;
   public buildConnector: string;
   public bulkApi: string;
@@ -169,6 +170,7 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
     this.behavioralAnalytics = '';
+    this.behavioralAnalyticsCORS = '';
     this.behavioralAnalyticsEvents = '';
     this.buildConnector = '';
     this.bulkApi = '';
@@ -305,6 +307,7 @@ class DocLinks {
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
     this.behavioralAnalytics = docLinks.links.enterpriseSearch.behavioralAnalytics;
+    this.behavioralAnalyticsCORS = docLinks.links.enterpriseSearch.behavioralAnalyticsCORS;
     this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.buildConnector = docLinks.links.enterpriseSearch.buildConnector;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
