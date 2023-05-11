@@ -34,7 +34,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.12.0' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.5' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -61,7 +61,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'check.request.body': {
               type: 'yaml',
-              value: '"testGlobalParamValue"',
+              value: '"${testGlobalParam}"',
             },
             'check.request.headers': {
               type: 'yaml',
@@ -77,15 +77,11 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'check.response.body.positive': {
               type: 'yaml',
-              value: '["testLocalParamsValue","saved"]',
+              value: '["${testLocal1}","saved"]',
             },
             'check.response.headers': {
               type: 'yaml',
               value: null,
-            },
-            'check.response.json': {
-              type: 'yaml',
-              value: '[{"description":"check status","expression":"foo.bar == \\"myValue\\""}]',
             },
             'check.response.status': {
               type: 'yaml',
@@ -103,14 +99,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'text',
               value: id,
             },
-            ipv4: {
-              type: 'bool',
-              value: true,
-            },
-            ipv6: {
-              type: 'bool',
-              value: true,
-            },
             location_name: {
               type: 'text',
               value: 'Test private location 0',
@@ -118,10 +106,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             max_redirects: {
               type: 'integer',
               value: '0',
-            },
-            mode: {
-              type: 'text',
-              value: 'any',
             },
             'monitor.project.id': {
               type: 'text',
@@ -143,21 +127,13 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'password',
               value: '',
             },
-            proxy_headers: {
-              type: 'yaml',
-              value: null,
-            },
             proxy_url: {
               type: 'text',
-              value: 'testGlobalParamOverwrite',
+              value: '${testGlobalParam2}',
             },
             'response.include_body': {
               type: 'text',
               value: 'always',
-            },
-            'response.include_body_max_bytes': {
-              type: 'text',
-              value: '900',
             },
             'response.include_headers': {
               type: 'bool',
@@ -234,7 +210,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             timeout: '80s',
             max_redirects: 0,
             tags: ['tag2', 'tag2'],
-            proxy_url: 'testGlobalParamOverwrite',
+            proxy_url: '${testGlobalParam2}',
             'run_from.geo.name': locationName ?? 'Test private location 0',
             'run_from.id': locationName ?? 'Test private location 0',
             'response.include_headers': false,
@@ -243,18 +219,9 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'ssl.verification_mode': 'strict',
             'check.request.method': 'POST',
             'check.request.headers': { 'Content-Type': 'application/x-www-form-urlencoded' },
-            'check.response.body.positive': ['testLocalParamsValue', 'saved'],
-            'check.response.json': [
-              {
-                description: 'check status',
-                expression: 'foo.bar == "myValue"',
-              },
-            ],
+            'check.response.body.positive': ['${testLocal1}', 'saved'],
             'check.response.status': ['200'],
-            'check.request.body': 'testGlobalParamValue',
-            ipv4: true,
-            ipv6: true,
-            mode: 'any',
+            'check.request.body': '${testGlobalParam}',
             processors: [
               {
                 add_fields: {
@@ -311,9 +278,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
-            ipv4: { type: 'bool', value: true },
-            ipv6: { type: 'bool', value: true },
-            mode: { type: 'text' },
           },
           id: `synthetics/tcp-tcp-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
@@ -348,9 +312,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
-            ipv4: { type: 'bool', value: true },
-            ipv6: { type: 'bool', value: true },
-            mode: { type: 'text' },
           },
           id: `synthetics/icmp-icmp-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
@@ -518,7 +479,7 @@ export const getTestProjectSyntheticsPolicy = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.5' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -778,10 +739,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           id: `synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
         {
@@ -797,10 +755,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           id: `synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
       ],

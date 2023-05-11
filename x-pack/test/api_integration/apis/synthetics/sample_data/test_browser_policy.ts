@@ -21,7 +21,7 @@ export const getTestBrowserSyntheticsPolicy = ({
   version: 'WzEzNzYsMV0=',
   name: 'Test HTTP Monitor 03-Test private location 0-default',
   namespace: 'testnamespace',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.5' },
   enabled: true,
   policy_id: 'fe621d20-7b01-11ed-803f-475d82e1f9ca',
   inputs: [
@@ -247,10 +247,7 @@ export const getTestBrowserSyntheticsPolicy = ({
           },
           id: 'synthetics/browser-browser.network-abf904a4-cb9a-4b29-8c11-4d183cca289b-fe621d20-7b01-11ed-803f-475d82e1f9ca-default',
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
         {
