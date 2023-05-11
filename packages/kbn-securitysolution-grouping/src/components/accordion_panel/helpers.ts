@@ -9,7 +9,7 @@
 import { Filter, FILTERS } from '@kbn/es-query';
 
 export const createGroupFilter = (selectedGroup: string, values?: string[] | null): Filter[] => {
-  if (values != null && values.length > 0 && selectedGroup) {
+  if (values != null && values.length > 0) {
     return values.reduce(
       (acc: Filter[], query) => [
         ...acc,

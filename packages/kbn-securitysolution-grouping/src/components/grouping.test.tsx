@@ -79,12 +79,12 @@ describe('grouping container', () => {
     fireEvent.click(group1);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       1,
-      createGroupFilter(testProps.selectedGroup, host1Name)
+      createGroupFilter(testProps.selectedGroup, [host1Name])
     );
     fireEvent.click(group2);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       2,
-      createGroupFilter(testProps.selectedGroup, host2Name)
+      createGroupFilter(testProps.selectedGroup, [host2Name])
     );
   });
 

@@ -53,9 +53,7 @@ describe('grouping accordion panel', () => {
         {...testProps}
         groupBucket={{
           ...testProps.groupBucket,
-          key: [],
-          // @ts-expect-error
-          key_as_string: null,
+          selectedGroup: 'wrong-group',
         }}
       />
     );
