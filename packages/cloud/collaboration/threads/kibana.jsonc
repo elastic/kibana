@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/cloud-collaboration-threads",
+  "owner": "@elastic/platform-onboarding"
+}

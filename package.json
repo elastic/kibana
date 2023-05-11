@@ -171,6 +171,7 @@
     "@kbn/cloud-chat-plugin": "link:x-pack/plugins/cloud_integrations/cloud_chat",
     "@kbn/cloud-collaboration-plugin": "link:x-pack/plugins/cloud_integrations/cloud_collaboration",
     "@kbn/cloud-collaboration-presence": "link:packages/cloud/collaboration/presence",
+    "@kbn/cloud-collaboration-threads": "link:packages/cloud/collaboration/threads",
     "@kbn/cloud-data-migration-plugin": "link:x-pack/plugins/cloud_integrations/cloud_data_migration",
     "@kbn/cloud-defend-plugin": "link:x-pack/plugins/cloud_defend",
     "@kbn/cloud-experiments-plugin": "link:x-pack/plugins/cloud_integrations/cloud_experiments",

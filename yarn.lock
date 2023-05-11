@@ -3033,6 +3033,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-collaboration-threads@link:packages/cloud/collaboration/threads":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-data-migration-plugin@link:x-pack/plugins/cloud_integrations/cloud_data_migration":
   version "0.0.0"
   uid ""
