@@ -18,7 +18,7 @@ export const BetaConnectorCallout: React.FC = () => (
     })}
     description={i18n.translate('xpack.enterpriseSearch.betaConnectorCalloutDescription', {
       defaultMessage:
-        'This connector is a beta feature and we are committed to delivering in the product, but is not yet ready for general availability. Elastic will take a best effort approach to fix any issues, but features in beta are not subject to the support SLA of official GA features.',
+        'This connector is in beta. Beta features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.',
     })}
   />
 );
