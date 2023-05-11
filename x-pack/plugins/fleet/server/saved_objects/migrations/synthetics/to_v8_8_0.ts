@@ -25,7 +25,10 @@ export const ALLOWED_SCHEDULES_IN_MINUTES = [
 export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
 ) => {
-  if (packagePolicyDoc.attributes.package?.name !== 'synthetics') {
+  if (
+    packagePolicyDoc.attributes.package?.name !== 'synthetics' ||
+    !packagePolicyDoc.attributes.is_managed
+  ) {
     return packagePolicyDoc;
   }
 
@@ -69,8 +72,8 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
   }
 
   // set location_id.id to agentPolicyId
-  if (enabledStream.vars && enabledStream.vars.location_id) {
-    enabledStream.vars.location_id.value = agentPolicyId;
+  if (enabledStream.vars) {
+    enabledStream.vars.location_id = { value: agentPolicyId, type: 'text' };
     enabledStream.compiled_stream.location_id = agentPolicyId;
   }
 

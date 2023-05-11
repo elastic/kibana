@@ -64,7 +64,6 @@ export const httpPolicy = {
               'ssl.verification_mode': { value: null, type: 'text' },
               'ssl.supported_protocols': { value: null, type: 'yaml' },
               location_name: { value: 'A private location', type: 'text' },
-              location_id: { value: 'A private location', type: 'text' },
               id: { value: 'ce2f0cc6-b082-4080-9ed3-82f38743a3ed', type: 'text' },
               config_id: { value: 'ce2f0cc6-b082-4080-9ed3-82f38743a3ed', type: 'text' },
               run_once: { value: false, type: 'bool' },
