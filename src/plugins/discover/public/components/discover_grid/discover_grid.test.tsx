@@ -20,7 +20,7 @@ import { buildDataTableRecord } from '../../utils/build_data_record';
 import { getDocId } from '../../utils/get_doc_id';
 import { EsHitRecord } from '../../types';
 
-function getProps() {
+function getProps(): DiscoverGridProps {
   const services = discoverServiceMock;
   services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
 
@@ -37,7 +37,7 @@ function getProps() {
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
     rows: esHits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-    sampleSize: 30,
+    sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
     setExpandedDoc: jest.fn(),

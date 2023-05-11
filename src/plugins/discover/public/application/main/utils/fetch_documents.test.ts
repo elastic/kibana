@@ -25,6 +25,7 @@ const getDeps = () =>
     searchSessionId: '123',
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
+    getAppState: () => ({ sampleSize: 100 }),
   } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {

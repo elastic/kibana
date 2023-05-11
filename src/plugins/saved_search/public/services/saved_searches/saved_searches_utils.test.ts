@@ -56,6 +56,7 @@ describe('saved_searches_utils', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
               "aggs": Object {
@@ -146,6 +147,7 @@ describe('saved_searches_utils', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "sort": Array [
             Array [
               "a",
