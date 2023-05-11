@@ -18,6 +18,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createInitialState, type CreateInitialStateParams } from './initial_state';
+import * as getOutdatedDocumentsQueryModule from './get_outdated_documents_query';
+import { getOutdatedDocumentsQuery } from './get_outdated_documents_query';
 
 const mockLogger = loggingSystemMock.create();
 
@@ -348,6 +350,8 @@ describe('createInitialState', () => {
     ).toEqual(true);
   });
   it('returns state with an outdatedDocumentsQuery', () => {
+    jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
+
     expect(
       createInitialState({
         ...createInitialStateParams,
@@ -471,124 +475,10 @@ describe('createInitialState', () => {
         },
       }
     `);
-  });
-
-  it('selects documents with outdated core migration version', () => {
-    expect(
-      createInitialState({
-        ...createInitialStateParams,
-        coreMigrationVersionPerType: { dashboard: '8.8.0' },
-      }).outdatedDocumentsQuery
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "should": Array [
-            Object {
-              "bool": Object {
-                "must": Array [
-                  Object {
-                    "term": Object {
-                      "type": "dashboard",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "should": Array [
-                        Object {
-                          "range": Object {
-                            "coreMigrationVersion": Object {
-                              "lt": "8.8.0",
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
-  });
-
-  it('combines query with outdated core and type migrations versions', () => {
-    expect(
-      createInitialState({
-        ...createInitialStateParams,
-        coreMigrationVersionPerType: { dashboard: '8.8.0' },
-        migrationVersionPerType: { dashboard: '7.7.0' },
-      }).outdatedDocumentsQuery
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "should": Array [
-            Object {
-              "bool": Object {
-                "must": Array [
-                  Object {
-                    "term": Object {
-                      "type": "dashboard",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "should": Array [
-                        Object {
-                          "range": Object {
-                            "coreMigrationVersion": Object {
-                              "lt": "8.8.0",
-                            },
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "typeMigrationVersion",
-                                },
-                              },
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion.dashboard",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Object {
-                              "exists": Object {
-                                "field": "migrationVersion",
-                              },
-                            },
-                            "must_not": Object {
-                              "term": Object {
-                                "migrationVersion.dashboard": "7.7.0",
-                              },
-                            },
-                          },
-                        },
-                        Object {
-                          "range": Object {
-                            "typeMigrationVersion": Object {
-                              "lt": "7.7.0",
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
+    expect(getOutdatedDocumentsQuery).toHaveBeenCalledWith({
+      coreMigrationVersionPerType: {},
+      migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
+    });
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
