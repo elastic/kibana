@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import {
   ChromeGlobalHelpExtensionMenuLink,
@@ -16,6 +16,7 @@ import {
 
 export interface HelpCenterPluginStartDependencies {
   screenshotMode: ScreenshotModePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export interface HelpCenterLinks {

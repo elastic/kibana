@@ -40,9 +40,8 @@ export class HelpCenterPublicPlugin
     return {};
   }
 
-  public start(core: CoreStart, { screenshotMode }: HelpCenterPluginStartDependencies) {
-    const api = getApi(this.kibanaVersion, core, this.stop$);
-
+  public async start(core: CoreStart, { security }: HelpCenterPluginStartDependencies) {
+    const api = await getApi(this.kibanaVersion, core, this.stop$, security);
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api, target, core.theme.theme$),

@@ -81,7 +81,7 @@ const examples = [
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('coreStart');
 
-export const DocsGpt = () => {
+export const DocsGpt = ({ username }: { username?: string }) => {
   const chatRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState('');
@@ -165,7 +165,7 @@ export const DocsGpt = () => {
     >
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
-          <h2>Hi Maria, how can I help?</h2>
+          <h2>Hi{username && ' ' + username}, how can I help?</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
       </EuiFlexItem>

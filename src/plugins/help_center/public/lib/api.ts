@@ -13,6 +13,7 @@ import {
   ChromeHelpExtensionMenuGitHubLink,
   CoreStart,
 } from '@kbn/core/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import {
   GITHUB_CREATE_ISSUE_LINK,
   KIBANA_FEEDBACK_LINK,
@@ -25,17 +26,19 @@ export interface HelpCenterApi {
    */
   kibanaVersion: string;
   fetchResults$: Observable<void | null | FetchResult>;
+  username?: string;
 }
 
 /*
  * Creates an Observable to HelpCenter items, powered by the main interval
  * Computes hasNew value from new item hashes saved in localStorage
  */
-export function getApi(
+export async function getApi(
   kibanaVersion: string,
   core: CoreStart,
-  stop$: ReplaySubject<void>
-): HelpCenterApi {
+  stop$: ReplaySubject<void>,
+  security?: SecurityPluginStart
+): Promise<HelpCenterApi> {
   const fetchResults$ = combineLatest([
     core.chrome.getHelpExtension$(),
     core.chrome.getHelpSupportUrl$(),
@@ -131,7 +134,10 @@ export function getApi(
     })
   );
 
+  const user = await security?.authc.getCurrentUser();
+
   return {
+    username: user?.full_name,
     kibanaVersion,
     fetchResults$,
   };

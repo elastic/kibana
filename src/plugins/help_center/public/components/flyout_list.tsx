@@ -37,7 +37,13 @@ import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
 import { DocsGpt, OpenAiLogo } from './docs_gpt';
 
-export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null }) => {
+export const HelpCenterFlyout = ({
+  headerRef,
+  username,
+}: {
+  headerRef: HTMLElement | null;
+  username?: string;
+}) => {
   const { setFlyoutVisible, kibanaVersion } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
 
@@ -62,7 +68,7 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        content: <DocsGpt />,
+        content: <DocsGpt username={username} />,
       },
       {
         id: 'documentation',
