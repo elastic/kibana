@@ -578,7 +578,7 @@ packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
-x-pack/plugins/serverless_search @elastic/appex-sharedux
+x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
 x-pack/plugins/serverless_security @elastic/security-solution
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
