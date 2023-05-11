@@ -39,6 +39,9 @@ export function registerTelemetryConfigRoutes({
     {
       path: FetchTelemetryConfigRoute,
       validate: false,
+      options: {
+        authRequired: 'optional',
+      },
     },
     async (context, req, res) => {
       const config = await firstValueFrom(config$);

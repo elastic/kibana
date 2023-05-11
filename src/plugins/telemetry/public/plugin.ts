@@ -232,15 +232,14 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.telemetryNotifications = telemetryNotifications;
 
     application.currentAppId$.subscribe(async () => {
+      // Refresh and get telemetry config
+      const updatedConfig = await this.refreshConfig(http);
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
         return;
       }
-
-      // Refresh and get telemetry config
-      const updatedConfig = await this.refreshConfig(http);
-
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
 
       const telemetryBanner = updatedConfig?.banner;
 
