@@ -19,8 +19,8 @@
     "@kbn/config-schema",
     "@kbn/serverless",
     "@kbn/observability-shared-plugin",
-    "@kbn/core-chrome-browser",
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-chrome-navigation",
   ]
 }
