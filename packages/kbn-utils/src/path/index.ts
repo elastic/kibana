@@ -10,6 +10,8 @@ import { join } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getConfigFromFiles } from '@kbn/config';
+import getopts from 'getopts';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
@@ -24,8 +26,6 @@ const CONFIG_DIRECTORIES = [
   join(REPO_ROOT, 'config'),
   '/etc/kibana',
 ].filter(isString);
-
-const DATA_PATHS = [join(REPO_ROOT, 'data'), '/var/lib/kibana'].filter(isString);
 
 const LOGS_PATHS = [join(REPO_ROOT, 'logs'), '/var/log/kibana'].filter(isString);
 
@@ -52,6 +52,21 @@ export const getConfigPath = () => findFile(CONFIG_PATHS);
  * @internal
  */
 export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
+
+const configDataPath = getConfigFromFiles([getConfigPath()]).path?.data;
+const argv = process.argv.slice(2);
+const options = getopts(argv, {
+  alias: {
+    pathData: 'path.data',
+  },
+});
+
+const DATA_PATHS = [
+  options.pathData && join(REPO_ROOT, options.pathData),
+  configDataPath && join(REPO_ROOT, configDataPath),
+  join(REPO_ROOT, 'data'),
+  '/var/lib/kibana',
+].filter(isString);
 
 /**
  * Get the directory containing runtime data
