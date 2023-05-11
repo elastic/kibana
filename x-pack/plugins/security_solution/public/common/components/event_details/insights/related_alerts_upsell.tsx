@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SubscriptionLink } from '@kbn/subscription-tracking';
 import type { SubscriptionContextData } from '@kbn/subscription-tracking';
 import { INSIGHTS_UPSELL } from './translations';
-import { useNavigation } from '../../../lib/kibana';
 
 const subscriptionContext: SubscriptionContextData = {
   feature: 'alert-details-insights',
@@ -30,15 +29,6 @@ const StyledIcon = euiStyled(EuiIcon)`
 `;
 
 export const RelatedAlertsUpsell = React.memo(() => {
-  const { getAppUrl, navigateTo } = useNavigation();
-  const subscriptionUrl = getAppUrl({
-    appId: 'management',
-    path: 'stack/license_management',
-  });
-  const goToSubscription = useCallback(() => {
-    navigateTo({ url: subscriptionUrl });
-  }, [navigateTo, subscriptionUrl]);
-
   return (
     <UpsellContainer>
       <EuiFlexGroup alignItems="center" gutterSize="none">
