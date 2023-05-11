@@ -72,7 +72,8 @@ export const getMonitorSummary = (
     monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
     monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
     monitorId: monitorInfo.monitor?.id,
-    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
+    monitorName,
+    monitorNameTruncated: truncateString(monitorName, MAX_NAME_CHARS),
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
     locationName: monitorInfo.observer?.geo?.name!,
@@ -110,6 +111,12 @@ export const getReasonMessage = ({
       checkedAt,
     },
   });
+};
+
+export const MAX_NAME_CHARS = 30;
+
+export const truncateString = (str: string, maxLength) => {
+  return str.substring(0, maxLength).concat('...');
 };
 
 export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
