@@ -17,6 +17,7 @@ import type {
 } from '../prompt_context/types';
 import type { SecurityAssistantUiSettings } from '../helpers';
 import type { Conversation } from './types';
+import { DEFAULT_CONVERSATION_STATE } from '../use_conversation';
 
 interface SecurityAssistantProviderProps {
   apiConfig: SecurityAssistantUiSettings;
@@ -38,24 +39,6 @@ interface UseSecurityAssistantContext {
 export const SECURITY_ASSISTANT_UI_SETTING_KEY = 'securityAssistant';
 
 const LOCAL_STORAGE_KEY = `securityAssistant`;
-
-export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: 'default',
-  messages: [],
-  apiConfig: {
-    openAI: {
-      apiKey: '',
-      baseUrl: '',
-      model: '',
-      prompt: '',
-      temperature: 0.2,
-    },
-    virusTotal: {
-      apiKey: '',
-      baseUrl: '',
-    },
-  },
-};
 
 const SecurityAssistantContext = React.createContext<UseSecurityAssistantContext | undefined>(
   undefined

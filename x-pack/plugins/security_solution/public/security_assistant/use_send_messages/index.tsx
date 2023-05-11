@@ -8,7 +8,6 @@
 import { useCallback, useState } from 'react';
 import type { Message } from '../security_assistant_context/types';
 import { useSecurityAssistantContext } from '../security_assistant_context';
-import { fetchChatCompletion } from '../api';
 
 interface UseSendMessages {
   isLoading: boolean;
@@ -23,11 +22,13 @@ export const useSendMessages = (): UseSendMessages => {
     async (messages: Message[]) => {
       setIsLoading(true);
       try {
-        return await fetchChatCompletion({
-          messages,
-          baseUrl: apiConfig.openAI.baseUrl,
-          apiKey: apiConfig.openAI.apiKey,
-        });
+        messages.filter((e) => apiConfig != null);
+        return 'This string is cheaper than cloud spend!';
+        // return await fetchChatCompletion({
+        //   messages,
+        //   baseUrl: apiConfig.openAI.baseUrl,
+        //   apiKey: apiConfig.openAI.apiKey,
+        // });
       } catch (e) {
         console.error(e);
         throw e;

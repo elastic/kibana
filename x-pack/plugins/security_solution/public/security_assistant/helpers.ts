@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import crypto from 'crypto';
 import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
-import type { SecurityAssistantConversation } from './security_assistant';
-import { ConversationRole } from './security_assistant';
+
 import type { Message } from './security_assistant_context/types';
 
 /**
@@ -68,8 +68,8 @@ export const isFileHash = (prompt: string): boolean => {
 };
 
 interface HandleOpenAlertsProps {
-  chatHistory: SecurityAssistantConversation;
-  setChatHistory: (value: SecurityAssistantConversation) => void;
+  chatHistory: Message[];
+  setChatHistory: (value: Message[]) => void;
 }
 export const handleOpenAlerts = async ({ chatHistory, setChatHistory }: HandleOpenAlertsProps) => {
   const response = await fetchOpenAlerts();
@@ -82,7 +82,7 @@ export const handleOpenAlerts = async ({ chatHistory, setChatHistory }: HandleOp
       setChatHistory([
         ...chatHistory,
         {
-          role: ConversationRole.Assistant,
+          role: 'assistant',
           content: formattedResponseComponent,
           timestamp: dateTimeString,
         },
@@ -95,7 +95,7 @@ export const handleOpenAlerts = async ({ chatHistory, setChatHistory }: HandleOp
     setChatHistory([
       ...chatHistory,
       {
-        role: ConversationRole.Assistant,
+        role: 'assistant',
         content: 'An error occurred while processing your request. Please try again later.',
         timestamp: dateTimeString,
       },
@@ -105,8 +105,8 @@ export const handleOpenAlerts = async ({ chatHistory, setChatHistory }: HandleOp
 
 interface HandleFileHashProps {
   promptText: string;
-  chatHistory: SecurityAssistantConversation;
-  setChatHistory: (value: SecurityAssistantConversation) => void;
+  chatHistory: Message[];
+  setChatHistory: (value: Message[]) => void;
   settings: SecurityAssistantUiSettings;
 }
 export const handleFileHash = async ({
@@ -123,7 +123,7 @@ export const handleFileHash = async ({
     const markdownReport = formatVirusTotalResponse(result);
     setChatHistory([
       ...chatHistory,
-      { role: ConversationRole.Assistant, content: markdownReport, timestamp: dateTimeString },
+      { role: 'assistant', content: markdownReport, timestamp: dateTimeString },
     ]);
     // setLastResponse(markdownReport);
   } catch (error) {
@@ -131,7 +131,7 @@ export const handleFileHash = async ({
     setChatHistory([
       ...chatHistory,
       {
-        role: ConversationRole.Assistant,
+        role: 'assistant',
         content: 'An error occurred while processing your request. Please try again later.',
         timestamp: dateTimeString,
       },
@@ -143,16 +143,21 @@ export const formatVirusTotalResponse = (response: any) => {
   const { data } = response;
   const { attributes } = data;
 
-  const { last_analysis_stats, magic, meaningful_name, sha256 } = attributes;
+  const {
+    last_analysis_stats: lastAnalysisStats,
+    magic,
+    meaningful_name: name,
+    sha256,
+  } = attributes;
 
   const mdResponse =
-    `**File Name:** [${meaningful_name}](https://www.virustotal.com/gui/file/${sha256});\n\n` +
+    `**File Name:** [${name}](https://www.virustotal.com/gui/file/${sha256});\n\n` +
     `**File Type:** ${magic}\n\n` +
     `**Scan Results:**\n\n` +
-    `  - Malicious: ${last_analysis_stats.malicious}\n` +
-    `  - Suspicious: ${last_analysis_stats.suspicious}\n` +
-    `  - Undetected: ${last_analysis_stats.undetected}\n` +
-    `  - Timeout: ${last_analysis_stats.timeout}\n\n`;
+    `  - Malicious: ${lastAnalysisStats.malicious}\n` +
+    `  - Suspicious: ${lastAnalysisStats.suspicious}\n` +
+    `  - Undetected: ${lastAnalysisStats.undetected}\n` +
+    `  - Timeout: ${lastAnalysisStats.timeout}\n\n`;
 
   return mdResponse;
 };
@@ -193,8 +198,8 @@ export const formatOpenAlertsResponse = (response: any): string => {
 export interface HandleFileUploadProps {
   files: FileList | null;
   virusTotal: SecurityAssistantUiSettings['virusTotal'];
-  chatHistory: SecurityAssistantConversation;
-  setChatHistory: (value: SecurityAssistantConversation) => void;
+  chatHistory: Message[];
+  setChatHistory: (value: Message[]) => void;
   setFilePickerKey: React.Dispatch<React.SetStateAction<number>>;
 }
 export const handleFileUpload = async ({
@@ -233,7 +238,7 @@ export const handleFileUpload = async ({
         setChatHistory([
           ...chatHistory,
           {
-            role: ConversationRole.Assistant,
+            role: 'assistant',
             content: `The file with SHA-256 hash \`${sha256Hash}\` has been uploaded to VirusTotal. The results will be displayed once the analysis is complete.`,
             timestamp: dateTimeString,
           },
@@ -265,7 +270,7 @@ export const handleFileUpload = async ({
         setChatHistory([
           ...chatHistory,
           {
-            role: ConversationRole.Assistant,
+            role: 'assistant',
             content: virusTotalResult,
             timestamp: dateTimeString,
           },

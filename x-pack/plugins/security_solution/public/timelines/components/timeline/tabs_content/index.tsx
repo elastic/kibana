@@ -137,7 +137,7 @@ const SecurityAssistantTab: React.FC<{
   timelineId: TimelineId;
 }> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <SecurityAssistant />
+    <SecurityAssistant conversationId={'timeline'} />
   </Suspense>
 ));
 SecurityAssistantTab.displayName = 'SecurityAssistant';

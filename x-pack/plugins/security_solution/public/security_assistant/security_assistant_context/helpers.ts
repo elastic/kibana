@@ -7,10 +7,10 @@
 
 import { v4 } from 'uuid';
 
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { PromptContext } from '../prompt_context/types';
-import { SecurityAssistantUiSettings } from '../helpers';
-import { DEFAULT_CONVERSATION_STATE } from './index';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { SecurityAssistantUiSettings } from '../helpers';
+import { DEFAULT_CONVERSATION_STATE } from '../use_conversation';
 
 export const getUniquePromptContextId = (): string => v4();
 

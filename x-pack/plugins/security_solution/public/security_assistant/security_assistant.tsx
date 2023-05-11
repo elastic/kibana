@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
@@ -23,32 +23,24 @@ import {
   EuiMarkdownFormat,
   EuiIcon,
   EuiToolTip,
-  EuiFormRow,
-  EuiSuperSelect,
 } from '@elastic/eui';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 import styled from 'styled-components';
-import { css } from '@emotion/react';
-import useEvent from 'react-use/lib/useEvent';
 import * as i18n from './translations';
 
 import { useKibana } from '../common/lib/kibana';
 import { getMessageFromRawResponse, isFileHash } from './helpers';
 import { SendToTimelineButton } from './send_to_timeline_button';
 import { SettingsPopover } from './settings_popover';
-import {
-  DEFAULT_CONVERSATION_STATE,
-  useSecurityAssistantContext,
-} from './security_assistant_context';
+import { useSecurityAssistantContext } from './security_assistant_context';
 import { ContextPills } from './context_pills';
 import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from './security_assistant_context/types';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+import { ConversationSelector } from './conversation_selector';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -71,7 +63,6 @@ const StyledCommentList = styled(EuiCommentList)`
 
 export interface SecurityAssistantProps {
   promptContextId?: string;
-  localStorageEnabled?: boolean;
   conversationId?: string;
   showTitle?: boolean;
 }
@@ -84,11 +75,12 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
   React.memo<SecurityAssistantProps>(
     ({ promptContextId = '', showTitle = true, conversationId = 'default' }) => {
       const { promptContexts, conversations } = useSecurityAssistantContext();
-      const { appendMessage, clearConversation } = useConversation();
+      const { appendMessage, clearConversation, createConversation } = useConversation();
       const { isLoading, sendMessages } = useSendMessages();
+
       const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
-      const currentConversation = conversations[conversationId] ?? DEFAULT_CONVERSATION_STATE;
-      const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
+      const currentConversation =
+        conversations[selectedConversationId] ?? createConversation({ conversationId });
 
       const { cases } = useKibana().services;
       const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -101,52 +93,6 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
         bottomRef.current?.scrollIntoView({ behavior: 'auto' });
       }, [currentConversation.messages.length]);
       ////
-
-      // Conversation selection methods
-      // Register keyboard listener to change selected conversation
-      // TODO: Pick better keyboard shortcuts that don't interfere with text navigation
-      const conversationOptions = conversationIds.map((id) => ({ value: id, inputDisplay: id }));
-      const onKeyDown = useCallback(
-        (event: KeyboardEvent) => {
-          if (event.key === 'ArrowLeft' && (isMac ? event.metaKey : event.ctrlKey)) {
-            event.preventDefault();
-            const previousConversationId =
-              conversationIds.indexOf(selectedConversationId) === 0
-                ? conversationIds[conversationIds.length]
-                : conversationIds[conversationIds.indexOf(selectedConversationId) - 1];
-            setSelectedConversationId(previousConversationId);
-          }
-          if (event.key === 'ArrowRight' && (isMac ? event.metaKey : event.ctrlKey)) {
-            event.preventDefault();
-            const nextConversationId =
-              conversationIds.indexOf(selectedConversationId) + 1 >= conversationIds.length
-                ? conversationIds[0]
-                : conversationIds[conversationIds.indexOf(selectedConversationId) + 1];
-            setSelectedConversationId(nextConversationId);
-          }
-        },
-        [conversationIds, selectedConversationId]
-      );
-      useEvent('keydown', onKeyDown);
-
-      const onLocalStorageComboBoxChange = useCallback((value: string) => {
-        setSelectedConversationId(value ?? 'default');
-      }, []);
-      const onLeftArrowClick = useCallback(() => {
-        const previousConversationId =
-          conversationIds.indexOf(selectedConversationId) === 0
-            ? conversationIds[conversationIds.length]
-            : conversationIds[conversationIds.indexOf(selectedConversationId) - 1];
-        setSelectedConversationId(previousConversationId);
-      }, [conversationIds, selectedConversationId]);
-      const onRightArrowClick = useCallback(() => {
-        const nextConversationId =
-          conversationIds.indexOf(selectedConversationId) + 1 >= conversationIds.length
-            ? conversationIds[0]
-            : conversationIds[conversationIds.indexOf(selectedConversationId) + 1];
-        setSelectedConversationId(nextConversationId);
-      }, [conversationIds, selectedConversationId]);
-      //
 
       // Attach to case support
       const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -192,10 +138,13 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
             //   settings: currentConversation.apiConfig,
             // });
           } else {
-            const updatedMessages = appendMessage(selectedConversationId, message);
+            const updatedMessages = appendMessage({
+              conversationId: selectedConversationId,
+              message,
+            });
             const rawResponse = await sendMessages(updatedMessages);
             const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-            appendMessage(selectedConversationId, responseMessage);
+            appendMessage({ conversationId: selectedConversationId, message: responseMessage });
           }
         },
         [appendMessage, selectedConversationId, sendMessages]
@@ -278,40 +227,10 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
               <EuiPageHeader
                 pageTitle={i18n.SECURITY_ASSISTANT_TITLE}
                 rightSideItems={[
-                  <EuiFormRow
-                    label="Selected Conversation"
-                    display="rowCompressed"
-                    css={css`
-                      min-width: 300px;
-                      margin-top: -6px;
-                    `}
-                  >
-                    <EuiSuperSelect
-                      options={conversationOptions}
-                      valueOfSelected={selectedConversationId}
-                      onChange={onLocalStorageComboBoxChange}
-                      compressed={true}
-                      aria-label="Conversation Selector"
-                      prepend={
-                        <EuiToolTip content="Previous Conversation (⌘ + ←)" display="block">
-                          <EuiButtonIcon
-                            iconType="arrowLeft"
-                            aria-label="Previous Conversation"
-                            onClick={onLeftArrowClick}
-                          />
-                        </EuiToolTip>
-                      }
-                      append={
-                        <EuiToolTip content="Next Conversation (⌘ + →)" display="block">
-                          <EuiButtonIcon
-                            iconType="arrowRight"
-                            aria-label="Next Conversation"
-                            onClick={onRightArrowClick}
-                          />
-                        </EuiToolTip>
-                      }
-                    />
-                  </EuiFormRow>,
+                  <ConversationSelector
+                    conversationId={selectedConversationId}
+                    onSelectionChange={(id) => setSelectedConversationId(id)}
+                  />,
                 ]}
                 iconType="logoSecurity"
               />

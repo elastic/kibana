@@ -56,7 +56,7 @@ export const AssistantOverlay: React.FC<AssistantOverlayProps> = React.memo(({})
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal}>
-          <SecurityAssistant autoSendInput={false} />
+          <SecurityAssistant />
 
           <EuiSpacer size="xs" />
 
