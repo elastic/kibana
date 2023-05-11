@@ -145,6 +145,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
           columns={columns}
           items={schemaField.indices}
+          responsive={false}
         />
       </EuiFlexGroup>
     </EuiPanel>
@@ -216,7 +217,7 @@ export const EngineSchema: React.FC = () => {
         if (type !== 'conflict') return null;
         return <EuiIcon type="error" color="danger" />;
       },
-      width: '2%',
+      width: '24px',
     },
     {
       name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_name.columnTitle', {
@@ -230,7 +231,6 @@ export const EngineSchema: React.FC = () => {
           </EuiText>
         </EuiFlexGroup>
       ),
-      width: '43%',
     },
     {
       name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_type.columnTitle', {
@@ -259,7 +259,7 @@ export const EngineSchema: React.FC = () => {
           </EuiFlexGroup>
         );
       },
-      width: '30%',
+      width: '180px',
     },
     {
       name: i18n.translate(
@@ -288,15 +288,16 @@ export const EngineSchema: React.FC = () => {
           </EuiBadge>
         );
       },
-      width: '15%',
+      width: '110px',
     },
     {
+      isExpander: true,
       render: (schemaField: SchemaField) => {
         const { name, type, indices } = schemaField;
         if (type === 'conflict' || indices.some((i) => i.type === 'unmapped')) {
           const icon = itemIdToExpandedRowMap[name] ? 'arrowUp' : 'arrowDown';
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
               <EuiButtonEmpty
                 size="s"
                 color="primary"
@@ -316,7 +317,7 @@ export const EngineSchema: React.FC = () => {
         }
         return null;
       },
-      width: '10%',
+      width: '115px',
     },
   ];
   const filterButton = (
@@ -437,6 +438,7 @@ export const EngineSchema: React.FC = () => {
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable
+          responsive={false}
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
           <EuiCallOut
