@@ -83,6 +83,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await flyOutCancelButton.click();
     });
 
+    it('slack api connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('slack');
+      await testSubjects.click('.slack_apiButton');
+      await testSubjects.setValue('nameInput', 'Slack api test connector');
+      await testSubjects.setValue('secrets.token-input', 'xoxb-XXXX-XXXX-XXXX');
+      await commonScreenshots.takeScreenshot('slack-api-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await pageObjects.common.closeToast();
+      await commonScreenshots.takeScreenshot('slack-api-params', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('slack webhook connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('slack');
+      await testSubjects.setValue('nameInput', 'Slack webhook test connector');
+      await testSubjects.setValue(
+        'slackWebhookUrlInput',
+        'https://hooks.slack.com/services/abcd/ljklmnopqrstuvwxz'
+      );
+      await commonScreenshots.takeScreenshot('slack-webhook-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('slack-webhook-params', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     it('email connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
