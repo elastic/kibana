@@ -97,7 +97,6 @@ export const registerSyntheticsStatusCheckRule = (
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
         const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
-        const monitorSummary = getMonitorSummary(ping, DOWN_LABEL, locationId, configId);
         const alertId = idWithLocation;
         const monitorSummary = getMonitorSummary(
           ping,
