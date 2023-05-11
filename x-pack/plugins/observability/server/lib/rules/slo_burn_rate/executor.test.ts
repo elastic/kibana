@@ -126,12 +126,12 @@ describe('BurnRateRuleExecutor', () => {
   });
 
   it('throws when the slo is not found', async () => {
-    soClientMock.find.mockRejectedValue(new SLONotFound('SLO [inexistent] not found'));
+    soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
     const executor = getRuleExecutor({ basePath: basePathMock });
 
     await expect(
       executor({
-        params: someRuleParams({ sloId: 'inexistent', burnRateThreshold: BURN_RATE_THRESHOLD }),
+        params: someRuleParams({ sloId: 'non-existent', burnRateThreshold: BURN_RATE_THRESHOLD }),
         startedAt: new Date(),
         services: servicesMock,
         executionId: 'irrelevant',
