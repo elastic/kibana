@@ -15,7 +15,7 @@ import {
   generateAttachmentsMetadata,
   generateAttachmentsWithoutOwner,
 } from '../../utils/attachments';
-import { useKibana } from '../../../../hooks';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../common/types/indicator';
 
 export interface AddToNewCaseProps {
