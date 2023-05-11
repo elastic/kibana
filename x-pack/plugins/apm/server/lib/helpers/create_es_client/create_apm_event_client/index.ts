@@ -11,8 +11,12 @@ import type {
   FieldCapsResponse,
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
-  TermsEnumRequest,
   TermsEnumResponse,
+  TermsEnumRequest,
+  IndicesGetDataStreamRequest,
+  IndicesGetIndexTemplateRequest,
+  IndicesSimulateTemplateResponse,
+  IndicesGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -46,17 +50,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
 };
 
-export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+type APMEventWrapper<T> = Omit<T, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
-export type APMEventEqlSearchRequest = Omit<EqlSearchRequest, 'index'> & {
-  apm: { events: ProcessorEvent[] };
-};
-
-export type APMEventFieldCapsRequest = Omit<FieldCapsRequest, 'index'> & {
-  apm: { events: ProcessorEvent[] };
-};
+type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
+type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
+type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
 // These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
 // See https://github.com/microsoft/TypeScript/issues/37888
@@ -288,7 +288,7 @@ export class APMEventClient {
 
   async termsEnum(
     operationName: string,
-    params: APMEventESTermsEnumRequest
+    params: APMEventTermsEnumRequest
   ): Promise<TermsEnumResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
@@ -302,6 +302,64 @@ export class APMEventClient {
       requestType: 'terms_enum',
       params: requestParams,
       cb: (opts) => this.esClient.termsEnum(requestParams, opts),
+    });
+  }
+
+  async indexTemplate(
+    operationName: string,
+    params: IndicesGetIndexTemplateRequest
+  ) {
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: 'index_template',
+      params,
+      cb: (abortOptions) =>
+        this.esClient.indices.getIndexTemplate(params, abortOptions),
+    });
+  }
+
+  async simulateIndexTemplate(
+    operationName: string,
+    params: {
+      index_patterns: string[];
+    }
+  ) {
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: 'simulate_index_template',
+      params,
+      cb: (abortOptions) => {
+        return this.esClient.transport.request<IndicesSimulateTemplateResponse>(
+          {
+            method: 'POST',
+            path: '/_index_template/_simulate',
+            body: params,
+          },
+          abortOptions
+        );
+      },
+    });
+  }
+
+  async dataStreams(
+    operationName: string,
+    params: IndicesGetDataStreamRequest
+  ) {
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: 'data_streams',
+      params,
+      cb: (abortOptions) =>
+        this.esClient.indices.getDataStream(params, abortOptions),
+    });
+  }
+
+  async getIndices(operationName: string, params: IndicesGetRequest) {
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: 'get_indices',
+      params,
+      cb: (abortOptions) => this.esClient.indices.get(params, abortOptions),
     });
   }
 }
