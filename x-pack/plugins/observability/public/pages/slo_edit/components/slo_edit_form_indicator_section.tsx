@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { isObject } from 'lodash';
 
 import { SLI_OPTIONS } from '../constants';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
@@ -34,11 +35,11 @@ export function SloEditFormIndicatorSection() {
       setValue('indicator.params.total.metrics', [NEW_CUSTOM_METRIC]);
       setValue('indicator.params.total.equation', 'A');
     }
-    if (indicator === 'sli.kql.custom') {
+    if (indicator === 'sli.kql.custom' && isObject(watch('indicator.params.good'))) {
       setValue('indicator.params.good', '');
       setValue('indicator.params.total', '');
     }
-  }, [indicator, setValue]);
+  }, [indicator, setValue, watch]);
 
   const getIndicatorTypeForm = () => {
     switch (watch('indicator.type')) {
