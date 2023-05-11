@@ -13,7 +13,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import {
-  type UploadActionRequestBody,
+  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -59,7 +59,12 @@ export const registerActionFileUploadRoute = (
 
 export const getActionFileUploadHandler = (
   endpointContext: EndpointAppContext
-): RequestHandler<never, never, UploadActionRequestBody, SecuritySolutionRequestHandlerContext> => {
+): RequestHandler<
+  never,
+  never,
+  UploadActionApiRequestBody,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointContext.logFactory.get('uploadAction');
   const maxFileBytes = endpointContext.serverConfig.maxUploadResponseActionFileBytes;
 
@@ -109,7 +114,15 @@ export const getActionFileUploadHandler = (
           { casesClient }
         );
 
-      await setFileActionId(esClient, logger, data);
+      // Update the file meta to include the action id, and if any errors (unlikely),
+      // then just log them and still allow api to return success since the action has
+      // already been created and potentially dispatched to Endpoint. Action ID is not
+      // needed by the Endpoint or fleet-server's API, so no need to fail here
+      try {
+        await setFileActionId(esClient, logger, data);
+      } catch (e) {
+        logger.warn(`Attempt to update File meta with Action ID failed: ${e.message}`, e);
+      }
 
       return res.ok({
         body: {
