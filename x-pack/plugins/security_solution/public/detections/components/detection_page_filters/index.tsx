@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { ComponentProps, useMemo } from 'react';
+import type { ComponentProps } from 'react';
+import { useMemo } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { EuiFlexItem } from '@elastic/eui';
+import type { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { FilterGroupLoading } from '../../../common/components/filter_group/loading';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { FilterGroup } from '../../../common/components/filter_group';
 import { useSecuritySolutionUserSettings } from '../../../common/user_settings/use_security_solution_user_settings';
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { getPanelsInOrderFromControlsInput } from '../../../common/components/filter_group/utils';
 
 type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls' | 'onSave'> & {
   activeTemplateId?: string;
@@ -44,9 +46,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
     if (!templateFilters) return DEFAULT_DETECTION_PAGE_FILTERS;
 
-    const savedFilterControls = Object.values(templateFilters?.panels ?? {}).sort(
-      (a, b) => a.order - b.order
-    );
+    const savedFilterControls = getPanelsInOrderFromControlsInput(templateFilters);
 
     const sanitizedControls =
       savedFilterControls && savedFilterControls.length > 0

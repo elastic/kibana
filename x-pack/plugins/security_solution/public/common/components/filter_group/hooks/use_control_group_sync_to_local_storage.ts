@@ -29,14 +29,14 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
   saveHandler,
 }) => {
   const storage = useRef<Storage>(new Storage(localStorage));
+  const storageKeyRef = useRef(storageKey);
 
   const [controlGroupInput, setControlGroupInput] = useState(
     () => (storage.current.get(storageKey) as ControlGroupInput) ?? undefined
-  );
+  ); // related to old storage key
 
   const getStoredControlGroupInput = useCallback(() => {
     const val = (storage.current.get(storageKey) as ControlGroupInput) ?? undefined;
-    console.log({ storageKey, val });
     return val;
   }, [storageKey]);
 
@@ -46,8 +46,14 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
       controlGroupInput &&
       !isEqual(controlGroupInput, getStoredControlGroupInput())
     ) {
+      if (storageKeyRef.current !== storageKey) {
+        storageKeyRef.current = storageKey;
+        return;
+      }
+
       if (saveHandler) saveHandler(controlGroupInput);
       storage.current.set(storageKey, controlGroupInput);
+      storageKeyRef.current = storageKey;
     }
   }, [shouldSync, controlGroupInput, storageKey, saveHandler, getStoredControlGroupInput]);
 

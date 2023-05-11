@@ -85,7 +85,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [spaceId, uniqueControlId]
   );
 
-  console.log({localStoragePageFilterKey})
+  console.log({ localStoragePageFilterKey });
 
   const currentFiltersRef = useRef<Filter[]>();
 
@@ -250,8 +250,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * Below is the priority of how controls are fetched.
      *  1. URL
-     *  2. If not found in URL, see in Localstorage
-     *  3. If not found in Localstorage, defaultControls are assigned
+      2. If not found in URL, see in Localstorage
+   *  3. If not found in Localstorage, defaultControls are assigned
      *
      * */
 
@@ -299,6 +299,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         })),
       ];
     }
+
+    console.log({ resultControls });
 
     return resultControls;
   }, [initialUrlParam, initialControls, getStoredControlInput]);

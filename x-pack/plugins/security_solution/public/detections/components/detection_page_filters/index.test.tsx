@@ -55,7 +55,6 @@ const TestComponent = (props: Partial<ComponentProps<typeof DetectionPageFilterS
     <TestProviders>
       <DetectionPageFilterSet
         chainingSystem="HIERARCHICAL"
-        dataViewId=""
         onFilterChange={onFilterChangeMock}
         {...props}
       />
