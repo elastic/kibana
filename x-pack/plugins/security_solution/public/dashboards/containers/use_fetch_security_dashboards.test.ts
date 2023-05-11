@@ -51,7 +51,12 @@ describe('useFetchSecurityDashboards', () => {
     await asyncRenderUseFetchSecurityDashboards();
 
     expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-    expect(getDashboardsByTagIds).toHaveBeenCalledWith(mockHttp, [MOCK_TAG_ID]);
+    expect((getDashboardsByTagIds as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        http: mockHttp,
+        tagIds: [MOCK_TAG_ID],
+      })
+    );
   });
 
   it('should return Security Solution dashboards', async () => {
