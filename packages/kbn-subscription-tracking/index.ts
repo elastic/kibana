@@ -13,3 +13,5 @@ export {
   SubscriptionTrackingProvider,
   registerEvents,
 } from './src/services';
+
+export * from './types';

@@ -11,11 +11,11 @@ import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { EuiLinkProps, EuiButtonEmptyProps, EuiButtonProps } from '@elastic/eui';
 import { useGoToSubscription } from './use_go_to_subscription';
 import { useImpression } from './use_impression';
-import type { SubscriptionContext } from '../types';
+import type { SubscriptionContextData } from '../types';
 
 interface CommonProps {
   /** The context information for this subscription element */
-  subscriptionContext: SubscriptionContext;
+  subscriptionContext: SubscriptionContextData;
 }
 
 export type SubscriptionLinkProps = EuiLinkProps & CommonProps;

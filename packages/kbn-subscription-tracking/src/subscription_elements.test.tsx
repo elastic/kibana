@@ -14,7 +14,7 @@ import {
   SubscriptionButtonEmpty,
 } from './subscription_elements';
 import { SubscriptionTrackingProvider } from './services';
-import { EVENT_NAMES, Services, SubscriptionContext } from '../types';
+import { EVENT_NAMES, Services, SubscriptionContextData } from '../types';
 import { coolDownTimeMs, resetCoolDown } from './use_impression';
 
 const testServices: Services = {
@@ -24,7 +24,7 @@ const testServices: Services = {
     registerEventType: jest.fn(),
   } as any,
 };
-const testContext: SubscriptionContext = { feature: 'test', source: 'security__test' };
+const testContext: SubscriptionContextData = { feature: 'test', source: 'security__test' };
 
 const WithProviders: React.FC = ({ children }) => (
   <SubscriptionTrackingProvider

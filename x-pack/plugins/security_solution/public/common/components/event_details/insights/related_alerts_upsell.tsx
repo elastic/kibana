@@ -6,11 +6,18 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { SubscriptionLink } from '@kbn/subscription-tracking';
+import type { SubscriptionContextData } from '@kbn/subscription-tracking';
 import { INSIGHTS_UPSELL } from './translations';
 import { useNavigation } from '../../../lib/kibana';
+
+const subscriptionContext: SubscriptionContextData = {
+  feature: 'alert-details-insights',
+  source: 'security__alert-details-flyout',
+};
 
 const UpsellContainer = euiStyled.div`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -40,9 +47,13 @@ export const RelatedAlertsUpsell = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <EuiLink color="subdued" onClick={goToSubscription} target="_blank">
+            <SubscriptionLink
+              color="subdued"
+              target="_blank"
+              subscriptionContext={subscriptionContext}
+            >
               {INSIGHTS_UPSELL}
-            </EuiLink>
+            </SubscriptionLink>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

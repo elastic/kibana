@@ -17,7 +17,7 @@ type SourceIdentifier = `${SolutionIdentifier}__${LocationString}`;
  * A piece of metadata which consists of an identifier of the advertised feature and
  * the `source` (e.g. location) of the subscription element.
  */
-export interface SubscriptionContext {
+export interface SubscriptionContextData {
   /**
    * A human-readable identifier describing the location of the beginning of the
    * subscription flow.

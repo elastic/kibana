@@ -9,7 +9,7 @@
 import { useEffect } from 'react';
 import { isValidContext } from './helpers';
 import { useServices } from './services';
-import { EVENT_NAMES, SubscriptionContext } from '../types';
+import { EVENT_NAMES, SubscriptionContextData } from '../types';
 
 /**
  * Sends an impression event with the given context.
@@ -17,7 +17,7 @@ import { EVENT_NAMES, SubscriptionContext } from '../types';
  * Note: impression events are throttled and will not fire more
  * often than once every 30 seconds.
  */
-export const useImpression = (context: SubscriptionContext) => {
+export const useImpression = (context: SubscriptionContextData) => {
   const { analyticsClient } = useServices();
 
   useEffect(() => {
@@ -39,19 +39,19 @@ export const useImpression = (context: SubscriptionContext) => {
  * if the user is navigating back and forth rapidly.
  */
 export const coolDownTimeMs = 30 * 1000;
-let impressionCooldown = new WeakMap<SubscriptionContext, number>();
+let impressionCooldown = new WeakMap<SubscriptionContextData, number>();
 
-function isCoolingDown(context: SubscriptionContext) {
+function isCoolingDown(context: SubscriptionContextData) {
   const previousLog = impressionCooldown.get(context);
 
   // we logged before and we are in the cooldown period
   return previousLog && Date.now() - previousLog < coolDownTimeMs;
 }
 
-function coolDown(context: SubscriptionContext) {
+function coolDown(context: SubscriptionContextData) {
   impressionCooldown.set(context, Date.now());
 }
 
 export function resetCoolDown() {
-  impressionCooldown = new WeakMap<SubscriptionContext, number>();
+  impressionCooldown = new WeakMap<SubscriptionContextData, number>();
 }

@@ -8,10 +8,10 @@
 import { useCallback } from 'react';
 import { isValidContext } from './helpers';
 import { useServices } from './services';
-import { EVENT_NAMES, SubscriptionContext } from '../types';
+import { EVENT_NAMES, SubscriptionContextData } from '../types';
 
 interface Options {
-  subscriptionContext: SubscriptionContext;
+  subscriptionContext: SubscriptionContextData;
 }
 
 /**
