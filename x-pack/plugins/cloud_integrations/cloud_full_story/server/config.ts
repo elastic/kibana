@@ -24,7 +24,6 @@ const configSchema = schema.object({
       'Host Entry Clicked', // Worst-case scenario once per second - AT RISK,
       'Host Flyout Filter Removed', // Worst-case scenario once per second - AT RISK,
       'Host Flyout Filter Added', // Worst-case scenario once per second - AT RISK,
-      'Host View Total Host Count Retrieved', // Worst-case scenario 1 every 2 seconds
     ],
   }),
 });

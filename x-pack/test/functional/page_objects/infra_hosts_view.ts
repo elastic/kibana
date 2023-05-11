@@ -118,7 +118,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
-      metricsTab.click();
+      return metricsTab.click();
     },
 
     async getAllMetricsCharts() {
