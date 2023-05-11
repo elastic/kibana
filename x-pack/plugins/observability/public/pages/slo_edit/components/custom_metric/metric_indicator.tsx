@@ -42,6 +42,11 @@ const MAX_VARIABLES = 26;
 const CHAR_CODE_FOR_A = 65;
 const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
 const VAR_NAMES = range(CHAR_CODE_FOR_A, CHAR_CODE_FOR_Z).map((c) => String.fromCharCode(c));
+const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/;
+const validateEquation = (value: string) => {
+  const result = value.match(INVALID_EQUATION_REGEX);
+  return result === null;
+};
 
 type MetricCustomIndicator = t.TypeOf<typeof metricCustomIndicatorSchema>;
 type MetricCustomMetricDef =
@@ -112,7 +117,7 @@ export function MetricIndicator({
     <>
       <EuiFlexItem>
         {metrics?.map((metric, index) => (
-          <EuiFormRow fullWidth label={`${metricLabel} ${metric.id}`}>
+          <EuiFormRow fullWidth label={`${metricLabel} ${metric.id}`} key={metric.id}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
                 <Controller
@@ -177,6 +182,10 @@ export function MetricIndicator({
                     'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
                     { defaultMessage: 'Delete metric' }
                   )}
+                  aria-label={i18n.translate(
+                    'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
+                    { defaultMessage: 'Delete metric' }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -192,6 +201,10 @@ export function MetricIndicator({
               iconType={'plusInCircleFilled'}
               onClick={handleAddMetric}
               isDisabled={disableAdd}
+              aria-label={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.addMetricAriaLabel',
+                { defaultMessage: 'Add metric' }
+              )}
             >
               <FormattedMessage
                 id="xpack.observability.slo.sloEdit.sliType.customMetric.addMetricLabel"
@@ -202,30 +215,43 @@ export function MetricIndicator({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={equationLabel}
-          helpText={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.equationHelpText',
-            { defaultMessage: 'Supports basic math equations' }
-          )}
-        >
-          <Controller
-            name={`indicator.params.${type}.equation`}
-            shouldUnregister
-            defaultValue=""
-            rules={{ required: true }}
-            control={control}
-            render={({ field: { ref, ...field }, fieldState }) => (
+        <Controller
+          name={`indicator.params.${type}.equation`}
+          shouldUnregister
+          defaultValue=""
+          rules={{
+            required: true,
+            validate: { validateEquation },
+          }}
+          control={control}
+          render={({ field: { ref, ...field }, fieldState }) => (
+            <EuiFormRow
+              fullWidth
+              label={equationLabel}
+              helpText={i18n.translate(
+                'xpack.observability.slo.sloEdit.sliType.customMetric.equationHelpText',
+                { defaultMessage: 'Supports basic math equations' }
+              )}
+              isInvalid={fieldState.invalid}
+              error={[
+                i18n.translate(
+                  'xpack.observability.slo.sloEdit.sliType.customMetric.equation.invalidCharacters',
+                  {
+                    defaultMessage:
+                      'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+                  }
+                ),
+              ]}
+            >
               <EuiFieldText
                 {...field}
                 isInvalid={fieldState.invalid}
                 fullWidth
                 data-test-subj="o11yCustomMetricEquation"
               />
-            )}
-          />
-        </EuiFormRow>
+            </EuiFormRow>
+          )}
+        />
       </EuiFlexItem>
     </>
   );
