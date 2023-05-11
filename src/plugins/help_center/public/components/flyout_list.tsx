@@ -145,7 +145,7 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
         >
           <ResizableBox
             width={500}
-            height={600}
+            height={700}
             css={css`
               position: fixed !important;
               z-index: 6000;

@@ -11,23 +11,42 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useState } from 'react';
+
+const ExampleEntry = ({ question, onClick }: { question: string; onClick: () => void }) => {
+  return (
+    <EuiPanel color="subdued" hasShadow={false} tabIndex={0} onClick={onClick}>
+      {question}
+    </EuiPanel>
+  );
+};
+
+const Message = ({ response, content }: { response: boolean; content: string }) => {
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiPanel color={response ? 'subdued' : 'primary'} hasShadow={false}>
+        <EuiMarkdownFormat textSize="relative">{content}</EuiMarkdownFormat>
+      </EuiPanel>
+    </>
+  );
+};
+
+const examples = [
+  'How do I create a new temporary data view?',
+  'What happens if I delete a saved object with references?',
+  'Can I create small multiples in Lens?',
+];
 
 export const DocsGpt = () => {
-  const items = [...Array(4)].map((_, i) => (
-    <>
-      <EuiPanel color="subdued" hasShadow={false} key={i} id={i}>
-        Explain how to create a data view
-      </EuiPanel>
-      <EuiSpacer size="s" />
-    </>
-  ));
+  const [messages, setMessages] = useState<Array<{ response: boolean; content: string }>>([]);
 
   return (
     <EuiFlexGroup
@@ -54,9 +73,20 @@ export const DocsGpt = () => {
             <EuiTitle className="eui-textCenter" size="xxs">
               <h2>Examples</h2>
             </EuiTitle>
-            <EuiSpacer size="s" />
-            {items}
+            {examples.map((example, i) => (
+              <>
+                <EuiSpacer size="s" />{' '}
+                <ExampleEntry
+                  key={i}
+                  question={example}
+                  onClick={() => setMessages([...messages, { response: false, content: example }])}
+                />
+              </>
+            ))}
           </EuiPanel>
+          {messages.map((message, i) => (
+            <Message key={i} {...message} />
+          ))}
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -75,7 +105,7 @@ export const DocsGpt = () => {
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <p>
-                Free Research Preview. ChatGPT may produce inaccurate information about people,
+                Free research preview. ChatGPT may produce inaccurate information about people,
                 places, or facts.
               </p>
             </EuiText>
