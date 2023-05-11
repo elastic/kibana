@@ -15,7 +15,7 @@ import type {
   GeoContainmentExtractedRuleParams,
   GeoContainmentRuleParams,
 } from './types';
-import { getGeoContainmentExecutor } from './geo_containment';
+import { executor } from './executor';
 import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
 const actionVariables = {
@@ -178,7 +178,7 @@ export function getRuleType(): GeoContainmentRuleType {
     },
     doesSetRecoveryContext: true,
     defaultActionGroupId: ActionGroupId,
-    executor: getGeoContainmentExecutor(),
+    executor,
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,

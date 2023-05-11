@@ -8,8 +8,8 @@
 import fastIsEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { BoundariesRequestMeta } from './types';
-import { getQueryDsl } from './utils';
+import type { BoundariesRequestMeta } from '../types';
+import { getQueryDsl } from './get_query_dsl';
 
 interface BoundaryHit {
   _index: string;
@@ -24,7 +24,7 @@ export function canSkipBoundariesFetch(
   requestMeta: BoundariesRequestMeta,
   prevRequestMeta?: BoundariesRequestMeta
 ) {
-  return prevRequestMeta ? fastIsEqual(requestMeta, prevRequestMeta) : false;
+  return fastIsEqual(requestMeta, prevRequestMeta);
 }
 
 export async function getShapeFilters(

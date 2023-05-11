@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getQueryDsl } from './utils';
+import { getQueryDsl } from './get_query_dsl';
 
 describe('getQueryDsl', () => {
-  it('should convert lucene queries to elasticasearch dsl', async () => {
+  test('should convert lucene queries to elasticasearch dsl', async () => {
     const testLuceneQuery1 = {
       query: `"airport": "Denver"`,
       language: 'lucene',
@@ -27,7 +27,7 @@ describe('getQueryDsl', () => {
     });
   });
 
-  it('should convert kuery queries to elasticsearch dsl', async () => {
+  test('should convert kuery queries to elasticsearch dsl', async () => {
     const testKueryQuery1 = {
       query: `"airport": "Denver"`,
       language: 'kuery',

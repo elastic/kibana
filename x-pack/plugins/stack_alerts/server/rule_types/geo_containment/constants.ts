@@ -8,3 +8,4 @@
 export const ActionGroupId = 'Tracked entity contained';
 export const RecoveryActionGroupId = 'notGeoContained';
 export const GEO_CONTAINMENT_ID = '.geo-containment';
+export const OTHER_CATEGORY = 'other';

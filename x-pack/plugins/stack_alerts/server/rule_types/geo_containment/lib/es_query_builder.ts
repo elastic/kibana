@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
-import { getQueryDsl } from './utils';
+import { OTHER_CATEGORY } from '../constants'
+import { getQueryDsl } from './get_query_dsl';
 
-export const OTHER_CATEGORY = 'other';
 const MAX_BUCKETS_LIMIT = 65535;
 
 export async function executeEsQueryFactory(
