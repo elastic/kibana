@@ -145,3 +145,29 @@ export const incidentTypes = [
   { id: 17, name: 'Communication error (fax; email)' },
   { id: 1001, name: 'Custom type' },
 ];
+
+export const resilientIncidentTypes = [
+  {
+    id: 19,
+    name: 'Malware',
+  },
+  {
+    id: 21,
+    name: 'Denial of Service',
+  },
+];
+
+export const resilientSeverity = [
+  {
+    id: 4,
+    name: 'Low',
+  },
+  {
+    id: 5,
+    name: 'Medium',
+  },
+  {
+    id: 6,
+    name: 'High',
+  },
+];

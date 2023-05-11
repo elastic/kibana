@@ -15,11 +15,15 @@ import {
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
-import type { CaseConnector } from '../../../common/api';
+import type { CaseConnector, ConnectorTypeFields } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { CaseActionConnector } from '../types';
-import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import {
+  getConnectorById,
+  getConnectorsFormSerializer,
+  getConnectorsFormValidators,
+} from '../utils';
 import { ConnectorSelector } from '../connector_selector/form';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import * as i18n from './translations';
@@ -35,7 +39,7 @@ interface Props {
 
 interface FormState {
   connectorId: string;
-  fields?: Record<string, unknown> | null;
+  fields: ConnectorTypeFields['fields'];
 }
 
 const ConnectorsFormComponent: React.FC<Props> = ({
@@ -52,6 +56,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
   const { form } = useForm<FormState>({
     defaultValue: { connectorId: initialConnectorId, fields: initialConnectorFields },
     options: { stripEmptyFields: false },
+    serializer: getConnectorsFormSerializer,
   });
 
   const [{ connectorId, fields }] = useFormData<FormState>({ form });
@@ -72,7 +77,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
 
   const enableSave =
     (!isDefaultNoneConnectorSelected && currentActionConnector?.id !== initialConnectorId) ||
-    !deepEqual(fields, initialConnectorFields);
+    !deepEqual(fields ?? null, initialConnectorFields);
 
   const onConnectorChange = (newConnectorId: string) => {
     const newFields = caseConnectors[newConnectorId]?.fields ?? {};

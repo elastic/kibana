@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { connector } from '../mock';
+import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import Fields from './case_fields';
@@ -28,36 +28,14 @@ describe('ResilientParamsFields renders', () => {
   const useGetIncidentTypesResponse = {
     isLoading: false,
     data: {
-      data: [
-        {
-          id: 19,
-          name: 'Malware',
-        },
-        {
-          id: 21,
-          name: 'Denial of Service',
-        },
-      ],
+      data: resilientIncidentTypes,
     },
   };
 
   const useGetSeverityResponse = {
     isLoading: false,
     data: {
-      data: [
-        {
-          id: 4,
-          name: 'Low',
-        },
-        {
-          id: 5,
-          name: 'Medium',
-        },
-        {
-          id: 6,
-          name: 'High',
-        },
-      ],
+      data: resilientSeverity,
     },
   };
 

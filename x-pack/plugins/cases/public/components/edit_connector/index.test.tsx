@@ -132,19 +132,15 @@ describe('EditConnector ', () => {
     userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
-      expect(onSubmit).toHaveBeenCalledWith(
-        {
-          fields: {
-            incidentTypes: null,
-            severityCode: null,
-          },
-          id: 'resilient-2',
-          name: 'My Resilient connector',
-          type: '.resilient',
+      expect(onSubmit).toHaveBeenCalledWith({
+        fields: {
+          incidentTypes: null,
+          severityCode: null,
         },
-        expect.anything(),
-        expect.anything()
-      )
+        id: 'resilient-2',
+        name: 'My Resilient connector',
+        type: '.resilient',
+      })
     );
   });
 

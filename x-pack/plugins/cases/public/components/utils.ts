@@ -10,6 +10,8 @@ import type {
   FieldConfig,
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { isEmpty } from 'lodash';
+import type { ConnectorTypeFields } from '../../common/api';
 import { ConnectorTypes } from '../../common/api';
 import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
@@ -64,6 +66,27 @@ export const getConnectorsFormValidators = ({
     },
   ],
 });
+
+export const getConnectorsFormSerializer = <T extends { fields: ConnectorTypeFields['fields'] }>(
+  data: T
+): T => {
+  if (data.fields) {
+    const serializedFields = Object.entries(data.fields).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: isEmpty(value) ? null : value,
+      }),
+      {}
+    );
+
+    return {
+      ...data,
+      fields: serializedFields as ConnectorTypeFields['fields'],
+    };
+  }
+
+  return data;
+};
 
 export const getConnectorIcon = (
   triggersActionsUi: CasesPluginStart['triggersActionsUi'],
