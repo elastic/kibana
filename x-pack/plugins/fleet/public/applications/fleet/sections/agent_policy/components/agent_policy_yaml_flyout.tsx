@@ -38,6 +38,9 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
     const core = useStartServices();
     const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
+    const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
+      (packagePolicy) => packagePolicy?.secret_references?.length
+    );
     const body = isLoadingYaml ? (
       <Loading />
     ) : error ? (
@@ -54,9 +57,32 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         {error.message}
       </EuiCallOut>
     ) : (
-      <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-        {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
-      </EuiCodeBlock>
+      <>
+        {packagePoliciesContainSecrets && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.secretsTitle"
+                defaultMessage="This policy contains secret values"
+              />
+            }
+            size="m"
+            color="primary"
+            iconType="iInCircle"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.secretsDescription"
+              defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
+              values={{
+                envVarPrefix: <code>{'${SECRET_0}'}</code>,
+              }}
+            />
+          </EuiCallOut>
+        )}
+        <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
+          {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
+        </EuiCodeBlock>
+      </>
     );
 
     const downloadLink = core.http.basePath.prepend(

@@ -25,7 +25,6 @@ const POLICY_KEYS_ORDER = [
   'meta',
   'input',
   'download',
-  'secret_references',
   'signed',
 ];
 
