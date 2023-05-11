@@ -7,13 +7,10 @@
 
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import {
-  KibanaContextProvider,
-  useKibana as useKibanaReact,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ServerlessObservabilityPluginStartDependencies } from './types';
 
-export type Services = CoreStart & ServerlessObservabilityPluginStartDependencies;
+type Services = CoreStart & ServerlessObservabilityPluginStartDependencies;
 
 export const KibanaServicesProvider: React.FC<{
   core: CoreStart;
@@ -22,5 +19,3 @@ export const KibanaServicesProvider: React.FC<{
   const services: Services = { ...core, ...pluginsStart };
   return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
 };
-
-export const useKibana = () => useKibanaReact<Services>();
