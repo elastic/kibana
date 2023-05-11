@@ -1923,10 +1923,10 @@ describe('SavedObjectsRepository', () => {
     };
 
     const createBulkDeleteFailStatus = ({
-      type,
-      id,
-      error,
-    }: {
+                                          type,
+                                          id,
+                                          error,
+                                        }: {
       type: string;
       id: string;
       error?: ExpectedErrorResult['error'];
@@ -3792,7 +3792,6 @@ describe('SavedObjectsRepository', () => {
                 'updated_at',
                 'created_at',
                 'originId',
-                'title',
               ],
             }),
           }),
