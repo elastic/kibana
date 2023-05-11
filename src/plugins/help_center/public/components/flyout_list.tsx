@@ -238,22 +238,6 @@ export const HelpCenterFlyout = ({
                 >
                   <div style={{ width: '100%', height: '100%' }}>{selectedTab?.content}</div>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText color="subdued" size="s">
-                        <p>
-                          <FormattedMessage
-                            id="HelpCenter.flyoutList.versionTextLabel"
-                            defaultMessage="{version}"
-                            values={{ version: `Version ${kibanaVersion}` }}
-                          />
-                        </p>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </ResizableBox>
