@@ -18,9 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
-import { CreateSLOInput, metricCustomIndicatorSchema } from '@kbn/slo-schema';
+import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
 import { range, first, xor } from 'lodash';
-import * as t from 'io-ts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 
@@ -48,10 +47,9 @@ const validateEquation = (value: string) => {
   return result === null;
 };
 
-type MetricCustomIndicator = t.TypeOf<typeof metricCustomIndicatorSchema>;
 type MetricCustomMetricDef =
-  | MetricCustomIndicator['params']['good']
-  | MetricCustomIndicator['params']['total'];
+  | MetricCustomIndicatorSchema['params']['good']
+  | MetricCustomIndicatorSchema['params']['total'];
 
 function createOptions(fields: Field[]): Option[] {
   return fields
