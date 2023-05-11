@@ -47,7 +47,6 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
-    const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
 
     useImperativeHandle(
       ref,
@@ -67,9 +66,10 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     }, []);
 
     useEffect(() => {
-      // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
       if (!dashboardContainer) return;
-      if (!dashboardContainer.isExpectingIdChange()) setDashboardIdToBuild(savedObjectId);
+
+      // When a dashboard already exists, don't rebuild it, just set a new id.
+      dashboardContainer.navigateToDashboard(savedObjectId);
 
       // Disabling exhaustive deps because this useEffect should only be triggered when the savedObjectId changes.
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,9 +115,9 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         canceled = true;
         destroyContainer?.();
       };
-      // Disabling exhaustive deps because embeddable should only be created when the dashboardIdToBuild changes.
+      // Disabling exhaustive deps because embeddable should only be created on first render.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dashboardIdToBuild]);
+    }, []);
 
     const viewportClasses = classNames(
       'dashboardViewport',

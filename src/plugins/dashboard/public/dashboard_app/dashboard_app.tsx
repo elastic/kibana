@@ -83,11 +83,6 @@ export function DashboardApp({
     customBranding,
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
-
-  const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-    DASHBOARD_APP_ID,
-    true
-  );
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useExecutionContext(executionContext, {
@@ -130,8 +125,9 @@ export function DashboardApp({
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
 
-    return Promise.resolve({
-      incomingEmbeddable,
+    return Promise.resolve<DashboardCreationOptions>({
+      getIncomingEmbeddable: () =>
+        getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
       // integrations
       useControlGroupIntegration: true,
@@ -164,13 +160,13 @@ export function DashboardApp({
       validateLoadedSavedObject: validateOutcome,
     });
   }, [
-    history,
-    validateOutcome,
+    getScreenshotContext,
+    kbnUrlStateStorage,
     stateFromLocator,
     isScreenshotMode,
-    kbnUrlStateStorage,
-    incomingEmbeddable,
-    getScreenshotContext,
+    getStateTransfer,
+    validateOutcome,
+    history,
   ]);
 
   /**

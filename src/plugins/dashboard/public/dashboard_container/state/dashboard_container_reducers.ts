@@ -56,6 +56,10 @@ export const dashboardContainerReducers = {
     }
   },
 
+  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.lastSavedId = action.payload;
+  },
+
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
