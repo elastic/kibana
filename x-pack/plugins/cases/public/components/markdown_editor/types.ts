@@ -21,7 +21,12 @@ export type TemporaryProcessingPluginsType = [
   [
     typeof rehype2react,
     Parameters<typeof rehype2react>[0] & {
-      components: { a: FunctionComponent<EuiLinkAnchorProps>; lens: unknown; timeline: unknown; mentions: unknown };
+      components: {
+        a: FunctionComponent<EuiLinkAnchorProps>;
+        lens: unknown;
+        timeline: unknown;
+        mentions: unknown;
+      };
     }
   ],
   ...PluggableList

@@ -15,7 +15,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { TimeRange } from '@kbn/es-query';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
-import { MentionsSerializer, MentionsParser } from './mentions';
 
 export interface LensMarkdownNode extends Node {
   timeRange: TimeRange;
@@ -39,7 +38,7 @@ export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | N
  * plain markdown.
  */
 export const parseCommentString = (comment: string) => {
-  const processor = unified().use([[markdown, {}], LensParser, TimelineParser, MentionsParser]);
+  const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
   return processor.parse(comment) as MarkdownNode;
 };
 
@@ -53,7 +52,6 @@ export const stringifyMarkdownComment = (comment: MarkdownNode) =>
       */
       LensSerializer,
       TimelineSerializer,
-      MentionsSerializer,
     ])
     .stringify(comment);
 

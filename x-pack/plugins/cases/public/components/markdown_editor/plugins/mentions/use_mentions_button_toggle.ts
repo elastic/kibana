@@ -8,12 +8,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { some } from 'lodash';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { MENTION } from './translations';
-import { PREFIX } from './constants';
 
 const DISABLED_CLASSNAME = 'euiButtonIcon-isDisabled';
 
@@ -36,8 +34,8 @@ export const useMentionsButtonToggle = ({
   uiPlugins,
   value,
 }: UseMentionsButtonToggleProps) => {
-  const lensPluginAvailable = useRef(false);
-  const [lensNodeSelected, setLensNodeSelected] = useState(false);
+  const mentionsPluginAvailable = useRef(false);
+  const [mentionsNodeSelected, setMentionsNodeSelected] = useState(false);
 
   const enableLensButton = useCallback(() => {
     if (editorRef?.current?.textarea && editorRef.current?.toolbar) {
@@ -49,8 +47,14 @@ export const useMentionsButtonToggle = ({
         const isDisabled = mentionsPluginButton.className.includes(DISABLED_CLASSNAME);
         const buttonStyle = mentionsPluginButton.getAttribute('style');
         if (isDisabled && buttonStyle) {
-            mentionsPluginButton.className = mentionsPluginButton.className.replace(DISABLED_CLASSNAME, '');
-            mentionsPluginButton.setAttribute('style', buttonStyle.replace('pointer-events: none;', ''));
+          mentionsPluginButton.className = mentionsPluginButton.className.replace(
+            DISABLED_CLASSNAME,
+            ''
+          );
+          mentionsPluginButton.setAttribute(
+            'style',
+            buttonStyle.replace('pointer-events: none;', '')
+          );
         }
       }
     }
@@ -66,15 +70,15 @@ export const useMentionsButtonToggle = ({
         const isDisabled = mentionsPluginButton.className.includes(DISABLED_CLASSNAME);
 
         if (!isDisabled) {
-            mentionsPluginButton.className += ` ${DISABLED_CLASSNAME}`;
-            mentionsPluginButton.setAttribute('style', 'pointer-events: none;');
+          mentionsPluginButton.className += ` ${DISABLED_CLASSNAME}`;
+          mentionsPluginButton.setAttribute('style', 'pointer-events: none;');
         }
       }
     }
   }, [editorRef]);
 
   useEffect(() => {
-    lensPluginAvailable.current = some(uiPlugins, ['name', 'lens']);
+    mentionsPluginAvailable.current = some(uiPlugins, ['name', 'lens']);
   }, [uiPlugins]);
 
   // useDebounce(
@@ -94,7 +98,7 @@ export const useMentionsButtonToggle = ({
     if (
       editorRef?.current?.textarea == null ||
       astRef?.current == null ||
-      !lensPluginAvailable.current
+      !mentionsPluginAvailable.current
     ) {
       return;
     }
@@ -123,7 +127,7 @@ export const useMentionsButtonToggle = ({
         break;
       }
 
-      setLensNodeSelected(node.type === 'mentions');
+      setMentionsNodeSelected(node.type === 'mentions');
     };
 
     const textarea = editorRef.current?.textarea;

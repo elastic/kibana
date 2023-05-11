@@ -51,7 +51,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     // This line of code is TS-compatible and it will break if [1][1] change in the future.
     processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
 
-    if(kibanaConfig?.markdownPlugins?.mentions && !disabledPlugins?.includes(MentionsPluginId)) {
+    if (kibanaConfig?.markdownPlugins?.mentions && !disabledPlugins?.includes(MentionsPluginId)) {
       uiPlugins.push(mentionsPlugin.plugin);
     }
 

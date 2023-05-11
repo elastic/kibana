@@ -1,27 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Plugin } from 'unified';
+import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
-import { MentionsNodeDetails } from './types';
+import type { MentionsNodeDetails } from './types';
 import { ID, PREFIX } from './constants';
-import { mentionsConfig } from './config';
 
 export const MentionsParser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.blockTokenizers;
   const methods = Parser.prototype.blockMethods;
 
-  const tokenizeMentions: RemarkTokenizer = function tokenizeMentions(
-    eat,
-    value,
-    silent
-  ) {
+  const tokenizeMentions: RemarkTokenizer = function tokenizeMentions(eat, value, silent) {
     if (value.startsWith(PREFIX) === false) return false;
 
     let mention = '';
@@ -48,7 +42,6 @@ export const MentionsParser: Plugin = function () {
     return eat(match)({
       type: ID,
       mention,
-      config: mentionsConfig,
     } as MentionsNodeDetails);
   };
 
