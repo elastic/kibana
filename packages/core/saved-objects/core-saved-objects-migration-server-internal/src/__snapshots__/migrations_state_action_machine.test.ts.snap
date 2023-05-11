@@ -216,6 +216,9 @@ Object {
                   "type": Object {
                     "type": "keyword",
                   },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
+                  },
                 },
               },
               "versionAlias": ".my-so-index_7.11.0",
@@ -442,6 +445,9 @@ Object {
                   },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -673,6 +679,9 @@ Object {
                   },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -908,6 +917,9 @@ Object {
                   },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1169,6 +1181,9 @@ Object {
                   "type": Object {
                     "type": "keyword",
                   },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
+                  },
                 },
               },
               "versionAlias": ".my-so-index_7.11.0",
@@ -1406,6 +1421,9 @@ Object {
                   },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },

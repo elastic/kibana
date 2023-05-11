@@ -272,6 +272,9 @@ describe('createInitialState', () => {
             "type": Object {
               "type": "keyword",
             },
+            "typeMigrationVersion": Object {
+              "type": "version",
+            },
           },
         },
         "versionAlias": ".kibana_task_manager_8.1.0",

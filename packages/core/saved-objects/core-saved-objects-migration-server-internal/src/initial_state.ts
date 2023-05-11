@@ -94,6 +94,9 @@ export const createInitialState = ({
         dynamic: 'true',
         type: 'object',
       },
+      typeMigrationVersion: {
+        type: 'version',
+      },
     },
   };
 
