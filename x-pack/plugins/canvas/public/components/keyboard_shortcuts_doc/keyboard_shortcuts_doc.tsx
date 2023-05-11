@@ -7,7 +7,17 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiDescriptionList, EuiHorizontalRule, EuiCode, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiHorizontalRule,
+  EuiCode,
+  EuiSpacer,
+  EuiTitle,
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { keymap } from '../../lib/keymap';
@@ -71,15 +81,32 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
   });
 
 export const KeyboardShortcutsDoc: FunctionComponent<Props> = () => (
-  <>
-    <EuiTitle size="s">
-      <h2>{strings.getTitle()}</h2>
-    </EuiTitle>
+  <EuiAccordion
+    key={getId('shortcuts')}
+    id={`documentation-canvas-custom`}
+    className="euiAccordionForm"
+    buttonClassName="euiAccordionForm__button"
+    buttonContent={
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'canvasApp'} size="m" />
+          </EuiFlexItem>
 
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3>{strings.getTitle()}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    }
+  >
     {Object.values(keymap).map((namespace: ShortcutNameSpace) => {
       const { displayName, ...shortcuts } = namespace;
+
       return (
-        <div key={getId('shortcuts')} className="canvasKeyboardShortcut">
+        <>
           <EuiTitle size="xs">
             <h4>{displayName}</h4>
           </EuiTitle>
@@ -91,10 +118,10 @@ export const KeyboardShortcutsDoc: FunctionComponent<Props> = () => (
             compressed
           />
           <EuiSpacer />
-        </div>
+        </>
       );
     })}
-  </>
+  </EuiAccordion>
 );
 
 KeyboardShortcutsDoc.propTypes = {

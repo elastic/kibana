@@ -9,7 +9,7 @@
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
 import './style.scss';
-import React, { Fragment, useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import {
   EuiFlyoutProps,
   EuiTitle,
@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiPortal,
   EuiSpacer,
-  EuiIcon,
   EuiTab,
   EuiTabs,
   EuiSearchBar,
@@ -37,12 +36,9 @@ import { Contact } from './contact';
 import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
 
-export const HelpCenterFlyout = (
-  props: Partial<EuiFlyoutProps> & { headerRef: HTMLElement; showPlainSpinner: boolean }
-) => {
+export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null }) => {
   const { setFlyoutVisible, kibanaVersion } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-  const { showPlainSpinner, headerRef, ...rest } = props;
 
   const euiThemeContext = useEuiTheme();
   const euiTheme = euiThemeContext.euiTheme;
@@ -66,7 +62,6 @@ export const HelpCenterFlyout = (
             />
             <EuiSpacer size="m" />
             <CustomContent />
-            <EuiSpacer size="m" />
             <DocumentationCards />
             <EuiSpacer size="m" />
             <GlobalContent />
@@ -77,9 +72,9 @@ export const HelpCenterFlyout = (
         id: 'talkToUs',
         name: 'Contact us',
         content: (
-          <Fragment>
+          <>
             <Contact />
-          </Fragment>
+          </>
         ),
       },
     ],
@@ -136,7 +131,6 @@ export const HelpCenterFlyout = (
               z-index: 6000;
 
               min-height: 100px;
-              // max-height: 600px;
               max-width: 100vw;
             `}
           >

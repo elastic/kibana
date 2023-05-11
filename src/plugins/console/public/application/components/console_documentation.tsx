@@ -9,22 +9,41 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiTitle, EuiText, EuiCode } from '@elastic/eui';
+import {
+  EuiText,
+  EuiCode,
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTitle,
+} from '@elastic/eui';
 import EditorExample from './editor_example';
 import * as examples from '../../../common/constants/welcome_panel';
 
 export function ConsoleDocumentation() {
   return (
-    <>
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="console.welcomePage.pageTitle"
-            defaultMessage="Send requests with Console"
-          />
-        </h2>
-      </EuiTitle>
+    <EuiAccordion
+      key={`documentation-console-custom`}
+      id={`documentation-console-custom`}
+      className="euiAccordionForm"
+      buttonClassName="euiAccordionForm__button"
+      buttonContent={
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={'consoleApp'} size="m" />
+            </EuiFlexItem>
 
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>{'How to send requests'}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      }
+    >
       <EuiText>
         <p>
           <FormattedMessage
@@ -129,6 +148,6 @@ export function ConsoleDocumentation() {
           linesOfExampleCode={9}
         />
       </EuiText>
-    </>
+    </EuiAccordion>
   );
 }

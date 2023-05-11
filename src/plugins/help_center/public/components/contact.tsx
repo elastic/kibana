@@ -14,10 +14,11 @@ export const Contact = () => {
   const { helpFetchResults } = useContext(HelpCenterContext);
   return (
     <>
-      {(helpFetchResults?.contact ?? []).map((contact) => {
+      {(helpFetchResults?.contact ?? []).map((contact, i) => {
         return (
           <>
             <EuiCard
+              id={`contact_card_${i}`}
               layout={'horizontal'}
               icon={<EuiIcon size="xl" type={contact.iconType ?? 'discuss'} />}
               title={contact.title ?? ''}

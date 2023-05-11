@@ -53,7 +53,7 @@ export function Main() {
     }),
     links: [
       {
-        iconType: 'discoverApp',
+        iconType: 'consoleApp',
         linkType: 'documentation',
         href: `https://www.elastic.co/guide/en/kibana/current/console-kibana.html`,
       },

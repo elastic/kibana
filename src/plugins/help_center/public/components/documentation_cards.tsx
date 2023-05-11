@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import {
   EuiIcon,
-  EuiCard,
-  EuiSpacer,
   EuiText,
   EuiAccordion,
   EuiFlexGroup,
@@ -21,8 +19,6 @@ import {
 } from '@elastic/eui';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
-import { css } from '@emotion/react';
-import ReactDOM from 'react-dom';
 
 export const DocumentationCards = () => {
   const { helpFetchResults } = useContext(HelpCenterContext);
@@ -69,11 +65,12 @@ export const DocumentationCards = () => {
         (helpFetchResults?.documentation ?? []).map((doc, i) => {
           return (
             <EuiAccordion
+              key={`documentation-${i}`}
               id={`documentation-${i}`}
               className="euiAccordionForm"
               buttonClassName="euiAccordionForm__button"
               buttonContent={
-                <div>
+                <>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiIcon type={doc.iconType ?? 'document'} size="m" />
@@ -81,11 +78,11 @@ export const DocumentationCards = () => {
 
                     <EuiFlexItem>
                       <EuiTitle size="s">
-                        <h3>{doc.title}</h3>
+                        <h3>{doc.title} documentation</h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </div>
+                </>
                 // <EuiCard
                 //   css={css`
                 //     margin-block-end: 0;

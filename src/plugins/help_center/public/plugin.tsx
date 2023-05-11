@@ -44,8 +44,7 @@ export class HelpCenterPublicPlugin
 
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: (target) =>
-        this.mount(api, target, core.theme.theme$, core.customBranding.hasCustomBranding$),
+      mount: (target) => this.mount(api, target, core.theme.theme$),
     });
   }
 
@@ -53,16 +52,11 @@ export class HelpCenterPublicPlugin
     this.stop$.next();
   }
 
-  private mount(
-    api: HelpCenterApi,
-    targetDomElement: HTMLElement,
-    theme$: Observable<CoreTheme>,
-    hasCustomBranding$: Observable<boolean>
-  ) {
+  private mount(api: HelpCenterApi, targetDomElement: HTMLElement, theme$: Observable<CoreTheme>) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <HelpCenterNavButton helpCenterApi={api} hasCustomBranding$={hasCustomBranding$} />
+          <HelpCenterNavButton helpCenterApi={api} />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

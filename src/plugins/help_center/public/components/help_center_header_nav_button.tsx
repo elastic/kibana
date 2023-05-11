@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
@@ -26,20 +25,17 @@ export const HelpCenterContext = React.createContext({} as IHelpCenterContext);
 
 export interface Props {
   helpCenterApi: HelpCenterApi;
-  hasCustomBranding$: Observable<boolean>;
 }
 
-export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props) => {
+export const HelpCenterNavButton = ({ helpCenterApi }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [helpFetchResult, setHelpFetchResult] = useState<void | FetchResult | null>(null);
-  const [topNav, setTopNav] = useState<HTMLElement>();
+  const [topNav, setTopNav] = useState<HTMLElement | null>();
 
   useEffect(() => {
     setTopNav(document.querySelectorAll<HTMLElement>('#kibana-body')[0]);
-    // console.log(topNav);
   }, []);
 
-  const hasCustomBranding = useObservable(hasCustomBranding$, false);
   const kibanaVersion = helpCenterApi.kibanaVersion;
   useEffect(() => {
     const helpLinksSubscription = helpCenterApi.fetchResults$.subscribe((links) => {
@@ -77,13 +73,7 @@ export const HelpCenterNavButton = ({ helpCenterApi, hasCustomBranding$ }: Props
         >
           <EuiIcon type="help" size="m" />
         </EuiHeaderSectionItemButton>
-        {flyoutVisible && topNav ? (
-          <HelpCenterFlyout
-            headerRef={topNav}
-            focusTrapProps={{ shards: [buttonRef] }}
-            showPlainSpinner={hasCustomBranding}
-          />
-        ) : null}
+        {flyoutVisible && topNav ? <HelpCenterFlyout headerRef={topNav} /> : null}
       </>
     </HelpCenterContext.Provider>
   );
