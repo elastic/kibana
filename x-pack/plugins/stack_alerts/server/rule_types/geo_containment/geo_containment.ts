@@ -161,7 +161,6 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
     const executeEsQuery = await executeEsQueryFactory(
       params,
       services.scopedClusterClient.asCurrentUser,
-      logger,
       shapesFilters
     );
 

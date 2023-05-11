@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
 import { getQueryDsl } from './utils';
@@ -34,7 +34,6 @@ export async function executeEsQueryFactory(
     indexQuery?: Query;
   },
   esClient: ElasticsearchClient,
-  log: Logger,
   shapesFilters: Record<string, unknown>
 ) {
   return async (
@@ -135,7 +134,10 @@ export async function executeEsQueryFactory(
     try {
       esResult = await esClient.search(esQuery);
     } catch (err) {
-      log.warn(`${err.message}`);
+      throw new Error(i18n.translate('xpack.stackAlerts.geoContainment.entityContainmentFetchError', {
+        defaultMessage: 'Unable to fetch entity containment, error: {error}',
+        values: { error: err.message }
+      }));
     }
     return esResult;
   };
