@@ -65,6 +65,7 @@ export interface SecurityAssistantProps {
   promptContextId?: string;
   conversationId?: string;
   showTitle?: boolean;
+  shouldRefocusPrompt?: boolean;
 }
 
 /**
@@ -73,7 +74,12 @@ export interface SecurityAssistantProps {
  */
 export const SecurityAssistant: React.FC<SecurityAssistantProps> =
   React.memo<SecurityAssistantProps>(
-    ({ promptContextId = '', showTitle = true, conversationId = 'default' }) => {
+    ({
+      promptContextId = '',
+      showTitle = true,
+      conversationId = 'default',
+      shouldRefocusPrompt = false,
+    }) => {
       const { promptContexts, conversations } = useSecurityAssistantContext();
       const { appendMessage, clearConversation, createConversation } = useConversation();
       const { isLoading, sendMessages } = useSendMessages();
@@ -84,6 +90,14 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
 
       const { cases } = useKibana().services;
       const bottomRef = useRef<HTMLDivElement | null>(null);
+
+      // For auto-focusing prompt within timeline
+      const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
+      useEffect(() => {
+        if (shouldRefocusPrompt && promptTextAreaRef.current) {
+          promptTextAreaRef?.current.focus();
+        }
+      }, [shouldRefocusPrompt]);
 
       // Scroll to bottom on conversation change
       useEffect(() => {
@@ -326,7 +340,7 @@ export const SecurityAssistant: React.FC<SecurityAssistantProps> =
           <EuiSpacer />
 
           <ChatContainerFlexGroup gutterSize="s">
-            <PromptTextArea value={''} onSubmit={handleSendMessage} />
+            <PromptTextArea value={''} onPromptSubmit={handleSendMessage} ref={promptTextAreaRef} />
 
             <ChatOptionsFlexItem grow={false}>
               <EuiFlexGroup direction="column" gutterSize="xs">

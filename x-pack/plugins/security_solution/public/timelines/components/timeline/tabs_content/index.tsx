@@ -135,17 +135,28 @@ const SecurityAssistantTab: React.FC<{
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
+  shouldRefocusPrompt: boolean;
+}> = memo(({ renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <SecurityAssistant conversationId={'timeline'} />
+    <SecurityAssistant conversationId={'timeline'} shouldRefocusPrompt={shouldRefocusPrompt} />
   </Suspense>
 ));
 SecurityAssistantTab.displayName = 'SecurityAssistant';
 
-type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
+type ActiveTimelineTabProps = BasicTimelineTab & {
+  activeTimelineTab: TimelineTabs;
+  showTimeline: boolean;
+};
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
-  ({ activeTimelineTab, renderCellValue, rowRenderers, timelineId, timelineType }) => {
+  ({
+    activeTimelineTab,
+    renderCellValue,
+    rowRenderers,
+    timelineId,
+    timelineType,
+    showTimeline,
+  }) => {
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -223,6 +234,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
+            shouldRefocusPrompt={
+              showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
+            }
           />
         </HideShowContainer>
       </>
@@ -435,6 +449,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineId={timelineId}
         timelineType={timelineType}
         timelineDescription={timelineDescription}
+        showTimeline={showTimeline}
       />
     </>
   );

@@ -6,14 +6,14 @@
  */
 
 import { EuiTextArea } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, forwardRef } from 'react';
 
 import styled from 'styled-components';
 import * as i18n from './translations';
 
-export interface Props {
+export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
-  onSubmit: (value: string) => void;
+  onPromptSubmit: (value: string) => void;
   handlePromptChange?: (value: string) => void;
 }
 
@@ -21,8 +21,8 @@ const StyledTextArea = styled(EuiTextArea)`
   min-height: 125px;
 `;
 
-export const PromptTextArea: React.FC<Props> = React.memo(
-  ({ value, onSubmit, handlePromptChange }) => {
+export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
+  ({ value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
     const [currentValue, setCurrentValue] = React.useState(value);
 
     const onChangeCallback = useCallback(
@@ -39,11 +39,11 @@ export const PromptTextArea: React.FC<Props> = React.memo(
       (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
           event.preventDefault();
-          onSubmit(event.target.value?.trim());
+          onPromptSubmit(event.target.value?.trim());
           setCurrentValue('');
         }
       },
-      [onSubmit]
+      [onPromptSubmit]
     );
 
     useEffect(() => {
@@ -56,6 +56,7 @@ export const PromptTextArea: React.FC<Props> = React.memo(
 
     return (
       <StyledTextArea
+        inputRef={ref}
         id={'prompt-textarea'}
         data-test-subj={'prompt-textarea'}
         fullWidth
