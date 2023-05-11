@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  MaintenanceWindow as MaintenanceWindowServerSide,
+  MaintenanceWindowModificationMetadata,
+} from '../../../common';
+
 export enum RRuleFrequency {
   YEARLY = 0,
   MONTHLY = 1,
@@ -19,23 +24,14 @@ export const RRuleFrequencyMap = {
   '3': RRuleFrequency.DAILY,
 };
 
-export interface RecurringSchedule {
-  freq: RRuleFrequency;
-  interval: number;
-  until?: string;
-  count?: number;
-  byweekday?: string[];
-  bymonthday?: number[];
-  bymonth?: number[];
-}
+export type MaintenanceWindow = Pick<MaintenanceWindowServerSide, 'title' | 'duration' | 'rRule'>;
 
-export type RRule = Partial<RecurringSchedule> & {
-  dtstart: string;
-  tzid: string;
-};
+export type MaintenanceWindowFindResponse = MaintenanceWindowServerSide &
+  MaintenanceWindowModificationMetadata & {
+    total: number;
+  };
 
-export interface MaintenanceWindow {
-  title: string;
-  duration: number;
-  rRule: RRule;
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
 }

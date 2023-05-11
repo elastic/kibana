@@ -9,10 +9,7 @@ import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
-  METRIC_SYSTEM_FREE_MEMORY,
-  METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
@@ -28,10 +25,7 @@ import {
 } from '../../lib/helpers/transactions';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
-import {
-  percentCgroupMemoryUsedScript,
-  percentSystemMemoryUsedScript,
-} from '../metrics/by_agent/shared/memory';
+import { systemMemory, cgroupMemory } from '../metrics/by_agent/shared/memory';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
@@ -313,9 +307,7 @@ function getMemoryStats({
       script,
     }: {
       additionalFilters: ESFilter[];
-      script:
-        | typeof percentCgroupMemoryUsedScript
-        | typeof percentSystemMemoryUsedScript;
+      script: typeof cgroupMemory.script | typeof systemMemory.script;
     }): Promise<NodeStats['memoryUsage']> => {
       const response = await apmEventClient.search(
         'get_avg_memory_for_service_map_node',
@@ -358,19 +350,14 @@ function getMemoryStats({
     };
 
     let memoryUsage = await getMemoryUsage({
-      additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-      ],
-      script: percentCgroupMemoryUsedScript,
+      script: cgroupMemory.script,
+      additionalFilters: [cgroupMemory.filter],
     });
 
     if (!memoryUsage) {
       memoryUsage = await getMemoryUsage({
-        additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-        ],
-        script: percentSystemMemoryUsedScript,
+        script: systemMemory.script,
+        additionalFilters: [systemMemory.filter],
       });
     }
 

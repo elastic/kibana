@@ -65,6 +65,7 @@ const DEFAULT_SORT = {
 };
 
 interface Props {
+  hideTitle?: boolean;
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
@@ -81,6 +82,7 @@ interface Props {
 export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
+  hideTitle = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showPerPageOptions = true,
@@ -139,6 +141,10 @@ export function TransactionsTable({
     type: ApmDocumentType.TransactionMetric,
   });
 
+  const shouldUseDurationSummary =
+    latencyAggregationType === 'avg' &&
+    preferred?.source?.hasDurationSummaryField;
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!latencyAggregationType || !transactionType || !preferred) {
@@ -155,6 +161,7 @@ export function TransactionsTable({
               start,
               end,
               transactionType,
+              useDurationSummary: shouldUseDurationSummary,
               latencyAggregationType:
                 latencyAggregationType as LatencyAggregationType,
               documentType: preferred.source.documentType,
@@ -225,7 +232,8 @@ export function TransactionsTable({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
@@ -237,8 +245,11 @@ export function TransactionsTable({
                 kuery,
                 start,
                 end,
-                numBuckets: 20,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 transactionType,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                useDurationSummary: shouldUseDurationSummary,
                 latencyAggregationType:
                   latencyAggregationType as LatencyAggregationType,
                 transactionNames: JSON.stringify(
@@ -294,32 +305,35 @@ export function TransactionsTable({
       gutterSize="s"
       data-test-subj="transactionsGroupTable"
     >
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.apm.transactionsTable.title', {
-                  defaultMessage: 'Transactions',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!hideViewTransactionsLink && (
+      {!hideTitle && (
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
-              <TransactionOverviewLink
-                serviceName={serviceName}
-                latencyAggregationType={latencyAggregationType}
-                transactionType={transactionType}
-              >
-                {i18n.translate('xpack.apm.transactionsTable.linkText', {
-                  defaultMessage: 'View transactions',
-                })}
-              </TransactionOverviewLink>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.transactionsTable.title', {
+                    defaultMessage: 'Transactions',
+                  })}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            {!hideViewTransactionsLink && (
+              <EuiFlexItem grow={false}>
+                <TransactionOverviewLink
+                  serviceName={serviceName}
+                  latencyAggregationType={latencyAggregationType}
+                  transactionType={transactionType}
+                >
+                  {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                    defaultMessage: 'View transactions',
+                  })}
+                </TransactionOverviewLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+
       {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
         <EuiFlexItem>
           <EuiCallOut

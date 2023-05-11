@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, type FieldTypeKnown, GetCustomFieldType } from '../types';
 import { getFieldIconType } from '../utils/field_types';
+import { fieldNameWildcardMatcher } from '../utils/field_name_wildcard_matcher';
 
 const htmlId = htmlIdGenerator('fieldList');
 
@@ -74,11 +75,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
       onFilterField:
         fieldSearchHighlight?.length || selectedFieldTypes.length > 0
           ? (field: T) => {
-              if (
-                fieldSearchHighlight?.length &&
-                !field.name?.toLowerCase().includes(fieldSearchHighlight) &&
-                !field.displayName?.toLowerCase().includes(fieldSearchHighlight)
-              ) {
+              if (fieldSearchHighlight && !fieldNameWildcardMatcher(field, fieldSearchHighlight)) {
                 return false;
               }
               if (selectedFieldTypes.length > 0) {

@@ -13,9 +13,6 @@ export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
 
 export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 
-export const ACTIONS_THROTTLE_INPUT =
-  '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
-
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 

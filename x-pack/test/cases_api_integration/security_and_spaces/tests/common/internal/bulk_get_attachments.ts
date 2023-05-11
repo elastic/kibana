@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   AttributesTypeExternalReference,
   AttributesTypeExternalReferenceSO,
-  CaseResponse,
+  Case,
   CommentResponseTypePersistableState,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('bulk_get_attachments', () => {
     describe('setup using two comments', () => {
-      let updatedCase: CaseResponse;
+      let updatedCase: Case;
 
       before(async () => {
         const postedCase = await createCase(supertest, postCaseReq);
@@ -212,8 +212,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('security and observability cases', () => {
-        let secCase: CaseResponse;
-        let obsCase: CaseResponse;
+        let secCase: Case;
+        let obsCase: Case;
         let secAttachmentId: string;
         let obsAttachmentId: string;
 

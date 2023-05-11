@@ -54,10 +54,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const CodeEditorMock = (props: any) => (
     <input
       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-value={props.value}
+      data-currentvalue={props.value}
       value={props.value}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.target.value);
+        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
       }}
     />
   );

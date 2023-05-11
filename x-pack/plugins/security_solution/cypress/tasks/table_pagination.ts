@@ -10,6 +10,7 @@ import {
   rowsPerPageSelector,
   tablePageSelector,
   TABLE_PER_PAGE_POPOVER_BTN,
+  TABLE_SEARCH_BAR,
   TABLE_SORT_COLUMN_BTN,
 } from '../screens/table_pagination';
 
@@ -31,6 +32,14 @@ export const setRowsPerPageTo = (rowsCount: number) => {
   cy.get(rowsPerPageSelector(rowsCount))
     .pipe(($el) => $el.trigger('click'))
     .should('not.exist');
+};
+
+export const searchByTitle = (title: string) => {
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(TABLE_PER_PAGE_POPOVER_BTN).should('exist');
+  cy.get(TABLE_SEARCH_BAR).click({ force: true });
+  // EuiSearchBox needs the "search" event to be triggered, {enter} doesn't work
+  cy.get(TABLE_SEARCH_BAR).type(`"${title}"`).trigger('search');
 };
 
 export const expectRowsPerPage = (rowsCount: number) => {

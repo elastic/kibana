@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
@@ -29,7 +28,7 @@ import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
 
-type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
+type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 export const passThroughValidation = {

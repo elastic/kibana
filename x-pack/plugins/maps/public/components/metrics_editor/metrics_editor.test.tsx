@@ -20,6 +20,7 @@ const defaultProps = {
   fields: [],
   onChange: () => {},
   allowMultipleMetrics: true,
+  isJoin: false,
 };
 
 test('should render metrics editor', () => {

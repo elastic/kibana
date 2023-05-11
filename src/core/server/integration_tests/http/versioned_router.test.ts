@@ -14,14 +14,28 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
-import type { IRouterWithVersion } from '@kbn/core-http-server';
+import type { IRouter } from '@kbn/core-http-server';
+import type { CliArgs } from '@kbn/config';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 
 describe('Routing versioned requests', () => {
-  let router: IRouterWithVersion;
+  let router: IRouter;
   let supertest: Supertest.SuperTest<Supertest.Test>;
+
+  async function setupServer(cliArgs: Partial<CliArgs> = {}) {
+    logger = loggingSystemMock.create();
+    await server?.stop(); // stop the already started server
+    server = createHttpServer({
+      logger,
+      env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
+    });
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    router = createRouter('/');
+    supertest = Supertest(innerServer.listener);
+  }
 
   const setupDeps = {
     context: contextServiceMock.createSetupContract(),
@@ -29,12 +43,7 @@ describe('Routing versioned requests', () => {
   };
 
   beforeEach(async () => {
-    logger = loggingSystemMock.create();
-    server = createHttpServer({ logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    router = createRouter('/');
-    supertest = Supertest(innerServer.listener);
+    await setupServer();
   });
 
   afterEach(async () => {
@@ -191,17 +200,8 @@ describe('Routing versioned requests', () => {
   });
 
   it('does not run response validation in prod', async () => {
-    logger = loggingSystemMock.create();
-    await server.stop(); // stop the already started server
-    server = createHttpServer({
-      logger,
-      env: createTestEnv({ envOptions: getEnvOptions({ cliArgs: { dev: false } }) }),
-    });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    await setupServer({ dev: false });
 
-    router = createRouter('/');
-    supertest = Supertest(innerServer.listener);
     router.versioned
       .get({ path: '/my-path', access: 'internal' })
       .addVersion(
@@ -236,5 +236,49 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual(
       expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
     );
+  });
+
+  it('resolves the newest handler on serverless', async () => {
+    await setupServer({ serverless: true });
+
+    router.versioned
+      .get({ path: '/my-path', access: 'public' })
+      .addVersion({ validate: false, version: '2023-04-04' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: 'oldest' } });
+      })
+      .addVersion({ validate: false, version: '2024-04-04' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: 'newest' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .expect(200)
+        .then(({ body }) => body.v)
+    ).resolves.toEqual('newest');
+  });
+
+  it('resolves the oldest handler on anything other than serverless', async () => {
+    await setupServer({ serverless: false });
+
+    router.versioned
+      .get({ path: '/my-path', access: 'public' })
+      .addVersion({ validate: false, version: '2023-04-04' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: 'oldest' } });
+      })
+      .addVersion({ validate: false, version: '2024-04-04' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: 'newest' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .expect(200)
+        .then(({ body }) => body.v)
+    ).resolves.toEqual('oldest');
   });
 });

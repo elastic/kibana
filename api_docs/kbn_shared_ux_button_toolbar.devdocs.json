@@ -434,7 +434,7 @@
           },
           " extends Pick<",
           "EuiButtonPropsForButton",
-          ", \"data-test-subj\" | \"onClick\" | \"iconType\" | \"iconSide\">"
+          ", \"onClick\" | \"data-test-subj\" | \"iconType\" | \"iconSide\">"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -509,7 +509,7 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ 'data-test-subj'?: string | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; iconSide?: ",
+          "{ onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; iconSide?: ",
           "ButtonContentIconSide",
           "; }"
         ],

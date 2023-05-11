@@ -7,12 +7,16 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 import {
   EndpointActionListRequestSchema,
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   ExecuteActionRequestSchema,
+  UploadActionRequestSchema,
 } from './actions';
+import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
+import type { HapiReadableStream } from '../../../server/types';
 
 describe('actions schemas', () => {
   describe('Endpoint action list API Schema', () => {
@@ -185,7 +189,7 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it.each(['isolate', 'unisolate', 'kill-process', 'suspend-process', 'running-processes'])(
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
       'should work with commands query params with %s action',
       (command) => {
         expect(() => {
@@ -636,6 +640,58 @@ describe('actions schemas', () => {
           comment: 'a user comment',
         });
       }).not.toThrow();
+    });
+  });
+
+  describe(`UploadActionRequestSchema`, () => {
+    let fileStream: HapiReadableStream;
+
+    beforeEach(() => {
+      fileStream = createHapiReadableStreamMock();
+    });
+
+    it('should not error if `override` parameter is not defined', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          file: fileStream,
+        });
+      }).not.toThrow();
+    });
+
+    it('should allow `overwrite` parameter', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+          file: fileStream,
+        });
+      }).not.toThrow();
+    });
+
+    it('should error if `file` is not defined', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+        });
+      }).toThrow('[file]: expected value of type [Stream] but got [undefined]');
+    });
+
+    it('should error if `file` is not a Stream', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+          file: {},
+        });
+      }).toThrow('[file]: expected value of type [Stream] but got [Object]');
     });
   });
 });

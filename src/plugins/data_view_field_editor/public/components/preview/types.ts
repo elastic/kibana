@@ -55,6 +55,11 @@ export interface PreviewState {
     isValid: boolean;
     message: string | null;
   };
+  /** Response from the Painless _execute API */
+  previewResponse: {
+    fields: FieldPreview[];
+    error: PreviewError | null;
+  };
 }
 
 export interface FetchDocError {
@@ -108,9 +113,7 @@ export type ChangeSet = Record<string, Change>;
 
 export interface Context {
   controller: PreviewController;
-  fields: FieldPreview[];
   fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
-  error: PreviewError | null;
   fieldTypeInfo?: FieldTypeInfo[];
   initialPreviewComplete: boolean;
   params: {

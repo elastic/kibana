@@ -453,6 +453,7 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   showLabels?: boolean;
@@ -539,6 +540,7 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
+  deferred?: boolean;
 };
 
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
@@ -579,7 +581,7 @@ export interface TemplateMapEntry {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
       }
     | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
       };
 }
 

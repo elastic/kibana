@@ -38,17 +38,13 @@ describe('<RiskScore />', () => {
       getFieldsData: jest.fn(),
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <RiskScore />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if getFieldsData is invalid', () => {
@@ -56,16 +52,12 @@ describe('<RiskScore />', () => {
       getFieldsData: jest.fn().mockImplementation(() => 123),
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <RiskScore />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });

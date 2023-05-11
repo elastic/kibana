@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
-import { PROCESS_EVENTS_INDEX } from '@kbn/session-view-plugin/common/constants';
 import { MULTI_TERMS_AGGREGATE_ROUTE, AGGREGATE_PAGE_SIZE } from '../../common/constants';
 import {
   MultiTermsAggregateGroupBy,
@@ -20,6 +19,7 @@ export const registerMultiTermsAggregateRoute = (router: IRouter) => {
       path: MULTI_TERMS_AGGREGATE_ROUTE,
       validate: {
         query: schema.object({
+          index: schema.string(),
           query: schema.string(),
           countBy: schema.maybe(schema.string()),
           groupBys: schema.arrayOf(
@@ -31,7 +31,6 @@ export const registerMultiTermsAggregateRoute = (router: IRouter) => {
           ),
           page: schema.number(),
           perPage: schema.maybe(schema.number()),
-          index: schema.maybe(schema.string()),
         }),
       },
     },
@@ -40,7 +39,7 @@ export const registerMultiTermsAggregateRoute = (router: IRouter) => {
       const { query, countBy, groupBys, page, perPage, index } = request.query;
 
       try {
-        const body = await doSearch(client, query, groupBys, page, perPage, index, countBy);
+        const body = await doSearch(client, index, query, groupBys, page, perPage, countBy);
 
         return response.ok({ body });
       } catch (err) {
@@ -52,11 +51,11 @@ export const registerMultiTermsAggregateRoute = (router: IRouter) => {
 
 export const doSearch = async (
   client: ElasticsearchClient,
+  index: string,
   query: string,
   groupBys: MultiTermsAggregateGroupBy[],
   page: number, // zero based
   perPage = AGGREGATE_PAGE_SIZE,
-  index?: string,
   countBy?: string
 ): Promise<MultiTermsAggregateBucketPaginationResult> => {
   const queryDSL = JSON.parse(query);
@@ -72,7 +71,7 @@ export const doSearch = async (
     : undefined;
 
   const search = await client.search({
-    index: [index || PROCESS_EVENTS_INDEX],
+    index: [index],
     body: {
       query: queryDSL,
       size: 0,

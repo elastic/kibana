@@ -31,6 +31,15 @@ export interface ExceptionListItem {
   tags: string[];
   type: 'simple';
   entries: Array<{ field: string; operator: string; type: string; value: string[] }>;
+  expire_time?: string;
+}
+
+export interface RuleExceptionItem {
+  description: string;
+  name: string;
+  type: 'simple';
+  entries: Array<{ field: string; operator: string; type: string; value: string[] | string }>;
+  expire_time: string | undefined;
 }
 
 export const getExceptionList = (): ExceptionList => ({

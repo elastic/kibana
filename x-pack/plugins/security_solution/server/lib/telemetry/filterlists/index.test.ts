@@ -26,6 +26,9 @@ describe('Security Telemetry filters', () => {
       'event.provider': true,
       'event.type': true,
       'powershell.file.script_block_text': true,
+      'kubernetes.pod.uid': true,
+      'kubernetes.pod.name': true,
+      'kubernetes.pod.ip': true,
       package_version: true,
     };
 
@@ -175,6 +178,24 @@ describe('Security Telemetry filters', () => {
         'event.provider': 'iam.amazonaws.com',
         'event.type': ['user', 'creation'],
         package_version: '3.4.1',
+      });
+    });
+
+    it('copies over kubernetes fields', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        'event.id': '36857486973080746231799376445175633955031786243637182487',
+        'event.ingested': 'May 17, 2022 @ 00:22:07.000',
+        'kubernetes.pod.uid': '059a3767-7492-4fb5-92d4-93f458ddab44',
+        'kubernetes.pod.name': 'kube-dns-6f4fd4zzz-7z7xj',
+        'kubernetes.pod.ip': '10-245-0-5',
+      };
+      expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+        'event.id': '36857486973080746231799376445175633955031786243637182487',
+        'event.ingested': 'May 17, 2022 @ 00:22:07.000',
+        'kubernetes.pod.uid': '059a3767-7492-4fb5-92d4-93f458ddab44',
+        'kubernetes.pod.name': 'kube-dns-6f4fd4zzz-7z7xj',
+        'kubernetes.pod.ip': '10-245-0-5',
       });
     });
   });

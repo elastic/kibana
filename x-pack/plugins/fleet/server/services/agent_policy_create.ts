@@ -9,6 +9,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
+
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -48,7 +50,11 @@ async function createPackagePolicy(
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   packageToInstall: string,
-  options: { spaceId: string; user: AuthenticatedUser | undefined }
+  options: {
+    spaceId: string;
+    user: AuthenticatedUser | undefined;
+    authorizationHeader?: HTTPAuthorizationHeader | null;
+  }
 ) {
   const newPackagePolicy = await packagePolicyService
     .buildPackagePolicyFromPackage(soClient, packageToInstall)
@@ -71,6 +77,7 @@ async function createPackagePolicy(
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
+    authorizationHeader: options.authorizationHeader,
   });
 }
 
@@ -83,6 +90,7 @@ interface CreateAgentPolicyParams {
   monitoringEnabled?: string[];
   spaceId: string;
   user?: AuthenticatedUser;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -94,6 +102,7 @@ export async function createAgentPolicyWithPackages({
   monitoringEnabled,
   spaceId,
   user,
+  authorizationHeader,
 }: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
@@ -118,6 +127,7 @@ export async function createAgentPolicyWithPackages({
       esClient,
       packagesToInstall,
       spaceId,
+      authorizationHeader,
     });
   }
 
@@ -126,6 +136,7 @@ export async function createAgentPolicyWithPackages({
   const agentPolicy = await agentPolicyService.create(soClient, esClient, policy, {
     user,
     id: agentPolicyId,
+    authorizationHeader,
   });
 
   // Create the fleet server package policy and add it to agent policy.
@@ -133,6 +144,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
       spaceId,
       user,
+      authorizationHeader,
     });
   }
 
@@ -141,6 +153,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
       spaceId,
       user,
+      authorizationHeader,
     });
   }
 

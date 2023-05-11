@@ -15,6 +15,8 @@ import type {
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
@@ -175,6 +177,8 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   try {
     const body: CreateAgentPolicyResponse = {
       item: await createAgentPolicyWithPackages({
@@ -186,6 +190,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         monitoringEnabled,
         spaceId,
         user,
+        authorizationHeader,
       }),
     };
 
@@ -208,6 +213,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+
   const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(

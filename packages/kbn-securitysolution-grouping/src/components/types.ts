@@ -12,21 +12,28 @@ export interface GenericBuckets {
   key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
-
 export const NONE_GROUP_KEY = 'none';
 
 export type RawBucket<T> = GenericBuckets & T;
 
+export type GroupingBucket<T> = RawBucket<T> & {
+  selectedGroup: string;
+  isNullGroup?: boolean;
+};
+
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
-export interface GroupingAggregation<T> {
+export interface RootAggregation<T> {
   groupByFields?: {
-    buckets?: Array<RawBucket<T>>;
+    buckets?: Array<GroupingBucket<T>>;
   };
   groupsCount?: {
     value?: number | null;
   };
   unitsCount?: {
+    value?: number | null;
+  };
+  unitsCountWithoutNull?: {
     value?: number | null;
   };
 }
@@ -38,6 +45,8 @@ export type GroupingFieldTotalAggregation<T> = Record<
     buckets?: Array<RawBucket<T>>;
   }
 >;
+
+export type GroupingAggregation<T> = RootAggregation<T> & GroupingFieldTotalAggregation<T>;
 
 export interface BadgeMetric {
   value: number;
@@ -58,7 +67,8 @@ export type GroupStatsRenderer<T> = (
 
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
-  fieldBucket: RawBucket<T>
+  fieldBucket: RawBucket<T>,
+  nullGroupMessage?: string
 ) => JSX.Element | undefined;
 
 export type OnGroupToggle = (params: {
@@ -67,3 +77,5 @@ export type OnGroupToggle = (params: {
   groupNumber: number;
   groupingId: string;
 }) => void;
+
+export type { GroupingProps } from './grouping';

@@ -309,22 +309,7 @@ export function SavedQueryManagementList({
         </>
       )}
       <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup
-          gutterSize="s"
-          justifyContent={canEditSavedObjects ? 'spaceBetween' : 'flexEnd'}
-        >
-          {canEditSavedObjects && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={http.basePath.prepend(
-                  `/app/management/kibana/objects?initialQuery=type:("query")`
-                )}
-                size="s"
-              >
-                Manage
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+        <EuiFlexGroup gutterSize="s" direction="column">
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
@@ -334,26 +319,33 @@ export function SavedQueryManagementList({
               aria-label={i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Apply query',
+                  defaultMessage: 'Load query',
                 }
               )}
               data-test-subj="saved-query-management-apply-changes-button"
             >
-              {hasFiltersOrQuery
-                ? i18n.translate(
-                    'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
-                    {
-                      defaultMessage: 'Load query',
-                    }
-                  )
-                : i18n.translate(
-                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                    {
-                      defaultMessage: 'Apply query',
-                    }
-                  )}
+              {i18n.translate(
+                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                {
+                  defaultMessage: 'Load query',
+                }
+              )}
             </EuiButton>
           </EuiFlexItem>
+          {canEditSavedObjects && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={http.basePath.prepend(
+                  `/app/management/kibana/objects?initialQuery=type:("query")`
+                )}
+                size="s"
+              >
+                {i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverManageLabel', {
+                  defaultMessage: 'Manage saved objects',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPopoverFooter>
       {showDeletionConfirmationModal && toBeDeletedSavedQuery && (

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   CLOUDBEAT_GCP,
@@ -12,12 +13,42 @@ import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_AWS,
+  CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
+export const getMockPolicyVulnMgmtAWS = () =>
+  getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
+
+export const getMockPackageInfoVulnMgmtAWS = () => {
+  return {
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'vuln_mgmt',
+        inputs: [
+          {
+            type: 'cloudbeat/vuln_mgmt_aws',
+            title: '',
+            description: '',
+            vars: [
+              {
+                type: 'text',
+                name: 'cloud_formation_template',
+                default: 's3_url',
+                show_user: false,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
 
 const getPolicyMock = (
   type: PostureInput,
@@ -82,6 +113,12 @@ const getPolicyMock = (
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
         enabled: false,
+        streams: [{ enabled: false, data_stream: dataStream }],
+      },
+      {
+        type: CLOUDBEAT_VULN_MGMT_AWS,
+        policy_template: 'vuln_mgmt',
+        enabled: type === CLOUDBEAT_VULN_MGMT_AWS,
         streams: [{ enabled: false, data_stream: dataStream }],
       },
     ],

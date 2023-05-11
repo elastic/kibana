@@ -22,6 +22,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { IEventLogClientService } from '@kbn/event-log-plugin/server';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineAlertTypes } from './alert_types';
@@ -41,6 +42,7 @@ export interface FixtureStartDeps {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  eventLog: IEventLogClientService;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {

@@ -18,28 +18,50 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AlertingPluginStart } from '../plugin';
 import { paths } from '../config';
+import { useLicense } from '../hooks/use_license';
 
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
 const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
   () => import('../pages/maintenance_windows/maintenance_window_create_page')
 );
+const MaintenanceWindowsEditLazy: React.FC = React.lazy(
+  () => import('../pages/maintenance_windows/maintenance_window_edit_page')
+);
 
 const App = React.memo(() => {
+  const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
+
   return (
-    <>
-      <Switch>
-        <Route path="/" exact>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <MaintenanceWindowsLazy />
-          </Suspense>
-        </Route>
-        <Route path={paths.alerting.maintenanceWindowsCreate} exact>
+    <Switch>
+      {hasLicense ? (
+        <Route
+          key={paths.alerting.maintenanceWindowsCreate}
+          path={paths.alerting.maintenanceWindowsCreate}
+          exact
+        >
           <Suspense fallback={<EuiLoadingSpinner />}>
             <MaintenanceWindowsCreateLazy />
           </Suspense>
         </Route>
-      </Switch>
-    </>
+      ) : null}
+      {hasLicense ? (
+        <Route
+          key={paths.alerting.maintenanceWindowsEdit}
+          path={paths.alerting.maintenanceWindowsEdit}
+          exact
+        >
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <MaintenanceWindowsEditLazy />
+          </Suspense>
+        </Route>
+      ) : null}
+      <Route>
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <MaintenanceWindowsLazy />
+        </Suspense>
+      </Route>
+    </Switch>
   );
 });
 App.displayName = 'App';

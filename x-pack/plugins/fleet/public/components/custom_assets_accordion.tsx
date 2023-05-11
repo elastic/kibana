@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import type { FunctionComponent } from 'react';
 import {
   EuiAccordion,
@@ -64,7 +64,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           {views.map((view, index) => (
-            <>
+            <Fragment key={index}>
               <EuiSplitPanel.Inner grow={false} key={index}>
                 <EuiText size="m">
                   <p>
@@ -80,7 +80,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
                 </EuiText>
               </EuiSplitPanel.Inner>
               {index + 1 < views.length && <EuiHorizontalRule margin="none" />}
-            </>
+            </Fragment>
           ))}
         </EuiSplitPanel.Outer>
       </>

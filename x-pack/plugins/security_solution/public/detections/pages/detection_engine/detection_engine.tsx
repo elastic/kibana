@@ -29,7 +29,6 @@ import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  FILTER_OPEN,
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
@@ -78,13 +77,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -139,7 +138,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
   // when arePageFiltersEnabled === false
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
 
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
@@ -173,12 +172,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { filterManager } = data.query;
 
+  const topLevelFilters = useMemo(() => {
+    return [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ];
+  }, [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+
   const alertPageFilters = useMemo(() => {
     if (arePageFiltersEnabled) {
       return detectionPageFilters;
     }
-    return buildAlertStatusFilter(filterGroup);
-  }, [filterGroup, detectionPageFilters, arePageFiltersEnabled]);
+    return buildAlertStatusFilter(statusFilter[0] ?? 'open');
+  }, [statusFilter, detectionPageFilters, arePageFiltersEnabled]);
 
   useEffect(() => {
     if (!detectionPageFilterHandler) return;
@@ -231,13 +238,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const alertsDefaultFilters = useMemo(
-    () => [
-      ...filters,
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...(alertPageFilters ?? []),
-    ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    () => [...topLevelFilters, ...(alertPageFilters ?? [])],
+    [topLevelFilters, alertPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -276,6 +278,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
+    if (newFilters.length) {
+      const newStatusFilter = newFilters.find(
+        (filter) => filter.meta.key === 'kibana.alert.workflow_status'
+      );
+      if (newStatusFilter) {
+        const status: Status[] = newStatusFilter.meta.params
+          ? (newStatusFilter.meta.params as Status[])
+          : [newStatusFilter.query?.match_phrase['kibana.alert.workflow_status']];
+        setStatusFilter(status);
+      } else {
+        setStatusFilter([]);
+      }
+    }
   }, []);
 
   // Callback for when open/closed filter changes
@@ -284,9 +299,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       const timelineId = TableId.alertsOnAlertsPage;
       clearEventsLoading({ id: timelineId });
       clearEventsDeleted({ id: timelineId });
-      setFilterGroup(newFilterGroup);
+      setStatusFilter([newFilterGroup]);
     },
-    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, setStatusFilter]
   );
 
   const areDetectionPageFiltersLoading = useMemo(() => {
@@ -317,7 +332,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <AlertsTableFilterGroup
-              status={filterGroup}
+              status={statusFilter[0] ?? 'open'}
               onFilterGroupChanged={onFilterGroupChangedCallback}
             />
           </EuiFlexItem>
@@ -338,7 +353,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <DetectionPageFilterSet
           dataViewId={dataViewId}
           onFilterChange={pageFiltersUpdateHandler}
-          filters={filters}
+          filters={topLevelFilters}
           query={query}
           timeRange={{
             from,
@@ -350,10 +365,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         />
       ),
     [
+      topLevelFilters,
       arePageFiltersEnabled,
       dataViewId,
-      filterGroup,
-      filters,
+      statusFilter,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
       showUpdating,
@@ -462,7 +477,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <GroupedAlertsTable
-              currentAlertStatusFilterValue={filterGroup}
+              currentAlertStatusFilterValue={statusFilter}
               defaultFilters={alertsTableDefaultFilters}
               from={from}
               globalFilters={filters}

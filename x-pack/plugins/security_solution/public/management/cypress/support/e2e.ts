@@ -50,4 +50,42 @@ Cypress.Commands.addQuery<'findByTestSubj'>(
   }
 );
 
+Cypress.Commands.add(
+  'waitUntil',
+  { prevSubject: 'optional' },
+  (subject, fn, { interval = 500, timeout = 30000 } = {}) => {
+    let attempts = Math.floor(timeout / interval);
+
+    const completeOrRetry = (result: boolean) => {
+      if (result) {
+        return result;
+      }
+      if (attempts < 1) {
+        throw new Error(`Timed out while retrying, last result was: {${result}}`);
+      }
+      cy.wait(interval, { log: false }).then(() => {
+        attempts--;
+        return evaluate();
+      });
+    };
+
+    const evaluate = () => {
+      const result = fn(subject);
+
+      if (typeof result === 'boolean') {
+        return completeOrRetry(result);
+      } else if ('then' in result) {
+        // @ts-expect-error
+        return result.then(completeOrRetry);
+      } else {
+        throw new Error(
+          `Unknown return type from callback: ${Object.prototype.toString.call(result)}`
+        );
+      }
+    };
+
+    return evaluate();
+  }
+);
+
 Cypress.on('uncaught:exception', () => false);

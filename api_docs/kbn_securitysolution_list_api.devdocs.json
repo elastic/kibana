@@ -350,6 +350,57 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-api",
+        "id": "def-common.duplicateExceptionList",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "duplicateExceptionList",
+        "description": [
+          "\nDuplicate an ExceptionList and its items by providing a ExceptionList list_id\n"
+        ],
+        "signature": [
+          "({ http, includeExpiredExceptions, listId, namespaceType, signal, }: ",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-list-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+            "section": "def-common.DuplicateExceptionListProps",
+            "text": "DuplicateExceptionListProps"
+          },
+          ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
+        ],
+        "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.duplicateExceptionList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  includeExpiredExceptions,\n  listId,\n  namespaceType,\n  signal,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-io-ts-list-types",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
+                "section": "def-common.DuplicateExceptionListProps",
+                "text": "DuplicateExceptionListProps"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/api/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-api",
         "id": "def-common.exportExceptionList",
         "type": "Function",
         "tags": [

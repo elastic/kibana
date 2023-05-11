@@ -21,7 +21,7 @@ import {
   ContentManagementServerStart,
   SetupDependencies,
 } from './types';
-import { EventStreamService, EsEventStreamClientFactory } from './event_stream';
+import { EventStreamService } from './event_stream';
 import { procedureNames } from '../common/rpc';
 
 export class ContentManagementPlugin
@@ -29,20 +29,22 @@ export class ContentManagementPlugin
 {
   private readonly logger: Logger;
   private readonly core: Core;
-  readonly #eventStream: EventStreamService;
+  readonly #eventStream?: EventStreamService;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const kibanaVersion = initializerContext.env.packageInfo.version;
-
     this.logger = initializerContext.logger.get();
-    this.#eventStream = new EventStreamService({
-      logger: this.logger,
-      clientFactory: new EsEventStreamClientFactory({
-        baseName: '.kibana',
-        kibanaVersion,
-        logger: this.logger,
-      }),
-    });
+
+    // TODO: Enable Event Stream once we ready to log events.
+    // const kibanaVersion = initializerContext.env.packageInfo.version;
+    // this.#eventStream = new EventStreamService({
+    //   logger: this.logger,
+    //   clientFactory: new EsEventStreamClientFactory({
+    //     baseName: '.kibana',
+    //     kibanaVersion,
+    //     logger: this.logger,
+    //   }),
+    // });
+
     this.core = new Core({
       logger: this.logger,
       eventStream: this.#eventStream,
@@ -50,7 +52,9 @@ export class ContentManagementPlugin
   }
 
   public setup(core: CoreSetup) {
-    this.#eventStream.setup({ core });
+    if (this.#eventStream) {
+      this.#eventStream.setup({ core });
+    }
 
     const { api: coreApi, contentRegistry } = this.core.setup();
 
@@ -69,16 +73,20 @@ export class ContentManagementPlugin
   }
 
   public start(core: CoreStart) {
-    this.#eventStream.start();
+    if (this.#eventStream) {
+      this.#eventStream.start();
+    }
 
     return {};
   }
 
   public async stop(): Promise<void> {
-    try {
-      await this.#eventStream.stop();
-    } catch (e) {
-      this.logger.error(`Error during event stream stop: ${e}`);
+    if (this.#eventStream) {
+      try {
+        await this.#eventStream.stop();
+      } catch (e) {
+        this.logger.error(`Error during event stream stop: ${e}`);
+      }
     }
   }
 }

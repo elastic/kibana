@@ -9,7 +9,7 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { CoreVersionedRoute } from './core_versioned_route';
-import { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
 
 /** @internal */
 interface Dependencies {

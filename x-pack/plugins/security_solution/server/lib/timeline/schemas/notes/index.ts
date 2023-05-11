@@ -22,3 +22,7 @@ export const persistNoteSchema = runtimeTypes.intersection([
     version: unionWithNullType(runtimeTypes.string),
   }),
 ]);
+
+export const deleteNoteSchema = runtimeTypes.partial({
+  noteId: unionWithNullType(runtimeTypes.string),
+});

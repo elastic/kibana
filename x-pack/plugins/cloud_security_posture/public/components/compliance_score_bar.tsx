@@ -6,11 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { calculatePostureScore } from '../../common/utils/helpers';
 import { statusColors } from '../common/constants';
 
+/**
+ * This component will take 100% of the width set by the parent
+ * */
 export const ComplianceScoreBar = ({
   totalPassed,
   totalFailed,
@@ -23,7 +27,12 @@ export const ComplianceScoreBar = ({
 
   return (
     <EuiToolTip
-      anchorClassName="cspComplianceScoreBarTooltip"
+      anchorProps={{
+        // ensures the compliance bar takes full width of its parent
+        css: css`
+          width: 100%;
+        `,
+      }}
       content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
         defaultMessage: '{failed} failed and {passed} passed findings',
         values: {
@@ -36,11 +45,7 @@ export const ComplianceScoreBar = ({
         gutterSize="none"
         alignItems="center"
         justifyContent="flexEnd"
-        style={{
-          height: '32px',
-          cursor: 'pointer',
-          gap: `${euiTheme.size.s}`,
-        }}
+        style={{ gap: euiTheme.size.s }}
       >
         <EuiFlexItem>
           <EuiFlexGroup

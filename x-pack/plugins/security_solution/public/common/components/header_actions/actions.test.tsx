@@ -383,7 +383,8 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'] } },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
@@ -400,7 +401,8 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'] } },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
@@ -425,7 +427,8 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'] } },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(

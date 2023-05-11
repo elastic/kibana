@@ -114,12 +114,14 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           return dashboardData;
         };
 
-        const kibanaIndex = core.savedObjects.getKibanaIndex();
+        const dashboardIndex = await core
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType('dashboard'));
         const pageSize = 50;
 
         const searchParams = {
           size: pageSize,
-          index: kibanaIndex,
+          index: dashboardIndex,
           ignore_unavailable: true,
           filter_path: ['hits.hits', '_scroll_id'],
           body: { query: { bool: { filter: { term: { type: 'dashboard' } } } } },

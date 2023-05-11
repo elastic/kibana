@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -19,6 +18,7 @@ export interface FormProps {
   title: string;
   startDate: string;
   endDate: string;
+  timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringScheduleFormProps;
 }
@@ -37,7 +37,7 @@ export interface RecurringScheduleFormProps {
 export const schema: FormSchema<FormProps> = {
   title: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.CREATE_FORM_NAME,
+    label: i18n.NAME,
     validations: [
       {
         validator: emptyField(i18n.CREATE_FORM_NAME_REQUIRED),
@@ -46,6 +46,7 @@ export const schema: FormSchema<FormProps> = {
   },
   startDate: {},
   endDate: {},
+  timezone: {},
   recurring: {
     type: FIELD_TYPES.TOGGLE,
     label: i18n.CREATE_FORM_REPEAT,
@@ -72,11 +73,7 @@ export const schema: FormSchema<FormProps> = {
       defaultValue: EndsOptions.NEVER,
       validations: [],
     },
-    until: {
-      label: '',
-      defaultValue: moment().endOf('day').toISOString(),
-      validations: [],
-    },
+    until: {},
     count: {
       label: '',
       type: FIELD_TYPES.TEXT,

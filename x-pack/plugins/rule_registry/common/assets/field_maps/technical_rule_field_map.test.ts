@@ -274,6 +274,13 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date_range",
       },
+      "kibana.alert.url": Object {
+        "array": false,
+        "ignore_above": 2048,
+        "index": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.uuid": Object {
         "array": false,
         "required": true,

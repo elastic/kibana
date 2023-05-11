@@ -12,11 +12,14 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
+  type DefaultItemAction,
 } from '@elastic/eui';
 import React, { type FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { useDataSource } from '../../hooks/use_data_source';
 import { useCommonChartProps } from './use_common_chart_props';
 import {
   type ChangePointAnnotation,
@@ -33,13 +36,49 @@ export interface ChangePointsTableProps {
   onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
+function getFilterConfig(
+  index: string,
+  item: Required<ChangePointAnnotation>,
+  negate: boolean
+): Filter {
+  return {
+    meta: {
+      disabled: false,
+      negate,
+      alias: null,
+      index,
+      key: `${item.group.name}_${item.group.value}`,
+      // @ts-ignore FilterMeta type definition misses the field property
+      field: item.group.name,
+      params: {
+        query: item.group.value,
+      },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        [item.group.name]: item.group.value,
+      },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  };
+}
+
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
   annotations,
   fieldConfig,
   onSelectionChange,
 }) => {
-  const { fieldFormats } = useAiopsAppContext();
+  const {
+    fieldFormats,
+    data: {
+      query: { filterManager },
+    },
+  } = useAiopsAppContext();
+  const { dataView } = useDataSource();
 
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
@@ -50,6 +89,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       direction: 'asc' as const,
     },
   };
+
+  const hasActions = fieldConfig.splitField !== undefined;
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
@@ -126,6 +167,61 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             truncateText: false,
             sortable: true,
           },
+          {
+            name: i18n.translate('xpack.aiops.changePointDetection.actionsColumn', {
+              defaultMessage: 'Actions',
+            }),
+            actions: [
+              {
+                name: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                  {
+                    defaultMessage: 'Filter for value',
+                  }
+                ),
+                description: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                  {
+                    defaultMessage: 'Filter for value',
+                  }
+                ),
+                icon: 'plusInCircle',
+                color: 'primary',
+                type: 'icon',
+                onClick: (item) => {
+                  filterManager.addFilters(
+                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, false)!
+                  );
+                },
+                isPrimary: true,
+                'data-test-subj': 'aiopsChangePointFilterForValue',
+              },
+              {
+                name: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                  {
+                    defaultMessage: 'Filter out value',
+                  }
+                ),
+                description: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                  {
+                    defaultMessage: 'Filter out value',
+                  }
+                ),
+                icon: 'minusInCircle',
+                color: 'primary',
+                type: 'icon',
+                onClick: (item) => {
+                  filterManager.addFilters(
+                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, true)!
+                  );
+                },
+                isPrimary: true,
+                'data-test-subj': 'aiopsChangePointFilterForValue',
+              },
+            ] as Array<DefaultItemAction<ChangePointAnnotation>>,
+          },
         ]
       : []),
   ];
@@ -155,6 +251,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       columns={columns}
       pagination={{ pageSizeOptions: [5, 10, 15] }}
       sorting={defaultSorting}
+      hasActions={hasActions}
       message={
         isLoading ? (
           <EuiEmptyPrompt

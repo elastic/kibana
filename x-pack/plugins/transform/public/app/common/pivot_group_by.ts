@@ -59,6 +59,7 @@ interface GroupByDateHistogram extends GroupByConfigBase {
   field: EsFieldName;
   calendar_interval: string;
   missing_bucket?: boolean;
+  time_zone?: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {

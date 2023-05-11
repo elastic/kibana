@@ -27,6 +27,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -95,6 +96,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public subscriptions: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
+  public searchSessionId?: string;
+
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
@@ -117,6 +120,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     reduxToolsPackage: ReduxToolsPackage,
+    initialSessionId?: string,
     initialLastSavedInput?: DashboardContainerInput,
     dashboardCreationStartTime?: number,
     parent?: Container,
@@ -146,6 +150,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     } = pluginServices.getServices());
 
     this.creationOptions = creationOptions;
+    this.searchSessionId = initialSessionId;
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
@@ -244,7 +249,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       syncColors,
       syncTooltips,
       hidePanelTitles,
-      searchSessionId,
       refreshInterval,
       executionContext,
     } = this.input;
@@ -254,10 +258,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
     return {
+      searchSessionId: this.searchSessionId,
       refreshConfig: refreshInterval,
       filters: combinedFilters,
       hidePanelTitles,
-      searchSessionId,
       executionContext,
       syncTooltips,
       syncColors,
@@ -328,9 +332,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const {
       explicitInput: { timeRange, refreshInterval },
       componentState: {
-        lastSavedInput: { timeRestore: lastSavedTimeRestore },
+        lastSavedInput: {
+          controlGroupInput: lastSavedControlGroupInput,
+          timeRestore: lastSavedTimeRestore,
+        },
       },
     } = this.getState();
+
+    if (
+      this.controlGroup &&
+      lastSavedControlGroupInput &&
+      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
+    ) {
+      this.controlGroup.updateInput(lastSavedControlGroupInput);
+    }
 
     // if we are using the unified search integration, we need to force reset the time picker.
     if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
@@ -398,4 +413,41 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     return titles;
   }
+
+  public setScrollToPanelId = (id: string | undefined) => {
+    this.dispatch.setScrollToPanelId(id);
+  };
+
+  public scrollToPanel = async (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.scrollToPanelId;
+    if (!id) return;
+
+    this.untilEmbeddableLoaded(id).then(() => {
+      this.setScrollToPanelId(undefined);
+      panelRef.scrollIntoView({ block: 'center' });
+    });
+  };
+
+  public scrollToTop = () => {
+    window.scroll(0, 0);
+  };
+
+  public setHighlightPanelId = (id: string | undefined) => {
+    this.dispatch.setHighlightPanelId(id);
+  };
+
+  public highlightPanel = (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.highlightPanelId;
+
+    if (id && panelRef) {
+      this.untilEmbeddableLoaded(id).then(() => {
+        panelRef.classList.add('dshDashboardGrid__item--highlighted');
+        // Removes the class after the highlight animation finishes
+        setTimeout(() => {
+          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        }, 5000);
+      });
+    }
+    this.setHighlightPanelId(undefined);
+  };
 }

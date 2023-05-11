@@ -59,6 +59,11 @@ export interface ServicesDefinition {
       result?: VersionableObject<any, any, any, any>;
     };
   };
+  mSearch?: {
+    out?: {
+      result?: VersionableObject<any, any, any, any>;
+    };
+  };
 }
 
 export interface ServiceTransforms {
@@ -108,6 +113,11 @@ export interface ServiceTransforms {
     in: {
       options: ObjectTransforms<any, any, any, any>;
     };
+    out: {
+      result: ObjectTransforms<any, any, any, any>;
+    };
+  };
+  mSearch: {
     out: {
       result: ObjectTransforms<any, any, any, any>;
     };

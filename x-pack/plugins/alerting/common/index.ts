@@ -45,8 +45,13 @@ export * from './rrule_type';
 export * from './maintenance_window';
 export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
+export * from './iso_weekdays';
 
-export { mappingFromFieldMap, getComponentTemplateFromFieldMap } from './alert_schema';
+export {
+  mappingFromFieldMap,
+  getComponentTemplateFromFieldMap,
+  contextToSchemaName,
+} from './alert_schema';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
@@ -57,6 +62,13 @@ export interface AlertingFrameworkHealth {
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
+export const INTERNAL_ALERTING_API_FIND_RULES_PATH = `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`;
+
+export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;
+export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
+  `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
+
 export const ALERTS_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = false;
+export const ENABLE_MAINTENANCE_WINDOWS = true;

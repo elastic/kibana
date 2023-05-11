@@ -11,10 +11,10 @@ import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
-import { NativeConnector } from '../types';
+import { ConnectorDefinition } from '../types';
 
 interface ResearchConfigurationProps {
-  nativeConnector: NativeConnector;
+  nativeConnector: ConnectorDefinition;
 }
 export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
   nativeConnector,

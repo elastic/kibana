@@ -17,9 +17,9 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type {
   RequestHandlerContextBase,
-  IRouter,
   IContextContainer,
   IContextProvider,
+  IRouter,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -129,7 +129,7 @@ export class HttpService
           path,
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
-          { isDev: this.env.mode.dev }
+          { isDev: this.env.mode.dev, isServerless: this.env.cliArgs.serverless }
         );
 
         registerCallback(router);
@@ -175,6 +175,7 @@ export class HttpService
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
         const router = new Router<Context>(path, this.log, enhanceHandler, {
           isDev: this.env.mode.dev,
+          isServerless: this.env.cliArgs.serverless,
         });
         registerRouter(router);
         return router;

@@ -12,6 +12,7 @@ import {
   objectToJsonFormatter,
   stringToJsonFormatter,
 } from '../formatting_utils';
+import { DEFAULT_THROTTLING_VALUE } from '../../constants/monitor_defaults';
 
 import { tlsFormatters } from '../tls/formatters';
 
@@ -24,12 +25,15 @@ export const throttlingFormatter: Formatter = (fields) => {
     return 'false';
   }
 
-  return `${throttling.value.download}d/${throttling.value.upload}u/${throttling.value.latency}l`;
+  return JSON.stringify({
+    download: Number(throttling?.value?.download || DEFAULT_THROTTLING_VALUE.download),
+    upload: Number(throttling?.value?.upload || DEFAULT_THROTTLING_VALUE.upload),
+    latency: Number(throttling?.value?.latency || DEFAULT_THROTTLING_VALUE),
+  });
 };
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,

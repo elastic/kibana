@@ -91,18 +91,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           size: 10,
         });
         expect(response.terms).to.eql([
-          {
-            label: 'SM-G973F',
-            count: 6,
-          },
-          {
-            label: 'HUAWEI P2-0000',
-            count: 3,
-          },
-          {
-            label: 'SM-G930F',
-            count: 3,
-          },
+          { label: 'SM-G973F', count: 6 },
+          { label: 'HUAWEI P2-0000', count: 3 },
+          { label: 'Pixel 7', count: 3 },
+          { label: 'Pixel 7 Pro', count: 3 },
+          { label: 'Pixel 8', count: 3 },
+          { label: 'SM-G930F', count: 3 },
         ]);
       });
 
@@ -116,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.terms).to.eql([
           {
             label: '2.3',
-            count: 6,
+            count: 15,
           },
           {
             label: '1.1',
@@ -139,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.terms).to.eql([
           {
             label: '2.3',
-            count: 6,
+            count: 15,
           },
         ]);
       });

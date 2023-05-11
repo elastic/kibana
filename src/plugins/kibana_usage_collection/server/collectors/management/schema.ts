@@ -167,10 +167,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:showLegacyFieldTopValues': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:sampleSize': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -412,6 +408,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:rulesTableRefresh': {
     type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:syntheticsThrottlingEnabled': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInspectEsQueries': {

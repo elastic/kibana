@@ -19,6 +19,7 @@ export interface LoadRulesProps {
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleLastRunOutcomesFilter?: string[];
+  ruleParamsFilter?: Record<string, string | number | object>;
   ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
 }

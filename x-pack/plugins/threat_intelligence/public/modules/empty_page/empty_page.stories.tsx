@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EmptyPage } from '.';
+import { EmptyPage } from './empty_page';
 import { StoryProvidersComponent } from '../../common/mocks/story_providers';
 
 export default {

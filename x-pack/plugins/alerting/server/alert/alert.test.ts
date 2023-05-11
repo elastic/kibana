@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
+import { CombinedSummarizedAlerts } from '../types';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -344,6 +345,7 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
         flappingHistory: [],
+        maintenanceWindowIds: [],
       },
     });
   });
@@ -357,6 +359,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -373,6 +376,7 @@ describe('updateLastScheduledActions()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         lastScheduledActions: {
           date: new Date(),
           group: 'default',
@@ -387,6 +391,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -484,6 +489,7 @@ describe('toJSON', () => {
             group: 'default',
           },
           flappingHistory: [false, true],
+          maintenanceWindowIds: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -548,6 +554,7 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
       },
     });
@@ -570,6 +577,7 @@ describe('setFlappingHistory', () => {
           "flappingHistory": Array [
             false,
           ],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -602,6 +610,7 @@ describe('setFlapping', () => {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -660,8 +669,34 @@ describe('resetPendingRecoveredCount', () => {
 });
 
 describe('isFilteredOut', () => {
-  const summarizedAlerts = {
-    all: { count: 1, data: [{ kibana: { alert: { instance: { id: 1 } } } }] },
+  const summarizedAlerts: CombinedSummarizedAlerts = {
+    all: {
+      count: 1,
+      data: [
+        {
+          _id: '1',
+          _index: '.alerts',
+          '@timestamp': '',
+          kibana: {
+            alert: {
+              instance: { id: 'a' },
+              rule: {
+                category: 'category',
+                consumer: 'consumer',
+                name: 'name',
+                producer: 'producer',
+                revision: 0,
+                rule_type_id: 'rule_type_id',
+                uuid: 'uuid',
+              },
+              status: 'status',
+              uuid: '1',
+            },
+            space_ids: ['default'],
+          },
+        },
+      ],
+    },
     new: { count: 0, data: [] },
     ongoing: { count: 0, data: [] },
     recovered: { count: 0, data: [] },
@@ -669,19 +704,25 @@ describe('isFilteredOut', () => {
 
   test('returns false if summarizedAlerts is null', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
     });
     expect(alert.isFilteredOut(null)).toBe(false);
   });
-  test('returns false if the alert is in summarizedAlerts', () => {
+  test('returns false if the alert with same ID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: 'no' },
     });
-    expect(alert.isFilteredOut(null)).toBe(false);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
   });
-  test('returns true if the alert is not in summarizedAlerts', () => {
+  test('returns false if the alert with same UUID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
+  });
+  test('returns true if the alert with same UUID or ID is not in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3, uuid: '3' },
     });
     expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
   });

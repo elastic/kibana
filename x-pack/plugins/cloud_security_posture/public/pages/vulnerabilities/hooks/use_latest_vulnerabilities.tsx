@@ -13,6 +13,7 @@ import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constan
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import { FindingsBaseEsQuery } from '../../../common/types';
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<any, FindingsAggs>>;
 
@@ -20,13 +21,36 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getFindingsQuery = ({ query }: any) => ({
+interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
+  sort: estypes.Sort;
+  enabled: boolean;
+}
+
+export const getFindingsQuery = ({ query, sort }: VulnerabilitiesQuery) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query,
+  query: {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter || []),
+        { exists: { field: 'vulnerability.score.base' } },
+        { exists: { field: 'vulnerability.score.version' } },
+        { exists: { field: 'vulnerability.severity' } },
+        { exists: { field: 'resource.name' } },
+        { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
+      ],
+      must_not: [
+        ...(query?.bool?.must_not || []),
+        { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
+      ],
+    },
+  },
   size: MAX_FINDINGS_TO_LOAD,
+  sort,
 });
 
-export const useLatestVulnerabilities = (options: any) => {
+export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
   const {
     data,
     notifications: { toasts },

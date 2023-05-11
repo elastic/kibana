@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiText,
@@ -19,10 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PLATFORM_TYPE } from '../hooks';
+import { CLOUD_FORMATION_PLATFORM_OPTION, type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
+import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
 
 interface Props {
   linuxCommand: string;
@@ -38,6 +39,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
+  cloudFormationTemplateUrl?: string | null;
 }
 
 // Otherwise the copy button is over the text
@@ -59,16 +61,31 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   hasFleetServer,
   fullCopyButton,
   onCopy,
+  cloudFormationTemplateUrl,
 }) => {
-  const { platform, setPlatform } = usePlatform();
+  const getInitialPlatform = useCallback(() => {
+    if (cloudFormationTemplateUrl) return 'cloudFormation';
 
-  useEffect(() => {
-    setPlatform(hasK8sIntegration ? 'kubernetes' : 'linux');
-  }, [hasK8sIntegration, setPlatform]);
+    if (hasK8sIntegration) return 'kubernetes';
+
+    return 'linux';
+  }, [cloudFormationTemplateUrl, hasK8sIntegration]);
+
+  const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
-  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration);
+  const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
+
+  const getPlatformOptions = useCallback(() => {
+    const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
+
+    if (cloudFormationTemplateUrl) {
+      return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
+    }
+
+    return platformOptions;
+  }, [cloudFormationTemplateUrl, isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -101,6 +118,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
+    cloudFormation: '',
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -116,7 +134,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       <>
         {!hasK8sIntegrationMultiPage && (
           <EuiButtonGroup
-            options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
+            options={getPlatformOptions()}
             idSelected={platform}
             onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
             legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
@@ -147,7 +165,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {!hasK8sIntegrationMultiPage && (
+        {platform === 'cloudFormation' && cloudFormationTemplateUrl && (
+          <>
+            <CloudFormationInstructions
+              cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+              enrollmentAPIKey={enrollToken}
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {!hasK8sIntegrationMultiPage && platform !== 'cloudFormation' && (
           <>
             {platform === 'kubernetes' && (
               <EuiText>

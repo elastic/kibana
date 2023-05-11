@@ -371,7 +371,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     } else {
       batch(() => {
         this.dispatch.updateQueryResults({
-          availableOptions: {},
+          availableOptions: [],
         });
         this.dispatch.setLoading(false);
       });

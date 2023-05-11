@@ -16,12 +16,15 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { SloEditForm } from './components/slo_edit_form';
+import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 export function SloEditPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { hasWriteCapabilities } = useCapabilities();
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
@@ -40,7 +43,7 @@ export function SloEditPage() {
 
   const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
-  if (hasRightLicense === false) {
+  if (hasRightLicense === false || !hasWriteCapabilities) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
@@ -58,7 +61,7 @@ export function SloEditPage() {
           : i18n.translate('xpack.observability.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
-        rightSideItems: [],
+        rightSideItems: [<FeedbackButton />],
         bottomBorder: false,
       }}
       data-test-subj="slosEditPage"

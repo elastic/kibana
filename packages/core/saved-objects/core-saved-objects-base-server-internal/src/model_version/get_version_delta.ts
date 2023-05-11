@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ModelVersionMap } from './version_map';
-import { compareModelVersions } from './version_compare';
+import type { VirtualVersionMap, VirtualVersion } from './version_map';
+import { compareVirtualVersions } from './version_compare';
 
 interface GetModelVersionDeltaOpts {
-  currentVersions: ModelVersionMap;
-  targetVersions: ModelVersionMap;
+  currentVersions: VirtualVersionMap;
+  targetVersions: VirtualVersionMap;
   deletedTypes: string[];
 }
 
@@ -26,9 +26,9 @@ interface ModelVersionDeltaTypeResult {
   /** the name of the type */
   name: string;
   /** the current version the type is at */
-  current: number;
+  current: VirtualVersion;
   /** the target version the type should go to */
-  target: number;
+  target: VirtualVersion;
 }
 
 /**
@@ -41,7 +41,7 @@ export const getModelVersionDelta = ({
   targetVersions,
   deletedTypes,
 }: GetModelVersionDeltaOpts): ModelVersionDeltaResult => {
-  const compared = compareModelVersions({
+  const compared = compareVirtualVersions({
     indexVersions: currentVersions,
     appVersions: targetVersions,
     deletedTypes,
@@ -78,8 +78,8 @@ const getTypeDelta = ({
   targetVersions,
 }: {
   type: string;
-  currentVersions: ModelVersionMap;
-  targetVersions: ModelVersionMap;
+  currentVersions: VirtualVersionMap;
+  targetVersions: VirtualVersionMap;
 }): ModelVersionDeltaTypeResult => {
   const currentVersion = currentVersions[type];
   const targetVersion = targetVersions[type];

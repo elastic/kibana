@@ -59,7 +59,7 @@ export const Toolbar = ({ children }: Props) => {
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="xs">
+        <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="s">
           {iconButtonGroup ? <EuiFlexItem grow={false}>{iconButtonGroup}</EuiFlexItem> : null}
           {extra}
         </EuiFlexGroup>

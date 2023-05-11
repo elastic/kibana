@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllRules, deleteSignalsIndex } from '../../utils';
@@ -60,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
         // and we won't have a conflict
         await es.index({
           id: 'alert:90e3ca0e-71f7-513a-b60a-ac678efd8887',
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           refresh: true,
           body: {
             alert: {
