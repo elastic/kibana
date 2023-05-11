@@ -90,6 +90,7 @@ export const SelectConnector: React.FC = () => {
                 <ConnectorCheckable
                   icon={connector.icon}
                   isBeta={connector.isBeta}
+                  isTechPreview={Boolean(connector.isTechPreview)}
                   name={connector.name}
                   serviceType={connector.serviceType}
                   onChange={() => {
