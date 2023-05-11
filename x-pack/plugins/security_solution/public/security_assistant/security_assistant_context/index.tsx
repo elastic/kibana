@@ -18,6 +18,7 @@ import type {
 import type { SecurityAssistantUiSettings } from '../helpers';
 import type { Conversation } from './types';
 import { DEFAULT_CONVERSATION_STATE } from '../use_conversation';
+import { useLocalStorage } from '../../common/components/local_storage';
 
 interface SecurityAssistantProviderProps {
   apiConfig: SecurityAssistantUiSettings;
@@ -75,16 +76,13 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
   /**
    * Conversation state/actions
    */
-  const [conversations, setConversations] = useState<Record<string, Conversation>>({
-    default: DEFAULT_CONVERSATION_STATE,
+  const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
+    defaultValue: { default: DEFAULT_CONVERSATION_STATE },
+    key: LOCAL_STORAGE_KEY,
+    isInvalidDefault: (valueFromStorage) => {
+      return !valueFromStorage;
+    },
   });
-  // const [conversationsMap, setConversationsMap] = useLocalStorage<Record<string, Conversation>>({
-  //   defaultValue: { default: DEFAULT_CONVERSATION_STATE },
-  //   key: LOCAL_STORAGE_KEY,
-  //   isInvalidDefault: (valueFromStorage) => {
-  //     return !valueFromStorage;
-  //   },
-  // });
 
   const value = useMemo(
     () => ({
@@ -103,6 +101,7 @@ export const SecurityAssistantProvider: React.FC<SecurityAssistantProviderProps>
       promptContexts,
       registerPromptContext,
       unRegisterPromptContext,
+      setConversations,
       conversations,
     ]
   );
