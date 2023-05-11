@@ -87,7 +87,7 @@ function mountDatePicker(initialParams: {
           settings: {
             client: {
               get: (key: string) => [],
-              get$: (key: string) => of(true)
+              get$: (key: string) => of(true),
             },
           },
         }}
