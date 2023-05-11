@@ -18,6 +18,8 @@ export const Contact = () => {
         return (
           <>
             <EuiCard
+              className="help-center-card"
+              hasBorder={true}
               id={`contact_card_${i}`}
               layout={'horizontal'}
               icon={<EuiIcon size="xl" type={contact.iconType ?? 'discuss'} />}

@@ -82,30 +82,7 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
   });
 
 export const KeyboardShortcutsDoc: FunctionComponent<Props> = () => (
-  <EuiAccordion
-    key={getId('shortcuts')}
-    id={`documentation-canvas-custom`}
-    className="euiAccordionForm"
-    css={css`
-      border-bottom: 0px !important;
-    `}
-    buttonClassName="euiAccordionForm__button"
-    buttonContent={
-      <>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'canvasApp'} size="m" />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h3>{strings.getTitle()}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    }
-  >
+  <>
     {Object.values(keymap).map((namespace: ShortcutNameSpace) => {
       const { displayName, ...shortcuts } = namespace;
 
@@ -125,7 +102,7 @@ export const KeyboardShortcutsDoc: FunctionComponent<Props> = () => (
         </>
       );
     })}
-  </EuiAccordion>
+  </>
 );
 
 KeyboardShortcutsDoc.propTypes = {

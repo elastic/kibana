@@ -19,9 +19,10 @@ export const GlobalContent = () => {
         const { content: text, href, image, description } = link;
 
         return (
-          <EuiPanel key={`documentation-card-${i}`}>
+          <EuiPanel key={`documentation-card-${i}`} hasBorder={true}>
             <EuiFlexGroup
               alignItems="center"
+              justifyContent="flexStart"
               responsive={true}
               css={css`
                 width: 100%;

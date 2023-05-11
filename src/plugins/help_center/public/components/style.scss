@@ -1,10 +1,20 @@
-.euiCard__main {
-  align-items: center;
-  .euiCard__top {
-    margin-block-end: 0px;
+.help-center-card {
+  .euiCard__titleButton {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+  }
+  .euiCard__content {
+    align-items: center;
+
+  }
+  .euiCard__main {
+    align-items: center;
+    .euiCard__top {
+      margin-block-end: 0px;
+    }
   }
 }
-
 
 .image {
   img {

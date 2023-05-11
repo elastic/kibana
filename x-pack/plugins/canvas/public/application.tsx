@@ -149,11 +149,14 @@ export const initializeCanvas = async (
         linkType: 'documentation',
         href: docLinks.links.canvas.guide,
       },
+      {
+        priority: 100,
+        iconType: 'canvasApp',
+        linkType: 'documentation',
+        title: 'Keyboard shortcuts',
+        content: <KeyboardShortcutsDoc onClose={() => {}} />,
+      },
     ],
-    content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(<KeyboardShortcutsDoc onClose={() => {}} />, domNode);
-      return () => ReactDOM.unmountComponentAtNode(domNode);
-    },
   });
 
   if (setupPlugins.usageCollection) {

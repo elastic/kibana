@@ -24,30 +24,7 @@ import * as examples from '../../../common/constants/welcome_panel';
 
 export function ConsoleDocumentation() {
   return (
-    <EuiAccordion
-      key={`documentation-console-custom`}
-      id={`documentation-console-custom`}
-      css={css`
-        border-bottom: 0px !important;
-      `}
-      className="euiAccordionForm"
-      buttonClassName="euiAccordionForm__button"
-      buttonContent={
-        <>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'consoleApp'} size="m" />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3>{'How to send requests'}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      }
-    >
+    <>
       <EuiText>
         <p>
           <FormattedMessage
@@ -152,6 +129,6 @@ export function ConsoleDocumentation() {
           linesOfExampleCode={9}
         />
       </EuiText>
-    </EuiAccordion>
+    </>
   );
 }

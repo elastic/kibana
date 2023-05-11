@@ -33,5 +33,4 @@ export interface FetchResult {
   >;
   contact: ChromeHelpExtensionMenuDiscussLink[];
   global: ChromeGlobalHelpExtensionMenuLink[];
-  custom: ChromeHelpExtension['content'];
 }

@@ -27,6 +27,7 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiFocusTrap,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -36,19 +37,29 @@ import { Contact } from './contact';
 import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
 import { DocsGpt, OpenAiLogo } from './docs_gpt';
+import { DocumentationTab } from './documentation_tab';
+import { ReactElement } from 'react-markdown';
 
-export const HelpCenterFlyout = ({
+export const HelpCenterPanel = ({
   headerRef,
   username,
 }: {
   headerRef: HTMLElement | null;
   username?: string;
 }) => {
-  const { setFlyoutVisible, kibanaVersion } = useContext(HelpCenterContext);
+  const { setFlyoutVisible } = useContext(HelpCenterContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
 
   const euiThemeContext = useEuiTheme();
   const euiTheme = euiThemeContext.euiTheme;
+
+  const [panelTitle, setPanelTitle] = useState<ReactElement>(
+    <EuiTitle size="m">
+      <h2 id="flyoutSmallTitle">
+        <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
+      </h2>
+    </EuiTitle>
+  );
 
   const tabs = useMemo(
     () => [
@@ -73,25 +84,7 @@ export const HelpCenterFlyout = ({
       {
         id: 'documentation',
         name: 'Documentation',
-        content: (
-          <>
-            <EuiSearchBar
-            // defaultQuery={initialQuery}
-            // box={{
-            //   placeholder: 'type:visualization -is:active joe',
-            //   incremental,
-            //   schema,
-            // }}
-            // filters={filters}
-            // onChange={onChange}
-            />
-            <EuiSpacer size="m" />
-            <CustomContent />
-            <DocumentationCards />
-            <EuiSpacer size="m" />
-            <GlobalContent />
-          </>
-        ),
+        content: <DocumentationTab setPanelTitle={setPanelTitle} />,
       },
       {
         id: 'talkToUs',
@@ -103,7 +96,7 @@ export const HelpCenterFlyout = ({
         ),
       },
     ],
-    []
+    [username]
   );
 
   const [selectedTabId, setSelectedTabId] = useState('docsGpt');
@@ -124,7 +117,6 @@ export const HelpCenterFlyout = ({
           padding-left: 0px;
           padding-right: 8px;
         `}
-        prepend={tab.prepend}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
       >
@@ -219,11 +211,7 @@ export const HelpCenterFlyout = ({
                 `}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="m">
-                    <h2 id="flyoutSmallTitle">
-                      <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
-                    </h2>
-                  </EuiTitle>
+                  {panelTitle}
                   <EuiTabs>{renderTabs()}</EuiTabs>
                   <EuiSpacer size="l" />
                 </EuiFlexItem>

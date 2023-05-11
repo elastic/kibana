@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 
-import { HelpCenterFlyout } from './flyout_list';
+import { HelpCenterPanel } from './help_center_panel';
 import type { HelpCenterApi } from '../lib/api';
 import { FetchResult } from '../types';
 
@@ -74,7 +74,7 @@ export const HelpCenterNavButton = ({ helpCenterApi }: Props) => {
           <EuiIcon type="help" size="m" />
         </EuiHeaderSectionItemButton>
         {flyoutVisible && topNav ? (
-          <HelpCenterFlyout headerRef={topNav} username={helpCenterApi.username} />
+          <HelpCenterPanel headerRef={topNav} username={helpCenterApi.username} />
         ) : null}
       </>
     </HelpCenterContext.Provider>

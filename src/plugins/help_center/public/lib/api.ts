@@ -50,7 +50,7 @@ export async function getApi(
         ChromeHelpExtensionMenuDocumentationLink & { title: string; priority: number }
       > = [
         {
-          title: 'Kibana',
+          title: 'Kibana documentation',
           priority: -1, // should always go last since it's the most general
           linkType: 'documentation',
           iconType: 'logoKibana',
@@ -88,7 +88,7 @@ export async function getApi(
           switch (link.linkType) {
             case 'documentation': {
               documentationLinks.push({
-                title: helpExtension.appName,
+                title: helpExtension.appName + ' documentation',
                 ...link,
                 priority: link.priority ?? 0,
               });
@@ -124,12 +124,11 @@ export async function getApi(
         });
       }
       contactLinks.push(githubLink);
-
+      console.log(documentationLinks);
       return {
         global: globalHelpExtensionMenuLinks.sort((a, b) => b.priority - a.priority),
         documentation: documentationLinks.sort((a, b) => b.priority - a.priority),
         contact: contactLinks,
-        custom: helpExtension?.content,
       };
     })
   );

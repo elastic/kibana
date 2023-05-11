@@ -57,11 +57,14 @@ export function Main() {
         linkType: 'documentation',
         href: `https://www.elastic.co/guide/en/kibana/current/console-kibana.html`,
       },
+      {
+        iconType: 'consoleApp',
+        linkType: 'documentation',
+        title: 'How to send requests',
+        priority: 100,
+        content: <ConsoleDocumentation />,
+      },
     ],
-    content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(<ConsoleDocumentation />, domNode);
-      return () => ReactDOM.unmountComponentAtNode(domNode);
-    },
   });
 
   // const [showWelcome, setShowWelcomePanel] = useState(

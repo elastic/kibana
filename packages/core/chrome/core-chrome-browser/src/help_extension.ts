@@ -8,6 +8,7 @@
 
 import type React from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
+import { ReactNode } from 'react';
 
 /** @public */
 export interface ChromeHelpMenuActions {
@@ -77,9 +78,11 @@ export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExte
    * URL to documentation page.
    * i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
    */
-  href: string;
+  href?: string;
 
   priority?: number;
+
+  content?: ReactNode;
 }
 
 /** @public */
