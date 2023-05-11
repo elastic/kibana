@@ -16,7 +16,6 @@ import {
   getFilterOptionsLocalStorageKey,
 } from './use_all_cases_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
 import { CaseStatuses } from '../../../common';
 import { SortFieldCase } from '../../containers/types';
@@ -55,6 +54,9 @@ jest.mock('react-router-dom', () => ({
 const APP_ID = 'testAppId';
 const LOCALSTORAGE_QUERY_PARAMS_KEY = getQueryParamsLocalStorageKey(APP_ID);
 const LOCALSTORAGE_FILTER_OPTIONS_KEY = getFilterOptionsLocalStorageKey(APP_ID);
+
+// @ts-ignore
+const stringify = (parsedParams) => new URLSearchParams(parsedParams).toString();
 
 describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
@@ -173,7 +175,6 @@ describe('useAllCasesQueryParams', () => {
 
   it('takes into account existing url filter options on first run', () => {
     const nonDefaultUrlParams = { severity: 'critical', status: 'open' };
-    const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
     mockLocation.search = stringify(nonDefaultUrlParams);
 
@@ -182,7 +183,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(expectedUrl),
+      search: 'severity=critical&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc',
     });
   });
 
@@ -190,7 +191,6 @@ describe('useAllCasesQueryParams', () => {
     const nonDefaultUrlParams = {
       foo: 'bar',
     };
-    const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
     mockLocation.search = stringify(nonDefaultUrlParams);
 
@@ -199,7 +199,8 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(expectedUrl),
+      search:
+        'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=all&status=all',
     });
   });
 

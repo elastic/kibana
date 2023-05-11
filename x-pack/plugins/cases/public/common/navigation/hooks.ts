@@ -8,13 +8,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { parse, stringify } from 'query-string';
 import { APP_ID, CASES_CONFIGURE_PATH, CASES_CREATE_PATH } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 import type { ICasesDeepLinkId } from './deep_links';
 import type { CaseViewPathParams, CaseViewPathSearchParams } from './paths';
 import { generateCaseViewPath } from './paths';
+
+// @ts-ignore
+const stringify = (parsedParams) => new URLSearchParams(parsedParams).toString();
+const parse = (queryString: string) => Object.fromEntries(new URLSearchParams(queryString));
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
 

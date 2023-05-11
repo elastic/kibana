@@ -10,7 +10,6 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { parse, stringify } from 'query-string';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { parseUrlQueryParams } from './utils';
@@ -35,6 +34,10 @@ export const getFilterOptionsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesFilterOptions;
   return `${appId}.${filteringKey}`;
 };
+
+// @ts-ignore
+const stringify = (parsedParams) => new URLSearchParams(parsedParams).toString();
+const parse = (queryString: string) => Object.fromEntries(new URLSearchParams(queryString));
 
 const getQueryParams = (
   params: PartialQueryParams,
