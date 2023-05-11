@@ -364,6 +364,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should render "N/A" when processes summary is not available in flyout', async () => {
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        const processesTotalValue =
+          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+        const processValue = await processesTotalValue.getVisibleText();
+        expect(processValue).to.eql('N/A');
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+      });
+
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
           const hosts = await pageObjects.infraHostsView.getAllKPITiles();
