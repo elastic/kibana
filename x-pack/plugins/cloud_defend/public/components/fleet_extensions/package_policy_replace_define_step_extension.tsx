@@ -5,16 +5,15 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import type {
-  PackagePolicyReplaceDefineStepExtensionComponent,
-  PackagePolicyReplaceDefineStepExtensionComponentProps,
-} from '@kbn/fleet-plugin/public/types';
+import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { PolicySettings } from '../policy_settings';
 
 export const CloudDefendFleetPolicyReplaceDefineStepExtension =
-  memo<PackagePolicyReplaceDefineStepExtensionComponent>(
+  memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
     ({ newPolicy, onChange }: PackagePolicyReplaceDefineStepExtensionComponentProps) => {
-      return <PolicySettings policy={newPolicy} onChange={onChange} />;
+      const policy = JSON.parse(JSON.stringify(newPolicy));
+
+      return <PolicySettings policy={policy} onChange={onChange} />;
     }
   );
 
