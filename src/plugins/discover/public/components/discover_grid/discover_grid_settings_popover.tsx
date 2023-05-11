@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiRange, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useDebounce from 'react-use/lib/useDebounce';
+import { debounce } from 'lodash';
 
 export function DiscoverGridSettingsPopover({
   sampleSize,
@@ -29,14 +29,20 @@ export function DiscoverGridSettingsPopover({
     setIsPopoverOpen(false);
   }, []);
 
+  const debouncedOnChangeSampleSize = useMemo(
+    () => debounce(onChangeSampleSize, 300, { leading: false, trailing: true }),
+    [onChangeSampleSize]
+  );
+
   const onChangeActiveSampleSize = useCallback(
     (event) => {
       const newSampleSize = Number(event.target.value);
       if (newSampleSize > 0) {
         setActiveSampleSize(newSampleSize);
+        debouncedOnChangeSampleSize(newSampleSize);
       }
     },
-    [setActiveSampleSize]
+    [setActiveSampleSize, debouncedOnChangeSampleSize]
   );
 
   const buttonLabel = i18n.translate('discover.grid.settingsPopover.buttonLabel', {
@@ -50,14 +56,6 @@ export function DiscoverGridSettingsPopover({
   useEffect(() => {
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
-
-  useDebounce(
-    () => {
-      onChangeSampleSize(activeSampleSize);
-    },
-    300,
-    [activeSampleSize, onChangeSampleSize]
-  );
 
   return (
     <EuiPopover
