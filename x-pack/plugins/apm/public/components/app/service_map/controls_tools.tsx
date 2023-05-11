@@ -5,14 +5,32 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { useContext } from 'react';
-import { CytoscapeContext } from '../../../context/cytoscape_context';
-import { useApmDataView } from '../../../hooks/use_apm_data_view';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { IEsSearchRequest } from '../../../../../../../src/plugins/data/public';
 import cytoscape from 'cytoscape';
+import React, { useContext, useState } from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { CytoscapeContext } from '../../../context/cytoscape_context';
+import { EuiButton } from '@elastic/eui';
+import {
+  CodeEditor,
+  createKibanaReactContext,
+} from '../../../../../../../src/plugins/kibana_react/public';
+import { EuiCodeBlock } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { EuiTextArea } from '@elastic/eui';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 const ControlsContainer = euiStyled('div')`
   right: ${({ theme }) => theme.eui.euiSize};
@@ -161,10 +179,10 @@ export function ControlsTools() {
     //   ],
     //   connections: [
     //     {
-    //       source: 3,
+    //     data: {  source: 3,
     //       target: 2,
     //       weight: 0.95,
-    //       doc_count: 575,
+    //       doc_count: 575,}
     //     },
     //     {
     //       source: 2,
@@ -301,6 +319,27 @@ export function ControlsTools() {
     cyTemp.destroy();
   }
 
+  const [isQueryPanelVisible, setIsQueryPanelVisible] = useState(false);
+  const [editorContents, setEditorContents] = useState('');
+  const [queryResponse, setQueryResponse] = useState({});
+
+  function toggleQueryPanel() {
+    setIsQueryPanelVisible(!isQueryPanelVisible);
+  }
+  function handleCodeEditorChange(event) {
+    setEditorContents(event.target.value);
+  }
+  async function handleCodeEditorSubmit(event) {
+    event.preventDefault();
+
+    const resp = await callApmApi('GET /internal/apm/service-map', {
+      params: {
+        query: { q: editorContents },
+      },
+    });
+    setQueryResponse(resp);
+  }
+
   return (
     <ControlsContainer>
       <Panel hasShadow={true} paddingSize="none">
@@ -316,6 +355,48 @@ export function ControlsTools() {
             onClick={explore}
           />
         </EuiToolTip>
+      </Panel>
+      <Panel hasShadow={true} paddingSize="none">
+        <EuiToolTip anchorClassName="eui-displayInline" content="Query">
+          <Button
+            aria-label="Query"
+            color="text"
+            iconType="console"
+            onClick={toggleQueryPanel}
+          />
+        </EuiToolTip>
+        {isQueryPanelVisible && (
+          <EuiFlyout size="s" onClose={toggleQueryPanel}>
+            <EuiFlyoutHeader>
+              <EuiTitle>
+                <h1>Query</h1>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiText>
+                Query your infrastructure using{' '}
+                <EuiLink href="https://mondoo.com/cnquery">cnquery</EuiLink> and{' '}
+                <EuiLink href="https://mondoo.com/docs/mql/resources/">
+                  MQL
+                </EuiLink>
+                .
+              </EuiText>
+              <EuiSpacer />
+              <EuiTextArea
+                placeholder=""
+                fullWidth={true}
+                onChange={handleCodeEditorChange}
+                value={editorContents}
+              />
+              <EuiSpacer />
+              <EuiButton onClick={handleCodeEditorSubmit}>Submit</EuiButton>
+              <EuiSpacer />
+              <EuiCodeBlock>
+                {JSON.stringify(queryResponse, null, 2)}
+              </EuiCodeBlock>
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        )}
       </Panel>
     </ControlsContainer>
   );

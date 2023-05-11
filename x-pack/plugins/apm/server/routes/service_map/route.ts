@@ -29,85 +29,34 @@ import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { TransformServiceMapResponse } from './transform_service_map_responses';
 
+
+// Don't mind me here, just deleting the service map route and replacing it with
+// a handler that just shells out to cnquery and passes whatever is in the query
+// string to cnquery run YOLO. Don't ever run this code anywhere.
+import execa from 'execa';
+
+
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
   params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        serviceGroup: t.string,
-        kuery: kueryRt.props.kuery,
-      }),
-      environmentRt,
-      rangeRt,
-    ]),
+    query: t.type({
+      q: t.string,
+    }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<TransformServiceMapResponse> => {
-    const { config, context, params, logger } = resources;
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-
-    notifyFeatureUsage({
-      licensingPlugin: licensingContext,
-      featureName: 'serviceMaps',
-    });
-
-    const {
-      query: {
-        serviceName,
-        serviceGroup: serviceGroupId,
-        environment,
-        start,
-        end,
-        kuery,
-      },
-    } = params;
-
-    const {
-      savedObjects: { client: savedObjectsClient },
-      uiSettings: { client: uiSettingsClient },
-    } = await context.core;
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        serviceGroupId
-          ? getServiceGroup({
-              savedObjectsClient,
-              serviceGroupId,
-            })
-          : Promise.resolve(null),
-        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    try {
+      const { stdout, stderr } = await execa('cnquery', [
+        'run',
+        'k8s',
+        '-j',
+        '-c',
+        resources.params.query.q,
       ]);
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery,
-    });
-    return getServiceMap({
-      mlClient,
-      config,
-      apmEventClient,
-      serviceName,
-      environment,
-      searchAggregatedTransactions,
-      logger,
-      start,
-      end,
-      maxNumberOfServices,
-      serviceGroupKuery: serviceGroup?.kuery,
-      kuery,
-    });
+      return { stdout, stderr };
+    } catch (error) {
+      return { error };
+    }
   },
 });
 
