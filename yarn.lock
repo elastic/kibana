@@ -3065,6 +3065,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-storybook-config@link:packages/cloud/storybook/config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/code-editor-mocks@link:packages/shared-ux/code_editor/mocks":
   version "0.0.0"
   uid ""

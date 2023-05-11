@@ -150,6 +150,8 @@
       "@kbn/cloud-plugin/*": ["x-pack/plugins/cloud/*"],
       "@kbn/cloud-security-posture-plugin": ["x-pack/plugins/cloud_security_posture"],
       "@kbn/cloud-security-posture-plugin/*": ["x-pack/plugins/cloud_security_posture/*"],
+      "@kbn/cloud-storybook-config": ["packages/cloud/storybook/config"],
+      "@kbn/cloud-storybook-config/*": ["packages/cloud/storybook/config/*"],
       "@kbn/code-editor": ["packages/shared-ux/code_editor/impl"],
       "@kbn/code-editor/*": ["packages/shared-ux/code_editor/impl/*"],
       "@kbn/code-editor-mocks": ["packages/shared-ux/code_editor/mocks"],

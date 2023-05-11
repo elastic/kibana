@@ -1029,6 +1029,7 @@
     "@kbn/ci-stats-reporter": "link:packages/kbn-ci-stats-reporter",
     "@kbn/ci-stats-shipper-cli": "link:packages/kbn-ci-stats-shipper-cli",
     "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
+    "@kbn/cloud-storybook-config": "link:packages/cloud/storybook/config",
     "@kbn/core-analytics-browser-mocks": "link:packages/core/analytics/core-analytics-browser-mocks",
     "@kbn/core-analytics-server-mocks": "link:packages/core/analytics/core-analytics-server-mocks",
     "@kbn/core-application-browser-mocks": "link:packages/core/application/core-application-browser-mocks",
