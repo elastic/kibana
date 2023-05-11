@@ -225,7 +225,7 @@ export const setRecoveredAlertsContext = ({
       });
       recoveryReason = errorStartedAt
         ? i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithDuration', {
-            defaultMessage: `The monitor returned to an Up state at {checkedAt} after being Down for {duration}`,
+            defaultMessage: `The monitor is now Up again. It ran successfully at {checkedAt} after a {duration} downtime.`,
             values: {
               checkedAt,
               duration,
