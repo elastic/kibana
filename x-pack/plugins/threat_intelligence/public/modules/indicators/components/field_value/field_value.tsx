@@ -6,12 +6,12 @@
  */
 
 import React, { VFC } from 'react';
-import { useFieldTypes } from '../../../../hooks';
+import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { EMPTY_VALUE } from '../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { DateFormatter } from '../../../../components/date_formatter';
+import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { unwrapValue } from '../../utils';
-import { TLPBadge } from '../tlp_badge';
+import { TLPBadge } from '../tlp_badge/tlp_badge';
 
 export interface IndicatorFieldValueProps {
   /**
