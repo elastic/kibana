@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
 import { CreateSLOInput, metricCustomIndicatorSchema } from '@kbn/slo-schema';
 import { range, first, xor } from 'lodash';
 import * as t from 'io-ts';
@@ -37,7 +37,7 @@ interface MetricIndicatorProps {
   equationLabel: string;
 }
 
-export const NEW_CUSTOM_METRIC = { id: 'A', aggregation: 'sum' as const, field: '' };
+export const NEW_CUSTOM_METRIC = { name: 'A', aggregation: 'sum' as const, field: '' };
 const MAX_VARIABLES = 26;
 const CHAR_CODE_FOR_A = 65;
 const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
@@ -60,7 +60,7 @@ function createOptions(fields: Field[]): Option[] {
 }
 
 function createEquationFromMetric(metrics: MetricCustomMetricDef['metrics']) {
-  return metrics.map((row) => row.id).join(' + ');
+  return metrics.map((row) => row.name).join(' + ');
 }
 
 export function MetricIndicator({
@@ -74,9 +74,10 @@ export function MetricIndicator({
 
   const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
 
-  const metrics = useWatch({ control, name: `indicator.params.${type}.metrics` }) as
-    | MetricCustomMetricDef['metrics']
-    | undefined;
+  const { fields: metrics, replace } = useFieldArray({
+    control,
+    name: `indicator.params.${type}.metrics`,
+  });
 
   const disableAdd = metrics?.length === MAX_VARIABLES;
   const disableDelete = metrics?.length === 1;
@@ -92,32 +93,32 @@ export function MetricIndicator({
     }
   };
 
-  const handleDeleteMetric = (id: string) => () => {
+  const handleDeleteMetric = (name: string) => () => {
     const previousMetrics = watch(
       `indicator.params.${type}.metrics`
     ) as MetricCustomMetricDef['metrics'];
-    const nextMetrics = previousMetrics.filter((row) => row.id !== id) ?? [NEW_CUSTOM_METRIC];
+    const nextMetrics = previousMetrics.filter((row) => row.name !== name) ?? [NEW_CUSTOM_METRIC];
     const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_CUSTOM_METRIC];
     setDefaultEquationIfUnchanged(previousMetrics, finalMetrics);
-    setValue(`indicator.params.${type}.metrics`, finalMetrics);
+    replace(finalMetrics);
   };
 
   const handleAddMetric = () => {
     const previousMetrics = watch(
       `indicator.params.${type}.metrics`
     ) as MetricCustomMetricDef['metrics'];
-    const currentVars = previousMetrics.map((m) => m.id) ?? [];
-    const id = first(xor(VAR_NAMES, currentVars))!;
-    const nextMetrics = [...(previousMetrics || []), { ...NEW_CUSTOM_METRIC, id }];
+    const currentVars = previousMetrics.map((m) => m.name) ?? [];
+    const name = first(xor(VAR_NAMES, currentVars))!;
+    const nextMetrics = [...(previousMetrics || []), { ...NEW_CUSTOM_METRIC, name }];
     setDefaultEquationIfUnchanged(previousMetrics, nextMetrics);
-    setValue(`indicator.params.${type}.metrics`, nextMetrics);
+    replace(nextMetrics);
   };
 
   return (
     <>
       <EuiFlexItem>
         {metrics?.map((metric, index) => (
-          <EuiFormRow fullWidth label={`${metricLabel} ${metric.id}`} key={metric.id}>
+          <EuiFormRow fullWidth label={`${metricLabel} ${metric.name}`} key={metric.name}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
                 <Controller
@@ -176,7 +177,7 @@ export function MetricIndicator({
                   iconType="trash"
                   color="danger"
                   style={{ marginBottom: '0.2em' }}
-                  onClick={handleDeleteMetric(metric.id)}
+                  onClick={handleDeleteMetric(metric.name)}
                   disabled={disableDelete}
                   title={i18n.translate(
                     'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',

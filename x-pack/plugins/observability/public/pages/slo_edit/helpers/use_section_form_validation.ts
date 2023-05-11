@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
 
 interface Props {
@@ -19,6 +19,27 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
   let isIndicatorSectionValid: boolean = false;
 
   switch (watch('indicator.type')) {
+    case 'sli.metric.custom':
+      isIndicatorSectionValid =
+        (
+          [
+            'indicator.params.index',
+            'indicator.params.filter',
+            'indicator.params.timestampField',
+          ] as const
+        ).every((field) => !getFieldState(field).invalid) &&
+        (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
+          (field) => !!getValues(field)
+        ) &&
+        (['indicator.params.good', 'indicator.params.total'] as const).every((field, index) => {
+          const indicator = getValues(
+            field
+          ) as unknown as MetricCustomIndicatorSchema['params']['good'];
+          const isValidEquation = !getFieldState(`${field}.equation`).invalid;
+          const isFieldsValid = indicator.metrics.every((metric) => Boolean(metric.field));
+          return isValidEquation && isFieldsValid;
+        });
+      break;
     case 'sli.kql.custom':
       isIndicatorSectionValid =
         (

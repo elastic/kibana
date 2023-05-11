@@ -65,7 +65,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     return metricDef.metrics.reduce(
       (acc, metric) => ({
         ...acc,
-        [`_${type}_${metric.id}`]: {
+        [`_${type}_${metric.name}`]: {
           [metric.aggregation]: { field: metric.field },
         },
       }),
@@ -82,7 +82,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
 
   private buildMetricEquation(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
     const bucketsPath = metricDef.metrics.reduce(
-      (acc, metric) => ({ ...acc, [metric.id]: `_${type}_${metric.id}` }),
+      (acc, metric) => ({ ...acc, [metric.name]: `_${type}_${metric.name}` }),
       {}
     );
     return {

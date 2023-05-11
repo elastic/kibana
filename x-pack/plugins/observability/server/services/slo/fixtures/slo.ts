@@ -79,13 +79,13 @@ export const createMetricCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: {
       metrics: [
-        { id: 'A', aggregation: 'sum', field: 'total' },
-        { id: 'B', aggregation: 'sum', field: 'processed' },
+        { name: 'A', aggregation: 'sum', field: 'total' },
+        { name: 'B', aggregation: 'sum', field: 'processed' },
       ],
       equation: 'A - B',
     },
     total: {
-      metrics: [{ id: 'A', aggregation: 'sum', field: 'total' }],
+      metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
       equation: 'A',
     },
     timestampField: 'log_timestamp',

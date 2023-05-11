@@ -90,8 +90,8 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
     params: {
       index: '',
       filter: '',
-      good: { metrics: [{ id: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
-      total: { metrics: [{ id: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
+      good: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
+      total: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
       timestampField: '',
     },
   },

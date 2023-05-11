@@ -37,17 +37,17 @@ properties:
           - equation
         properties:
           metrics:
-            description: List of metrics with their IDs, aggregation type, and field.
+            description: List of metrics with their name, aggregation type, and field.
             type: array
             items:
               type: object
               required:
-                - id
+                - name
                 - aggregation
                 - field
               properties:
-                id:
-                  description: The ID of the metric. Only valid options are A-Z
+                name:
+                  description: The name of the metric. Only valid options are A-Z
                   type: string
                   example: A
                   pattern: '^[A-Z]$'
@@ -73,17 +73,17 @@ properties:
           - equation
         properties:
           metrics:
-            description: List of metrics with their IDs, aggregation type, and field.
+            description: List of metrics with their name, aggregation type, and field.
             type: array
             items:
               type: object
               required:
-                - id
+                - name
                 - aggregation
                 - field
               properties:
-                id:
-                  description: The ID of the metric. Only valid options are A-Z
+                name:
+                  description: The name of the metric. Only valid options are A-Z
                   type: string
                   example: A
                   pattern: '^[A-Z]$'

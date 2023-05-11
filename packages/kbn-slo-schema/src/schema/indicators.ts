@@ -65,7 +65,7 @@ const metricCustomValidAggregations = t.keyof({
 const metricCustomMetricDef = t.type({
   metrics: t.array(
     t.type({
-      id: t.string,
+      name: t.string,
       aggregation: metricCustomValidAggregations,
       field: t.string,
     })

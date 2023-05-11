@@ -20,7 +20,7 @@ describe('Metric Custom Transform Generator', () => {
       const anSLO = createSLO({
         indicator: createMetricCustomIndicator({
           good: {
-            metrics: [{ id: 'A', aggregation: 'sum', field: 'good' }],
+            metrics: [{ name: 'A', aggregation: 'sum', field: 'good' }],
             equation: 'Math.floor(A / z)',
           },
         }),
@@ -31,7 +31,7 @@ describe('Metric Custom Transform Generator', () => {
       const anSLO = createSLO({
         indicator: createMetricCustomIndicator({
           total: {
-            metrics: [{ id: 'A', aggregation: 'sum', field: 'total' }],
+            metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
             equation: 'Math.foo(A)',
           },
         }),
@@ -110,7 +110,7 @@ describe('Metric Custom Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createMetricCustomIndicator({
         good: {
-          metrics: [{ id: 'A', aggregation: 'sum', field: 'good' }],
+          metrics: [{ name: 'A', aggregation: 'sum', field: 'good' }],
           equation: 'A * 100',
         },
       }),
@@ -124,7 +124,7 @@ describe('Metric Custom Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createMetricCustomIndicator({
         total: {
-          metrics: [{ id: 'A', aggregation: 'sum', field: 'total' }],
+          metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
           equation: 'A / 100',
         },
       }),
