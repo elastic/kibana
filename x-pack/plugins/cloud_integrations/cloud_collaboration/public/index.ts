@@ -12,4 +12,5 @@ import { CloudCollaborationPlugin } from './plugin';
 export function plugin() {
   return new CloudCollaborationPlugin();
 }
+
 export type { CloudCollaborationPluginSetup, CloudCollaborationPluginStart } from './types';

@@ -3029,6 +3029,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-collaboration-presence@link:packages/cloud/collaboration/presence":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-data-migration-plugin@link:x-pack/plugins/cloud_integrations/cloud_data_migration":
   version "0.0.0"
   uid ""

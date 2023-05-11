@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { CordProvider } from '@cord-sdk/react';
+import useObservable from 'react-use/lib/useObservable';
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreStart, CoreSetup, Plugin } from '@kbn/core/public';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { BreadcrumbPresence } from '@kbn/cloud-collaboration-presence';
 
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   CloudCollaborationPluginSetup,
   CloudCollaborationPluginSetupDependencies,
@@ -47,10 +52,35 @@ export class CloudCollaborationPlugin
     return {};
   }
 
-  public start(): CloudCollaborationPluginStart {
+  public start({
+    chrome: { setBreadcrumbsAppendExtension },
+  }: CoreStart): CloudCollaborationPluginStart {
+    const setBreadcrumbPresence = (application: string, savedObjectId: string) => {
+      const Presence = () => {
+        const token = useObservable(this.token$);
+        return (
+          <CordProvider clientAuthToken={token}>
+            <BreadcrumbPresence {...{ application, savedObjectId }} />
+          </CordProvider>
+        );
+      };
+
+      setBreadcrumbsAppendExtension({
+        content: toMountPoint(<Presence />),
+      });
+    };
+
+    const clearBreadcrumbPresence = () => {
+      setBreadcrumbsAppendExtension({
+        content: toMountPoint(<></>),
+      });
+    };
+
     return {
       getIsAvailable$: () => this.isAvailable$,
       getToken$: () => this.token$,
+      setBreadcrumbPresence,
+      clearBreadcrumbPresence,
     };
   }
 

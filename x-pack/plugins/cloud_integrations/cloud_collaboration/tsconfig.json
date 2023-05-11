@@ -19,6 +19,8 @@
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/security-plugin",
+    "@kbn/cloud-collaboration-presence",
+    "@kbn/kibana-react-plugin",
   ],
   "exclude": []
 }

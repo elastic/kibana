@@ -15,6 +15,8 @@ export interface CloudCollaborationPluginSetup {}
 export interface CloudCollaborationPluginStart {
   getIsAvailable$: () => BehaviorSubject<boolean>;
   getToken$: () => BehaviorSubject<string | null>;
+  setBreadcrumbPresence: (application: string, savedObjectId: string) => void;
+  clearBreadcrumbPresence: () => void;
 }
 
 export interface CloudCollaborationPluginSetupDependencies {

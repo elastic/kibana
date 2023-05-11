@@ -13,10 +13,13 @@
       "collaboration"
     ],
     "requiredPlugins": [
-      "cloud"
+      "cloud",
     ],
     "optionalPlugins": [
       "security"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
     ]
   }
 }
