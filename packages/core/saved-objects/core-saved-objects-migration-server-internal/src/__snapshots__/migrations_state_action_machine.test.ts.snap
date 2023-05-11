@@ -435,10 +435,6 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
                   },
@@ -669,10 +665,6 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
                   },
@@ -907,10 +899,6 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
                   },
@@ -1170,10 +1158,6 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
                   },
@@ -1411,10 +1395,6 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
                   },
