@@ -565,6 +565,12 @@ export interface RulePreviewLogs {
   duration: number;
 }
 
+export interface AdHocRunResponse {
+  adHocRunId: string | undefined;
+  logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
+}
+
 export interface PreviewResponse {
   previewId: string | undefined;
   logs: RulePreviewLogs[] | undefined;

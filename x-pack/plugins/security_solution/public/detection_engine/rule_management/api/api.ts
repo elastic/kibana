@@ -21,6 +21,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_AD_HOC_RUNNER,
 } from '../../../../common/constants';
 
 import {
@@ -39,11 +40,13 @@ import { BulkActionType } from '../../../../common/detection_engine/rule_managem
 import type {
   RuleResponse,
   PreviewResponse,
+  AdHocRunResponse,
 } from '../../../../common/detection_engine/rule_schema';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 import type {
+  AdHocRunRuleProps,
   CreateRulesProps,
   ExportDocumentsProps,
   FetchRuleProps,
@@ -124,6 +127,24 @@ export const patchRule = async ({
  */
 export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
   KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+/**
+ * Run provided Rule on an ad-hoc timerange
+ *
+ * @param rule RuleCreateProps to add
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const adHocRunRule = async ({
+  rule,
+  signal,
+}: AdHocRunRuleProps): Promise<AdHocRunResponse> =>
+  KibanaServices.get().http.fetch<AdHocRunResponse>(DETECTION_ENGINE_RULES_AD_HOC_RUNNER, {
     method: 'POST',
     body: JSON.stringify(rule),
     signal,

@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -16,64 +16,62 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { RuleAdHocRunner } from '../../../../../components/rules/rule_ad_hoc_runner';
+import type { Rule } from '../../../../../../detection_engine/rule_management/logic';
+
 // import * as ruleI18n from '../../translations';
 
 interface ShowAdHocRunnerFlyoutButtonProps {
-  ruleId: string;
+  rule: Rule | null;
   disabled: boolean;
   disabledReason?: string;
 }
 
 export function ShowAdHocRunnerFlyoutButton({
-  ruleId,
+  rule,
   disabled = false,
   disabledReason,
-}: ShowAdHocRunnerFlyoutButtonProps): JSX.Element {
+}: ShowAdHocRunnerFlyoutButtonProps): JSX.Element | null {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const simpleFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'simpleFlyoutTitle',
+  const adHocRunnerlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'adHocRunner',
   });
 
   let flyout;
 
-  const htmlCode = `<div id="adHocRunner">
-    <p>Run the rule with the following parameters:</p>
-    <p>Rule ID: ${ruleId}</p>
-    <p>Rule name: ${ruleId}</p>
-    <p>Rule type: ${ruleId}</p>
-  </div>
-  `;
-
-  if (isFlyoutVisible) {
+  if (isFlyoutVisible && rule) {
     flyout = (
       <EuiFlyout
         ownFocus
         onClose={() => setIsFlyoutVisible(false)}
-        aria-labelledby={simpleFlyoutTitleId}
+        aria-labelledby={adHocRunnerlyoutTitleId}
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={simpleFlyoutTitleId}>{'Execute the rule'}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiCodeBlock language="html">{htmlCode}</EuiCodeBlock>
+          <RuleAdHocRunner rule={rule} />
         </EuiFlyoutBody>
       </EuiFlyout>
     );
   }
 
+  if (!rule) {
+    return null;
+  }
+
   return (
     <>
       <EuiToolTip position="top" content={disabledReason}>
-        <EuiButtonIcon
+        <EuiButton
           data-test-subj="showAdHocRunnerFlyoutButton"
           color="primary"
           onClick={() => setIsFlyoutVisible(true)}
-          iconType="refresh"
-          aria-label={'Run rule'}
-          isDisabled={disabled}
-        />
+        >
+          {'Execute rule'}
+          <EuiButtonIcon
+            iconType="doubleArrowRight"
+            aria-label={'Run rule'}
+            isDisabled={disabled}
+          />
+        </EuiButton>
       </EuiToolTip>
       {flyout}
     </>

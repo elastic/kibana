@@ -14,6 +14,7 @@ export const SINGLE_RULE_ACTIONS = {
   EXPORT: `${APP_UI_ID} singleRuleActions export`,
   DELETE: `${APP_UI_ID} singleRuleActions delete`,
   PREVIEW: `${APP_UI_ID} singleRuleActions preview`,
+  AD_HOC_RUN: `${APP_UI_ID} singleRuleActions adHocRun`,
   SAVE: `${APP_UI_ID} singleRuleActions save`,
 };
 

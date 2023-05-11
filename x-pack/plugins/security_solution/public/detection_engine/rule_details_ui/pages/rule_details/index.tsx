@@ -755,7 +755,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <ShowAdHocRunnerFlyoutButton
-                          ruleId={ruleId}
+                          rule={rule}
                           disabled={
                             !isExistingRule ||
                             !hasUserCRUDPermission(canUserCRUD) ||

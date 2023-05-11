@@ -101,6 +101,16 @@ export interface CreateRulesProps {
   signal?: AbortSignal;
 }
 
+export interface AdHocRunRuleProps {
+  rule: {
+    ruleId: string;
+    timeframeStart: string;
+    timeframeEnd: string;
+    interval: string;
+  };
+  signal?: AbortSignal;
+}
+
 export interface PreviewRulesProps {
   rule: RuleCreateProps & { invocationCount: number; timeframeEnd: string };
   signal?: AbortSignal;
