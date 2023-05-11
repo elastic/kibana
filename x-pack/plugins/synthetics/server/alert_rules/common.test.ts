@@ -358,7 +358,7 @@ describe('setRecoveredAlertsContext', () => {
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
       monitorName: 'test-monitor',
       status: 'up',
-      recoveryReason: 'The monitor returned to an Up state at Feb 25, 2023 @ 19:00:00.000',
+      recoveryReason: 'The monitor returned to an Up state at Feb 26, 2023 @ 00:00:00.000',
       recoveryStatus: 'is now Up',
       locationId: 'us_west',
       linkMessage:
