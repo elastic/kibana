@@ -90,7 +90,7 @@ http.cors.allow-headers: X-Requested-With, X-Auth-Token, Content-Type, Content-L
             )}
           </p>
           <EuiLink
-            href={``}
+            href={docLinks.behavioralAnalyticsCORS}
             data-telemetry-id="entSearchContent-analytics-cors-learnMoreLink"
             external
             target="_blank"
