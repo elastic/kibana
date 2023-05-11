@@ -86,7 +86,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
         component={PasswordField}
         componentProps={{
           euiFieldProps: {
-            'data-test-subj': 'connector-servicenow-password-form-input',
+            'data-test-subj': 'swimlaneApiTokenInput',
             readOnly,
           },
         }}

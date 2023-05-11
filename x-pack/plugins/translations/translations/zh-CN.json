@@ -35699,7 +35699,6 @@
     "xpack.triggersActionsUI.components.enableSelectedIdsErrorNotification.descriptionText": "无法启用 {numErrors, number} 个{numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}",
     "xpack.triggersActionsUI.components.enableSelectedIdsPartialSuccessNotification.descriptionText": "已启用 {numberOfSuccess, number} 个{numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}，{numberOfErrors, number} 个{numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}}遇到错误",
     "xpack.triggersActionsUI.components.enableSelectedIdsSuccessNotification.descriptionText": "已启用 {numSuccesses, number} 个{numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}",
-    "xpack.triggersActionsUI.components.passwordField.error.requiredNameText": "{label} 必填。",
     "xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesLabel": "记住值{encryptedFieldsLength, plural, other {}} {secretFieldsLabel}。每次编辑连接器时都必须重新输入{encryptedFieldsLength, plural, other {值}}。",
     "xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesMessage": "值{encryptedFieldsLength, plural, other {}} {secretFieldsLabel} {encryptedFieldsLength, plural, other {已}}加密。请为{encryptedFieldsLength, plural, one {此} other {这些}}字段{encryptedFieldsLength, plural, other {}}重新输入值{encryptedFieldsLength, plural, other {}}。",
     "xpack.triggersActionsUI.data.coreQueryParams.aggTypeRequiredErrorMessage": "[aggField]：当 [aggType] 为“{aggType}”时必须具有值",

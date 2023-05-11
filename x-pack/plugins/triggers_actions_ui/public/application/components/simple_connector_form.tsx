@@ -106,6 +106,7 @@ const FormRow: React.FC<FormRowProps> = ({
             <UseField
               path={id}
               config={getFieldConfig({ label })}
+              helpText={helpText}
               component={PasswordField}
               componentProps={{
                 euiFieldProps: {
