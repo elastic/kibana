@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
-import { OTHER_CATEGORY } from '../constants'
+import { OTHER_CATEGORY } from '../constants';
 import { getQueryDsl } from './get_query_dsl';
 
 const MAX_BUCKETS_LIMIT = 65535;

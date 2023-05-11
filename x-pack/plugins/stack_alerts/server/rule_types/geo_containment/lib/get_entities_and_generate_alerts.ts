@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type {
   GeoContainmentAlertInstanceState,

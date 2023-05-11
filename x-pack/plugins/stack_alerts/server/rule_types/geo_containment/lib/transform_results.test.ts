@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import sampleAggsJsonResponse from '../tests/es_sample_response.json';
 import sampleAggsJsonResponseWithNesting from '../tests/es_sample_response_with_nesting.json';
 import { transformResults } from './transform_results';

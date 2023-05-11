@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorOptions } from '../../types';
-import { canSkipBoundariesFetch, executeEsQueryFactory, getEntitiesAndGenerateAlerts, getShapeFilters, transformResults } from './lib';
+import {
+  canSkipBoundariesFetch,
+  executeEsQueryFactory,
+  getEntitiesAndGenerateAlerts,
+  getShapeFilters,
+  transformResults,
+} from './lib';
 import type {
   GeoContainmentRuleParams,
   GeoContainmentAlertInstanceState,
@@ -27,7 +32,13 @@ export async function executor({
   rule: { id: ruleId },
   state,
   logger,
-}: RuleExecutorOptions<GeoContainmentRuleParams, GeoContainmentRuleState, GeoContainmentAlertInstanceState, GeoContainmentAlertInstanceContext, typeof ActionGroupId>): Promise<{ state: GeoContainmentRuleState }> {
+}: RuleExecutorOptions<
+  GeoContainmentRuleParams,
+  GeoContainmentRuleState,
+  GeoContainmentAlertInstanceState,
+  GeoContainmentAlertInstanceContext,
+  typeof ActionGroupId
+>): Promise<{ state: GeoContainmentRuleState }> {
   const boundariesRequestMeta = {
     geoField: params.geoField,
     boundaryIndexTitle: params.boundaryIndexTitle,
