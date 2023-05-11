@@ -12,6 +12,7 @@ import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -51,6 +52,8 @@ export const useUnifiedSearch = () => {
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { dataView } = useMetricsDataViewContext();
   const { services } = useKibanaContextForPlugin();
+  const kibanaQuerySettings = useKibanaQuerySettings();
+
   const {
     data: {
       query: {
@@ -62,9 +65,12 @@ export const useUnifiedSearch = () => {
     telemetry,
   } = services;
 
-  const validateQuery = (query: Query) => {
-    fromKueryExpression(query.query);
-  };
+  const validateQuery = useCallback(
+    (query: Query) => {
+      fromKueryExpression(query.query, kibanaQuerySettings);
+    },
+    [kibanaQuerySettings]
+  );
 
   const onSubmit = useCallback(
     (params?: HostsSearchPayload) => {
@@ -88,7 +94,7 @@ export const useUnifiedSearch = () => {
         setError(err);
       }
     },
-    [queryStringService, setSearch]
+    [queryStringService, setSearch, validateQuery]
   );
 
   const getParsedDateRange = useCallback(() => {
@@ -111,11 +117,19 @@ export const useUnifiedSearch = () => {
   }, [getParsedDateRange]);
 
   const buildQuery = useCallback(() => {
-    return buildEsQuery(dataView, searchCriteria.query, [
-      ...searchCriteria.filters,
-      ...searchCriteria.panelFilters,
-    ]);
-  }, [dataView, searchCriteria.query, searchCriteria.filters, searchCriteria.panelFilters]);
+    return buildEsQuery(
+      dataView,
+      searchCriteria.query,
+      [...searchCriteria.filters, ...searchCriteria.panelFilters],
+      kibanaQuerySettings
+    );
+  }, [
+    dataView,
+    searchCriteria.query,
+    searchCriteria.filters,
+    searchCriteria.panelFilters,
+    kibanaQuerySettings,
+  ]);
 
   useEffectOnce(() => {
     // Sync filtersService from the URL state
