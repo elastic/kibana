@@ -91,7 +91,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                             <p>
                               <FormattedMessage
                                 id="xpack.enterpriseSearch.content.overview.documentExample.description.text"
-                                defaultMessage="Generate an API key and read the {documentation} about posting documents to the Elasticsearch API endpoint. Use Elastic  {clients} for streamlined integration."
+                                defaultMessage="Generate an API key and read the {documentation} on how to send documents to the Elasticsearch API endpoint. Use Elastic  {clients} for streamlined integration."
                                 values={{
                                   clients: (
                                     <EuiLink href={docLinks.clientsGuide} external>
