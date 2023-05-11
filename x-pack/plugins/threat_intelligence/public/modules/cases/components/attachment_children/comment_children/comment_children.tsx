@@ -8,6 +8,7 @@
 import React, { useMemo, useState, VFC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorsFlyout } from '../../../../indicators/components/flyout/flyout';
 import { useStyles } from '../styles';
@@ -55,7 +56,7 @@ export const CommentChildren: VFC<CommentChildrenProps> = ({ id, metadata }) => 
   );
 
   if (isLoading) {
-    return <EuiLoadingLogo logo="logoSecurity" size="xl" />;
+    return <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />;
   }
 
   return (
