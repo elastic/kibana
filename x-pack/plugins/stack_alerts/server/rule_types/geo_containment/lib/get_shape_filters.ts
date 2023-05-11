@@ -26,8 +26,21 @@ export function canSkipBoundariesFetch(
 ) {
   return prevRequestMeta
     ? fastIsEqual(
-      [requestMeta.geoField, requestMeta.boundaryIndexTitle, requestMeta.boundaryGeoField, requestMeta.boundaryNameField, requestMeta.boundaryIndexQuery],
-      [prevRequestMeta.geoField, prevRequestMeta.boundaryIndexTitle, prevRequestMeta.boundaryGeoField, prevRequestMeta.boundaryNameField, prevRequestMeta.boundaryIndexQuery])
+        [
+          requestMeta.geoField,
+          requestMeta.boundaryIndexTitle,
+          requestMeta.boundaryGeoField,
+          requestMeta.boundaryNameField,
+          requestMeta.boundaryIndexQuery,
+        ],
+        [
+          prevRequestMeta.geoField,
+          prevRequestMeta.boundaryIndexTitle,
+          prevRequestMeta.boundaryGeoField,
+          prevRequestMeta.boundaryNameField,
+          prevRequestMeta.boundaryIndexQuery,
+        ]
+      )
     : false;
 }
 

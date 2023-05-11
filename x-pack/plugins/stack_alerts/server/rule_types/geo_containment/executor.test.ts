@@ -165,7 +165,7 @@ describe('getGeoContainmentExecutor', () => {
         boundariesRequestMeta: {
           ...geoContainmentState.boundariesRequestMeta,
           geoField: 'otherLocation',
-        }
+        },
       },
     });
     if (executionResult && executionResult.state.shapesFilters) {
