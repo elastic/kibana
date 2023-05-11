@@ -13,16 +13,16 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
 
 // The below zod declarations could be shared between endpoints
-const nonEmptyString = z.string().trim().nonempty();
+const nonEmptyString = z.string().trim().nonempty({ message: `value '' is not valid` });
 
-const soAttribute = z.union([z.string(), z.boolean(), z.undefined(), z.number(), z.null()]);
+const soAttribute = z.union([nonEmptyString, z.boolean(), z.undefined(), z.number(), z.null()]);
 
 const anyRecord = z.record(
-  z.string(),
+  nonEmptyString,
   z.any({ description: 'Allow any valid, primitive value or object here' })
 );
 
-const soObject = z.record(z.string(), soAttribute.or(anyRecord.default({})));
+const soObject = z.record(nonEmptyString, soAttribute.or(anyRecord.default({})));
 
 export const bodySchema = z.object({
   name: nonEmptyString,

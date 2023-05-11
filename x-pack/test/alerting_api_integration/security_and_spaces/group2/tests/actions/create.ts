@@ -251,7 +251,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `[request body.config.encrypted]: value '' is not valid`,
+                message: `[get 2023-10-31 body]: [config.encrypted]: value '' is not valid`,
               });
               break;
             default:
