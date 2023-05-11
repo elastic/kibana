@@ -293,13 +293,28 @@ export function ServicesTable() {
           <EuiButton
             data-test-subj="StorageExplorerDownloadReportButton"
             iconType="download"
-            isDisabled={isEmpty(items)}
+            isDisabled={isEmpty(serviceStatisticsItems)}
             onClick={() =>
               downloadJson({
                 fileName: `storage-explorefpr-${moment(Date.now()).format(
                   'YYYYMMDDHHmmss'
                 )}.json`,
-                data: items,
+                data: {
+                  filters: {
+                    rangeFrom,
+                    rangeTo,
+                    environment,
+                    kuery,
+                    indexLifecyclePhase,
+                  },
+                  services: serviceStatisticsItems.map((item) => ({
+                    ...item,
+                    sampling: asPercent(item?.sampling, 1),
+                    size: item?.size
+                      ? asDynamicBytes(item?.size)
+                      : NOT_AVAILABLE_LABEL,
+                  })),
+                },
               })
             }
             fill
