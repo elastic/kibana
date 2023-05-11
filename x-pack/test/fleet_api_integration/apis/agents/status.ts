@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
             updated_by: 'system',
             inactivity_timeout: 60,
           },
-          migrationVersion: {
+          typeMigrationVersion: {
             'ingest-agent-policies': '7.10.0',
           },
         },
@@ -287,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
                 updated_by: 'system',
                 inactivity_timeout: 60,
               },
-              migrationVersion: {
+              typeMigrationVersion: {
                 'ingest-agent-policies': '7.10.0',
               },
             },

@@ -209,6 +209,7 @@ describe('split .kibana index into multiple system indices', () => {
             "fleet-message-signing-keys",
             "fleet-preconfiguration-deletion-record",
             "fleet-proxy",
+            "fleet-uninstall-tokens",
             "graph-workspace",
             "guided-onboarding-guide-state",
             "guided-onboarding-plugin-state",
