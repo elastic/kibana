@@ -100,7 +100,7 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
     []
   );
 
-  const [selectedTabId, setSelectedTabId] = useState('documentation');
+  const [selectedTabId, setSelectedTabId] = useState('docsGpt');
   const selectedTab = useMemo(
     () => tabs.find((obj) => obj.id === selectedTabId),
     [selectedTabId, tabs]
@@ -141,11 +141,11 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
           handle=".handle"
           bounds="#app-fixed-viewport"
           positionOffset={{ x: 0, y: 96 }}
-          defaultPosition={{ x: headerRef.clientWidth - 425, y: -45 }}
+          defaultPosition={{ x: headerRef.clientWidth - 525, y: -45 }}
         >
           <ResizableBox
-            width={420}
-            height={420}
+            width={500}
+            height={600}
             css={css`
               position: fixed !important;
               z-index: 6000;
