@@ -20,20 +20,19 @@ interface BoundaryHit {
 // Consider dynamically obtaining from config?
 const MAX_SHAPES_QUERY_SIZE = 10000;
 
-export function canSkipBoundariesFetch(requestMeta: BoundariesRequestMeta, prevRequestMeta?: BoundariesRequestMeta) {
-  return prevRequestMeta
-    ? fastIsEqual(requestMeta, prevRequestMeta)
-    : false;
+export function canSkipBoundariesFetch(
+  requestMeta: BoundariesRequestMeta,
+  prevRequestMeta?: BoundariesRequestMeta
+) {
+  return prevRequestMeta ? fastIsEqual(requestMeta, prevRequestMeta) : false;
 }
 
-export async function getShapeFilters(requestMeta: BoundariesRequestMeta, esClient: ElasticsearchClient) {
-  const {
-    geoField,
-    boundaryIndexTitle,
-    boundaryGeoField,
-    boundaryNameField,
-    boundaryIndexQuery,
-  } = requestMeta;
+export async function getShapeFilters(
+  requestMeta: BoundariesRequestMeta,
+  esClient: ElasticsearchClient
+) {
+  const { geoField, boundaryIndexTitle, boundaryGeoField, boundaryNameField, boundaryIndexQuery } =
+    requestMeta;
 
   let boundaryData;
   try {
@@ -46,17 +45,20 @@ export async function getShapeFilters(requestMeta: BoundariesRequestMeta, esClie
         ...(boundaryIndexQuery ? { query: getQueryDsl(boundaryIndexQuery) } : {}),
       },
     });
-  } catch(e) {
-    throw new Error(i18n.translate('xpack.stackAlerts.geoContainment.boundariesFetchError', {
-      defaultMessage: 'Unable to fetch tracking containment boundaries, error: {error}',
-      values: { error: e.message }
-    }));
+  } catch (e) {
+    throw new Error(
+      i18n.translate('xpack.stackAlerts.geoContainment.boundariesFetchError', {
+        defaultMessage: 'Unable to fetch tracking containment boundaries, error: {error}',
+        values: { error: e.message },
+      })
+    );
   }
 
   const hits = boundaryData?.hits?.hits;
   if (!hits || hits.length === 0) {
     const noBoundariesMsg = i18n.translate('xpack.stackAlerts.geoContainment.noBoundariesError', {
-      defaultMessage: 'No tracking containtment boundaries found. Ensure index, "{index}", has documents.',
+      defaultMessage:
+        'No tracking containtment boundaries found. Ensure index, "{index}", has documents.',
       values: { index: boundaryIndexTitle },
     });
 
