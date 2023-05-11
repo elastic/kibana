@@ -219,6 +219,17 @@ export async function installComponentAndIndexTemplateForDataStream({
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
 }) {
+  // update index template first in case TSDS was removed, so that it does not become invalid
+  const existingIndexTemplate = await esClient.indices.getIndexTemplate({
+    name: indexTemplate.templateName,
+  });
+  if (
+    existingIndexTemplate.index_templates[0]?.index_template.template?.settings?.index?.mode ===
+      'time_series' &&
+    indexTemplate.indexTemplate.template.settings.index.mode !== 'time_series'
+  ) {
+    await installTemplate({ esClient, logger, template: indexTemplate });
+  }
   await installDataStreamComponentTemplates({ esClient, logger, componentTemplates });
   await installTemplate({ esClient, logger, template: indexTemplate });
 }
