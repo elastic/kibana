@@ -10,54 +10,91 @@ import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
+import {
+  NUMERIC_TYPE_LABEL,
+  CATEGORICAL_TYPE_LABEL,
+  REFERENCE_LABEL,
+  PRODUCTION_LABEL,
+  DRIFT_P_VALUE_THRESHOLD,
+  CRITICAL_VALUES_TABLE,
+  SIGNIFICANCE_LEVELS,
+} from './constants';
 
-export enum FETCH_STATUS {
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  NOT_INITIATED = 'not_initiated',
-}
+import {
+  Histogram,
+  NumericDriftData,
+  CategoricalDriftData,
+  Range,
+  FETCH_STATUS,
+  Result,
+  isNumericDriftData,
+  Feature,
+} from './types';
 
-interface Histogram {
-  doc_count: 0;
-  key: string | number;
-}
+const criticalTableLookup = (chi2Statistic: number, df: number) => {
+  // Get the row index
+  const rowIndex: number = df - 1;
 
-export interface Result<T extends unknown> {
-  status: FETCH_STATUS;
-  data?: T;
-  error?: string;
-}
+  // Get the column index
+  let minDiff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][0] - chi2Statistic);
+  let columnIndex: number = 0;
+  for (let j = 1; j < CRITICAL_VALUES_TABLE[rowIndex].length; j++) {
+    const diff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][j] - chi2Statistic);
+    if (diff < minDiff) {
+      minDiff = diff;
+      columnIndex = j;
+    }
+  }
 
-interface Range {
-  min: number;
-  max: number;
-  interval: number;
-}
-
-interface NumericDriftData {
-  type: 'numeric';
-  pValue: number;
-  range: Range;
-  referenceHistogram: Histogram[];
-  productionHistogram: Histogram[];
-}
-interface CategoricalDriftData {
-  type: 'categoric';
-  driftedTerms: Histogram[];
-  driftedSumOtherDocCount: number;
-  baselineTerms: Histogram[];
-  baselineSumOtherDocCount: number;
-}
-
-export const isNumericDriftData = (arg: any): arg is NumericDriftData => {
-  return isPopulatedObject(arg, ['type']) && arg.type === 'numeric';
+  const significanceLevel: number = SIGNIFICANCE_LEVELS[columnIndex];
+  return significanceLevel;
 };
 
-export const isCategoricalDriftData = (arg: any): arg is CategoricalDriftData => {
-  return isPopulatedObject(arg, ['type']) && arg.type === 'categoric';
+export const computeChi2PValue = (
+  normalizedBaselineTerms: Histogram[],
+  normalizedDriftedTerms: Histogram[]
+) => {
+  // Get all unique keys from both arrays
+  const allKeys: string[] = Array.from(
+    new Set([
+      ...normalizedBaselineTerms.map((term) => term.key.toString()),
+      ...normalizedDriftedTerms.map((term) => term.key.toString()),
+    ])
+  ).sort();
+
+  // // Calculate the expected and observed frequencies for each key
+  // const frequencies: { [key: string]: { observed: number; expected: number } } = {};
+  // // let totalBaseline: number = 0;
+  // // let totalDrifted: number = 0;
+  // allKeys.forEach((key) => {
+  //   const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
+  //   const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
+
+  //   const observedBaseline: number = baselineTerm ? baselineTerm.doc_count : 0;
+  //   const observedDrifted: number = driftedTerm ? driftedTerm.doc_count : 0;
+  //   frequencies[key] = {
+  //     observed: observedDrifted,
+  //     expected: observedBaseline,
+  //   };
+
+  //   // totalBaseline += observedBaseline;
+  //   // totalDrifted += observedDrifted;
+  // });
+
+  // Calculate the chi-squared statistic and degrees of freedom
+  let chiSquared: number = 0;
+  const degreesOfFreedom: number = allKeys.length - 1;
+  allKeys.forEach((key) => {
+    const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
+    const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
+
+    const observed: number = driftedTerm ? driftedTerm.doc_count : 0;
+    const expected: number = baselineTerm ? baselineTerm.doc_count : 1e-6; // Prevent divide by zero
+    chiSquared += Math.pow(observed - expected, 2) / expected;
+  });
+
+  return criticalTableLookup(chiSquared, degreesOfFreedom);
 };
 
 export const useDataSearch = () => {
@@ -92,13 +129,128 @@ export const useDataSearch = () => {
 
 const percents = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95];
 
+const normalizeHistogram = (histogram: Histogram[]): Histogram[] => {
+  // Compute a total doc_count for all terms
+  const totalDocCount: number = histogram.reduce((acc, term) => acc + term.doc_count, 0);
+  // Iterate over the original array and update the doc_count of each term in the new array
+  return histogram.map((term) => ({ ...term, percentage: term.doc_count / totalDocCount }));
+};
+
+const normalizeTerms = (
+  terms: Histogram[],
+  keys: Array<{ key: string; relative_drift: number }>,
+  sumOtherDocCount: number
+): { normalizedTerms: Histogram[]; totalDocCount: number } => {
+  // Compute a total doc_count for all terms
+  const totalDocCount: number = terms.reduce((acc, term) => acc + term.doc_count, sumOtherDocCount);
+
+  // Create a new array of terms with the same keys as the given array
+  const normalizedTerms: Array<Histogram & { relative_drift?: number }> = keys.map((term) => ({
+    ...term,
+    doc_count: 0,
+  }));
+
+  // Iterate over the original array and update the doc_count of each term in the new array
+  terms.forEach((term) => {
+    const index: number = keys.findIndex((k) => k.key === term.key.toString());
+    if (index !== -1) {
+      normalizedTerms[index].doc_count = term.doc_count;
+      normalizedTerms[index].percentage = term.doc_count / totalDocCount;
+    }
+  });
+
+  return {
+    normalizedTerms,
+    totalDocCount,
+  };
+};
+
+const processDataDriftResult = (
+  result: Record<string, NumericDriftData | CategoricalDriftData>
+): Feature[] => {
+  const d = Object.entries(result).map(([featureName, data], idx) => {
+    if (isNumericDriftData(data)) {
+      // normalize data.referenceHistogram and data.productionHistogram to use frequencies instead of counts
+      const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
+      const productionHistogram: Histogram[] = normalizeHistogram(data.productionHistogram);
+
+      return {
+        featureName,
+        featureType: NUMERIC_TYPE_LABEL,
+        driftDetected: data.pValue < DRIFT_P_VALUE_THRESHOLD,
+        similarityTestPValue: data.pValue,
+        referenceHistogram: referenceHistogram ?? [],
+        productionHistogram: productionHistogram ?? [],
+        comparisonDistribution: [
+          ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+          ...productionHistogram.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+        ],
+      };
+    }
+
+    // normalize data.baselineTerms and data.driftedTerms to have same keys
+    // Get all unique keys from both arrays
+    const allKeys: string[] = Array.from(
+      new Set([
+        ...data.baselineTerms.map((term) => term.key.toString()),
+        ...data.driftedTerms.map((term) => term.key.toString()),
+      ])
+    );
+
+    // Sort the categories (allKeys) by the following metric: Math.abs(productionDocCount-referenceDocCount)/referenceDocCount
+    const sortedKeys = allKeys
+      .map((k) => {
+        const key = k.toString();
+        const baselineTerm = data.baselineTerms.find((t) => t.key === key);
+        const driftedTerm = data.driftedTerms.find((t) => t.key === key);
+        if (baselineTerm && driftedTerm) {
+          const referenceDocCount = baselineTerm.doc_count;
+          const productionDocCount = driftedTerm.doc_count;
+          return {
+            key,
+            relative_drift: Math.abs(productionDocCount - referenceDocCount) / referenceDocCount,
+          };
+        }
+        return {
+          key,
+          relative_drift: Infinity,
+        };
+      })
+      .sort((s1, s2) => s2.relative_drift - s1.relative_drift);
+
+    // Normalize the baseline and drifted terms arrays
+    const { normalizedTerms: normalizedBaselineTerms } = normalizeTerms(
+      data.baselineTerms,
+      sortedKeys,
+      data.baselineSumOtherDocCount
+    );
+    const { normalizedTerms: normalizedDriftedTerms } = normalizeTerms(
+      data.driftedTerms,
+      sortedKeys,
+      data.driftedSumOtherDocCount
+    );
+
+    const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
+    return {
+      featureName,
+      featureType: CATEGORICAL_TYPE_LABEL,
+      driftDetected: pValue < DRIFT_P_VALUE_THRESHOLD,
+      similarityTestPValue: pValue,
+      referenceHistogram: normalizedBaselineTerms ?? [],
+      productionHistogram: normalizedDriftedTerms ?? [],
+      comparisonDistribution: [
+        ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
+        ...normalizedDriftedTerms.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+      ],
+    };
+  });
+  return d;
+};
 export const useFetchDataDriftResult = (
   fields: Array<{ field: string; type: 'numeric' | 'categoric' }>
 ) => {
   const dataSearch = useDataSearch();
-  const [result, setResult] = useState<
-    Result<Record<string, NumericDriftData | CategoricalDriftData>>
-  >({
+  const [result, setResult] = useState<Result<Feature[]>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
     error: undefined,
@@ -356,10 +508,8 @@ export const useFetchDataDriftResult = (
           }
         }
 
-        console.log('Parsed data', data);
-
         setResult({
-          data,
+          data: processDataDriftResult(data),
           status: FETCH_STATUS.SUCCESS,
         });
       } catch (e) {
@@ -376,6 +526,7 @@ export const useFetchDataDriftResult = (
     return () => {
       controller.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSearch, JSON.stringify(fields)]);
   return result;
 };
