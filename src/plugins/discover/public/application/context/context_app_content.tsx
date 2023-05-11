@@ -152,7 +152,7 @@ export function ContextAppContent({
             dataView={dataView}
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
-            sampleSize={0}
+            sampleSizeState={0}
             sort={sort as SortOrder[]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}

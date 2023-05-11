@@ -40,7 +40,7 @@ export function DiscoverGridSettingsPopover({
   );
 
   const buttonLabel = i18n.translate('discover.grid.settingsPopover.buttonLabel', {
-    defaultMessage: 'Grid settings',
+    defaultMessage: 'Settings',
   });
 
   const sampleSizeLabel = i18n.translate('discover.grid.settingsPopover.sampleSizeLabel', {
