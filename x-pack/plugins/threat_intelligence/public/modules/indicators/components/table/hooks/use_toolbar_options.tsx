@@ -61,6 +61,7 @@ export const useToolbarOptions = ({
         },
         right: (
           <EuiButtonIcon
+            aria-label={INSPECT_BUTTON_TITLE}
             iconType="inspect"
             title={INSPECT_BUTTON_TITLE}
             data-test-subj={INSPECT_BUTTON_TEST_ID}

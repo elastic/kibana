@@ -15,6 +15,8 @@ import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link'
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 import { useIndicatorsTotalCount } from '../../modules/indicators/hooks/use_total_count';
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../../utils/filter_integrations';
+import { LOADING_LOGO_TEST_ID } from './test_ids';
+import { EMPTY_PROMPT_TEST_ID } from '../../modules/empty_page/empty_page';
 
 jest.mock('../../modules/indicators/hooks/use_total_count');
 jest.mock('../../hooks/use_integrations_page_link');
@@ -40,11 +42,11 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
 
-    expect(asFragment()).toMatchSnapshot();
+    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading when indicator only is loading', async () => {
@@ -65,11 +67,11 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
 
-    expect(asFragment()).toMatchSnapshot();
+    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading when integrations only are loading', async () => {
@@ -90,11 +92,11 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
 
-    expect(asFragment()).toMatchSnapshot();
+    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render empty page when no indicators are found and no ti integrations are installed', async () => {
@@ -115,10 +117,10 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
-    expect(asFragment()).toMatchSnapshot();
+    expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render indicators table when we have some indicators', async () => {
@@ -136,7 +138,11 @@ describe('IntegrationsGuard', () => {
     const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
-    expect(asFragment()).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        should be restricted
+      </DocumentFragment>
+    `);
   });
 
   it('should render indicators page when we have some ti integrations installed', async () => {
@@ -160,6 +166,10 @@ describe('IntegrationsGuard', () => {
     const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
-    expect(asFragment()).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        should be restricted
+      </DocumentFragment>
+    `);
   });
 });
