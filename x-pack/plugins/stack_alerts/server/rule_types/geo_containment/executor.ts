@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
-  executeEsQueryFactory,
+  executeEsQuery,
   getEntitiesAndGenerateAlerts,
   getRecoveredAlertContext,
   getShapeFilters,
@@ -25,7 +24,7 @@ import type {
 import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({
-  previousStartedAt: windowStart,
+  previousStartedAt,
   startedAt: windowEnd,
   services,
   params,
@@ -52,27 +51,25 @@ export async function executor({
       ? state
       : await getShapeFilters(boundariesRequestMeta, services.scopedClusterClient.asCurrentUser);
 
-  const executeEsQuery = await executeEsQueryFactory(
-    params,
-    services.scopedClusterClient.asCurrentUser,
-    shapesFilters
-  );
-
-  // Start collecting data only on the first cycle
-  let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
+  let windowStart = previousStartedAt;
   if (!windowStart) {
     logger.debug(`alert ${GEO_CONTAINMENT_ID}:${rule.id} alert initialized. Collecting data`);
     // Consider making first time window configurable?
     const START_TIME_WINDOW = 1;
-    const tempPreviousEndTime = new Date(windowEnd);
-    tempPreviousEndTime.setMinutes(tempPreviousEndTime.getMinutes() - START_TIME_WINDOW);
-    currentIntervalResults = await executeEsQuery(tempPreviousEndTime, windowEnd);
-  } else {
-    currentIntervalResults = await executeEsQuery(windowStart, windowEnd);
+    windowStart = new Date(windowEnd);
+    windowStart.setMinutes(windowStart.getMinutes() - START_TIME_WINDOW);
   }
 
+  const results = await executeEsQuery(
+    params,
+    services.scopedClusterClient.asCurrentUser,
+    shapesFilters,
+    windowStart,
+    windowEnd,
+  );
+
   const currLocationMap: Map<string, GeoContainmentAlertInstanceState[]> = transformResults(
-    currentIntervalResults,
+    results,
     params.dateField,
     params.geoField
   );

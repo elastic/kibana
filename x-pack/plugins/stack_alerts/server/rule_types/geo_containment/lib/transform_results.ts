@@ -11,13 +11,10 @@ import type { GeoContainmentAlertInstanceState } from '../types';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
-  results: estypes.SearchResponse<unknown> | undefined,
+  results: estypes.SearchResponse<unknown>,
   dateField: string,
   geoField: string
 ): Map<string, GeoContainmentAlertInstanceState[]> {
-  if (!results) {
-    return new Map();
-  }
   const buckets = _.get(results, 'aggregations.shapes.buckets', {});
   const arrResults = _.flatMap(buckets, (bucket: unknown, bucketKey: string) => {
     const subBuckets = _.get(bucket, 'entitySplit.buckets', []);

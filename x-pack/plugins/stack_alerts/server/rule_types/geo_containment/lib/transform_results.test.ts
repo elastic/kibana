@@ -128,9 +128,4 @@ describe('transformResults', () => {
       ])
     );
   });
-
-  test('should return an empty array if no results', async () => {
-    const transformedResults = transformResults(undefined, dateField, geoField);
-    expect(transformedResults).toEqual(new Map());
-  });
 });
