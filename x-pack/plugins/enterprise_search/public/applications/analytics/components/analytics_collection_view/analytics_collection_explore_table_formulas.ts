@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IKibanaSearchRequest, TimeRange } from '@kbn/data-plugin/common';
+import { DataView, IKibanaSearchRequest, TimeRange } from '@kbn/data-plugin/common';
 
 const getSearchQueryRequestParams = (field: string, search: string): { regexp: {} } => {
   const createRegexQuery = (queryString: string) => {
@@ -44,6 +44,7 @@ export const getPaginationRequestParams = (pageIndex: number, pageSize: number) 
 });
 
 export const getBaseSearchTemplate = (
+  dataView: DataView,
   aggregationFieldName: string,
   {
     search,
@@ -53,6 +54,7 @@ export const getBaseSearchTemplate = (
   aggs: IKibanaSearchRequest['params']['aggs']
 ): IKibanaSearchRequest => ({
   params: {
+    index: dataView.title,
     aggs,
     query: {
       bool: {

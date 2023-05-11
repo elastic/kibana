@@ -11,6 +11,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
@@ -29,12 +30,18 @@ export function SloListItems({ sloList, loading, error }: Props) {
   const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
     useFetchHistoricalSummary({ sloIds });
 
+  const { mutate: deleteSlo } = useDeleteSlo();
+
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
   if (!loading && error) {
     return <SloListError />;
   }
+
+  const handleDelete = (slo: SLOWithSummaryResponse) => {
+    deleteSlo({ id: slo.id, name: slo.name });
+  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -46,6 +53,7 @@ export function SloListItems({ sloList, loading, error }: Props) {
             historicalSummary={sloHistoricalSummaryResponse?.[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
             slo={slo}
+            onConfirmDelete={handleDelete}
           />
         </EuiFlexItem>
       ))}

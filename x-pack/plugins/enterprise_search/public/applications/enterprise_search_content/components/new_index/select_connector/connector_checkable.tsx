@@ -30,6 +30,7 @@ export type ConnectorCheckableProps = Omit<
   documentationUrl: string | undefined;
   icon: string;
   isBeta: boolean;
+  isTechPreview: boolean;
   name: string;
   serviceType: string;
 };
@@ -38,6 +39,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   documentationUrl,
   icon,
   isBeta,
+  isTechPreview,
   name,
   serviceType,
   ...props
@@ -65,21 +67,41 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       name={name}
       value={serviceType}
     >
-      {documentationUrl && (
-        <EuiLink target="_blank" href={documentationUrl}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
-            {
-              defaultMessage: 'Documentation',
-            }
-          )}
-        </EuiLink>
-      )}
-      {isBeta && (
-        <EuiBadge color="hollow" iconType="beaker">
-          <EuiText size="xs">{BETA_LABEL}</EuiText>
-        </EuiBadge>
-      )}
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        {documentationUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink target="_blank" href={documentationUrl}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
+                {
+                  defaultMessage: 'Documentation',
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+        {isBeta && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" iconType="beaker">
+              <EuiText size="xs">{BETA_LABEL}</EuiText>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+        {isTechPreview && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" iconType="beaker">
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.techPreviewLabel',
+                  {
+                    defaultMessage: 'Tech preview',
+                  }
+                )}
+              </EuiText>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </EuiCheckableCard>
   );
 };

@@ -42,7 +42,7 @@ export const buildGroupByFieldAggregation = ({
           },
         },
       })),
-      size: maxSignals,
+      size: maxSignals + 1, // Add extra bucket to check if there's more data after max signals
     },
     aggs: {
       topHits: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiText,
@@ -19,10 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PLATFORM_TYPE } from '../hooks';
+import { CLOUD_FORMATION_PLATFORM_OPTION, type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
+import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
 
 interface Props {
   linuxCommand: string;
@@ -39,6 +40,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
+  cloudFormationTemplateUrl?: string | null;
 }
 
 // Otherwise the copy button is over the text
@@ -61,18 +63,31 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   hasFleetServer,
   fullCopyButton,
   onCopy,
+  cloudFormationTemplateUrl,
 }) => {
-  const { platform, setPlatform } = usePlatform();
+  const getInitialPlatform = useCallback(() => {
+    if (cloudFormationTemplateUrl) return 'cloudFormation';
 
-  useEffect(() => {
-    setPlatform(
-      hasK8sIntegration || typeOfCSPIntegration === 'IS_CSP_KSPM' ? 'kubernetes' : 'linux'
-    );
-  }, [hasK8sIntegration, typeOfCSPIntegration, setPlatform]);
+    if (hasK8sIntegration || typeOfCSPIntegration === 'IS_CSP_KSPM') return 'kubernetes';
+
+    return 'linux';
+  }, [cloudFormationTemplateUrl, hasK8sIntegration, typeOfCSPIntegration]);
+
+  const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
-  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration);
+  const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
+
+  const getPlatformOptions = useCallback(() => {
+    const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
+
+    if (cloudFormationTemplateUrl) {
+      return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
+    }
+
+    return platformOptions;
+  }, [cloudFormationTemplateUrl, isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -98,10 +113,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
-  const placeHolderCallout = (
+  const k8sCSPMCallout = (
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.placeHolderCallout', {
-        defaultMessage: 'PLACEHOLDER',
+        defaultMessage:
+          'We strongly advise against deploying CSPM within a Kubernetes cluster. Doing so may lead to redundant data fetching, which can cause increased consumption costs within your Elastic account and potentially trigger API rate limiting in your cloud account(s).',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const macCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
+        defaultMessage:
+          'We recommend against deploying CSPM within Mac as it is currently not being supported.',
       })}
       color="warning"
       iconType="warning"
@@ -115,6 +142,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
+    cloudFormation: '',
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -130,7 +158,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       <>
         {!hasK8sIntegrationMultiPage && (
           <EuiButtonGroup
-            options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
+            options={getPlatformOptions()}
             idSelected={platform}
             onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
             legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
@@ -146,21 +174,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           </>
         )}
         {platform === 'mac' &&
-          (typeOfCSPIntegration === 'IS_CSP_CSPM' ||
-            typeOfCSPIntegration === 'IS_CSP_CNVM' ||
-            typeOfCSPIntegration === 'IS_CSP_KSPM') && (
+          (typeOfCSPIntegration === 'IS_CSP_CSPM' || typeOfCSPIntegration === 'IS_CSP_KSPM') && (
             <>
-              {placeHolderCallout}
+              {macCallout}
               <EuiSpacer size="m" />
             </>
           )}
-        {platform === 'kubernetes' &&
-          (typeOfCSPIntegration === 'IS_CSP_CSPM' || typeOfCSPIntegration === 'IS_CSP_CNVM') && (
-            <>
-              {placeHolderCallout}
-              <EuiSpacer size="m" />
-            </>
-          )}
+        {platform === 'kubernetes' && typeOfCSPIntegration === 'IS_CSP_CSPM' && (
+          <>
+            {k8sCSPMCallout}
+            <EuiSpacer size="m" />
+          </>
+        )}
         {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}
@@ -177,7 +202,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {!hasK8sIntegrationMultiPage && (
+        {platform === 'cloudFormation' && cloudFormationTemplateUrl && (
+          <>
+            <CloudFormationInstructions
+              cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+              enrollmentAPIKey={enrollToken}
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {!hasK8sIntegrationMultiPage && platform !== 'cloudFormation' && (
           <>
             {platform === 'kubernetes' && (
               <EuiText>

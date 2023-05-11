@@ -8,8 +8,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
-import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  getMockPackageInfoVulnMgmtAWS,
+  getMockPolicyAWS,
+  getMockPolicyEKS,
+  getMockPolicyK8s,
+  getMockPolicyVulnMgmtAWS,
+} from './mocks';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
@@ -26,11 +37,14 @@ jest.mock('react-router-dom', () => ({
 }));
 jest.mock('../../common/api/use_setup_status_api');
 
+const onChange = jest.fn();
+
 describe('<CspPolicyTemplateForm />', () => {
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
+    onChange.mockClear();
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -39,14 +53,16 @@ describe('<CspPolicyTemplateForm />', () => {
     );
   });
 
-  const onChange = jest.fn();
-
   const WrappedComponent = ({
     newPolicy,
     edit = false,
+    agentPolicy,
+    packageInfo = {} as PackageInfo,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
+    agentPolicy?: AgentPolicy;
+    packageInfo?: PackageInfo;
   }) => (
     <TestProvider>
       {edit && (
@@ -54,24 +70,22 @@ describe('<CspPolicyTemplateForm />', () => {
           policy={newPolicy as PackagePolicy}
           newPolicy={newPolicy}
           onChange={onChange}
-          packageInfo={{} as PackageInfo}
+          packageInfo={packageInfo}
           isEditPage={true}
+          agentPolicy={agentPolicy}
         />
       )}
       {!edit && (
         <CspPolicyTemplateForm
           newPolicy={newPolicy}
           onChange={onChange}
-          packageInfo={{} as PackageInfo}
+          packageInfo={packageInfo}
           isEditPage={false}
+          agentPolicy={agentPolicy}
         />
       )}
     </TestProvider>
   );
-
-  beforeEach(() => {
-    onChange.mockClear();
-  });
 
   it('updates package policy namespace to default when it changes', () => {
     const policy = getMockPolicyK8s();
@@ -207,7 +221,6 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'kspm',
     }));
-    policy.name = 'cloud_security_posture-1';
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
@@ -228,16 +241,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
-        name: 'cloud_security_posture-1',
-      },
-    });
-
-    // 2nd call happens to set integration name
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: {
-        ...policy,
-        name: 'kspm-2',
       },
     });
   });
@@ -249,7 +252,6 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
-    policy.name = 'cloud_security_posture-1';
 
     (useParams as jest.Mock).mockReturnValue({
       integration: 'cspm',
@@ -270,16 +272,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyAWS(),
-        name: 'cloud_security_posture-1',
-      },
-    });
-
-    // 2nd call happens to set integration name
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: {
-        ...policy,
-        name: 'cspm-2',
       },
     });
   });
@@ -291,7 +283,6 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
-    policy.name = 'cloud_security_posture-1';
 
     (useParams as jest.Mock).mockReturnValue({
       integration: 'vuln_mgmt',
@@ -312,16 +303,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyAWS(),
-        name: 'cloud_security_posture-1',
-      },
-    });
-
-    // 2nd call happens to set integration name
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: {
-        ...policy,
-        name: 'vuln_mgmt-2',
       },
     });
   });
@@ -505,4 +486,31 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
   }
+
+  describe('Vuln Mgmt', () => {
+    it('Update Agent Policy CloudFormation template from vars', () => {
+      const policy = getMockPolicyVulnMgmtAWS();
+
+      const packageInfo = getMockPackageInfoVulnMgmtAWS();
+      render(<WrappedComponent newPolicy={policy} packageInfo={packageInfo} />);
+
+      const expectedUpdatedPolicy = {
+        ...policy,
+        inputs: policy.inputs.map((input) => {
+          if (input.type === 'cloudbeat/vuln_mgmt_aws') {
+            return {
+              ...input,
+              config: { cloud_formation_template_url: { value: 's3_url' } },
+            };
+          }
+          return input;
+        }),
+      };
+
+      expect(onChange).toHaveBeenNthCalledWith(2, {
+        isValid: true,
+        updatedPolicy: expectedUpdatedPolicy,
+      });
+    });
+  });
 });

@@ -95,6 +95,7 @@ export type ActionTypeFormProps = {
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
   | 'messageVariables'
+  | 'summaryMessageVariables'
   | 'defaultActionMessage'
   | 'defaultSummaryMessage'
 >;
@@ -121,6 +122,7 @@ export const ActionTypeForm = ({
   defaultActionGroupId,
   defaultActionMessage,
   messageVariables,
+  summaryMessageVariables,
   actionGroups,
   setActionGroupIdByIndex,
   actionTypeRegistry,
@@ -203,7 +205,12 @@ export const ActionTypeForm = ({
     (async () => {
       setAvailableActionVariables(
         messageVariables
-          ? getAvailableActionVariables(messageVariables, selectedActionGroup, isSummaryAction)
+          ? getAvailableActionVariables(
+              messageVariables,
+              summaryMessageVariables,
+              selectedActionGroup,
+              isSummaryAction
+            )
           : []
       );
 
@@ -609,11 +616,13 @@ export const ActionTypeForm = ({
 
 function getAvailableActionVariables(
   actionVariables: ActionVariables,
+  summaryActionVariables?: ActionVariables,
   actionGroup?: ActionGroupWithMessageVariables,
   isSummaryAction?: boolean
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionVariables,
+    summaryActionVariables,
     actionGroup?.omitMessageVariables,
     isSummaryAction
   );

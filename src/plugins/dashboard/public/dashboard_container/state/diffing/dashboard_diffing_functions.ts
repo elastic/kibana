@@ -37,7 +37,7 @@ export type DashboardDiffFunctions = {
   ) => boolean | Promise<boolean>;
 };
 
-export const isKeyEqual = async (
+export const isKeyEqualAsync = async (
   key: keyof DashboardContainerInput,
   diffFunctionProps: DiffFunctionProps<typeof key>,
   diffingFunctions: DashboardDiffFunctions
@@ -50,6 +50,25 @@ export const isKeyEqual = async (
       : diffingFunction(propsAsNever);
   }
   return fastIsEqual(diffFunctionProps.currentValue, diffFunctionProps.lastValue);
+};
+
+export const isKeyEqual = (
+  key: keyof Omit<DashboardContainerInput, 'panels'>, // only Panels is async
+  diffFunctionProps: DiffFunctionProps<typeof key>,
+  diffingFunctions: DashboardDiffFunctions
+) => {
+  const propsAsNever = diffFunctionProps as never; // todo figure out why props has conflicting types in some constituents.
+  const diffingFunction = diffingFunctions[key];
+  if (!diffingFunction) {
+    return fastIsEqual(diffFunctionProps.currentValue, diffFunctionProps.lastValue);
+  }
+
+  if (diffingFunction?.prototype?.name === 'AsyncFunction') {
+    throw new Error(
+      `The function for key "${key}" is async, must use isKeyEqualAsync for asynchronous functions`
+    );
+  }
+  return diffingFunction(propsAsNever);
 };
 
 /**

@@ -407,6 +407,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/visualization_ui_components/README.md[visualizationUiComponents]
+|A series of UI components pulled out of Lens to make them available outside Lens.
+
+
 |===
 
 [discrete]
@@ -704,6 +708,22 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]
+|
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.mdx[serverlessObservability]
+|This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
+|This plugin contains configuration and code used to create a Serverless Search project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_security/README.mdx[serverlessSecurity]
+|This plugin contains configuration and code used to create a Serverless Security project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]

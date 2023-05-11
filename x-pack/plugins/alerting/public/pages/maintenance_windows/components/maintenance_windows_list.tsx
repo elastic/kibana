@@ -32,10 +32,11 @@ import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_
 interface MaintenanceWindowsListProps {
   loading: boolean;
   items: MaintenanceWindowFindResponse[];
+  readOnly: boolean;
   refreshData: () => void;
 }
 
-const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
+const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'title',
     name: i18n.NAME,
@@ -44,6 +45,7 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'status',
     name: i18n.TABLE_STATUS,
+    'data-test-subj': 'maintenance-windows-column-status',
     render: (status: MaintenanceWindowStatus) => {
       return (
         <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
@@ -99,7 +101,7 @@ const search: { filters: SearchFilterConfig[] } = {
 };
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
-  ({ loading, items, refreshData }) => {
+  ({ loading, items, readOnly, refreshData }) => {
     const { euiTheme } = useEuiTheme();
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback(
@@ -139,32 +141,41 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       `;
     }, [euiTheme.colors.highlight]);
 
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
-      {
-        name: '',
-        render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
-          return (
-            <TableActionsPopover
-              id={id}
-              status={status}
-              onEdit={onEdit}
-              onCancel={onCancel}
-              onArchive={onArchive}
-              onCancelAndArchive={onCancelAndArchive}
-            />
-          );
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = useMemo(
+      () => [
+        {
+          name: '',
+          render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
+            return (
+              <TableActionsPopover
+                id={id}
+                status={status}
+                onEdit={onEdit}
+                onCancel={onCancel}
+                onArchive={onArchive}
+                onCancelAndArchive={onCancelAndArchive}
+              />
+            );
+          },
         },
-      },
-    ];
+      ],
+      [onArchive, onCancel, onCancelAndArchive, onEdit]
+    );
+
+    const columns = useMemo(
+      () => (readOnly ? COLUMNS : COLUMNS.concat(actions)),
+      [actions, readOnly]
+    );
 
     return (
       <EuiInMemoryTable
+        data-test-subj="maintenance-windows-table"
         css={tableCss}
         itemId="id"
         loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
         tableCaption="Maintenance Windows List"
         items={items}
-        columns={columns.concat(actions)}
+        columns={columns}
         pagination={true}
         sorting={sorting}
         rowProps={rowProps}

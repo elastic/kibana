@@ -64,7 +64,7 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
 
 export const MetricsGrid = React.memo(() => {
   return (
-    <EuiFlexGrid columns={2} gutterSize="s">
+    <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
       {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
         <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
           <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />

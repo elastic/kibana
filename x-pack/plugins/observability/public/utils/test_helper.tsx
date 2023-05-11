@@ -55,7 +55,17 @@ const queryClient = new QueryClient({
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
-      <KibanaContextProvider services={{ ...core, data }}>
+      <KibanaContextProvider
+        services={{
+          ...core,
+          data,
+          exploratoryView: {
+            createExploratoryViewUrl: jest.fn(),
+            getAppDataView: jest.fn(),
+            ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
+          },
+        }}
+      >
         <PluginContext.Provider
           value={{
             appMountParameters,

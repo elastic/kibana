@@ -81,7 +81,7 @@ export const CreateDockerUbuntu: Task = {
 };
 
 export const CreateDockerServerless: Task = {
-  description: 'Creating Docker Ubuntu image',
+  description: 'Creating Docker Serverless image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {

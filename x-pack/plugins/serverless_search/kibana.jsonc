@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-search",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Serverless customizations for search.",
+  "plugin": {
+    "id": "serverlessSearch",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "search"
+    ],
+    "requiredPlugins": [
+      "serverless",
+      "enterpriseSearch",
+      "management"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

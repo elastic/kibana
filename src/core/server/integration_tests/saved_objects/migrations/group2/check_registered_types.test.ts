@@ -88,7 +88,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "event_loop_delays_daily": "ef49e7f15649b551b458c7ea170f3ed17f89abd0",
         "exception-list": "38181294f64fc406c15f20d85ca306c8a4feb3c0",
         "exception-list-agnostic": "d527ce9d12b134cb163150057b87529043a8ec77",
-        "file": "d12998f49bc82da596a9e6c8397999930187ec6a",
+        "file": "487a562dd895407307980cc4404ca08e87e8999d",
         "file-upload-usage-collection-telemetry": "c6fcb9a7efcf19b2bb66ca6e005bfee8961f6073",
         "fileShare": "f07d346acbb724eacf139a0fb781c38dc5280115",
         "fleet-fleet-server-host": "67180a54a689111fb46403c3603c9b3a329c698d",
@@ -135,7 +135,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-note": "13c9d4c142f96624a93a623c6d7cba7e1ae9b5a6",
         "siem-ui-timeline-pinned-event": "96a43d59b9e2fc11f12255a0cb47ef0a3d83af4c",
         "slo": "aefffabdb35d15a6c388634af2cee1fa59ede83c",
-        "space": "7fc578a1f9f7708cb07479f03953d664ad9f1dae",
+        "space": "168a35eab6fc40eceacc4731c8b8d8af114e27c4",
         "spaces-usage-stats": "084bd0f080f94fb5735d7f3cf12f13ec92f36bad",
         "synthetics-monitor": "fa988678e5d6791c75515fa1acdbbb3b2d1f916d",
         "synthetics-param": "9776c9b571d35f0d0397e8915e035ea1dc026db7",
@@ -150,7 +150,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "uptime-synthetics-api-key": "599319bedbfa287e8761e1ba49d536417a33fa13",
         "url": "816fa15bfe460ce39108ed8095e60fdbfcc40f11",
         "usage-counters": "f478b2668be350f5bdc08d9e1cf6fbce0e079f61",
-        "visualization": "55530e57ffe86bfd7c2a2b50461398c1f7a99e95",
+        "visualization": "cee4d02c56af349054642c6744bf9c471c1ad941",
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
       }
     `);

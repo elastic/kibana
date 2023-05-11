@@ -2653,20 +2653,102 @@ describe('successful migrations', () => {
       ]);
     });
 
-    test('migrates rule to include revision and defaults revision to 0', () => {
-      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+    describe('security rule version to revision', () => {
+      test('migrates rule to include revision and defaults revision to 0', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
 
-      const rule = getMockData();
-      const migratedAlert880 = migration880(rule, migrationContext);
-      expect(migratedAlert880.attributes.revision).toEqual(0);
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.revision).toEqual(0);
+      });
+
+      test('migrates security rule version to revision', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.revision).toEqual(2);
+      });
     });
 
-    test('migrates security rule version to revision', () => {
-      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+    describe('migrate actions frequency for Security Solution ', () => {
+      test('Add frequency when throttle is null', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
 
-      const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
-      const migratedAlert880 = migration880(rule, migrationContext);
-      expect(migratedAlert880.attributes.revision).toEqual(2);
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onActiveAlert'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual(null);
+      });
+
+      test('Add frequency when throttle is 1h', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, throttle: '1h' });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onThrottleInterval'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual('1h');
+      });
+
+      test('Do not migrate action when alert does NOT belong to security solution', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        const updatedActions = migratedAlert880.attributes.actions.map(
+          (action: { [x: string]: unknown; uuid: unknown }) => {
+            const { uuid, ...updatedAction } = action;
+            return updatedAction;
+          }
+        );
+        expect(updatedActions).toEqual(rule.attributes.actions);
+      });
+    });
+
+    describe('unmute security rules', () => {
+      test.each(Object.values(ruleTypeMappings))(
+        'unmutes custom rules of type "%s" successfully',
+        (ruleType) => {
+          const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+            '8.8.0'
+          ];
+
+          const rule = getMockData({ alertTypeId: ruleType, muteAll: true });
+          const migratedAlert880 = migration880(rule, migrationContext);
+
+          expect(migratedAlert880.attributes.muteAll).toBeFalsy();
+        }
+      );
+
+      test('ignores non security rules', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({
+          alertTypeId: 'unknown',
+          muteAll: true,
+        });
+        const migratedAlert880 = migration880(rule, migrationContext);
+
+        expect(migratedAlert880.attributes.muteAll).toBeTruthy();
+      });
     });
   });
 

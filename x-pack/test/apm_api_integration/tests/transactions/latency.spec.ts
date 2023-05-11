@@ -49,6 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           documentType: ApmDocumentType.TransactionMetric,
           rollupInterval: RollupInterval.OneMinute,
           bucketSizeInSeconds: 60,
+          useDurationSummary: false,
           ...overrides?.query,
         },
       },
@@ -236,6 +237,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             GO_PROD_DURATION * 1000
           );
           expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+      });
+
+      describe('should return same data with duration summary true and false', () => {
+        let responseWithSummaryDurationTrue: Awaited<ReturnType<typeof fetchLatencyCharts>>;
+        let responseWithSummaryDurationFalse: Awaited<ReturnType<typeof fetchLatencyCharts>>;
+
+        before(async () => {
+          [responseWithSummaryDurationTrue, responseWithSummaryDurationFalse] = await Promise.all([
+            fetchLatencyCharts({
+              query: {
+                environment: 'production',
+                useDurationSummary: true,
+              },
+            }),
+            fetchLatencyCharts({
+              query: {
+                environment: 'production',
+                useDurationSummary: false,
+              },
+            }),
+          ]);
+        });
+
+        it('returns average duration and timeseries', async () => {
+          const latencyChartWithSummaryDurationTrueReturn =
+            responseWithSummaryDurationTrue.body as LatencyChartReturnType;
+          const latencyChartWithSummaryDurationFalseReturn =
+            responseWithSummaryDurationFalse.body as LatencyChartReturnType;
+          [
+            latencyChartWithSummaryDurationTrueReturn,
+            latencyChartWithSummaryDurationFalseReturn,
+          ].forEach((response) => {
+            expect(response.currentPeriod.overallAvgDuration).to.be(GO_PROD_DURATION * 1000);
+            expect(response.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+          });
         });
       });
     }

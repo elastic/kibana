@@ -62,6 +62,7 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
     status: 'IS_LOADING',
     cloudformationUrl: 'PlaceHolder',
   });
+
   useEffect(() => {
     async function checkifK8s() {
       if (!agentPolicy) {

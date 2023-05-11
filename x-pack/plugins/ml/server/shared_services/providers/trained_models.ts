@@ -7,7 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { UpdateTrainedModelDeploymentRequest } from '../../lib/ml_client/types';
+import type {
+  MlInferTrainedModelRequest,
+  MlStopTrainedModelDeploymentRequest,
+  UpdateTrainedModelDeploymentRequest,
+  UpdateTrainedModelDeploymentResponse,
+} from '../../lib/ml_client/types';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -21,6 +26,24 @@ export interface TrainedModelsProvider {
     getTrainedModelsStats(
       params: estypes.MlGetTrainedModelsStatsRequest
     ): Promise<estypes.MlGetTrainedModelsStatsResponse>;
+    startTrainedModelDeployment(
+      params: estypes.MlStartTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStartTrainedModelDeploymentResponse>;
+    stopTrainedModelDeployment(
+      params: MlStopTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStopTrainedModelDeploymentResponse>;
+    inferTrainedModel(
+      params: MlInferTrainedModelRequest
+    ): Promise<estypes.MlInferTrainedModelResponse>;
+    deleteTrainedModel(
+      params: estypes.MlDeleteTrainedModelRequest
+    ): Promise<estypes.MlDeleteTrainedModelResponse>;
+    updateTrainedModelDeployment(
+      params: UpdateTrainedModelDeploymentRequest
+    ): Promise<UpdateTrainedModelDeploymentResponse>;
+    putTrainedModel(
+      params: estypes.MlPutTrainedModelRequest
+    ): Promise<estypes.MlPutTrainedModelResponse>;
   };
 }
 
@@ -53,7 +76,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.startTrainedModelDeployment(params);
             });
         },
-        async stopTrainedModelDeployment(params: estypes.MlStopTrainedModelDeploymentRequest) {
+        async stopTrainedModelDeployment(params: MlStopTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canStartStopTrainedModels'])
@@ -61,7 +84,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.stopTrainedModelDeployment(params);
             });
         },
-        async inferTrainedModel(params: estypes.MlInferTrainedModelRequest) {
+        async inferTrainedModel(params: MlInferTrainedModelRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
@@ -80,9 +103,17 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
         async updateTrainedModelDeployment(params: UpdateTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
-            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .hasMlCapabilities(['canCreateTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.updateTrainedModelDeployment(params);
+            });
+        },
+        async putTrainedModel(params: estypes.MlPutTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canCreateTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.putTrainedModel(params);
             });
         },
       };

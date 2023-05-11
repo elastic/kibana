@@ -114,6 +114,7 @@ export interface State {
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
     standardizationEnabled: undefined | string;
+    timeFieldName: undefined | string;
     trainingPercent: number;
     useEstimatedMml: boolean;
   };
@@ -199,6 +200,7 @@ export const getInitialState = (): State => ({
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
     standardizationEnabled: 'true',
+    timeFieldName: undefined,
     trainingPercent: 80,
     useEstimatedMml: true,
   },

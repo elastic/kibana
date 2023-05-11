@@ -177,6 +177,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           await mlContext.dataViewsContract.createAndSave(
             {
               title: dataViewName,
+              ...(form.timeFieldName ? { timeFieldName: form.timeFieldName } : {}),
             },
             false,
             true

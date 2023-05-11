@@ -70,8 +70,8 @@ export type SelectorCondition =
   | 'kubernetesClusterId'
   | 'kubernetesClusterName'
   | 'kubernetesNamespace'
-  | 'kubernetesResourceLabel'
-  | 'kubernetesResourceName'
+  | 'kubernetesPodLabel'
+  | 'kubernetesPodName'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
@@ -117,11 +117,11 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   kubernetesClusterId: { type: 'stringArray' },
   kubernetesClusterName: { type: 'stringArray' },
   kubernetesNamespace: { type: 'stringArray' },
-  kubernetesResourceName: { type: 'stringArray' },
-  kubernetesResourceLabel: {
+  kubernetesPodName: { type: 'stringArray' },
+  kubernetesPodLabel: {
     type: 'stringArray',
     pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
-    patternError: i18n.errorInvalidResourceLabel,
+    patternError: i18n.errorInvalidPodLabel,
   },
   operation: {
     type: 'stringArray',
@@ -153,8 +153,8 @@ export interface Selector {
   kubernetesClusterId?: string[];
   kubernetesClusterName?: string[];
   kubernetesNamespace?: string[];
-  kubernetesResourceLabel?: string[];
-  kubernetesResourceName?: string[];
+  kubernetesPodLabel?: string[];
+  kubernetesPodName?: string[];
 
   // selector properties
   targetFilePath?: string[];

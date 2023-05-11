@@ -15,6 +15,7 @@ import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '
 import {
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
+  getMaxSignalsWarning,
   mergeReturns,
 } from '../../utils/utils';
 import type { SuppressionBucket } from './wrap_suppressed_alerts';
@@ -226,6 +227,13 @@ export const groupAndBulkCreate = async ({
 
       if (buckets.length === 0) {
         return toReturn;
+      }
+
+      if (
+        buckets.length > tuple.maxSignals &&
+        !toReturn.warningMessages.includes(getMaxSignalsWarning()) // If the unsuppressed result didn't already hit max signals, we add the warning here
+      ) {
+        toReturn.warningMessages.push(getMaxSignalsWarning());
       }
 
       const suppressionBuckets: SuppressionBucket[] = buckets.map((bucket) => ({

@@ -51,13 +51,13 @@ const REQUEST_ACCESS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.
 });
 
 export const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.label', {
-  defaultMessage: 'Monitor Management',
+  defaultMessage: 'Synthetics App',
 });
 
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.loading.label',
   {
-    defaultMessage: 'Loading Monitor Management',
+    defaultMessage: 'Loading Synthetics App',
   }
 );
 
