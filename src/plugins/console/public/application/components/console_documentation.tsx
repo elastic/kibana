@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -26,6 +27,9 @@ export function ConsoleDocumentation() {
     <EuiAccordion
       key={`documentation-console-custom`}
       id={`documentation-console-custom`}
+      css={css`
+        border-bottom: 0px !important;
+      `}
       className="euiAccordionForm"
       buttonClassName="euiAccordionForm__button"
       buttonContent={

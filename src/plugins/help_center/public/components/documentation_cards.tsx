@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { HelpCenterContext } from './help_center_header_nav_button';
+import { css } from '@emotion/react';
 
 export const DocumentationCards = () => {
   const { helpFetchResults } = useContext(HelpCenterContext);

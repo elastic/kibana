@@ -19,6 +19,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import { keymap } from '../../lib/keymap';
 import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
@@ -85,6 +86,9 @@ export const KeyboardShortcutsDoc: FunctionComponent<Props> = () => (
     key={getId('shortcuts')}
     id={`documentation-canvas-custom`}
     className="euiAccordionForm"
+    css={css`
+      border-bottom: 0px !important;
+    `}
     buttonClassName="euiAccordionForm__button"
     buttonContent={
       <>
