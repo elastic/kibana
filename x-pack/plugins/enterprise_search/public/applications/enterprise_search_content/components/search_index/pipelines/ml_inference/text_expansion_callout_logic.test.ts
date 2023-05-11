@@ -369,7 +369,7 @@ describe('TextExpansionCalloutLogic', () => {
           threadsPerAllocation: 4,
         });
         expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
-      });      
+      });
     });
 
     describe('isModelStarted', () => {
