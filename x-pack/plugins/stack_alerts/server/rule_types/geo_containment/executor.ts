@@ -29,7 +29,7 @@ export async function executor({
   startedAt: windowEnd,
   services,
   params,
-  rule: { id: ruleId },
+  rule,
   state,
   logger,
 }: RuleExecutorOptions<
@@ -61,7 +61,7 @@ export async function executor({
   // Start collecting data only on the first cycle
   let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
   if (!windowStart) {
-    logger.debug(`alert ${GEO_CONTAINMENT_ID}:${ruleId} alert initialized. Collecting data`);
+    logger.debug(`alert ${GEO_CONTAINMENT_ID}:${rule.id} alert initialized. Collecting data`);
     // Consider making first time window configurable?
     const START_TIME_WINDOW = 1;
     const tempPreviousEndTime = new Date(windowEnd);
