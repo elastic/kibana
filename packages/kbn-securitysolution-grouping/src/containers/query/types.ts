@@ -10,6 +10,7 @@ import type {
   InlineScript,
   Field,
   MappingRuntimeField,
+  MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BoolQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -50,7 +51,7 @@ export interface GroupingRuntimeField extends MappingRuntimeField {
   script?: InlineScript;
 }
 
-type MappingRuntimeFields = Record<Field, GroupingRuntimeField>;
+type GroupingMappingRuntimeFields = Record<Field, GroupingRuntimeField>;
 
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
   aggs: MainAggregation;
@@ -59,7 +60,7 @@ export interface GroupingQuery extends estypes.QueryDslQueryContainer {
       filter: Array<BoolAgg | RangeAgg>;
     };
   };
-  runtime_mappings: MappingRuntimeFields;
+  runtime_mappings: MappingRuntimeFields & GroupingMappingRuntimeFields;
   size: number;
   _source: boolean;
 }
