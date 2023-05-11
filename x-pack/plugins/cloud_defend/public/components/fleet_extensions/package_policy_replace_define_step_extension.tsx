@@ -5,17 +5,21 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import type {
+  PackagePolicyReplaceDefineStepExtensionComponent,
+  PackagePolicyReplaceDefineStepExtensionComponentProps,
+} from '@kbn/fleet-plugin/public/types';
 import { PolicySettings } from '../policy_settings';
 
-export const CloudDefendFleetPolicyExtension =
-  memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
+export const CloudDefendFleetPolicyReplaceDefineStepExtension =
+  memo<PackagePolicyReplaceDefineStepExtensionComponent>(
     ({ newPolicy, onChange }: PackagePolicyReplaceDefineStepExtensionComponentProps) => {
       return <PolicySettings policy={newPolicy} onChange={onChange} />;
     }
   );
 
-CloudDefendFleetPolicyExtension.displayName = 'CloudDefendFleetPolicyExtension';
+CloudDefendFleetPolicyReplaceDefineStepExtension.displayName =
+  'CloudDefendFleetPolicyReplaceDefineStepExtension';
 
 // eslint-disable-next-line import/no-default-export
-export { CloudDefendFleetPolicyExtension as default };
+export { CloudDefendFleetPolicyReplaceDefineStepExtension as default };
