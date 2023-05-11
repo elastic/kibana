@@ -13,29 +13,45 @@ install() {
   node --version
   npm --version
 }
-TGT=${TGT:-"../../../target/junit"}
+TGT=${TGT:-../../../../target/junit/nodejs_internal_test_runner}
 shutdown() {
   exit_code=$?
   echo "### Runner - Exit Code: ${exit_code}"
 
   #  exit $exit_code
 }
+unusedExamples() {
+  #  node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+  #  node --test-reporter=./lifecycle_stream.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+  #  node --test-reporter spec --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
+  #  node --test-reporter spec --test
+  true
+}
 testAndReport() {
+  echo '--- Run the Test Runner and Report'
+
   trap "shutdown" EXIT
 
-  pushd packages/kbn-test/new_test_runner >/dev/null
+#  set -x
+  echo "### Clean ${TGT}"
+  rm -rf "${TGT}"
+
+  echo '### Move to Dir'
+  pushd packages/kbn-test/new_test_runner/test >/dev/null
+
+  echo '--- New NodeJS Std Test Runner, Report to Screen, w/ CustomReporter Generator Fn'
+  node --test-reporter=../lifecycle_gen.mjs --test
 
   echo '--- New NodeJS Std Test Runner using Tap-Junit reporter'
-#  node --test-reporter tap --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-  node --test-reporter=./lifecycle_gen.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-#  node --test-reporter=./lifecycle_stream.mjs --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-#  node --test-reporter spec --test ./ | ../../../node_modules/tap-junit/bin/tap-junit --output "$TGT"
-#  node --test-reporter spec --test
+  node --test | ../../../../node_modules/tap-junit/bin/tap-junit --output "${TGT}"
 
+  echo '### Move back to root dir'
   popd >/dev/null
 
   echo '--- Junit Xml to JSON'
-  npx junit2json target/junit/tap.xml | jq
+  npx junit2json target/junit/nodejs_internal_test_runner/tap.xml | jq
+
+#  set +x
 }
 upload() {
   buildkite-agent artifact upload "target/junit/*.xml"
