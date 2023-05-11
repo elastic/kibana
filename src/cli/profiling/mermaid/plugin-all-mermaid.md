@@ -1,5 +1,17 @@
 # Kibana plugin dependency diagrams
 
+Dependency graphs of all Kibana plugins as of early 2023-05.
+
+For each graph:
+
+- the red node is the plugin in focus
+- the green nodes show plugins dependent on this plugin
+- the blue nodes show plugins required by this plugin
+
+Optional plugins are treated as required.
+
+_I haven't checked this super-close, could be errors._
+see: https://github.com/elastic/kibana/pull/157049
 
 ## actions
 
