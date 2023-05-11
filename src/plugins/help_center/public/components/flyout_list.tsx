@@ -35,6 +35,7 @@ import { DocumentationCards } from './documentation_cards';
 import { Contact } from './contact';
 import { GlobalContent } from './global_content';
 import { CustomContent } from './custom_content';
+import { DocsGpt, OpenAiLogo } from './docs_gpt';
 
 export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null }) => {
   const { setFlyoutVisible, kibanaVersion } = useContext(HelpCenterContext);
@@ -45,6 +46,24 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
 
   const tabs = useMemo(
     () => [
+      {
+        id: 'docsGpt',
+        name: (
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <OpenAiLogo />
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                white-space: nowrap;
+              `}
+            >
+              Docs GPT
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        content: <DocsGpt />,
+      },
       {
         id: 'documentation',
         name: 'Documentation',
@@ -82,9 +101,10 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
   );
 
   const [selectedTabId, setSelectedTabId] = useState('documentation');
-  const selectedTabContent = useMemo(() => {
-    return tabs.find((obj) => obj.id === selectedTabId)?.content;
-  }, [tabs, selectedTabId]);
+  const selectedTab = useMemo(
+    () => tabs.find((obj) => obj.id === selectedTabId),
+    [selectedTabId, tabs]
+  );
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
@@ -184,26 +204,49 @@ export const HelpCenterFlyout = ({ headerRef }: { headerRef: HTMLElement | null 
                 `}
               />
 
-              <EuiTitle size="m">
-                <h2 id="flyoutSmallTitle">
-                  <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
-                </h2>
-              </EuiTitle>
-
-              <EuiTabs>{renderTabs()}</EuiTabs>
-              <EuiSpacer size="l" />
-              <div style={{ width: '100%' }}>{selectedTabContent}</div>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+                css={css`
+                  height: 100%;
+                `}
+              >
                 <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="s">
-                    <p>
-                      <FormattedMessage
-                        id="HelpCenter.flyoutList.versionTextLabel"
-                        defaultMessage="{version}"
-                        values={{ version: `Version ${kibanaVersion}` }}
-                      />
-                    </p>
-                  </EuiText>
+                  <EuiTitle size="m">
+                    <h2 id="flyoutSmallTitle">
+                      <FormattedMessage id="helpCenter__flyoutTitle" defaultMessage="Help" />
+                    </h2>
+                  </EuiTitle>
+                  <EuiTabs>{renderTabs()}</EuiTabs>
+                  <EuiSpacer size="l" />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  css={
+                    selectedTab?.id === 'docsGpt'
+                      ? css`
+                          overflow: hidden;
+                        `
+                      : undefined
+                  }
+                >
+                  <div style={{ width: '100%', height: '100%' }}>{selectedTab?.content}</div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="s">
+                        <p>
+                          <FormattedMessage
+                            id="HelpCenter.flyoutList.versionTextLabel"
+                            defaultMessage="{version}"
+                            values={{ version: `Version ${kibanaVersion}` }}
+                          />
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
