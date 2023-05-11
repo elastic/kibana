@@ -99,5 +99,5 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.ORIGINAL_SPACE]: getCommonNormalizer(ConfigKey.ORIGINAL_SPACE),
   [ConfigKey.CONFIG_HASH]: getCommonNormalizer(ConfigKey.CONFIG_HASH),
   [ConfigKey.MONITOR_QUERY_ID]: getCommonNormalizer(ConfigKey.MONITOR_QUERY_ID),
-  [ConfigKey.PARAMS]: getCommonNormalizers(ConfigKey.PARAMS),
+  [ConfigKey.PARAMS]: getCommonNormalizer(ConfigKey.PARAMS),
 };
