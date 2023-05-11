@@ -10,6 +10,7 @@ import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import {
   NUMERIC_TYPE_LABEL,
@@ -30,7 +31,20 @@ import {
   Result,
   isNumericDriftData,
   Feature,
+  DataDriftField,
 } from './types';
+
+export const getDataDriftType = (kibanaType: string): 'numeric' | 'categoric' | 'unsupported' => {
+  switch (kibanaType) {
+    case 'number':
+      return 'numeric';
+    case 'boolean':
+    case 'string':
+      return 'categoric';
+    default:
+      return 'unsupported';
+  }
+};
 
 const criticalTableLookup = (chi2Statistic: number, df: number) => {
   // Get the row index
@@ -246,9 +260,15 @@ const processDataDriftResult = (
   });
   return d;
 };
-export const useFetchDataDriftResult = (
-  fields: Array<{ field: string; type: 'numeric' | 'categoric' }>
-) => {
+export const useFetchDataDriftResult = ({
+  fields,
+  referenceDataView,
+  productionDataView,
+}: {
+  fields?: DataDriftField[];
+  referenceDataView?: DataView;
+  productionDataView?: DataView;
+} = {}) => {
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<Result<Feature[]>>({
     data: undefined,
@@ -266,11 +286,13 @@ export const useFetchDataDriftResult = (
 
       const signal = controller.signal;
 
+      if (!fields || !referenceDataView || !productionDataView) return;
+
       setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
 
-      // @TODO: Should refactor for array of input `fields`, not just hard coded `numeric_unchangeable`
-      const referenceIndex = 'baseline';
-      const productionIndex = 'drifted';
+      const referenceIndex = referenceDataView?.getIndexPattern();
+      const productionIndex = productionDataView?.getIndexPattern();
+
       try {
         const baselineRequest = {
           index: referenceIndex,
@@ -527,6 +549,6 @@ export const useFetchDataDriftResult = (
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataSearch, JSON.stringify(fields)]);
+  }, [dataSearch, JSON.stringify(fields), referenceDataView?.id, productionDataView?.id]);
   return result;
 };

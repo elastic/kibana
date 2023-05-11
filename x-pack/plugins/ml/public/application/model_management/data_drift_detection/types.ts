@@ -28,6 +28,11 @@ export interface Feature {
   comparisonDistribution: ComparisionHistogram[];
 }
 
+export interface DataDriftField {
+  field: string;
+  type: 'numeric' | 'categoric' | 'unsupported';
+  displayName: string;
+}
 export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',

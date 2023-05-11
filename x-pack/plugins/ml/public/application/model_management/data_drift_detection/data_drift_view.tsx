@@ -27,11 +27,16 @@ import {
   EuiFormRow,
   EuiScreenReaderOnly,
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { useFetchDataDriftResult } from './use_data_drift_result';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useMlKibana } from '../../contexts/kibana';
+import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
 import { NUMERIC_TYPE_LABEL } from './constants';
-import type { Histogram, ComparisionHistogram, Feature } from './types';
+import { Histogram, ComparisionHistogram, Feature, FETCH_STATUS, DataDriftField } from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (significanceLevel < 0.01) {
@@ -46,21 +51,19 @@ const idPrefix = htmlIdGenerator()();
 export const DataViewSelector = ({
   type,
   onChangeDataView,
-  dataViewId,
+  dataView,
 }: {
   type: 'reference' | 'production';
   onChangeDataView: (newDataViewId: string) => void;
-  dataViewId?: string;
+  dataView?: DataView;
 }) => {
   return (
-    <div css={{ display: 'flex', flexDirection: 'row' }}>
-      <EuiFormRow label={`Select ${type} data view`} id={idPrefix}>
-        <DataViewPicker
-          trigger={{ label: dataViewId ? dataViewId : 'Pick data view' }}
-          onChangeDataView={onChangeDataView}
-        />
-      </EuiFormRow>
-    </div>
+    <EuiFormRow label={`Select ${type} data view`} id={idPrefix}>
+      <DataViewPicker
+        trigger={{ label: dataView ? dataView.getName() : 'Pick data view' }}
+        onChangeDataView={onChangeDataView}
+      />
+    </EuiFormRow>
   );
 };
 
@@ -132,27 +135,93 @@ const DataDriftChart = ({
     </Chart>
   );
 };
+
 // Data drift view
 export const DataDriftView = () => {
-  const result = useFetchDataDriftResult([
-    { field: 'numeric_unchangeable', type: 'numeric' },
-    { field: 'numeric_changeable', type: 'numeric' },
-    { field: 'categoric_unchangeable', type: 'categoric' },
-    { field: 'categoric_changeable', type: 'categoric' },
-  ]);
+  const {
+    services: {
+      data: { dataViews },
+    },
+  } = useMlKibana();
 
+  const [referenceDataView, setReferenceDataView] = useState<DataView | undefined>();
+  const [productionDataView, setProductionDataView] = useState<DataView | undefined>();
+  const [fetchInfo, setFields] = useState<
+    | { fields: DataDriftField[]; referenceDataView: DataView; productionDataView: DataView }
+    | undefined
+  >();
+
+  const updateDataView = async (type: 'reference' | 'production', newDataViewId: string) => {
+    const dataView = await dataViews.get(newDataViewId);
+
+    if (type === 'reference') setReferenceDataView(dataView);
+    if (type === 'production') setProductionDataView(dataView);
+  };
+
+  const updateFields = () => {
+    const mergedFields: DataDriftField[] = [];
+
+    [referenceDataView, productionDataView].forEach((dv) => {
+      if (dv) {
+        mergedFields.push(
+          ...dv.fields
+            .filter(
+              (f) =>
+                f.aggregatable === true &&
+                // @ts-ignore metadata does exist
+                f.spec.metadata_field! !== true &&
+                getDataDriftType(f.type) !== 'unsupported' &&
+                mergedFields.findIndex((merged) => merged.field === f.name) === -1
+            )
+            .map((f) => ({
+              field: f.name,
+              type: getDataDriftType(f.type),
+              displayName: f.displayName,
+            }))
+        );
+      }
+    });
+    if (referenceDataView && productionDataView) {
+      setFields({ fields: mergedFields, productionDataView, referenceDataView });
+    }
+  };
+
+  const result = useFetchDataDriftResult(fetchInfo);
   const dataFromResult = result.data;
 
-  console.log(`--@@dataFromResult`, dataFromResult);
-  const onChangeDataView = (newDataViewId: string) => {
-    console.log('--@@e', newDataViewId);
-  };
   return (
     <div>
-      <DataViewSelector type="reference" onChangeDataView={onChangeDataView} />
-      <DataViewSelector type="production" onChangeDataView={onChangeDataView} />
-      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <DataViewSelector
+            type="reference"
+            onChangeDataView={(newDataViewId) => updateDataView('reference', newDataViewId)}
+            dataView={referenceDataView}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <DataViewSelector
+            type="production"
+            onChangeDataView={(newDataViewId) => updateDataView('production', newDataViewId)}
+            dataView={productionDataView}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton disabled={!referenceDataView || !productionDataView} onClick={updateFields}>
+              Analyze
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
+      <EuiSpacer size="m" />
+      <div css={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
+        {result.status === FETCH_STATUS.NOT_INITIATED
+          ? 'Pick a reference data view and production data view to detect drift'
+          : null}
+        {result.status === FETCH_STATUS.LOADING ? 'Loading' : null}
+      </div>
       {dataFromResult ? <DataDriftOverviewTable data={dataFromResult} /> : null}
     </div>
   );
