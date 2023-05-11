@@ -32,6 +32,7 @@ import {
   MultiButtonGroupField,
   DatePickerField,
   PasswordField,
+  HiddenField,
 } from './fields';
 
 const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
@@ -51,6 +52,7 @@ const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.MULTI_BUTTON_GROUP]: MultiButtonGroupField,
   [FIELD_TYPES.DATE_PICKER]: DatePickerField,
   [FIELD_TYPES.PASSWORD]: PasswordField,
+  [FIELD_TYPES.HIDDEN]: HiddenField,
 };
 
 export const Field = (props: Props) => {

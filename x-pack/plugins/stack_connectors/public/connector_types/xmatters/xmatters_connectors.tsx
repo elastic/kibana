@@ -15,9 +15,13 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  TextField,
+  PasswordField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ButtonGroupField, HiddenField } from '@kbn/triggers-actions-ui-plugin/public';
+import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersAuthenticationType } from '../types';
 import * as i18n from './translations';
 
@@ -110,7 +114,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
         options={authenticationButtons}
       />
-      <HiddenField path={'config.usesBasic'} config={{ defaultValue: true }} />
+      <UseField path="config.usesBasic" component={HiddenField} config={{ defaultValue: true }} />
       <EuiSpacer size="m" />
       {selectedAuth === XmattersAuthenticationType.URL ? (
         <EuiFlexGroup justifyContent="spaceBetween">

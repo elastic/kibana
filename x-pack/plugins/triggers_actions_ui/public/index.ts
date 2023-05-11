@@ -76,7 +76,6 @@ export type { ConfigFieldSchema, SecretsFieldSchema } from './application/compon
 
 export {
   ButtonGroupField,
-  HiddenField,
   JsonEditorWithMessageVariables,
   JsonFieldWrapper,
   MustacheTextFieldWrapper,

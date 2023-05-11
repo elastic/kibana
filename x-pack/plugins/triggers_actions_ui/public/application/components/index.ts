@@ -6,7 +6,6 @@
  */
 
 export { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
-export { HiddenField } from './hidden_field';
 export { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 export { TextAreaWithMessageVariables } from './text_area_with_message_variables';
 export { SimpleConnectorForm } from './simple_connector_form';
