@@ -84,6 +84,7 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
+  const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
@@ -126,6 +127,14 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
+
+  const totalHitsState = useDataState(totalHits$);
+  const canFetchMoreRecords =
+    !isPlainRecord && (totalHitsState.result || 0) > (documentState.result?.length || 0);
+
+  const onFetchMoreRecords = useCallback(() => {
+    stateContainer.dataState.fetchMore();
+  }, [stateContainer.dataState]);
 
   const {
     columns: currentColumns,
@@ -258,6 +267,8 @@ function DiscoverDocumentsComponent({
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}
               services={services}
+              canFetchMoreRecords={canFetchMoreRecords}
+              onFetchMoreRecords={onFetchMoreRecords}
             />
           </div>
         </>

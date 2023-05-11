@@ -19,7 +19,7 @@ import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { fetchAll } from '../utils/fetch_all';
+import { fetchAll, fetchMoreDocuments } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
 import { DataTableRecord } from '../../../types';
@@ -36,7 +36,10 @@ export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 export type DataFetch$ = Observable<{
-  reset: boolean;
+  options: {
+    reset: boolean;
+    fetchMore: boolean;
+  };
   searchSessionId: string;
 }>;
 
@@ -53,7 +56,7 @@ export enum RecordRawType {
   PLAIN = 'plain',
 }
 
-export type DataRefetchMsg = 'reset' | undefined;
+export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
@@ -88,6 +91,10 @@ export interface DiscoverDataStateContainer {
    * Implicitly starting fetching data from ES
    */
   fetch: () => void;
+  /**
+   * Fetch more data from ES
+   */
+  fetchMore: () => void;
   /**
    * Observable emitting when a next fetch is triggered
    */
@@ -186,21 +193,20 @@ export function getDataStateContainer({
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
     map((val) => ({
-      reset: val === 'reset',
+      options: {
+        reset: val === 'reset',
+        fetchMore: val === 'fetch_more',
+      },
       searchSessionId: searchSessionManager.getNextSearchSessionId(),
     })),
     share()
   );
   let abortController: AbortController;
+  let abortControllerFetchMore: AbortController;
 
   function subscribe() {
-    const subscription = fetch$.subscribe(async ({ reset, searchSessionId }) => {
-      abortController?.abort();
-      abortController = new AbortController();
-      const prevAutoRefreshDone = autoRefreshDone;
-
-      await fetchAll(dataSubjects, reset, {
-        abortController,
+    const subscription = fetch$.subscribe(async ({ options, searchSessionId }) => {
+      const commonFetchDeps = {
         initialFetchStatus: getInitialFetchStatus(),
         inspectorAdapters,
         searchSessionId,
@@ -208,6 +214,28 @@ export function getDataStateContainer({
         getAppState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+      };
+
+      if (options.fetchMore) {
+        abortControllerFetchMore?.abort();
+        abortControllerFetchMore = new AbortController();
+
+        await fetchMoreDocuments(dataSubjects, {
+          abortController: abortControllerFetchMore,
+          ...commonFetchDeps,
+        });
+        return;
+      }
+
+      abortControllerFetchMore?.abort();
+
+      abortController?.abort();
+      abortController = new AbortController();
+      const prevAutoRefreshDone = autoRefreshDone;
+
+      await fetchAll(dataSubjects, options.reset, {
+        abortController,
+        ...commonFetchDeps,
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -235,6 +263,11 @@ export function getDataStateContainer({
     return refetch$;
   };
 
+  const fetchMore = () => {
+    refetch$.next('fetch_more');
+    return refetch$;
+  };
+
   const reset = (savedSearch: SavedSearch) => {
     const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
     sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
@@ -242,6 +275,7 @@ export function getDataStateContainer({
 
   return {
     fetch: fetchQuery,
+    fetchMore,
     fetch$,
     data$: dataSubjects,
     refetch$,

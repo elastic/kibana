@@ -46,6 +46,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
+import { DiscoverGridFooter } from './discover_grid_footer';
 import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
@@ -205,6 +206,14 @@ export interface DiscoverGridProps {
     dataViewFieldEditor: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
   };
+  /**
+   * Is number of fetched records less than the total number of found hits?
+   */
+  canFetchMoreRecords?: boolean;
+  /**
+   * To fetch more
+   */
+  onFetchMoreRecords?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -247,6 +256,8 @@ export const DiscoverGrid = ({
   onFieldEdited,
   DocumentView,
   services,
+  canFetchMoreRecords,
+  onFetchMoreRecords,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -336,8 +347,6 @@ export const DiscoverGrid = ({
       : undefined;
   }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
 
-  const isOnLastPage = paginationObj ? paginationObj.pageIndex === pageCount - 1 : false;
-
   useEffect(() => {
     setPagination((paginationData) =>
       paginationData.pageSize === currentPageSize
@@ -386,7 +395,6 @@ export const DiscoverGrid = ({
   /**
    * Render variables
    */
-  const showDisclaimer = rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -615,17 +623,15 @@ export const DiscoverGrid = ({
             gridStyle={GRID_STYLE}
           />
         </div>
-        {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
-            <FormattedMessage
-              id="discover.gridSampleSize.limitDescription"
-              defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
-              values={{
-                sampleSize,
-              }}
-            />
-          </p>
-        )}
+        <DiscoverGridFooter
+          isLoading={isLoading}
+          rowCount={rowCount}
+          sampleSize={sampleSize}
+          pageCount={pageCount}
+          pageIndex={paginationObj?.pageIndex}
+          canFetchMoreRecords={canFetchMoreRecords}
+          onFetchMoreRecords={onFetchMoreRecords}
+        />
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>

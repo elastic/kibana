@@ -75,6 +75,10 @@
   padding: $euiSize / 2 $euiSize;
   margin-top: $euiSize / 4;
   text-align: center;
+
+  &--withButton {
+    padding: 0 $euiSize;
+  }
 }
 
 .dscTable__flyoutHeader {

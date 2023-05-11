@@ -131,6 +131,75 @@ export function fetchAll(
   }
 }
 
+export function fetchMoreDocuments(
+  dataSubjects: SavedSearchData,
+  fetchDeps: FetchDeps
+): Promise<void> {
+  const { getAppState, services, savedSearch } = fetchDeps;
+  const searchSource = savedSearch.searchSource.createChild();
+
+  try {
+    const latestDocuments = dataSubjects.documents$.getValue().result || [];
+    const lastDocumentSort = latestDocuments[latestDocuments.length - 1]?.raw?.sort;
+
+    if (!lastDocumentSort) {
+      return Promise.resolve();
+    }
+
+    // TODO: add tie breaker field
+    searchSource.setField('searchAfter', lastDocumentSort);
+
+    const dataView = searchSource.getField('index')!;
+    const query = getAppState().query;
+    const recordRawType = getRawRecordType(query);
+
+    if (recordRawType === RecordRawType.PLAIN) {
+      // not supported yet
+      // TODO?
+      return Promise.resolve();
+    }
+
+    // Update the base searchSource, base for all child fetches
+    updateVolatileSearchSource(searchSource, {
+      dataView,
+      services,
+      sort: getAppState().sort as SortOrder[],
+    });
+
+    // Mark subjects as loading
+    sendLoadingMsg(dataSubjects.documents$, {
+      recordRawType,
+      query,
+      result: dataSubjects.documents$.getValue().result,
+    });
+
+    // Start fetching all required requests
+    const response = fetchDocuments(searchSource, fetchDeps);
+
+    // Handle results of the individual queries and forward the results to the corresponding dataSubjects
+    response
+      .then(({ records, textBasedQueryColumns }) => {
+        dataSubjects.documents$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: [...(dataSubjects.documents$.getValue().result || []), ...records],
+          textBasedQueryColumns,
+          recordRawType,
+          query,
+        });
+      })
+      .catch((error) => {
+        // TODO?
+        // eslint-disable-next-line no-console
+        console.error(error);
+      });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    // We also want to return a resolved promise in an error case, since it just indicates we're done with querying.
+  }
+  return Promise.resolve();
+}
+
 const fetchStatusByType = <T extends DataMsg>(subject: BehaviorSubject<T>, type: string) =>
   subject.pipe(map(({ fetchStatus }) => ({ type, fetchStatus })));
 
