@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useKibana } from '../../common/lib/kibana';
-import { getTagsByName, createTag } from '../../common/containers/tags/api';
+import { createTag, getTagsByName } from '../../common/containers/tags/api';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
 import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
 
 export const useFetchSecurityTags = () => {
   const { http } = useKibana().services;
+  const tagCreated = useRef(false);
 
   const {
     data: tags,
@@ -30,7 +31,8 @@ export const useFetchSecurityTags = () => {
   } = useFetch(REQUEST_NAMES.SECURITY_CREATE_TAG, createTag);
 
   useEffect(() => {
-    if (!isLoadingTags && !errorFetchTags && tags && tags.length === 0) {
+    if (!isLoadingTags && !errorFetchTags && tags && tags.length === 0 && !tagCreated.current) {
+      tagCreated.current = true;
       fetchCreateTag({
         http,
         tag: { name: SECURITY_TAG_NAME, description: SECURITY_TAG_DESCRIPTION },
