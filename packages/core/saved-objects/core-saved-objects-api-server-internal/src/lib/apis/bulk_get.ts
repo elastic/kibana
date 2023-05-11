@@ -27,6 +27,8 @@ import {
   getSavedObjectFromSource,
   isLeft,
   isRight,
+  left,
+  right,
   rawDocExistsInNamespaces,
 } from './utils';
 import { ApiExecutionContext } from './types';
@@ -93,26 +95,20 @@ export const performBulkGet = async <T>(
       }
 
       if (error) {
-        return {
-          tag: 'Left',
-          value: { id, type, error: errorContent(error) },
-        };
+        return left({ id, type, error: errorContent(error) });
       }
 
       let namespaces = object.namespaces;
       if (spacesExtension && namespaces?.includes(ALL_NAMESPACES_STRING)) {
         namespaces = await getAvailableSpaces();
       }
-      return {
-        tag: 'Right',
-        value: {
-          type,
-          id,
-          fields,
-          namespaces,
-          esRequestIndex: bulkGetRequestIndexCounter++,
-        },
-      };
+      return right({
+        type,
+        id,
+        fields,
+        namespaces,
+        esRequestIndex: bulkGetRequestIndexCounter++,
+      });
     })
   );
 

@@ -18,7 +18,16 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsCheckConflictsResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { Either, errorContent, isLeft, isRight, isMgetDoc, rawDocExistsInNamespace } from './utils';
+import {
+  Either,
+  errorContent,
+  left,
+  right,
+  isLeft,
+  isRight,
+  isMgetDoc,
+  rawDocExistsInNamespace,
+} from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformCheckConflictsParams<T = unknown> {
@@ -48,24 +57,18 @@ export const performCheckConflicts = async <T>(
     const { type, id } = object;
 
     if (!allowedTypes.includes(type)) {
-      return {
-        tag: 'Left',
-        value: {
-          id,
-          type,
-          error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
-        },
-      };
+      return left({
+        id,
+        type,
+        error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+      });
     }
 
-    return {
-      tag: 'Right',
-      value: {
-        type,
-        id,
-        esRequestIndex: bulkGetRequestIndexCounter++,
-      },
-    };
+    return right({
+      type,
+      id,
+      esRequestIndex: bulkGetRequestIndexCounter++,
+    });
   });
 
   const validObjects = expectedBulkGetResults.filter(isRight);

@@ -29,8 +29,10 @@ import {
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
-  isLeft,
   isMgetDoc,
+  left,
+  right,
+  isLeft,
   isRight,
   rawDocExistsInNamespace,
 } from './utils';
@@ -80,10 +82,7 @@ export const performBulkUpdate = async <T>(
     }
 
     if (error) {
-      return {
-        tag: 'Left',
-        value: { id, type, error: errorContent(error) },
-      };
+      return left({ id, type, error: errorContent(error) });
     }
 
     const documentToSave = {
@@ -94,17 +93,14 @@ export const performBulkUpdate = async <T>(
 
     const requiresNamespacesCheck = registry.isMultiNamespace(object.type);
 
-    return {
-      tag: 'Right',
-      value: {
-        type,
-        id,
-        version,
-        documentToSave,
-        objectNamespace,
-        ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-      },
-    };
+    return right({
+      type,
+      id,
+      version,
+      documentToSave,
+      objectNamespace,
+      ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+    });
   });
 
   const validObjects = expectedBulkGetResults.filter(isRight);
@@ -199,14 +195,11 @@ export const performBulkUpdate = async <T>(
             getNamespaceId(objectNamespace)
           )
         ) {
-          return {
-            tag: 'Left',
-            value: {
-              id,
-              type,
-              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-            },
-          };
+          return left({
+            id,
+            type,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+          });
         }
         // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
         namespaces = actualResult!._source.namespaces ?? [
@@ -251,7 +244,7 @@ export const performBulkUpdate = async <T>(
         }
       );
 
-      return { tag: 'Right', value: expectedResult };
+      return right(expectedResult);
     })
   );
 

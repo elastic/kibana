@@ -27,6 +27,8 @@ import {
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
+  left,
+  right,
   isLeft,
   isRight,
   normalizeNamespace,
@@ -41,6 +43,15 @@ export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
   options: SavedObjectsCreateOptions;
 }
+
+type ExpectedResult = Either<
+  { type: string; id?: string; error: Payload },
+  {
+    method: 'index' | 'create';
+    object: SavedObjectsBulkCreateObject & { id: string };
+    preflightCheckIndex?: number;
+  }
+>;
 
 export const performBulkCreate = async <T>(
   { objects, options }: PerformBulkCreateParams<T>,
@@ -73,14 +84,6 @@ export const performBulkCreate = async <T>(
   const time = getCurrentTime();
 
   let preflightCheckIndexCounter = 0;
-  type ExpectedResult = Either<
-    { type: string; id?: string; error: Payload },
-    {
-      method: 'index' | 'create';
-      object: SavedObjectsBulkCreateObject & { id: string };
-      preflightCheckIndex?: number;
-    }
-  >;
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
     let error: DecoratedError | undefined;
@@ -99,27 +102,21 @@ export const performBulkCreate = async <T>(
     }
 
     if (error) {
-      return {
-        tag: 'Left',
-        value: { id: requestId, type, error: errorContent(error) },
-      };
+      return left({ id: requestId, type, error: errorContent(error) });
     }
 
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
 
-    return {
-      tag: 'Right',
-      value: {
-        method,
-        object: {
-          ...object,
-          id,
-          managed: setManaged({ optionsManaged, objectManaged }),
-        },
-        ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
+    return right({
+      method,
+      object: {
+        ...object,
+        id,
+        managed: setManaged({ optionsManaged, objectManaged }),
       },
-    };
+      ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
+    }) as ExpectedResult;
   });
 
   const validObjects = expectedResults.filter(isRight);
@@ -187,17 +184,14 @@ export const performBulkCreate = async <T>(
         const { type, id, existingDocument, error } = preflightResult;
         if (error) {
           const { metadata } = error;
-          return {
-            tag: 'Left',
-            value: {
-              id,
-              type,
-              error: {
-                ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                ...(metadata && { metadata }),
-              },
+          return left({
+            id,
+            type,
+            error: {
+              ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+              ...(metadata && { metadata }),
             },
-          };
+          });
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
@@ -249,14 +243,11 @@ export const performBulkCreate = async <T>(
       try {
         validationHelper.validateObjectForCreate(object.type, migrated);
       } catch (error) {
-        return {
-          tag: 'Left',
-          value: {
-            id: object.id,
-            type: object.type,
-            error,
-          },
-        };
+        return left({
+          id: object.id,
+          type: object.type,
+          error,
+        });
       }
 
       const expectedResult = {
@@ -276,7 +267,7 @@ export const performBulkCreate = async <T>(
         expectedResult.rawMigratedDoc._source
       );
 
-      return { tag: 'Right', value: expectedResult };
+      return right(expectedResult);
     })
   );
 

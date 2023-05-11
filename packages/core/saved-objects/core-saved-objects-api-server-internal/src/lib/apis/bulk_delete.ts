@@ -28,6 +28,8 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
   isRight,
+  left,
+  right,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from '../legacy_url_aliases';
@@ -230,24 +232,18 @@ function presortObjectsByNamespaceType(
   return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
     const { type, id } = object;
     if (!allowedTypes.includes(type)) {
-      return {
-        tag: 'Left',
-        value: {
-          id,
-          type,
-          error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
-        },
-      };
+      return left({
+        id,
+        type,
+        error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
+      });
     }
     const requiresNamespacesCheck = registry.isMultiNamespace(type);
-    return {
-      tag: 'Right',
-      value: {
-        type,
-        id,
-        ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-      },
-    };
+    return right({
+      type,
+      id,
+      ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+    });
   });
 }
 
@@ -281,25 +277,19 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
 
         // return an error if the doc isn't found at all or the doc doesn't exist in the namespaces
         if (!docFound) {
-          return {
-            tag: 'Left',
-            value: {
-              id,
-              type,
-              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-            },
-          };
+          return left({
+            id,
+            type,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+          });
         }
         // the following check should be redundant since we're retrieving the docs from elasticsearch but we check just to make sure
         if (!rawDocExistsInNamespace(registry, actualResult as SavedObjectsRawDoc, namespace)) {
-          return {
-            tag: 'Left',
-            value: {
-              id,
-              type,
-              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-            },
-          };
+          return left({
+            id,
+            type,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+          });
         }
         // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
         namespaces = actualResult!._source.namespaces ?? [
@@ -308,19 +298,16 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
         const useForce = force && force === true;
         // the document is shared to more than one space and can only be deleted by force.
         if (!useForce && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
-          return {
-            tag: 'Left',
-            value: {
-              success: false,
-              id,
-              type,
-              error: errorContent(
-                SavedObjectsErrorHelpers.createBadRequestError(
-                  'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
-                )
-              ),
-            },
-          };
+          return left({
+            success: false,
+            id,
+            type,
+            error: errorContent(
+              SavedObjectsErrorHelpers.createBadRequestError(
+                'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
+              )
+            ),
+          });
         }
       }
       // contains all objects that passed initial preflight checks, including single namespace objects that skipped the mget call
@@ -332,7 +319,7 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
         esRequestIndex: indexCounter++,
       };
 
-      return { tag: 'Right', value: expectedResult };
+      return right(expectedResult);
     });
   return expectedBulkDeleteMultiNamespaceDocsResults;
 }

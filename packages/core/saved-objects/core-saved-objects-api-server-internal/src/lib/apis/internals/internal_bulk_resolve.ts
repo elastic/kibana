@@ -45,6 +45,8 @@ import {
   type Right,
   isLeft,
   isRight,
+  left,
+  right,
 } from '../utils';
 import type { RepositoryEsClient } from '../../repository_es_client';
 
@@ -271,19 +273,13 @@ function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTy
   return objects.map<Either<BulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
     const { type, id } = object;
     if (!allowedTypes.includes(type)) {
-      return {
-        tag: 'Left',
-        value: {
-          type,
-          id,
-          error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type),
-        },
-      };
+      return left({
+        type,
+        id,
+        error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type),
+      });
     }
-    return {
-      tag: 'Right',
-      value: object,
-    };
+    return right(object);
   });
 }
 

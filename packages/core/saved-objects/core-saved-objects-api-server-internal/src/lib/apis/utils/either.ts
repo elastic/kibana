@@ -31,6 +31,24 @@ export interface Right<R> {
 }
 
 /**
+ * Returns a {@link Left} part holding the provided value.
+ * @internal
+ */
+export const left = <L>(value: L): Left<L> => ({
+  tag: 'Left',
+  value,
+});
+
+/**
+ * Returns a {@link Right} part holding the provided value.
+ * @internal
+ */
+export const right = <R>(value: R): Right<R> => ({
+  tag: 'Right',
+  value,
+});
+
+/**
  * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
  * @internal
  */

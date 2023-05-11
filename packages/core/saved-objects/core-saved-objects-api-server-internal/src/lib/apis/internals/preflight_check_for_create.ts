@@ -24,7 +24,7 @@ import {
 import { findLegacyUrlAliases } from '../../legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
-import { isLeft, isRight, rawDocExistsInNamespaces, type Either } from '../utils';
+import { left, right, isLeft, isRight, rawDocExistsInNamespaces, type Either } from '../utils';
 
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
@@ -200,9 +200,10 @@ async function optionallyFindAliases(
   const objectsToGetOrObjectsToFind = objects.map<Either<ParsedObject>>((object) => {
     const { type, id, namespaces, overwrite = false } = object;
     const spaces = new Set(namespaces);
-    const tag =
-      spaces.size > FIND_ALIASES_THRESHOLD || spaces.has(ALL_NAMESPACES_STRING) ? 'Right' : 'Left';
-    return { tag, value: { type, id, overwrite, spaces } };
+    const value = { type, id, overwrite, spaces };
+    return spaces.size > FIND_ALIASES_THRESHOLD || spaces.has(ALL_NAMESPACES_STRING)
+      ? right(value)
+      : left(value);
   });
 
   const objectsToFind = objectsToGetOrObjectsToFind
@@ -235,13 +236,13 @@ async function optionallyFindAliases(
         }
         if (spacesWithConflictingAliases.length) {
           // we found one or more conflicting aliases, this is an error result
-          return { tag: 'Left', value: { ...either.value, spacesWithConflictingAliases } };
+          return left({ ...either.value, spacesWithConflictingAliases });
         }
       }
       // we checked for aliases but did not detect any conflicts; make sure we don't check for aliases again during mget
       checkAliases = false;
     }
-    return { tag: 'Right', value: { ...either.value, checkAliases } };
+    return right({ ...either.value, checkAliases });
   });
 
   return result;

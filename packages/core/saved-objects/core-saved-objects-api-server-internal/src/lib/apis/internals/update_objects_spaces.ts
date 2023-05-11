@@ -36,6 +36,8 @@ import {
   type Either,
   isLeft,
   isRight,
+  left,
+  right,
 } from '../utils';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import type { RepositoryEsClient } from '../../repository_es_client';
@@ -117,10 +119,7 @@ export async function updateObjectsSpaces({
 
     if (!allowedTypes.includes(type)) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-      return {
-        tag: 'Left',
-        value: { id, type, spaces: [], error },
-      };
+      return left({ id, type, spaces: [], error });
     }
     if (!registry.isShareable(type)) {
       const error = errorContent(
@@ -128,21 +127,15 @@ export async function updateObjectsSpaces({
           `${type} doesn't support multiple namespaces`
         )
       );
-      return {
-        tag: 'Left',
-        value: { id, type, spaces: [], error },
-      };
+      return left({ id, type, spaces: [], error });
     }
 
-    return {
-      tag: 'Right',
-      value: {
-        type,
-        id,
-        version,
-        esRequestIndex: bulkGetRequestIndexCounter++,
-      },
-    };
+    return right({
+      type,
+      id,
+      version,
+      esRequestIndex: bulkGetRequestIndexCounter++,
+    });
   });
 
   const validObjects = expectedBulkGetResults.filter(isRight);
@@ -217,10 +210,7 @@ export async function updateObjectsSpaces({
       !rawDocExistsInNamespace(registry, doc, namespace)
     ) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-      return {
-        tag: 'Left',
-        value: { id, type, spaces: [], error },
-      };
+      return left({ id, type, spaces: [], error });
     }
 
     const currentSpaces = doc._source?.namespaces ?? [];
@@ -265,7 +255,7 @@ export async function updateObjectsSpaces({
       }
     }
 
-    return { tag: 'Right', value: expectedResult };
+    return right(expectedResult);
   });
 
   const { refresh = DEFAULT_REFRESH_SETTING } = options;
