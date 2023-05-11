@@ -30,6 +30,7 @@ export type ConnectorCheckableProps = Omit<
   documentationUrl: string | undefined;
   icon: string;
   isBeta: boolean;
+  isTechPreview: boolean;
   name: string;
   serviceType: string;
 };
@@ -38,6 +39,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   documentationUrl,
   icon,
   isBeta,
+  isTechPreview,
   name,
   serviceType,
   ...props
@@ -82,6 +84,20 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" iconType="beaker">
               <EuiText size="xs">{BETA_LABEL}</EuiText>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+        {isTechPreview && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" iconType="beaker">
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.techPreviewLabel',
+                  {
+                    defaultMessage: 'Tech preview',
+                  }
+                )}
+              </EuiText>
             </EuiBadge>
           </EuiFlexItem>
         )}
