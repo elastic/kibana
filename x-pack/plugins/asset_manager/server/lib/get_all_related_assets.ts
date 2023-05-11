@@ -67,7 +67,7 @@ export async function getAllRelatedAssets(
   return {
     primary,
     [relation]: type.length
-      ? relatedAssets.filter((asset) => type.includes(asset['asset.type']))
+      ? relatedAssets.filter((asset) => asset['asset.type'] && type.includes(asset['asset.type']))
       : relatedAssets,
   };
 }
