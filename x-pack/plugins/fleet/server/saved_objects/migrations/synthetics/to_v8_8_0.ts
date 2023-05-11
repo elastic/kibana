@@ -29,6 +29,8 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
     return packagePolicyDoc;
   }
 
+  const agentPolicyId = packagePolicyDoc.attributes.policy_id;
+
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
 
   const enabledInput = updatedPackagePolicyDoc.attributes.inputs.find(
@@ -64,6 +66,12 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
       enabledStream.vars['throttling.config'].value = JSON.stringify(formattedThrottling);
       enabledStream.compiled_stream.throttling = formattedThrottling;
     }
+  }
+
+  // set location_id.id to agentPolicyId
+  if (enabledStream.vars && enabledStream.vars.location_id) {
+    enabledStream.vars.location_id.value = agentPolicyId;
+    enabledStream.compiled_stream.location_id = agentPolicyId;
   }
 
   return updatedPackagePolicyDoc;
