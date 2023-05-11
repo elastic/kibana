@@ -92,14 +92,15 @@ export const ProcessListAPIResponseRT = rt.type({
   ),
   summary: rt.exact(
     rt.partial({
-      total: rt.number,
-      running: rt.number,
-      sleeping: rt.number,
-      dead: rt.number,
-      stopped: rt.number,
-      idle: rt.number,
-      zombie: rt.number,
-      unknown: rt.number,
+      // string in case of 'N?A'
+      total: rt.union([rt.number, rt.string]),
+      running: rt.union([rt.number, rt.string]),
+      sleeping: rt.union([rt.number, rt.string]),
+      dead: rt.union([rt.number, rt.string]),
+      stopped: rt.union([rt.number, rt.string]),
+      idle: rt.union([rt.number, rt.string]),
+      zombie: rt.union([rt.number, rt.string]),
+      unknown: rt.union([rt.number, rt.string]),
     })
   ),
 });
