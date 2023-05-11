@@ -115,7 +115,7 @@ export const getReasonMessage = ({
 
 export const MAX_NAME_CHARS = 30;
 
-export const truncateString = (str: string, maxLength) => {
+export const truncateString = (str: string, maxLength: number) => {
   return str.substring(0, maxLength).concat('...');
 };
 
