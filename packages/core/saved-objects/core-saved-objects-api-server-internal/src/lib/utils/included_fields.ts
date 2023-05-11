@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-function toArray(value: string | string[]): string[] {
-  return typeof value === 'string' ? [value] : value;
-}
-
 const ROOT_FIELDS = [
   'namespace',
   'namespaces',
@@ -39,14 +35,13 @@ export function includedFields(
     return;
   }
 
-  // convert to an array
-  const sourceFields = toArray(fields);
-  const sourceType = toArray(type);
+  const sourceFields = typeof fields === 'string' ? [fields] : fields;
+  const sourceType = typeof type === 'string' ? [type] : type;
 
   return sourceType
     .reduce((acc: string[], t) => {
-      return [...acc, ...sourceFields.map((f) => `${t}.${f}`)];
+      acc.push(...sourceFields.map((f) => `${t}.${f}`));
+      return acc;
     }, [])
-    .concat(ROOT_FIELDS)
-    .concat(fields); // v5 compatibility
+    .concat(ROOT_FIELDS);
 }
