@@ -56,7 +56,7 @@ export async function getShapeFilters(requestMeta: BoundariesRequestMeta, esClie
   const hits = boundaryData?.hits?.hits;
   if (!hits || hits.length === 0) {
     const noBoundariesMsg = i18n.translate('xpack.stackAlerts.geoContainment.noBoundariesError', {
-      defaultMessage: 'No tracking containtement boundaries found. Ensure index, "{index}", has documents.',
+      defaultMessage: 'No tracking containtment boundaries found. Ensure index, "{index}", has documents.',
       values: { index: boundaryIndexTitle },
     });
 
