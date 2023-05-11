@@ -27,17 +27,7 @@ export const SearchApplicationDocumentation = () => {
     <EuiPanel color="transparent">
       <EuiFlexGroup justifyContent="spaceBetween" direction="row">
         <EuiFlexGroup direction="column">
-          <EuiImage
-            size="l"
-            float="left"
-            src={welcomeGraphicLight}
-            alt={i18n.translate(
-              'xpack.enterpriseSearch.content.searchApplication.documentation.welcomeGraphicLightImage.altText',
-              {
-                defaultMessage: 'Search Application documentaion illustration',
-              }
-            )}
-          />
+          <EuiImage size="l" float="left" src={welcomeGraphicLight} alt="" />
 
           <EuiText>
             <h2>
