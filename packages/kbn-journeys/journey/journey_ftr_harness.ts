@@ -54,8 +54,24 @@ export class JourneyFtrHarness {
 
   private apm: apmNode.Agent | null = null;
 
+  // Update the Telemetry and APM global labels to link traces with journey
+  private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {
+    this.log.info(`Updating telemetry & APM labels: ${JSON.stringify(labels)}`);
+
+    await this.kibanaServer.request({
+      path: '/api/internal/telemetry/labels',
+      method: 'PUT',
+      body: labels,
+    });
+  }
+
   private async setupApm() {
     const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
+    const journeyLabels: { [k: string]: string } = Object.fromEntries(
+      kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS.split(',').map((kv: string) => kv.split('='))
+    );
+
+    await this.updateTelemetryAndAPMLabels(journeyLabels);
 
     this.apm = apmNode.start({
       serviceName: 'functional test runner',
