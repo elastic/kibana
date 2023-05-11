@@ -191,4 +191,4 @@ export interface SelectedIndex {
   pattern: string;
 }
 
-export type OnInValidValueUpdateCallback = (indexName: sting) => void;
+export type OnInValidValueUpdateCallback = () => void;

@@ -15,7 +15,7 @@ export const updateUnallowedValues = async ({
   httpFetch,
   body,
 }: {
-  abortController: AbortController;
+  abortController?: AbortController;
   httpFetch: HttpHandler;
   body: Array<{
     id: string;
@@ -29,7 +29,8 @@ export const updateUnallowedValues = async ({
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
-      signal: abortController.signal,
+      signal: abortController?.signal,
+      cache: 'no-cache',
     });
   } catch (e) {
     throw new Error(

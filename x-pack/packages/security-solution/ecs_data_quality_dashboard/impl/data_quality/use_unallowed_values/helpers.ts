@@ -93,7 +93,7 @@ export async function fetchUnallowedValues({
   indexName,
   requestItems,
 }: {
-  abortController: AbortController;
+  abortController?: AbortController;
   httpFetch: HttpHandler;
   indexName: string;
   requestItems: UnallowedValueRequestItem[];
@@ -103,7 +103,7 @@ export async function fetchUnallowedValues({
       body: JSON.stringify(requestItems),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
-      signal: abortController.signal,
+      signal: abortController?.signal,
     });
   } catch (e) {
     throw new Error(

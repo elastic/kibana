@@ -112,7 +112,13 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     loading: loadingUnallowedValues,
     unallowedValues,
     unallowedValuesDocs,
+    refetchUnallowedValue,
   } = useUnallowedValues({ indexName, requestItems });
+
+  const refetchOnInValidValueUpdate = useCallback(async () => {
+    await onInValidValueUpdateCallback?.();
+    await refetchUnallowedValue();
+  }, [onInValidValueUpdateCallback, refetchUnallowedValue]);
 
   const mappingsProperties = useMemo(
     () =>
@@ -161,14 +167,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         setSelectedTabId,
         stats: patternRollup?.stats ?? null,
         theme,
-        onInValidValueUpdateCallback,
+        onInValidValueUpdateCallback: refetchOnInValidValueUpdate,
       }),
     [
       addSuccessToast,
       addToNewCaseDisabled,
-      docsCount,
       formatBytes,
       formatNumber,
+      docsCount,
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
@@ -178,7 +184,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
-      onInValidValueUpdateCallback,
+      refetchOnInValidValueUpdate,
     ]
   );
 

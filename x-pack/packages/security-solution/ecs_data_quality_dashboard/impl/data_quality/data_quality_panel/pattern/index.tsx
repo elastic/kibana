@@ -122,6 +122,7 @@ const PatternComponent: React.FC<Props> = ({
 
   const { error: statsError, loading: loadingStats, stats, refetchStats } = useStats(pattern);
   const { error: ilmExplainError, loading: loadingIlmExplain, ilmExplain } = useIlmExplain(pattern);
+  const refetchAbortController = useRef(new AbortController());
 
   const loading = useMemo(
     () => loadingStats || loadingIlmExplain,
@@ -133,16 +134,9 @@ const PatternComponent: React.FC<Props> = ({
     Record<string, React.ReactNode>
   >({});
 
-  const onInValidValueUpdateCallback = useCallback(
-    (indexName: string) => {
-      const abortController = new AbortController();
-
-      refetchStats(abortController);
-
-      // setItemIdToExpandedRowMap({}); // collapse the selected index
-    },
-    [refetchStats]
-  );
+  const onInValidValueUpdateCallback = useCallback(async () => {
+    await refetchStats(refetchAbortController.current);
+  }, [refetchAbortController, refetchStats]);
 
   const toggleExpanded = useCallback(
     (indexName: string) => {
@@ -275,12 +269,14 @@ const PatternComponent: React.FC<Props> = ({
 
       containerRef.current?.scrollIntoView();
       setSelectedIndex(null);
+      refetchAbortController.current.abort();
     }
   }, [
     itemIdToExpandedRowMap,
     items,
     pageSize,
     pattern,
+    refetchAbortController,
     selectedIndex,
     setSelectedIndex,
     toggleExpanded,

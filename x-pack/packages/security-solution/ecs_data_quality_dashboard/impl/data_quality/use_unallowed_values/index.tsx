@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
@@ -16,6 +16,7 @@ export interface UseUnallowedValues {
   unallowedValuesDocs: Record<string, UnallowedValueDoc[]> | null;
   error: string | null;
   loading: boolean;
+  refetchUnallowedValue: (abortController?: AbortController | undefined) => Promise<void>;
 }
 
 export const useUnallowedValues = ({
@@ -37,15 +38,8 @@ export const useUnallowedValues = ({
   const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (requestItems.length === 0) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    async function fetchData() {
+  const fetchData = useCallback(
+    async (abortController?: AbortController) => {
       try {
         const searchResults = await fetchUnallowedValues({
           abortController,
@@ -59,27 +53,35 @@ export const useUnallowedValues = ({
           searchResults,
         });
 
-        if (!abortController.signal.aborted) {
+        if (!abortController?.signal.aborted) {
           setUnallowedValues(unallowedValuesMap);
           setUnallowedValuesDocs(unallowedValuesDocuments);
         }
       } catch (e) {
-        if (!abortController.signal.aborted) {
+        if (!abortController?.signal.aborted) {
           setError(e.message);
         }
       } finally {
-        if (!abortController.signal.aborted) {
+        if (!abortController?.signal.aborted) {
           setLoading(false);
         }
       }
+    },
+    [httpFetch, indexName, requestItems]
+  );
+  useEffect(() => {
+    if (requestItems.length === 0) {
+      return;
     }
 
-    fetchData();
+    const abortController = new AbortController();
+
+    fetchData(abortController);
 
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, indexName, requestItems, setError]);
+  }, [fetchData, httpFetch, indexName, requestItems, setError]);
 
-  return { unallowedValues, unallowedValuesDocs, error, loading };
+  return { unallowedValues, unallowedValuesDocs, error, loading, refetchUnallowedValue: fetchData };
 };

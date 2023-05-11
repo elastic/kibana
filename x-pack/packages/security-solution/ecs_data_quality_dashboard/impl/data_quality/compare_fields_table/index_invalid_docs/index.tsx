@@ -44,27 +44,40 @@ const IndexInvalidValueDropdownComponent: React.FC<{
   onInValidValueUpdateCallback,
 }) => {
   const [value, setValue] = useState(indexInvalidValue);
-  const [requestItems, setRequestItems] = useState<
-    Array<{
-      id: string;
-      indexFieldName: string;
-      indexName: string;
-      value: string;
-    }>
-  >([]);
-  const { error, result, loading } = useUpdateUnallowedValues(requestItems);
-  const onChange = (e) => {
+  // const [requestItems, setRequestItems] = useState<
+  //   Array<{
+  //     id: string;
+  //     indexFieldName: string;
+  //     indexName: string;
+  //     value: string;
+  //   }>
+  // >([]);
+  const { error, result, loading, updateUnallowedValue } = useUpdateUnallowedValues();
+  const onChange = async (e) => {
+    const refetchAbortController = new AbortController();
+
     setValue(e.target.value);
     if (e.target.value !== indexInvalidValue) {
-      setRequestItems([
-        {
-          id,
-          indexFieldName,
-          indexName,
-          value: e.target.value,
-        },
-      ]);
-      onInValidValueUpdateCallback?.(indexName);
+      // setRequestItems([
+      //   {
+      //     id,
+      //     indexFieldName,
+      //     indexName,
+      //     value: e.target.value,
+      //   },
+      // ]);
+      await updateUnallowedValue({
+        abortController: refetchAbortController,
+        requestItems: [
+          {
+            id,
+            indexFieldName,
+            indexName,
+            value: e.target.value,
+          },
+        ],
+      });
+      await onInValidValueUpdateCallback?.();
     }
   };
   const options = useMemo(

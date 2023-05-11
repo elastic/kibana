@@ -42,6 +42,7 @@ export const updateUnallowedFieldValues = (
   return esClient.bulk(
     {
       operations,
+      refresh: 'wait_for',
     },
     {
       maxRetries: 0,
