@@ -50,7 +50,6 @@ describe('startMlModelDownload', () => {
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
         modelId: knownModelName,
-        allocationCount: 1,
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
@@ -73,7 +72,6 @@ describe('startMlModelDownload', () => {
         Promise.resolve({
           deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: knownModelName,
-          allocationCount: 1,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
@@ -84,7 +82,6 @@ describe('startMlModelDownload', () => {
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Downloading,
           modelId: knownModelName,
-          allocationCount: 1,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,

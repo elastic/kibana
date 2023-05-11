@@ -13,7 +13,7 @@ export type FetchTextExpansionModelArgs = undefined;
 export interface FetchTextExpansionModelResponse {
   deploymentState: string;
   modelId: string;
-  allocationCount: number;
+  targetAllocationCount: number;
   nodeAllocationCount: number;
   threadsPerAllocation: number;
 }

@@ -136,7 +136,7 @@ describe('TextExpansionCalloutLogic', () => {
       const data = {
         deploymentState: MlModelDeploymentState.Downloading,
         modelId: 'mock-model-id',
-        allocationCount: 1,
+        targetAllocationCount: 1,
         nodeAllocationCount: 1,
         threadsPerAllocation: 1,
       };
@@ -174,7 +174,7 @@ describe('TextExpansionCalloutLogic', () => {
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess({
           deploymentState: MlModelDeploymentState.Downloaded,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
@@ -298,7 +298,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
@@ -308,7 +308,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Started,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
@@ -321,7 +321,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Downloaded,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
@@ -331,7 +331,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
@@ -340,31 +340,21 @@ describe('TextExpansionCalloutLogic', () => {
     });
 
     describe('isModelRunningSingleThreaded', () => {
-      it('is set to true if the model has 1 deployment with 1 allocation and 1 thread', () => {
+      it('is set to true if the model has 1 target allocation and 1 thread', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(true);
       });
-      it('is set to false if the model has multiple deployments', () => {
+      it('is set to false if the model has multiple target allocations', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
           modelId: 'mock-model-id',
-          allocationCount: 3,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
-        });
-        expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
-      });
-      it('is set to false if the model has multiple allocations on a node', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: MlModelDeploymentState.FullyAllocated,
-          modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 2,
           nodeAllocationCount: 2,
           threadsPerAllocation: 1,
         });
@@ -374,7 +364,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 4,
         });
@@ -387,7 +377,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });
@@ -397,7 +387,7 @@ describe('TextExpansionCalloutLogic', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: 'mock-model-id',
-          allocationCount: 1,
+          targetAllocationCount: 1,
           nodeAllocationCount: 1,
           threadsPerAllocation: 1,
         });

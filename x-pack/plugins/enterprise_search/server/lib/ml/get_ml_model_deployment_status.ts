@@ -81,7 +81,6 @@ export const getMlModelDeploymentStatus = async (
   return {
     deploymentState: getMlModelDeploymentStateForStatus(modelDeployment?.allocation_status.state),
     modelId: modelName,
-    allocationCount: modelStatsResponse.trained_model_stats.length,
     nodeAllocationCount: modelDeployment?.allocation_status.allocation_count || 0,
     startTime: modelDeployment?.start_time || 0,
     targetAllocationCount: modelDeployment?.allocation_status.target_allocation_count || 0,
@@ -96,7 +95,6 @@ function getDefaultStatusReturn(
   return {
     deploymentState: status,
     modelId: modelName,
-    allocationCount: 0,
     nodeAllocationCount: 0,
     startTime: 0,
     targetAllocationCount: 0,
