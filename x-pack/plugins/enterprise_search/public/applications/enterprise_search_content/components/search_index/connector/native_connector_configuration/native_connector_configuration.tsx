@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 
 import { BetaConnectorCallout } from '../../../../../shared/beta/beta_connector_callout';
 import { docLinks } from '../../../../../shared/doc_links';
+import { CONNECTOR_ICONS } from '../../../../../shared/icons/connector_icons';
+
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
@@ -45,11 +47,18 @@ export const NativeConnectorConfiguration: React.FC = () => {
 
   const nativeConnector = NATIVE_CONNECTORS.find(
     (connector) => connector.serviceType === index.connector.service_type
-  );
-
-  if (!nativeConnector) {
-    return <></>;
-  }
+  ) || {
+    docsUrl: '',
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.custom,
+    iconPath: 'custom.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: [],
+    name: index.connector.name,
+    serviceType: index.connector.service_type ?? '',
+  };
 
   const hasDescription = !!index.connector.description;
   const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
@@ -78,7 +87,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
               )}
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
-                  <h3>{nativeConnector.name}</h3>
+                  <h3>{nativeConnector?.name ?? index.connector.name}</h3>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
