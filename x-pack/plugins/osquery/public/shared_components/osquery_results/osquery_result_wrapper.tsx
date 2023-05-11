@@ -28,6 +28,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
     const { data } = useLiveQueryDetails({
       actionId,
       isLive,
+      skip: !canReadOsquery,
     });
 
     useLayoutEffect(() => {

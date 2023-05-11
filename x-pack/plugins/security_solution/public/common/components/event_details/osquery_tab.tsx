@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ResponseActionsEmptyPrompt } from '../response_actions/response_actions_empty_prompt';
 import type { RawEventData } from './types';
-import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
@@ -57,27 +56,6 @@ export const useOsqueryTab = ({
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
-  );
-  const emptyPrompt = useMemo(
-    () => (
-      <EuiEmptyPrompt
-        iconType="logoOsquery"
-        title={<h2>{PERMISSION_DENIED}</h2>}
-        titleSize="xs"
-        body={
-          <FormattedMessage
-            id="xpack.securitySolution.osquery.results.missingPrivileges"
-            defaultMessage="To access these results, ask your administrator for {osquery} Kibana
-              privileges."
-            values={{
-              // eslint-disable-next-line react/jsx-no-literals
-              osquery: <EuiCode>osquery</EuiCode>,
-            }}
-          />
-        }
-      />
-    ),
-    []
   );
 
   const shouldEarlyReturn =
@@ -128,7 +106,7 @@ export const useOsqueryTab = ({
       <>
         <TabContentWrapper data-test-subj="osqueryViewWrapper">
           {!application?.capabilities?.osquery?.read ? (
-            emptyPrompt
+            <ResponseActionsEmptyPrompt type="osquery" />
           ) : (
             <>
               <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />

@@ -8,11 +8,13 @@
 import { EuiComment } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React from 'react';
+import { useUserPrivileges } from '../user_privileges';
 import type { LogsEndpointAction } from '../../../../common/endpoint/types';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_COMMANDS } from '../event_details/translations';
+import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointAction;
@@ -21,7 +23,15 @@ interface EndpointResponseActionResultsProps {
 export const EndpointResponseActionResults = ({ action }: EndpointResponseActionResultsProps) => {
   const { rule, agent } = action;
   const { action_id: actionId, expiration } = action.EndpointActions;
-  const { data: responseData } = useGetAutomatedActionResponseList({ actionId, expiration, agent });
+  const {
+    endpointPrivileges: { canReadActionsLogManagement, canAccessEndpointActionsLogManagement },
+  } = useUserPrivileges();
+
+  const canReadEndpoint = canReadActionsLogManagement && canAccessEndpointActionsLogManagement;
+  const { data: responseData } = useGetAutomatedActionResponseList(
+    { actionId, expiration, agent },
+    { skip: !canReadEndpoint }
+  );
 
   const eventText = getCommentText(action.EndpointActions.data.command);
   const expandedAction = combineAction(action, responseData);
@@ -33,7 +43,11 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
       event={eventText}
       data-test-subj={'endpoint-results-comment'}
     >
-      <ActionsLogExpandedTray action={expandedAction} />
+      {canReadEndpoint ? (
+        <ActionsLogExpandedTray action={expandedAction} />
+      ) : (
+        <ResponseActionsEmptyPrompt type="endpoint" />
+      )}
     </EuiComment>
   );
 };

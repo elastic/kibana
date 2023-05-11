@@ -70,7 +70,8 @@ export const useGetAutomatedActionList = (
 };
 
 export const useGetAutomatedActionResponseList = (
-  query: EndpointAutomatedActionResponseRequestQuery
+  query: EndpointAutomatedActionResponseRequestQuery,
+  { skip = false }: GetAutomatedActionsListOptions
 ) => {
   const { data } = useKibana().services;
   const { expiration, actionId, agent } = query;
@@ -134,6 +135,7 @@ export const useGetAutomatedActionResponseList = (
     },
     {
       keepPreviousData: true,
+      enabled: !skip,
     }
   );
 };
