@@ -8,7 +8,6 @@
 
 import type {
   InlineScript,
-  Field,
   MappingRuntimeField,
   MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -48,10 +47,12 @@ export interface MainAggregation extends NamedAggregation {
 }
 
 export interface GroupingRuntimeField extends MappingRuntimeField {
-  script?: InlineScript;
+  script: InlineScript & {
+    params: Record<string, any>;
+  };
 }
 
-type GroupingMappingRuntimeFields = Record<Field, GroupingRuntimeField>;
+type GroupingMappingRuntimeFields = Record<'groupByField', GroupingRuntimeField>;
 
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
   aggs: MainAggregation;

@@ -67,7 +67,6 @@ describe('group selector', () => {
   it('Sets runtime field and terms query', () => {
     const result = getGroupingQuery(testProps);
 
-    // @ts-ignore if undefined, this test should fail
     expect(result.runtime_mappings.groupByField.script.params.selectedGroup).toEqual('host.name');
 
     expect(result.aggs.groupByFields.aggs).toEqual({

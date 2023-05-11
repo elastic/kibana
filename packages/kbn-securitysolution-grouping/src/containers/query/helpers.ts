@@ -9,10 +9,17 @@
 import { Filter, FILTERS } from '@kbn/es-query';
 export const getEmptyValue = () => '—';
 
-export const createGroupFilter = (selectedGroup: string, values?: string[] | null): Filter[] =>
+type StrictFilter = Filter & {
+  query: Record<string, any>;
+};
+
+export const createGroupFilter = (
+  selectedGroup: string,
+  values?: string[] | null
+): StrictFilter[] =>
   values != null && values.length > 0
     ? values.reduce(
-        (acc: Filter[], query) => [
+        (acc: StrictFilter[], query) => [
           ...acc,
           {
             meta: {
@@ -61,7 +68,7 @@ export const createGroupFilter = (selectedGroup: string, values?: string[] | nul
       )
     : [];
 
-export const getNullGroupFilter = (selectedGroup: string): Filter[] => [
+export const getNullGroupFilter = (selectedGroup: string): StrictFilter[] => [
   {
     meta: {
       disabled: false,

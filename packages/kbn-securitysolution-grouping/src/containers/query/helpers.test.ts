@@ -15,15 +15,11 @@ describe('createGroupFilter', () => {
     const result = createGroupFilter(selectedGroup, values);
     expect(result).toHaveLength(3);
     expect(result[0].meta.key).toBe(selectedGroup);
-    // @ts-ignore if undefined, test should fail
     expect(result[0].query.script.script.params.field).toBe(selectedGroup);
-    // @ts-ignore if undefined, test should fail
     expect(result[0].query.script.script.params.size).toBe(values.length);
     expect(result[1].meta.key).toBe(selectedGroup);
-    // @ts-ignore if undefined, test should fail
     expect(result[1].query.match_phrase[selectedGroup].query).toBe(values[0]);
     expect(result[2].meta.key).toBe(selectedGroup);
-    // @ts-ignore if undefined, test should fail
     expect(result[2].query.match_phrase[selectedGroup].query).toBe(values[1]);
   });
 
