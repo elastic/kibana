@@ -82,17 +82,12 @@ const ConnectorsFormComponent: React.FC<Props> = ({
     !deepEqual(fields ?? null, initialConnectorFields);
 
   const onConnectorChange = (newConnectorId: string) => {
-    const newFields = caseConnectors[newConnectorId]?.fields ?? {};
+    const newFields = caseConnectors[newConnectorId]?.fields;
 
-    const updatedFields = Object.entries(newFields).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [`fields.${key}`]: value,
-      }),
-      {}
-    );
-
-    form.updateFieldValues(updatedFields);
+    form.reset({
+      resetValues: true,
+      defaultValue: { connectorId: newConnectorId, fields: newFields },
+    });
   };
 
   const connectorIdConfig = getConnectorsFormValidators({

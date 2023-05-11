@@ -283,7 +283,7 @@ describe('ConnectorsForm ', () => {
     const caseConnectorsOptional = {
       ...caseConnectors,
       'resilient-2': {
-        ...caseConnectors['servicenow-1'],
+        ...caseConnectors['resilient-2'],
         fields: null,
       },
     } as CaseConnectors;
@@ -314,6 +314,57 @@ describe('ConnectorsForm ', () => {
         id: 'resilient-2',
         name: 'My Resilient connector',
         type: '.resilient',
+      })
+    );
+  });
+
+  it('resets fields when changing between connectors of the same type', async () => {
+    const caseConnectorsOptional = {
+      ...caseConnectors,
+      'servicenow-2': {
+        ...caseConnectors['servicenow-2'],
+        fields: null,
+      },
+    } as CaseConnectors;
+
+    const connectors = [
+      ...connectorsMock,
+      { ...connectorsMock[0], id: 'servicenow-2', name: 'My SN connector 2' },
+    ];
+
+    appMockRender.render(
+      <ConnectorsForm
+        {...props}
+        caseConnectors={caseConnectorsOptional}
+        supportedActionConnectors={connectors}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('My SN connector')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+
+    await waitFor(() => {
+      expect(screen.getByText('My SN connector 2')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith({
+        fields: {
+          category: null,
+          impact: null,
+          severity: null,
+          urgency: null,
+        },
+        id: 'servicenow-2',
+        name: 'My SN connector 2',
+        type: '.servicenow',
       })
     );
   });
