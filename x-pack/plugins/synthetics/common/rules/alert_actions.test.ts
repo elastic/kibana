@@ -268,7 +268,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
+            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}  \n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \nMonitor type: {{context.monitorType}}  \nFrom: {{context.locationName}}  \nLatest error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
         },
       },
       {
@@ -378,7 +378,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
+            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}  \n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \nMonitor type: {{context.monitorType}}  \nFrom: {{context.locationName}}  \nLatest error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
         },
       },
       {
@@ -434,7 +434,7 @@ describe('Alert Actions factory', () => {
             text: '',
           },
           message:
-            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
+            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}  \n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \nMonitor type: {{context.monitorType}}  \nFrom: {{context.locationName}}  \nLatest error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
           subject:
             '{{context.monitorName}} ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
           to: ['test@email.com'],
@@ -451,7 +451,7 @@ describe('Alert Actions factory', () => {
             text: '',
           },
           message:
-            '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nChecked at: {{context.checkedAt}}\nFrom: {{context.locationName}}\nError received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
+            '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}  \n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \nMonitor type: {{context.monitorType}}  \nChecked at: {{context.checkedAt}}  \nFrom: {{context.locationName}}  \nError received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
           subject:
             '{{context.monitorName}} ({{context.locationName}}) is Down - Elastic Synthetics',
           to: ['test@email.com'],

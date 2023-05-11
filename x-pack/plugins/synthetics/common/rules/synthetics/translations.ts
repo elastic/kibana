@@ -11,7 +11,8 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultActionMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
-      defaultMessage: `"{monitorName}" is {status} from {locationName}.\n\nDetails:\n\nMonitor name: {monitorName}\n{monitorUrlLabel}: {monitorUrl}\nMonitor type: {monitorType}\nChecked at: {checkedAt}\nFrom: {locationName}\nError received: {lastErrorMessage}\n{linkMessage}`,
+      // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
+      defaultMessage: `"{monitorName}" is {status} from {locationName}.\n\nDetails:\n\nMonitor name: {monitorName}  \n{monitorUrlLabel}: {monitorUrl}  \nMonitor type: {monitorType}  \nChecked at: {checkedAt}  \nFrom: {locationName}  \nError received: {lastErrorMessage}  \n{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
         monitorType: '{{context.monitorType}}',
@@ -49,8 +50,9 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultRecoveryMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
+      // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
-        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\nMonitor name: {monitorName}\n{monitorUrlLabel}: {monitorUrl}\nMonitor type: {monitorType}\nFrom: {locationName}\nLatest error received: {lastErrorMessage}\n{linkMessage}',
+        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}.\n\nDetails:\n\nMonitor name: {monitorName}  \n{monitorUrlLabel}: {monitorUrl}  \nMonitor type: {monitorType}  \nFrom: {locationName}  \nLatest error received: {lastErrorMessage}  \n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrlLabel: '{{context.monitorUrlLabel}}',
