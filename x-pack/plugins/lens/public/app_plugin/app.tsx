@@ -9,7 +9,16 @@ import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiBreadcrumb,
+  EuiCard,
+  EuiConfirmModal,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
@@ -40,6 +49,7 @@ import {
   selectFrameDatasourceAPI,
   beginReversibleOperation,
   completeReversibleOperation,
+  selectRevisionHistory,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -591,6 +601,8 @@ export function App({
     [dispatch]
   );
 
+  const [showingRevisionHistory, setShowingRevisionHistory] = useState(false);
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -626,6 +638,7 @@ export function App({
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          toggleShowRevisionHistory={() => setShowingRevisionHistory(!showingRevisionHistory)}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -697,6 +710,9 @@ export function App({
           })}
         </EuiConfirmModal>
       )}
+      {showingRevisionHistory && (
+        <RevisionHistoryFlyout onClose={() => setShowingRevisionHistory(false)} />
+      )}
     </>
   );
 }
@@ -730,3 +746,36 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
     />
   );
 });
+
+const RevisionHistoryFlyout = ({ onClose }: { onClose: () => void }) => {
+  const changes = useLensSelector(selectRevisionHistory);
+
+  return (
+    <EuiFlyout size="s" onClose={onClose}>
+      <EuiFlyoutHeader hasBorder aria-labelledby="some-id">
+        <EuiTitle>
+          <h2 id="some-id">Version history</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {changes.map((change, index) => (
+          <>
+            <EuiCard
+              key={index}
+              title={i18n.translate('xpack.lens.revisionCreated', {
+                defaultMessage: '{dateCreated, date, medium} @ {dateCreated, time, short}',
+                values: { dateCreated: new Date(change.created) },
+              })}
+              titleSize="xs"
+              display={change.active ? 'primary' : 'plain'}
+              hasBorder
+              layout="horizontal"
+              onClick={change.active ? undefined : () => {}}
+            />
+            <EuiSpacer size="s" key={index} />
+          </>
+        ))}
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};

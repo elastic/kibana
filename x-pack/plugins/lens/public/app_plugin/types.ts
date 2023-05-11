@@ -129,6 +129,7 @@ export interface LensTopNavMenuProps {
   getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;
+  toggleShowRevisionHistory: () => void;
 }
 
 export interface HistoryLocationState {
@@ -190,5 +191,6 @@ type AvailableTopNavActions =
   | 'getUnderlyingDataUrl'
   | 'openSettings'
   | 'undo'
+  | 'toggleHistory'
   | 'redo';
 export type LensTopNavActions = Record<AvailableTopNavActions, TopNavAction>;

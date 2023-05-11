@@ -261,6 +261,16 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Redo last change',
       }),
       disableButton: !canRedo,
+    },
+    {
+      label: '',
+      iconType: 'timeRefresh',
+      run: actions.toggleHistory.execute,
+      testId: 'lnsApp_toggleHistory',
+      description: i18n.translate('xpack.lens.app.redoButtonAriaLabel', {
+        defaultMessage: 'Toggle revision history list',
+      }),
+      disableButton: !canUndo,
     }
   );
 
@@ -321,6 +331,7 @@ export const LensTopNavMenu = ({
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
+  toggleShowRevisionHistory,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -800,6 +811,10 @@ export const LensTopNavMenu = ({
             dispatch(redo());
           },
         },
+        toggleHistory: {
+          visible: true,
+          execute: () => toggleShowRevisionHistory(),
+        },
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -850,6 +865,7 @@ export const LensTopNavMenu = ({
     lensStore,
     theme$,
     dispatch,
+    toggleShowRevisionHistory,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

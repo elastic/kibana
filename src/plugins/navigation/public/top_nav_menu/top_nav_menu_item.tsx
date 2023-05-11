@@ -62,7 +62,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       {getButtonContainer()}
     </EuiButton>
   ) : !props.label && props.iconType ? (
-    <EuiButtonIcon size="s" {...commonButtonProps} iconType={props.iconType} />
+    <EuiButtonIcon size="s" {...commonButtonProps} display="base" iconType={props.iconType} />
   ) : (
     <EuiHeaderLink size="s" color="primary" {...commonButtonProps} {...overrideProps}>
       {getButtonContainer()}

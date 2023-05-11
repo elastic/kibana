@@ -34,6 +34,10 @@ export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
 export const selectCanUndo = (state: LensState) => Boolean(state.lens.changes.length);
 export const selectCanRedo = (state: LensState) => Boolean(state.lens.reversedChanges.length);
+export const selectRevisionHistory = (state: LensState) =>
+  [...state.lens.changes, ...state.lens.reversedChanges].sort(
+    ({ created: a }, { created: b }) => b - a
+  );
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 export const selectVisualizationState = (state: LensState) => state.lens.visualization;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;

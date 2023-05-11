@@ -25,7 +25,7 @@ import type {
   DataViewsState,
   LensAppState,
   LensStoreDeps,
-  StateChangeOperation,
+  StateRevision,
   VisualizationState,
 } from './types';
 import type { Datasource, Visualization } from '../types';
@@ -248,7 +248,7 @@ export const removeDimension = createAction<{
   datasourceId?: string;
 }>('lens/removeDimension');
 export const recordReversibleStateChange = createAction<{
-  change: StateChangeOperation;
+  change: StateRevision;
 }>('lens/recordReversibleStateChange');
 export const undo = createAction('lens/undo');
 export const redo = createAction('lens/redo');
@@ -1227,47 +1227,32 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload: { change },
       }: {
         payload: {
-          change: StateChangeOperation;
+          change: StateRevision;
         };
       }
     ) => {
+      const currentActive = state.changes[state.changes.length - 1];
+      if (currentActive) {
+        currentActive.active = false;
+      }
       state.changes.push(change);
       state.reversedChanges = [];
     },
     [undo.type]: (_state) => {
       const currentState = current(_state);
-      const history = currentState.changes;
-      const change = history[history.length - 1];
-
-      const changes = history.slice(0, history.length - 1);
-      const reversedChanges = [...currentState.reversedChanges, change];
-
-      // console.log('changes', changes);
-      // console.log('reversedChanges', reversedChanges);
-      return change
-        ? {
-            ...applyPatch(currentState, change.backward, false, false).newDocument,
-            changes,
-            reversedChanges,
-          }
-        : currentState;
+      return moveStateThroughHistory(
+        currentState,
+        currentState.changes[currentState.changes.length - 1].created,
+        'backward'
+      );
     },
     [redo.type]: (_state) => {
       const currentState = current(_state);
-      const history = currentState.reversedChanges;
-      const change = history[history.length - 1];
-
-      const reversedChanges = history.slice(0, history.length - 1);
-      const changes = [...currentState.changes, change];
-      // console.log('changes', changes);
-      // console.log('reversedChanges', reversedChanges);
-      return change
-        ? {
-            ...applyPatch(currentState, change.forward, false, false).newDocument,
-            changes,
-            reversedChanges,
-          }
-        : currentState;
+      return moveStateThroughHistory(
+        currentState,
+        currentState.reversedChanges[currentState.reversedChanges.length - 1].created,
+        'forward'
+      );
     },
     [applyPatches.type]: (_state, { payload: { patches } }: { payload: { patches: Patch[] } }) => {
       let newState = current(_state);
@@ -1278,6 +1263,70 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
   });
 };
+
+function moveLastItemToAnotherReadonlyArray<T>(from: T[], to: T[]): [T[], T[], T] {
+  const movedItem = from[from.length - 1];
+  let newFrom = from;
+  let newTo = to;
+  if (movedItem) {
+    newFrom = from.slice(0, from.length - 1);
+    newTo = [...to, movedItem];
+  }
+
+  return [newFrom, newTo, movedItem];
+}
+
+const applyToLastElement = <T>(arr: T[], transform: (item: T) => T): T[] =>
+  arr.map((item, index) => (index === arr.length - 1 ? transform(item) : item));
+
+function moveStateThroughHistory(
+  _state: LensAppState,
+  targetTimestamp: number,
+  direction: 'forward' | 'backward'
+) {
+  const comparator =
+    direction === 'backward'
+      ? (source: number, target: number) => source >= target
+      : (source: number, target: number) => source <= target;
+  const [fromAccessor, toAccessor] =
+    direction === 'backward'
+      ? (['changes', 'reversedChanges'] as const)
+      : (['reversedChanges', 'changes'] as const);
+
+  let state = {
+    ..._state,
+    changes: _state.changes.map((change) => ({ ...change, active: false })),
+    reversedChanges: _state.reversedChanges.map((reversedChange) => ({
+      ...reversedChange,
+      active: false,
+    })),
+  };
+
+  while (
+    state[fromAccessor].length &&
+    comparator(state[fromAccessor][state[fromAccessor].length - 1].created, targetTimestamp)
+  ) {
+    const [fromArray, toArray, change] = moveLastItemToAnotherReadonlyArray(
+      state[fromAccessor],
+      state[toAccessor]
+    );
+
+    if (!change) {
+      return state;
+    }
+
+    state = {
+      ...applyPatch(state, change[direction], false, false).newDocument,
+      [fromAccessor]: fromArray,
+      [toAccessor]: toArray,
+    };
+  }
+
+  return {
+    ...state,
+    changes: applyToLastElement(state.changes, (change) => ({ ...change, active: true })),
+  };
+}
 
 function addInitialValueIfAvailable({
   visualizationState,

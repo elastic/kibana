@@ -15,7 +15,7 @@ import {
   recordReversibleStateChange,
 } from './lens_slice';
 import { StateCoordinator } from './state_coordinator';
-import { LensAppState, StateChangeOperation } from './types';
+import { LensAppState, StateRevision } from './types';
 import { initEmpty, redo, undo } from '.';
 
 const reversableStatePaths: Array<keyof LensAppState | string> = [
@@ -38,7 +38,9 @@ const createReversibleStateChange = (prev: LensAppState, next: LensAppState) => 
   const reversiblePrev = onlyReversiblePaths(prev);
   const reversibleNext = onlyReversiblePaths(next);
 
-  const change: StateChangeOperation = {
+  const change: StateRevision = {
+    active: true,
+    created: new Date().getTime(),
     forward: compare(reversiblePrev, reversibleNext),
     backward: compare(reversibleNext, reversiblePrev),
   };
