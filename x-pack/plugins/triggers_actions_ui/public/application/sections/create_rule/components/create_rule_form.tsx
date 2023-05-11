@@ -363,10 +363,7 @@ export const CreateRuleForm = ({
                   </EuiTitle>
                   <EuiSpacer size="s" />
                   <EuiText color="subdued">
-                    <p>
-                      Preview the alerts that would be detected with the current configuration of
-                      your rule.
-                    </p>
+                    <p>Preview your rule before saving it.</p>
                   </EuiText>
                   <EuiSpacer size="s" />
                   <EuiSuperUpdateButton
@@ -414,6 +411,14 @@ export const CreateRuleForm = ({
                   {isLoadingPreview ? <CenterJustifiedSpinner /> : null}
                   {hasPreviewAlertData && alertsTableQuery ? (
                     <>
+                      <EuiTitle size="s">
+                        <h3>Alert preview</h3>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <EuiText color="subdued">
+                        <p>The following alerts would have been detected</p>
+                      </EuiText>
+                      <EuiSpacer size="m" />
                       <AlertsTableState
                         id={'preview'}
                         configurationId={'preview'}
@@ -434,7 +439,13 @@ export const CreateRuleForm = ({
                       </EuiTitle>
                       <EuiSpacer size="s" />
                       <EuiText color="subdued">
-                        <p>The following notifications would have been sent</p>
+                        <p>
+                          The following{' '}
+                          {previewActionData.length > 1
+                            ? `${previewActionData.length} notifications`
+                            : `notification`}{' '}
+                          would have been sent
+                        </p>
                       </EuiText>
                       <EuiSpacer size="m" />
                       {previewActionData.map((previewAction: RuleAction, index: number) => {
