@@ -22,7 +22,7 @@ import {
   throwErrorOnSavedSearchUrlConflict,
 } from '@kbn/saved-search-plugin/public';
 import { SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
 
@@ -46,11 +46,7 @@ export class SearchEmbeddableFactory
   constructor(
     private getStartServices: () => Promise<StartServices>,
     private getDiscoverServices: () => Promise<DiscoverServices>
-  ) {
-    this.getDiscoverServices().then(({ uiActions }) => {
-      uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-    });
-  }
+  ) {}
 
   public canCreateNew() {
     return false;
