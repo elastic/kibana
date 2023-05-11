@@ -612,9 +612,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
-
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields in the entity to return in the response. default: null </div><div class="param">from (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">from (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. default: null </div><div class="param">owner (optional)</div>
 
@@ -2099,6 +2097,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#findCases_200_response"><code>findCases_200_response</code> - </a></li>
     <li><a href="#findCases_assignees_parameter"><code>findCases_assignees_parameter</code> - </a></li>
     <li><a href="#findCases_owner_parameter"><code>findCases_owner_parameter</code> - </a></li>
+    <li><a href="#findCases_searchFields_parameter"><code>findCases_searchFields_parameter</code> - </a></li>
     <li><a href="#getCaseComment_200_response"><code>getCaseComment_200_response</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner"><code>getCaseConfiguration_200_response_inner</code> - </a></li>
     <li><a href="#getCaseConfiguration_200_response_inner_connector"><code>getCaseConfiguration_200_response_inner_connector</code> - </a></li>
@@ -2127,6 +2126,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#payload_user_comment"><code>payload_user_comment</code> - </a></li>
     <li><a href="#payload_user_comment_comment"><code>payload_user_comment_comment</code> - </a></li>
     <li><a href="#rule"><code>rule</code> - Alerting rule</a></li>
+    <li><a href="#search_fields"><code>search_fields</code> - </a></li>
     <li><a href="#setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a></li>
     <li><a href="#setCaseConfiguration_request_connector"><code>setCaseConfiguration_request_connector</code> - </a></li>
     <li><a href="#setCaseConfiguration_request_settings"><code>setCaseConfiguration_request_settings</code> - </a></li>
@@ -2605,6 +2605,12 @@ Any modifications made to this file will be overwritten.
           </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="findCases_searchFields_parameter"><code>findCases_searchFields_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="getCaseComment_200_response"><code>getCaseComment_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -2871,6 +2877,12 @@ Any modifications made to this file will be overwritten.
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>
     </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="search_fields"><code>search_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="setCaseConfiguration_request"><code>setCaseConfiguration_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
