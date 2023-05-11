@@ -171,11 +171,11 @@ describe('Response console', () => {
     });
   });
 
-  describe('User journey for Processes commands: list, kill and suspend process.', () => {
+  describe('File operations: get-file and execute', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
 
-    const filePath = `/home/ubuntu/32-mb-test-file`;
+    const homeFilePath = `/home/ubuntu`;
 
     before(() => {
       getAgentByHostName(endpointHostname).then((agentData) => {
@@ -201,17 +201,16 @@ describe('Response console', () => {
     it('"get-file --path" - should retrieve a file', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
       openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`get-file --path ${filePath}`);
+      // TODO: change this to fetch the agent log file
+      inputConsoleCommand(`get-file --path ${homeFilePath}/.profile`);
       submitCommand();
       waitForCommandToBeExecuted('get-file');
     });
 
-    it('"execute --command" - should execute a command', () => {
+    it('"execute --command" - should execute a command', async () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
       openResponseConsoleFromEndpointList();
-      inputConsoleCommand(
-        `execute --command "echo write something > ${filePath}; cat ${filePath};"`
-      );
+      inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
       submitCommand();
       waitForCommandToBeExecuted('execute');
     });

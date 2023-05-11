@@ -225,20 +225,6 @@ const enrollHostWithFleet = async ({
     await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
   }
 
-  // create a file to test file operations; `execute` and `get-file`
-  log.info('Creating a test file on the VM to test file operations');
-  execa('multipass', [
-    'exec',
-    vmName,
-    '--working-directory',
-    `/home/ubuntu`,
-    '--',
-    'truncate',
-    '-s',
-    '32MB',
-    '32-mb-test-file',
-  ]);
-
   const agentInstallArguments = [
     'exec',
 
