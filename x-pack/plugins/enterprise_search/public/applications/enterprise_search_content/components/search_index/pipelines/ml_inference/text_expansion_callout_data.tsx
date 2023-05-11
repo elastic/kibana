@@ -24,7 +24,8 @@ export const useTextExpansionCallOutData = ({
   isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { isCreateButtonDisabled, isModelRunningSingleThreaded, isStartButtonDisabled } = useValues(TextExpansionCalloutLogic);
+  const { isCreateButtonDisabled, isModelRunningSingleThreaded, isStartButtonDisabled } =
+    useValues(TextExpansionCalloutLogic);
 
   const [show, setShow] = useState<boolean>(() => {
     if (!isDismissable) return true;
