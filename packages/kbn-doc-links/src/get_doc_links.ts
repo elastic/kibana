@@ -125,6 +125,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
       behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
+      behavioralAnalyticsCORS: `${ENTERPRISE_SEARCH_DOCS}analytics-cors-proxy.html`,
       behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       buildConnector: `${ENTERPRISE_SEARCH_DOCS}build-connector.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
@@ -603,7 +604,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       putIndexTemplateV1: `${ELASTICSEARCH_DOCS}indices-templates-v1.html`,
       putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
       putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
+      restApis: `${ELASTICSEARCH_DOCS}rest-apis.html`,
       searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
+      securityApis: `${ELASTICSEARCH_DOCS}security-api.html`,
       simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
       timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
@@ -713,6 +716,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       javaInstallation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/installation.html`,
       javaIntroduction: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/introduction.html`,
       javaRestLow: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/java-api-client/${DOC_LINK_VERSION}/java-rest-low.html`,
+      jsAdvancedConfig: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/advanced-config.html`,
+      jsApiReference: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/api-reference.html`,
+      jsBasicConfig: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/basic-config.html`,
       jsClientConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/client-connecting.html`,
       jsIntro: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/javascript-api/${DOC_LINK_VERSION}/introduction.html`,
       netGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/index.html`,
@@ -727,6 +733,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       pythonGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/index.html`,
       pythonOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/python-api/${DOC_LINK_VERSION}/overview.html`,
       rubyAuthentication: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/connecting.html#client-auth`,
+      rubyAdvancedConfig: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/advanced-config.html`,
+      rubyBasicConfig: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/basic-config.html`,
+      rubyExamples: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/examples.html`,
       rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
       rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
       rustOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/overview.html`,
@@ -746,6 +755,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     searchUI: {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
+    },
+    serverlessSearch: {
+      integrations: `${ELASTIC_WEBSITE_URL}/integrations`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
