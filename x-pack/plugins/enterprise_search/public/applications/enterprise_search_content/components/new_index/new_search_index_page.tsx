@@ -9,12 +9,10 @@ import React from 'react';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
-import { docLinks } from '../../../shared/doc_links';
 import { parseQueryParams } from '../../../shared/query_params';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -57,7 +55,7 @@ function getTitle(method: string, serviceType: string): string {
   }
 }
 
-function getDescription(method: string): string | React.ReactNode {
+function getDescription(method: string): string {
   switch (method) {
     case INGESTION_METHOD_IDS.API:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.apiDescription', {
@@ -65,21 +63,12 @@ function getDescription(method: string): string | React.ReactNode {
           'Use the API to programatically add documents to an Elasticsearch index. Start by creating your index.',
       });
     case INGESTION_METHOD_IDS.CONNECTOR: {
-      return (
-        <FormattedMessage
-          id="xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType"
-          defaultMessage="Use a connector to sync, extract, transform and index data from your data source. Connectors are {integrations} that write directly to Elasticsearch indices."
-          values={{
-            integrations: (
-              <EuiLink external target="_blank" href={docLinks.connectorsClients}>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType.link',
-                  { defaultMessage: 'Elastic integrations' }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType',
+        {
+          defaultMessage:
+            'Use a connector to sync, extract, transform and index data from your data source. Connectors are Elastic integrations that write directly to Elasticsearch indices.',
+        }
       );
     }
     case INGESTION_METHOD_IDS.CRAWLER:
